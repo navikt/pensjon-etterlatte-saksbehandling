@@ -9,7 +9,6 @@ import io.ktor.http.content.streamProvider
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
-import io.ktor.server.request.authorization
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
@@ -18,6 +17,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.journalpost.JournalpostService
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
@@ -72,8 +72,10 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
 
         post("behandling/{behandlingId}/vedtak") {
             val behandlingId = call.parameters["behandlingId"]!!
+            val vedtakType = call.request.queryParameters["vedtakType"]!!
+                .let { VedtakType.valueOf(it) }
 
-            val brev = service.oppdaterVedtaksbrev(behandlingId)
+            val brev = service.oppdaterVedtaksbrev(behandlingId, vedtakType)
 
             call.respond(brev)
         }
@@ -136,23 +138,21 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
             call.respond(brev)
         }
 
-        get("innkommende/{fnr}") {
-            logger.info(call.request.authorization())
-
+        get("dokumenter/{fnr}") {
             val accessToken = try {
                 getAccessToken(call)
             } catch (ex: Exception) {
                 logger.error("Bearer not found", ex)
                 throw ex
             }
-            val fnr = call.parameters["fnr"]!!
 
-            val innhold = journalpostService.hentInnkommendeBrev(fnr, BrukerIdType.FNR, accessToken)
+            val fnr = call.parameters["fnr"]!!
+            val innhold = journalpostService.hentDokumenter(fnr, BrukerIdType.FNR, accessToken)
 
             call.respond(innhold)
         }
 
-        post("innkommende/{journalpostId}/{dokumentInfoId}") {
+        post("dokumenter/{journalpostId}/{dokumentInfoId}") {
             val accessToken = try {
                 getAccessToken(call)
             } catch (ex: Exception) {
@@ -162,7 +162,7 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
 
             val journalpostId = call.parameters["journalpostId"]!!
             val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-            val innhold = journalpostService.hentInnkommendeBrevInnhold(journalpostId, dokumentInfoId, accessToken)
+            val innhold = journalpostService.hentDokumentPDF(journalpostId, dokumentInfoId, accessToken)
 
             call.respond(innhold)
         }

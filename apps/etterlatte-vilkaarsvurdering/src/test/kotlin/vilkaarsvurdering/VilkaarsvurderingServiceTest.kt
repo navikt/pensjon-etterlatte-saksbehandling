@@ -14,10 +14,15 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.SakType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
@@ -30,6 +35,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -67,14 +73,14 @@ internal class VilkaarsvurderingServiceTest {
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
             LocalDate.of(2022, 1, 1),
-            "",
+            objectMapper.createObjectNode(),
             grunnlag,
             null
         )
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar shouldHaveSize 7
+        vilkaarsvurdering.vilkaar shouldHaveSize 5
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.ALDER_BARN }.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
             vilkaar.grunnlag!! shouldHaveSize 2
@@ -95,6 +101,94 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
+    fun `Skal oppdatere en vilkaarsvurdering med vilkaar som har oppfylt hovedvilkaar`() {
+        opprettVilkaarsvurdering()
+
+        val vurdering = vilkaarsVurderingData()
+        val vurdertVilkaar = VurdertVilkaar(
+            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.FORTSATT_MEDLEMSKAP, resultat = Utfall.OPPFYLT),
+            vurdering = vurdering
+        )
+
+        val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar)
+
+        vilkaarsvurderingOppdatert shouldNotBe null
+        vilkaarsvurderingOppdatert.vilkaar
+            .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
+            .let { vilkaar ->
+                vilkaar.hovedvilkaar.resultat shouldBe Utfall.OPPFYLT
+                vilkaar.unntaksvilkaar?.forEach {
+                    it.resultat shouldBe null
+                }
+                vilkaar.vurdering?.let {
+                    it.saksbehandler shouldBe vurdering.saksbehandler
+                    it.kommentar shouldBe vurdering.kommentar
+                    it.tidspunkt shouldNotBe null
+                }
+            }
+    }
+
+    @Test
+    fun `Skal oppdatere en vilkaarsvurdering med vilkaar som har oppfylt unntaksvilkaar`() {
+        opprettVilkaarsvurdering()
+
+        val vurdering = vilkaarsVurderingData()
+        val vurdertVilkaar = VurdertVilkaar(
+            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.FORTSATT_MEDLEMSKAP, resultat = Utfall.IKKE_OPPFYLT),
+            unntaksvilkaar = VilkaarTypeOgUtfall(
+                type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRE_MINST_20_AAR_SAMLET_BOTID,
+                resultat = Utfall.OPPFYLT
+            ),
+            vurdering = vurdering
+        )
+
+        val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar)
+
+        vilkaarsvurderingOppdatert shouldNotBe null
+        vilkaarsvurderingOppdatert.vilkaar
+            .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
+            .let { vilkaar ->
+                vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
+                val unntaksvilkaar = vilkaar.unntaksvilkaar?.first { it.type == vurdertVilkaar.unntaksvilkaar?.type }
+                unntaksvilkaar?.resultat shouldBe Utfall.OPPFYLT
+
+                vilkaar.vurdering?.let {
+                    it.saksbehandler shouldBe vurdering.saksbehandler
+                    it.kommentar shouldBe vurdering.kommentar
+                    it.tidspunkt shouldNotBe null
+                }
+            }
+    }
+
+    @Test
+    fun `Skal oppdatere en vilkaarsvurdering med vilkaar som ikke har oppfylt hovedvilkaar eller unntaksvilkaar`() {
+        opprettVilkaarsvurdering()
+
+        val vurdering = vilkaarsVurderingData()
+        val vurdertVilkaar = VurdertVilkaar(
+            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.FORTSATT_MEDLEMSKAP, resultat = Utfall.IKKE_OPPFYLT),
+            vurdering = vurdering
+        )
+
+        val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar)
+
+        vilkaarsvurderingOppdatert shouldNotBe null
+        vilkaarsvurderingOppdatert.vilkaar
+            .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
+            .let { vilkaar ->
+                vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
+                vilkaar.unntaksvilkaar?.forEach {
+                    it.resultat shouldBe Utfall.IKKE_OPPFYLT
+                }
+                vilkaar.vurdering?.let {
+                    it.saksbehandler shouldBe vurdering.saksbehandler
+                    it.kommentar shouldBe vurdering.kommentar
+                    it.tidspunkt shouldNotBe null
+                }
+            }
+    }
+
+    @Test
     fun `Skal opprette en vilkaarsvurdering for revurdering for doed soeker`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
@@ -103,7 +197,7 @@ internal class VilkaarsvurderingServiceTest {
             SakType.BARNEPENSJON,
             BehandlingType.REVURDERING,
             LocalDate.now(),
-            "",
+            objectMapper.createObjectNode(),
             grunnlag,
             RevurderingAarsak.SOEKER_DOD
         )
@@ -122,7 +216,7 @@ internal class VilkaarsvurderingServiceTest {
         val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
         val vilkaarsvurderingDao = VilkaarsvurderingDao(
             vilkaarsvurdering.behandlingId,
-            """{"virkningstidspunkt": "21-01-01"}""",
+            objectMapper.readTree("""{"virkningstidspunkt": "21-01-01"}"""),
             emptyList(),
             LocalDate.now(),
             vilkaarsvurdering.resultat
@@ -137,4 +231,19 @@ internal class VilkaarsvurderingServiceTest {
         payloadContent.captured shouldInclude "virkningstidspunkt"
         payloadContent.captured shouldInclude "vilkaarsvurdering"
     }
+
+    private fun opprettVilkaarsvurdering() {
+        service.opprettVilkaarsvurdering(
+            uuid,
+            SakType.BARNEPENSJON,
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            LocalDate.now(),
+            objectMapper.createObjectNode(),
+            GrunnlagTestData().hentOpplysningsgrunnlag(),
+            null
+        )
+    }
+
+    private fun vilkaarsVurderingData() =
+        VilkaarVurderingData("en kommentar", LocalDateTime.now(), "saksbehandler")
 }

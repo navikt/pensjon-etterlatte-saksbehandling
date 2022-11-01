@@ -1,8 +1,11 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -41,7 +44,7 @@ class VilkaarsvurderingService(
         sakType: SakType,
         behandlingType: BehandlingType,
         virkningstidspunkt: LocalDate,
-        payload: String,
+        payload: JsonNode,
         grunnlag: Grunnlag,
         revurderingAarsak: RevurderingAarsak?
     ): VilkaarsvurderingDao {
@@ -80,7 +83,7 @@ class VilkaarsvurderingService(
 
     fun oppdaterVilkaarsvurderingPayload(
         behandlingId: UUID,
-        payload: String,
+        payload: JsonNode,
         virkningstidspunkt: LocalDate
     ): VilkaarsvurderingDao {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let {
@@ -123,7 +126,7 @@ class VilkaarsvurderingService(
     }
 
     fun publiserVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingDao) {
-        val oppdatertPayload = JsonMessage.newMessage(vilkaarsvurdering.payload)
+        val oppdatertPayload = JsonMessage.newMessage(vilkaarsvurdering.payload.toJson())
             .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDomain() }
 
         sendToRapid(oppdatertPayload.toJson())
@@ -131,14 +134,20 @@ class VilkaarsvurderingService(
 
     private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar): Vilkaar =
         if (vilkaar.hovedvilkaar.type == vurdertVilkaar.hovedvilkaar.type) {
+            val hovedvilkaarOgUnntaksvilkaarIkkeOppfylt =
+                vurdertVilkaar.hovedvilkaar.resultat == Utfall.IKKE_OPPFYLT && vurdertVilkaar.unntaksvilkaar == null
             vilkaar.copy(
-                vurdering = vurdertVilkaar.vilkaarVurderingData,
+                vurdering = vurdertVilkaar.vurdering,
                 hovedvilkaar = vilkaar.hovedvilkaar.copy(resultat = vurdertVilkaar.hovedvilkaar.resultat),
                 unntaksvilkaar = vilkaar.unntaksvilkaar?.map {
-                    if (vurdertVilkaar.unntaksvilkaar?.type === it.type) {
-                        it.copy(resultat = vurdertVilkaar.unntaksvilkaar!!.resultat)
+                    if (hovedvilkaarOgUnntaksvilkaarIkkeOppfylt) {
+                        it.copy(resultat = Utfall.IKKE_OPPFYLT)
                     } else {
-                        it.copy(resultat = null)
+                        if (vurdertVilkaar.unntaksvilkaar?.type === it.type) {
+                            it.copy(resultat = vurdertVilkaar.unntaksvilkaar!!.resultat)
+                        } else {
+                            it.copy(resultat = null)
+                        }
                     }
                 }
             )

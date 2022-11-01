@@ -4,14 +4,14 @@ import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import java.io.FileNotFoundException
 
 class JournalpostServiceMock : JournalpostService {
-    override suspend fun hentInnkommendeBrevInnhold(
+    override suspend fun hentDokumentPDF(
         journalpostId: String,
         dokumentInfoId: String,
         accessToken: String
     ): ByteArray =
         readFile("/pdf/innkommende.pdf")
 
-    override suspend fun hentInnkommendeBrev(
+    override suspend fun hentDokumenter(
         fnr: String,
         idType: BrukerIdType,
         accessToken: String

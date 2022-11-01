@@ -9,21 +9,12 @@ export const hentMottakere = async (): Promise<any> => await fetch(`${path}/brev
 export const hentBrevForBehandling = async (behandlingId: string): Promise<any> =>
   await fetch(`${path}/brev/behandling/${behandlingId}`).then((res) => res.json())
 
-export const hentInnkommendeBrev = async (fnr: string): Promise<JournalpostResponse> =>
-  await fetch(`${path}/brev/innkommende/${fnr}`).then((res) => res.json())
-
-export const hentInnkommendeBrevInnhold = async (journalpostId: string, dokumentInfoId: string): Promise<Blob> =>
-  await fetch(`${path}/brev/innkommende/${journalpostId}/${dokumentInfoId}`, { method: 'POST' })
-    .then((res) => {
-      if (res.status == 200) {
-        return res.arrayBuffer()
-      } else {
-        throw Error(res.statusText)
-      }
-    })
-    .then((buffer) => new Blob([buffer], { type: 'application/pdf' }))
-
-export const nyttBrevForBehandling = async (behandlingId: string, mottaker: Mottaker, mal: any, enhet: string): Promise<any> =>
+export const nyttBrevForBehandling = async (
+  behandlingId: string,
+  mottaker: Mottaker,
+  mal: any,
+  enhet: string
+): Promise<any> =>
   await fetch(`${path}/brev/behandling/${behandlingId}`, {
     method: 'POST',
     body: JSON.stringify({ mottaker, mal, enhet }),
@@ -45,8 +36,8 @@ export const opprettBrevFraPDF = async (behandlingId: string, mottaker: Mottaker
   })
 }
 
-export const opprettEllerOppdaterBrevForVedtak = async (behandlingId: string): Promise<any> =>
-  await fetch(`${path}/brev/behandling/${behandlingId}/vedtak`, {
+export const opprettEllerOppdaterBrevForVedtak = async (behandlingId: string, vedtakType: string): Promise<any> =>
+  await fetch(`${path}/brev/behandling/${behandlingId}/vedtak?vedtakType=${vedtakType}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -91,6 +82,20 @@ export const hentForhaandsvisning = async (mottaker: Mottaker, mal: any, enhet: 
     })
     .then((buffer) => new Blob([buffer], { type: 'application/pdf' }))
 
+export const hentDokumenter = async (fnr: string): Promise<JournalpostResponse> =>
+  await fetch(`${path}/brev/dokumenter/${fnr}`).then((res) => res.json())
+
+export const hentDokumentPDF = async (journalpostId: string, dokumentInfoId: string): Promise<Blob> =>
+  await fetch(`${path}/brev/dokumenter/${journalpostId}/${dokumentInfoId}`, { method: 'POST' })
+    .then((res) => {
+      if (res.status == 200) {
+        return res.arrayBuffer()
+      } else {
+        throw Error(res.statusText)
+      }
+    })
+    .then((buffer) => new Blob([buffer], { type: 'application/pdf' }))
+
 export interface Mottaker {
   foedselsnummer?: string
   orgnummer?: string
@@ -106,6 +111,6 @@ export interface Adresse {
 }
 
 export interface Mal {
-    tittel: string
-    navn: string
+  tittel: string
+  navn: string
 }

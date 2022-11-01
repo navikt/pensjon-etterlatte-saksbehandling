@@ -3,17 +3,17 @@ import { useMatch, useNavigate } from 'react-router'
 import { Beregne } from './beregne'
 import { Inngangsvilkaar as InngangsvilkaarV2 } from './vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt'
-import { Brev } from './brev'
 import Beregningsgrunnlag from './beregningsgrunnlag'
 import { IBehandlingsType } from '../../store/reducers/BehandlingReducer'
 import { useAppSelector } from '../../store/Store'
+import { Vedtaksbrev } from './vedtaksbrev'
 
 const behandlingRoutes = [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false },
   { path: 'inngangsvilkaar', element: <InngangsvilkaarV2 />, erRevurderingRoute: true },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag />, erRevurderingRoute: false },
   { path: 'beregne', element: <Beregne />, erRevurderingRoute: true },
-  { path: 'brev', element: <Brev />, erRevurderingRoute: true },
+  { path: 'brev', element: <Vedtaksbrev />, erRevurderingRoute: true },
 ] as const
 
 const revurderingBehandlingRoutes = () => behandlingRoutes.filter((route) => route.erRevurderingRoute)

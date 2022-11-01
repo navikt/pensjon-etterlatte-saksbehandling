@@ -1,4 +1,4 @@
-import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import {
   slettVurdering,
@@ -11,7 +11,7 @@ import styled from 'styled-components'
 import { format } from 'date-fns'
 import { Delete, Edit } from '@navikt/ds-icons'
 
-const MIN_KOMMENTAR_LENGDE = 10
+const MIN_KOMMENTAR_LENGDE = 1
 
 export const Vurdering = ({
   vilkaar,
@@ -32,7 +32,7 @@ export const Vurdering = ({
   const vilkaarVurdert = () => {
     !resultat ? setRadioError('Du må velge et svar') : setRadioError(undefined)
     !(kommentar.length >= MIN_KOMMENTAR_LENGDE)
-      ? setKommentarError('Begrunnelsen må være minst 10 tegn')
+      ? setKommentarError('Begrunnelse er påkrevet')
       : setKommentarError(undefined)
 
     if (
@@ -41,12 +41,15 @@ export const Vurdering = ({
       resultat !== undefined &&
       kommentar.length >= MIN_KOMMENTAR_LENGDE
     ) {
+      const inkluderUnntaksvilkaar =
+        resultat == VurderingsResultat.IKKE_OPPFYLT && vilkaarsUnntakType && vilkaarsUnntakType != ''
+
       vurderVilkaar(behandlingId, {
         hovedvilkaar: {
           type: vilkaar.hovedvilkaar.type,
           resultat,
         },
-        ...(vilkaarsUnntakType && {
+        ...(inkluderUnntaksvilkaar && {
           unntaksvilkaar: {
             type: vilkaarsUnntakType,
             resultat: VurderingsResultat.OPPFYLT,
@@ -72,12 +75,18 @@ export const Vurdering = ({
 
   const redigerVilkaar = () => {
     setAktivVurdering(true)
-    setResultat(vilkaar.hovedvilkaar?.resultat || undefined)
-    vilkaar.unntaksvilkaar?.forEach((unntaksvilkaar) => {
-      if (unntaksvilkaar.resultat) {
-        setVilkaarsUnntakType(unntaksvilkaar.type)
-      }
-    })
+    setResultat(vilkaar.hovedvilkaar?.resultat)
+
+    const unntaksvilkaarOppfylt = vilkaar.unntaksvilkaar?.find(
+      (unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat
+    )
+
+    if (unntaksvilkaarOppfylt) {
+      setVilkaarsUnntakType(unntaksvilkaarOppfylt.type)
+    } else {
+      setVilkaarsUnntakType('')
+    }
+
     setKommentar(vilkaar.vurdering?.kommentar || '')
   }
 
@@ -105,29 +114,43 @@ export const Vurdering = ({
     }
   }
 
+  const oppfyltUnntaksvilkaar = vilkaar.unntaksvilkaar?.find(
+    (unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat
+  )
+
   return (
     <div>
       {vilkaar.vurdering && !aktivVurdering && (
         <>
           <KildeVilkaar>
-            <KildeOverskrift>{overskrift()}</KildeOverskrift>
-            <p>Manuelt av {vilkaar.vurdering?.saksbehandler}</p>
-            {vilkaar.vurdering?.kommentar && (
-              <p>
-                Kommentar: <br />
-                {vilkaar.vurdering?.kommentar}
-              </p>
+            <Heading size="small">{overskrift()}</Heading>
+            <VilkaarVurdertInformasjon>
+              <Detail size="medium">Manuelt av {vilkaar.vurdering?.saksbehandler}</Detail>
+              <Detail size="medium">
+                Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}
+              </Detail>
+            </VilkaarVurdertInformasjon>
+            {oppfyltUnntaksvilkaar && (
+              <VilkaarVurdertInformasjon>
+                <Heading size="xsmall">Unntak er oppfylt</Heading>
+                <BodyShort size="small">{oppfyltUnntaksvilkaar?.paragraf.tittel}</BodyShort>
+              </VilkaarVurdertInformasjon>
             )}
-            <p>Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}</p>
+            {vilkaar.vurdering?.kommentar && (
+              <VilkaarVurdertInformasjon>
+                <Heading size="xsmall">Begrunnelse</Heading>
+                <BodyShort size="small">{vilkaar.vurdering?.kommentar}</BodyShort>
+              </VilkaarVurdertInformasjon>
+            )}
           </KildeVilkaar>
 
-          <RedigerWrapper onClick={slettVurderingAvVilkaar}>
-            <Delete />
-            <span className={'text'}> Slett</span>
-          </RedigerWrapper>
           <RedigerWrapper onClick={redigerVilkaar}>
             <Edit />
             <span className={'text'}> Rediger</span>
+          </RedigerWrapper>
+          <RedigerWrapper onClick={slettVurderingAvVilkaar}>
+            <Delete />
+            <span className={'text'}> Slett</span>
           </RedigerWrapper>
         </>
       )}
@@ -143,7 +166,7 @@ export const Vurdering = ({
                 setResultat(VurderingsResultat[event as VurderingsResultat])
                 setRadioError(undefined)
               }}
-              value={resultat}
+              value={resultat || ''}
               error={radioError ? radioError : false}
             >
               <div className="flex">
@@ -157,27 +180,32 @@ export const Vurdering = ({
           {VurderingsResultat.IKKE_OPPFYLT === resultat && vilkaar.unntaksvilkaar && vilkaar.unntaksvilkaar.length > 0 && (
             <>
               <VurderingsTitle>Er unntak fra hovedregelen oppfylt?</VurderingsTitle>
-              <RadioGroup
-                legend=""
-                size="small"
-                className="radioGroup"
-                onChange={(event) => setVilkaarsUnntakType(event)}
-                value={vilkaarsUnntakType}
-              >
-                <div className="flex">
-                  {vilkaar.unntaksvilkaar.map((unntakvilkaar) => {
-                    return (
-                      <Radio key={unntakvilkaar.type} value={unntakvilkaar.type}>
-                        {unntakvilkaar.paragraf.tittel}
-                      </Radio>
-                    )
-                  })}
-                </div>
-              </RadioGroup>
+              <Unntaksvilkaar>
+                <RadioGroup
+                  legend=""
+                  size="small"
+                  className="radioGroup"
+                  onChange={(event) => setVilkaarsUnntakType(event)}
+                  value={vilkaarsUnntakType || ''}
+                >
+                  <div className="flex">
+                    {vilkaar.unntaksvilkaar.map((unntakvilkaar) => {
+                      return (
+                        <Radio key={unntakvilkaar.type} value={unntakvilkaar.type}>
+                          {unntakvilkaar.paragraf.tittel}
+                        </Radio>
+                      )
+                    })}
+                    <Radio key="Nei" value="">
+                      Nei, ingen av unntakene er oppfylt
+                    </Radio>
+                  </div>
+                </RadioGroup>
+              </Unntaksvilkaar>
             </>
           )}
           <Textarea
-            label="Begrunnelse"
+            label="Begrunnelse (obligatorisk)"
             hideLabel={false}
             placeholder="Gi en begrunnelse for vurderingen"
             value={kommentar}
@@ -202,7 +230,7 @@ export const Vurdering = ({
       )}
       {!vilkaar.vurdering && !aktivVurdering && (
         <IkkeVurdert>
-          <p>Vilkåret er ikke vurdert</p>
+          <Heading size="small">Vilkåret er ikke vurdert</Heading>
           <Button variant={'secondary'} size={'small'} onClick={() => setAktivVurdering(true)}>
             Vurder vilkår
           </Button>
@@ -239,7 +267,6 @@ export const IkkeVurdert = styled.div`
 `
 
 export const KildeVilkaar = styled.div`
-  color: grey;
   font-size: 0.7em;
 
   p {
@@ -268,9 +295,18 @@ export const RadioGroupWrapper = styled.div`
   }
 `
 
+export const Unntaksvilkaar = styled.div`
+  margin-bottom: 1em;
+`
+
 export const VurderingKnapper = styled.div`
   button {
     margin-top: 10px;
     margin-right: 10px;
   }
+`
+
+export const VilkaarVurdertInformasjon = styled.div`
+  margin-bottom: 1.5em;
+  color: var(--navds-global-color-gray-700);
 `

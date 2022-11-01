@@ -1,15 +1,29 @@
 import { BodyLong } from '@navikt/ds-react'
 import styled from 'styled-components'
+import Spinner from '../../../shared/Spinner'
 
 const PdfViewer = styled.iframe`
-  margin-bottom: 20px;
-  width: 800px;
-  height: 1080px;
+  min-width: 680px;
+  width: 100%;
+  min-height: 600px;
+  height: 100%;
 `
 
-export const PdfVisning = ({ fileUrl, error }: { fileUrl?: string; error?: string }) => {
+const Container = styled.div`
+  margin: auto;
+  height: 100%;
+  width: 100%;
+`
+
+interface Props {
+  fileUrl?: string
+  error?: string
+  loading?: boolean
+}
+
+export const PdfVisning = ({ fileUrl, error, loading }: Props) => {
   return (
-    <>
+    <Container>
       {error && (
         <BodyLong>
           En feil har oppstått ved henting av PDF:
@@ -18,7 +32,7 @@ export const PdfVisning = ({ fileUrl, error }: { fileUrl?: string; error?: strin
         </BodyLong>
       )}
 
-      <div>{fileUrl && <PdfViewer src={fileUrl} />}</div>
-    </>
+      {loading ? <Spinner visible={true} label={'Oppretter brev ...'} /> : fileUrl && <PdfViewer src={fileUrl} />}
+    </Container>
   )
 }

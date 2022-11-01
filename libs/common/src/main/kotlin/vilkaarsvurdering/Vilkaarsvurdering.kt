@@ -88,8 +88,8 @@ data class VilkaarTypeOgUtfall(
 
 data class VurdertVilkaar(
     val hovedvilkaar: VilkaarTypeOgUtfall,
-    val unntaksvilkaar: VilkaarTypeOgUtfall?,
-    val vilkaarVurderingData: VilkaarVurderingData
+    val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
+    val vurdering: VilkaarVurderingData
 )
 
 data class Vilkaarsgrunnlag<T>(

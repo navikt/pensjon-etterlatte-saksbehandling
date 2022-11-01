@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../handlinger/vilkaarsvurderingKnapper'
 import {
@@ -10,10 +9,12 @@ import {
   VilkaarsvurderingResultat,
 } from '../../../shared/api/vilkaarsvurdering'
 import { VilkaarBorder } from './styled'
-import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
-import { ISvar } from '../../../store/reducers/BehandlingReducer'
+import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { ISvar, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import { svarTilTotalResultat } from './utils'
 import { Delete } from '@navikt/ds-icons'
+import { StatusIcon } from '../../../shared/icons/statusIcon'
+import { formaterStringDato } from '../../../utils/formattering'
 
 type Props = {
   dato: string
@@ -21,7 +22,7 @@ type Props = {
   oppdaterVilkaar: (vilkaarsvurdering?: Vilkaarsvurdering) => void
   behandlingId: string
 }
-const MIN_KOMMENTAR_LENGDE = 10
+const MIN_KOMMENTAR_LENGDE = 1
 
 export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVilkaar, behandlingId }) => {
   const [svar, setSvar] = useState<ISvar>()
@@ -45,7 +46,7 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
       ? setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
       : setRadioError(undefined)
     !(kommentar.length >= MIN_KOMMENTAR_LENGDE)
-      ? setKommentarError('Begrunnelsen må være minst 10 tegn')
+      ? setKommentarError('Begrunnelse er påkrevet')
       : setKommentarError(undefined)
 
     if (
@@ -63,7 +64,9 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
   }
 
   const resultatTekst = () =>
-    vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'Innvilget' : 'Avslag'
+    vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
+      ? 'Ja, vilkår er oppfylt'
+      : 'Nei, vilkår er ikke oppfylt'
 
   const reset = () => {
     setSvar(undefined)
@@ -72,29 +75,34 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
     setKommentarError(undefined)
   }
 
+  const status =
+    vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
+      ? VurderingsResultat.OPPFYLT
+      : VurderingsResultat.IKKE_OPPFYLT
+
   return (
     <>
       <VilkaarsvurderingContent>
+        <HeadingWrapper>
+          <Heading size="small">Er vilkårene for barnepensjon oppfylt?</Heading>
+        </HeadingWrapper>
         {vilkaarsvurdering.resultat && (
-          <>
+          <ContentWrapper>
             <TekstWrapper>
-              <span>
-                <b>Vilkårsresultat: </b>
-                {`${resultatTekst()} fra ${format(new Date(dato), 'dd.MM.yyyy')}`}
-              </span>
+              <StatusIcon status={status} noLeftPadding /> {`${resultatTekst()}`}
             </TekstWrapper>
-            <p>
-              Manuelt av {vilkaarsvurdering.resultat.saksbehandler} (
-              <i>{format(new Date(vilkaarsvurdering.resultat.tidspunkt), 'dd.MM.yyyy HH:ss')}):</i>
-            </p>
+            {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
+              <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(dato)}</BodyShort>
+            )}
             <Kommentar>
-              <p>{vilkaarsvurdering.resultat.kommentar}</p>
+              <Heading size="xsmall">Begrunnelse</Heading>
+              <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
             </Kommentar>
             <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
               <Delete />
               <span className={'text'}>Slett vurdering</span>
             </SlettWrapper>
-          </>
+          </ContentWrapper>
         )}
 
         {!vilkaarsvurdering.resultat && !alleVilkaarErVurdert && (
@@ -103,9 +111,6 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
 
         {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
           <>
-            <TekstWrapper>
-              <b>Er vilkårsvurderingen oppfylt?</b>
-            </TekstWrapper>
             <RadioGroupWrapper>
               <RadioGroup
                 legend=""
@@ -117,14 +122,12 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
                 }}
                 error={radioError ? radioError : false}
               >
-                <div className="flex">
-                  <Radio value={ISvar.JA}>Ja</Radio>
-                  <Radio value={ISvar.NEI}>Nei</Radio>
-                </div>
+                <Radio value={ISvar.JA}>Ja, vilkår er oppfylt</Radio>
+                <Radio value={ISvar.NEI}>Nei, vilkår er ikke oppfylt</Radio>
               </RadioGroup>
             </RadioGroupWrapper>
             <Textarea
-              label="Begrunnelse"
+              label="Begrunnelse (obligatorisk)"
               hideLabel={false}
               placeholder="Gi en begrunnelse for vurderingen"
               value={kommentar}
@@ -154,7 +157,7 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
 
 export const RadioGroupWrapper = styled.div`
   margin-top: 1em;
-  margin-bottom: 1em;
+  margin-bottom: 2em;
   display: flex;
 
   .flex {
@@ -173,13 +176,15 @@ const VilkaarsvurderingContent = styled.div`
 `
 
 const TekstWrapper = styled.div`
-  margin-top: 30px;
+  margin-top: 20px;
+  margin-bottom: 10px;
   display: flex;
-  font-size: 1.2em;
+  font-weight: bold;
 `
 
 const Kommentar = styled.div`
-  color: gray;
+  margin-top: 20px;
+  margin-bottom: 20px;
 `
 
 const SlettWrapper = styled.div`
@@ -196,4 +201,12 @@ const SlettWrapper = styled.div`
   &:hover {
     text-decoration-line: underline;
   }
+`
+
+const HeadingWrapper = styled.div`
+  margin-top: 2em;
+`
+
+const ContentWrapper = styled.div`
+  color: var(--navds-global-color-gray-700);
 `

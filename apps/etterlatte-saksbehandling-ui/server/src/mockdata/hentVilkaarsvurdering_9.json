@@ -13,10 +13,10 @@
         "tittel" : "Formål",
           "lenke" : "https://lovdata.no/lov/1997-02-28-19/%C2%A718-1",
           "lovtekst" : "Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde."
-        }
+        },
+        "resultat" : "OPPFYLT"
       },
       "vurdering" : {
-        "resultat" : "OPPFYLT",
         "kommentar" : "Vilkåret er oppfyllt ved at faren har omkommet",
         "tidspunkt" : "2022-09-29T13:09:49.94689449",
         "saksbehandler" : "Z9991111"

@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -67,7 +68,7 @@ internal class GrunnlagEndretRiverTest {
     private fun eksisterendeVilkaarsvurdering() =
         VilkaarsvurderingDao(
             behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
-            payload = grunnlagEndretMelding,
+            payload = grunnlagEndretMelding.toJsonNode(),
             vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(grunnlag),
             virkningstidspunkt = LocalDate.of(2022, 1, 1)
         )

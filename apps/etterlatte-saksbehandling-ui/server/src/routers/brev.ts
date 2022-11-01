@@ -18,34 +18,6 @@ router.get('/behandling/:behandlingId', async (req: Request, res: Response, next
   }
 })
 
-router.get('/innkommende/:fnr', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const path = `${apiUrl}/brev/innkommende/${req.params.fnr}`
-    const response = await fetch(path)
-    const json = await response.json()
-    res.send(json)
-  } catch (e) {
-    next(e)
-  }
-})
-
-router.post('/innkommende/:journalpostId/:dokumentInfoId', async (req: Request, res: Response, next) => {
-  try {
-    const path = `${apiUrl}/brev/innkommende/${req.params.journalpostId}/${req.params.dokumentInfoId}`
-    const response = await fetch(path, { method: 'POST' })
-    const data = await response.buffer()
-
-    if (response.status == 200) {
-      res.contentType('application/pdf')
-      res.send(data)
-    } else {
-      res.sendStatus(response.status)
-    }
-  } catch (e) {
-    next(e)
-  }
-})
-
 router.delete('/:brevId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const path = `${apiUrl}/brev/${req.params.brevId}`
@@ -99,7 +71,7 @@ router.post('/behandling/:behandlingId', async (req: Request, res: Response, nex
 
 router.post('/behandling/:behandlingId/vedtak', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const path = `${apiUrl}/brev/behandling/${req.params.behandlingId}/vedtak`
+    const path = `${apiUrl}${req.originalUrl}`
 
     const response = await fetch(path, {
       method: 'POST',
@@ -173,6 +145,34 @@ router.post('/forhaandsvisning', async (req: Request, res: Response, next: NextF
       res.send(data)
     } else {
       res.sendStatus(result.status)
+    }
+  } catch (e) {
+    next(e)
+  }
+})
+
+router.get('/dokumenter/:fnr', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const path = `${apiUrl}/brev/dokumenter/${req.params.fnr}`
+    const response = await fetch(path)
+    const json = await response.json()
+    res.send(json)
+  } catch (e) {
+    next(e)
+  }
+})
+
+router.post('/brev/dokumenter/:journalpostId/:dokumentInfoId', async (req: Request, res: Response, next) => {
+  try {
+    const path = `${apiUrl}/brev/dokumenter/${req.params.journalpostId}/${req.params.dokumentInfoId}`
+    const response = await fetch(path, { method: 'POST' })
+    const data = await response.buffer()
+
+    if (response.status == 200) {
+      res.contentType('application/pdf')
+      res.send(data)
+    } else {
+      res.sendStatus(response.status)
     }
   } catch (e) {
     next(e)

@@ -36,8 +36,8 @@ export const opprettBrevFraPDF = async (behandlingId: string, mottaker: Mottaker
   })
 }
 
-export const opprettEllerOppdaterBrevForVedtak = async (behandlingId: string): Promise<any> =>
-  await fetch(`${path}/brev/behandling/${behandlingId}/vedtak`, {
+export const opprettEllerOppdaterBrevForVedtak = async (behandlingId: string, vedtakType: string): Promise<any> =>
+  await fetch(`${path}/brev/behandling/${behandlingId}/vedtak?vedtakType=${vedtakType}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

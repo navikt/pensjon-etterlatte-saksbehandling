@@ -71,7 +71,7 @@ router.post('/behandling/:behandlingId', async (req: Request, res: Response, nex
 
 router.post('/behandling/:behandlingId/vedtak', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const path = `${apiUrl}/brev/behandling/${req.params.behandlingId}/vedtak`
+    const path = `${apiUrl}${req.originalUrl}`
 
     const response = await fetch(path, {
       method: 'POST',

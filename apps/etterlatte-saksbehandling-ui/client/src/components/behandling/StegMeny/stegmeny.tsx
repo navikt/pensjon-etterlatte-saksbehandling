@@ -14,6 +14,7 @@ export const StegMeny = () => {
   const vilkaar =
     behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
     behandling.vilkårsprøving?.resultat === VurderingsResultat.OPPFYLT
+  const vurdert = !!behandling.vilkårsprøving?.resultat
 
   const avdoedesBarn = behandling.familieforhold?.avdoede.opplysning.avdoedesBarn
   const soekerHarSoesken = avdoedesBarn ? avdoedesBarn.length > 1 : false
@@ -44,8 +45,8 @@ export const StegMeny = () => {
         <NavLink to="beregne">Beregning</NavLink>
       </li>
       <Separator />
-      <li>
-        <NavLink to="brev">Brev</NavLink>
+      <li className={classNames({ disabled: !vurdert })}>
+        <NavLink to="brev">Vedtaksbrev</NavLink>
       </li>
     </StegMenyWrapper>
   )

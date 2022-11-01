@@ -50,8 +50,9 @@ HENT_DOKUMENT_URL=https://saf-q1.dev.intern.nav.no/rest/hentdokument;
 SAF_GRAPHQL_URL=https://saf-q1.dev.intern.nav.no/graphql;
 ETTERLATTE_PROXY_URL="";
 ETTERLATTE_PROXY_OUTBOUND_SCOPE="";
-NORG2_URL="";
 ETTERLATTE_BRREG_URL="";
 ```
+
+**OBS:** Siden vi går mot Norg2 APIet i dev (fra lokal maskin) må du koble til Naisdevice.
 
 ##### 3. Kjør din nye run config (ApplicationKt)

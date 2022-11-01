@@ -4,6 +4,10 @@ import GrunnlagTestData
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldInclude
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -15,6 +19,7 @@ import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.SakType
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
@@ -35,7 +40,7 @@ internal class VilkaarsvurderingServiceTest {
 
     private lateinit var service: VilkaarsvurderingService
     private val uuid: UUID = UUID.randomUUID()
-    private fun sendToRapid(message: String) {}
+    private val sendToRapid: (String) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
     fun beforeAll() {
@@ -45,7 +50,7 @@ internal class VilkaarsvurderingServiceTest {
             postgreSQLContainer.username,
             postgreSQLContainer.password
         ).apply { migrate() }
-        service = VilkaarsvurderingService(VilkaarsvurderingRepositoryImpl(ds.dataSource()), ::sendToRapid)
+        service = VilkaarsvurderingService(VilkaarsvurderingRepositoryImpl(ds.dataSource()), sendToRapid)
     }
 
     @AfterAll
@@ -110,5 +115,26 @@ internal class VilkaarsvurderingServiceTest {
             vilkaar.grunnlag shouldBe null
             vilkaar.hovedvilkaar.type shouldBe VilkaarType.FORMAAL
         }
+    }
+
+    @Test
+    fun `Skal publisere oppdatert vilkaarsvurdering paa kafka`() {
+        val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
+        val vilkaarsvurderingDao = VilkaarsvurderingDao(
+            vilkaarsvurdering.behandlingId,
+            """{"virkningstidspunkt": "21-01-01"}""",
+            emptyList(),
+            LocalDate.now(),
+            vilkaarsvurdering.resultat
+        )
+        val payloadContent = slot<String>()
+
+        service.publiserVilkaarsvurdering(vilkaarsvurderingDao)
+
+        verify(exactly = 1) {
+            sendToRapid.invoke(capture(payloadContent))
+        }
+        payloadContent.captured shouldInclude "virkningstidspunkt"
+        payloadContent.captured shouldInclude "vilkaarsvurdering"
     }
 }

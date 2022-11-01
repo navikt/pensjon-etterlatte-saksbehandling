@@ -3,11 +3,14 @@ import { IBehandlingInfo } from './types'
 import { BehandlingInfo } from '../attestering'
 import { IHendelseType } from '../../../store/reducers/BehandlingReducer'
 import { useAppSelector } from '../../../store/Store'
+import { Button } from '@navikt/ds-react'
+import { CollapsibleSidebar, SidebarContent, SidebarTools } from '../../../shared/styled'
 
 export const SideMeny = () => {
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const [behandlingsInfo, setBehandlingsinfo] = useState<IBehandlingInfo>()
+  const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
     const underkjentHendelser = behandling.hendelser.filter(
@@ -30,5 +33,18 @@ export const SideMeny = () => {
       })
   }, [saksbehandler, behandling])
 
-  return <div>{behandlingsInfo && <BehandlingInfo behandlingsInfo={behandlingsInfo} />}</div>
+  return (
+    <CollapsibleSidebar collapsed={collapsed}>
+      <SidebarTools>
+        <Button variant={collapsed ? 'primary' : 'tertiary'} onClick={() => setCollapsed(!collapsed)}>
+          {/* Bruker &laquo; og &raquo; siden ds-icons ikke har dobbel chevron. */}
+          {collapsed ? '«' : '»'}
+        </Button>
+      </SidebarTools>
+
+      <SidebarContent collapsed={collapsed}>
+        {behandlingsInfo && <BehandlingInfo behandlingsInfo={behandlingsInfo} />}
+      </SidebarContent>
+    </CollapsibleSidebar>
+  )
 }

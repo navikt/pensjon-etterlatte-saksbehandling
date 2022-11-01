@@ -2,14 +2,21 @@ import { BodyLong } from '@navikt/ds-react'
 import styled from 'styled-components'
 
 const PdfViewer = styled.iframe`
-  margin-bottom: 20px;
-  width: 800px;
-  height: 1080px;
+  min-width: 680px;
+  width: 100%;
+  min-height: 600px;
+  height: 100%;
+`
+
+const Container = styled.div`
+  margin: auto;
+  height: 100%;
+  width: 100%;
 `
 
 export const PdfVisning = ({ fileUrl, error }: { fileUrl?: string; error?: string }) => {
   return (
-    <>
+    <Container>
       {error && (
         <BodyLong>
           En feil har oppstått ved henting av PDF:
@@ -18,7 +25,7 @@ export const PdfVisning = ({ fileUrl, error }: { fileUrl?: string; error?: strin
         </BodyLong>
       )}
 
-      <div>{fileUrl && <PdfViewer src={fileUrl} />}</div>
-    </>
+      <>{fileUrl && <PdfViewer src={fileUrl} />}</>
+    </Container>
   )
 }

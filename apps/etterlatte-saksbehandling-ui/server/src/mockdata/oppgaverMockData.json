@@ -43,5 +43,20 @@
     "saksbehandler": "",
     "handling": "BEHANDLE",
     "antallSoesken": null
+  },
+  {
+    "behandlingsId": "14",
+    "sakId": 67,
+    "status": "OPPRETTET",
+    "oppgaveStatus": "NY",
+    "soeknadType": "Barnepensjon",
+    "behandlingType": "FØRSTEGANGSBEHANDLING",
+    "regdato": "2022-10-28T05:47:08.644",
+    "fristdato": "2023-10-28T05:47:08.644",
+    "fnr": "29081276127",
+    "beskrivelse": "",
+    "saksbehandler": "",
+    "handling": "BEHANDLE",
+    "antallSoesken": null
   }
 ]

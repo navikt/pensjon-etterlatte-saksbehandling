@@ -79,8 +79,8 @@ class BrevService(
         return db.opprettBrev(UlagretBrev(behandlingId, brevInnhold.mal, mottaker, false, brevInnhold.data))
     }
 
-    suspend fun oppdaterVedtaksbrev(behandlingId: String): BrevID {
-        val vedtak = vedtakService.hentVedtak(behandlingId)
+    suspend fun oppdaterVedtaksbrev(behandlingId: String, vedtakType: VedtakType): BrevID {
+        val vedtak = vedtakService.hentVedtak(behandlingId).copy(type = vedtakType)
         val nyttBrev = opprettNyttBrevFraVedtak(vedtak, behandlingId)
 
         val vedtaksbrev = db.hentBrevForBehandling(behandlingId)

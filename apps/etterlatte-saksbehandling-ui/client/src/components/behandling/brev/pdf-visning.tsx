@@ -1,5 +1,6 @@
 import { BodyLong } from '@navikt/ds-react'
 import styled from 'styled-components'
+import Spinner from '../../../shared/Spinner'
 
 const PdfViewer = styled.iframe`
   min-width: 680px;
@@ -14,7 +15,13 @@ const Container = styled.div`
   width: 100%;
 `
 
-export const PdfVisning = ({ fileUrl, error }: { fileUrl?: string; error?: string }) => {
+interface Props {
+  fileUrl?: string
+  error?: string
+  loading?: boolean
+}
+
+export const PdfVisning = ({ fileUrl, error, loading }: Props) => {
   return (
     <Container>
       {error && (
@@ -25,7 +32,7 @@ export const PdfVisning = ({ fileUrl, error }: { fileUrl?: string; error?: strin
         </BodyLong>
       )}
 
-      <>{fileUrl && <PdfViewer src={fileUrl} />}</>
+      {loading ? <Spinner visible={true} label={'Oppretter brev ...'} /> : fileUrl && <PdfViewer src={fileUrl} />}
     </Container>
   )
 }

@@ -17,6 +17,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.journalpost.JournalpostService
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
@@ -71,8 +72,10 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
 
         post("behandling/{behandlingId}/vedtak") {
             val behandlingId = call.parameters["behandlingId"]!!
+            val vedtakType = call.request.queryParameters["vedtakType"]!!
+                .let { VedtakType.valueOf(it) }
 
-            val brev = service.oppdaterVedtaksbrev(behandlingId)
+            val brev = service.oppdaterVedtaksbrev(behandlingId, vedtakType)
 
             call.respond(brev)
         }

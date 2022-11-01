@@ -18,6 +18,7 @@ import {
   VilkaarsvurderingResultat,
   VurderingsResultat,
 } from '../../../shared/api/vilkaarsvurdering'
+import { useVedtaksResultat } from '../useVedtaksResultat'
 
 interface VilkaarOption {
   value: string
@@ -26,6 +27,7 @@ interface VilkaarOption {
 
 export const Vedtaksbrev = () => {
   const { behandlingId } = useParams()
+  const vedtaksresultat = useVedtaksResultat()
   const { soeknadMottattDato, behandlingType } = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const [fileURL, setFileURL] = useState<string>()
@@ -33,7 +35,24 @@ export const Vedtaksbrev = () => {
   const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering>({ vilkaar: [] })
   const [ikkeOpfylteVilkaar, setIkkeOppfylteVilkaar] = useState<VilkaarOption[]>([])
   const [valgtVilkaarType, setValgtVilkaarType] = useState<string>()
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
+
+  // TODO: Dette er midlertidig kun for demo
+  const vedtakType = () => {
+    switch (vedtaksresultat) {
+      case 'opphoer':
+        return 'OPPHOER'
+      case 'innvilget':
+        return 'INNVILGELSE'
+      case 'avslag':
+        return 'AVSLAG'
+      case 'endring':
+        return 'ENDRING'
+      case 'uavklart':
+        return 'UAVKLART'
+    }
+  }
 
   useEffect(() => {
     if (!vedtaksbrevId) return
@@ -44,7 +63,8 @@ export const Vedtaksbrev = () => {
       .catch((e) => setError(e.message))
       .finally(() => {
         if (fileURL) URL.revokeObjectURL(fileURL)
-        // setHasLoaded(true)
+
+        setLoading(false)
       })
   }, [vedtaksbrevId])
 
@@ -68,6 +88,7 @@ export const Vedtaksbrev = () => {
       const vilkaar = [...hovedvilkaar, ...unntaksvilkaar]
       if (vilkaar.length === 1) {
         setValgtVilkaarType(vilkaar[0].value)
+        console.log(valgtVilkaarType)
       } else {
         setIkkeOppfylteVilkaar([...hovedvilkaar, ...unntaksvilkaar])
       }
@@ -78,14 +99,12 @@ export const Vedtaksbrev = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
 
     hentVilkaarsvurdering(behandlingId).then((response) => {
-      console.log(response.status)
       if (response.status === 'ok') {
         setVilkaarsvurdering(response.data)
-        console.log('vilkaarsvurder set')
       }
     })
 
-    opprettEllerOppdaterBrevForVedtak(behandlingId!!)
+    opprettEllerOppdaterBrevForVedtak(behandlingId!!, vedtakType())
       .then((res) => {
         console.log(res)
         setVedtaksbrevId(res)
@@ -110,9 +129,9 @@ export const Vedtaksbrev = () => {
             <Soeknadsdato mottattDato={soeknadMottattDato} />
           </ContentHeader>
 
-          {!!ikkeOpfylteVilkaar.length ? (
+          {!!ikkeOpfylteVilkaar.length && (
             <Select
-              label={'Velg det vedtaket som er mest relevant'}
+              label={'Velg det vilkåret som er mest relevant'}
               onChange={(e) => setValgtVilkaarType(e.target.value)}
             >
               <option value=""></option>
@@ -122,12 +141,10 @@ export const Vedtaksbrev = () => {
                 </option>
               ))}
             </Select>
-          ) : (
-            <p>{valgtVilkaarType}</p>
           )}
         </Editor>
 
-        <PdfVisning fileUrl={fileURL} error={error} />
+        <PdfVisning fileUrl={fileURL} error={error} loading={loading} />
       </BrevContent>
 
       <BrevContentFooter>

@@ -260,7 +260,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setString(13, oppgaveStatus?.name)
             stmt.setString(
                 14,
-                foerstegangsbehandling.hentVirkningstidspunkt()?.let { objectMapper.writeValueAsString(it) }
+                foerstegangsbehandling.hentVirkningstidspunkt()?.toJson()
             )
         }
         stmt.executeUpdate()

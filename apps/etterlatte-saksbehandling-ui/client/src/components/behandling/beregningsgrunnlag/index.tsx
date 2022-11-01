@@ -54,7 +54,11 @@ const Beregningsgrunnlag = () => {
       <Header>
         <h1>Beregningsgrunnlag</h1>
         <BodyShort spacing>
-          Vilkårsresultat: <strong>Innvilget fra {formaterStringDato(behandling.virkningstidspunkt!!.dato)}</strong>
+          Vilkårsresultat:{' '}
+          <strong>
+            Innvilget fra{' '}
+            {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt.dato) : 'ukjent dato'}
+          </strong>
         </BodyShort>
         <Heading level="2" size="small">
           Søskenjustering

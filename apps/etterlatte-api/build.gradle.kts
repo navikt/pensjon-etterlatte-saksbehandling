@@ -42,4 +42,5 @@ dependencies {
     testImplementation(NavFelles.MockOauth2Server)
     testImplementation(Kotlinx.CoroutinesTest)
     testImplementation("org.skyscreamer:jsonassert:1.5.1")
+//    testImplementation(project(":libs:testdata"))
 }

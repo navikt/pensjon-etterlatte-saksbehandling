@@ -32,7 +32,7 @@ export const Vedtaksbrev = () => {
 
   const [fileURL, setFileURL] = useState<string>()
   const [vedtaksbrevId, setVedtaksbrevId] = useState<string>()
-  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering>({ vilkaar: [] })
+  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering | undefined>(undefined)
   const [ikkeOpfylteVilkaar, setIkkeOppfylteVilkaar] = useState<VilkaarOption[]>([])
   const [valgtVilkaarType, setValgtVilkaarType] = useState<string>()
   const [loading, setLoading] = useState(true)
@@ -69,7 +69,7 @@ export const Vedtaksbrev = () => {
   }, [vedtaksbrevId])
 
   useEffect(() => {
-    if (vilkaarsvurdering.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT) {
+    if (vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT) {
       const hovedvilkaar: VilkaarOption[] = vilkaarsvurdering.vilkaar
         .filter((v) => v.hovedvilkaar.resultat === VurderingsResultat.IKKE_OPPFYLT)
         .map((v) => ({

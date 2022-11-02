@@ -24,9 +24,9 @@ internal class LesVilkaarsmeldingTest {
     fun `skal lese og lage melding`() {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
-        Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
+        Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurderingGammel").size())
         Assertions.assertEquals(2, inspector.message(0).get("kommerSoekerTilGode").size())
-        Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
+        Assertions.assertEquals(8, inspector.message(0).get("kommerSoekerTilGodeGrunnlagRef").intValue())
         Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey).size())
     }
 
@@ -34,8 +34,8 @@ internal class LesVilkaarsmeldingTest {
     fun `skal lese og lage en melding for revurdering doedsfall`() {
         val inspector = inspector.apply { sendTestMessage(meldingRevurderingDoedsfall) }.inspektør
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
-        Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
-        Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
+        Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurderingGammel").size())
+        Assertions.assertEquals(8, inspector.message(0).get("kommerSoekerTilGodeGrunnlagRef").intValue())
         Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey).size())
     }
 
@@ -43,8 +43,8 @@ internal class LesVilkaarsmeldingTest {
     fun `skal lese og lage en melding for revurdering manuelt opphoer`() {
         val inspector = inspector.apply { sendTestMessage(meldingRevurderingManueltOpphoer) }.inspektør
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
-        Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
-        Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
+        Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurderingGammel").size())
+        Assertions.assertEquals(8, inspector.message(0).get("kommerSoekerTilGodeGrunnlagRef").intValue())
         Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey).size())
     }
 }

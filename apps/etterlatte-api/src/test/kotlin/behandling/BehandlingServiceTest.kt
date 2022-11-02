@@ -29,8 +29,9 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.typer.LagretHendelse
 import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Sak
@@ -128,7 +129,12 @@ internal class BehandlingServiceTest {
             null,
             null,
             null,
-            VilkaarResultat(VurderingsResultat.OPPFYLT, null, LocalDateTime.now()),
+            Vilkaarsvurdering(
+                UUID.randomUUID(),
+                emptyList(),
+                LocalDate.now(),
+                VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), "ABV")
+            ),
             null,
             null,
             null,
@@ -217,7 +223,7 @@ internal class BehandlingServiceTest {
 
         assertEquals(behandlingid, respons.id)
         assertEquals(4, respons.sak)
-        assertEquals(VurderingsResultat.OPPFYLT, respons.vilkårsprøving?.resultat)
+        assertEquals(VilkaarsvurderingUtfall.OPPFYLT, respons.vilkårsprøving?.resultat?.utfall)
         assertEquals(2, respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.size)
         assertEquals("TestKari", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(0)!!.fornavn)
         assertEquals("TestOla", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(1)!!.fornavn)

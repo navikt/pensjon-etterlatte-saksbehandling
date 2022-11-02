@@ -9,20 +9,24 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.safeLet
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
-import no.nav.etterlatte.vilkaarsvurdering.Hovedvilkaar
-import no.nav.etterlatte.vilkaarsvurdering.Paragraf
-import no.nav.etterlatte.vilkaarsvurdering.Unntaksvilkaar
-import no.nav.etterlatte.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarOpplysningsType
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsgrunnlag
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Hovedvilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Paragraf
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Unntaksvilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningsType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 
-fun barnepensjonVilkaar(grunnlag: Grunnlag) = listOf(
+fun barnepensjonFoerstegangsbehandlingVilkaar(grunnlag: Grunnlag) = listOf(
     doedsfallForelder(),
     alderBarn(grunnlag.soeker, grunnlag.hentAvdoed()),
     barnetsMedlemskap(),
     avdoedesForutgaaendeMedlemskap(),
     yrkesskadeAvdoed()
+)
+
+fun barnepensjonRevurderingSoekerDoedVilkaar() = listOf(
+    formaal()
 )
 
 enum class Kapittel18(val paragraf: String, val lenke: String) {

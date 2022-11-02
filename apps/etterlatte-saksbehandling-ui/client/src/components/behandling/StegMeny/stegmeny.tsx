@@ -4,6 +4,7 @@ import { IBehandlingsType, VurderingsResultat } from '../../../store/reducers/Be
 import classNames from 'classnames'
 import { Next } from '@navikt/ds-icons'
 import { useAppSelector } from '../../../store/Store'
+import { VilkaarsvurderingResultat } from '../../../shared/api/vilkaarsvurdering'
 
 export const StegMeny = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -13,7 +14,7 @@ export const StegMeny = () => {
     behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const vilkaar =
     behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
-    behandling.vilkårsprøving?.resultat === VurderingsResultat.OPPFYLT
+    behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT
   const vurdert = !!behandling.vilkårsprøving?.resultat
 
   const avdoedesBarn = behandling.familieforhold?.avdoede.opplysning.avdoedesBarn

@@ -7,10 +7,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
+import java.time.LocalDate
 import java.util.*
 
 internal class GrunnlagEndretRiverTest {
@@ -27,7 +28,9 @@ internal class GrunnlagEndretRiverTest {
                 SakType.BARNEPENSJON,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 any(),
-                any()
+                any(),
+                any(),
+                null
             )
         } returns eksisterendeVilkaarsvurdering()
 
@@ -40,7 +43,9 @@ internal class GrunnlagEndretRiverTest {
                 SakType.BARNEPENSJON,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 any(),
-                any()
+                any(),
+                any(),
+                null
             )
         }
         confirmVerified(vilkaarsvurderingService)
@@ -50,21 +55,22 @@ internal class GrunnlagEndretRiverTest {
     fun `skal motta grunnlagsendring og oppdatere eksisterende vilkaarsvurdering med innholdet i meldingen`() {
         every { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns eksisterendeVilkaarsvurdering()
         every {
-            vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(any(), any())
+            vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(any(), any(), any())
         } returns eksisterendeVilkaarsvurdering()
 
         inspector.apply { sendTestMessage(grunnlagEndretMelding) }.inspektør
 
         verify(exactly = 1) { vilkaarsvurderingService.hentVilkaarsvurdering(any()) }
-        verify(exactly = 1) { vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(any(), any()) }
+        verify(exactly = 1) { vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(any(), any(), any()) }
         confirmVerified(vilkaarsvurderingService)
     }
 
     private fun eksisterendeVilkaarsvurdering() =
-        Vilkaarsvurdering(
+        VilkaarsvurderingDao(
             behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
             payload = grunnlagEndretMelding.toJsonNode(),
-            vilkaar = barnepensjonVilkaar(grunnlag)
+            vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(grunnlag),
+            virkningstidspunkt = LocalDate.of(2022, 1, 1)
         )
 
     companion object {

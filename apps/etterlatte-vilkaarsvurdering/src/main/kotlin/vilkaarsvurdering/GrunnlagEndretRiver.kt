@@ -2,6 +2,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -9,11 +10,11 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 
@@ -35,11 +36,11 @@ class GrunnlagEndretRiver(
             validate { it.requireKey("behandling.type") }
             validate { it.requireKey("sak.sakType") }
             validate { it.requireKey("fnrSoeker") }
+            validate { it.requireKey("virkningstidspunkt") }
             validate { it.interestedIn(BehandlingGrunnlagEndret.revurderingAarsakKey) }
             validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerAarsakKey) }
             validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey) }
             validate { it.rejectKey("vilkaarsvurdering") }
-            validate { it.rejectKey("kommerSoekerTilGode") }
             validate { it.rejectKey("gyldighetsvurdering") }
             correlationId()
         }.register(this)
@@ -48,16 +49,21 @@ class GrunnlagEndretRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             try {
-                val grunnlagEndretPayload = packet.toJsonNode()
+                // todo: Denne flyten skal erstattes med http kall for å hente inn data.
+                val grunnlagEndretPayload = objectMapper.readTree(packet.toJson())
                 val behandlingId = packet["behandlingId"].asText().toUUID()
                 val behandlingType = BehandlingType.valueOf(packet["behandling.type"].asText())
                 val sakType = SakType.valueOf(packet["sak.sakType"].asText())
+                val virkningstidspunkt = packet["virkningstidspunkt"].asYearMonth().atDay(1)
                 val grunnlag =
                     requireNotNull(
                         objectMapper.treeToValue<Grunnlag>(
                             packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey]
                         )
                     )
+                val revurderingAarsak: RevurderingAarsak? = kotlin.runCatching {
+                    RevurderingAarsak.valueOf(packet[BehandlingGrunnlagEndret.revurderingAarsakKey].asText())
+                }.getOrNull()
 
                 // todo: Midlertidig fiks for å unngå at behandling forsøkes å opprettes
                 // Vil kaste NPE dersom grunnlag ikke eksisterer for avdød.
@@ -70,15 +76,21 @@ class GrunnlagEndretRiver(
                 // kunne sende dette videre sendere.
                 if (vilkaarsvurdering != null) {
                     logger.info("Oppdaterer eksisterende vilkårsvurdering for behandlingId=$behandlingId")
-                    vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(behandlingId, grunnlagEndretPayload)
+                    vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(
+                        behandlingId = behandlingId,
+                        payload = grunnlagEndretPayload,
+                        virkningstidspunkt = virkningstidspunkt
+                    )
                 } else {
                     logger.info("Oppretter ny vilkårsvurdering for behandlingId=$behandlingId")
                     vilkaarsvurderingService.opprettVilkaarsvurdering(
-                        behandlingId,
-                        sakType,
-                        behandlingType,
-                        grunnlagEndretPayload,
-                        grunnlag
+                        behandlingId = behandlingId,
+                        sakType = sakType,
+                        behandlingType = behandlingType,
+                        virkningstidspunkt = virkningstidspunkt,
+                        payload = grunnlagEndretPayload,
+                        grunnlag = grunnlag,
+                        revurderingAarsak = revurderingAarsak
                     )
                 }
             } catch (e: Exception) {

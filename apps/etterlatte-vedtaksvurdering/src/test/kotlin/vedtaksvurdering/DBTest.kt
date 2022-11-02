@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -43,6 +44,7 @@ internal class DBTest {
     private lateinit var dataSource: DataSource
 
     private val uuid = UUID.randomUUID()
+    private val sakId = "12321423523545"
 
     @BeforeAll
     fun beforeAll() {
@@ -68,7 +70,7 @@ internal class DBTest {
         val now = LocalDateTime.now()
         val beregningsperiode = listOf<Beregningsperiode>()
         vedtaksvurderingService.lagreBeregningsresultat(
-            "12321423523545",
+            sakId,
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
             "",
             BeregningsResultat(
@@ -86,17 +88,12 @@ internal class DBTest {
     fun leggtilvilkaarsresultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
-        val now = LocalDateTime.now()
         vedtaksvurderingService.lagreVilkaarsresultat(
-            "12321423523545",
+            sakId,
             "BARNEPENSJON",
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
             "fnr",
-            VilkaarResultat(
-                VurderingsResultat.OPPFYLT,
-                emptyList(),
-                now
-            ),
+            VilkaarsvurderingTestData.oppfylt,
             LocalDate.now()
         )
     }
@@ -107,7 +104,7 @@ internal class DBTest {
         val now = LocalDateTime.now()
 
         vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(
-            "12321423523545",
+            sakId,
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
             "fnr",
             KommerSoekerTilgode(
@@ -149,7 +146,7 @@ internal class DBTest {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         vedtaksvurderingService.lagreAvkorting(
-            "12321423523545",
+            sakId,
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
             "fnr",
             AvkortingsResultat(
@@ -174,17 +171,17 @@ internal class DBTest {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         leggtilavkortingsresultat()
-        val avkortet = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        val avkortet = vedtaksvurderingService.hentVedtak(sakId, uuid)
         Assertions.assertEquals(VedtakStatus.AVKORTET, avkortet?.vedtakStatus)
         leggtilvilkaarsresultat()
-        val vilkaarsvurdert = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        val vilkaarsvurdert = vedtaksvurderingService.hentVedtak(sakId, uuid)
         Assertions.assertEquals(VedtakStatus.VILKAARSVURDERT, vilkaarsvurdert?.vedtakStatus)
         leggtilkommersoekertilgoderesultat()
         leggtilberegningsresultat()
-        val beregnet = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        val beregnet = vedtaksvurderingService.hentVedtak(sakId, uuid)
         Assertions.assertEquals(VedtakStatus.BEREGNET, beregnet?.vedtakStatus)
 
-        val vedtaket = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        val vedtaket = vedtaksvurderingService.hentVedtak(sakId, uuid)
         assert(vedtaket?.beregningsResultat != null)
         assert(vedtaket?.avkortingsResultat != null)
         assert(vedtaket?.beregningsResultat?.grunnlagVersjon == 0.toLong())
@@ -194,18 +191,18 @@ internal class DBTest {
         Assertions.assertNotNull(vedtaket?.virkningsDato)
 
         vedtaksvurderingService.fattVedtak(uuid, "saksbehandler")
-        val fattetVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        val fattetVedtak = vedtaksvurderingService.hentVedtak(sakId, uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
 
         vedtaksvurderingService.underkjennVedtak(uuid)
-        val underkjentVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        val underkjentVedtak = vedtaksvurderingService.hentVedtak(sakId, uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
         vedtaksvurderingService.fattVedtak(uuid, "saksbehandler")
 
         vedtaksvurderingService.attesterVedtak(uuid, "attestant")
-        val attestertVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        val attestertVedtak = vedtaksvurderingService.hentVedtak(sakId, uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)
         Assertions.assertNotNull(attestertVedtak?.virkningsDato)
@@ -215,8 +212,8 @@ internal class DBTest {
         val iverksattVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.IVERKSATT, iverksattVedtak?.vedtakStatus)
 
-        vedtaksvurderingService.slettSak(12321423523545)
-        Assertions.assertNull(vedtaksvurderingService.hentVedtak("12321423523545", uuid))
+        vedtaksvurderingService.slettSak(sakId.toLong())
+        Assertions.assertNull(vedtaksvurderingService.hentVedtak(sakId, uuid))
     }
 
     @Test
@@ -235,17 +232,30 @@ internal class DBTest {
         Assertions.assertEquals(3, vedtaksvurderingService.hentVedtakBolk(listOf(uuid1, uuid2, uuid3)).size)
     }
 
+    @Test
+    fun `Skal lagre eller oppdatere virkningstidspunkt`() {
+        val vedtakRepo = VedtaksvurderingRepository(dataSource)
+        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
+        val sakId = "99999999999"
+        val behandlingId = UUID.randomUUID()
+        val virk = LocalDate.now()
+
+        vedtaksvurderingService.lagreVirkningstidspunkt(sakId, behandlingId, virk)
+        val vedtak = vedtaksvurderingService.hentVedtak(sakId, behandlingId)
+        Assertions.assertEquals(virk, vedtak?.virkningsDato)
+
+        vedtaksvurderingService.lagreVirkningstidspunkt(sakId, behandlingId, virk.plusDays(1))
+        val vedtakOppdatertVirk = vedtaksvurderingService.hentVedtak(sakId, behandlingId)
+        Assertions.assertEquals(virk.plusDays(1), vedtakOppdatertVirk?.virkningsDato)
+    }
+
     private fun lagreNyttVilkaarsresultat(service: VedtaksvurderingService, sakId: String, behandlingId: UUID) {
         service.lagreVilkaarsresultat(
             sakId,
             "BARNEPENSJON",
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
             "fnr",
-            VilkaarResultat(
-                VurderingsResultat.OPPFYLT,
-                emptyList(),
-                LocalDateTime.now()
-            ),
+            VilkaarsvurderingTestData.oppfylt,
             LocalDate.now()
         )
     }

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router'
 import { Beregne } from './beregne'
-import { Inngangsvilkaar } from './inngangsvilkaar'
 import { Inngangsvilkaar as InngangsvilkaarV2 } from './vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag'
@@ -11,8 +10,7 @@ import { Vedtaksbrev } from './vedtaksbrev'
 
 const behandlingRoutes = [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false },
-  { path: 'inngangsvilkaar', element: <Inngangsvilkaar />, erRevurderingRoute: true },
-  { path: 'inngangsvilkaar_v2', element: <InngangsvilkaarV2 />, erRevurderingRoute: true },
+  { path: 'inngangsvilkaar', element: <InngangsvilkaarV2 />, erRevurderingRoute: true },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag />, erRevurderingRoute: false },
   { path: 'beregne', element: <Beregne />, erRevurderingRoute: true },
   { path: 'brev', element: <Vedtaksbrev />, erRevurderingRoute: true },

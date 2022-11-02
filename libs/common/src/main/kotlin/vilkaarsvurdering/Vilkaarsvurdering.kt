@@ -1,15 +1,15 @@
-package no.nav.etterlatte.vilkaarsvurdering
+package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 data class Vilkaarsvurdering(
     val behandlingId: UUID,
-    val payload: JsonNode,
     val vilkaar: List<Vilkaar>,
-    val resultat: VilkaarsvurderingResultat? = null
+    val virkningstidspunkt: LocalDate,
+    val resultat: VilkaarsvurderingResultat
 )
 
 data class Vilkaar(
@@ -81,15 +81,15 @@ enum class VilkaarsvurderingUtfall {
     IKKE_OPPFYLT
 }
 
+data class VilkaarTypeOgUtfall(
+    val type: VilkaarType,
+    val resultat: Utfall
+)
+
 data class VurdertVilkaar(
     val hovedvilkaar: VilkaarTypeOgUtfall,
     val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
     val vurdering: VilkaarVurderingData
-)
-
-data class VilkaarTypeOgUtfall(
-    val type: VilkaarType,
-    val resultat: Utfall
 )
 
 data class Vilkaarsgrunnlag<T>(

@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
@@ -37,7 +37,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         saktype: String,
         behandling: Behandling,
         fnr: String,
-        vilkaarsresultat: VilkaarResultat,
+        vilkaarsresultat: Vilkaarsvurdering,
         virkningsDato: LocalDate?
     ) {
         logger.info("Lagrer vilkaarsresultat")
@@ -59,7 +59,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         sakId: String,
         saktype: String,
         behandlingsId: UUID,
-        vilkaarsresultat: VilkaarResultat
+        vilkaarsresultat: Vilkaarsvurdering
     ) {
         logger.info("Lagrer vilkaarsresultat")
         connection.use {
@@ -369,7 +369,7 @@ data class Vedtak(
     val saksbehandlerId: String?,
     val avkortingsResultat: AvkortingsResultat?,
     val beregningsResultat: BeregningsResultat?,
-    val vilkaarsResultat: VilkaarResultat?,
+    val vilkaarsResultat: Vilkaarsvurdering?,
     val kommerSoekerTilgodeResultat: KommerSoekerTilgode?,
     val vedtakFattet: Boolean?,
     val fnr: String?,
@@ -421,7 +421,9 @@ private object Queries {
         "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
 
     val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE sakId = ? AND behandlingId = ?"
-    val lagreDatoVirkFom = "UPDATE vedtak SET datoVirkFom = ? WHERE sakId = ? AND behandlingId = ?"
+    val lagreDatoVirkFom =
+        "INSERT INTO VEDTAK as v (datoVirkFom, sakId, behandlingId) VALUES (?, ?, ?) ON CONFLICT (sakId, behandlingId) DO " + // ktlint-disable max-line-length
+            "UPDATE SET datoVirkFom = EXCLUDED.datoVirkFom WHERE v.sakId = EXCLUDED.sakId AND v.behandlingId = EXCLUDED.behandlingId" // ktlint-disable max-line-length
 
     val lagreUtbetalingsperiode =
         "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"

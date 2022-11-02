@@ -32,6 +32,7 @@ export const lagreTotalVurdering = async (
 export interface Vilkaarsvurdering {
   vilkaar: Vilkaar[]
   resultat?: VilkaarsvurderingVurdertResultat
+  virkningstidspunkt: string
 }
 
 export interface Vilkaar {

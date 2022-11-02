@@ -8,7 +8,6 @@ import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny'
-import { RevurderingsAarsakModal } from './inngangsvilkaar/revurderingInfo/RevurderingInfoModal'
 import { useAppDispatch, useAppSelector } from '../../store/Store'
 
 export const Behandling = () => {
@@ -42,7 +41,6 @@ export const Behandling = () => {
 
   const soeker = behandling?.kommerSoekerTilgode?.familieforhold?.soeker
   const soekerInfo = soeker ? { navn: soeker.navn, fnr: soeker.fnr, type: 'Etterlatt' } : null
-  const behandlingStatus = behandling?.status
 
   return (
     <>
@@ -52,7 +50,6 @@ export const Behandling = () => {
       <Spinner visible={isLoading} label="Laster" />
       {!isLoading && (
         <GridContainer>
-          <RevurderingsAarsakModal behandlingStatus={behandlingStatus} />
           <MainContent>
             <Routes>
               {behandlingRoutes.map((route) => {

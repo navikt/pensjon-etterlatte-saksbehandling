@@ -8,19 +8,18 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asYearMonth
 import org.slf4j.LoggerFactory
 
-internal class LagreVilkaarsresultat(
+internal class LagreVirkningstidspunkt(
     rapidsConnection: RapidsConnection,
     val vedtaksvurderingService: VedtaksvurderingService
 ) : River.PacketListener {
-    private val logger = LoggerFactory.getLogger(LagreVilkaarsresultat::class.java)
+    private val logger = LoggerFactory.getLogger(LagreVirkningstidspunkt::class.java)
 
     init {
         River(rapidsConnection).apply {
@@ -30,8 +29,8 @@ internal class LagreVilkaarsresultat(
             validate { it.requireKey("behandling") }
             validate { it.requireKey("fnrSoeker") }
             validate { it.requireKey("virkningstidspunkt") }
-            validate { it.requireKey("vilkaarsvurdering") }
             correlationId()
+            validate { it.rejectKey("vilkaarsvurdering") }
             validate { it.rejectKey("beregning") }
         }.register(this)
     }
@@ -39,38 +38,15 @@ internal class LagreVilkaarsresultat(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             val behandling = objectMapper.readValue<Behandling>(packet["behandling"].toString())
-
             val sakId = packet["sak.id"].toString()
-            val sakType = packet["sak.sakType"].textValue()
-            val vilkaarsvurdering: Vilkaarsvurdering = objectMapper.readValue(
-                packet["vilkaarsvurdering"].toString()
-            )
+            val virkningstidspunkt = packet["virkningstidspunkt"].asYearMonth().atDay(1)
+
             try {
-                vedtaksvurderingService.lagreVilkaarsresultat(
-                    sakId,
-                    sakType,
-                    behandling,
-                    packet["fnrSoeker"].textValue(),
-                    vilkaarsvurdering,
-                    vilkaarsvurdering.virkningstidspunkt // todo: kan vi komme i usync?
-                )
-                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandling.id)).also {
-                    context.publish(
-                        JsonMessage.newMessage(
-                            mapOf(
-                                eventNameKey to "VEDTAK:VILKAARSVURDERT",
-                                "sakId" to it.sakId.toLong(),
-                                "behandlingId" to it.behandlingId.toString(),
-                                "vedtakId" to it.id,
-                                "eventtimestamp" to Tidspunkt.now()
-                            )
-                        ).toJson()
-                    )
-                }
+                vedtaksvurderingService.lagreVirkningstidspunkt(sakId, behandling.id, virkningstidspunkt)
             } catch (e: KanIkkeEndreFattetVedtak) {
                 packet[eventNameKey] = "VEDTAK:ENDRING_FORKASTET"
                 packet["vedtakId"] = e.vedtakId
-                packet["forklaring"] = "Vilkaarsvurdering forkastet fordi vedtak allerede er fattet"
+                packet["forklaring"] = "Nytt virkningstidspunkt forkastet fordi vedtak allerede er fattet"
                 context.publish(
                     packet.toJson()
                 )

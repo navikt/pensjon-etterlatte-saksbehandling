@@ -12,8 +12,9 @@ import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.typer.BehandlingsOppgave
 import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Sak
@@ -47,7 +48,17 @@ internal class OppgaveServiceTest {
             null,
             null,
             null,
-            VilkaarResultat(VurderingsResultat.OPPFYLT, null, LocalDateTime.now()),
+            Vilkaarsvurdering(
+                UUID.randomUUID(),
+                emptyList(),
+                LocalDate.now(),
+                VilkaarsvurderingResultat(
+                    VilkaarsvurderingUtfall.OPPFYLT,
+                    "",
+                    LocalDateTime.now(),
+                    "ABV"
+                )
+            ),
             null,
             null,
             null,

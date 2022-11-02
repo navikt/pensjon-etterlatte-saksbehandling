@@ -14,6 +14,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDateTime
 import java.util.*
@@ -27,7 +33,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 logger.info("Henter vilkårsvurdering for $behandlingId")
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
 
-                call.respond(vilkaarsvurdering ?: HttpStatusCode.NotFound)
+                call.respond(vilkaarsvurdering?.toDto() ?: HttpStatusCode.NotFound)
             }
         }
 
@@ -68,6 +74,8 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             behandlingId,
                             toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler)
                         )
+
+                    vilkaarsvurderingService.publiserVilkaarsvurdering(oppdatertVilkaarsvurdering)
 
                     call.respond(oppdatertVilkaarsvurdering)
                 }

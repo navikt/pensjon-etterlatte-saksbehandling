@@ -11,12 +11,17 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.restModule
-import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
-import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationProperties
+import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,6 +32,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -37,7 +43,7 @@ internal class VilkaarsvurderingRoutesTest {
     private val server = MockOAuth2Server()
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
-    private lateinit var applicationContext: ApplicationContext
+    private val sendToRapid: (String) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
     fun before() {
@@ -46,14 +52,13 @@ internal class VilkaarsvurderingRoutesTest {
         System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
         postgreSQLContainer.start()
 
-        applicationContext = ApplicationContext(
-            ApplicationProperties(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password
-            )
-        )
-        vilkaarsvurderingServiceImpl = applicationContext.vilkaarsvurderingService
+        val ds = DataSourceBuilder(
+            postgreSQLContainer.jdbcUrl,
+            postgreSQLContainer.username,
+            postgreSQLContainer.password
+        ).apply { migrate() }
+        vilkaarsvurderingServiceImpl =
+            VilkaarsvurderingService(VilkaarsvurderingRepositoryImpl(ds.dataSource()), sendToRapid)
     }
 
     @AfterAll
@@ -76,7 +81,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -85,7 +90,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), Vilkaarsvurdering::class.java)
+            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
             val vilkaar = vilkaarsvurdering.vilkaar.first()
 
             assertEquals(HttpStatusCode.OK, response.status)
@@ -105,7 +110,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -125,7 +130,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), Vilkaarsvurdering::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
             val oppdatertVilkaar = oppdatertVilkaarsvurdering.vilkaar.find {
                 it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type
             }
@@ -143,7 +148,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -207,7 +212,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -253,7 +258,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
             val resultat = VurdertVilkaarsvurderingResultatDto(
@@ -267,14 +272,14 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), Vilkaarsvurdering::class.java)
-
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDao::class.java)
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
             assertEquals(resultat.resultat, oppdatertVilkaarsvurdering?.resultat?.utfall)
             assertEquals(resultat.kommentar, oppdatertVilkaarsvurdering?.resultat?.kommentar)
             assertEquals("Saksbehandler01", oppdatertVilkaarsvurdering?.resultat?.saksbehandler)
             assertNotNull(oppdatertVilkaarsvurdering?.resultat?.tidspunkt)
+            verify(exactly = 1) { sendToRapid.invoke(any()) }
 
             val sletteResponse = client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -282,8 +287,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val slettetVilkaarsvurdering = objectMapper
-                .readValue(sletteResponse.bodyAsText(), Vilkaarsvurdering::class.java)
-
+                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingDao::class.java)
             assertEquals(HttpStatusCode.OK, sletteResponse.status)
             assertEquals(behandlingId, slettetVilkaarsvurdering.behandlingId)
             assertEquals(null, slettetVilkaarsvurdering?.resultat)
@@ -295,8 +299,10 @@ internal class VilkaarsvurderingRoutesTest {
             behandlingId,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            objectMapper.createObjectNode(),
-            grunnlag
+            LocalDate.of(2022, 1, 1),
+            objectMapper.readTree("""{"virkningstidspunkt": "21-01-01"}"""),
+            grunnlag,
+            null
         )
     }
 

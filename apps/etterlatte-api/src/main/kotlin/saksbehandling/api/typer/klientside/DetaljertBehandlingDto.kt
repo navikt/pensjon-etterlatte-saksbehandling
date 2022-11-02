@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.typer.LagretHendelse
 import java.time.Instant
 import java.time.LocalDate
@@ -20,7 +20,7 @@ data class DetaljertBehandlingDto(
     val sak: Long,
     val gyldighetsprøving: GyldighetsResultat?,
     val kommerSoekerTilgode: KommerSoekerTilgode?,
-    val vilkårsprøving: VilkaarResultat?,
+    val vilkårsprøving: Vilkaarsvurdering?,
     val beregning: BeregningsResultat?,
     val avkortning: AvkortingsResultat?,
     val saksbehandlerId: String?,

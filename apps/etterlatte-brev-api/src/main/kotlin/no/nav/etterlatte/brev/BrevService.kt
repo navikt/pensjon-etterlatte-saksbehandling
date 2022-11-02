@@ -1,11 +1,11 @@
 package no.nav.etterlatte.brev
 
+import no.nav.etterlatte.adresse.AdresseService
 import no.nav.etterlatte.brev.model.AnnetBrevRequest
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.model.mapper.finnBarn
-import no.nav.etterlatte.adresse.AdresseService
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakType
@@ -62,8 +62,12 @@ class BrevService(
 
     suspend fun opprett(mottaker: Mottaker, mal: Mal, enhet: String): BrevInnhold {
         val brevMottaker = when {
-            mottaker.foedselsnummer != null -> BrevMottaker.fraRegoppslag(adresseService.hentMottakerAdresse(mottaker.foedselsnummer!!.value))
-            mottaker.orgnummer != null -> BrevMottaker.fraRegoppslag(adresseService.hentMottakerAdresse(mottaker.orgnummer!!))
+            mottaker.foedselsnummer != null -> BrevMottaker.fraRegoppslag(
+                adresseService.hentMottakerAdresse(mottaker.foedselsnummer!!.value)
+            )
+            mottaker.orgnummer != null -> BrevMottaker.fraRegoppslag(
+                adresseService.hentMottakerAdresse(mottaker.orgnummer!!)
+            )
             mottaker.adresse != null -> BrevMottaker.fraAdresse(adresse = mottaker.adresse!!)
             else -> throw Exception("Ingen brevmottaker spesifisert")
         }

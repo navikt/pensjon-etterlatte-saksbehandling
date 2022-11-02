@@ -3,7 +3,7 @@ package no.nav.etterlatte.domene.vedtak
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.time.ZonedDateTime
@@ -17,7 +17,7 @@ data class Vedtak(
     val behandling: Behandling,
     val type: VedtakType,
     val grunnlag: List<Grunnlagsopplysning<ObjectNode>>,
-    val vilkaarsvurdering: VilkaarResultat?,
+    val vilkaarsvurdering: Vilkaarsvurdering?,
     val beregning: BilagMedSammendrag<List<Beregningsperiode>>?,
     val avkorting: BilagMedSammendrag<List<Beregningsperiode>>?,
     val pensjonTilUtbetaling: List<Utbetalingsperiode>?,

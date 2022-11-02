@@ -1,11 +1,12 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
+import { Vilkaarsvurdering } from '../../shared/api/vilkaarsvurdering'
 
 export interface IDetaljertBehandling {
   id: string
   sak: number
   gyldighetsprøving?: IGyldighetResultat
   kommerSoekerTilgode?: IKommerSoekerTilgode
-  vilkårsprøving?: IVilkaarResultat
+  vilkårsprøving?: Vilkaarsvurdering
   beregning?: IBeregning
   avkortning?: any //todo legg med type når denne er klar
   saksbehandlerId?: string
@@ -242,7 +243,7 @@ export interface IKriterie {
 export enum Kriterietype {
   AVDOED_ER_FORELDER = 'AVDOED_ER_FORELDER',
   DOEDSFALL_ER_REGISTRERT_I_PDL = 'DOEDSFALL_ER_REGISTRERT_I_PDL',
-  SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO = 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO',
+  SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO = 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO', //BEHOLDE PGA gammel vilkårsvurdering i backend?
   SOEKER_ER_I_LIVE = 'SOEKER_ER_I_LIVE',
   SOEKER_IKKE_ADRESSE_I_UTLANDET = 'SOEKER_IKKE_ADRESSE_I_UTLANDET',
   GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET = 'GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET',

@@ -1,7 +1,6 @@
 import { IApiResponse } from './types'
 import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 import { apiClient, ApiResponse } from './apiClient'
-import { IPeriodeInput } from '../../components/behandling/inngangsvilkaar/types'
 
 const path = process.env.REACT_APP_VEDTAK_URL
 
@@ -126,12 +125,6 @@ export const lagreSoeskenMedIBeregning = async (
 export interface GrunnlagResponse {
   response: string
 }
-
-export const lagrePeriodeForAvdoedesMedlemskap = async (
-  behandlingsId: string,
-  periode: IPeriodeInput
-): Promise<ApiResponse<GrunnlagResponse>> =>
-  apiClient.post<GrunnlagResponse>(`/grunnlag/saksbehandler/periode/${behandlingsId}`, { periode: periode })
 
 export const slettPeriodeForAvdoedesMedlemskap = async (
   behandlingsId: string,

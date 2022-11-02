@@ -13,12 +13,12 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.vedtaksvurdering.database.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -209,11 +209,6 @@ internal class VedtaksvurderingServiceTest {
 
     @Test
     fun `når vilkårsresultat lagres og vedtak finnes fra før, så skal vedtaket oppdateres`() {
-        val vilkårsresultat = VilkaarResultat(
-            null,
-            emptyList(),
-            LocalDateTime.now()
-        )
         val virkingsDato = LocalDate.now()
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns vedtakSomIkkeErFattet
@@ -226,19 +221,21 @@ internal class VedtaksvurderingServiceTest {
             sakType,
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
             fnr,
-            vilkårsresultat,
+            VilkaarsvurderingTestData.oppfylt,
             virkingsDato
         )
-        verify { repositoryMock.oppdaterVilkaarsresultat(sakId, sakType, behandlingId, vilkårsresultat) }
+        verify {
+            repositoryMock.oppdaterVilkaarsresultat(
+                sakId,
+                sakType,
+                behandlingId,
+                VilkaarsvurderingTestData.oppfylt
+            )
+        }
     }
 
     @Test
     fun `når vilkårsresultat lagres og vedtak ikke finnes fra før, så skal det opprettes nytt vedtak`() {
-        val vilkårsresultat = VilkaarResultat(
-            null,
-            emptyList(),
-            LocalDateTime.now()
-        )
         val virkingsDato = LocalDate.now()
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
@@ -257,7 +254,7 @@ internal class VedtaksvurderingServiceTest {
             sakType,
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
             fnr,
-            vilkårsresultat,
+            VilkaarsvurderingTestData.oppfylt,
             virkingsDato
         )
         verify {
@@ -266,7 +263,7 @@ internal class VedtaksvurderingServiceTest {
                 sakType,
                 Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
                 fnr,
-                vilkårsresultat,
+                VilkaarsvurderingTestData.oppfylt,
                 virkingsDato
             )
         }
@@ -274,11 +271,6 @@ internal class VedtaksvurderingServiceTest {
 
     @Test
     fun `skal ikke lagre vilkårsresultat på fattet vedtak`() {
-        val vilkårsresultat = VilkaarResultat(
-            null,
-            emptyList(),
-            LocalDateTime.now()
-        )
         val virkingsDato = LocalDate.now()
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns fattetVedtak
         assertThrows<KanIkkeEndreFattetVedtak> {
@@ -287,7 +279,7 @@ internal class VedtaksvurderingServiceTest {
                 sakType,
                 Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
                 fnr,
-                vilkårsresultat,
+                VilkaarsvurderingTestData.oppfylt,
                 virkingsDato
             )
         }

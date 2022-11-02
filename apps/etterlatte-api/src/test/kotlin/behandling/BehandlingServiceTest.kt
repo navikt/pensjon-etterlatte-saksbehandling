@@ -29,6 +29,8 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.typer.LagretHendelse
 import no.nav.etterlatte.typer.LagretHendelser
@@ -38,7 +40,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -128,7 +129,12 @@ internal class BehandlingServiceTest {
             null,
             null,
             null,
-            VilkaarsvurderingTestData.oppfylt,
+            Vilkaarsvurdering(
+                UUID.randomUUID(),
+                emptyList(),
+                LocalDate.now(),
+                VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), "ABV")
+            ),
             null,
             null,
             null,

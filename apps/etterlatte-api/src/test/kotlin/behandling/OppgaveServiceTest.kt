@@ -12,14 +12,17 @@ import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.typer.BehandlingsOppgave
 import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -45,7 +48,17 @@ internal class OppgaveServiceTest {
             null,
             null,
             null,
-            VilkaarsvurderingTestData.oppfylt,
+            Vilkaarsvurdering(
+                UUID.randomUUID(),
+                emptyList(),
+                LocalDate.now(),
+                VilkaarsvurderingResultat(
+                    VilkaarsvurderingUtfall.OPPFYLT,
+                    "",
+                    LocalDateTime.now(),
+                    "ABV"
+                )
+            ),
             null,
             null,
             null,

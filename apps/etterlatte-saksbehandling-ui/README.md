@@ -28,6 +28,7 @@ Serveren på port `8080` eller den porten som er angitt via `process.env.PORT`
 
 ## Miljøvariabler for lokal kjøring
 `BREV_DEV` kan settes til `true` hvis man vil gå mot en lokal instans av `etterlatte-brev-api`.
+`VILKAARSVURDERING_DEV` kan settes til `true` hvis man vil gå mot en lokal instans av `etterlatte-vilkaarsvurdering`.
 
 
 ## Bygg og deploy

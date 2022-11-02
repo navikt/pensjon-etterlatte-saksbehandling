@@ -1,4 +1,5 @@
 import express from 'express'
+import cors from 'cors'
 import path from 'path'
 import { appConf } from './config/config'
 import { authenticateUser } from './middleware/auth'
@@ -8,6 +9,7 @@ import { modiaRouter } from './routers/modia'
 import { expressProxy } from './routers/proxy'
 import { logger } from './utils/logger'
 import brev from './routers/brev'
+import { lokalProxy } from './routers/lokalproxy'
 
 const app = express()
 
@@ -28,14 +30,11 @@ app.use((req, res, next) => {
 
 app.use(express.json())
 
-// cors-middleware
-app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000') //Todo: fikse domene
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE')
-  res.header('Access-Control-Allow-Headers', 'Content-Type')
-  res.header('Access-Control-Allow-Credentials', 'true')
-  next()
-})
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+  })
+)
 
 app.use('/health', healthRouter) // åpen rute
 if (process.env.DEVELOPMENT !== 'true') {
@@ -45,11 +44,15 @@ if (process.env.DEVELOPMENT !== 'true') {
 app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
 if (isDev) {
-  app.use('/api', mockRouter)
+  if (process.env.VILKAARSVURDERING_DEV) {
+    app.use('/api/vilkaarsvurdering', lokalProxy('http://localhost:8087/api/vilkaarsvurdering'))
+  }
 
   if (process.env.BREV_DEV) {
     app.use('/brev', brev)
   }
+
+  app.use('/api', mockRouter)
 } else {
   logger.info('Proxy-kall')
   app.use(

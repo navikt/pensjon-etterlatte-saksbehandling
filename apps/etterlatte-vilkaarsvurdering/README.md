@@ -23,6 +23,7 @@ AZURE_APP_CLIENT_ID=clientId;
 DB_JDBC_URL=jdbc:postgresql://localhost:5432/postgres;
 DB_USERNAME=postgres;
 DB_PASSWORD=postgres;
+HTTP_PORT=8087;
 ```
 
 ### Teste mot rapid

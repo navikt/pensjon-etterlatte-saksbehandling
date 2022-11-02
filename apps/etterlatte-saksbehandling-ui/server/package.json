@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@types/express-http-proxy": "^1.6.3",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.3",
     "node-fetch": "^2.6.7",
@@ -12,6 +13,7 @@
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/mocha": "^9.1.0",
     "@types/node": "^17.0.31",
@@ -30,6 +32,7 @@
     "build": "tsc",
     "dev": "DEVELOPMENT=true ts-node-dev ./src/index.ts",
     "dev:brev": "DEVELOPMENT=true BREV_DEV=true ts-node-dev ./src/index.ts",
+    "dev:vilkaarsvurdering": "DEVELOPMENT=true VILKAARSVURDERING_DEV=true ts-node-dev ./src/index.ts",
     "test": "mocha -r ts-node/register './src/tests/**/*.test.ts'"
   }
 }

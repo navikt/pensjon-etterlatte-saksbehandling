@@ -12,8 +12,7 @@ import { format } from 'date-fns'
 export const Inngangsvilkaar = () => {
   const location = useLocation()
   const { behandlingId } = useParams()
-  const virk = Date() // todo: Hente korrekt virkningsdato. Se EY-946.
-  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering>({ vilkaar: [] })
+  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering | undefined>(undefined)
   const [status, setStatus] = useState<RequestStatus>(RequestStatus.notStarted)
 
   const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering: Vilkaarsvurdering) => {
@@ -72,7 +71,7 @@ export const Inngangsvilkaar = () => {
           />
         </>
       )}
-      {vilkaarsvurdering.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
+      {vilkaarsvurdering?.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
       {status === RequestStatus.isloading && <Spinner visible={true} label={'Henter vilkårsvurdering'} />}
       {status === RequestStatus.error && <p>En feil har oppstått</p>}
     </Content>

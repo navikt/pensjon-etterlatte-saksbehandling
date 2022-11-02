@@ -8,15 +8,21 @@ import { Resultat } from './Resultat'
 import { RequestStatus } from './utils'
 import Spinner from '../../../shared/Spinner'
 import { format } from 'date-fns'
+import { updateVilkaarsvurdering } from '../../../store/reducers/BehandlingReducer'
+import { useAppDispatch } from '../../../store/Store'
 
 export const Inngangsvilkaar = () => {
   const location = useLocation()
   const { behandlingId } = useParams()
+  const dispatch = useAppDispatch()
   const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering | undefined>(undefined)
   const [status, setStatus] = useState<RequestStatus>(RequestStatus.notStarted)
 
   const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering: Vilkaarsvurdering) => {
     setVilkaarsvurdering(oppdatertVilkaarsvurdering)
+    if (oppdatertVilkaarsvurdering.resultat) {
+      dispatch(updateVilkaarsvurdering(oppdatertVilkaarsvurdering))
+    }
   }
 
   const hentVilkaarsvurderingLocal = () => {
@@ -26,7 +32,7 @@ export const Inngangsvilkaar = () => {
       .then((response) => {
         if (response.status == 'ok') {
           setStatus(RequestStatus.ok)
-          setVilkaarsvurdering(response.data)
+          oppdaterVilkaarsvurdering(response.data)
         } else {
           setStatus(RequestStatus.error)
         }

@@ -10,13 +10,13 @@ import java.util.*
 import javax.sql.DataSource
 
 interface VilkaarsvurderingRepository {
-    fun hent(behandlingId: UUID): VilkaarsvurderingDao?
-    fun lagre(vilkaarsvurdering: VilkaarsvurderingDao): VilkaarsvurderingDao
+    fun hent(behandlingId: UUID): VilkaarsvurderingIntern?
+    fun lagre(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern
 }
 
 class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : VilkaarsvurderingRepository {
 
-    override fun hent(behandlingId: UUID): VilkaarsvurderingDao? =
+    override fun hent(behandlingId: UUID): VilkaarsvurderingIntern? =
         using(sessionOf(ds)) { session ->
             queryOf(
                 statement = Queries.hentVilkaarsvurdering,
@@ -25,7 +25,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                 .let { query ->
                     session.run(
                         query.map { row ->
-                            VilkaarsvurderingDao(
+                            VilkaarsvurderingIntern(
                                 behandlingId = row.uuid("behandlingId"),
                                 payload = row.string("payload").let { payload ->
                                     objectMapper.readValue(payload)
@@ -43,7 +43,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                 }
         }
 
-    override fun lagre(vilkaarsvurdering: VilkaarsvurderingDao): VilkaarsvurderingDao {
+    override fun lagre(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern {
         using(sessionOf(ds)) {
             it.transaction { tx ->
                 queryOf(
@@ -63,9 +63,10 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
 }
 
 private object Queries {
-    val hentVilkaarsvurdering = "SELECT behandlingId, payload, vilkaar, resultat, virkningstidspunkt " +
+    const val hentVilkaarsvurdering = "SELECT behandlingId, payload, vilkaar, resultat, virkningstidspunkt " +
         "FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID"
-    val lagreVilkaarsvurdering = "INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat, virkningstidspunkt) " + // ktlint-disable max-line-length
-        "VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::DATE) " +
-        "ON CONFLICT (behandlingId) DO UPDATE SET payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat, virkningstidspunkt = EXCLUDED.virkningstidspunkt" // ktlint-disable max-line-length
+    const val lagreVilkaarsvurdering =
+        "INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat, virkningstidspunkt) " +
+            "VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::DATE) " + // ktlint-disable max-line-length
+            "ON CONFLICT (behandlingId) DO UPDATE SET payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat, virkningstidspunkt = EXCLUDED.virkningstidspunkt" // ktlint-disable max-line-length
 }

@@ -66,7 +66,7 @@ internal class GrunnlagEndretRiverTest {
     }
 
     private fun eksisterendeVilkaarsvurdering() =
-        VilkaarsvurderingDao(
+        VilkaarsvurderingIntern(
             behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
             payload = grunnlagEndretMelding.toJsonNode(),
             vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(grunnlag),

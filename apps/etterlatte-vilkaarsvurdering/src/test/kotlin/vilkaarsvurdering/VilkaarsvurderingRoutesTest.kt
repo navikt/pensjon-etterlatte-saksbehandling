@@ -43,7 +43,7 @@ internal class VilkaarsvurderingRoutesTest {
     private val server = MockOAuth2Server()
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
-    private val sendToRapid: (String) -> Unit = mockk(relaxed = true)
+    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
     fun before() {
@@ -279,7 +279,7 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(resultat.kommentar, oppdatertVilkaarsvurdering?.resultat?.kommentar)
             assertEquals("Saksbehandler01", oppdatertVilkaarsvurdering?.resultat?.saksbehandler)
             assertNotNull(oppdatertVilkaarsvurdering?.resultat?.tidspunkt)
-            verify(exactly = 1) { sendToRapid.invoke(any()) }
+            verify(exactly = 1) { sendToRapid.invoke(any(), any()) }
 
             val sletteResponse = client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

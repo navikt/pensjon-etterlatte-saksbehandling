@@ -46,7 +46,7 @@ internal class VilkaarsvurderingServiceTest {
 
     private lateinit var service: VilkaarsvurderingService
     private val uuid: UUID = UUID.randomUUID()
-    private val sendToRapid: (String) -> Unit = mockk(relaxed = true)
+    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
     fun beforeAll() {
@@ -226,7 +226,7 @@ internal class VilkaarsvurderingServiceTest {
         service.publiserVilkaarsvurdering(vilkaarsvurderingDao)
 
         verify(exactly = 1) {
-            sendToRapid.invoke(capture(payloadContent))
+            sendToRapid.invoke(capture(payloadContent), vilkaarsvurdering.behandlingId)
         }
         payloadContent.captured shouldInclude "skalBliMed"
         payloadContent.captured shouldInclude "vilkaarsvurdering"

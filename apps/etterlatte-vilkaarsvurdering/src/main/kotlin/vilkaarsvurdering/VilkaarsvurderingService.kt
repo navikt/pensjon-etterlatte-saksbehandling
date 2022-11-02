@@ -22,7 +22,7 @@ class UgyldigSakTypeException(override val message: String) : RuntimeException(m
 
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
-    private val sendToRapid: (String) -> Unit
+    private val sendToRapid: (String, UUID) -> Unit
 ) {
 
     fun hentVilkaarsvurdering(behandlingId: UUID): VilkaarsvurderingDao? {
@@ -130,7 +130,7 @@ class VilkaarsvurderingService(
         val oppdatertPayload = JsonMessage(vilkaarsvurdering.payload.toJson(), MessageProblems("{}"), null)
             .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDomain() }
 
-        sendToRapid(oppdatertPayload.toJson())
+        sendToRapid(oppdatertPayload.toJson(), vilkaarsvurdering.behandlingId)
     }
 
     private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar): Vilkaar =

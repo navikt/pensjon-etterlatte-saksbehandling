@@ -6,6 +6,7 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import java.util.*
 
 class ApplicationBuilder {
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
@@ -34,8 +35,8 @@ class ApplicationBuilder {
             }
 
     fun start() = rapidsConnection.start()
-    private fun publiser(melding: String) {
-        rapidsConnection.publish(message = melding)
+    private fun publiser(melding: String, key: UUID) {
+        rapidsConnection.publish(message = melding, key = key.toString())
     }
 }
 

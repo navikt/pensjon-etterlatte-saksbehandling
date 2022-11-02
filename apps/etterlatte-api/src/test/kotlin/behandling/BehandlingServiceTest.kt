@@ -121,6 +121,7 @@ internal class BehandlingServiceTest {
             null,
             null,
             null,
+            null,
             null
         )
         val vedtak = Vedtak(

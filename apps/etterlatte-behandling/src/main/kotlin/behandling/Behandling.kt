@@ -37,7 +37,12 @@ sealed interface Behandling {
             soesken = persongalleri.soesken,
             gyldighetsproeving = gyldighetsproeving,
             status = status,
-            behandlingType = type
+            behandlingType = type,
+            virkningstidspunkt = when (this) {
+                is Foerstegangsbehandling -> hentVirkningstidspunkt()
+                is ManueltOpphoer -> null
+                is Revurdering -> null
+            }
         )
     }
 

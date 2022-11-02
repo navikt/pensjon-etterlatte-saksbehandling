@@ -3,6 +3,7 @@ package no.nav.etterlatte.saksbehandling.api.typer.klientside
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -11,7 +12,6 @@ import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.typer.LagretHendelse
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -29,7 +29,7 @@ data class DetaljertBehandlingDto(
     val datoattestert: Instant?,
     val attestant: String?,
     val soeknadMottattDato: LocalDateTime?,
-    val virkningstidspunkt: LocalDate?,
+    val virkningstidspunkt: Virkningstidspunkt?,
     val status: BehandlingStatus?,
     val hendelser: List<LagretHendelse>?,
     val familieforhold: Familieforhold?,

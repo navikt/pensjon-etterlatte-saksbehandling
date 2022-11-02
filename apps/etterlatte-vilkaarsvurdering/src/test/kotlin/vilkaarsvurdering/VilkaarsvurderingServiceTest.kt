@@ -216,7 +216,7 @@ internal class VilkaarsvurderingServiceTest {
         val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
         val vilkaarsvurderingDao = VilkaarsvurderingDao(
             vilkaarsvurdering.behandlingId,
-            objectMapper.readTree("""{"virkningstidspunkt": "21-01-01"}"""),
+            objectMapper.readTree("""{"skalBliMed": "21-01-01"}"""),
             emptyList(),
             LocalDate.now(),
             vilkaarsvurdering.resultat
@@ -228,7 +228,7 @@ internal class VilkaarsvurderingServiceTest {
         verify(exactly = 1) {
             sendToRapid.invoke(capture(payloadContent))
         }
-        payloadContent.captured shouldInclude "virkningstidspunkt"
+        payloadContent.captured shouldInclude "skalBliMed"
         payloadContent.captured shouldInclude "vilkaarsvurdering"
     }
 

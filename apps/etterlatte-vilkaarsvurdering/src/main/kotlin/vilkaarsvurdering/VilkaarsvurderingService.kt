@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonRevurderingSoekerDoedVilkaar
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
 import java.time.LocalDate
 import java.util.*
 
@@ -126,7 +127,7 @@ class VilkaarsvurderingService(
     }
 
     fun publiserVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingDao) {
-        val oppdatertPayload = JsonMessage.newMessage(vilkaarsvurdering.payload.toJson())
+        val oppdatertPayload = JsonMessage(vilkaarsvurdering.payload.toJson(), MessageProblems("{}"), null)
             .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDomain() }
 
         sendToRapid(oppdatertPayload.toJson())

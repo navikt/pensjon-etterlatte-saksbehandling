@@ -17,8 +17,10 @@ import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
-import no.nav.etterlatte.libs.common.grunnlag.hentKommerBarnetTilgode
+import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
@@ -26,8 +28,10 @@ import org.slf4j.LoggerFactory
 import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
 import vilkaar.barnepensjon.barnOgAvdoedSammeBostedsadresse
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
+import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.*
 
 class VilkaarService {
     private val logger = LoggerFactory.getLogger(VilkaarService::class.java)
@@ -138,7 +142,14 @@ class VilkaarService {
         val soeker = grunnlag.soeker
         val gjenlevende = grunnlag.hentGjenlevende()
         val avdoed = grunnlag.hentAvdoed()
-        val saksbehandlerKommerBarnetTilgode = grunnlag.sak.hentKommerBarnetTilgode()
+        val saksbehandlerKommerBarnetTilgode = Opplysning.Konstant(
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, null),
+            ResultatKommerBarnetTilgode(
+                "Ja",
+                "Kommentar"
+            )
+        )
 
         val kommerBarnetTilGode = listOf(
             barnOgForelderSammeBostedsadresse(

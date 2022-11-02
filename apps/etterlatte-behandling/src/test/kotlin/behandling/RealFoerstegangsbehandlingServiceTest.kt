@@ -81,7 +81,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
                 Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
-            )
+            ),
+            kommerBarnetTilgode = null
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
@@ -117,7 +118,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
                 Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
-            )
+            ),
+            kommerBarnetTilgode = null
         )
 
         val persongalleri = Persongalleri(

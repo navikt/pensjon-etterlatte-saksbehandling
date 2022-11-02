@@ -52,6 +52,8 @@ spec:
       value: http://etterlatte-brev-api
     - name: VILKAARSVURDERING_API_URL
       value: http://etterlatte-vilkaarsvurdering
+    - name: BEHANDLING_API_URL
+      value: http://etterlatte-behandling
   accessPolicy:
     outbound:
       external:
@@ -62,3 +64,4 @@ spec:
         - application: etterlatte-api
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-behandling

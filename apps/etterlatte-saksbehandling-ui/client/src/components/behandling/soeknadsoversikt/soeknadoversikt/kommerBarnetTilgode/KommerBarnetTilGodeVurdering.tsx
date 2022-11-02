@@ -1,58 +1,34 @@
-import {
-  ISvar,
-  IVilkaarResultat,
-  KriterieOpplysningsType,
-  Kriterietype,
-  VilkaarsType,
-  VurderingsResultat,
-} from '../../../../../store/reducers/BehandlingReducer'
+import { IKommerBarnetTilgode, JaNeiVetikke, JaNeiVetIkkeRec } from '../../../../../store/reducers/BehandlingReducer'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
-import { VurderingsTitle, Undertekst, VurderingsContainer } from '../../styled'
+import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
 import { CaseworkerfilledIcon } from '../../../../../shared/icons/caseworkerfilledIcon'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { EndreVurdering } from './EndreVurdering'
-import { hentKriterierMedOpplysning } from '../../../felles/utils'
 import { formaterStringDato } from '../../../../../utils/formattering'
+import { svarTilVurderingsstatus } from '../../utils'
 
 export const KommerBarnetTilGodeVurdering = ({
-  kommerSoekerTilgodeVurdering,
-  automatiskTekst,
+  kommerBarnetTilgode,
 }: {
-  kommerSoekerTilgodeVurdering: IVilkaarResultat
-  automatiskTekst: string
+  kommerBarnetTilgode: IKommerBarnetTilgode | null
 }) => {
   const [redigeringsModus, setRedigeringsModus] = useState(false)
-  const vilkaar = kommerSoekerTilgodeVurdering?.vilkaar
-  const saksbehandlerVurdering = vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SAKSBEHANDLER_RESULTAT)
-  const saksbehandlerKriterie = hentKriterierMedOpplysning(
-    saksbehandlerVurdering,
-    Kriterietype.SAKSBEHANDLER_RESULTAT,
-    KriterieOpplysningsType.SAKSBEHANDLER_RESULTAT
-  )
-
-  const saksbehandlerOpplysning: SaksbehandlerOpplysning = saksbehandlerKriterie?.opplysning
-
-  interface SaksbehandlerOpplysning {
-    svar: ISvar
-    kommentar: string
-  }
-
-  const harSaksbehandlerOpplysning = saksbehandlerKriterie !== undefined
 
   const tittel =
-    kommerSoekerTilgodeVurdering.resultat !== VurderingsResultat.OPPFYLT
+    kommerBarnetTilgode === null
+      ? 'Ikke vurdert'
+      : kommerBarnetTilgode?.svar === JaNeiVetikke.JA
+      ? 'Sannsynlig pensjonen kommer barnet til gode'
+      : kommerBarnetTilgode?.svar === JaNeiVetikke.NEI
       ? 'Ikke sannsynlig pensjonen kommer barnet til gode'
-      : 'Sannsynlig pensjonen kommer barnet til gode'
-
-  const typeVurdering = saksbehandlerVurdering ? 'Vurdert av ' + saksbehandlerKriterie?.kilde.ident : 'Automatisk '
-  const redigerTekst = saksbehandlerVurdering ? 'Rediger vurdering' : 'Legg til vurdering'
+      : 'Usikkert om pensjonen kommer barnet til gode'
 
   return (
     <VurderingsContainer>
       <div>
-        {kommerSoekerTilgodeVurdering.resultat && (
-          <GyldighetIcon status={kommerSoekerTilgodeVurdering.resultat} large={true} />
+        {kommerBarnetTilgode?.svar && (
+          <GyldighetIcon status={svarTilVurderingsstatus(kommerBarnetTilgode.svar)} large={true} />
         )}
       </div>
       {redigeringsModus ? (
@@ -61,24 +37,20 @@ export const KommerBarnetTilGodeVurdering = ({
         <div>
           <VurderingsTitle>{tittel}</VurderingsTitle>
           <Undertekst gray={true}>
-            {typeVurdering} {formaterStringDato(kommerSoekerTilgodeVurdering.vurdertDato)}
+            {kommerBarnetTilgode?.kilde?.tidspunkt
+              ? formaterStringDato(kommerBarnetTilgode.kilde.tidspunkt)
+              : 'Ikke vurdert'}
           </Undertekst>
-          {harSaksbehandlerOpplysning ? (
-            <div>
-              <Undertekst gray={false}>
-                Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
-              </Undertekst>
-              <div>{saksbehandlerOpplysning.svar}</div>
-              <BegrunnelseWrapper>
-                <div style={{ fontWeight: 'bold' }}>Begrunnelse</div>
-                <div>{saksbehandlerOpplysning.kommentar}</div>
-              </BegrunnelseWrapper>
-            </div>
-          ) : (
-            <Undertekst gray={false}>{automatiskTekst}</Undertekst>
-          )}
+          <Undertekst gray={false}>
+            Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
+          </Undertekst>
+          <div>{kommerBarnetTilgode?.svar ? JaNeiVetIkkeRec[kommerBarnetTilgode?.svar] : '-'}</div>
+          <BegrunnelseWrapper>
+            <div style={{ fontWeight: 'bold' }}>Begrunnelse</div>
+            <div>{kommerBarnetTilgode?.begrunnelse ?? ''}</div>
+          </BegrunnelseWrapper>
           <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
-            <CaseworkerfilledIcon /> <span className={'text'}> {redigerTekst}</span>
+            <CaseworkerfilledIcon /> <span className={'text'}> Rediger vurdering</span>
           </RedigerWrapper>
         </div>
       )}

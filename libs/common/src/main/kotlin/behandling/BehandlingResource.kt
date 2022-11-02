@@ -30,5 +30,6 @@ data class DetaljertBehandling(
     val gyldighetsproeving: GyldighetsResultat?,
     val status: BehandlingStatus?,
     val behandlingType: BehandlingType?,
-    val virkningstidspunkt: Virkningstidspunkt?
+    val virkningstidspunkt: Virkningstidspunkt?,
+    val kommerBarnetTilgode: KommerBarnetTilgode?
 )

@@ -23,13 +23,16 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
@@ -41,6 +44,25 @@ fun Route.behandlingRoutes(
 ) {
     val logger = application.log
 
+    route("/api/behandling/{behandlingsid}/kommerbarnettilgode") {
+        post {
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for vurdering av ytelsen kommer barnet tilgode"
+            )
+            val body = call.receive<KommerBarnetTilgodeJson>()
+
+            foerstegangsbehandlingService.settKommerBarnetTilgode(
+                behandlingsId,
+                KommerBarnetTilgode(
+                    body.svar,
+                    body.begrunnelse,
+                    Grunnlagsopplysning.Saksbehandler(navIdent, Instant.now())
+                )
+            )
+            call.respond(HttpStatusCode.OK)
+        }
+    }
     route("/behandlinger") {
         get {
             call.respond(
@@ -191,7 +213,8 @@ fun Route.behandlingRoutes(
                             gyldighetsproeving = it.gyldighetsproeving,
                             status = it.status,
                             virkningstidspunkt = it.hentVirkningstidspunkt(),
-                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            kommerBarnetTilgode = it.kommerBarnetTilgode
                         )
                     } ?: HttpStatusCode.NotFound
                 )
@@ -226,7 +249,8 @@ fun Route.behandlingRoutes(
                             gyldighetsproeving = null,
                             status = it.status,
                             virkningstidspunkt = null,
-                            behandlingType = BehandlingType.REVURDERING
+                            behandlingType = BehandlingType.REVURDERING,
+                            kommerBarnetTilgode = it.kommerBarnetTilgode
                         )
                     } ?: HttpStatusCode.NotFound
                 )
@@ -259,7 +283,8 @@ fun Route.behandlingRoutes(
                             gyldighetsproeving = null,
                             status = it.status,
                             virkningstidspunkt = null,
-                            behandlingType = BehandlingType.MANUELT_OPPHOER
+                            behandlingType = BehandlingType.MANUELT_OPPHOER,
+                            kommerBarnetTilgode = null
                         )
                     } ?: HttpStatusCode.NotFound
                 )
@@ -381,3 +406,5 @@ internal data class FastsettVirkningstidspunktResponse(
         )
     }
 }
+
+internal data class KommerBarnetTilgodeJson(val svar: JaNeiVetIkke, val begrunnelse: String)

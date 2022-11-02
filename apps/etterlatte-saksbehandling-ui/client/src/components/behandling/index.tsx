@@ -39,8 +39,10 @@ export const Behandling = () => {
     }
   }, [match?.params.behandlingId, behandlingId])
 
-  const soeker = behandling?.kommerSoekerTilgode?.familieforhold?.soeker
-  const soekerInfo = soeker ? { navn: soeker.navn, fnr: soeker.fnr, type: 'Etterlatt' } : null
+  const soeker = behandling?.søker
+  const soekerInfo = soeker
+    ? { navn: `${soeker.fornavn} ${soeker.etternavn}`, fnr: soeker.foedselsnummer, type: 'Etterlatt' }
+    : null
 
   return (
     <>

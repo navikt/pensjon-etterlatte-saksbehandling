@@ -9,16 +9,20 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -33,7 +37,8 @@ fun foerstegangsbehandling(
     soeknadMottattDato: LocalDateTime = LocalDateTime.now(),
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
-    virkningstidspunkt: Virkningstidspunkt? = null
+    virkningstidspunkt: Virkningstidspunkt? = null,
+    kommerBarnetTilgode: KommerBarnetTilgode? = null
 ) = Foerstegangsbehandling(
     id = id,
     sak = sak,
@@ -44,7 +49,8 @@ fun foerstegangsbehandling(
     soeknadMottattDato = soeknadMottattDato,
     persongalleri = persongalleri,
     gyldighetsproeving = gyldighetsproeving,
-    virkningstidspunkt = virkningstidspunkt
+    virkningstidspunkt = virkningstidspunkt,
+    kommerBarnetTilgode = kommerBarnetTilgode
 )
 
 fun revurdering(
@@ -55,7 +61,8 @@ fun revurdering(
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     oppgaveStatus: OppgaveStatus = OppgaveStatus.NY,
     persongalleri: Persongalleri = persongalleri(),
-    revurderingAarsak: RevurderingAarsak
+    revurderingAarsak: RevurderingAarsak,
+    kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode()
 ) = Revurdering(
     id = id,
     sak = sak,
@@ -64,7 +71,8 @@ fun revurdering(
     status = status,
     oppgaveStatus = oppgaveStatus,
     persongalleri = persongalleri,
-    revurderingsaarsak = revurderingAarsak
+    revurderingsaarsak = revurderingAarsak,
+    kommerBarnetTilgode = kommerBarnetTilgode
 )
 
 fun manueltOpphoer(
@@ -160,3 +168,9 @@ fun grunnlagsinformasjonForelderBarnRelasjonHendelse(
     )
 
 )
+
+fun kommerBarnetTilgode(
+    svar: JaNeiVetIkke = JaNeiVetIkke.JA,
+    begrunnelse: String = "En begrunnelse",
+    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("S01", Instant.now())
+) = KommerBarnetTilgode(svar, begrunnelse, kilde)

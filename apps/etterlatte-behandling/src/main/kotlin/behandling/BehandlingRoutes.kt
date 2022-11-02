@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -25,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDate
 import java.util.*
@@ -115,8 +117,14 @@ fun Route.behandlingRoutes(
                     )
                 }
 
-                foerstegangsbehandlingService.fastsettVirkningstidspunkt(body.behandlingId, body.dato, navIdent)
-                call.respond(HttpStatusCode.OK)
+                val virkningstidspunkt =
+                    foerstegangsbehandlingService.fastsettVirkningstidspunkt(body.behandlingId, body.dato, navIdent)
+
+                call.respondText(
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.OK,
+                    text = virkningstidspunkt.toJson()
+                )
             }
         }
 

@@ -38,6 +38,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
@@ -57,8 +59,10 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import java.lang.Thread.sleep
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 class ApplicationTest {
@@ -174,6 +178,12 @@ class ApplicationTest {
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
+                val expected = Virkningstidspunkt(
+                    YearMonth.of(2022, 1),
+                    Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Instant.now())
+                )
+                assertEquals(expected.dato, it.body<Virkningstidspunkt>().dato)
+                assertEquals(expected.kilde.ident, it.body<Virkningstidspunkt>().kilde.ident)
             }
 
             client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {

@@ -15,7 +15,7 @@ export interface IDetaljertBehandling {
   datoAttestert?: string //kommer som Instant fra backend
   attestant?: string
   soeknadMottattDato: string
-  virkningstidspunkt: string
+  virkningstidspunkt: Virkningstidspunkt | null
   status: IBehandlingStatus
   hendelser: IHendelse[]
   familieforhold?: IFamilieforhold
@@ -312,7 +312,7 @@ export interface IPdlPerson {
   etternavn: string
   foedselsnummer: string
   foedselsdato: Date
-  doedsdato: Date
+  doedsdato: string
   bostedsadresse?: IAdresse[]
   deltBostedsadresse?: IAdresse[]
   kontaktadresse?: IAdresse[]
@@ -320,6 +320,14 @@ export interface IPdlPerson {
   avdoedesBarn?: IPdlPerson[]
   familieRelasjon?: IFamilieRelasjon
   // ...
+}
+
+export interface Virkningstidspunkt {
+  dato: string
+  kilde: {
+    ident: string
+    tidspunkt: string
+  }
 }
 
 export enum PersonType {
@@ -357,7 +365,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   beregning: undefined,
   fastsatt: false,
   soeknadMottattDato: '',
-  virkningstidspunkt: '',
+  virkningstidspunkt: null,
   hendelser: [],
   familieforhold: undefined,
   behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
@@ -366,6 +374,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
 
 export const addBehandling = createAction<IDetaljertBehandling>('behandling/add')
 export const resetBehandling = createAction('behandling/reset')
+export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
 
 export interface IBehandlingReducer {
   behandling: IDetaljertBehandling
@@ -379,5 +388,8 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(resetBehandling, (state) => {
     state.behandling = detaljertBehandlingInitialState
-  })
+  }),
+    builder.addCase(oppdaterVirkningstidspunkt, (state, action) => {
+      state.behandling.virkningstidspunkt = action.payload
+    })
 })

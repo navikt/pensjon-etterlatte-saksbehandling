@@ -45,7 +45,8 @@ class FoerstegangsbehandlingAggregat(
                 soeknadMottattDato = LocalDateTime.parse(mottattDato),
                 persongalleri = persongalleri,
                 gyldighetsproeving = null,
-                oppgaveStatus = OppgaveStatus.NY
+                oppgaveStatus = OppgaveStatus.NY,
+                virkningstidspunkt = null
             )
                 .also {
                     behandlinger.opprettFoerstegangsbehandling(it)

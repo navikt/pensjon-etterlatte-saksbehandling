@@ -124,7 +124,11 @@ class RealRevurderingServiceTest {
         )
 
         val opprettetRevurdering =
-            sut.startRevurdering(forrigeBehandling, doedsHendelse, RevurderingAarsak.SOEKER_DOD)
+            sut.startRevurdering(
+                forrigeBehandling,
+                doedsHendelse,
+                RevurderingAarsak.SOEKER_DOD
+            )
 
         assertAll(
             "skal starte revurdering",

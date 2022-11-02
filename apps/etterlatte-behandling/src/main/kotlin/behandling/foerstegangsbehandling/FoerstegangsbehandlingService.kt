@@ -5,11 +5,17 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.ManueltOpphoer
+import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import org.slf4j.LoggerFactory
+import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 
 interface FoerstegangsbehandlingService {
@@ -23,6 +29,7 @@ interface FoerstegangsbehandlingService {
     ): Foerstegangsbehandling
 
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
+    fun fastsettVirkningstidspunkt(behandlingId: UUID, dato: LocalDate, ident: String): Virkningstidspunkt
 }
 
 class RealFoerstegangsbehandlingService(
@@ -58,7 +65,11 @@ class RealFoerstegangsbehandlingService(
     ): Foerstegangsbehandling {
         logger.info("Starter en behandling")
         return inTransaction {
-            foerstegangsbehandlingFactory.opprettFoerstegangsbehandling(sak, mottattDato, persongalleri)
+            foerstegangsbehandlingFactory.opprettFoerstegangsbehandling(
+                sak,
+                mottattDato,
+                persongalleri
+            )
         }.also {
             runBlocking {
                 behandlingHendelser.send(it.lagretBehandling.id to BehandlingHendelseType.OPPRETTET)
@@ -70,6 +81,35 @@ class RealFoerstegangsbehandlingService(
         inTransaction {
             foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
                 .lagreGyldighetprøving(gyldighetsproeving)
+        }
+    }
+
+    override fun fastsettVirkningstidspunkt(behandlingId: UUID, dato: LocalDate, ident: String): Virkningstidspunkt {
+        val behandling = inTransaction {
+            behandlinger.hentBehandling(behandlingId) ?: throw RuntimeException("Fant ikke behandling")
+        }
+
+        when (behandling) {
+            is Foerstegangsbehandling -> {
+                behandling.oppdaterVirkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler(ident, Instant.now()))
+                val virkningstidspunkt = behandling.hentVirkningstidspunkt()!!
+
+                inTransaction {
+                    behandlinger.lagreNyttVirkningstidspunkt(
+                        behandling.id,
+                        virkningstidspunkt
+                    )
+                }
+
+                return virkningstidspunkt
+            }
+
+            is ManueltOpphoer -> throw RuntimeException(
+                "Kan ikke fastsette virkningstidspunkt for ${ManueltOpphoer::class.java.simpleName}"
+            ) // TODO ai: Hvordan håndtere error cases?
+            is Revurdering -> throw RuntimeException(
+                "Kan ikke fastsette virkningstidspunkt for ${Revurdering::class.java.simpleName}"
+            )
         }
     }
 }

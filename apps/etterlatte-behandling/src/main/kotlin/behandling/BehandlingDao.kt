@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import java.sql.Connection
 import java.sql.ResultSet
@@ -169,7 +170,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
-        oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) }
+        oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
+        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) }
     )
 
     private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
@@ -227,8 +229,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status, virkningstidspunkt)
+                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(foerstegangsbehandling) {
@@ -256,6 +258,10 @@ class BehandlingDao(private val connection: () -> Connection) {
                 stmt.setString(12, soesken.toJson())
             }
             stmt.setString(13, oppgaveStatus?.name)
+            stmt.setString(
+                14,
+                foerstegangsbehandling.hentVirkningstidspunkt()?.toJson()
+            )
         }
         stmt.executeUpdate()
     }
@@ -265,7 +271,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                 innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status, revurdering_aarsak )
+                 innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status, revurdering_aarsak)
                  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
@@ -447,6 +453,12 @@ class BehandlingDao(private val connection: () -> Connection) {
             oppgaveStatus = OppgaveStatus.LUKKET,
             sistEndret = LocalDateTime.now()
         )
+    }
+
+    fun lagreNyttVirkningstidspunkt(behandlingId: UUID, virkningstidspunkt: Virkningstidspunkt) {
+        val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
+        statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
+        statement.setObject(2, behandlingId)
     }
 }
 

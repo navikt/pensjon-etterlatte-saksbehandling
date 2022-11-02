@@ -22,6 +22,7 @@ import io.ktor.server.auth.Authentication
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.behandling.BehandlingsBehov
+import no.nav.etterlatte.behandling.FastsettVirkningstidspunktJson
 import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
@@ -37,6 +38,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
@@ -56,8 +59,10 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import java.lang.Thread.sleep
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 class ApplicationTest {
@@ -161,6 +166,26 @@ class ApplicationTest {
                 assertEquals("innsender", behandling.innsender)
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
             }
+
+            client.post("/behandlinger/$behandlingId/virkningstidspunkt") {
+                addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    FastsettVirkningstidspunktJson(
+                        behandlingId,
+                        LocalDate.parse("2022-01-01")
+                    )
+                )
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+                val expected = Virkningstidspunkt(
+                    YearMonth.of(2022, 1),
+                    Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Instant.now())
+                )
+                assertEquals(expected.dato, it.body<Virkningstidspunkt>().dato)
+                assertEquals(expected.kilde.ident, it.body<Virkningstidspunkt>().kilde.ident)
+            }
+
             client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

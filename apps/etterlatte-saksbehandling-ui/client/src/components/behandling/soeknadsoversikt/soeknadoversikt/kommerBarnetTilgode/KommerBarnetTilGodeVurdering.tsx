@@ -86,7 +86,8 @@ export const KommerBarnetTilGodeVurdering = ({
   )
 }
 
-const RedigerWrapper = styled.div`
+// TODO ai: Trekk ut
+export const RedigerWrapper = styled.div`
   display: inline-flex;
   cursor: pointer;
   color: #0056b4;
@@ -112,7 +113,6 @@ export const RadioGroupWrapper = styled.div`
 `
 const BegrunnelseWrapper = styled.div`
   background-color: ${'#EFECF4'};
-  color: ;
   padding: 0.1em 0.5em;
   border-radius: 4px;
   margin-right: 0.9em;

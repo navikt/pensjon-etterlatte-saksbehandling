@@ -2,6 +2,7 @@ import { OversiktGyldigFramsatt } from './gyldigFramsattSoeknad/OversiktGyldigFr
 import { OversiktKommerSoekerTilgode } from './kommerBarnetTilgode/OversiktKommerSoekerTilgode'
 import { IDetaljertBehandling, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import { Innhold } from '../styled'
+import Virkningstidspunkt from './virkningstidspunkt/Virkningstidspunkt'
 
 export interface PropsOmSoeknad {
   behandling: IDetaljertBehandling
@@ -14,6 +15,7 @@ export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({ behandling }) => {
       {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
         <OversiktKommerSoekerTilgode kommerSoekerTilgode={behandling.kommerSoekerTilgode} />
       )}
+      <Virkningstidspunkt />
     </Innhold>
   )
 }

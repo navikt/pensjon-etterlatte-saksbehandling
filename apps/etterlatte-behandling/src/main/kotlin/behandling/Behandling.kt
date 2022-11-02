@@ -7,8 +7,13 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import java.lang.RuntimeException
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 sealed interface Behandling {
@@ -54,10 +59,20 @@ data class Foerstegangsbehandling(
     override val status: BehandlingStatus,
     override val oppgaveStatus: OppgaveStatus?,
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    val soeknadMottattDato: LocalDateTime,
     override val persongalleri: Persongalleri,
+    private var virkningstidspunkt: Virkningstidspunkt?,
+    val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?
-) : Behandling
+) : Behandling {
+    fun hentVirkningstidspunkt() = virkningstidspunkt
+    fun oppdaterVirkningstidspunkt(dato: LocalDate, kilde: Grunnlagsopplysning.Saksbehandler) {
+        if (BehandlingStatus.underBehandling().contains(this.status)) {
+            virkningstidspunkt = Virkningstidspunkt(YearMonth.from(dato), kilde)
+        } else {
+            throw RuntimeException("Kan ikke endre virkningstidspunkt for behandling som ikke er under behandling.")
+        }
+    }
+}
 
 data class Revurdering(
     override val id: UUID,

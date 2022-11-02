@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -25,15 +26,16 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
-import java.util.UUID
+import java.time.LocalDate
+import java.util.*
 
 fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
     revurderingService: RevurderingService,
     manueltOpphoerService: ManueltOpphoerService
-
 ) {
     val logger = application.log
 
@@ -100,6 +102,29 @@ fun Route.behandlingRoutes(
                 val body = call.receive<GyldighetsResultat>()
                 foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)
                 call.respond(HttpStatusCode.OK)
+            }
+
+            post("/virkningstidspunkt") {
+                val navIdent = navIdentFraToken() ?: return@post call.respond(
+                    HttpStatusCode.Unauthorized,
+                    "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
+                )
+                val body = call.receive<FastsettVirkningstidspunktJson>()
+                if (body.dato.dayOfMonth != 1) {
+                    return@post call.respond(
+                        HttpStatusCode.BadRequest,
+                        "Virkningsdato må være første dagen i måneden"
+                    )
+                }
+
+                val virkningstidspunkt =
+                    foerstegangsbehandlingService.fastsettVirkningstidspunkt(body.behandlingId, body.dato, navIdent)
+
+                call.respondText(
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.OK,
+                    text = virkningstidspunkt.toJson()
+                )
             }
         }
 
@@ -337,3 +362,5 @@ enum class HendelseType {
 }
 
 data class ManueltOpphoerResponse(val behandlingId: String)
+
+internal data class FastsettVirkningstidspunktJson(val behandlingId: UUID, val dato: LocalDate)

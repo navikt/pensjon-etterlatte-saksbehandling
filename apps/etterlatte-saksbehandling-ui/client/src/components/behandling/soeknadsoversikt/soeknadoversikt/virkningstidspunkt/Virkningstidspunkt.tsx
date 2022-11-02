@@ -1,10 +1,10 @@
 import styled from 'styled-components'
+import DatePicker from 'react-datepicker'
 import { Button } from '@navikt/ds-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
 import { oppdaterVirkningstidspunkt, VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
-import { DatovelgerPeriode } from '../../../inngangsvilkaar/vilkaar/DatovelgerPeriode'
-import { Edit } from '@navikt/ds-icons'
+import { Calender, Edit } from '@navikt/ds-icons'
 
 import {
   Header,
@@ -23,6 +23,11 @@ import { fastsettVirkningstidspunkt } from '../../../../../shared/api/behandling
 
 const Virkningstidspunkt = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const datepickerRef: any = useRef(null)
+  const toggleDatepicker = () => {
+    datepickerRef.current.setOpen(true)
+    datepickerRef.current.setFocus()
+  }
   const [rediger, setRediger] = useState(behandling.virkningstidspunkt === null)
   const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(null)
 
@@ -40,6 +45,7 @@ const Virkningstidspunkt = () => {
   }
 
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
+  console.log(behandling)
 
   return (
     <>
@@ -88,13 +94,30 @@ const Virkningstidspunkt = () => {
             <div>
               {rediger ? (
                 <>
-                  <DatovelgerPeriode
-                    label="Virkningstidspunkt"
-                    dato={virkningstidspunkt}
-                    setDato={setVirkningstidspunkt}
-                    setErrorUndefined={() => 0}
-                    error={undefined}
-                  />
+                  {/* TODO ai: Erstatt med komponent fra design-biblioteket når det kommer ut */}
+                  <Datovelger>
+                    <div>
+                      <DatePicker
+                        ref={datepickerRef}
+                        dateFormat={'dd.MM.yyyy'}
+                        placeholderText={'dd.mm.åååå'}
+                        selected={virkningstidspunkt}
+                        onChange={(date: Date) => setVirkningstidspunkt(date)}
+                        autoComplete="off"
+                      />
+                    </div>
+                    <KalenderIkon
+                      tabIndex={0}
+                      onKeyPress={toggleDatepicker}
+                      onClick={toggleDatepicker}
+                      role="button"
+                      title="Åpne datovelger"
+                      aria-label="Åpne datovelger"
+                    >
+                      <Calender color="white" />
+                    </KalenderIkon>
+                  </Datovelger>
+
                   <ButtonContainer>
                     <Button onClick={() => lagreVirkningstidspunkt(virkningstidspunkt)} size="small" variant="primary">
                       Lagre
@@ -135,6 +158,29 @@ const Virkningstidspunkt = () => {
 const ButtonContainer = styled.div`
   display: flex;
   gap: 8px;
+  margin-top: 16px;
+`
+
+const Datovelger = styled.div`
+  display: flex;
+  align-items: flex-end;
+
+  input {
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    height: 48px;
+    text-indent: 4px;
+  }
+`
+
+const KalenderIkon = styled.div`
+  padding: 4px 10px;
+  cursor: pointer;
+  background-color: #0167c5;
+  border: 1px solid #000;
+  border-radius: 0 4px 4px 0;
+  height: 48px;
+  line-height: 42px;
 `
 
 export default Virkningstidspunkt

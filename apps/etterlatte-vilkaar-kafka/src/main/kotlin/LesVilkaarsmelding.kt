@@ -39,7 +39,9 @@ internal class LesVilkaarsmelding(
             validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerAarsakKey) }
             validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey) }
             validate { it.rejectKey("vilkaarsvurdering") }
+            validate { it.rejectKey("vilkaarsvurderingGammel") }
             validate { it.rejectKey("kommerSoekerTilGode") }
+            validate { it.rejectKey("virkningstidspunkt") }
             validate { it.rejectKey("gyldighetsvurdering") }
             correlationId()
         }.register(this)

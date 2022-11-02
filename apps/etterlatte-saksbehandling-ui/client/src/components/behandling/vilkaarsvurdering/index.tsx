@@ -5,24 +5,36 @@ import { hentVilkaarsvurdering, Vilkaarsvurdering } from '../../../shared/api/vi
 import { ManueltVilkaar } from './ManueltVilkaar'
 import { VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
+import { RequestStatus } from './utils'
+import Spinner from '../../../shared/Spinner'
 import { format } from 'date-fns'
 
 export const Inngangsvilkaar = () => {
   const location = useLocation()
   const { behandlingId } = useParams()
-  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering | undefined>(undefined)
+  const virk = Date() // todo: Hente korrekt virkningsdato. Se EY-946.
+  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering>({ vilkaar: [] })
+  const [status, setStatus] = useState<RequestStatus>(RequestStatus.notStarted)
 
-  const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering?: Vilkaarsvurdering) => {
-    if (oppdatertVilkaarsvurdering) {
-      setVilkaarsvurdering(oppdatertVilkaarsvurdering)
-    } else {
-      if (!behandlingId) throw new Error('Mangler behandlingsid')
-      hentVilkaarsvurdering(behandlingId).then((response) => {
+  const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering: Vilkaarsvurdering) => {
+    setVilkaarsvurdering(oppdatertVilkaarsvurdering)
+  }
+
+  const hentVilkaarsvurderingLocal = () => {
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
+    setStatus(RequestStatus.isloading)
+    hentVilkaarsvurdering(behandlingId)
+      .then((response) => {
         if (response.status == 'ok') {
+          setStatus(RequestStatus.ok)
           setVilkaarsvurdering(response.data)
+        } else {
+          setStatus(RequestStatus.error)
         }
       })
-    }
+      .catch(() => {
+        setStatus(RequestStatus.error)
+      })
   }
 
   useEffect(() => {
@@ -31,7 +43,7 @@ export const Inngangsvilkaar = () => {
   }, [location.hash])
 
   useEffect(() => {
-    oppdaterVilkaarsvurdering()
+    hentVilkaarsvurderingLocal()
   }, [behandlingId])
 
   return (
@@ -40,7 +52,7 @@ export const Inngangsvilkaar = () => {
         <h1>Vilkårsvurdering</h1>
       </Header>
 
-      {behandlingId && vilkaarsvurdering?.virkningstidspunkt && (
+      {behandlingId && status === RequestStatus.ok && vilkaarsvurdering?.virkningstidspunkt && (
         <>
           <VilkaarBorderTop />
           {vilkaarsvurdering.vilkaar.map((value, index) => (
@@ -60,6 +72,9 @@ export const Inngangsvilkaar = () => {
           />
         </>
       )}
+      {vilkaarsvurdering.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
+      {status === RequestStatus.isloading && <Spinner visible={true} label={'Henter vilkårsvurdering'} />}
+      {status === RequestStatus.error && <p>En feil har oppstått</p>}
     </Content>
   )
 }

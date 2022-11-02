@@ -30,3 +30,11 @@ export function hentKildenavn(type?: KildeType): string {
       return 'Ukjent kilde'
   }
 }
+
+
+export enum RequestStatus {
+    notStarted,
+    isloading,
+    error,
+    ok,
+}

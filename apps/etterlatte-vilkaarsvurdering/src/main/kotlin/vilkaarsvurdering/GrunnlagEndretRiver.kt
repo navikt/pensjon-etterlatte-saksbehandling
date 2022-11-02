@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -50,7 +49,8 @@ class GrunnlagEndretRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             try {
-                val grunnlagEndretPayload = packet.toJsonNode()
+                // todo: Denne flyten skal erstattes med http kall for å hente inn data.
+                val grunnlagEndretPayload = objectMapper.readTree(packet.toJson())
                 val behandlingId = packet["behandlingId"].asText().toUUID()
                 val behandlingType = BehandlingType.valueOf(packet["behandling.type"].asText())
                 val sakType = SakType.valueOf(packet["sak.sakType"].asText())

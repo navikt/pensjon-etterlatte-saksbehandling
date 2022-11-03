@@ -108,7 +108,13 @@ fun Route.behandlingRoute(service: BehandlingService) {
         post("virkningstidspunkt") {
             call.withUUID("behandlingId") {
                 val body = call.receive<VirkningstidspunktRequest>()
-                call.respond(service.fastsettVirkningstidspunkt(it.toString(), body.dato, getAccessToken(call)))
+                call.respond(
+                    service.fastsettVirkningstidspunkt(
+                        it.toString(),
+                        body.dato.toLocalDate(),
+                        getAccessToken(call)
+                    )
+                )
             }
         }
     }

@@ -301,23 +301,18 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         dato: LocalDate,
         accessToken: String
     ): VirkningstidspunktResponse {
-        return try {
-            val json = downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/behandlinger/$behandlingId/virkningstidspunkt"),
-                accessToken
+        val json = downstreamResourceClient.get(
+            Resource(clientId, "$resourceUrl/behandlinger/$behandlingId/virkningstidspunkt"),
+            accessToken
+        )
+            .mapBoth(
+                success = { json -> json.response },
+                failure = { throwableErrorMessage ->
+                    throw Error(throwableErrorMessage.message, throwableErrorMessage.throwable)
+                }
             )
-                .mapBoth(
-                    success = { json -> json.response },
-                    failure = { throwableErrorMessage ->
-                        throw Error(throwableErrorMessage.message, throwableErrorMessage.throwable)
-                    }
-                )
 
-            objectMapper.readValue(json.toString(), VirkningstidspunktResponse::class.java)
-        } catch (e: Exception) {
-            logger.error("Kunne ikke fastsette virkningstidspunkt for $behandlingId", e)
-            throw e
-        }
+        return objectMapper.readValue(json.toString(), VirkningstidspunktResponse::class.java)
     }
 }
 

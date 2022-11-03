@@ -105,6 +105,7 @@ fun Route.behandlingRoutes(
             }
 
             post("/virkningstidspunkt") {
+                logger.debug("Prøver å fastsette virkningstidspunkt")
                 val navIdent = navIdentFraToken() ?: return@post call.respond(
                     HttpStatusCode.Unauthorized,
                     "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"

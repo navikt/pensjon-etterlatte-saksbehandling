@@ -72,7 +72,7 @@ internal class Fordeler(
                 }
             } catch (e: JsonMappingException) {
                 sikkerLogg.error("Feil under deserialisering", e)
-                logger.error("Feil under deserialisering. Sjekk sikkerlogg for detaljer", e)
+                logger.error("Feil under deserialisering. Sjekk sikkerlogg for detaljer")
             } catch (e: Exception) {
                 logger.error("Uhåndtert feilsituasjon", e)
             }

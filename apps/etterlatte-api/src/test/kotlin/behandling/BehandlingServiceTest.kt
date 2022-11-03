@@ -261,7 +261,7 @@ internal class BehandlingServiceTest {
             )
         } returns VirkningstidspunktResponse(
             LocalDate.parse("2022-01-01"),
-            VirkningstidspunktResponse.Kilde("saksbehandler", LocalDateTime.of(2022, 1, 1, 0, 0))
+            VirkningstidspunktResponse.Kilde("saksbehandler", Instant.now())
         )
 
         val respons = runBlocking {

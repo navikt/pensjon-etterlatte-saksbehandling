@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import java.time.LocalDate
 import java.util.*
 
-data class VilkaarsvurderingDao(
+data class VilkaarsvurderingIntern(
     val behandlingId: UUID,
     val payload: JsonNode,
     val vilkaar: List<Vilkaar>,

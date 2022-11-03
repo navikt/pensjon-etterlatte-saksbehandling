@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.SakType
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingDao
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingIntern
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
@@ -214,7 +214,7 @@ internal class VilkaarsvurderingServiceTest {
     @Test
     fun `Skal publisere oppdatert vilkaarsvurdering paa kafka`() {
         val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
-        val vilkaarsvurderingDao = VilkaarsvurderingDao(
+        val vilkaarsvurderingIntern = VilkaarsvurderingIntern(
             vilkaarsvurdering.behandlingId,
             objectMapper.readTree("""{"skalBliMed": "21-01-01"}"""),
             emptyList(),
@@ -223,7 +223,7 @@ internal class VilkaarsvurderingServiceTest {
         )
         val payloadContent = slot<String>()
 
-        service.publiserVilkaarsvurdering(vilkaarsvurderingDao)
+        service.publiserVilkaarsvurdering(vilkaarsvurderingIntern)
 
         verify(exactly = 1) {
             sendToRapid.invoke(capture(payloadContent), vilkaarsvurdering.behandlingId)

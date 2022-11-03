@@ -272,7 +272,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDao::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
             assertEquals(resultat.resultat, oppdatertVilkaarsvurdering?.resultat?.utfall)
@@ -287,7 +287,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val slettetVilkaarsvurdering = objectMapper
-                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingDao::class.java)
+                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
             assertEquals(HttpStatusCode.OK, sletteResponse.status)
             assertEquals(behandlingId, slettetVilkaarsvurdering.behandlingId)
             assertEquals(null, slettetVilkaarsvurdering?.resultat)

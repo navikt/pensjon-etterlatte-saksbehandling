@@ -171,10 +171,7 @@ class ApplicationTest {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    FastsettVirkningstidspunktJson(
-                        behandlingId,
-                        LocalDate.parse("2022-01-01")
-                    )
+                    FastsettVirkningstidspunktJson(LocalDate.parse("2022-01-01"))
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)

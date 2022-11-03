@@ -14,6 +14,7 @@ import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
 import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 data class PersonSakerResult(
     val person: Person,
@@ -141,5 +142,14 @@ class BehandlingService(
         logger.info("Oppretter manuelt opphør for sak ${manueltOpphoerRequest.sak}")
         return behandlingKlient.opprettManueltOpphoer(manueltOpphoerRequest, accessToken)
             .getOrThrow()
+    }
+
+    suspend fun fastsettVirkningstidspunkt(
+        behandlingId: String,
+        dato: LocalDateTime,
+        accessToken: String
+    ): VirkningstidspunktResponse {
+        logger.info("Fastsetter virkningstidspunkt for behandling $behandlingId")
+        return behandlingKlient.fastsettVirkningstidspunkt(behandlingId, dato.toLocalDate(), accessToken)
     }
 }

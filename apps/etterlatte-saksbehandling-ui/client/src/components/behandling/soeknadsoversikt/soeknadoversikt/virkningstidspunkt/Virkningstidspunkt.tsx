@@ -101,8 +101,10 @@ const Virkningstidspunkt = () => {
                         dateFormat={'dd.MM.yyyy'}
                         placeholderText={'dd.mm.åååå'}
                         selected={virkningstidspunkt}
+                        locale="nb"
                         onChange={(date: Date) => setVirkningstidspunkt(date)}
                         autoComplete="off"
+                        showMonthYearPicker
                       />
                     </div>
                     <KalenderIkon

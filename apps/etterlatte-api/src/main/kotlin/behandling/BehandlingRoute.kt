@@ -14,8 +14,10 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.logger
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 
 val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRoute")
@@ -111,7 +113,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond(
                     service.fastsettVirkningstidspunkt(
                         it.toString(),
-                        body.dato.toLocalDate(),
+                        LocalDate.ofInstant(Instant.parse(body.dato), norskTidssone),
                         getAccessToken(call)
                     )
                 )
@@ -137,7 +139,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
     }
 }
 
-data class VirkningstidspunktRequest(val dato: LocalDateTime)
+data class VirkningstidspunktRequest(val dato: String)
 
 suspend fun ApplicationCall.withUUID(parameter: String, onSuccess: (suspend (id: UUID) -> Unit)) {
     val id = this.parameters[parameter]

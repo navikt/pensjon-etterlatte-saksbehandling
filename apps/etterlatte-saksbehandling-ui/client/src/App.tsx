@@ -1,4 +1,3 @@
-import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import '@navikt/ds-css'
 import './App.css'
@@ -8,9 +7,12 @@ import { Header } from './shared/header'
 import { Person } from './components/person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import { Testside } from './components/testside'
+import nb from 'date-fns/locale/nb'
+import { registerLocale } from 'react-datepicker'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
+  registerLocale('nb', nb)
 
   return (
     <>

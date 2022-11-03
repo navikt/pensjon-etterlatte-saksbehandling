@@ -301,9 +301,10 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         dato: LocalDate,
         accessToken: String
     ): VirkningstidspunktResponse {
-        val json = downstreamResourceClient.get(
+        val json = downstreamResourceClient.post(
             Resource(clientId, "$resourceUrl/behandlinger/$behandlingId/virkningstidspunkt"),
-            accessToken
+            accessToken,
+            object { val dato: LocalDate = dato }
         )
             .mapBoth(
                 success = { json -> json.response },

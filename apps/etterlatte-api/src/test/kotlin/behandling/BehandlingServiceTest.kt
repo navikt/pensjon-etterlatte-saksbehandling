@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.EtterlatteVedtak
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.Vedtak
+import no.nav.etterlatte.behandling.VirkningstidspunktResponse
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -248,6 +249,31 @@ internal class BehandlingServiceTest {
             )
         }
         assertEquals(respons.behandlingId, "123")
+    }
+
+    @Test
+    fun fastsettVirkningstidspunktTest() {
+        coEvery {
+            behandlingKlient.fastsettVirkningstidspunkt(
+                any(),
+                any(),
+                accessToken
+            )
+        } returns VirkningstidspunktResponse(
+            LocalDate.parse("2022-01-01"),
+            VirkningstidspunktResponse.Kilde("saksbehandler", LocalDateTime.of(2022, 1, 1, 0, 0))
+        )
+
+        val respons = runBlocking {
+            service.fastsettVirkningstidspunkt(
+                behandlingId = UUID.randomUUID().toString(),
+                dato = LocalDate.parse("2022-01-01"),
+                accessToken = accessToken
+            )
+        }
+
+        assertEquals(LocalDate.parse("2022-01-01"), respons.dato)
+        assertEquals("saksbehandler", respons.kilde.ident)
     }
 
     private fun mockPerson(

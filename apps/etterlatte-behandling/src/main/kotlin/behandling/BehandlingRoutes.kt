@@ -118,7 +118,7 @@ fun Route.behandlingRoutes(
                 }
 
                 val virkningstidspunkt =
-                    foerstegangsbehandlingService.fastsettVirkningstidspunkt(body.behandlingId, body.dato, navIdent)
+                    foerstegangsbehandlingService.fastsettVirkningstidspunkt(behandlingsId, body.dato, navIdent)
 
                 call.respondText(
                     contentType = ContentType.Application.Json,
@@ -366,4 +366,4 @@ enum class HendelseType {
 
 data class ManueltOpphoerResponse(val behandlingId: String)
 
-internal data class FastsettVirkningstidspunktJson(val behandlingId: UUID, val dato: LocalDate)
+internal data class FastsettVirkningstidspunktJson(val dato: LocalDate)

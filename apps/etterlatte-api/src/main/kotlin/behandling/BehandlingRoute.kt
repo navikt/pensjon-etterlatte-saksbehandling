@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.logger
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.util.*
 
 val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRoute")
@@ -103,6 +104,13 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond(service.avbrytBehanding(it.toString(), getAccessToken(call)))
             }
         }
+
+        post("virkningstidspunkt") {
+            call.withUUID("behandlingId") {
+                val body = call.receive<VirkningstidspunktRequest>()
+                call.respond(service.fastsettVirkningstidspunkt(it.toString(), body.dato, getAccessToken(call)))
+            }
+        }
     }
 
     route("personer") {
@@ -122,6 +130,8 @@ fun Route.behandlingRoute(service: BehandlingService) {
         }
     }
 }
+
+data class VirkningstidspunktRequest(val dato: LocalDateTime)
 
 suspend fun ApplicationCall.withUUID(parameter: String, onSuccess: (suspend (id: UUID) -> Unit)) {
     val id = this.parameters[parameter]

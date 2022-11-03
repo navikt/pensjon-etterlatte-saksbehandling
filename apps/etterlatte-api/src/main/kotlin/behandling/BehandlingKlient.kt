@@ -15,6 +15,8 @@ import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 interface EtterlatteBehandling {
     suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker
@@ -30,6 +32,11 @@ interface EtterlatteBehandling {
         Result<ManueltOpphoerResponse>
 
     suspend fun hentGrunnlagsendringshendelserForSak(sakId: Int, accessToken: String): GrunnlagsendringshendelseListe
+    suspend fun fastsettVirkningstidspunkt(
+        behandlingId: String,
+        dato: LocalDate,
+        accessToken: String
+    ): VirkningstidspunktResponse
 }
 
 data class GrunnlagsendringshendelseListe(val hendelser: List<Grunnlagsendringshendelse>)
@@ -288,6 +295,33 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             throw e
         }
     }
+
+    override suspend fun fastsettVirkningstidspunkt(
+        behandlingId: String,
+        dato: LocalDate,
+        accessToken: String
+    ): VirkningstidspunktResponse {
+        return try {
+            val json = downstreamResourceClient.get(
+                Resource(clientId, "$resourceUrl/behandlinger/$behandlingId/virkningstidspunkt"),
+                accessToken
+            )
+                .mapBoth(
+                    success = { json -> json.response },
+                    failure = { throwableErrorMessage ->
+                        throw Error(throwableErrorMessage.message, throwableErrorMessage.throwable)
+                    }
+                )
+
+            objectMapper.readValue(json.toString(), VirkningstidspunktResponse::class.java)
+        } catch (e: Exception) {
+            logger.error("Kunne ikke fastsette virkningstidspunkt for $behandlingId", e)
+            throw e
+        }
+    }
 }
 
 data class ManueltOpphoerResponse(val behandlingId: String)
+data class VirkningstidspunktResponse(val dato: LocalDate, val kilde: Kilde) {
+    data class Kilde(val ident: String, val tidspunkt: LocalDateTime)
+}

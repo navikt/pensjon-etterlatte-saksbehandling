@@ -39,7 +39,7 @@ spec:
     - name: PDL_OUTBOUND_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
     - name: PPS_URL
-      value: https://pensjon-parallelle-sannheter.intern.nav.no"
+      value: https://pensjon-parallelle-sannheter.intern.nav.no
     - name: ROOT_LOGLEVEL
       value: "INFO"
     - name: NAV_CONSUMER_ID

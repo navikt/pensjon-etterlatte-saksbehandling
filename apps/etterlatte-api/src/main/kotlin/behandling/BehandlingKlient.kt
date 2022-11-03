@@ -15,8 +15,8 @@ import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 interface EtterlatteBehandling {
     suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker
@@ -320,5 +320,5 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
 
 data class ManueltOpphoerResponse(val behandlingId: String)
 data class VirkningstidspunktResponse(val dato: LocalDate, val kilde: Kilde) {
-    data class Kilde(val ident: String, val tidspunkt: LocalDateTime)
+    data class Kilde(val ident: String, val tidspunkt: Instant)
 }

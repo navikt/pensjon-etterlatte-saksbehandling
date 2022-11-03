@@ -14,16 +14,13 @@ import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
 fun foerstegangsbehandling(
@@ -36,10 +33,7 @@ fun foerstegangsbehandling(
     soeknadMottattDato: LocalDateTime = LocalDateTime.now(),
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
-    virkningstidspunkt: Virkningstidspunkt = Virkningstidspunkt(
-        YearMonth.of(2022, 1),
-        Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
-    )
+    virkningstidspunkt: Virkningstidspunkt? = null
 ) = Foerstegangsbehandling(
     id = id,
     sak = sak,

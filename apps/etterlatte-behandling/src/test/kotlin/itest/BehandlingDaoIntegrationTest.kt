@@ -575,12 +575,13 @@ internal class BehandlingDaoIntegrationTest {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
         val behandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.OPPRETTET)
 
-        val saksbehandler = Grunnlagsopplysning.Saksbehandler("saksbehandler", Instant.now())
-        behandling.oppdaterVirkningstidspunkt(LocalDate.parse("2022-01-01"), saksbehandler)
-
         behandlingRepo.opprettFoerstegangsbehandling(behandling)
 
-        val expected = Virkningstidspunkt(YearMonth.of(2022, 1), saksbehandler)
+        val saksbehandler = Grunnlagsopplysning.Saksbehandler("navIdent", Instant.now())
+        behandling.oppdaterVirkningstidspunkt(LocalDate.parse("2022-02-01"), saksbehandler)
+        behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, behandling.hentVirkningstidspunkt()!!)
+
+        val expected = Virkningstidspunkt(YearMonth.of(2022, 2), saksbehandler)
         with(behandlingRepo.hentBehandling(behandling.id)) {
             val actual = (this as Foerstegangsbehandling).hentVirkningstidspunkt()
             assertEquals(expected, actual)

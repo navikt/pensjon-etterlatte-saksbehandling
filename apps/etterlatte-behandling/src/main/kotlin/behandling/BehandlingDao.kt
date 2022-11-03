@@ -459,6 +459,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
         statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
         statement.setObject(2, behandlingId)
+        statement.executeUpdate()
     }
 }
 

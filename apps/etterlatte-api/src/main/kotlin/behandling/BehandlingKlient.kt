@@ -296,6 +296,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         }
     }
 
+    private data class BehandlingVirkningstidspunktRequest(val dato: LocalDate)
     override suspend fun fastsettVirkningstidspunkt(
         behandlingId: String,
         dato: LocalDate,
@@ -304,7 +305,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         val json = downstreamResourceClient.post(
             Resource(clientId, "$resourceUrl/behandlinger/$behandlingId/virkningstidspunkt"),
             accessToken,
-            object { val dato: LocalDate = dato }
+            BehandlingVirkningstidspunktRequest(dato)
         )
             .mapBoth(
                 success = { json -> json.response },

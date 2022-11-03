@@ -175,19 +175,20 @@ fun Route.behandlingRoutes(
                 call.respond(
                     foerstegangsbehandlingService.hentBehandling(behandlingsId)?.let {
                         DetaljertBehandling(
-                            it.id,
-                            it.sak,
-                            it.behandlingOpprettet,
-                            it.sistEndret,
-                            it.soeknadMottattDato,
-                            it.persongalleri.innsender,
-                            it.persongalleri.soeker,
-                            it.persongalleri.gjenlevende,
-                            it.persongalleri.avdoed,
-                            it.persongalleri.soesken,
-                            it.gyldighetsproeving,
-                            it.status,
-                            BehandlingType.FØRSTEGANGSBEHANDLING
+                            id = it.id,
+                            sak = it.sak,
+                            behandlingOpprettet = it.behandlingOpprettet,
+                            sistEndret = it.sistEndret,
+                            soeknadMottattDato = it.soeknadMottattDato,
+                            innsender = it.persongalleri.innsender,
+                            soeker = it.persongalleri.soeker,
+                            gjenlevende = it.persongalleri.gjenlevende,
+                            avdoed = it.persongalleri.avdoed,
+                            soesken = it.persongalleri.soesken,
+                            gyldighetsproeving = it.gyldighetsproeving,
+                            status = it.status,
+                            virkningstidspunkt = it.hentVirkningstidspunkt(),
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
                         )
                     } ?: HttpStatusCode.NotFound
                 )
@@ -209,19 +210,20 @@ fun Route.behandlingRoutes(
                 call.respond(
                     revurderingService.hentRevurdering(behandlingsId)?.let {
                         DetaljertBehandling(
-                            it.id,
-                            it.sak,
-                            it.behandlingOpprettet,
-                            it.sistEndret,
-                            it.behandlingOpprettet,
-                            it.persongalleri.innsender,
-                            it.persongalleri.soeker,
-                            it.persongalleri.gjenlevende,
-                            it.persongalleri.avdoed,
-                            it.persongalleri.soesken,
-                            null,
-                            it.status,
-                            BehandlingType.REVURDERING
+                            id = it.id,
+                            sak = it.sak,
+                            behandlingOpprettet = it.behandlingOpprettet,
+                            sistEndret = it.sistEndret,
+                            soeknadMottattDato = it.behandlingOpprettet,
+                            innsender = it.persongalleri.innsender,
+                            soeker = it.persongalleri.soeker,
+                            gjenlevende = it.persongalleri.gjenlevende,
+                            avdoed = it.persongalleri.avdoed,
+                            soesken = it.persongalleri.soesken,
+                            gyldighetsproeving = null,
+                            status = it.status,
+                            virkningstidspunkt = null,
+                            behandlingType = BehandlingType.REVURDERING
                         )
                     } ?: HttpStatusCode.NotFound
                 )
@@ -241,19 +243,20 @@ fun Route.behandlingRoutes(
                 call.respond(
                     manueltOpphoerService.hentManueltOpphoerInTransaction(behandlingsId)?.let {
                         DetaljertBehandling(
-                            it.id,
-                            it.sak,
-                            it.behandlingOpprettet,
-                            it.sistEndret,
-                            it.behandlingOpprettet,
-                            it.persongalleri.innsender,
-                            it.persongalleri.soeker,
-                            it.persongalleri.gjenlevende,
-                            it.persongalleri.avdoed,
-                            it.persongalleri.soesken,
-                            null,
-                            it.status,
-                            BehandlingType.MANUELT_OPPHOER
+                            id = it.id,
+                            sak = it.sak,
+                            behandlingOpprettet = it.behandlingOpprettet,
+                            sistEndret = it.sistEndret,
+                            soeknadMottattDato = it.behandlingOpprettet,
+                            innsender = it.persongalleri.innsender,
+                            soeker = it.persongalleri.soeker,
+                            gjenlevende = it.persongalleri.gjenlevende,
+                            avdoed = it.persongalleri.avdoed,
+                            soesken = it.persongalleri.soesken,
+                            gyldighetsproeving = null,
+                            status = it.status,
+                            virkningstidspunkt = null,
+                            behandlingType = BehandlingType.MANUELT_OPPHOER
                         )
                     } ?: HttpStatusCode.NotFound
                 )

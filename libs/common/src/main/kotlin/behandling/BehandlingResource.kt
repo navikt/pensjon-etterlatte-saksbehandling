@@ -29,5 +29,6 @@ data class DetaljertBehandling(
     val soesken: List<String>?,
     val gyldighetsproeving: GyldighetsResultat?,
     val status: BehandlingStatus?,
-    val behandlingType: BehandlingType?
+    val behandlingType: BehandlingType?,
+    val virkningstidspunkt: Virkningstidspunkt?
 )

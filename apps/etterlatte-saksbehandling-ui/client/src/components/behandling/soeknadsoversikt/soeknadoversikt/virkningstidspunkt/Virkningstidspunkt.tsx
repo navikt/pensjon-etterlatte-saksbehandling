@@ -45,7 +45,6 @@ const Virkningstidspunkt = () => {
   }
 
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
-  console.log(behandling)
 
   return (
     <>

@@ -106,7 +106,7 @@ class BehandlingService(
             datoattestert = vedtak.await().datoattestert,
             attestant = vedtak.await().attestant,
             soeknadMottattDato = behandling.await().soeknadMottattDato,
-            virkningstidspunkt = vedtak.await().virkningsDato,
+            virkningstidspunkt = behandling.await().virkningstidspunkt,
             status = behandling.await().status,
             hendelser = hendelser.await().hendelser,
             familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),

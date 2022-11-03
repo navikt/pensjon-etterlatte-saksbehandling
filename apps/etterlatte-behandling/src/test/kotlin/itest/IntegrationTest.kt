@@ -22,7 +22,7 @@ import io.ktor.server.auth.Authentication
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.behandling.BehandlingsBehov
-import no.nav.etterlatte.behandling.FastsettVirkningstidspunktJson
+import no.nav.etterlatte.behandling.FastsettVirkningstidspunktRequest
 import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
@@ -171,7 +171,7 @@ class ApplicationTest {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    FastsettVirkningstidspunktJson(LocalDate.parse("2022-01-01"))
+                    FastsettVirkningstidspunktRequest(LocalDate.parse("2022-01-01"))
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)

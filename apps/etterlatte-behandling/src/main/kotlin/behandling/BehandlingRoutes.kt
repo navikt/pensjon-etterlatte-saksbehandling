@@ -24,6 +24,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -110,7 +112,7 @@ fun Route.behandlingRoutes(
                     HttpStatusCode.Unauthorized,
                     "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
                 )
-                val body = call.receive<FastsettVirkningstidspunktJson>()
+                val body = call.receive<FastsettVirkningstidspunktRequest>()
                 if (body.dato.dayOfMonth != 1) {
                     return@post call.respond(
                         HttpStatusCode.BadRequest,
@@ -124,7 +126,7 @@ fun Route.behandlingRoutes(
                 call.respondText(
                     contentType = ContentType.Application.Json,
                     status = HttpStatusCode.OK,
-                    text = virkningstidspunkt.toJson()
+                    text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
                 )
             }
         }
@@ -367,4 +369,15 @@ enum class HendelseType {
 
 data class ManueltOpphoerResponse(val behandlingId: String)
 
-internal data class FastsettVirkningstidspunktJson(val dato: LocalDate)
+internal data class FastsettVirkningstidspunktRequest(val dato: LocalDate)
+internal data class FastsettVirkningstidspunktResponse(
+    val dato: LocalDate,
+    val kilde: Grunnlagsopplysning.Saksbehandler
+) {
+    companion object {
+        fun from(virkningstidspunkt: Virkningstidspunkt) = FastsettVirkningstidspunktResponse(
+            LocalDate.of(virkningstidspunkt.dato.year, virkningstidspunkt.dato.month, 1),
+            virkningstidspunkt.kilde
+        )
+    }
+}

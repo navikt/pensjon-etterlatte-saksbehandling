@@ -30,12 +30,6 @@ app.use((req, res, next) => {
 
 app.use(express.json())
 
-app.use(
-  cors({
-    origin: 'http://localhost:3000',
-  })
-)
-
 app.use('/health', healthRouter) // åpen rute
 if (process.env.DEVELOPMENT !== 'true') {
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
@@ -44,6 +38,12 @@ if (process.env.DEVELOPMENT !== 'true') {
 app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
 if (isDev) {
+  app.use(
+    cors({
+      origin: 'http://localhost:3000',
+    })
+  )
+
   if (process.env.VILKAARSVURDERING_DEV) {
     app.use('/api/vilkaarsvurdering', lokalProxy('http://localhost:8087/api/vilkaarsvurdering'))
   }

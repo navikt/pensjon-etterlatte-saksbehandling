@@ -23,6 +23,7 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktRequest
+import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
@@ -39,7 +40,6 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -62,7 +62,6 @@ import java.lang.Thread.sleep
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
 class ApplicationTest {
@@ -175,12 +174,12 @@ class ApplicationTest {
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
-                val expected = Virkningstidspunkt(
-                    YearMonth.of(2022, 1),
+                val expected = FastsettVirkningstidspunktResponse(
+                    LocalDate.of(2022, 1, 1),
                     Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Instant.now())
                 )
-                assertEquals(expected.dato, it.body<Virkningstidspunkt>().dato)
-                assertEquals(expected.kilde.ident, it.body<Virkningstidspunkt>().kilde.ident)
+                assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)
+                assertEquals(expected.kilde.ident, it.body<FastsettVirkningstidspunktResponse>().kilde.ident)
             }
 
             client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {

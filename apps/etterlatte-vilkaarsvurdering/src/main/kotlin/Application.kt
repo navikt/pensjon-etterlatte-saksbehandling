@@ -26,6 +26,7 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationBuilder
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.security.token.support.v2.tokenValidationSupport
+import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
 
@@ -65,3 +66,5 @@ fun Application.restModule(vilkaarsvurderingService: VilkaarsvurderingService) {
         }
     }
 }
+
+val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")

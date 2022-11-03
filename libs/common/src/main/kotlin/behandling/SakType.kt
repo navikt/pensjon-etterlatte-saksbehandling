@@ -1,0 +1,3 @@
+package no.nav.etterlatte.libs.common.behandling
+
+enum class SakType { BARNEPENSJON, OMSTILLINGSSTOENAD }

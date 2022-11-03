@@ -1,8 +1,10 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -10,6 +12,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -93,12 +96,14 @@ class GrunnlagEndretRiver(
                         revurderingAarsak = revurderingAarsak
                     )
                 }
+            } catch (e: JsonMappingException) {
+                sikkerLogg.error("Feilet under deserialisering ved opprettelse/oppdatering av vilkårsvurdering", e)
+                logger.error(
+                    "Feilet under deserialisering ved opprettelse/oppdatering av vilkårsvurdering. " +
+                        "Sjekk sikkerlogg for detaljert feilmelding"
+                )
             } catch (e: Exception) {
-                // TODO Se på flyten her - denn skal muligens kastes hele veien ut
-                logger.error("En feil oppstod", e)
+                logger.error("Feilet ved opprettelse/oppdatering av vilkårsvurdering", e)
             }
         }
 }
-
-// TODO Denne bør vel flyttes?
-enum class SakType { BARNEPENSJON, OMSTILLINGSSTOENAD }

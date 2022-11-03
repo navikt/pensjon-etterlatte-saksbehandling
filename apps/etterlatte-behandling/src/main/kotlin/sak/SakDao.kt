@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
+import no.nav.etterlatte.libs.common.behandling.SakType
 import java.sql.Connection
 
 class SakDao(private val connection: () -> Connection) {

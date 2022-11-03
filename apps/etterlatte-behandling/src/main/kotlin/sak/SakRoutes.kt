@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.SakType
 
 fun Route.sakRoutes(sakService: SakService) {
     get("/saker") {
@@ -53,4 +54,3 @@ private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt
 
 data class Sak(val ident: String, val sakType: SakType, val id: Long)
 data class Saker(val saker: List<Sak>)
-enum class SakType { BARNEPENSJON, OMSTILLINGSSTOENAD }

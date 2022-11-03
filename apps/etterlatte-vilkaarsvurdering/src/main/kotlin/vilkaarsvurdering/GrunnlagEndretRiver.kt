@@ -98,6 +98,10 @@ class GrunnlagEndretRiver(
                 }
             } catch (e: JsonMappingException) {
                 sikkerLogg.error("Feilet under deserialisering ved opprettelse/oppdatering av vilkårsvurdering", e)
+                logger.error(
+                    "Feilet under deserialisering ved opprettelse/oppdatering av vilkårsvurdering. " +
+                        "Sjekk sikkerlogg for detaljert feilmelding"
+                )
             } catch (e: Exception) {
                 logger.error("Feilet ved opprettelse/oppdatering av vilkårsvurdering", e)
             }

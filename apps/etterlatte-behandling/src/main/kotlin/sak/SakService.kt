@@ -1,5 +1,7 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.libs.common.behandling.SakType
+
 interface SakService {
     fun hentSaker(): List<Sak>
     fun finnSaker(person: String): List<Sak>

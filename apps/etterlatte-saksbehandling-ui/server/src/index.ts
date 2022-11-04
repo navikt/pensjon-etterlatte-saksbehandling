@@ -31,11 +31,6 @@ app.use((req, res, next) => {
 app.use(express.json())
 
 app.use('/health', healthRouter) // åpen rute
-if (process.env.DEVELOPMENT !== 'true') {
-  app.use(authenticateUser) // Alle ruter etter denne er authenticated
-}
-
-app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
 if (isDev) {
   app.use(
@@ -43,6 +38,8 @@ if (isDev) {
       origin: 'http://localhost:3000',
     })
   )
+
+  app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
   if (process.env.VILKAARSVURDERING_DEV) {
     app.use('/api/vilkaarsvurdering', lokalProxy('http://localhost:8087/api/vilkaarsvurdering'))
@@ -54,6 +51,9 @@ if (isDev) {
 
   app.use('/api', mockRouter)
 } else {
+  app.use(authenticateUser) // Alle ruter etter denne er authenticated
+  app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
+
   logger.info('Proxy-kall')
   app.use(
     '/api/vilkaarsvurdering',

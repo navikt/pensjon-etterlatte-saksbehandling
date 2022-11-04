@@ -1,9 +1,9 @@
 import express, { Request, Response } from 'express'
 import { parseJwt } from '../utils/parsejwt'
-import { getOboToken } from "../middleware/getOboToken"
+import { getOboToken } from '../middleware/getOboToken'
 import fetch from 'node-fetch'
 import { logger } from '../utils/logger'
-import { lagEnhetFraString } from "../utils/enhet";
+import { lagEnhetFraString } from '../utils/enhet'
 
 export const modiaRouter = express.Router() // for å støtte dekoratør for innloggede flater
 
@@ -20,8 +20,9 @@ export interface ISaksbehandler {
   enheter: IEnhet[]
   rolle: string //test
 }
+
 const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> => {
-  if (process.env.DEVELOPMENT === 'true') {
+  if (process.env.NODE_ENV !== 'production') {
     /* mulig det bør gjøre kall mot https://modiacontextholder.nais.adeo.no/modiacontextholder/api/decorator */
     return {
       ident: 'Z81549300',
@@ -61,24 +62,24 @@ const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> =>
 }
 
 const hentEnheter = async (req: Request, bearerToken: string): Promise<IEnhet[]> => {
+  if (bearerToken) {
+    try {
+      const oboToken = await getOboToken(req.headers.authorization, 'https://graph.microsoft.com/.default')
+      const query = 'officeLocation'
 
-    if (bearerToken) {
-        try {
-            const oboToken = await getOboToken( req.headers.authorization, 'https://graph.microsoft.com/.default');
-            const query = "officeLocation";
+      const data = await fetch(`https://graph.microsoft.com/v1.0/me?$select=${query}`, {
+        headers: { Authorization: `Bearer ${oboToken}` },
+      }).then((response) => response.json())
 
-            const data = await fetch(`https://graph.microsoft.com/v1.0/me?$select=${query}`, { headers: {"Authorization" : `Bearer ${oboToken}`} })
-              .then(response => response.json())
+      const enhet = lagEnhetFraString(data.officeLocation)
 
-            const enhet = lagEnhetFraString(data.officeLocation)
-
-            return [enhet]
-        } catch (error) {
-            logger.info("Feilmelding ved uthenting av enheter", error);
-        }
+      return [enhet]
+    } catch (error) {
+      logger.info('Feilmelding ved uthenting av enheter', error)
     }
-    return []
-};
+  }
+  return []
+}
 
 // TODO: endre navn på router og endepunkt
 modiaRouter.get('/decorator', async (req: Request, res: Response) => {

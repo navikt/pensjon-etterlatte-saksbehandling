@@ -25,13 +25,18 @@ internal class FerdigstillVedtaksbrev(rapidsConnection: RapidsConnection, privat
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext {
-            val vedtak: Vedtak = objectMapper.readValue(packet["vedtak"].toJson())
-            logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
+        try {
+            withLogContext {
+                val vedtak: Vedtak = objectMapper.readValue(packet["vedtak"].toJson())
+                logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
 
-            val brev = brevService.ferdigstillAttestertVedtak(vedtak)
+                val brev = brevService.ferdigstillAttestertVedtak(vedtak)
 
-            logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er ferdigstilt (brevId = ${brev.id})")
+                logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er ferdigstilt (brevId = ${brev.id})")
+            }
+        } catch (e: Exception) {
+            logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)
+            throw e
         }
     }
 }

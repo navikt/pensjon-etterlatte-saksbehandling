@@ -10,51 +10,31 @@ import { expressProxy } from './routers/proxy'
 import { logger } from './utils/logger'
 import brev from './routers/brev'
 import { lokalProxy } from './routers/lokalproxy'
+import { requestLogger } from './middleware/logging'
 
-const app = express()
+logger.info(`environment: ${process.env.NODE_ENV}`)
 
 const clientPath = path.resolve(__dirname, '../client')
 const isDev = process.env.NODE_ENV !== 'production'
 
-logger.info(`environment: ${process.env.NODE_ENV}`)
-
+const app = express()
 app.set('trust proxy', 1)
-
 app.use('/', express.static(clientPath))
-
-// requestlogger-middleware
-app.use((req, res, next) => {
-  logger.info('Request', { ...req.headers, url: req.url })
-  next()
-})
-
+app.use(requestLogger(isDev))
 app.use(express.json())
-
-app.use('/health', healthRouter) // åpen rute
+app.use('/health', healthRouter)
 
 if (isDev) {
-  app.use(
-    cors({
-      origin: 'http://localhost:3000',
-    })
-  )
-
-  app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
-
+  app.use(cors({ origin: 'http://localhost:3000' }))
   if (process.env.VILKAARSVURDERING_DEV) {
     app.use('/api/vilkaarsvurdering', lokalProxy('http://localhost:8087/api/vilkaarsvurdering'))
   }
-
   if (process.env.BREV_DEV) {
     app.use('/brev', brev)
   }
-
   app.use('/api', mockRouter)
 } else {
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
-  app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
-
-  logger.info('Proxy-kall')
   app.use(
     '/api/vilkaarsvurdering',
     expressProxy(`${process.env.VILKAARSVURDERING_API_URL}`, 'api://f4cf400f-8ef9-406f-baf1-8218f8f7edac/.default')
@@ -63,6 +43,7 @@ if (isDev) {
   app.use('/brev', expressProxy(`${process.env.BREV_API_URL}`, 'api://d6add52a-5807-49cd-a181-76908efee836/.default'))
 }
 
+app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: any, res: any) => {
   return res.sendFile(`${clientPath}/index.html`)
 })

@@ -56,11 +56,7 @@ const Virkningstidspunkt = () => {
             den måneden da kravet ble satt fram
           </Infoboks>
           <OversiktElement
-            tekst={
-              behandling.virkningstidspunkt?.kilde?.tidspunkt
-                ? `PDL ${formaterStringDato(behandling.virkningstidspunkt!!.kilde.tidspunkt)}`
-                : 'Ukjent'
-            }
+            tekst=""
             label="Dødsdato"
             navn={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : ''}
             erOppfylt

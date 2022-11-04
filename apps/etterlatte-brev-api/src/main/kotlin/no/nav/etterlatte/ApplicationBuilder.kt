@@ -89,6 +89,7 @@ class ApplicationBuilder {
                     }
                 })
                 OppdaterDistribusjonStatus(this, db)
+                FerdigstillVedtaksbrev(this, brevService)
             }
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)

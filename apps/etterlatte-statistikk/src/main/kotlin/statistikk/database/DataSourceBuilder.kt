@@ -34,6 +34,12 @@ class DataSourceBuilder(private val env: Map<String, String>) {
     private fun runMigration(dataSource: DataSource) =
         Flyway.configure()
             .dataSource(dataSource)
+            .apply {
+                // Kjør GCP-spesifikke migrasjoner kun hvis vi er i GCP
+                if (env.containsKey("NAIS_CLUSTER_NAME")) {
+                    locations("db/migrations", "db/gcp")
+                }
+            }
             .load()
             .migrate()
 }

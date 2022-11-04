@@ -1,9 +1,9 @@
 const path = process.env.REACT_APP_VEDTAK_URL
 
-type Success<T> = { status: 'ok'; data: T; statusCode: number }
-type Error = { status: 'error'; statusCode: number; error?: any }
+type ApiSuccess<T> = { status: 'ok'; data: T; statusCode: number }
+export type ApiError = { status: 'error'; statusCode: number; error?: any }
 
-export type ApiResponse<T> = Success<T> | Error
+export type ApiResponse<T> = ApiSuccess<T> | ApiError
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 

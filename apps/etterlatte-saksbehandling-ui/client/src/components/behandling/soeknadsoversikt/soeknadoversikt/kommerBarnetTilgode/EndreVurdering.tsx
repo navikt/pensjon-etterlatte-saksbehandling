@@ -22,7 +22,7 @@ export const EndreVurdering = ({ setRedigeringsModusFalse }: { setRedigeringsMod
       lagreBegrunnelseKommerBarnetTilgode(behandlingId, kommentar, svar.toString()).then((response) => {
         if (response.status === 'ok') {
           hentBehandling(behandlingId).then((response) => {
-            if (response.statusCode === 200) {
+            if (response.status === 'ok') {
               window.location.reload()
             }
           })

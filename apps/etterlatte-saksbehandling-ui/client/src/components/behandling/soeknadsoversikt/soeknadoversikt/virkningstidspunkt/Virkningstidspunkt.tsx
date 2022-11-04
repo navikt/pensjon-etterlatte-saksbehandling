@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
-import { Button } from '@navikt/ds-react'
+import { Alert, Button, Loader } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
 import { oppdaterVirkningstidspunkt, VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
@@ -20,28 +20,20 @@ import { OversiktElement } from '../OversiktElement'
 import { formaterStringDato, formaterStringTidspunkt } from '../../../../../utils/formattering'
 import { useAppDispatch, useAppSelector } from '../../../../../store/Store'
 import { fastsettVirkningstidspunkt } from '../../../../../shared/api/behandling'
+import { useApiCall, isPending, isFailure } from '../../../../../shared/hooks/useApiCall'
 
 const Virkningstidspunkt = () => {
+  const dispatch = useAppDispatch()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+
+  const [rediger, setRediger] = useState(behandling.virkningstidspunkt === null)
+  const [formData, setFormData] = useState<Date | null>(null)
+  const [virkningstidspunkt, fastsettVirkningstidspunktRequest] = useApiCall(fastsettVirkningstidspunkt)
+
   const datepickerRef: any = useRef(null)
   const toggleDatepicker = () => {
     datepickerRef.current.setOpen(true)
     datepickerRef.current.setFocus()
-  }
-  const [rediger, setRediger] = useState(behandling.virkningstidspunkt === null)
-  const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(null)
-
-  const dispatch = useAppDispatch()
-
-  const toggleRediger = () => setRediger(!rediger)
-  const lagreVirkningstidspunkt = async (dato: Date | null) => {
-    if (dato === null) return
-
-    const response = await fastsettVirkningstidspunkt(behandling.id, dato)
-    if (response.status === 'ok') {
-      dispatch(oppdaterVirkningstidspunkt(response.data))
-      toggleRediger()
-    }
   }
 
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
@@ -96,9 +88,9 @@ const Virkningstidspunkt = () => {
                         ref={datepickerRef}
                         dateFormat={'dd.MM.yyyy'}
                         placeholderText={'dd.mm.åååå'}
-                        selected={virkningstidspunkt}
+                        selected={formData}
                         locale="nb"
-                        onChange={(date: Date) => setVirkningstidspunkt(date)}
+                        onChange={(date: Date) => setFormData(date)}
                         autoComplete="off"
                         showMonthYearPicker
                       />
@@ -116,13 +108,26 @@ const Virkningstidspunkt = () => {
                   </Datovelger>
 
                   <ButtonContainer>
-                    <Button onClick={() => lagreVirkningstidspunkt(virkningstidspunkt)} size="small" variant="primary">
-                      Lagre
+                    <Button
+                      onClick={() => {
+                        if (!formData) return
+                        fastsettVirkningstidspunktRequest({ dato: formData, id: behandling.id }, (res) => {
+                          dispatch(oppdaterVirkningstidspunkt(res))
+                          setRediger(false)
+                        })
+                      }}
+                      size="small"
+                      variant="primary"
+                    >
+                      Lagre {isPending(virkningstidspunkt) && <Loader />}
                     </Button>
-                    <Button size="small" variant="secondary" onClick={toggleRediger}>
+                    <Button size="small" variant="secondary" onClick={() => setRediger(false)}>
                       Avbryt
                     </Button>
                   </ButtonContainer>
+                  {isFailure(virkningstidspunkt) && (
+                    <ApiErrorAlert>Kunne ikke fastsette virkningstidspunkt</ApiErrorAlert>
+                  )}
                 </>
               ) : (
                 <div>
@@ -135,7 +140,7 @@ const Virkningstidspunkt = () => {
                           ? formaterStringTidspunkt(behandling.virkningstidspunkt?.kilde.tidspunkt)
                           : ''}
                       </Undertekst>
-                      <RedigerWrapper onClick={toggleRediger}>
+                      <RedigerWrapper onClick={() => setRediger(true)}>
                         <Edit /> Rediger
                       </RedigerWrapper>
                     </>
@@ -178,6 +183,10 @@ const KalenderIkon = styled.div`
   border-radius: 0 4px 4px 0;
   height: 48px;
   line-height: 42px;
+`
+
+const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
+  margin-top: 8px;
 `
 
 export default Virkningstidspunkt

@@ -71,7 +71,7 @@ data class Foerstegangsbehandling(
 ) : Behandling {
     fun hentVirkningstidspunkt() = virkningstidspunkt
     fun oppdaterVirkningstidspunkt(dato: LocalDate, kilde: Grunnlagsopplysning.Saksbehandler) {
-        if (BehandlingStatus.underBehandling().contains(this.status)) {
+        if (BehandlingStatus.kanRedigeres().contains(this.status)) {
             virkningstidspunkt = Virkningstidspunkt(YearMonth.from(dato), kilde)
         } else {
             throw RuntimeException("Kan ikke endre virkningstidspunkt for behandling som ikke er under behandling.")

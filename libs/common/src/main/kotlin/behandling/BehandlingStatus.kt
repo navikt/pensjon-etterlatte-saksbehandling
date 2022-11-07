@@ -29,6 +29,8 @@ enum class BehandlingStatus {
             ATTESTERT
         )
 
+        fun kanRedigeres() = underBehandling() - FATTET_VEDTAK
+
         fun ikkeAvbrutt() = iverksattEllerAttestert() + underBehandling()
     }
 }

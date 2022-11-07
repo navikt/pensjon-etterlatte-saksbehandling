@@ -37,7 +37,7 @@ class DataSourceBuilder(private val env: Map<String, String>) {
             .apply {
                 // Kjør GCP-spesifikke migrasjoner kun hvis vi er i GCP
                 if (env.containsKey("NAIS_CLUSTER_NAME")) {
-                    locations("db/migrations", "db/gcp")
+                    locations("db/migration", "db/gcp")
                 }
             }
             .load()

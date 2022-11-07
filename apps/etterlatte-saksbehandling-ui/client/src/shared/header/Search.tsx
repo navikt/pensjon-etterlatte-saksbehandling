@@ -6,8 +6,8 @@ import { getPerson } from '../api/person'
 import { ErrorIcon } from '../icons/errorIcon'
 import { InformationIcon } from '../icons/informationIcon'
 import { PeopleIcon } from '../icons/peopleIcon'
-import { IApiResponse } from '../api/types'
 import { IPersonResult } from '../../components/person/typer'
+import { ApiResponse } from '../api/apiClient'
 
 export const Search = () => {
   const navigate = useNavigate()
@@ -26,12 +26,12 @@ export const Search = () => {
     } else {
       setLaster(true)
       setFeilInput(false)
-      getPerson(searchInput).then((result: IApiResponse<IPersonResult>) => {
+      getPerson(searchInput).then((result: ApiResponse<IPersonResult>) => {
         setLaster(false)
-        if (result.status === 200) {
+        if (result.status === 'ok') {
           setSearchResult(result?.data)
         } else {
-          setError(result?.data)
+          setError(result?.error)
         }
       })
     }

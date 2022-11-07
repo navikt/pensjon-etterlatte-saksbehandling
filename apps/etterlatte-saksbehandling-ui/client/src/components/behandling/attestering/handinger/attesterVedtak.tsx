@@ -10,7 +10,7 @@ export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
   const attester = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     attesterVedtak(behandlingId).then((response) => {
-      if (response.status === 200) {
+      if (response.status === 'ok') {
         hentBehandling(behandlingId).then((response) => {
           if (response.statusCode === 200) {
             window.location.reload()

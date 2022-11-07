@@ -3,9 +3,9 @@ import { Button, Link } from '@navikt/ds-react'
 import { Modal } from '../../../shared/modal/modal'
 import { WarningText } from '../../../shared/styled'
 import { avbrytBehandling } from '../../../shared/api/behandling'
-import { IApiResponse } from '../../../shared/api/types'
 import { useMatch, useNavigate } from 'react-router'
 import { handlinger } from './typer'
+import { ApiResponse } from '../../../shared/api/apiClient'
 
 export const AvbrytBehandling = () => {
   const navigate = useNavigate()
@@ -16,8 +16,8 @@ export const AvbrytBehandling = () => {
   const avbryt = () => {
     //TODO!
     if (match?.params.behandlingId) {
-      avbrytBehandling(match.params.behandlingId).then((response: IApiResponse<any>) => {
-        if (response.status !== 500) {
+      avbrytBehandling(match.params.behandlingId).then((response: ApiResponse<any>) => {
+        if (response.status === 'ok') {
           navigate('/')
         } else {
           setError(true)

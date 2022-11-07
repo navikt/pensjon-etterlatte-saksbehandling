@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
-import { Alert, Button, Loader } from '@navikt/ds-react'
+import { Alert, Button, Label, Loader } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
 import { oppdaterVirkningstidspunkt, VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
@@ -27,7 +27,9 @@ const Virkningstidspunkt = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const [rediger, setRediger] = useState(behandling.virkningstidspunkt === null)
-  const [formData, setFormData] = useState<Date | null>(null)
+  const [formData, setFormData] = useState<Date | null>(
+    behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
+  )
   const [virkningstidspunkt, fastsettVirkningstidspunktRequest] = useApiCall(fastsettVirkningstidspunkt)
 
   const datepickerRef: any = useRef(null)
@@ -82,6 +84,7 @@ const Virkningstidspunkt = () => {
               {rediger ? (
                 <>
                   {/* TODO ai: Erstatt med komponent fra design-biblioteket når det kommer ut */}
+                  <DatePickerLabel>Virkningstidspunkt</DatePickerLabel>
                   <Datovelger>
                     <div>
                       <DatePicker
@@ -137,7 +140,8 @@ const Virkningstidspunkt = () => {
                       <Undertekst gray>
                         Sist endret{' '}
                         {behandling.virkningstidspunkt?.kilde.tidspunkt
-                          ? formaterStringTidspunkt(behandling.virkningstidspunkt?.kilde.tidspunkt)
+                          ? `${formaterStringDato(behandling.virkningstidspunkt?.kilde.tidspunkt)}
+                          kl.${formaterStringTidspunkt(behandling.virkningstidspunkt?.kilde.tidspunkt)}`
                           : ''}
                       </Undertekst>
                       <RedigerWrapper onClick={() => setRediger(true)}>
@@ -156,6 +160,10 @@ const Virkningstidspunkt = () => {
     </>
   )
 }
+
+const DatePickerLabel = styled(Label)`
+  margin-top: 12px;
+`
 
 const ButtonContainer = styled.div`
   display: flex;

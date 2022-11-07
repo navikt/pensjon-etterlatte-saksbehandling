@@ -9,8 +9,11 @@ export const avbrytBehandling = async (id: string): Promise<ApiResponse<unknown>
   return apiClient.post(`/behandling/${id}/avbryt`, {})
 }
 
-export const fastsettVirkningstidspunkt = async (id: string, dato: Date): Promise<ApiResponse<Virkningstidspunkt>> => {
-  return apiClient.post(`/behandling/${id}/virkningstidspunkt`, { dato })
+export const fastsettVirkningstidspunkt = async (args: {
+  id: string
+  dato: Date
+}): Promise<ApiResponse<Virkningstidspunkt>> => {
+  return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, { dato: args.dato })
 }
 
 export const fattVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {

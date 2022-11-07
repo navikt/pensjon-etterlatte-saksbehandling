@@ -16,11 +16,19 @@ import {
   VurderingsTitle,
 } from '../../styled'
 import { RedigerWrapper } from '../kommerBarnetTilgode/KommerBarnetTilGodeVurdering'
-import { OversiktElement } from '../OversiktElement'
 import { formaterStringDato, formaterStringTidspunkt } from '../../../../../utils/formattering'
 import { useAppDispatch, useAppSelector } from '../../../../../store/Store'
 import { fastsettVirkningstidspunkt } from '../../../../../shared/api/behandling'
 import { useApiCall, isPending, isFailure } from '../../../../../shared/hooks/useApiCall'
+
+export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
+  return (
+    <InfoElement>
+      <Label size="small">{label}</Label>
+      <div>{tekst}</div>
+    </InfoElement>
+  )
+}
 
 const Virkningstidspunkt = () => {
   const dispatch = useAppDispatch()
@@ -49,23 +57,11 @@ const Virkningstidspunkt = () => {
             Barnepensjon innvilges som hovedregel fra og med måneden etter dødsfall, men kan gis for opptil tre år før
             den måneden da kravet ble satt fram
           </Infoboks>
-          <OversiktElement
-            tekst=""
-            label="Dødsdato"
-            navn={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : ''}
-            erOppfylt
-          />
-          <OversiktElement
-            navn=""
-            label="Søknad mottatt"
-            tekst={formaterStringDato(behandling.soeknadMottattDato)}
-            erOppfylt
-          />
-          <OversiktElement
-            navn=""
+          <Info label="Dødsdato" tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : ''} />
+          <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
+          <Info
             label="Virkningstidspunkt"
             tekst={behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt.dato) : 'Ikke satt'}
-            erOppfylt
           />
         </InfobokserWrapper>
 
@@ -79,12 +75,12 @@ const Virkningstidspunkt = () => {
             />
           </div>
           <div>
-            <VurderingsTitle>Fastsett virkningstidspunkt</VurderingsTitle>
+            <VurderingsTitle>Virkningstidspunkt</VurderingsTitle>
             <div>
               {rediger ? (
                 <>
                   {/* TODO ai: Erstatt med komponent fra design-biblioteket når det kommer ut */}
-                  <DatePickerLabel>Virkningstidspunkt</DatePickerLabel>
+                  <DatePickerLabel>Dato</DatePickerLabel>
                   <Datovelger>
                     <div>
                       <DatePicker
@@ -169,6 +165,10 @@ const ButtonContainer = styled.div`
   display: flex;
   gap: 8px;
   margin-top: 16px;
+`
+
+const InfoElement = styled.div`
+  margin: 0 8px;
 `
 
 const Datovelger = styled.div`

@@ -8,7 +8,6 @@ import { Container } from '../../shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
 import { Dokumenter, IPersonResult } from './typer'
-import { IApiResponse } from '../../shared/api/types'
 import Spinner from '../../shared/Spinner'
 
 const testDokumenter: Dokumenter = {
@@ -36,19 +35,20 @@ export const Person = () => {
   const match = useParams<{ fnr: string }>()
 
   useEffect(() => {
+    const getPersonAsync = async (fnr: string) => {
+      const response = await getPerson(fnr)
+
+      if (response.status === 'ok') {
+        setPersonData(response?.data)
+      } else {
+        setError(response?.error)
+      }
+
+      setLastet(true)
+    }
+
     if (match.fnr) {
-      getPerson(match.fnr)
-        .then((result: IApiResponse<IPersonResult>) => {
-          if (result.status === 200) {
-            setPersonData(result?.data)
-          } else {
-            setError(result?.data)
-          }
-          setLastet(true)
-        })
-        .catch((e) => {
-          console.log('error', e)
-        })
+      getPersonAsync(match.fnr)
     }
   }, [])
 

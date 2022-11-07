@@ -17,7 +17,7 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandlingId, kommentar, val
     if (!behandlingId) throw new Error('Mangler behandlingsid')
 
     underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse).then((response) => {
-      if (response.status === 200) {
+      if (response.status === 'ok') {
         hentBehandling(behandlingId).then((response) => {
           if (response.statusCode === 200) {
             window.location.reload()

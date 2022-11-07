@@ -1,7 +1,7 @@
 const path = process.env.REACT_APP_VEDTAK_URL
 
 type Success<T> = { status: 'ok'; data: T; statusCode: number }
-type Error = { status: 'error'; statusCode: number; error?: unknown }
+type Error = { status: 'error'; statusCode: number; error?: any }
 
 export type ApiResponse<T> = Success<T> | Error
 

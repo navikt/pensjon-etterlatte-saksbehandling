@@ -21,7 +21,7 @@ export const SendTilAttesteringModal: React.FC = () => {
     if (!match?.params.behandlingId) throw new Error('Mangler behandlingsid')
 
     fattVedtak(match.params.behandlingId).then((response) => {
-      if (response.status === 200) {
+      if (response.status === 'ok') {
         setBeregneModalisOpen(false)
         goToOppgavebenken()
       }

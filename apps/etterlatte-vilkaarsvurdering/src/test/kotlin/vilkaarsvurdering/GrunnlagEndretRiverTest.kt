@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
+import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.io.FileNotFoundException
-import java.time.LocalDate
 import java.util.*
 
 internal class GrunnlagEndretRiverTest {
@@ -70,8 +70,8 @@ internal class GrunnlagEndretRiverTest {
         VilkaarsvurderingIntern(
             behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
             payload = grunnlagEndretMelding.toJsonNode(),
-            vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(grunnlag),
-            virkningstidspunkt = LocalDate.of(2022, 1, 1)
+            vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(grunnlag, VilkaarsvurderingTestData.virkningstidspunkt),
+            virkningstidspunkt = VilkaarsvurderingTestData.virkningstidspunkt
         )
 
     companion object {

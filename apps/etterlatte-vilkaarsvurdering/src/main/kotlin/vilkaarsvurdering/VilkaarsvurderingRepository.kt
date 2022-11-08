@@ -36,7 +36,9 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                                 resultat = row.stringOrNull("resultat").let { resultat ->
                                     resultat?.let { objectMapper.readValue(it) }
                                 },
-                                virkningstidspunkt = row.localDate("virkningstidspunkt")
+                                virkningstidspunkt = row.string("virkningstidspunkt").let {
+                                    objectMapper.readValue(it)
+                                }
                             )
                         }.asSingle
                     )
@@ -53,7 +55,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                         "payload" to vilkaarsvurdering.payload.toJson(),
                         "vilkaar" to vilkaarsvurdering.vilkaar.toJson(),
                         "resultat" to vilkaarsvurdering.resultat?.toJson(),
-                        "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt
+                        "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt.toJson()
                     )
                 ).let { tx.run(it.asUpdate) }
             }
@@ -67,6 +69,6 @@ private object Queries {
         "FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID"
     const val lagreVilkaarsvurdering =
         "INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat, virkningstidspunkt) " +
-            "VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::DATE) " + // ktlint-disable max-line-length
+            "VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::JSONB) " + // ktlint-disable max-line-length
             "ON CONFLICT (behandlingId) DO UPDATE SET payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat, virkningstidspunkt = EXCLUDED.virkningstidspunkt" // ktlint-disable max-line-length
 }

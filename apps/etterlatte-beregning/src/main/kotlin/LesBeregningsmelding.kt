@@ -1,4 +1,5 @@
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -37,9 +38,12 @@ internal class LesBeregningsmelding(
             try {
                 // TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
                 val tom = YearMonth.now().plusMonths(3)
+                val virkningstidspunkt: Virkningstidspunkt = objectMapper.readValue(
+                    packet["virkningstidspunkt"].toString()
+                )
                 val beregningsResultat = beregning.beregnResultat(
                     grunnlag = objectMapper.readValue(grunnlag),
-                    virkFOM = YearMonth.parse(packet["virkningstidspunkt"].asText()),
+                    virkFOM = virkningstidspunkt.dato,
                     virkTOM = tom,
                     vilkaarsvurdering = objectMapper.readValue(packet["vilkaarsvurdering"].toString()),
                     behandlingType = objectMapper.readValue(packet["behandling.type"].toString())

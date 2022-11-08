@@ -162,7 +162,7 @@ class VedtaksvurderingService(
                 vedtakId = vedtak.id,
                 virk = Periode(
                     vedtak.virkningsDato?.let(YearMonth::from)
-                        ?: vedtak.vilkaarsResultat?.virkningstidspunkt?.let(YearMonth::from)
+                        ?: vedtak.vilkaarsResultat?.virkningstidspunkt?.dato
                         ?: YearMonth.now(),
                     null
                 ), // må få inn dette på toppnivå?

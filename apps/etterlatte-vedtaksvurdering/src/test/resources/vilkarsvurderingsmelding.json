@@ -460,11 +460,25 @@
     ],
     "versjon": 48
   },
-  "virkningstidspunkt": "2022-03",
+  "virkningstidspunkt": {
+    "dato": "2022-01",
+    "kilde": {
+      "type": "saksbehandler",
+      "ident": "Z994641",
+      "tidspunkt": "2022-09-01T08:14:45.259402121Z"
+    }
+  },
   "vilkaarsvurdering": {
     "behandlingId": "dbe1fb59-4740-4fd6-ac5d-0754792c2e8c",
     "vilkaar": [],
-    "virkningstidspunkt": "2022-10-24",
+    "virkningstidspunkt": {
+      "dato": "2022-01",
+      "kilde": {
+        "type": "saksbehandler",
+        "ident": "Z994641",
+        "tidspunkt": "2022-09-01T08:14:45.259402121Z"
+      }
+    },
     "resultat": {
       "utfall": "OPPFYLT",
       "kommentar": null,

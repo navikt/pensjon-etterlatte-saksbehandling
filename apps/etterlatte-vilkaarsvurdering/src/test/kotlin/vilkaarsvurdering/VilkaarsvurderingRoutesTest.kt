@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDate
+import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -300,7 +300,7 @@ internal class VilkaarsvurderingRoutesTest {
             behandlingId,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            LocalDate.of(2022, 1, 1),
+            VilkaarsvurderingTestData.virkningstidspunkt,
             objectMapper.readTree("""{"virkningstidspunkt": "21-01-01"}"""),
             grunnlag,
             null

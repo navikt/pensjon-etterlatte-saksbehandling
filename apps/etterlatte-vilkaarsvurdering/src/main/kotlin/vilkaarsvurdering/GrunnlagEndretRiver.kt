@@ -5,9 +5,11 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -20,6 +22,8 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
+import java.time.Instant
+import java.time.YearMonth
 
 class GrunnlagEndretRiver(
     rapidsConnection: RapidsConnection,
@@ -58,6 +62,13 @@ class GrunnlagEndretRiver(
                 val behandlingType = BehandlingType.valueOf(packet["behandling.type"].asText())
                 val sakType = SakType.valueOf(packet["sak.sakType"].asText())
                 val virkningstidspunkt = packet["virkningstidspunkt"].asYearMonth().atDay(1)
+                    // TODO fjern dette når det blir hentet direkte fra behandling
+                    .let {
+                        Virkningstidspunkt(
+                            dato = YearMonth.of(it.year, it.month),
+                            kilde = Grunnlagsopplysning.Saksbehandler("todo", Instant.now())
+                        )
+                    }
                 val grunnlag =
                     requireNotNull(
                         objectMapper.treeToValue<Grunnlag>(

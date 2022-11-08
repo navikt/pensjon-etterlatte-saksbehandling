@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from './apiClient'
-import { KildeType } from '../../store/reducers/BehandlingReducer'
+import { KildeType, Virkningstidspunkt } from '../../store/reducers/BehandlingReducer'
 
 export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
   apiClient.get<Vilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}`)
@@ -32,7 +32,7 @@ export const lagreTotalVurdering = async (
 export interface Vilkaarsvurdering {
   vilkaar: Vilkaar[]
   resultat?: VilkaarsvurderingVurdertResultat
-  virkningstidspunkt: string
+  virkningstidspunkt: Virkningstidspunkt
 }
 
 export interface Vilkaar {
@@ -51,6 +51,7 @@ export interface Vilkaarsgrunnlag<T> {
 
 export interface Kilde {
   navn: string
+  tidspunkt: string
   tidspunktForInnhenting: string
   registersReferanse: string
   opplysningId: string

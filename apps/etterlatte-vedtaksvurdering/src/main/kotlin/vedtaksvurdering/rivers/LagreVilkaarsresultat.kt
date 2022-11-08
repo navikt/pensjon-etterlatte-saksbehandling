@@ -15,6 +15,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal class LagreVilkaarsresultat(
     rapidsConnection: RapidsConnection,
@@ -52,7 +53,7 @@ internal class LagreVilkaarsresultat(
                     behandling,
                     packet["fnrSoeker"].textValue(),
                     vilkaarsvurdering,
-                    vilkaarsvurdering.virkningstidspunkt // todo: kan vi komme i usync?
+                    LocalDate.now() // todo: kan vi komme i usync?
                 )
                 requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandling.id)).also {
                     context.publish(

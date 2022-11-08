@@ -70,7 +70,7 @@ export const Inngangsvilkaar = () => {
           ))}
 
           <Resultat
-            dato={format(Date.parse(vilkaarsvurdering.virkningstidspunkt), 'dd.MM.yyyy')}
+            dato={format(Date.parse(vilkaarsvurdering.virkningstidspunkt.dato), 'dd.MM.yyyy')}
             vilkaarsvurdering={vilkaarsvurdering}
             oppdaterVilkaar={oppdaterVilkaarsvurdering}
             behandlingId={behandlingId}

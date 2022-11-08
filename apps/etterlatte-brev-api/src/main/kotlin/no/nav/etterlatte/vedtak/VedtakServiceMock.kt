@@ -12,14 +12,16 @@ import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakFattet
 import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.math.BigDecimal
-import java.time.LocalDate
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.*
@@ -41,7 +43,10 @@ class VedtakServiceMock : VedtakService {
         vilkaarsvurdering = Vilkaarsvurdering(
             UUID.randomUUID(),
             emptyList(),
-            LocalDate.now(),
+            Virkningstidspunkt(
+                YearMonth.of(2022, Month.JANUARY),
+                Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
+            ),
             VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, LocalDateTime.now(), "ABCDEF")
         ),
         beregning = null,

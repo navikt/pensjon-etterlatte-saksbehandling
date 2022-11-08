@@ -1,4 +1,4 @@
-package vilkaarsvurdering
+package no.nav.etterlatte.vilkaarsvurdering
 
 import GrunnlagTestData
 import io.kotest.matchers.collections.shouldHaveSize
@@ -24,9 +24,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingIntern
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -34,7 +31,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDate
+import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.LocalDateTime
 import java.util.*
 
@@ -72,7 +69,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            LocalDate.of(2022, 1, 1),
+            VilkaarsvurderingTestData.virkningstidspunkt,
             objectMapper.createObjectNode(),
             grunnlag,
             null
@@ -83,7 +80,7 @@ internal class VilkaarsvurderingServiceTest {
         vilkaarsvurdering.vilkaar shouldHaveSize 5
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.ALDER_BARN }.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
-            vilkaar.grunnlag!! shouldHaveSize 2
+            vilkaar.grunnlag!! shouldHaveSize 3
 
             requireNotNull(vilkaar.grunnlag?.get(0)).let {
                 it.opplysningsType shouldBe VilkaarOpplysningsType.FOEDSELSDATO
@@ -196,7 +193,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.REVURDERING,
-            LocalDate.now(),
+            VilkaarsvurderingTestData.virkningstidspunkt,
             objectMapper.createObjectNode(),
             grunnlag,
             RevurderingAarsak.SOEKER_DOD
@@ -218,7 +215,7 @@ internal class VilkaarsvurderingServiceTest {
             vilkaarsvurdering.behandlingId,
             objectMapper.readTree("""{"skalBliMed": "21-01-01"}"""),
             emptyList(),
-            LocalDate.now(),
+            VilkaarsvurderingTestData.virkningstidspunkt,
             vilkaarsvurdering.resultat
         )
         val payloadContent = slot<String>()
@@ -237,7 +234,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            LocalDate.now(),
+            VilkaarsvurderingTestData.virkningstidspunkt,
             objectMapper.createObjectNode(),
             GrunnlagTestData().hentOpplysningsgrunnlag(),
             null

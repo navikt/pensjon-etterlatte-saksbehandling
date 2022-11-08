@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -22,25 +23,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                 statement = Queries.hentVilkaarsvurdering,
                 paramMap = mapOf("behandlingId" to behandlingId)
             )
-                .let { query ->
-                    session.run(
-                        query.map { row ->
-                            VilkaarsvurderingIntern(
-                                behandlingId = row.uuid("behandlingId"),
-                                payload = row.string("payload").let { payload ->
-                                    objectMapper.readValue(payload)
-                                },
-                                vilkaar = row.string("vilkaar").let { vilkaar ->
-                                    objectMapper.readValue(vilkaar)
-                                },
-                                resultat = row.stringOrNull("resultat").let { resultat ->
-                                    resultat?.let { objectMapper.readValue(it) }
-                                },
-                                virkningstidspunkt = row.localDate("virkningstidspunkt")
-                            )
-                        }.asSingle
-                    )
-                }
+                .let { query -> session.run(query.map(::toVilkaarsvurderingIntern).asSingle) }
         }
 
     override fun lagre(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern {
@@ -55,18 +38,40 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                         "resultat" to vilkaarsvurdering.resultat?.toJson(),
                         "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt
                     )
-                ).let { tx.run(it.asUpdate) }
+                ).let { query -> tx.run(query.asUpdate) }
             }
         }
-        return vilkaarsvurdering
+        return checkNotNull(hent(vilkaarsvurdering.behandlingId)) {
+            "Fant ikke vilkårsvurdering for behandlingId=${vilkaarsvurdering.behandlingId}"
+        }
+    }
+
+    private fun toVilkaarsvurderingIntern(row: Row) = with(row) {
+        VilkaarsvurderingIntern(
+            behandlingId = uuid("behandlingId"),
+            payload = string("payload").let { payload -> objectMapper.readValue(payload) },
+            vilkaar = string("vilkaar").let { vilkaar -> objectMapper.readValue(vilkaar) },
+            resultat = stringOrNull("resultat").let {
+                    resultat ->
+                resultat?.let { objectMapper.readValue(it) }
+            },
+            virkningstidspunkt = localDate("virkningstidspunkt")
+        )
     }
 }
 
 private object Queries {
-    const val hentVilkaarsvurdering = "SELECT behandlingId, payload, vilkaar, resultat, virkningstidspunkt " +
-        "FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID"
-    const val lagreVilkaarsvurdering =
-        "INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat, virkningstidspunkt) " +
-            "VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::DATE) " + // ktlint-disable max-line-length
-            "ON CONFLICT (behandlingId) DO UPDATE SET payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat, virkningstidspunkt = EXCLUDED.virkningstidspunkt" // ktlint-disable max-line-length
+    val hentVilkaarsvurdering = """
+        |SELECT behandlingId, payload, vilkaar, resultat, virkningstidspunkt 
+        |FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID
+    """.trimMargin()
+
+    val lagreVilkaarsvurdering = """
+        |INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat, virkningstidspunkt) 
+        |VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::DATE) 
+        |ON CONFLICT (behandlingId)  
+        |DO UPDATE SET 
+        |   payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat,  
+        |   virkningstidspunkt = EXCLUDED.virkningstidspunkt
+    """.trimMargin()
 }

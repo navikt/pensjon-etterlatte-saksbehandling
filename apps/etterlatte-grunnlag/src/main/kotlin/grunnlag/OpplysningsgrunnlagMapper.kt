@@ -44,7 +44,7 @@ class OpplysningsgrunnlagMapper(
             grunnlagsopplysning.periode != null
     }
 
-    fun hentOpplysningsgrunnlag(): Grunnlag {
+    fun hentGrunnlag(): Grunnlag {
         val grupper = grunnlaghendelser.groupByFnrAndOpplysningstype()
         val senestVersjon = grupper.hentSenesteHendelserPerGruppe().maxOfOrNull { it.hendelseNummer } ?: 0
         val opplysninger = grupper.map { GruppertHendelser(it) }

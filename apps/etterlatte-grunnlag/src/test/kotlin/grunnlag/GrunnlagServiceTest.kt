@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.B
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDELAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -73,7 +74,7 @@ internal class GrunnlagServiceTest {
         )
 
         @Test
-        fun `hentOpplysningsgrunnlag skal mappe om dataen fra DB til søker`() {
+        fun `skal mappe om dataen fra DB til søker`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.foedselsnummer, PersonRolle.BARN)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
@@ -89,7 +90,7 @@ internal class GrunnlagServiceTest {
         }
 
         @Test
-        fun `hentOpplysningsgrunnlag skal mappe om dataen fra DB til avdød`() {
+        fun `skal mappe om dataen fra DB til avdød`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.avdoed.foedselsnummer, PersonRolle.AVDOED)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
@@ -106,7 +107,7 @@ internal class GrunnlagServiceTest {
         }
 
         @Test
-        fun `hentOpplysningsgrunnlag skal mappe om dataen fra DB til gjenlevende`() {
+        fun `skal mappe om dataen fra DB til gjenlevende`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.gjenlevende.foedselsnummer, PersonRolle.GJENLEVENDE)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
@@ -123,7 +124,7 @@ internal class GrunnlagServiceTest {
         }
 
         @Test
-        fun `hentOpplysningsgrunnlag skal mappe om dataen fra DB til søsken`() {
+        fun `skal mappe om dataen fra DB til søsken`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.soesken.foedselsnummer, PersonRolle.BARN)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
@@ -263,5 +264,53 @@ internal class GrunnlagServiceTest {
         )
 
         Assertions.assertEquals(expected, actual.soeker.hentBostedsadresse())
+    }
+
+    @Test
+    fun `kan hente og mappe opplysningsgrunnlag`() {
+        every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns lagGrunnlagHendelse(
+            1,
+            1,
+            PERSONGALLERI_V1,
+            id = statiskUuid,
+            fnr = testData.soeker.foedselsnummer,
+            verdi = testData.hentPersonGalleri().toJsonNode(),
+            kilde = kilde
+        )
+
+        every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns listOf(
+            lagGrunnlagHendelse(
+                1,
+                2,
+                NAVN,
+                id = statiskUuid,
+                fnr = testData.soeker.foedselsnummer,
+                verdi = Navn("Per", "Persson").toJsonNode(),
+                kilde = kilde
+            ),
+            lagGrunnlagHendelse(
+                1,
+                2,
+                PERSONROLLE,
+                id = statiskUuid,
+                fnr = testData.soeker.foedselsnummer,
+                verdi = PersonRolle.BARN.toJsonNode(),
+                kilde = kilde
+            ),
+            lagGrunnlagHendelse(
+                1,
+                3,
+                PERSONGALLERI_V1,
+                id = statiskUuid,
+                verdi = testData.hentPersonGalleri().toJsonNode(),
+                kilde = kilde
+            )
+        )
+
+        val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1)!!
+
+        Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
+        Assertions.assertEquals(2, opplysningsgrunnlag.soeker.size)
+        Assertions.assertEquals(0, opplysningsgrunnlag.familie.size)
     }
 }

@@ -4,17 +4,17 @@ import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
 import { ForelderWrap } from '../../styled'
 import { PersonStatus, RelatertPersonsRolle } from '../../../types'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
-import { IPersoninfoGjenlevendeForelder } from '../../../../../store/reducers/BehandlingReducer'
+import { IPdlPerson } from '../../../../../store/reducers/BehandlingReducer'
 import { hentAdresserEtterDoedsdato } from '../../../felles/utils'
 
 type Props = {
-  person: IPersoninfoGjenlevendeForelder
+  person: IPdlPerson
   innsenderErGjenlevendeForelder: boolean
   doedsdato: string
 }
 
 export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenlevendeForelder, doedsdato }) => {
-  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedadresser, doedsdato)
+  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedsadresse ?? [], doedsdato)
 
   return (
     <PersonBorder>
@@ -22,7 +22,7 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
         <span className="icon">
           <PeopleIcon />
         </span>
-        {person.navn}
+        {`${person.fornavn} ${person.etternavn}`}
         <span className="personRolle">
           ({innsenderErGjenlevendeForelder && PersonStatus.GJENLEVENDE_FORELDER + ' ' + RelatertPersonsRolle.FORELDER})
         </span>
@@ -30,7 +30,7 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
         <ForelderWrap>Innsender av søknad</ForelderWrap>
       </PersonHeader>
       <PersonInfoWrapper>
-        <PersonInfoFnr fnr={person.fnr} />
+        <PersonInfoFnr fnr={person.foedselsnummer} />
         <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} />
       </PersonInfoWrapper>
     </PersonBorder>

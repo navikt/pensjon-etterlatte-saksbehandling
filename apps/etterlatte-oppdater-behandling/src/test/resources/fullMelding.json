@@ -241,21 +241,6 @@
         "attestering": null
       },
       {
-        "id": "c7cb9e52-3765-4cd2-9ac1-dedd1515320b",
-        "kilde": {
-          "ident": "Z994398",
-          "tidspunkt": "2022-07-21T08:36:44.908159144Z",
-          "type": "saksbehandler"
-        },
-        "opplysningType": "KOMMER_BARNET_TILGODE",
-        "meta": {},
-        "opplysning": {
-          "svar": "JA",
-          "kommentar": "Siste test med ny melding"
-        },
-        "attestering": null
-      },
-      {
         "id": "cf21dc75-e2aa-4920-a45d-4fb49764c6aa",
         "kilde": {
           "navn": "pdl",
@@ -683,21 +668,6 @@
         "opplysning": {
           "mottattUforetrygd": [],
           "mottattAlderspensjon": []
-        },
-        "attestering": null
-      },
-      {
-        "id": "c7cb9e52-3765-4cd2-9ac1-dedd1515320b",
-        "kilde": {
-          "ident": "Z994398",
-          "tidspunkt": "2022-07-21T08:36:44.908159144Z",
-          "type": "saksbehandler"
-        },
-        "opplysningType": "KOMMER_BARNET_TILGODE",
-        "meta": {},
-        "opplysning": {
-          "svar": "JA",
-          "kommentar": "Siste test med ny melding"
         },
         "attestering": null
       },

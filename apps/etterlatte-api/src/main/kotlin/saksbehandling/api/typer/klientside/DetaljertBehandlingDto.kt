@@ -3,6 +3,7 @@ package no.nav.etterlatte.saksbehandling.api.typer.klientside
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -34,7 +35,8 @@ data class DetaljertBehandlingDto(
     val hendelser: List<LagretHendelse>?,
     val familieforhold: Familieforhold?,
     val behandlingType: BehandlingType?,
-    val søker: Person?
+    val søker: Person?,
+    val kommerBarnetTilgode: KommerBarnetTilgode?
 )
 
 data class Familieforhold(

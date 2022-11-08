@@ -97,7 +97,9 @@ class BehandlingService(
             id = behandling.await().id,
             sak = sakId,
             gyldighetsprøving = behandling.await().gyldighetsproeving,
+            kommerBarnetTilgode = behandling.await().kommerBarnetTilgode,
             kommerSoekerTilgode = vedtak.await().kommerSoekerTilgodeResultat,
+            // TODO: vedtak.kommerSoekerTilgodeResultat skal slettes når den gamle vilkårsvurderingen slettes
             vilkårsprøving = vedtak.await().vilkaarsResultat,
             beregning = vedtak.await().beregningsResultat,
             avkortning = vedtak.await().avkortingsResultat,

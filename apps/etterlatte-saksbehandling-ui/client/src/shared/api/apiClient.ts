@@ -44,6 +44,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
 
 export const apiClient = {
   get: <T>(url: string) => apiFetcher<T>({ url, method: 'GET' }),
-  post: <T>(url: string, body: Record<string, unknown>) => apiFetcher<T>({ url: url, body: body, method: 'POST' }),
+  post: <T>(url: string, body: Record<string, unknown>, noData = false) =>
+    apiFetcher<T>({ url: url, body: body, method: 'POST', noData: noData }),
   delete: <T>(url: string, noData?: boolean) => apiFetcher<T>({ url, method: 'DELETE', noData }),
 } as const

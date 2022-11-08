@@ -1,4 +1,4 @@
-import { IPersoninfoAvdoed } from '../../../../../store/reducers/BehandlingReducer'
+import { IPdlPerson } from '../../../../../store/reducers/BehandlingReducer'
 import { PersonStatus, RelatertPersonsRolle } from '../../../types'
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
@@ -8,7 +8,7 @@ import { format } from 'date-fns'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 
 type Props = {
-  person: IPersoninfoAvdoed
+  person: IPdlPerson
 }
 
 export const AvdoedForelder: React.FC<Props> = ({ person }) => {
@@ -18,7 +18,7 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
         <span className="icon">
           <PeopleIcon />
         </span>
-        {person.navn}
+        {`${person.fornavn} ${person.etternavn}`}
         <span className="personRolle">
           ({PersonStatus.AVDOED} {RelatertPersonsRolle.FORELDER})
         </span>
@@ -26,8 +26,8 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
         <ForelderWrap avdoed={true}>Død {format(new Date(person.doedsdato), 'dd.MM.yyyy')}</ForelderWrap>
       </PersonHeader>
       <PersonInfoWrapper>
-        <PersonInfoFnr fnr={person.fnr} />
-        <PersonInfoAdresse adresser={person.bostedadresser} visHistorikk={false} />
+        <PersonInfoFnr fnr={person.foedselsnummer} />
+        <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} />
       </PersonInfoWrapper>
     </PersonBorder>
   )

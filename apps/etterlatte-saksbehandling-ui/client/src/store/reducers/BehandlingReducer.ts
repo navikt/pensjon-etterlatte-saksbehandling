@@ -5,7 +5,7 @@ export interface IDetaljertBehandling {
   id: string
   sak: number
   gyldighetsprøving?: IGyldighetResultat
-  kommerSoekerTilgode?: IKommerSoekerTilgode
+  kommerBarnetTilgode: IKommerBarnetTilgode | null
   vilkårsprøving?: Vilkaarsvurdering
   beregning?: IBeregning
   avkortning?: any //todo legg med type når denne er klar
@@ -82,39 +82,24 @@ export interface IBeregningsperiode {
   utbetaltBeloep: number
 }
 
-export interface IKommerSoekerTilgode {
-  kommerSoekerTilgodeVurdering: IVilkaarResultat
-  familieforhold: IFamiliemedlemmer
+export interface IKommerBarnetTilgode {
+  svar: JaNei
+  begrunnelse: string
+  kilde: {
+    ident: string
+    tidspunkt: string
+  }
 }
 
-export interface IFamiliemedlemmer {
-  avdoed: IPersoninfoAvdoed
-  soeker: IPersoninfoSoeker
-  gjenlevendeForelder: IPersoninfoGjenlevendeForelder
+export enum JaNei {
+  JA = 'JA',
+  NEI = 'NEI',
 }
 
-export interface IPersoninfoAvdoed {
-  navn: string
-  fnr: string
-  rolle: PersonRolle
-  bostedadresser: IAdresse[]
-  doedsdato: string
-}
-
-export interface IPersoninfoSoeker {
-  navn: string
-  fnr: string
-  rolle: PersonRolle
-  bostedadresser: IAdresse[]
-  soeknadAdresse: IUtlandsadresseSoeknad
-  foedselsdato: string
-}
-
-export interface IAdresser {
-  bostedadresse: IAdresse[]
-  oppholdadresse: IAdresse[]
-  kontaktadresse: IAdresse[]
-}
+export const JaNeiRec: Record<JaNei, string> = {
+  [JaNei.JA]: 'Ja',
+  [JaNei.NEI]: 'Nei',
+} as const
 
 export interface IAdresse {
   adresseLinje1: string
@@ -361,7 +346,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   attestant: '',
   vilkårsprøving: undefined,
   gyldighetsprøving: undefined,
-  kommerSoekerTilgode: undefined,
+  kommerBarnetTilgode: null,
   beregning: undefined,
   fastsatt: false,
   soeknadMottattDato: '',

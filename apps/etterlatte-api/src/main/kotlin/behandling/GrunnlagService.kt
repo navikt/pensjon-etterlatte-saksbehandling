@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
 import java.time.Instant
 import java.time.YearMonth
 import java.util.*
@@ -93,33 +92,6 @@ class GrunnlagService(
         )
 
         return GrunnlagResult("Slettet")
-    }
-
-    suspend fun lagreResultatKommerBarnetTilgode(
-        behandlingId: String,
-        svar: String,
-        begrunnelse: String,
-        saksbehandlerId: String,
-        token: String
-    ): GrunnlagResult {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
-
-        val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
-            lagOpplysning(
-                Opplysningstype.KOMMER_BARNET_TILGODE,
-                Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
-                ResultatKommerBarnetTilgode(svar, begrunnelse)
-            )
-        )
-
-        rapid.publiser(
-            behandlingId,
-            JsonMessage.newMessage(
-                eventName = "OPPLYSNING:NY",
-                map = mapOf("opplysning" to opplysning, "sakId" to behandling.sak)
-            ).toJson()
-        )
-        return GrunnlagResult("Lagret")
     }
 
     suspend fun lagreSoeskenMedIBeregning(

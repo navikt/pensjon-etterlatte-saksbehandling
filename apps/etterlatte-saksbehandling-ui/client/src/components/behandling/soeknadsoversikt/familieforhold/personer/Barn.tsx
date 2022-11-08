@@ -2,18 +2,20 @@ import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { ChildIcon } from '../../../../../shared/icons/childIcon'
 import { PersonDetailWrapper, TypeStatusWrap } from '../../styled'
-import { IPersoninfoSoeker } from '../../../../../store/reducers/BehandlingReducer'
+import { IPdlPerson } from '../../../../../store/reducers/BehandlingReducer'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { hentAdresserEtterDoedsdato } from '../../../felles/utils'
 import differenceInYears from 'date-fns/differenceInYears'
 
 type Props = {
-  person: IPersoninfoSoeker
+  person: IPdlPerson
   doedsdato: string
 }
 
 export const Barn: React.FC<Props> = ({ person, doedsdato }) => {
-  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedadresser, doedsdato)
+  const bostedsadresse = person.bostedsadresse ?? []
+  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(bostedsadresse, doedsdato)
+  const aktivAdresse = bostedsadresse.find((adresse) => adresse.aktiv)
 
   return (
     <PersonBorder>
@@ -21,21 +23,21 @@ export const Barn: React.FC<Props> = ({ person, doedsdato }) => {
         <span className="icon">
           <ChildIcon />
         </span>
-        {person.navn}{' '}
+        {`${person.fornavn} ${person.etternavn}`}{' '}
         <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
         <br />
         <TypeStatusWrap type="barn">Mottaker av pensjon</TypeStatusWrap>
       </PersonHeader>
       <PersonInfoWrapper>
-        <PersonInfoFnr fnr={person.fnr} />
+        <PersonInfoFnr fnr={person.foedselsnummer} />
         <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} />
-        {person.soeknadAdresse && person.soeknadAdresse.adresseIUtlandet === 'JA' && (
+        {aktivAdresse && (
           <PersonDetailWrapper adresse={true}>
             <div>
-              <strong>Utlandsadresse fra søknad</strong>
+              <strong>Aktiv adresse</strong>
             </div>
-            <div>{person.soeknadAdresse.adresse}</div>
-            <div>{person.soeknadAdresse.land}</div>
+            <div>{aktivAdresse.adresseLinje1}</div>
+            <div>{aktivAdresse.land}</div>
           </PersonDetailWrapper>
         )}
       </PersonInfoWrapper>

@@ -27,13 +27,13 @@ const Beregningsgrunnlag = () => {
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const [isLoading, setIsLoading] = useState(false)
 
-  if (behandling.kommerSoekerTilgode == null || behandling.familieforhold?.avdoede == null) {
+  if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <div style={{ color: 'red' }}>Familieforhold kan ikke hentes ut</div>
   }
 
-  const soeker = behandling.kommerSoekerTilgode.familieforhold.soeker
+  const soeker = behandling.søker
   const soesken = behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
-    (barn) => barn.foedselsnummer !== soeker.fnr
+    (barn) => barn.foedselsnummer !== soeker?.foedselsnummer
   )
   const beregningsperiode = behandling.beregning?.beregningsperioder ?? []
 
@@ -47,7 +47,7 @@ const Beregningsgrunnlag = () => {
     },
   })
 
-  const doedsdato = behandling.kommerSoekerTilgode.familieforhold.avdoed.doedsdato
+  const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
 
   return (
     <Content>
@@ -83,7 +83,7 @@ const Beregningsgrunnlag = () => {
           })
         })}
       >
-        <Barn person={behandling.kommerSoekerTilgode.familieforhold.soeker} doedsdato={doedsdato} />
+        {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
         <Border />
         {soesken?.map((barn, index) => (
           <SoeskenContainer key={barn.foedselsnummer}>

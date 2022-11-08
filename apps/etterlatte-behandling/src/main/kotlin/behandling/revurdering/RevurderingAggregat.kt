@@ -41,7 +41,8 @@ class RevurderingAggregat(
                 type = BehandlingType.REVURDERING,
                 persongalleri = persongalleri,
                 oppgaveStatus = OppgaveStatus.NY,
-                revurderingsaarsak = revurderingAarsak
+                revurderingsaarsak = revurderingAarsak,
+                kommerBarnetTilgode = null
             )
                 .also {
                     behandlinger.opprettRevurdering(it)

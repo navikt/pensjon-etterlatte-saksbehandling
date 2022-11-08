@@ -39,6 +39,11 @@ if (isDev) {
     '/api/vilkaarsvurdering',
     expressProxy(`${process.env.VILKAARSVURDERING_API_URL}`, 'api://f4cf400f-8ef9-406f-baf1-8218f8f7edac/.default')
   )
+  app.use(
+    '/api/behandling/:behandlingsid/kommerbarnettilgode',
+    expressProxy(`${process.env.BEHANDLING_API_URL}`, 'api://59967ac8-009c-492e-a618-e5a0f6b3e4e4/.default')
+  )
+
   app.use('/api', expressProxy(`${process.env.API_URL}`, 'api://783cea60-43b5-459c-bdd3-de3325bd716a/.default'))
   app.use('/brev', expressProxy(`${process.env.BREV_API_URL}`, 'api://d6add52a-5807-49cd-a181-76908efee836/.default'))
 }

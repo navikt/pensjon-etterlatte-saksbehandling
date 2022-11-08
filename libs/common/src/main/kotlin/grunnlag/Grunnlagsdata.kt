@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.F
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNTEKT
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KOMMER_BARNET_TILGODE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KONTAKTADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.MEDLEMSKAPSPERIODE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
@@ -45,7 +44,6 @@ import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory.getLogger
 import java.time.LocalDate
@@ -72,8 +70,6 @@ fun Grunnlagsdata<JsonNode>.hentFamilierelasjon() = this.hentKonstantOpplysning<
 fun Grunnlagsdata<JsonNode>.hentAvdoedesbarn() = this.hentKonstantOpplysning<AvdoedesBarn>(AVDOEDESBARN)
 fun Grunnlagsdata<JsonNode>.hentVergemaalellerfremtidsfullmakt() =
     this.hentKonstantOpplysning<VergemaalEllerFremtidsfullmakt>(VERGEMAALELLERFREMTIDSFULLMAKT)
-fun Grunnlagsdata<JsonNode>.hentKommerBarnetTilgode() =
-    this.hentKonstantOpplysning<ResultatKommerBarnetTilgode>(KOMMER_BARNET_TILGODE)
 
 fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<PersonRolle>(PERSONROLLE)
 fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() =

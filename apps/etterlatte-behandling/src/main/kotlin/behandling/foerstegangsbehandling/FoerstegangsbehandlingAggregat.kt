@@ -46,7 +46,8 @@ class FoerstegangsbehandlingAggregat(
                 persongalleri = persongalleri,
                 gyldighetsproeving = null,
                 oppgaveStatus = OppgaveStatus.NY,
-                virkningstidspunkt = null
+                virkningstidspunkt = null,
+                kommerBarnetTilgode = null
             )
                 .also {
                     behandlinger.opprettFoerstegangsbehandling(it)

@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -30,6 +31,7 @@ interface FoerstegangsbehandlingService {
 
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun fastsettVirkningstidspunkt(behandlingId: UUID, dato: LocalDate, ident: String): Virkningstidspunkt
+    fun settKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
 }
 
 class RealFoerstegangsbehandlingService(
@@ -109,6 +111,15 @@ class RealFoerstegangsbehandlingService(
             ) // TODO ai: Hvordan håndtere error cases?
             is Revurdering -> throw RuntimeException(
                 "Kan ikke fastsette virkningstidspunkt for ${Revurdering::class.java.simpleName}"
+            )
+        }
+    }
+
+    override fun settKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
+        inTransaction {
+            behandlinger.lagreKommerBarnetTilgode(
+                behandlingId,
+                kommerBarnetTilgode
             )
         }
     }

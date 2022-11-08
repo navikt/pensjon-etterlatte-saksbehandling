@@ -37,10 +37,8 @@ export interface IBrev {
 
 export const Brev = () => {
   const { behandlingId } = useParams()
-  const { soeknadMottattDato, kommerSoekerTilgode, behandlingType } = useAppSelector(
-    (state) => state.behandlingReducer.behandling
-  )
-  const fnr = kommerSoekerTilgode?.familieforhold?.soeker?.fnr || ''
+  const { soeknadMottattDato, søker, behandlingType } = useAppSelector((state) => state.behandlingReducer.behandling)
+  const fnr = søker?.foedselsnummer ?? ''
 
   const [brevListe, setBrevListe] = useState<IBrev[]>([])
   const [innkommendeBrevListe, setInnkommendeBrevListe] = useState<Journalpost[]>([])

@@ -1,0 +1,1 @@
+ALTER TABLE behandling ADD COLUMN kommer_barnet_tilgode text

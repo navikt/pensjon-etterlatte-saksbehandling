@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -42,7 +43,8 @@ sealed interface Behandling {
                 is Foerstegangsbehandling -> hentVirkningstidspunkt()
                 is ManueltOpphoer -> null
                 is Revurdering -> null
-            }
+            },
+            kommerBarnetTilgode = kommerBarnetTilgode
         )
     }
 
@@ -54,6 +56,7 @@ sealed interface Behandling {
     val oppgaveStatus: OppgaveStatus?
     val type: BehandlingType
     val persongalleri: Persongalleri
+    val kommerBarnetTilgode: KommerBarnetTilgode?
 }
 
 data class Foerstegangsbehandling(
@@ -65,6 +68,7 @@ data class Foerstegangsbehandling(
     override val oppgaveStatus: OppgaveStatus?,
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     override val persongalleri: Persongalleri,
+    override val kommerBarnetTilgode: KommerBarnetTilgode?,
     private var virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?
@@ -88,6 +92,7 @@ data class Revurdering(
     override val oppgaveStatus: OppgaveStatus?,
     override val type: BehandlingType = BehandlingType.REVURDERING,
     override val persongalleri: Persongalleri,
+    override val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak
 ) : Behandling
 
@@ -120,4 +125,7 @@ data class ManueltOpphoer(
         opphoerAarsaker = opphoerAarsaker,
         fritekstAarsak = fritekstAarsak
     )
+
+    override val kommerBarnetTilgode: KommerBarnetTilgode?
+        get() = null
 }

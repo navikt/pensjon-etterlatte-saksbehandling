@@ -73,31 +73,6 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
             }
         }
 
-        post("/kommertilgode/{behandlingId}") {
-            try {
-                val behandlingId = call.parameters["behandlingId"]
-                val body = call.receive<KommerBarnetTilgodeClientRequest>()
-
-                if (behandlingId == null) {
-                    call.response.status(HttpStatusCode(400, "Bad request"))
-                    call.respond("Behandlings-id mangler")
-                } else {
-                    call.respond(
-                        service.lagreResultatKommerBarnetTilgode(
-                            behandlingId,
-                            body.svar,
-                            body.begrunnelse,
-                            call.navIdent,
-                            getAccessToken(call)
-                        )
-                    )
-                }
-            } catch (ex: Exception) {
-                logger.error("kommer barnet tilgode feilet", ex)
-                throw ex
-            }
-        }
-
         post("/beregningsgrunnlag/{behandlingId}") {
             try {
                 val behandlingId = call.parameters["behandlingId"]
@@ -157,7 +132,6 @@ data class AvdoedesMedlemskapsperiodeClientRequest(
     val tilDato: LocalDate
 )
 
-private data class KommerBarnetTilgodeClientRequest(val svar: String, val begrunnelse: String)
 private data class SoeskenMedIBeregning(val foedselsnummer: Foedselsnummer, val skalBrukes: Boolean) {
     fun toDomain() = no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning(
         this.foedselsnummer,

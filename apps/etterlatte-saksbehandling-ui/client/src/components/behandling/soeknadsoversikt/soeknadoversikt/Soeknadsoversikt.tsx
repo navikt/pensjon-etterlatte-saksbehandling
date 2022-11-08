@@ -1,5 +1,5 @@
 import { OversiktGyldigFramsatt } from './gyldigFramsattSoeknad/OversiktGyldigFramsatt'
-import { OversiktKommerSoekerTilgode } from './kommerBarnetTilgode/OversiktKommerSoekerTilgode'
+import { OversiktKommerBarnetTilgode } from './kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 import { IDetaljertBehandling, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import { Innhold } from '../styled'
 import Virkningstidspunkt from './virkningstidspunkt/Virkningstidspunkt'
@@ -13,7 +13,7 @@ export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({ behandling }) => {
     <Innhold>
       <OversiktGyldigFramsatt gyldigFramsatt={behandling.gyldighetsprøving} />
       {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
-        <OversiktKommerSoekerTilgode kommerSoekerTilgode={behandling.kommerSoekerTilgode} />
+        <OversiktKommerBarnetTilgode kommerBarnetTilgode={behandling.kommerBarnetTilgode} />
       )}
       <Virkningstidspunkt />
     </Innhold>

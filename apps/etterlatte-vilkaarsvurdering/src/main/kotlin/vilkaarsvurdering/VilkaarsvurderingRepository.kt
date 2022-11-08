@@ -51,8 +51,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
             behandlingId = uuid("behandlingId"),
             payload = string("payload").let { payload -> objectMapper.readValue(payload) },
             vilkaar = string("vilkaar").let { vilkaar -> objectMapper.readValue(vilkaar) },
-            resultat = stringOrNull("resultat").let {
-                    resultat ->
+            resultat = stringOrNull("resultat").let { resultat ->
                 resultat?.let { objectMapper.readValue(it) }
             },
             virkningstidspunkt = localDate("virkningstidspunkt")

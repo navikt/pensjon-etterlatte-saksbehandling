@@ -83,7 +83,7 @@ export interface IBeregningsperiode {
 }
 
 export interface IKommerBarnetTilgode {
-  svar: JaNeiVetikke
+  svar: JaNei
   begrunnelse: string
   kilde: {
     ident: string
@@ -91,16 +91,14 @@ export interface IKommerBarnetTilgode {
   }
 }
 
-export enum JaNeiVetikke {
+export enum JaNei {
   JA = 'JA',
   NEI = 'NEI',
-  VET_IKKE = 'VET IKKE',
 }
 
-export const JaNeiVetIkkeRec: Record<JaNeiVetikke, string> = {
-  [JaNeiVetikke.JA]: 'Ja',
-  [JaNeiVetikke.NEI]: 'Nei',
-  [JaNeiVetikke.VET_IKKE]: 'Vet ikke',
+export const JaNeiRec: Record<JaNei, string> = {
+  [JaNei.JA]: 'Ja',
+  [JaNei.NEI]: 'Nei',
 } as const
 
 export interface IAdresse {

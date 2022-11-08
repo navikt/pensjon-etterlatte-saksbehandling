@@ -1,4 +1,4 @@
-import { IKommerBarnetTilgode, JaNeiVetikke, JaNeiVetIkkeRec } from '../../../../../store/reducers/BehandlingReducer'
+import { IKommerBarnetTilgode, JaNei, JaNeiRec } from '../../../../../store/reducers/BehandlingReducer'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
 import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
 import { CaseworkerfilledIcon } from '../../../../../shared/icons/caseworkerfilledIcon'
@@ -18,9 +18,9 @@ export const KommerBarnetTilGodeVurdering = ({
   const tittel =
     kommerBarnetTilgode === null
       ? 'Ikke vurdert'
-      : kommerBarnetTilgode?.svar === JaNeiVetikke.JA
+      : kommerBarnetTilgode?.svar === JaNei.JA
       ? 'Sannsynlig pensjonen kommer barnet til gode'
-      : kommerBarnetTilgode?.svar === JaNeiVetikke.NEI
+      : kommerBarnetTilgode?.svar === JaNei.NEI
       ? 'Ikke sannsynlig pensjonen kommer barnet til gode'
       : 'Usikkert om pensjonen kommer barnet til gode'
 
@@ -32,7 +32,10 @@ export const KommerBarnetTilGodeVurdering = ({
         )}
       </div>
       {redigeringsModus ? (
-        <EndreVurdering setRedigeringsModusFalse={() => setRedigeringsModus(false)} />
+        <EndreVurdering
+          kommerBarnetTilgode={kommerBarnetTilgode}
+          setRedigeringsModusFalse={() => setRedigeringsModus(false)}
+        />
       ) : (
         <div>
           <VurderingsTitle>{tittel}</VurderingsTitle>
@@ -44,7 +47,7 @@ export const KommerBarnetTilGodeVurdering = ({
           <Undertekst gray={false}>
             Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
           </Undertekst>
-          <div>{kommerBarnetTilgode?.svar ? JaNeiVetIkkeRec[kommerBarnetTilgode?.svar] : '-'}</div>
+          <div>{kommerBarnetTilgode?.svar ? JaNeiRec[kommerBarnetTilgode?.svar] : '-'}</div>
           <BegrunnelseWrapper>
             <div style={{ fontWeight: 'bold' }}>Begrunnelse</div>
             <div>{kommerBarnetTilgode?.begrunnelse ?? ''}</div>

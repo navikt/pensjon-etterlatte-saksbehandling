@@ -2,15 +2,21 @@ import { Undertekst, VurderingsTitle } from '../../styled'
 import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { RadioGroupWrapper } from './KommerBarnetTilGodeVurdering'
 import { hentBehandling, lagreBegrunnelseKommerBarnetTilgode } from '../../../../../shared/api/behandling'
-import { useState } from 'react'
-import { ISvar } from '../../../../../store/reducers/BehandlingReducer'
+import { useEffect, useState } from 'react'
+import { IKommerBarnetTilgode, JaNei } from '../../../../../store/reducers/BehandlingReducer'
 import { useAppSelector } from '../../../../../store/Store'
 
-export const EndreVurdering = ({ setRedigeringsModusFalse }: { setRedigeringsModusFalse: () => void }) => {
+export const EndreVurdering = ({
+  setRedigeringsModusFalse,
+  kommerBarnetTilgode,
+}: {
+  setRedigeringsModusFalse: () => void
+  kommerBarnetTilgode: IKommerBarnetTilgode | null
+}) => {
   const behandlingId = useAppSelector((state) => state.behandlingReducer.behandling.id)
-  const [svar, setSvar] = useState<ISvar>()
+  const [svar, setSvar] = useState<JaNei>()
   const [radioError, setRadioError] = useState<string>()
-  const [kommentar, setKommentar] = useState<string>('')
+  const [kommentar, setKommentar] = useState<string>(kommerBarnetTilgode?.begrunnelse || '')
   const [begrunnelseError, setBegrunnelseError] = useState<string>()
 
   function lagreBegrunnelseKlikket() {
@@ -29,6 +35,12 @@ export const EndreVurdering = ({ setRedigeringsModusFalse }: { setRedigeringsMod
         }
       })
   }
+
+  useEffect(() => {
+    if (kommerBarnetTilgode && kommerBarnetTilgode.svar) {
+      setSvar(kommerBarnetTilgode.svar)
+    }
+  }, [])
 
   function reset() {
     setRedigeringsModusFalse()
@@ -50,14 +62,15 @@ export const EndreVurdering = ({ setRedigeringsModusFalse }: { setRedigeringsMod
           size="small"
           className="radioGroup"
           onChange={(event) => {
-            setSvar(ISvar[event as ISvar])
+            setSvar(JaNei[event as JaNei])
             setRadioError(undefined)
           }}
+          value={svar}
           error={radioError ? radioError : false}
         >
           <div className="flex">
-            <Radio value={ISvar.JA.toString()}>Ja</Radio>
-            <Radio value={ISvar.NEI.toString()}>Nei</Radio>
+            <Radio value={JaNei.JA}>Ja</Radio>
+            <Radio value={JaNei.NEI}>Nei</Radio>
           </div>
         </RadioGroup>
       </RadioGroupWrapper>

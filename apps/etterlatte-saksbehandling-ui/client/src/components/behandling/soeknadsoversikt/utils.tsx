@@ -1,4 +1,4 @@
-import { JaNeiVetikke, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { JaNei, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 
 export function hentGyldighetsTekst(
   innsenderErForelder: VurderingsResultat | undefined,
@@ -73,13 +73,11 @@ export function hentGyldighetsTekst(
   return svar
 }
 
-export const svarTilVurderingsstatus = (svar: JaNeiVetikke) => {
+export const svarTilVurderingsstatus = (svar: JaNei) => {
   switch (svar) {
-    case JaNeiVetikke.JA:
+    case JaNei.JA:
       return VurderingsResultat.OPPFYLT
-    case JaNeiVetikke.NEI:
+    case JaNei.NEI:
       return VurderingsResultat.IKKE_OPPFYLT
-    case JaNeiVetikke.VET_IKKE:
-      return VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
   }
 }

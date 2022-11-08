@@ -1,48 +1,54 @@
-import differenceInYears from 'date-fns/differenceInYears'
-import format from 'date-fns/format'
 import { Vilkaarsgrunnlag } from '../../../../shared/api/vilkaarsvurdering'
 import { KildeType } from '../../../../store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 import { VilkaarColumn } from '../styled'
 import { hentKildenavn } from '../utils'
+import { formaterStringDato } from '../../../../utils/formattering'
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
   const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'FOEDSELSDATO')
   const doedsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'DOEDSDATO')
+  const virkningstidspunktGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'VIRKNINGSTIDSPUNKT')
 
   const foedselsdatoKilde = foedselsdatoGrunnlag?.kilde
   const foedselsdato = foedselsdatoGrunnlag?.opplysning.foedselsdato
-  const barnetsAlder = !!foedselsdato ? differenceInYears(new Date(), new Date(foedselsdato)) : undefined
   const doedsdato = doedsdatoGrunnlag?.opplysning.doedsdato
   const doedsdatoKilde = doedsdatoGrunnlag?.kilde
-  const barnetsAlderVedDoedsfall = differenceInYears(new Date(doedsdato), new Date(foedselsdato))
+  const virkningstidspunkt = virkningstidspunktGrunnlag?.opplysning
+  const virkningstidspunktKilde = virkningstidspunktGrunnlag?.kilde
 
   return (
     <>
+      {doedsdato && doedsdatoKilde && (
+        <VilkaarColumn>
+          <Center>
+            <div>
+              <strong>Dødsfall</strong>
+            </div>
+            <span>{formaterStringDato(doedsdato)}</span>
+            <KildeDatoOpplysning type={doedsdatoKilde.type} dato={doedsdatoKilde.tidspunktForInnhenting} />
+          </Center>
+        </VilkaarColumn>
+      )}
       {foedselsdato && foedselsdatoKilde && (
         <VilkaarColumn>
           <Center>
             <div>
               <strong>Barnets fødselsdato</strong>
             </div>
-            <span>
-              {format(new Date(foedselsdato), 'dd.MM.yyyy')}
-              {barnetsAlder && <span> ({barnetsAlder} år)</span>}
-            </span>
+            <span>{formaterStringDato(foedselsdato)}</span>
             <KildeDatoOpplysning type={foedselsdatoKilde.type} dato={foedselsdatoKilde.tidspunktForInnhenting} />
           </Center>
         </VilkaarColumn>
       )}
-      {doedsdato && doedsdatoKilde && (
+      {virkningstidspunkt && virkningstidspunktKilde && (
         <VilkaarColumn>
           <Center>
             <div>
-              <strong>Alder ved dødsfall</strong>
+              <strong>Virkningstidspunkt</strong>
             </div>
-            <span>
-              {barnetsAlderVedDoedsfall} år ({format(new Date(doedsdato), 'dd.MM.yyyy')})
-            </span>
-            <KildeDatoOpplysning type={doedsdatoKilde.type} dato={doedsdatoKilde.tidspunktForInnhenting} />
+            <span>{formaterStringDato(virkningstidspunkt)}</span>
+            <KildeDatoOpplysning type={virkningstidspunktKilde.type} dato={virkningstidspunktKilde.tidspunkt} />
           </Center>
         </VilkaarColumn>
       )}
@@ -54,7 +60,7 @@ const KildeDatoOpplysning = ({ type, dato }: { type?: KildeType; dato?: string }
   if (!dato) {
     return <div />
   }
-  const dataDato = format(new Date(dato), 'dd.MM.yyyy')
+  const dataDato = formaterStringDato(dato)
   const kilde = hentKildenavn(type)
 
   return (

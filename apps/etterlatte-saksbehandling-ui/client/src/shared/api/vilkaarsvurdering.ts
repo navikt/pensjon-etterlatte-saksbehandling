@@ -51,6 +51,7 @@ export interface Vilkaarsgrunnlag<T> {
 
 export interface Kilde {
   navn: string
+  tidspunkt: string
   tidspunktForInnhenting: string
   registersReferanse: string
   opplysningId: string

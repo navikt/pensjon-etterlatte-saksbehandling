@@ -169,7 +169,7 @@
             data.forEach((familie) => {
                 const avdoed = familie.avdoed
                 const gjenlevende = familie.gjenlevende
-                const barn = familie.barn[0]
+                const [barn, ...soesken] = familie.barn
 
                 const tableRow = document.createElement('tr')
 
@@ -183,7 +183,7 @@
                 button.classList.add('btn-primary')
                 button.innerHTML = 'Send inn søknad for denne familien'
                 button.type = 'button'
-                button.onclick = () => sendSoeknad(avdoed, gjenlevende, barn)
+                button.onclick = () => sendSoeknad(avdoed, gjenlevende, barn, soesken)
 
                 avdoedTableElement.innerHTML = avdoed
                 avdoedTableElement.style.width = '300px'
@@ -207,14 +207,14 @@
         })
     }
 
-    const sendSoeknad = async (fnrAvdoed, fnrGjenlevende, fnrBarn) => {
+    const sendSoeknad = async (fnrAvdoed, fnrGjenlevende, fnrBarn, soesken) => {
         soeknadInnsendtAlert.style.display = "none"
         await fetch('dolly/send-soeknad', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: `fnrAvdoed=${fnrAvdoed}&fnrGjenlevende=${fnrGjenlevende}&fnrBarn=${fnrBarn}`
+            body: `fnrAvdoed=${fnrAvdoed}&fnrGjenlevende=${fnrGjenlevende}&fnrBarn=${fnrBarn}&soesken=${JSON.stringify(soesken)}`
         }).then(res => res.json()).then(data => {
             if ((data.status === 200)) {
                 soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert med nøkkel: ${data.noekkel}`

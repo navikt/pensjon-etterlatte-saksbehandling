@@ -104,12 +104,14 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     val noekkel = UUID.randomUUID().toString()
 
                     val (partisjon, offset) = call.receiveParameters().let {
+                        val soesken: List<String> = objectMapper.readValue(it["soesken"] ?: "[]")
                         producer.publiser(
                             noekkel,
                             opprettSoeknadJson(
                                 gjenlevendeFnr = it["fnrGjenlevende"]!!,
                                 avdoedFnr = it["fnrAvdoed"]!!,
-                                barnFnr = it["fnrBarn"]!!
+                                barnFnr = it["fnrBarn"]!!,
+                                soesken = soesken
                             ),
                             mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray()))
                         )
@@ -136,8 +138,13 @@ data class SoeknadResponse(
     val noekkel: String
 )
 
-private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {
-    val skjemaInfo = opprettSkjemaInfo(gjenlevendeFnr, barnFnr, avdoedFnr)
+fun opprettSoeknadJson(
+    gjenlevendeFnr: String,
+    avdoedFnr: String,
+    barnFnr: String,
+    soesken: List<String> = emptyList()
+): String {
+    val skjemaInfo = opprettSkjemaInfo(gjenlevendeFnr, barnFnr, avdoedFnr, soesken)
 
     return JsonMessage.newMessage(
         mapOf(
@@ -152,11 +159,82 @@ private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFn
     ).toJson()
 }
 
-private fun opprettSkjemaInfo(
+private fun fnrTilBarn(fnr: String, gjenlevende: String, avdoed: String) = """
+    {
+        "fornavn": {
+          "svar": "TEST",
+          "spoersmaal": ""
+        },
+        "etternavn": {
+          "svar": "SOESKEN",
+          "spoersmaal": ""
+        },
+        "foedselsnummer": {
+          "svar": "$fnr",
+          "spoersmaal": ""
+        },
+        "statsborgerskap": {
+          "svar": "Norsk",
+          "spoersmaal": ""
+        },
+        "utenlandsAdresse": {
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
+          "spoersmaal": "",
+          "opplysning": null
+        },
+        "foreldre": [
+          {
+            "fornavn": {
+              "svar": "Levende",
+              "spoersmaal": ""
+            },
+            "etternavn": {
+              "svar": "Testperson",
+              "spoersmaal": ""
+            },
+            "foedselsnummer": {
+              "svar": "$gjenlevende",
+              "spoersmaal": ""
+            },
+            "type": "FORELDER"
+          },
+          {
+            "fornavn": {
+              "svar": "Død",
+              "spoersmaal": ""
+            },
+            "etternavn": {
+              "svar": "Testperson",
+              "spoersmaal": ""
+            },
+            "foedselsnummer": {
+              "svar": "$avdoed",
+              "spoersmaal": ""
+            },
+            "type": "FORELDER"
+          }
+        ],
+        "type": "BARN"
+    }
+""".trimIndent()
+
+fun opprettSkjemaInfo(
     gjenlevendeFnr: String,
     barnFnr: String,
-    avdoedFnr: String
-) = """
+    avdoedFnr: String,
+    soesken: List<String>
+): String {
+    val soeskenString = soesken.joinToString(separator = ",", prefix = "[", postfix = "]") {
+        fnrTilBarn(
+            it,
+            avdoedFnr,
+            gjenlevendeFnr
+        )
+    }
+    return """
     {
       "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
       "spraak": "nb",
@@ -389,10 +467,11 @@ private fun opprettSkjemaInfo(
           "type": "AVDOED"
         }
       ],
-      "soesken": [],
+      "soesken": $soeskenString,
       "versjon": "2",
       "type": "BARNEPENSJON",
       "mottattDato": "2022-02-10T10:51:12.298943803",
       "template": "barnepensjon_v2"
     }
-""".trimIndent()
+    """.trimIndent()
+}

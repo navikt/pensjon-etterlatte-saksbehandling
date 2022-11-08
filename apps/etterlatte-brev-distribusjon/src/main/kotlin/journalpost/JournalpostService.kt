@@ -27,7 +27,10 @@ class JournalpostServiceImpl(
         logger.info("Oppretter journalpost for brev med id=${melding.brevId}")
 
         val brevDokument = brevService.hentBrevInnhold(melding.brevId)
+        logger.info("Oppretter journalpost med brevinnhold", brevDokument)
+
         val request = mapTilJournalpostRequest(melding, brevDokument)
+        logger.info("Oppretter journalpost med request", brevDokument)
 
         client.opprettJournalpost(request, true)
     }

@@ -187,7 +187,7 @@ class VedtaksvurderingService(
                                     it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }
                                         ?.let(YearMonth::from)
                                 ),
-                                BigDecimal.valueOf(it.grunnbelopMnd.toLong())
+                                BigDecimal.valueOf(it.utbetaltBeloep.toLong())
                             )
                         }
                     )

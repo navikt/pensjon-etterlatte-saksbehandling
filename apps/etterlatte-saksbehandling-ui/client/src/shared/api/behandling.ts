@@ -37,7 +37,7 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (
   begrunnelse: string,
   svar: string
 ): Promise<ApiResponse<any>> => {
-  return apiClient.post(`/behandling/${behandlingsId}/kommerbarnettilgode`, { svar, begrunnelse })
+  return apiClient.post(`/behandling/${behandlingsId}/kommerbarnettilgode`, { svar, begrunnelse }, true)
 }
 
 export const lagreSoeskenMedIBeregning = async (

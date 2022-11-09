@@ -29,6 +29,8 @@ dependencies {
     implementation(NavFelles.TokenValidationKtor2)
 
     testImplementation(MockK.MockK)
+    testImplementation(NavFelles.MockOauth2Server)
     testImplementation(Kotlinx.CoroutinesCore)
+    testImplementation(Ktor2.ServerTests)
     testImplementation(project(":libs:testdata"))
 }

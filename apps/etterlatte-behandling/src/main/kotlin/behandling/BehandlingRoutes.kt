@@ -61,7 +61,7 @@ fun Route.behandlingRoutes(
                 kommerBarnetTilgode
             )
 
-            call.respond(HttpStatusCode.Accepted, kommerBarnetTilgode)
+            call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
         }
     }
     route("/behandlinger") {

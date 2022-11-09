@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Button, Heading } from '@navikt/ds-react'
 import { initialOppgaveFelter, IOppgaveFelter } from './typer/oppgavefelter'
-import '../../App.css'
 import styled from 'styled-components'
 import 'react-datepicker/dist/react-datepicker.css'
 import '../../index.css'

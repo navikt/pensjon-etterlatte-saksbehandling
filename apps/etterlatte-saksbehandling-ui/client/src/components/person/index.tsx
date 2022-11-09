@@ -30,7 +30,7 @@ const testDokumenter: Dokumenter = {
 export const Person = () => {
   const [personData, setPersonData] = useState<IPersonResult | undefined>(undefined)
   const [lastet, setLastet] = useState<boolean>(false)
-  const [error, setError] = useState<IPersonResult | undefined>(undefined)
+  const [error, setError] = useState<IPersonResult>()
 
   const match = useParams<{ fnr: string }>()
 
@@ -55,7 +55,7 @@ export const Person = () => {
   if (error && personData === undefined) {
     return (
       <Container>
-        <div>{error}</div>
+        <div>{JSON.stringify(error)}</div>
       </Container>
     )
   }

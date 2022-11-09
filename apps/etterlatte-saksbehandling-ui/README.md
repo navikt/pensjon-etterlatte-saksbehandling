@@ -12,11 +12,12 @@ for testing.
 Kjør `yarn` i denne mappen.
 
 ### Client
-Kjøres fra mappen `client`. Frontendend startes med kommandoen
+Kjøres fra mappen `client`. Prosjektet bruker [Vite](https://vitejs.dev/).
 
-**`yarn start`**
+Frontend startes med kommandoen:\
+**`yarn dev`**
 
-Frontend-appen kjører på `localhost:3000`
+Frontend-appen kjører på `localhost:5173`
 
 ### Server
 Kjøres fra mappen `server` med kommandoen

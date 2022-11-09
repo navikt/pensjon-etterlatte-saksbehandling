@@ -1,8 +1,7 @@
 FROM node:16-alpine3.14
 
-
 WORKDIR /app
-COPY ./client/build ./client
+COPY ./client/dist ./client
 COPY ./server/build ./server
 COPY ./server/package.json ./server
 

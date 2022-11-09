@@ -39,9 +39,12 @@ export const KommerBarnetTilGodeVurdering = ({
       ) : (
         <div>
           <VurderingsTitle>{tittel}</VurderingsTitle>
+          {kommerBarnetTilgode?.kilde?.ident && (
+            <Undertekst gray={true}>{`Endret manuelt av ${kommerBarnetTilgode.kilde.ident}`}</Undertekst>
+          )}
           <Undertekst gray={true}>
             {kommerBarnetTilgode?.kilde?.tidspunkt
-              ? formaterStringDato(kommerBarnetTilgode.kilde.tidspunkt)
+              ? `Sist endret ${formaterStringDato(kommerBarnetTilgode.kilde.tidspunkt)}`
               : 'Ikke vurdert'}
           </Undertekst>
           <Undertekst gray={false}>

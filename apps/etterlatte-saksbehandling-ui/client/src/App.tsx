@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import '@navikt/ds-css'
-import './App.css'
 import Oppgavebenken from './components/oppgavebenken/Oppgavebenken'
 import { Behandling } from './components/behandling'
 import { Header } from './shared/header'

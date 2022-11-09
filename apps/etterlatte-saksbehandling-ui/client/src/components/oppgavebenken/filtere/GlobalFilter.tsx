@@ -1,3 +1,4 @@
+import 'regenerator-runtime'
 import { TextField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useAsyncDebounce } from 'react-table'

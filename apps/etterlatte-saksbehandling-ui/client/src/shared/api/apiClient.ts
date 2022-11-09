@@ -1,5 +1,3 @@
-const path = process.env.REACT_APP_VEDTAK_URL
-
 type ApiSuccess<T> = { status: 'ok'; data: T; statusCode: number }
 export type ApiError = { status: 'error'; statusCode: number; error?: any }
 
@@ -19,7 +17,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
 
   const trimmedUrl = url.startsWith('/') ? url.slice(1) : url
   try {
-    const response = await fetch(`${path}/api/${trimmedUrl}`, {
+    const response = await fetch(`/api/${trimmedUrl}`, {
       method: method,
       headers: {
         'Content-Type': 'application/json',

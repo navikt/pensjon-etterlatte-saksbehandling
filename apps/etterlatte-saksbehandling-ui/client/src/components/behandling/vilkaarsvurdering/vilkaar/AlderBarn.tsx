@@ -1,9 +1,9 @@
 import { Vilkaarsgrunnlag } from '../../../../shared/api/vilkaarsvurdering'
-import { KildeType } from '../../../../store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 import { VilkaarColumn } from '../styled'
 import { hentKildenavn } from '../utils'
 import { formaterStringDato } from '../../../../utils/formattering'
+import { KildeType } from '../../../../store/reducers/BehandlingReducer'
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
   const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'FOEDSELSDATO')
@@ -19,7 +19,7 @@ export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) =
 
   return (
     <>
-      {doedsdato && doedsdatoKilde && (
+      {doedsdato && doedsdatoKilde && doedsdatoKilde?.type === KildeType.pdl && (
         <VilkaarColumn>
           <Center>
             <div>
@@ -30,7 +30,7 @@ export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) =
           </Center>
         </VilkaarColumn>
       )}
-      {foedselsdato && foedselsdatoKilde && (
+      {foedselsdato && foedselsdatoKilde && foedselsdatoKilde?.type === KildeType.pdl && (
         <VilkaarColumn>
           <Center>
             <div>
@@ -41,7 +41,7 @@ export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) =
           </Center>
         </VilkaarColumn>
       )}
-      {virkningstidspunkt && virkningstidspunktKilde && (
+      {virkningstidspunkt && virkningstidspunktKilde && virkningstidspunktKilde?.type == KildeType.saksbehandler && (
         <VilkaarColumn>
           <Center>
             <div>

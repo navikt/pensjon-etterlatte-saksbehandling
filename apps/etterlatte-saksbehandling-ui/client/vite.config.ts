@@ -15,7 +15,6 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
-      '/modiacontextholder': 'http://localhost:8080',
     },
   },
   build: {

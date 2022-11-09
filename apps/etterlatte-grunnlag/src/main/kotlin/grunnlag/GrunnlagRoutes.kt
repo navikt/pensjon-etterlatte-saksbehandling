@@ -7,11 +7,21 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.toJson
 
-fun Route.grunnlagRoute(service: GrunnlagService) {
+fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
     route("grunnlag") {
+        get("{sakId}") {
+            val sakId = call.parameters["sakId"]!!.toLong()
+
+            when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(sakId)) {
+                null -> call.respond(HttpStatusCode.NotFound)
+                else -> call.respond(opplysningsgrunnlag.toJson())
+            }
+        }
+
         get("{sakId}/{opplysningType}") {
-            val grunnlag = service.hentGrunnlagAvType(
+            val grunnlag = grunnlagService.hentGrunnlagAvType(
                 call.parameters["sakId"]!!.toLong(),
                 Opplysningstype.valueOf(call.parameters["opplysningType"].toString())
             )

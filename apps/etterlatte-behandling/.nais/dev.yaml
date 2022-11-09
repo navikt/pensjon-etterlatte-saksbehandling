@@ -67,6 +67,7 @@ spec:
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-oppdater-behandling
         - application: etterlatte-statistikk
+        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-opplysninger-fra-soeknad
           permissions:

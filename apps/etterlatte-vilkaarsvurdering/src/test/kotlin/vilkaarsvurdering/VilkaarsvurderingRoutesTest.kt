@@ -11,10 +11,15 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -22,6 +27,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.restModule
+import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -34,6 +40,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -42,6 +49,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server = MockOAuth2Server()
+    private val behandlingKlient = mockk<BehandlingKlient>()
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
@@ -60,6 +68,8 @@ internal class VilkaarsvurderingRoutesTest {
         ).apply { migrate() }
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepositoryImpl(ds.dataSource()), sendToRapid)
+
+        coEvery { behandlingKlient.hentBehandling(any()) } returns RetryResult.Success(detaljertBehandling())
     }
 
     @AfterAll
@@ -82,7 +92,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient) }
 
             opprettVilkaarsvurdering()
 
@@ -108,10 +118,33 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
+    // todo: verifiser at denne fungerer etter vi har hentet grunnlag fra grunnlagstjenesten.
+    @Test
+    fun `skal opprette vilkaarsvurdering basert paa behandling dersom en ikke finnes`() {
+        testApplication {
+            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient) }
+
+            val nyBehandlingId = UUID.randomUUID()
+            val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
+
+            assertEquals(nyBehandlingId, vilkaarsvurdering.behandlingId)
+            assertEquals(
+                vilkaarsvurdering.virkningstidspunkt,
+                detaljertBehandling().virkningstidspunkt!!.dato.atDay(1)
+            )
+            assertNull(vilkaarsvurdering.resultat)
+        }
+    }
+
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient) }
 
             opprettVilkaarsvurdering()
 
@@ -149,7 +182,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient) }
 
             opprettVilkaarsvurdering()
 
@@ -213,7 +246,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient) }
 
             opprettVilkaarsvurdering()
 
@@ -259,7 +292,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient) }
 
             opprettVilkaarsvurdering()
             val resultat = VurdertVilkaarsvurderingResultatDto(
@@ -301,10 +334,19 @@ internal class VilkaarsvurderingRoutesTest {
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
             LocalDate.of(2022, 1, 1),
-            objectMapper.readTree("""{"virkningstidspunkt": "21-01-01"}"""),
             grunnlag,
             null
         )
+    }
+
+    private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
+        every { id } returns UUID.randomUUID()
+        every { sak } returns 1L
+        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+        every { soeker } returns "10095512345"
+        every { virkningstidspunkt } returns mockk<Virkningstidspunkt>().apply {
+            every { dato } returns YearMonth.of(2022, 1)
+        }
     }
 
     private companion object {

@@ -36,4 +36,5 @@ export enum RequestStatus {
   isloading,
   error,
   ok,
+  preconditionFailed,
 }

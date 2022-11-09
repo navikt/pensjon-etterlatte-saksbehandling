@@ -251,7 +251,8 @@ fun Route.behandlingRoutes(
                             status = it.status,
                             virkningstidspunkt = null,
                             behandlingType = BehandlingType.REVURDERING,
-                            kommerBarnetTilgode = it.kommerBarnetTilgode
+                            kommerBarnetTilgode = it.kommerBarnetTilgode,
+                            revurderingsaarsak = it.revurderingsaarsak
                         )
                     } ?: HttpStatusCode.NotFound
                 )

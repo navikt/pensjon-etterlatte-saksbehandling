@@ -30,7 +30,7 @@ class AppBuilder {
             val klient = JournalpostKlient(httpClient("AZURE_DOKARKIV_SCOPE"), requireNotNull(env["JOURNALPOST_URL"]))
             JournalpostServiceImpl(
                 klient,
-                BrevServiceImpl(httpClient("BREV_API_SCOPE"), requireNotNull("BREV_API_URL"))
+                BrevServiceImpl(httpClient("BREV_API_SCOPE"), requireNotNull(env["BREV_API_URL"]))
             )
         }
     }

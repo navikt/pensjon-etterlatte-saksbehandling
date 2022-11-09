@@ -17,6 +17,7 @@ class BrevServiceImpl(private val client: HttpClient, private val url: String) :
 
     override suspend fun hentBrevInnhold(id: Long): ByteArray {
         logger.info("Forsøker å hente innhold for brev med id = $id")
+        logger.info("Kaller brev api på: $url")
 
         try {
             return client.get("$url/$id/pdf") {

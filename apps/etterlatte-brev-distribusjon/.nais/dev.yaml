@@ -42,7 +42,7 @@ spec:
     - name: BREV_API_URL
       value: "http://etterlatte-brev-api/brev"
     - name: BREV_LOCAL_DEV
-      value: "true"
+      value: "false"
   accessPolicy:
     outbound:
       rules:

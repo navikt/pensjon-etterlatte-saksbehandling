@@ -1,10 +1,14 @@
 import { Undertekst, VurderingsTitle } from '../../styled'
 import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { RadioGroupWrapper } from './KommerBarnetTilGodeVurdering'
-import { hentBehandling, lagreBegrunnelseKommerBarnetTilgode } from '../../../../../shared/api/behandling'
+import { lagreBegrunnelseKommerBarnetTilgode } from '../../../../../shared/api/behandling'
 import { useEffect, useState } from 'react'
-import { IKommerBarnetTilgode, JaNei } from '../../../../../store/reducers/BehandlingReducer'
-import { useAppSelector } from '../../../../../store/Store'
+import {
+  IKommerBarnetTilgode,
+  JaNei,
+  oppdaterKommerBarnetTilgode,
+} from '../../../../../store/reducers/BehandlingReducer'
+import { useAppDispatch, useAppSelector } from '../../../../../store/Store'
 
 export const EndreVurdering = ({
   setRedigeringsModusFalse,
@@ -14,6 +18,7 @@ export const EndreVurdering = ({
   kommerBarnetTilgode: IKommerBarnetTilgode | null
 }) => {
   const behandlingId = useAppSelector((state) => state.behandlingReducer.behandling.id)
+  const dispatch = useAppDispatch()
   const [svar, setSvar] = useState<JaNei>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>(kommerBarnetTilgode?.begrunnelse || '')
@@ -27,11 +32,7 @@ export const EndreVurdering = ({
     if (radioError === undefined && begrunnelseError === undefined && svar !== undefined)
       lagreBegrunnelseKommerBarnetTilgode(behandlingId, kommentar, svar.toString()).then((response) => {
         if (response.status === 'ok') {
-          hentBehandling(behandlingId).then((response) => {
-            if (response.status === 'ok') {
-              window.location.reload()
-            }
-          })
+          dispatch(oppdaterKommerBarnetTilgode(response.data))
         }
       })
   }

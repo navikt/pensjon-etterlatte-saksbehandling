@@ -361,6 +361,7 @@ export const addBehandling = createAction<IDetaljertBehandling>('behandling/add'
 export const resetBehandling = createAction('behandling/reset')
 export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
 export const updateVilkaarsvurdering = createAction<Vilkaarsvurdering>('behandling/update_vilkaarsvurdering')
+export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 
 export interface IBehandlingReducer {
   behandling: IDetaljertBehandling
@@ -377,8 +378,11 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(resetBehandling, (state) => {
     state.behandling = detaljertBehandlingInitialState
-  }),
-    builder.addCase(oppdaterVirkningstidspunkt, (state, action) => {
-      state.behandling.virkningstidspunkt = action.payload
-    })
+  })
+  builder.addCase(oppdaterVirkningstidspunkt, (state, action) => {
+    state.behandling.virkningstidspunkt = action.payload
+  })
+  builder.addCase(oppdaterKommerBarnetTilgode, (state, action) => {
+    state.behandling.kommerBarnetTilgode = action.payload
+  })
 })

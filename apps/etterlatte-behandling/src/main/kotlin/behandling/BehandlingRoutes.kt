@@ -51,16 +51,17 @@ fun Route.behandlingRoutes(
                 "Kunne ikke hente ut navident for vurdering av ytelsen kommer barnet tilgode"
             )
             val body = call.receive<KommerBarnetTilgodeJson>()
-
+            val kommerBarnetTilgode = KommerBarnetTilgode(
+                body.svar,
+                body.begrunnelse,
+                Grunnlagsopplysning.Saksbehandler(navIdent, Instant.now())
+            )
             foerstegangsbehandlingService.settKommerBarnetTilgode(
                 behandlingsId,
-                KommerBarnetTilgode(
-                    body.svar,
-                    body.begrunnelse,
-                    Grunnlagsopplysning.Saksbehandler(navIdent, Instant.now())
-                )
+                kommerBarnetTilgode
             )
-            call.respond(HttpStatusCode.OK)
+
+            call.respond(HttpStatusCode.Accepted, kommerBarnetTilgode)
         }
     }
     route("/behandlinger") {

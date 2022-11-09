@@ -2,6 +2,8 @@ import proxy from 'express-http-proxy'
 import { logger } from '../utils/logger'
 import fetch from 'node-fetch'
 
+const tokenEndpoint = process.env.AZURE_OPENID_CONFIG_TOKEN_ENDPOINT || 'http://localhost:8082/azure/token'
+
 async function getTokenFromMockServer() {
   const body: any = {
     client_id: 'clientId',
@@ -10,7 +12,7 @@ async function getTokenFromMockServer() {
     grant_type: 'client_credentials',
   }
 
-  const response = await fetch('http://localhost:8082/azure/token', {
+  const response = await fetch(tokenEndpoint, {
     method: 'post',
     body: Object.keys(body)
       .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(body[key]))

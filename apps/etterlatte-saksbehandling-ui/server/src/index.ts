@@ -8,7 +8,6 @@ import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
 import { expressProxy } from './routers/proxy'
 import { logger } from './utils/logger'
-import brev from './routers/brev'
 import { lokalProxy } from './routers/lokalproxy'
 import { requestLogger } from './middleware/logging'
 
@@ -24,16 +23,28 @@ app.use(requestLogger(isDev))
 app.use(express.json())
 app.use('/health', healthRouter)
 
+/** ===============================
+ * TODO: Vi må lage et bedre oppsett for håndtering av mock og auth APIer...
+ =============================== */
 if (isDev) {
   app.use(cors({ origin: 'http://localhost:3000' }))
+
   app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
   if (process.env.VILKAARSVURDERING_DEV) {
     app.use('/api/vilkaarsvurdering', lokalProxy('http://localhost:8087/api/vilkaarsvurdering'))
   }
+
   if (process.env.BREV_DEV) {
-    app.use('/brev', brev)
+    app.use(authenticateUser) // Alle ruter etter denne er authenticated
+    app.use('/brev', expressProxy(process.env.BREV_API_URL!!, 'api://dev.etterlatte.etterlatte-brev-api/.default'))
   }
-  app.use('/api', mockRouter)
+
+  if (process.env.API_URL) {
+    app.use(authenticateUser) // Alle ruter etter denne er authenticated
+    app.use('/api', expressProxy(`${process.env.API_URL}`, 'api://dev.etterlatte.etterlatte-api/.default'))
+  } else {
+    app.use('/api', mockRouter)
+  }
 } else {
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
   app.use(

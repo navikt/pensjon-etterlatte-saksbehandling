@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import GrunnlagTestData
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -16,6 +17,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -85,13 +87,13 @@ internal class VilkaarsvurderingServiceTest {
 
             requireNotNull(vilkaar.grunnlag?.get(0)).let {
                 it.opplysningsType shouldBe VilkaarOpplysningsType.FOEDSELSDATO
-                val opplysning = it.opplysning as Foedselsdato
+                val opplysning: Foedselsdato = objectMapper.readValue(it.opplysning.toJson())
                 opplysning.foedselsdato shouldBe grunnlag.soeker.hentFoedselsdato()?.verdi
                 opplysning.foedselsnummer shouldBe grunnlag.soeker.hentFoedselsnummer()?.verdi
             }
             requireNotNull(vilkaar.grunnlag?.get(1)).let {
                 it.opplysningsType shouldBe VilkaarOpplysningsType.DOEDSDATO
-                val opplysning = it.opplysning as Doedsdato
+                val opplysning: Doedsdato = objectMapper.readValue(it.opplysning.toJson())
                 opplysning.foedselsnummer shouldBe grunnlag.hentAvdoed().hentFoedselsnummer()?.verdi
                 opplysning.doedsdato shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
             }

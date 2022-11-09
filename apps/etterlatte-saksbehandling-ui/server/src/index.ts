@@ -43,7 +43,7 @@ if (isDev) {
   app.use('/brev', expressProxy(`${process.env.BREV_API_URL}`, 'api://d6add52a-5807-49cd-a181-76908efee836/.default'))
 }
 
-app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
+app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: any, res: any) => {
   return res.sendFile(`${clientPath}/index.html`)
 })

@@ -101,5 +101,6 @@ data class Vilkaarsgrunnlag<T>(
 
 enum class VilkaarOpplysningsType {
     FOEDSELSDATO,
-    DOEDSDATO
+    DOEDSDATO,
+    VIRKNINGSTIDSPUNKT
 }

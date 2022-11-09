@@ -7,12 +7,16 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
+import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 internal class GrunnlagEndretRiverTest {
@@ -70,7 +74,13 @@ internal class GrunnlagEndretRiverTest {
         VilkaarsvurderingIntern(
             behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
             payload = grunnlagEndretMelding.toJsonNode(),
-            vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(grunnlag),
+            vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(
+                grunnlag,
+                Virkningstidspunkt(
+                    dato = YearMonth.from(LocalDate.of(2022, 1, 1)),
+                    kilde = Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
+                )
+            ),
             virkningstidspunkt = LocalDate.of(2022, 1, 1)
         )
 

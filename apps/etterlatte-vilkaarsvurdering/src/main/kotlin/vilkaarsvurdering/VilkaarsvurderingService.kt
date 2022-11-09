@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
@@ -15,7 +17,9 @@ import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangs
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonRevurderingSoekerDoedVilkaar
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
+import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
@@ -58,7 +62,16 @@ class VilkaarsvurderingService(
                             VilkaarsvurderingIntern(
                                 behandlingId,
                                 payload,
-                                barnepensjonFoerstegangsbehandlingVilkaar(grunnlag),
+                                barnepensjonFoerstegangsbehandlingVilkaar(
+                                    grunnlag,
+                                    virkningstidspunkt.let {
+                                        // TODO fjern dette når virkningstidspunkt kommer inn
+                                        Virkningstidspunkt(
+                                            dato = YearMonth.of(it.year, it.month),
+                                            kilde = Grunnlagsopplysning.Saksbehandler("todo", Instant.now())
+                                        )
+                                    }
+                                ),
                                 virkningstidspunkt
                             )
                         )

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering.barnepensjon
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -16,10 +17,11 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
+import java.util.*
 
-fun barnepensjonFoerstegangsbehandlingVilkaar(grunnlag: Grunnlag) = listOf(
+fun barnepensjonFoerstegangsbehandlingVilkaar(grunnlag: Grunnlag, virkningstidspunkt: Virkningstidspunkt) = listOf(
     doedsfallForelder(),
-    alderBarn(grunnlag.soeker, grunnlag.hentAvdoed()),
+    alderBarn(virkningstidspunkt, grunnlag.soeker, grunnlag.hentAvdoed()),
     barnetsMedlemskap(),
     avdoedesForutgaaendeMedlemskap(),
     yrkesskadeAvdoed()
@@ -175,16 +177,28 @@ private fun fortsattMedlemskapUnntaksbestemmelsene() = Vilkaar(
     )
 )
 
-private fun alderBarn(soeker: Grunnlagsdata<JsonNode>?, avdoed: Grunnlagsdata<JsonNode>?): Vilkaar {
-    val barnGrunnlag = safeLet(soeker?.hentFoedselsdato(), soeker?.hentFoedselsnummer()) { foedselsdato, fnr ->
+private fun alderBarn(
+    virkningstidspunkt: Virkningstidspunkt,
+    soeker: Grunnlagsdata<JsonNode>?,
+    avdoed: Grunnlagsdata<JsonNode>?
+): Vilkaar {
+    val virkningstidspunktGrunnlag =
         Vilkaarsgrunnlag(
-            id = foedselsdato.id,
-            opplysningsType = VilkaarOpplysningsType.FOEDSELSDATO,
-            kilde = foedselsdato.kilde,
-            opplysning = Foedselsdato(foedselsdato.verdi, fnr.verdi)
+            id = UUID.randomUUID(),
+            opplysningsType = VilkaarOpplysningsType.VIRKNINGSTIDSPUNKT,
+            kilde = virkningstidspunkt.kilde,
+            opplysning = virkningstidspunkt.dato
         )
-    }
-    val avdoedGrunnlag = safeLet(avdoed?.hentDoedsdato(), avdoed?.hentFoedselsnummer()) { doedsdato, fnr ->
+    val foedselsdatoBarnGrunnlag =
+        safeLet(soeker?.hentFoedselsdato(), soeker?.hentFoedselsnummer()) { foedselsdato, fnr ->
+            Vilkaarsgrunnlag(
+                id = foedselsdato.id,
+                opplysningsType = VilkaarOpplysningsType.FOEDSELSDATO,
+                kilde = foedselsdato.kilde,
+                opplysning = Foedselsdato(foedselsdato.verdi, fnr.verdi)
+            )
+        }
+    val doedsdatoAvdoedGrunnlag = safeLet(avdoed?.hentDoedsdato(), avdoed?.hentFoedselsnummer()) { doedsdato, fnr ->
         Vilkaarsgrunnlag(
             id = doedsdato.id,
             opplysningsType = VilkaarOpplysningsType.DOEDSDATO,
@@ -207,7 +221,7 @@ private fun alderBarn(soeker: Grunnlagsdata<JsonNode>?, avdoed: Grunnlagsdata<Js
         unntaksvilkaar = listOf(
             alderBarnBeggeForeldreDoedeUtdanning()
         ),
-        grunnlag = listOfNotNull(barnGrunnlag, avdoedGrunnlag)
+        grunnlag = listOfNotNull(foedselsdatoBarnGrunnlag, doedsdatoAvdoedGrunnlag, virkningstidspunktGrunnlag)
     )
 }
 

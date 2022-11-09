@@ -49,12 +49,20 @@ export interface Vilkaarsgrunnlag<T> {
   opplysning: T
 }
 
-export interface Kilde {
-  navn: string
+export type Kilde = KildeSaksbehandler | KildePdl
+
+interface KildeSaksbehandler {
+  type: KildeType.saksbehandler
+  tidspunkt: string
+  ident: string
+}
+
+interface KildePdl {
+  type: KildeType.pdl
   tidspunktForInnhenting: string
+  navn: string
   registersReferanse: string
   opplysningId: string
-  type: KildeType
 }
 
 export interface Hovedvilkaar {

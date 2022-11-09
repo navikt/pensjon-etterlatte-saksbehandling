@@ -117,7 +117,7 @@ export const Search = () => {
             <ErrorIcon />
           </span>
           <SearchResult>
-            <div className="text">{error}</div>
+            <div className="text">{JSON.stringify(error)}</div>
           </SearchResult>
         </Dropdown>
       )}

@@ -11,9 +11,7 @@ export const OversiktKommerBarnetTilgode: React.FC<Props> = ({ kommerBarnetTilgo
     <Header>Vurdering om pensjonen kommer barnet til gode</Header>
     <SoeknadOversiktWrapper>
       <InfobokserWrapper>
-        <InfoWrapper>
-          <div>Barnet har samme adresse som gjenlevende forelder</div>
-        </InfoWrapper>
+        <InfoWrapper>Har barnet samme adresse som den gjenlevende forelder?</InfoWrapper>
       </InfobokserWrapper>
       <VurderingsWrapper>
         <KommerBarnetTilGodeVurdering kommerBarnetTilgode={kommerBarnetTilgode} />

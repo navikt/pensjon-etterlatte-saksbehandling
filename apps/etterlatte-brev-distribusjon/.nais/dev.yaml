@@ -22,6 +22,7 @@ spec:
   azure:
     application:
       enabled: true
+      tenant: trygdeetaten.no
   replicas:
     cpuThresholdPercentage: 90
     max: 1

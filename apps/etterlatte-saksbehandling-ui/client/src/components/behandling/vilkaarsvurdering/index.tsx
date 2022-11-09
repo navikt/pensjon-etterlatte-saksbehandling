@@ -33,6 +33,8 @@ export const Inngangsvilkaar = () => {
         if (response.status == 'ok') {
           setStatus(RequestStatus.ok)
           oppdaterVilkaarsvurdering(response.data)
+        } else if (response.statusCode == 412) {
+          setStatus(RequestStatus.preconditionFailed)
         } else {
           setStatus(RequestStatus.error)
         }
@@ -80,6 +82,9 @@ export const Inngangsvilkaar = () => {
       {vilkaarsvurdering?.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
       {status === RequestStatus.isloading && <Spinner visible={true} label={'Henter vilkårsvurdering'} />}
       {status === RequestStatus.error && <p>En feil har oppstått</p>}
+      {status === RequestStatus.preconditionFailed && (
+        <p>Virkningstidspunkt må avklares før vilkårsvurdering kan starte</p>
+      )}
     </Content>
   )
 }

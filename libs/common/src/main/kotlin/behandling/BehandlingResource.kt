@@ -31,5 +31,6 @@ data class DetaljertBehandling(
     val status: BehandlingStatus?,
     val behandlingType: BehandlingType?,
     val virkningstidspunkt: Virkningstidspunkt?,
-    val kommerBarnetTilgode: KommerBarnetTilgode?
+    val kommerBarnetTilgode: KommerBarnetTilgode?,
+    val revurderingsaarsak: RevurderingAarsak? = null
 )

@@ -31,10 +31,10 @@ export function hentKildenavn(type?: KildeType): string {
   }
 }
 
-
 export enum RequestStatus {
-    notStarted,
-    isloading,
-    error,
-    ok,
+  notStarted,
+  isloading,
+  error,
+  ok,
+  preconditionFailed,
 }

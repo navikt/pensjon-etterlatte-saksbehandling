@@ -50,6 +50,10 @@ spec:
     - name: KAFKA_RESET_POLICY
     #sette tilbake til none senere
       value: latest
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:
     inbound:
       rules:

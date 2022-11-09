@@ -1,10 +1,13 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.domene.vedtak.Sak
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.toJson
@@ -16,7 +19,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonRevurderingSoekerDoedVilkaar
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
@@ -50,7 +52,6 @@ class VilkaarsvurderingService(
         sakType: SakType,
         behandlingType: BehandlingType,
         virkningstidspunkt: LocalDate,
-        payload: JsonNode,
         grunnlag: Grunnlag,
         revurderingAarsak: RevurderingAarsak?
     ): VilkaarsvurderingIntern {
@@ -61,7 +62,6 @@ class VilkaarsvurderingService(
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
                                 behandlingId,
-                                payload,
                                 barnepensjonFoerstegangsbehandlingVilkaar(
                                     grunnlag,
                                     virkningstidspunkt.let {
@@ -80,7 +80,6 @@ class VilkaarsvurderingService(
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
                                 behandlingId,
-                                payload,
                                 mapVilkaarRevurdering(requireNotNull(revurderingAarsak)),
                                 virkningstidspunkt
                             )
@@ -94,16 +93,6 @@ class VilkaarsvurderingService(
             SakType.OMSTILLINGSSTOENAD ->
                 throw UgyldigSakTypeException("Støtter ikke vilkårsvurdering for sakType=$sakType")
         }
-    }
-
-    fun oppdaterVilkaarsvurderingPayload(
-        behandlingId: UUID,
-        payload: JsonNode,
-        virkningstidspunkt: LocalDate
-    ): VilkaarsvurderingIntern {
-        return vilkaarsvurderingRepository.hent(behandlingId)?.let {
-            vilkaarsvurderingRepository.lagre(it.copy(payload = payload, virkningstidspunkt = virkningstidspunkt))
-        } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
     fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): VilkaarsvurderingIntern {
@@ -140,11 +129,30 @@ class VilkaarsvurderingService(
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun publiserVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingIntern) {
-        val oppdatertPayload = JsonMessage(vilkaarsvurdering.payload.toJson(), MessageProblems("{}"), null)
+    fun publiserVilkaarsvurdering(
+        vilkaarsvurdering: VilkaarsvurderingIntern,
+        grunnlag: Grunnlag,
+        behandling: DetaljertBehandling
+    ) {
+        // Bygger midlertidig opp en melding for å tilfredsstille beregning og vedtaksvurdering.
+        val message = JsonMessage.newMessage(BehandlingGrunnlagEndret.eventName)
+            .apply {
+                this["sak"] = Sak(
+                    behandling.soeker!!,
+                    SakType.BARNEPENSJON.toString(),
+                    behandling.sak
+                )
+            }
+            .apply { this["fnrSoeker"] = behandling.soeker!! }
+            .apply {
+                this["behandling"] =
+                    Behandling(behandling.behandlingType!!, behandling.id)
+            }
             .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDomain() }
+            .apply { this["virkningstidspunkt"] = YearMonth.from(vilkaarsvurdering.virkningstidspunkt) }
+            .apply { this["grunnlag"] = grunnlag }
 
-        sendToRapid(oppdatertPayload.toJson(), vilkaarsvurdering.behandlingId)
+        sendToRapid(message.toJson(), vilkaarsvurdering.behandlingId)
     }
 
     private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar): Vilkaar =

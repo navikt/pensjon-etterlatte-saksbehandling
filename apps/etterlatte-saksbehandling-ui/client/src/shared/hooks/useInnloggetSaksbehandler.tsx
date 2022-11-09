@@ -10,8 +10,8 @@ const useInnloggetSaksbehandler = () => {
 
   useEffect(() => {
     hentSaksbehandler({}, (response) => {
-      if (response.data) {
-        dispatch(setSaksbehandler(response.data))
+      if (response) {
+        dispatch(setSaksbehandler(response))
       }
     })
   }, [])

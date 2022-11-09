@@ -26,6 +26,7 @@ app.use('/health', healthRouter)
 
 if (isDev) {
   app.use(cors({ origin: 'http://localhost:3000' }))
+  app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
   if (process.env.VILKAARSVURDERING_DEV) {
     app.use('/api/vilkaarsvurdering', lokalProxy('http://localhost:8087/api/vilkaarsvurdering'))
   }

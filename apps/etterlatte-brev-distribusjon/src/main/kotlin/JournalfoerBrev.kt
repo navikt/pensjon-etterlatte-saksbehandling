@@ -33,13 +33,18 @@ internal class JournalfoerBrev(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet.correlationId) {
-            logger.info("Starter journalføring av brev.")
+        try {
+            withLogContext(packet.correlationId) {
+                logger.info("Starter journalføring av brev.")
 
-            val melding = packet.distribusjonsmelding()
-            val journalpostResponse = journalpostService.journalfoer(melding)
+                val melding = packet.distribusjonsmelding()
+                val journalpostResponse = journalpostService.journalfoer(melding)
 
-            rapidsConnection.svarSuksess(packet, journalpostResponse)
+                rapidsConnection.svarSuksess(packet, journalpostResponse)
+            }
+        } catch (ex: Exception) {
+            logger.error("Klarte ikke journalføre brev:", ex)
+            throw ex
         }
     }
 

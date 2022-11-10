@@ -46,10 +46,6 @@ export const EndreVurdering = ({
 
   function reset() {
     setRedigeringsModusFalse()
-    setSvar(undefined)
-    setRadioError(undefined)
-    setKommentar('')
-    setBegrunnelseError(undefined)
   }
 
   return (
@@ -67,7 +63,7 @@ export const EndreVurdering = ({
             setSvar(JaNei[event as JaNei])
             setRadioError(undefined)
           }}
-          value={svar}
+          value={svar || ''}
           error={radioError ? radioError : false}
         >
           <div className="flex">

@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostDokument
 import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import org.slf4j.LoggerFactory
+import java.util.*
 
 interface JournalpostService {
     fun journalfoer(melding: DistribusjonMelding): JournalpostResponse
@@ -70,5 +71,5 @@ private fun Mottaker.tilAvsenderMottaker() = when {
 private fun ByteArray.tilJournalpostDokument(melding: DistribusjonMelding) = JournalpostDokument(
     tittel = melding.tittel,
     brevkode = melding.brevKode,
-    dokumentvarianter = listOf(DokumentVariant.ArkivPDF(this.toString()))
+    dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(this)))
 )

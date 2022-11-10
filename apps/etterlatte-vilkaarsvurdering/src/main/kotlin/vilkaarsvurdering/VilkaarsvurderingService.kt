@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -73,7 +72,7 @@ class VilkaarsvurderingService(
                                     }
                                 ),
                                 virkningstidspunkt = virkningstidspunkt,
-                                metadata = grunnlag.metadata
+                                grunnlagsmetadata = grunnlag.metadata
                             )
                         )
 
@@ -83,7 +82,7 @@ class VilkaarsvurderingService(
                                 behandlingId = behandlingId,
                                 vilkaar = mapVilkaarRevurdering(requireNotNull(revurderingAarsak)),
                                 virkningstidspunkt = virkningstidspunkt,
-                                metadata = grunnlag.metadata
+                                grunnlagsmetadata = grunnlag.metadata
                             )
                         )
 

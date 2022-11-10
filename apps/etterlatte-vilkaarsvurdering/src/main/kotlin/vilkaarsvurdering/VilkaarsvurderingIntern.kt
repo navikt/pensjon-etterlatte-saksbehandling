@@ -12,7 +12,7 @@ data class VilkaarsvurderingIntern(
     val vilkaar: List<Vilkaar>,
     val virkningstidspunkt: LocalDate,
     val resultat: VilkaarsvurderingResultat? = null,
-    val metadata: Metadata
+    val grunnlagsmetadata: Metadata
 ) {
     fun toDomain() = Vilkaarsvurdering(
         behandlingId = this.behandlingId,

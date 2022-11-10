@@ -36,7 +36,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                         "vilkaar" to vilkaarsvurdering.vilkaar.toJson(),
                         "resultat" to vilkaarsvurdering.resultat?.toJson(),
                         "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt,
-                        "metadata" to vilkaarsvurdering.metadata.toJson()
+                        "metadata" to vilkaarsvurdering.grunnlagsmetadata.toJson()
                     )
                 ).let { query -> tx.run(query.asUpdate) }
             }
@@ -54,7 +54,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                 resultat?.let { objectMapper.readValue(it) }
             },
             virkningstidspunkt = localDate("virkningstidspunkt"),
-            metadata = string("metadata").let { metadata -> objectMapper.readValue(metadata) }
+            grunnlagsmetadata = string("metadata").let { metadata -> objectMapper.readValue(metadata) }
         )
     }
 }

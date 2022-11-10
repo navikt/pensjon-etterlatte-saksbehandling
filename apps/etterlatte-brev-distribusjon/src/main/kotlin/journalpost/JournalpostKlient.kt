@@ -21,7 +21,7 @@ class JournalpostKlient(private val client: HttpClient, private val url: String)
     private val logger = LoggerFactory.getLogger(JournalpostKlient::class.java)
 
     suspend fun opprettJournalpost(request: JournalpostRequest, ferdigstill: Boolean): JournalpostResponse = try {
-        client.post("$url?forsoekFerdigstill=$ferdigstill") {
+        client.post("$url") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             header(X_CORRELATION_ID, getXCorrelationId())

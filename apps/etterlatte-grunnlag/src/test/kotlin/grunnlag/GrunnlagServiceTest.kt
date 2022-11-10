@@ -70,8 +70,33 @@ internal class GrunnlagServiceTest {
                 fnr = fnr,
                 verdi = personRolle.toJsonNode(),
                 kilde = kilde
+            ),
+            lagGrunnlagHendelse(
+                1,
+                4,
+                PERSONGALLERI_V1,
+                id = statiskUuid,
+                fnr = fnr,
+                verdi = testData.hentPersonGalleri().toJsonNode(),
+                kilde = kilde
             )
         )
+
+        @Test
+        fun `skal hente opptil versjon av grunnlag`() {
+            val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.foedselsnummer, PersonRolle.BARN)
+
+            every { opplysningerMock.finnGrunnlagOpptilVersjon(1, 4) } returns grunnlagshendelser
+
+            val actual = grunnlagService.hentOpplysningsgrunnlagMedVersjon(1, 4)
+            val expected = mapOf(
+                NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
+                FOEDSELSDATO to Opplysning.Konstant(statiskUuid, kilde, nyFødselsdag.toJsonNode())
+            )
+
+            Assertions.assertEquals(expected[NAVN], actual?.soeker?.get(NAVN))
+            Assertions.assertEquals(expected[FOEDSELSDATO], actual?.soeker?.get(FOEDSELSDATO))
+        }
 
         @Test
         fun `skal mappe om dataen fra DB til søker`() {

@@ -15,6 +15,7 @@ interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
     fun lagreNyeOpplysninger(sak: Long, fnr: Foedselsnummer?, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
     fun hentOpplysningsgrunnlag(sak: Long): Grunnlag?
+    fun hentOpplysningsgrunnlagMedVersjon(sak: Long, versjon: Long): Grunnlag?
     fun hentOpplysningsgrunnlag(
         sak: Long,
         persongalleri: Persongalleri
@@ -41,6 +42,15 @@ class RealGrunnlagService(private val opplysningDao: OpplysningDao) : GrunnlagSe
         val grunnlag = opplysningDao.hentAlleGrunnlagForSak(sak)
 
         return OpplysningsgrunnlagMapper(grunnlag, sak, persongalleri).hentGrunnlag()
+    }
+
+    override fun hentOpplysningsgrunnlagMedVersjon(sak: Long, versjon: Long): Grunnlag? {
+        val grunnlag = opplysningDao.finnGrunnlagOpptilVersjon(sak, versjon)
+
+        val personGalleri = grunnlag.find { it.opplysning.opplysningType === Opplysningstype.PERSONGALLERI_V1 }
+            ?.let { objectMapper.readValue(it.opplysning.toJson(), Persongalleri::class.java) } ?: return null
+
+        return OpplysningsgrunnlagMapper(grunnlag, sak, personGalleri).hentGrunnlag()
     }
 
     override fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>? {

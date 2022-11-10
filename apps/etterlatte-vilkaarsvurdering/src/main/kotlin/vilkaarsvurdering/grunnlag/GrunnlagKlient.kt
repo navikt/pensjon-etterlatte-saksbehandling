@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 
 interface GrunnlagKlient {
     suspend fun hentGrunnlag(sakId: Long, accessToken: String): Grunnlag
+    suspend fun hentGrunnlagMedVersjon(sakId: Long, versjon: Long, accessToken: String): Grunnlag
 }
 
 class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlient {
@@ -50,6 +51,38 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                 is Success -> it.content
                 is Failure -> {
                     logger.error("Klarte ikke hente ut grunnlag for sak med id $sakId. ", it.lastError())
+                    throw it.exceptions.last()
+                }
+            }
+        }
+    }
+
+    override suspend fun hentGrunnlagMedVersjon(sakId: Long, versjon: Long, accessToken: String): Grunnlag {
+        logger.info("Henter grunnlag med for sak med id = $sakId og versjon $versjon")
+
+        return retry<Grunnlag> {
+            val json = downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/grunnlag/$sakId/$versjon"
+                    ),
+                    accessToken = accessToken
+                )
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+
+            objectMapper.readValue(json.toString())
+        }.let {
+            when (it) {
+                is Success -> it.content
+                is Failure -> {
+                    logger.error(
+                        "Klarte ikke hente ut grunnlag for sak med id $sakId og versjon $versjon ",
+                        it.lastError()
+                    )
                     throw it.exceptions.last()
                 }
             }

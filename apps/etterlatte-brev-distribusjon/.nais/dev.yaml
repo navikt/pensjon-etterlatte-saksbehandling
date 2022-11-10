@@ -48,3 +48,5 @@ spec:
     outbound:
       rules:
         - application: etterlatte-brev-api
+    external:
+      - host: dokarkiv.dev-fss-pub.nais.io

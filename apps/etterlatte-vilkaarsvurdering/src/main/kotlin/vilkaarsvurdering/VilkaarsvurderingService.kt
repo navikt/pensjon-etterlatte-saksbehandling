@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -61,8 +60,8 @@ class VilkaarsvurderingService(
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
-                                behandlingId,
-                                barnepensjonFoerstegangsbehandlingVilkaar(
+                                behandlingId = behandlingId,
+                                vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(
                                     grunnlag,
                                     virkningstidspunkt.let {
                                         // TODO fjern dette når virkningstidspunkt kommer inn
@@ -72,16 +71,18 @@ class VilkaarsvurderingService(
                                         )
                                     }
                                 ),
-                                virkningstidspunkt
+                                virkningstidspunkt = virkningstidspunkt,
+                                grunnlagsmetadata = grunnlag.metadata
                             )
                         )
 
                     BehandlingType.REVURDERING ->
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
-                                behandlingId,
-                                mapVilkaarRevurdering(requireNotNull(revurderingAarsak)),
-                                virkningstidspunkt
+                                behandlingId = behandlingId,
+                                vilkaar = mapVilkaarRevurdering(requireNotNull(revurderingAarsak)),
+                                virkningstidspunkt = virkningstidspunkt,
+                                grunnlagsmetadata = grunnlag.metadata
                             )
                         )
 

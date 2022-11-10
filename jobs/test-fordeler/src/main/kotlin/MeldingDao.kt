@@ -53,7 +53,7 @@ fun payload(fnr: String) = """
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "12101376212",
+        "svar": "02051272059",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {
@@ -79,7 +79,7 @@ fun payload(fnr: String) = """
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "12101376212",
+            "svar": "02051272059",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"

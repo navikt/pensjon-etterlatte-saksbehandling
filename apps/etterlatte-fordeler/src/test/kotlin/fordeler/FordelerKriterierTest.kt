@@ -249,7 +249,7 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
-                barn = listOf(Foedselsnummer.of(barn.foedselsnummer.value), Foedselsnummer.of("12101376212")),
+                barn = listOf(Foedselsnummer.of(barn.foedselsnummer.value), Foedselsnummer.of("02051272059")),
                 ansvarligeForeldre = null,
                 foreldre = null
             )

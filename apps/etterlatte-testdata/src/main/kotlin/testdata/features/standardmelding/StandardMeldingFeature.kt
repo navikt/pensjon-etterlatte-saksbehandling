@@ -17,7 +17,7 @@ import no.nav.etterlatte.producer
 import java.time.OffsetDateTime
 import java.util.UUID
 
-const val aremark_person = "12101376212"
+const val aremark_person = "02051272059"
 
 object StandardMeldingFeature : TestDataFeature {
     override val beskrivelse: String

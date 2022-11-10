@@ -28,7 +28,7 @@ internal class MappersTest {
         val barn = vedtak.finnBarn()
 
         barn.navn shouldBe "TALENTFULL BLYANT"
-        barn.fnr shouldBe "12101376212"
+        barn.fnr shouldBe "02051272059"
     }
 
     @Test

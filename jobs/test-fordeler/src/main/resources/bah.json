@@ -52,7 +52,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "12101376212",
+        "svar": "02051272059",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {
@@ -78,7 +78,7 @@
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "12101376212",
+            "svar": "02051272059",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"
@@ -209,7 +209,7 @@
   },
   "@lagret_soeknad_id": 682,
   "@template": "soeknad",
-  "@fnr_soeker": "12101376212",
+  "@fnr_soeker": "02051272059",
   "@hendelse_gyldig_til": "2023-02-18T08:52:15.614677856Z",
   "system_read_count": 2,
   "system_participating_services": [

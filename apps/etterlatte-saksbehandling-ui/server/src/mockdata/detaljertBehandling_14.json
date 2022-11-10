@@ -116,7 +116,7 @@
                 },
                 "opplysning": {
                   "foedselsdato": "2013-10-12",
-                  "foedselsnummer": "12101376212"
+                  "foedselsnummer": "02051272059"
                 }
               }
             ]
@@ -905,7 +905,10 @@
         "familieRelasjon": {
           "ansvarligeForeldre": null,
           "foreldre": null,
-          "barn": ["12101376212", "03108718357"]
+          "barn": [
+            "02051272059",
+            "03108718357"
+          ]
         }
       }
     }

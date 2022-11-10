@@ -59,7 +59,7 @@ class JournalpostServiceImpl(
 }
 
 private fun Mottaker.tilAvsenderMottaker() = when {
-    foedselsnummer != null -> AvsenderMottaker(id = foedselsnummer!!.value)
+    foedselsnummer != null -> AvsenderMottaker(id = "22107622946") // Bytt ut med foedselsnummer!!.value
     orgnummer != null -> AvsenderMottaker(id = orgnummer, idType = "ORGNR")
     adresse != null -> {
         val navn = "${adresse!!.fornavn} ${adresse!!.etternavn}"

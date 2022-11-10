@@ -32,15 +32,21 @@ class DollyService(
      */
     fun hentFamilier(gruppeId: Long, accessToken: String): List<ForenkletFamilieModell> = runBlocking {
         dollyClient.hentTestGruppeBestillinger(gruppeId, accessToken, 0, 10).let { bestillinger ->
-            dollyClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken).map { personResponse ->
-                ForenkletFamilieModell(
-                    avdoed = personResponse.ident,
-                    gjenlevende = personResponse.person.sivilstand.first { it.type == "GIFT" }.relatertVedSivilstand,
-                    barn = personResponse.person.forelderBarnRelasjon
-                        .filter { it.barn }
-                        .map { it.relatertPersonsIdent }
-                )
-            }
+            dollyClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken)
+                .mapNotNull { personResponse ->
+                    val gjenlevendeEktefelle =
+                        personResponse.person.sivilstand.firstOrNull { it.type == "GIFT" }?.relatertVedSivilstand
+                    when (gjenlevendeEktefelle) {
+                        null -> null
+                        else -> ForenkletFamilieModell(
+                            avdoed = personResponse.ident,
+                            gjenlevende = gjenlevendeEktefelle,
+                            barn = personResponse.person.forelderBarnRelasjon
+                                .filter { it.barn }
+                                .map { it.relatertPersonsIdent }
+                        )
+                    }
+                }
         }
     }
 

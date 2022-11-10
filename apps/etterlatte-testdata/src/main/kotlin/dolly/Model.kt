@@ -36,7 +36,7 @@ data class ForelderBarnRelasjon(
     val barn: Boolean
 )
 
-data class Sivilstand(val type: String, val relatertVedSivilstand: String)
+data class Sivilstand(val type: String, val relatertVedSivilstand: String?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Doedsfall(val doedsdato: String)

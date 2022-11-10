@@ -16,7 +16,7 @@ dependencies {
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.ClientAuth)
 
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:ktor2client-onbehalfof"))
 
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.ModuleKotlin)

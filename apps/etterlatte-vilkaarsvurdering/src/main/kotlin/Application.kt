@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationBuilder
+import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
@@ -35,7 +36,11 @@ fun main() {
     application.start()
 }
 
-fun Application.restModule(vilkaarsvurderingService: VilkaarsvurderingService, behandlingKlient: BehandlingKlient) {
+fun Application.restModule(
+    vilkaarsvurderingService: VilkaarsvurderingService,
+    behandlingKlient: BehandlingKlient,
+    grunnlagKlient: GrunnlagKlient
+) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
@@ -62,7 +67,7 @@ fun Application.restModule(vilkaarsvurderingService: VilkaarsvurderingService, b
 
     routing {
         authenticate {
-            vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
+            vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient, grunnlagKlient)
         }
     }
 }

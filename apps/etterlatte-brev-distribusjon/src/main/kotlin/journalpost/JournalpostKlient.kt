@@ -25,7 +25,7 @@ class JournalpostKlient(private val client: HttpClient, private val url: String)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             header(X_CORRELATION_ID, getXCorrelationId())
-            setBody(request.toJson())
+            setBody(request)
         }.body()
     } catch (responseException: ResponseException) {
         logger.error("Feil i kall mot Dokarkiv: ", responseException)

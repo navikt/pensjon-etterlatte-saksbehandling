@@ -33,6 +33,7 @@ export const EndreVurdering = ({
       lagreBegrunnelseKommerBarnetTilgode(behandlingId, kommentar, svar.toString()).then((response) => {
         if (response.status === 'ok') {
           dispatch(oppdaterKommerBarnetTilgode(response.data))
+          reset()
         }
       })
   }

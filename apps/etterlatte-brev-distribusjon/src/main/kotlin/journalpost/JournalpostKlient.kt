@@ -21,7 +21,7 @@ class JournalpostKlient(private val client: HttpClient, private val url: String)
     private val logger = LoggerFactory.getLogger(JournalpostKlient::class.java)
 
     suspend fun opprettJournalpost(request: JournalpostRequest, ferdigstill: Boolean): JournalpostResponse = try {
-        client.post("$url") {
+        client.post("$url?forsoekFerdigstill=$ferdigstill") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             header(X_CORRELATION_ID, getXCorrelationId())
@@ -29,6 +29,7 @@ class JournalpostKlient(private val client: HttpClient, private val url: String)
         }.body()
     } catch (responseException: ResponseException) {
         logger.error("Feil i kall mot Dokarkiv: ", responseException)
+        logger.error("Feilen kom etter følgende request: $request", request) // Todo: Fjerne denne
 
         throw when (responseException.response.status.value) {
             HttpStatusCode.Conflict.value -> DuplikatJournalpostException("Duplikat journalpost", responseException)

@@ -35,7 +35,7 @@ class DollyService(
             dollyClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken).map { personResponse ->
                 ForenkletFamilieModell(
                     avdoed = personResponse.ident,
-                    gjenlevende = personResponse.person.sivilstand.first().relatertVedSivilstand,
+                    gjenlevende = personResponse.person.sivilstand.first { it.type == "GIFT" }.relatertVedSivilstand,
                     barn = personResponse.person.forelderBarnRelasjon
                         .filter { it.barn }
                         .map { it.relatertPersonsIdent }

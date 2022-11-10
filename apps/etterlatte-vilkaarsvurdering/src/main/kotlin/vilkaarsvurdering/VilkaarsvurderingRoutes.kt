@@ -14,11 +14,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.RetryResult.Failure
-import no.nav.etterlatte.libs.common.RetryResult.Success
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
@@ -26,11 +23,16 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
+import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDateTime
 import java.util.*
 
-fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, behandlingKlient: BehandlingKlient) {
+fun Route.vilkaarsvurdering(
+    vilkaarsvurderingService: VilkaarsvurderingService,
+    behandlingKlient: BehandlingKlient,
+    grunnlagKlient: GrunnlagKlient
+) {
     route("/api/vilkaarsvurdering") {
         val logger = application.log
 
@@ -38,34 +40,25 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
             withBehandlingId { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
                 when (val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)) {
-                    null -> when (val behandling = behandlingKlient.hentBehandling(behandlingId)) {
-                        is Success -> {
-                            if (behandling.content.kanStarteVilkaarsvurdering()) {
-                                val nyVilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(
-                                    behandlingId = behandlingId,
-                                    sakType = SakType.BARNEPENSJON, // todo: Støtte for omstillingsstønad
-                                    behandlingType = behandling.content.behandlingType!!,
-                                    // todo: Endre til kompleks type
-                                    virkningstidspunkt = behandling.content.virkningstidspunkt!!.dato.atDay(1),
-                                    grunnlag = Grunnlag.empty(), // todo: Hente grunnlag fra ny tjeneste.
-                                    revurderingAarsak = behandling.content.revurderingsaarsak
-                                )
-                                call.respond(nyVilkaarsvurdering)
-                            } else {
-                                logger.info(
-                                    "Kan ikke opprette vilkårsvurdering for $behandlingId " +
-                                        "før virkningstidspunkt er satt"
-                                )
-                                call.respond(HttpStatusCode.PreconditionFailed)
-                            }
-                        }
-                        is Failure -> {
-                            logger.error(
-                                "Klarte ikke hente ut behandling med id $behandlingId. " +
-                                    "Klarer ikke å opprette vilkårsvurdering.",
-                                behandling.lastError()
+                    null -> {
+                        val accessToken = getAccessToken(call)
+                        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+
+                        if (behandling.kanStarteVilkaarsvurdering()) {
+                            val nyVilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(
+                                behandlingId = behandlingId,
+                                sakType = SakType.BARNEPENSJON, // todo: Støtte for omstillingsstønad
+                                behandlingType = behandling.behandlingType!!,
+                                virkningstidspunkt = behandling.virkningstidspunkt!!.dato.atDay(1),
+                                grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken),
+                                revurderingAarsak = behandling.revurderingsaarsak
                             )
-                            call.respond(HttpStatusCode.InternalServerError)
+                            call.respond(nyVilkaarsvurdering)
+                        } else {
+                            logger.info(
+                                "Kan ikke opprette vilkårsvurdering for $behandlingId før virkningstidspunkt er satt"
+                            )
+                            call.respond(HttpStatusCode.PreconditionFailed)
                         }
                     }
                     else -> call.respond(vilkaarsvurdering.toDto())
@@ -105,37 +98,31 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
                 withBehandlingId { behandlingId ->
                     val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
 
-                    when (val behandling = behandlingKlient.hentBehandling(behandlingId)) {
-                        is Success -> {
-                            logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
-                            val oppdatertVilkaarsvurdering =
-                                vilkaarsvurderingService.oppdaterTotalVurdering(
-                                    behandlingId,
-                                    toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler)
-                                )
-                            vilkaarsvurderingService.publiserVilkaarsvurdering(
-                                oppdatertVilkaarsvurdering,
-                                Grunnlag.empty(),
-                                behandling.content
-                            )
+                    logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
 
-                            call.respond(oppdatertVilkaarsvurdering)
-                        }
-                        is Failure -> {
-                            logger.error("Klarte ikke hente behandling med id $behandlingId ved lagring av resultat")
-                            call.respond(HttpStatusCode.InternalServerError)
-                        }
-                    }
-                }
-            }
-
-            delete("/{behandlingId}") {
-                withBehandlingId { behandlingId ->
-                    logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
-                    val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
+                    val accessToken = getAccessToken(call)
+                    val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+                    val oppdatertVilkaarsvurdering = vilkaarsvurderingService.oppdaterTotalVurdering(
+                        behandlingId,
+                        toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler)
+                    )
+                    vilkaarsvurderingService.publiserVilkaarsvurdering(
+                        vilkaarsvurdering = oppdatertVilkaarsvurdering,
+                        grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken),
+                        behandling = behandling
+                    )
 
                     call.respond(oppdatertVilkaarsvurdering)
                 }
+            }
+        }
+
+        delete("/{behandlingId}") {
+            withBehandlingId { behandlingId ->
+                logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
+                val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
+
+                call.respond(oppdatertVilkaarsvurdering)
             }
         }
     }

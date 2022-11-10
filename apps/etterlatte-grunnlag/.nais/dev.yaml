@@ -47,3 +47,4 @@ spec:
     inbound:
       rules:
         - application: etterlatte-api
+        - application: etterlatte-vilkaarsvurdering

@@ -1,4 +1,4 @@
-import { IDetaljertBehandling, Virkningstidspunkt } from '../../store/reducers/BehandlingReducer'
+import { IDetaljertBehandling, Virkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { apiClient, ApiResponse } from './apiClient'
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {

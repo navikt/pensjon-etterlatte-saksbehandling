@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { HistorikkElement } from '../soeknadsoversikt/styled'
-import { IAdresse } from '../../../store/reducers/BehandlingReducer'
+import { IAdresse } from '~store/reducers/BehandlingReducer'
 
 export const Adressevisning = ({
   adresser,

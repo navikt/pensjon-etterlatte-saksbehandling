@@ -1,11 +1,11 @@
-import { IPdlPerson } from '../../../../../store/reducers/BehandlingReducer'
-import { PersonStatus, RelatertPersonsRolle } from '../../../types'
+import { IPdlPerson } from '~store/reducers/BehandlingReducer'
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
-import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
-import { ForelderWrap } from '../../styled'
+import { PeopleIcon } from '~shared/icons/peopleIcon'
 import { format } from 'date-fns'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
+import { PersonStatus, RelatertPersonsRolle } from '~components/behandling/types'
+import { ForelderWrap } from '../../styled'
 
 type Props = {
   person: IPdlPerson

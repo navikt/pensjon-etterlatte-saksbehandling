@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
-import { hentBehandling } from '../../shared/api/behandling'
-import { GridContainer, MainContent } from '../../shared/styled'
-import { addBehandling, resetBehandling } from '../../store/reducers/BehandlingReducer'
-import Spinner from '../../shared/Spinner'
-import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
+import { hentBehandling } from '~shared/api/behandling'
+import { GridContainer, MainContent } from '~shared/styled'
+import { addBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
+import Spinner from '~shared/Spinner'
+import { StatusBar, StatusBarTheme } from '~shared/statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny'
-import { useAppDispatch, useAppSelector } from '../../store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 
 export const Behandling = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)

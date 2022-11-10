@@ -1,6 +1,6 @@
 import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
-import { attesterVedtak, hentBehandling } from '../../../../shared/api/behandling'
+import { attesterVedtak, hentBehandling } from '~shared/api/behandling'
 import { ButtonWrapper } from '../styled'
 import { GeneriskModal } from '../modal'
 

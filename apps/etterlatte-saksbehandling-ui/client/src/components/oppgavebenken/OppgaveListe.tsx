@@ -18,7 +18,7 @@ import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
 import { globalFilterFunction, tildeltFilterFunction } from './filtere/oppgaveListeFiltere'
-import { useAppSelector } from '../../store/Store'
+import { useAppSelector } from '~store/Store'
 
 type Props = {
   columns: ReadonlyArray<Column<IOppgave>>

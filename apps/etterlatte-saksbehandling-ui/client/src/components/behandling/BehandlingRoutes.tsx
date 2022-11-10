@@ -4,8 +4,8 @@ import { Beregne } from './beregne'
 import { Inngangsvilkaar as InngangsvilkaarV2 } from './vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag'
-import { IBehandlingsType } from '../../store/reducers/BehandlingReducer'
-import { useAppSelector } from '../../store/Store'
+import { IBehandlingsType } from '~store/reducers/BehandlingReducer'
+import { useAppSelector } from '~store/Store'
 import { Vedtaksbrev } from './vedtaksbrev'
 
 const behandlingRoutes = [

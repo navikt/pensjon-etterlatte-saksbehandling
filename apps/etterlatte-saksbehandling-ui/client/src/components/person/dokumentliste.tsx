@@ -1,9 +1,9 @@
 import { Alert, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { Journalpost } from '../behandling/types'
-import { formaterStringDato } from '../../utils/formattering'
+import { formaterStringDato } from '~utils/formattering'
 import DokumentModal from './dokumentModal'
-import Spinner from '../../shared/Spinner'
+import Spinner from '~shared/Spinner'
 
 const colonner = ['Journalpost id', 'Tittel', 'Avsender', 'Dato', 'Status', 'Type', '']
 

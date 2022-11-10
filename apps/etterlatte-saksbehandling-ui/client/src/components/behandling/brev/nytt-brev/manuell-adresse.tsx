@@ -1,4 +1,4 @@
-import { Adresse } from '../../../../shared/api/brev'
+import { Adresse } from '~shared/api/brev'
 import { Cell, Grid, TextField } from '@navikt/ds-react'
 import { Dispatch, SetStateAction } from 'react'
 

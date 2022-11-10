@@ -1,4 +1,4 @@
-import { Adresse } from '../../../../shared/api/brev'
+import { Adresse } from '~shared/api/brev'
 import { Cell, Grid, TextField, Tabs, Select } from '@navikt/ds-react'
 import { useState } from 'react'
 import { DefaultMottaker } from './last-opp'

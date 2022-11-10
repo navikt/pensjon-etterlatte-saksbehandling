@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { hentInnloggetSaksbehandler } from '../api/user'
-import { useAppDispatch } from '../../store/Store'
-import { setSaksbehandler } from '../../store/reducers/SaksbehandlerReducer'
+import { useAppDispatch } from '~store/Store'
+import { setSaksbehandler } from '~store/reducers/SaksbehandlerReducer'
 import { isSuccess, useApiCall } from './useApiCall'
 
 const useInnloggetSaksbehandler = () => {

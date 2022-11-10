@@ -1,4 +1,4 @@
-import { formaterEnumTilLesbarString } from '../../../utils/formattering'
+import { formaterEnumTilLesbarString } from '~utils/formattering'
 import { ColorTagBehandling } from './styled'
 
 export enum ISaksType {

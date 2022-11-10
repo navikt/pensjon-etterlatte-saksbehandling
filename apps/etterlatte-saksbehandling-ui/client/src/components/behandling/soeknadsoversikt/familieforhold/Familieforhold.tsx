@@ -3,14 +3,14 @@ import { Heading } from '@navikt/ds-react'
 import { AvdoedForelder } from './personer/AvdoedForelder'
 import { GjenlevendeForelder } from './personer/GjenlevendeForelder'
 import { Barn } from './personer/Barn'
-import { ContentHeader } from '../../../../shared/styled'
+import { ContentHeader } from '~shared/styled'
 import { Border, DashedBorder } from '../styled'
 import {
   GyldigFramsattType,
   IDetaljertBehandling,
   IGyldighetproving,
   VurderingsResultat,
-} from '../../../../store/reducers/BehandlingReducer'
+} from '~store/reducers/BehandlingReducer'
 import { SoeskenListe } from './personer/Soesken'
 
 export interface PropsFamilieforhold {

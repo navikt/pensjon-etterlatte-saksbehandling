@@ -1,6 +1,6 @@
-import { useAppSelector } from '../../store/Store'
-import { IBehandlingsType } from '../../store/reducers/BehandlingReducer'
-import { VilkaarsvurderingResultat } from '../../shared/api/vilkaarsvurdering'
+import { useAppSelector } from '~store/Store'
+import { IBehandlingsType } from '~store/reducers/BehandlingReducer'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 
 // Dette er en midlertidig workaround i frontend fram til vi får noe mer rimelig rundt hva er vedtaksresultat i backend
 // Laget som en felles greie slik at

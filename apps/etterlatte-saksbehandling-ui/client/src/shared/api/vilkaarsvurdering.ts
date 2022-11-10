@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from './apiClient'
-import { KildeType } from '../../store/reducers/BehandlingReducer'
+import { KildeType } from '~store/reducers/BehandlingReducer'
 
 export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
   apiClient.get<Vilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}`)

@@ -1,4 +1,4 @@
-import { VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { OversiktElement } from '../OversiktElement'
 
 export const Adresse = ({ resultat, tekst }: { resultat: VurderingsResultat | undefined; tekst: string }) => {

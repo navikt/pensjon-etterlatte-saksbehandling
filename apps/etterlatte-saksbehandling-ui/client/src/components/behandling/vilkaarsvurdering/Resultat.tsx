@@ -7,14 +7,14 @@ import {
   slettTotalVurdering,
   Vilkaarsvurdering,
   VilkaarsvurderingResultat,
-} from '../../../shared/api/vilkaarsvurdering'
+} from '~shared/api/vilkaarsvurdering'
 import { VilkaarBorder } from './styled'
 import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
-import { ISvar, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { ISvar, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { svarTilTotalResultat } from './utils'
 import { Delete } from '@navikt/ds-icons'
-import { StatusIcon } from '../../../shared/icons/statusIcon'
-import { formaterStringDato } from '../../../utils/formattering'
+import { StatusIcon } from '~shared/icons/statusIcon'
+import { formaterStringDato } from '~utils/formattering'
 
 type Props = {
   dato: string

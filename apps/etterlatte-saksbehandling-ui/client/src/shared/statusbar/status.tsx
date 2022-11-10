@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import { formaterEnumTilLesbarString } from '../../utils/formattering'
-import { PersonStatus } from '../../components/behandling/types'
+import { formaterEnumTilLesbarString } from '~utils/formattering'
+import { PersonStatus } from '~components/behandling/types'
 
 export interface IStatus {
   status: PersonStatus

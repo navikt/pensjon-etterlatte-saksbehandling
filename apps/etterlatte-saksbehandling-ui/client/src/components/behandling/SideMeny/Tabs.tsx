@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { ClockIcon } from '../../../shared/icons/clockIcon'
-import { DialogIcon } from '../../../shared/icons/dialogIcon'
-import { FolderIcon } from '../../../shared/icons/folderIcon'
+import { ClockIcon } from '~shared/icons/clockIcon'
+import { DialogIcon } from '~shared/icons/dialogIcon'
+import { FolderIcon } from '~shared/icons/folderIcon'
 import styled from 'styled-components'
 
 export const Tab = () => {

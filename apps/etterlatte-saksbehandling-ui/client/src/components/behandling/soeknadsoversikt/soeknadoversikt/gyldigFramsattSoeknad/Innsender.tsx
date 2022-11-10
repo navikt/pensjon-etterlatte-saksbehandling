@@ -1,4 +1,4 @@
-import { IGyldighetproving, VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
+import { IGyldighetproving, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { OversiktElement } from '../OversiktElement'
 
 interface Props {

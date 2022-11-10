@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Button, Link } from '@navikt/ds-react'
-import { Modal } from '../../../shared/modal/modal'
-import { WarningText } from '../../../shared/styled'
-import { avbrytBehandling } from '../../../shared/api/behandling'
+import { Modal } from '~shared/modal/modal'
+import { WarningText } from '~shared/styled'
+import { avbrytBehandling } from '~shared/api/behandling'
 import { useMatch, useNavigate } from 'react-router'
 import { handlinger } from './typer'
-import { ApiResponse } from '../../../shared/api/apiClient'
+import { ApiResponse } from '~shared/api/apiClient'
 
 export const AvbrytBehandling = () => {
   const navigate = useNavigate()

@@ -1,4 +1,4 @@
-import { JaNei, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { JaNei, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 
 export function hentGyldighetsTekst(
   innsenderErForelder: VurderingsResultat | undefined,

@@ -3,10 +3,10 @@ import { Button, Heading } from '@navikt/ds-react'
 import { initialOppgaveFelter, IOppgaveFelter } from './typer/oppgavefelter'
 import styled from 'styled-components'
 import 'react-datepicker/dist/react-datepicker.css'
-import '../../index.css'
+import '~index.css'
 import { GlobalFilter } from './filtere/GlobalFilter'
 import ColumnFilters from './filtere/ColumnFilters'
-import { useAppSelector } from '../../store/Store'
+import { useAppSelector } from '~store/Store'
 
 type Props = {
   oppgaveFelter: IOppgaveFelter

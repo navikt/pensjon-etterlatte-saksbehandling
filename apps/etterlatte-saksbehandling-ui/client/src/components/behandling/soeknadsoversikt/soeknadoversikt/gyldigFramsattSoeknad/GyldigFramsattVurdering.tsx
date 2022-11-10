@@ -1,12 +1,8 @@
-import {
-  IGyldighetproving,
-  IGyldighetResultat,
-  VurderingsResultat,
-} from '../../../../../store/reducers/BehandlingReducer'
+import { IGyldighetproving, IGyldighetResultat, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { format } from 'date-fns'
-import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
+import { GyldighetIcon } from '~shared/icons/gyldigIcon'
+import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
 import { hentGyldighetsTekst } from '../../utils'
-import { VurderingsContainer, VurderingsTitle, Undertekst } from '../../styled'
 
 export const GyldigFramsattVurdering = ({
   gyldigFramsatt,

@@ -1,5 +1,5 @@
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
-import { IKommerBarnetTilgode } from '../../../../../store/reducers/BehandlingReducer'
+import { IKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
 import { Header, InfobokserWrapper, InfoWrapper, SoeknadOversiktWrapper, VurderingsWrapper } from '../../styled'
 
 interface Props {

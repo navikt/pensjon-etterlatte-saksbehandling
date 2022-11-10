@@ -1,6 +1,6 @@
 import { ColorTagBehandling } from './styled'
-import { IBehandlingsType } from '../../../store/reducers/BehandlingReducer'
-import { formaterEnumTilLesbarString } from '../../../utils/formattering'
+import { IBehandlingsType } from '~store/reducers/BehandlingReducer'
+import { formaterEnumTilLesbarString } from '~utils/formattering'
 
 const colors = {
   [IBehandlingsType.FØRSTEGANGSBEHANDLING]: '#826ba1',

@@ -1,8 +1,8 @@
-import { IBehandlingInfo } from '../../SideMeny/types'
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
-import { formaterDato, formaterEnumTilLesbarString, formaterStringDato } from '../../../../utils/formattering'
-import { useVedtaksResultat, VedtakResultat } from '../../useVedtaksResultat'
-import { useAppSelector } from '../../../../store/Store'
+import { formaterDato, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
+import { useAppSelector } from '~store/Store'
+import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
+import { VedtakResultat, useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 
 function innvilgelsestekst(vedtaksresultat: VedtakResultat): string {
   switch (vedtaksresultat) {

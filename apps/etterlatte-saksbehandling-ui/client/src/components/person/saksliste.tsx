@@ -1,8 +1,8 @@
 import { Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { AarsaksTyper, IBehandlingsammendrag } from './typer'
-import { formaterStringDato, formaterEnumTilLesbarString } from '../../utils/formattering'
-import { IBehandlingStatus } from '../../store/reducers/BehandlingReducer'
+import { formaterStringDato, formaterEnumTilLesbarString } from '~utils/formattering'
+import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
 
 const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
 

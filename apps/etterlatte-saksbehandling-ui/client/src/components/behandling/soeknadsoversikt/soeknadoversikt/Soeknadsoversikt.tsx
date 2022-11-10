@@ -1,6 +1,6 @@
 import { OversiktGyldigFramsatt } from './gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { OversiktKommerBarnetTilgode } from './kommerBarnetTilgode/OversiktKommerBarnetTilgode'
-import { IDetaljertBehandling, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { IDetaljertBehandling, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { Innhold } from '../styled'
 import Virkningstidspunkt from './virkningstidspunkt/Virkningstidspunkt'
 

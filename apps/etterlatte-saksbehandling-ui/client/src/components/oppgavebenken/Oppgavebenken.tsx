@@ -13,9 +13,9 @@ import {
 import { Column } from 'react-table'
 import { kolonner } from './OppgaveKolonner'
 import { initialOppgaveFelter, IOppgaveFelter } from './typer/oppgavefelter'
-import { hentOppgaver, OppgaveDTO } from '../../shared/api/oppgaver'
-import Spinner from '../../shared/Spinner'
-import { useAppSelector } from '../../store/Store'
+import { hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
+import Spinner from '~shared/Spinner'
+import { useAppSelector } from '~store/Store'
 
 const OppgavebenkContainer = styled.div`
   max-width: 60em;

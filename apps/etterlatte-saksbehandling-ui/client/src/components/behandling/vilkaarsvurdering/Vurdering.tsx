@@ -6,7 +6,7 @@ import {
   Vilkaarsvurdering,
   VurderingsResultat,
   vurderVilkaar,
-} from '../../../shared/api/vilkaarsvurdering'
+} from '~shared/api/vilkaarsvurdering'
 import styled from 'styled-components'
 import { format } from 'date-fns'
 import { Delete, Edit } from '@navikt/ds-icons'

@@ -1,9 +1,9 @@
-import { Vilkaarsgrunnlag } from '../../../../shared/api/vilkaarsvurdering'
+import { Vilkaarsgrunnlag } from '~shared/api/vilkaarsvurdering'
 import styled from 'styled-components'
 import { VilkaarColumn } from '../styled'
 import { hentKildenavn } from '../utils'
-import { formaterStringDato } from '../../../../utils/formattering'
-import { KildeType } from '../../../../store/reducers/BehandlingReducer'
+import { formaterStringDato } from '~utils/formattering'
+import { KildeType } from '~store/reducers/BehandlingReducer'
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
   const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'FOEDSELSDATO')

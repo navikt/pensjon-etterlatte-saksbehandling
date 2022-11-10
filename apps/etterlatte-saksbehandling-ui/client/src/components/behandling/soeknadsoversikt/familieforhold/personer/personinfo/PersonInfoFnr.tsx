@@ -1,4 +1,4 @@
-import { PersonDetailWrapper } from '../../../styled'
+import { PersonDetailWrapper } from '~components/behandling/soeknadsoversikt/styled'
 
 type Props = {
   fnr: string | undefined

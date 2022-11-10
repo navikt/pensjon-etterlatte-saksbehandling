@@ -1,5 +1,5 @@
-import { ISvar, KildeType } from '../../../store/reducers/BehandlingReducer'
-import { VilkaarsvurderingResultat } from '../../../shared/api/vilkaarsvurdering'
+import { ISvar, KildeType } from '~store/reducers/BehandlingReducer'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 
 export const svarTilTotalResultat = (svar: ISvar) => {
   switch (svar) {
@@ -31,10 +31,9 @@ export function hentKildenavn(type?: KildeType): string {
   }
 }
 
-
 export enum RequestStatus {
-    notStarted,
-    isloading,
-    error,
-    ok,
+  notStarted,
+  isloading,
+  error,
+  ok,
 }

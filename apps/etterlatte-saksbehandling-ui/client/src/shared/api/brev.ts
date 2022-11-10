@@ -1,4 +1,4 @@
-import { JournalpostResponse } from '../../components/behandling/types'
+import { JournalpostResponse } from '~components/behandling/types'
 
 export const hentMaler = async (): Promise<Mal[]> => await fetch(`/brev/maler`).then((res) => res.json())
 

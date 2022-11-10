@@ -1,5 +1,5 @@
 import { Button } from '@navikt/ds-react'
-import { Modal } from '../../../shared/modal/modal'
+import { Modal } from '~shared/modal/modal'
 import styled from 'styled-components'
 
 export type Props = {

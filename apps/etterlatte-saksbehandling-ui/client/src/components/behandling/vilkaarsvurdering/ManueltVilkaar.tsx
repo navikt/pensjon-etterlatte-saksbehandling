@@ -11,10 +11,10 @@ import {
   VilkaarWrapper,
 } from './styled'
 import React from 'react'
-import { Vilkaar, Vilkaarsvurdering, VurderingsResultat } from '../../../shared/api/vilkaarsvurdering'
+import { Vilkaar, Vilkaarsvurdering, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
-import { VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
-import { StatusIcon } from '../../../shared/icons/statusIcon'
+import { VurderingsResultat as VurderingsresultatOld } from '~store/reducers/BehandlingReducer'
+import { StatusIcon } from '~shared/icons/statusIcon'
 import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 import { Link } from '@navikt/ds-react'
 

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -10,7 +11,8 @@ data class VilkaarsvurderingIntern(
     val behandlingId: UUID,
     val vilkaar: List<Vilkaar>,
     val virkningstidspunkt: LocalDate,
-    val resultat: VilkaarsvurderingResultat? = null
+    val resultat: VilkaarsvurderingResultat? = null,
+    val metadata: Metadata
 ) {
     fun toDomain() = Vilkaarsvurdering(
         behandlingId = this.behandlingId,

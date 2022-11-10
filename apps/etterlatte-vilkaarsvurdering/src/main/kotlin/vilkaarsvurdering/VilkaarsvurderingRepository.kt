@@ -35,7 +35,8 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                         "behandlingId" to vilkaarsvurdering.behandlingId,
                         "vilkaar" to vilkaarsvurdering.vilkaar.toJson(),
                         "resultat" to vilkaarsvurdering.resultat?.toJson(),
-                        "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt
+                        "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt,
+                        "metadata" to vilkaarsvurdering.metadata.toJson()
                     )
                 ).let { query -> tx.run(query.asUpdate) }
             }
@@ -52,23 +53,24 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
             resultat = stringOrNull("resultat").let { resultat ->
                 resultat?.let { objectMapper.readValue(it) }
             },
-            virkningstidspunkt = localDate("virkningstidspunkt")
+            virkningstidspunkt = localDate("virkningstidspunkt"),
+            metadata = string("metadata").let { metadata -> objectMapper.readValue(metadata) }
         )
     }
 }
 
 private object Queries {
     val hentVilkaarsvurdering = """
-        |SELECT behandlingId, vilkaar, resultat, virkningstidspunkt 
+        |SELECT behandlingId, vilkaar, resultat, virkningstidspunkt, metadata 
         |FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID
     """.trimMargin()
 
     val lagreVilkaarsvurdering = """
-        |INSERT INTO vilkaarsvurdering(behandlingId, vilkaar, resultat, virkningstidspunkt) 
-        |VALUES(:behandlingId::UUID, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::DATE) 
+        |INSERT INTO vilkaarsvurdering(behandlingId, vilkaar, resultat, virkningstidspunkt, metadata) 
+        |VALUES(:behandlingId::UUID, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::DATE, :metadata::JSONB) 
         |ON CONFLICT (behandlingId)  
         |DO UPDATE SET 
         |   vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat,  
-        |   virkningstidspunkt = EXCLUDED.virkningstidspunkt
+        |   virkningstidspunkt = EXCLUDED.virkningstidspunkt, metadata = EXCLUDED.metadata
     """.trimMargin()
 }

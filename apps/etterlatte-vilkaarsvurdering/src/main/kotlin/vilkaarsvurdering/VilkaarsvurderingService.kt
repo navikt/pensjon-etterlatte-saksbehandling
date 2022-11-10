@@ -61,8 +61,8 @@ class VilkaarsvurderingService(
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
-                                behandlingId,
-                                barnepensjonFoerstegangsbehandlingVilkaar(
+                                behandlingId = behandlingId,
+                                vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(
                                     grunnlag,
                                     virkningstidspunkt.let {
                                         // TODO fjern dette når virkningstidspunkt kommer inn
@@ -72,16 +72,18 @@ class VilkaarsvurderingService(
                                         )
                                     }
                                 ),
-                                virkningstidspunkt
+                                virkningstidspunkt = virkningstidspunkt,
+                                metadata = grunnlag.metadata
                             )
                         )
 
                     BehandlingType.REVURDERING ->
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
-                                behandlingId,
-                                mapVilkaarRevurdering(requireNotNull(revurderingAarsak)),
-                                virkningstidspunkt
+                                behandlingId = behandlingId,
+                                vilkaar = mapVilkaarRevurdering(requireNotNull(revurderingAarsak)),
+                                virkningstidspunkt = virkningstidspunkt,
+                                metadata = grunnlag.metadata
                             )
                         )
 

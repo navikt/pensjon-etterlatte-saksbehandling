@@ -58,4 +58,5 @@ spec:
         - application: etterlatte-grunnlag
     inbound:
       rules:
+        - application: ey-sak-lokal
         - application: etterlatte-saksbehandling-ui

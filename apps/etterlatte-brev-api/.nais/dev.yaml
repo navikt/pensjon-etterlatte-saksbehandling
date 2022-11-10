@@ -59,6 +59,7 @@ spec:
         - application: etterlatte-pdl-proxy
     inbound:
       rules:
+        - application: ey-sak-lokal
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-brev-distribusjon
       external:

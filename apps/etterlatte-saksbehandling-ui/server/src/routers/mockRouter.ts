@@ -32,6 +32,12 @@ mockRouter.get(`/behandling/:id`, (req: Request, res: Response) => {
   }, 1000)
 })
 
+mockRouter.post(`/behandling/:id/kommerbarnettilgode`, (req: Request, res: Response) => {
+  setTimeout(() => {
+    res.json(req.body)
+  }, 300)
+})
+
 mockRouter.post(`/vedtak/:id`, (req: Request, res: Response) => {
   // let vedtakIverksatt = require(`../mockdata/detaljertBehandling_${id}.json`)
   setTimeout(() => {

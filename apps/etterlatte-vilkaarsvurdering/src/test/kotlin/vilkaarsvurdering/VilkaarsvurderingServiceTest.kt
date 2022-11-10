@@ -214,15 +214,17 @@ internal class VilkaarsvurderingServiceTest {
     @Test
     fun `Skal publisere vilkaarsvurdering paa kafka paa et format vedtaksvurering og beregning forstaar`() {
         val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
+        val emptyGrunnlag = Grunnlag.empty()
         val vilkaarsvurderingIntern = VilkaarsvurderingIntern(
             vilkaarsvurdering.behandlingId,
             emptyList(),
             LocalDate.now(),
-            vilkaarsvurdering.resultat
+            vilkaarsvurdering.resultat,
+            emptyGrunnlag.metadata
         )
         val payloadContent = slot<String>()
 
-        service.publiserVilkaarsvurdering(vilkaarsvurderingIntern, Grunnlag.empty(), detaljertBehandling())
+        service.publiserVilkaarsvurdering(vilkaarsvurderingIntern, emptyGrunnlag, detaljertBehandling())
 
         verify(exactly = 1) {
             sendToRapid.invoke(capture(payloadContent), vilkaarsvurdering.behandlingId)

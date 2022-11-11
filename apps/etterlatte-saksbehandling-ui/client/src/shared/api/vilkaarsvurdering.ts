@@ -89,7 +89,6 @@ export interface VurdertResultat {
 
 export interface Paragraf {
   paragraf: string
-  tittel: string
   lenke: string
 }
 

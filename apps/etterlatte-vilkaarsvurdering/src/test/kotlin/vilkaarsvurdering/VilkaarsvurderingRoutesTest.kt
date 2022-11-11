@@ -114,13 +114,13 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(behandlingId, vilkaarsvurdering.behandlingId)
             assertEquals(VilkaarType.DOEDSFALL_FORELDER, vilkaar.hovedvilkaar.type)
-            assertEquals("§ 18-4", vilkaar.hovedvilkaar.paragraf.paragraf)
-            assertEquals("Dødsfall forelder", vilkaar.hovedvilkaar.paragraf.tittel)
+            assertEquals("§ 18-4", vilkaar.hovedvilkaar.lovreferanse.paragraf)
+            assertEquals("Dødsfall forelder", vilkaar.hovedvilkaar.tittel)
             assertEquals(
                 "En eller begge foreldrene er registrert død",
-                vilkaar.hovedvilkaar.paragraf.lovtekst
+                vilkaar.hovedvilkaar.beskrivelse
             )
-            assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-4", vilkaar.hovedvilkaar.paragraf.lenke)
+            assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-4", vilkaar.hovedvilkaar.lovreferanse.lenke)
             assertNull(vilkaar.vurdering)
         }
     }

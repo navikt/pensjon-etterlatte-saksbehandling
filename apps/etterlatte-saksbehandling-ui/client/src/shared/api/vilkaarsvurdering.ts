@@ -67,13 +67,17 @@ interface KildePdl {
 
 export interface Hovedvilkaar {
   type: string
-  paragraf: Paragraf
+  tittel: string
+  beskrivelse: string
+  lovreferanse: Paragraf
   resultat?: VurderingsResultat
 }
 
 export interface Unntaksvilkaar {
   type: string
-  paragraf: Paragraf
+  tittel: string
+  beskrivelse?: string
+  lovreferanse: Paragraf
   resultat?: VurderingsResultat
 }
 
@@ -87,7 +91,6 @@ export interface Paragraf {
   paragraf: string
   tittel: string
   lenke: string
-  lovtekst: string
 }
 
 export enum VurderingsResultat {

@@ -6,13 +6,13 @@ import { formaterStringDato } from '~utils/formattering'
 import { KildeType } from '~store/reducers/BehandlingReducer'
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
-  const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'FOEDSELSDATO')
-  const doedsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'DOEDSDATO')
+  const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'SOEKER_FOEDSELSDATO')
+  const doedsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'AVDOED_DOEDSDATO')
   const virkningstidspunktGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'VIRKNINGSTIDSPUNKT')
 
   const foedselsdatoKilde = foedselsdatoGrunnlag?.kilde
-  const foedselsdato = foedselsdatoGrunnlag?.opplysning.foedselsdato
-  const doedsdato = doedsdatoGrunnlag?.opplysning.doedsdato
+  const foedselsdato = foedselsdatoGrunnlag?.opplysning
+  const doedsdato = doedsdatoGrunnlag?.opplysning
   const doedsdatoKilde = doedsdatoGrunnlag?.kilde
   const virkningstidspunkt = virkningstidspunktGrunnlag?.opplysning
   const virkningstidspunktKilde = virkningstidspunktGrunnlag?.kilde

@@ -54,8 +54,8 @@ const Virkningstidspunkt = () => {
       <SoeknadOversiktWrapper>
         <InfobokserWrapper>
           <Infoboks>
-            Barnepensjon innvilges som hovedregel fra og med måneden etter dødsfall, men kan gis for opptil tre år før
-            den måneden da kravet ble satt fram
+            Barnepensjon innvilges tidligst fra og med måneden etter dødsfall, og kan gis for opptil tre år før måneden
+            kravet ble satt fram
           </Infoboks>
           <Info label="Dødsdato" tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : ''} />
           <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />

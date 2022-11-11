@@ -34,6 +34,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import vilkaarsvurdering.VilkaarsvurderingTestData
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 

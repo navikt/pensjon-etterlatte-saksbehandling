@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { useAppSelector } from '../../store/Store'
+import { useAppSelector } from '~store/Store'
 
 export const Bruker = () => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)

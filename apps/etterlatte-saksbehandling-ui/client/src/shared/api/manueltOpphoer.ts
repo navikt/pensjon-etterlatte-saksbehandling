@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from './apiClient'
-import { Opphoersgrunn } from '../../components/person/ManueltOpphoerModal'
+import { Opphoersgrunn } from '~components/person/ManueltOpphoerModal'
 
 export type ManueltOpphoerResponse = {
   behandlingId: string

@@ -6,7 +6,7 @@ import {
   IVilkaarsproving,
   KriterieOpplysningsType,
   Kriterietype,
-} from '../../../store/reducers/BehandlingReducer'
+} from '~store/reducers/BehandlingReducer'
 import { isAfter } from 'date-fns'
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {

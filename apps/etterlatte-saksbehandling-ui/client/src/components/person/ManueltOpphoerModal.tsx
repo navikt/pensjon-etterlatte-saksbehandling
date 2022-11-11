@@ -3,7 +3,7 @@ import React, { FormEvent, useEffect, useState } from 'react'
 import { Button, Checkbox, CheckboxGroup, Heading, Modal, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
-import { sendInnManueltOpphoer } from '../../shared/api/manueltOpphoer'
+import { sendInnManueltOpphoer } from '~shared/api/manueltOpphoer'
 
 export const OPPHOERSGRUNNER = ['UTFLYTTING_FRA_NORGE', 'SOESKEN_DOED', 'GJENLEVENDE_FORELDER_DOED', 'ANNET'] as const
 

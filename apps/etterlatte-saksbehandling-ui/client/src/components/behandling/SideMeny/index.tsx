@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { IBehandlingInfo } from './types'
 import { BehandlingInfo } from '../attestering'
-import { IHendelseType } from '../../../store/reducers/BehandlingReducer'
-import { useAppSelector } from '../../../store/Store'
+import { IHendelseType } from '~store/reducers/BehandlingReducer'
+import { useAppSelector } from '~store/Store'
 import { Button } from '@navikt/ds-react'
-import { CollapsibleSidebar, SidebarContent, SidebarTools } from '../../../shared/styled'
+import { CollapsibleSidebar, SidebarContent, SidebarTools } from '~shared/styled'
 
 export const SideMeny = () => {
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)

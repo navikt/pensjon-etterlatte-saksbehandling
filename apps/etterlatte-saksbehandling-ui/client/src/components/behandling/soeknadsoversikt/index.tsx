@@ -1,7 +1,7 @@
-import { Content, ContentHeader } from '../../../shared/styled'
+import { Content, ContentHeader } from '~shared/styled'
 import { SoeknadOversikt } from './soeknadoversikt/Soeknadsoversikt'
 import { Familieforhold } from './familieforhold/Familieforhold'
-import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { Border, HeadingWrapper } from './styled'
 import { BehandlingsType } from '../fargetags/behandlingsType'
 import { ISaksType, SaksType } from '../fargetags/saksType'
@@ -11,7 +11,7 @@ import { Start } from '../handlinger/start'
 import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { hentBehandlesFraStatus } from '../felles/utils'
-import { useAppSelector } from '../../../store/Store'
+import { useAppSelector } from '~store/Store'
 
 export const Soeknadsoversikt = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)

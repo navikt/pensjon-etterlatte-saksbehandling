@@ -6,7 +6,7 @@ import {
   Utflyttingshendelse,
 } from '../typer'
 import { Table } from '@navikt/ds-react'
-import { formaterStringDato } from '../../../utils/formattering'
+import { formaterStringDato } from '~utils/formattering'
 
 const teksterForGrunnlagshendelser: Record<GrunnlagsendringsType, string> = {
   GJENLEVENDE_FORELDER_DOED: 'Dødsfall gjenlevende forelder',

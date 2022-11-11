@@ -1,11 +1,11 @@
-import { IKommerBarnetTilgode, JaNei, JaNeiRec } from '../../../../../store/reducers/BehandlingReducer'
-import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
+import { IKommerBarnetTilgode, JaNei, JaNeiRec } from '~store/reducers/BehandlingReducer'
+import { GyldighetIcon } from '~shared/icons/gyldigIcon'
 import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
-import { CaseworkerfilledIcon } from '../../../../../shared/icons/caseworkerfilledIcon'
+import { CaseworkerfilledIcon } from '~shared/icons/caseworkerfilledIcon'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { EndreVurdering } from './EndreVurdering'
-import { formaterStringDato } from '../../../../../utils/formattering'
+import { formaterStringDato } from '~utils/formattering'
 import { svarTilVurderingsstatus } from '../../utils'
 
 export const KommerBarnetTilGodeVurdering = ({

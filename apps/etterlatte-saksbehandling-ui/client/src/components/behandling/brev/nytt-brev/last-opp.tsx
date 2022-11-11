@@ -2,13 +2,13 @@ import { Button, Loader, Modal, TextField, Alert } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { Add } from '@navikt/ds-icons'
 import styled from 'styled-components'
-import { Adresse, hentMottakere, Mottaker, opprettBrevFraPDF } from '../../../../shared/api/brev'
+import { Adresse, hentMottakere, Mottaker, opprettBrevFraPDF } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
-import { Border } from '../../soeknadsoversikt/styled'
-import { Column, GridContainer } from '../../../../shared/styled'
+import { Column, GridContainer } from '~shared/styled'
 import { PdfVisning } from '../pdf-visning'
 import { MottakerComponent } from './mottaker'
-import { IBrev } from "../index";
+import { IBrev } from '../index'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -93,7 +93,7 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev
 
     const formData = new FormData()
 
-    formData.append('fil', (valgtFil as Blob), valgtFil!!.name)
+    formData.append('fil', valgtFil as Blob, valgtFil!!.name)
     formData.append('filData', JSON.stringify(filData))
 
     opprettBrevFraPDF(behandlingId!!, brevMottaker, formData)

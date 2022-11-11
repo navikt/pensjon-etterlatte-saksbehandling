@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { VurderingsResultat } from '../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '~store/reducers/BehandlingReducer'
 
 export const GyldighetIcon = (props: { status: VurderingsResultat; large?: boolean }) => {
   return (

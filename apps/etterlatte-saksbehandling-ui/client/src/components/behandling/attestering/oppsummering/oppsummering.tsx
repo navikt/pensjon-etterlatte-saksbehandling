@@ -1,9 +1,9 @@
-import { IBehandlingInfo } from '../../SideMeny/types'
-import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
 import { Underkjent } from './underkjent'
 import { Oversikt } from './oversikt'
 import { IBeslutning } from '../types'
 import { Innvilget } from './innvilget'
+import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 
 type Props = {
   beslutning: IBeslutning | undefined

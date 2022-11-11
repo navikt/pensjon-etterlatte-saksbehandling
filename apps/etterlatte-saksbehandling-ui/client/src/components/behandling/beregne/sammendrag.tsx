@@ -2,10 +2,10 @@ import { BodyShort, Button, Label, Popover, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
-import { useAppSelector } from '../../../store/Store'
+import { useAppSelector } from '~store/Store'
 import { InformationColored } from '@navikt/ds-icons'
 import { differenceInYears, lastDayOfMonth } from 'date-fns'
-import { formaterDato, formaterStringDato } from '../../../utils/formattering'
+import { formaterDato, formaterStringDato } from '~utils/formattering'
 
 interface ToolTipPerson {
   fornavn: string

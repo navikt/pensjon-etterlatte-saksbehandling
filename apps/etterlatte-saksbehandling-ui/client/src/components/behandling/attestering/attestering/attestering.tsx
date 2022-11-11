@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import { SynchronizeIcon } from '../../../../shared/icons/synchronizeIcon'
-import { useBehandlingRoutes } from '../../BehandlingRoutes'
+import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { SynchronizeIcon } from '~shared/icons/synchronizeIcon'
 import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
 

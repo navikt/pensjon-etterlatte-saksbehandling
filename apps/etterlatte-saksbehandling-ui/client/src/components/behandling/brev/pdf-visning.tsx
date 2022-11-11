@@ -1,6 +1,6 @@
 import { BodyLong } from '@navikt/ds-react'
 import styled from 'styled-components'
-import Spinner from '../../../shared/Spinner'
+import Spinner from '~shared/Spinner'
 
 const PdfViewer = styled.iframe`
   min-width: 680px;

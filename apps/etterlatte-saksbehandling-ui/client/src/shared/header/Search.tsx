@@ -6,7 +6,7 @@ import { getPerson } from '../api/person'
 import { ErrorIcon } from '../icons/errorIcon'
 import { InformationIcon } from '../icons/informationIcon'
 import { PeopleIcon } from '../icons/peopleIcon'
-import { IPersonResult } from '../../components/person/typer'
+import { IPersonResult } from '~components/person/typer'
 import { ApiResponse } from '../api/apiClient'
 
 export const Search = () => {

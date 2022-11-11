@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import Spinner from '../../shared/Spinner'
-import { Container } from '../../shared/styled'
+import Spinner from '~shared/Spinner'
+import { Container } from '~shared/styled'
 
 export const Testside = () => {
   const [input, setInput] = useState<string>('')

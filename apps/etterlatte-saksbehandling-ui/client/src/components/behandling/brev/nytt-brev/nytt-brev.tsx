@@ -10,15 +10,15 @@ import {
   Mal,
   Mottaker,
   nyttBrevForBehandling,
-} from '../../../../shared/api/brev'
+} from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
-import { Border } from '../../soeknadsoversikt/styled'
-import { Column, GridContainer } from '../../../../shared/styled'
+import { Column, GridContainer } from '~shared/styled'
 import { PdfVisning } from '../pdf-visning'
 import { MottakerComponent } from './mottaker'
 import { isEmptyAddressObject } from './last-opp'
 import { IBrev } from '../index'
-import { useAppSelector } from '../../../../store/Store'
+import { useAppSelector } from '~store/Store'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 
 const CustomModal = styled(Modal)`
   min-width: 540px;

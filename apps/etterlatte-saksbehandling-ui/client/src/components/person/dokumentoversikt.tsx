@@ -1,7 +1,7 @@
 import { Dokumentliste } from './dokumentliste'
 import styled from 'styled-components'
 import { useEffect, useState } from 'react'
-import { hentDokumenter } from '../../shared/api/brev'
+import { hentDokumenter } from '~shared/api/brev'
 import { Journalpost } from '../behandling/types'
 
 export const Dokumentoversikt = (props: any) => {

@@ -1,15 +1,15 @@
-import { Content, ContentHeader } from '../../../shared/styled'
+import { Content, ContentHeader } from '~shared/styled'
 import { useEffect, useState } from 'react'
 import { Heading, Select } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingsType } from '../fargetags/behandlingsType'
 import { ISaksType, SaksType } from '../fargetags/saksType'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { genererPdf, opprettEllerOppdaterBrevForVedtak } from '../../../shared/api/brev'
+import { genererPdf, opprettEllerOppdaterBrevForVedtak } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import styled from 'styled-components'
-import { useAppSelector } from '../../../store/Store'
+import { useAppSelector } from '~store/Store'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import { PdfVisning } from '../brev/pdf-visning'
 import {
@@ -17,7 +17,7 @@ import {
   Vilkaarsvurdering,
   VilkaarsvurderingResultat,
   VurderingsResultat,
-} from '../../../shared/api/vilkaarsvurdering'
+} from '~shared/api/vilkaarsvurdering'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 
 interface VilkaarOption {

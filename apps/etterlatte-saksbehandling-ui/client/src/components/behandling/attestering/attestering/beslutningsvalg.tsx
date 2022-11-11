@@ -3,7 +3,7 @@ import { Underkjenn } from './underkjenn'
 import { RadioGroupWrapper } from '../styled'
 import { Godkjenn } from './godkjenn'
 import { IBeslutning } from '../types'
-import { useAppSelector } from '../../../../store/Store'
+import { useAppSelector } from '~store/Store'
 
 type Props = {
   beslutning: IBeslutning | undefined

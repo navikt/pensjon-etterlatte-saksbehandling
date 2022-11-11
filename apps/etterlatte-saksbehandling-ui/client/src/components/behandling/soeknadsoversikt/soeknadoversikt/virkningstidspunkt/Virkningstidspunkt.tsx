@@ -2,24 +2,24 @@ import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import { Alert, Button, Label, Loader } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
-import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
-import { oppdaterVirkningstidspunkt, VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
+import { GyldighetIcon } from '~shared/icons/gyldigIcon'
+import { oppdaterVirkningstidspunkt, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { Calender, Edit } from '@navikt/ds-icons'
 
+import { RedigerWrapper } from '../kommerBarnetTilgode/KommerBarnetTilGodeVurdering'
+import { formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
+import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
+import { useApiCall, isPending, isFailure } from '~shared/hooks/useApiCall'
 import {
   Header,
-  Infoboks,
-  InfobokserWrapper,
   SoeknadOversiktWrapper,
-  Undertekst,
+  InfobokserWrapper,
+  Infoboks,
   VurderingsContainer,
   VurderingsTitle,
+  Undertekst,
 } from '../../styled'
-import { RedigerWrapper } from '../kommerBarnetTilgode/KommerBarnetTilGodeVurdering'
-import { formaterStringDato, formaterStringTidspunkt } from '../../../../../utils/formattering'
-import { useAppDispatch, useAppSelector } from '../../../../../store/Store'
-import { fastsettVirkningstidspunkt } from '../../../../../shared/api/behandling'
-import { useApiCall, isPending, isFailure } from '../../../../../shared/hooks/useApiCall'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 
 export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
   return (

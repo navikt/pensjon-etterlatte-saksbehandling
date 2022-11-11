@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { getPerson } from '../../shared/api/person'
-import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
-import { Container } from '../../shared/styled'
+import { getPerson } from '~shared/api/person'
+import { StatusBar, StatusBarTheme } from '~shared/statusbar'
+import { Container } from '~shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
 import { Dokumenter, IPersonResult } from './typer'
-import Spinner from '../../shared/Spinner'
+import Spinner from '~shared/Spinner'
 
 const testDokumenter: Dokumenter = {
   brev: [

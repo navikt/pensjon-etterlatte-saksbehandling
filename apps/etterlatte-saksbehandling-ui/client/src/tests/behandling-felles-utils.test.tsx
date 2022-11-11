@@ -1,13 +1,13 @@
 import { it, describe, expect } from 'vitest'
+import { hentAdresserEtterDoedsdato, hentKriterierMedOpplysning } from '~components/behandling/felles/utils'
 import {
   IAdresse,
   IVilkaarsproving,
-  KriterieOpplysningsType,
-  Kriterietype,
   VilkaarsType,
+  Kriterietype,
+  KriterieOpplysningsType,
   VurderingsResultat,
-} from '../store/reducers/BehandlingReducer'
-import { hentAdresserEtterDoedsdato, hentKriterierMedOpplysning } from '../components/behandling/felles/utils'
+} from '~store/reducers/BehandlingReducer'
 
 const adresserMock: IAdresse[] = [
   {

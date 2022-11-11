@@ -1,5 +1,5 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
-import { Vilkaarsvurdering } from '../../shared/api/vilkaarsvurdering'
+import { Vilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 
 export interface IDetaljertBehandling {
   id: string

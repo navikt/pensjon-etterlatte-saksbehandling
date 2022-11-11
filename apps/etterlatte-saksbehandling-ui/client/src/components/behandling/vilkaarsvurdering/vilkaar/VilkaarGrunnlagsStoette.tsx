@@ -1,4 +1,4 @@
-import { Vilkaar } from '../../../../shared/api/vilkaarsvurdering'
+import { Vilkaar } from '~shared/api/vilkaarsvurdering'
 import { AlderBarn } from './AlderBarn'
 
 export const VilkaarGrunnlagsStoette = ({ vilkaar }: { vilkaar: Vilkaar }) => {

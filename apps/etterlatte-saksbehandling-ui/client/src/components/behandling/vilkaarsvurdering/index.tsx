@@ -1,15 +1,15 @@
-import { Content, Header } from '../../../shared/styled'
+import { Content, Header } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { hentVilkaarsvurdering, Vilkaarsvurdering } from '../../../shared/api/vilkaarsvurdering'
+import { hentVilkaarsvurdering, Vilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
 import { VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
 import { RequestStatus } from './utils'
-import Spinner from '../../../shared/Spinner'
+import Spinner from '~shared/Spinner'
 import { format } from 'date-fns'
-import { updateVilkaarsvurdering } from '../../../store/reducers/BehandlingReducer'
-import { useAppDispatch } from '../../../store/Store'
+import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
+import { useAppDispatch } from '~store/Store'
 
 export const Inngangsvilkaar = () => {
   const location = useLocation()

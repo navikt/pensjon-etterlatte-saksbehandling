@@ -1,12 +1,8 @@
 import styled from 'styled-components'
-import { useAppSelector } from '../../../../store/Store'
-import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
-import {
-  formaterEnumTilLesbarString,
-  formaterStringDato,
-  formaterStringTidspunkt,
-} from '../../../../utils/formattering'
-import { IBehandlingInfo } from '../../SideMeny/types'
+import { useAppSelector } from '~store/Store'
+import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
+import { formaterEnumTilLesbarString, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
+import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.ident)

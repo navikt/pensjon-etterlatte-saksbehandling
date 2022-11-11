@@ -1,4 +1,4 @@
-import { IBehandlingStatus, IBehandlingsType } from '../../store/reducers/BehandlingReducer'
+import { IBehandlingStatus, IBehandlingsType } from '~store/reducers/BehandlingReducer'
 
 export interface Dokument {
   dato: string

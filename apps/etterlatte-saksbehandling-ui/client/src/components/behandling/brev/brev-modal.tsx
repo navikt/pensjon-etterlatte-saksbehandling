@@ -1,10 +1,10 @@
 import { Button, Modal, Tag } from '@navikt/ds-react'
 import { useState } from 'react'
-import { genererPdf } from '../../../shared/api/brev'
+import { genererPdf } from '~shared/api/brev'
 import styled from 'styled-components'
 import { Delete, Findout, Notes, Success } from '@navikt/ds-icons'
 import { PdfVisning } from './pdf-visning'
-import Spinner from '../../../shared/Spinner'
+import Spinner from '~shared/Spinner'
 
 const ButtonRow = styled.div`
   background: white;

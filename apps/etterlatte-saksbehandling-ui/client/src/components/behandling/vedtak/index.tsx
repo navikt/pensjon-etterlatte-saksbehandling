@@ -1,4 +1,4 @@
-import { Content, ContentHeader } from '../../../shared/styled'
+import { Content, ContentHeader } from '~shared/styled'
 
 export const Vedtak = () => {
   return (

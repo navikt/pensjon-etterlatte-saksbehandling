@@ -1,12 +1,8 @@
-import { IBehandlingInfo } from '../../SideMeny/types'
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
-import { useAppSelector } from '../../../../store/Store'
-import {
-  formaterEnumTilLesbarString,
-  formaterStringDato,
-  formaterStringTidspunkt,
-} from '../../../../utils/formattering'
-import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
+import { useAppSelector } from '~store/Store'
+import { formaterEnumTilLesbarString, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
+import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
   const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.ident)

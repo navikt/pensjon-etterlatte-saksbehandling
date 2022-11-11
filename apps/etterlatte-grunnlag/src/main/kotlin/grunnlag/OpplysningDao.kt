@@ -90,6 +90,21 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().singleOrNull { asGrunnlagshendelse() }
         }
 
+    fun finnGrunnlagOpptilVersjon(sakId: Long, versjon: Long): List<GrunnlagHendelse> =
+        connection.use {
+            it.prepareStatement(
+                """
+                SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
+                FROM grunnlagshendelse hendelse 
+                WHERE hendelse.sak_id = ? AND hendelse.hendelsenummer <= ?
+                """.trimIndent()
+            )
+                .apply {
+                    setLong(1, sakId)
+                    setLong(2, versjon)
+                }.executeQuery().toList { asGrunnlagshendelse() }
+        }
+
     fun leggOpplysningTilGrunnlag(
         sakId: Long,
         behandlingsopplysning: Grunnlagsopplysning<JsonNode>,

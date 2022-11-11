@@ -108,7 +108,12 @@ fun Route.vilkaarsvurdering(
                     )
                     vilkaarsvurderingService.publiserVilkaarsvurdering(
                         vilkaarsvurdering = oppdatertVilkaarsvurdering,
-                        grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken),
+                        grunnlag = grunnlagKlient
+                            .hentGrunnlagMedVersjon(
+                                behandling.sak,
+                                oppdatertVilkaarsvurdering.grunnlagsmetadata.versjon,
+                                accessToken
+                            ),
                         behandling = behandling
                     )
 

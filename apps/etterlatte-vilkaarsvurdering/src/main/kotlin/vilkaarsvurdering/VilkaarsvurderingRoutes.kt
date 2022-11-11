@@ -49,7 +49,7 @@ fun Route.vilkaarsvurdering(
                                 behandlingId = behandlingId,
                                 sakType = SakType.BARNEPENSJON, // todo: Støtte for omstillingsstønad
                                 behandlingType = behandling.behandlingType!!,
-                                virkningstidspunkt = behandling.virkningstidspunkt!!.dato.atDay(1),
+                                virkningstidspunkt = behandling.virkningstidspunkt!!,
                                 grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken),
                                 revurderingAarsak = behandling.revurderingsaarsak
                             )
@@ -120,14 +120,14 @@ fun Route.vilkaarsvurdering(
                     call.respond(oppdatertVilkaarsvurdering)
                 }
             }
-        }
 
-        delete("/{behandlingId}") {
-            withBehandlingId { behandlingId ->
-                logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
-                val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
+            delete("/{behandlingId}") {
+                withBehandlingId { behandlingId ->
+                    logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
+                    val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
 
-                call.respond(oppdatertVilkaarsvurdering)
+                    call.respond(oppdatertVilkaarsvurdering)
+                }
             }
         }
     }

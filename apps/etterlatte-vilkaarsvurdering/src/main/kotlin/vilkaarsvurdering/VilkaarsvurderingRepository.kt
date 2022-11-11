@@ -35,7 +35,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                         "behandlingId" to vilkaarsvurdering.behandlingId,
                         "vilkaar" to vilkaarsvurdering.vilkaar.toJson(),
                         "resultat" to vilkaarsvurdering.resultat?.toJson(),
-                        "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt,
+                        "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt.toJson(),
                         "metadata" to vilkaarsvurdering.grunnlagsmetadata.toJson()
                     )
                 ).let { query -> tx.run(query.asUpdate) }
@@ -53,7 +53,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
             resultat = stringOrNull("resultat").let { resultat ->
                 resultat?.let { objectMapper.readValue(it) }
             },
-            virkningstidspunkt = localDate("virkningstidspunkt"),
+            virkningstidspunkt = string("virkningstidspunkt").let { virk -> objectMapper.readValue(virk) },
             grunnlagsmetadata = string("metadata").let { metadata -> objectMapper.readValue(metadata) }
         )
     }
@@ -67,7 +67,7 @@ private object Queries {
 
     val lagreVilkaarsvurdering = """
         |INSERT INTO vilkaarsvurdering(behandlingId, vilkaar, resultat, virkningstidspunkt, metadata) 
-        |VALUES(:behandlingId::UUID, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::DATE, :metadata::JSONB) 
+        |VALUES(:behandlingId::UUID, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::JSONB, :metadata::JSONB) 
         |ON CONFLICT (behandlingId)  
         |DO UPDATE SET 
         |   vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat,  

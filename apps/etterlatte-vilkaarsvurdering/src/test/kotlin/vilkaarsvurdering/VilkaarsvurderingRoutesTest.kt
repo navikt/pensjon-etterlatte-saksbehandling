@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import GrunnlagTestData
+import behandling.VirkningstidspunktTestData
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -18,7 +19,6 @@ import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -39,8 +39,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDate
-import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -72,6 +70,7 @@ internal class VilkaarsvurderingRoutesTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlagMedVersjon(any(), any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
     @AfterAll
@@ -120,11 +119,12 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
-    // todo: verifiser at denne fungerer etter vi har hentet grunnlag fra grunnlagstjenesten.
     @Test
     fun `skal opprette vilkaarsvurdering basert paa behandling dersom en ikke finnes`() {
         testApplication {
             application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
+
+            println(VirkningstidspunktTestData.virkningstidsunkt().toJson())
 
             val nyBehandlingId = UUID.randomUUID()
             val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
@@ -136,8 +136,8 @@ internal class VilkaarsvurderingRoutesTest {
 
             assertEquals(nyBehandlingId, vilkaarsvurdering.behandlingId)
             assertEquals(
-                vilkaarsvurdering.virkningstidspunkt,
-                detaljertBehandling().virkningstidspunkt!!.dato.atDay(1)
+                vilkaarsvurdering.virkningstidspunkt.dato,
+                VirkningstidspunktTestData.virkningstidsunkt().dato
             )
             assertNull(vilkaarsvurdering.resultat)
         }
@@ -335,7 +335,7 @@ internal class VilkaarsvurderingRoutesTest {
             behandlingId,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            LocalDate.of(2022, 1, 1),
+            VirkningstidspunktTestData.virkningstidsunkt(),
             grunnlag,
             null
         )
@@ -346,9 +346,8 @@ internal class VilkaarsvurderingRoutesTest {
         every { sak } returns 1L
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { soeker } returns "10095512345"
-        every { virkningstidspunkt } returns mockk<Virkningstidspunkt>().apply {
-            every { dato } returns YearMonth.of(2022, 1)
-        }
+        every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+        every { revurderingsaarsak } returns null
     }
 
     private companion object {

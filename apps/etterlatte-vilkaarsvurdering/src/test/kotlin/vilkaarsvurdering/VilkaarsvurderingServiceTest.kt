@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import GrunnlagTestData
+import behandling.VirkningstidspunktTestData
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -36,7 +37,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import vilkaarsvurdering.VilkaarsvurderingTestData
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -74,7 +74,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            LocalDate.of(2022, 1, 1),
+            VirkningstidspunktTestData.virkningstidsunkt(),
             grunnlag,
             null
         )
@@ -197,7 +197,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.REVURDERING,
-            LocalDate.now(),
+            VirkningstidspunktTestData.virkningstidsunkt(),
             grunnlag,
             RevurderingAarsak.SOEKER_DOD
         )
@@ -218,7 +218,7 @@ internal class VilkaarsvurderingServiceTest {
         val vilkaarsvurderingIntern = VilkaarsvurderingIntern(
             vilkaarsvurdering.behandlingId,
             emptyList(),
-            LocalDate.now(),
+            VirkningstidspunktTestData.virkningstidsunkt(),
             vilkaarsvurdering.resultat,
             emptyGrunnlag.metadata
         )
@@ -242,7 +242,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            LocalDate.now(),
+            VirkningstidspunktTestData.virkningstidsunkt(),
             GrunnlagTestData().hentOpplysningsgrunnlag(),
             null
         )

@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -18,9 +17,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonRevurderingSoekerDoedVilkaar
 import no.nav.helse.rapids_rivers.JsonMessage
-import java.time.Instant
-import java.time.LocalDate
-import java.time.YearMonth
 import java.util.*
 
 class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
@@ -50,7 +46,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         sakType: SakType,
         behandlingType: BehandlingType,
-        virkningstidspunkt: LocalDate,
+        virkningstidspunkt: Virkningstidspunkt,
         grunnlag: Grunnlag,
         revurderingAarsak: RevurderingAarsak?
     ): VilkaarsvurderingIntern {
@@ -63,13 +59,7 @@ class VilkaarsvurderingService(
                                 behandlingId = behandlingId,
                                 vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(
                                     grunnlag,
-                                    virkningstidspunkt.let {
-                                        // TODO fjern dette når virkningstidspunkt kommer inn
-                                        Virkningstidspunkt(
-                                            dato = YearMonth.of(it.year, it.month),
-                                            kilde = Grunnlagsopplysning.Saksbehandler("todo", Instant.now())
-                                        )
-                                    }
+                                    virkningstidspunkt
                                 ),
                                 virkningstidspunkt = virkningstidspunkt,
                                 grunnlagsmetadata = grunnlag.metadata
@@ -150,7 +140,7 @@ class VilkaarsvurderingService(
                     Behandling(behandling.behandlingType!!, behandling.id)
             }
             .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDomain() }
-            .apply { this["virkningstidspunkt"] = YearMonth.from(vilkaarsvurdering.virkningstidspunkt) }
+            .apply { this["virkningstidspunkt"] = vilkaarsvurdering.virkningstidspunkt.dato }
             .apply { this["grunnlag"] = grunnlag }
 
         sendToRapid(message.toJson(), vilkaarsvurdering.behandlingId)

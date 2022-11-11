@@ -51,7 +51,7 @@ class JournalpostServiceImpl(
             eksternReferanseId = "${melding.behandlingId}.${melding.brevId}",
             // sak = {...}
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(melding)),
-            tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema,
+            tema = "PEN", // https://confluence.adeo.no/display/BOA/Tema, // Todo: Skal byttes til EYB eller EYO
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
             journalfoerendeEnhet = melding.journalfoerendeEnhet
         )

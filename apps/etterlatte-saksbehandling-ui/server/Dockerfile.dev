@@ -8,4 +8,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD ["yarn", "dev:brev"]
+CMD ["yarn", "dev"]

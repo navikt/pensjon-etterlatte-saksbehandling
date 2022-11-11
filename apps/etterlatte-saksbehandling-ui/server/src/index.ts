@@ -30,16 +30,23 @@ if (isDev) {
   app.use(cors({ origin: 'http://localhost:3000' }))
 
   app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
-  if (process.env.VILKAARSVURDERING_DEV) {
-    app.use('/api/vilkaarsvurdering', lokalProxy('http://localhost:8087/api/vilkaarsvurdering'))
+  if (!!process.env.VILKAARSVURDERING_API_URL) {
+    app.use(authenticateUser) // Alle ruter etter denne er authenticated
+    app.use(
+      '/api/vilkaarsvurdering',
+      expressProxy(
+        process.env.VILKAARSVURDERING_API_URL!!,
+        'api://dev.etterlatte.etterlatte-vilkaarsvurdering-api/.default'
+      )
+    )
   }
 
-  if (process.env.BREV_DEV) {
+  if (!!process.env.BREV_API_URL) {
     app.use(authenticateUser) // Alle ruter etter denne er authenticated
     app.use('/brev', expressProxy(process.env.BREV_API_URL!!, 'api://dev.etterlatte.etterlatte-brev-api/.default'))
   }
 
-  if (process.env.API_URL) {
+  if (!!process.env.API_URL) {
     app.use(authenticateUser) // Alle ruter etter denne er authenticated
     app.use('/api', expressProxy(`${process.env.API_URL}`, 'api://dev.etterlatte.etterlatte-api/.default'))
   } else {

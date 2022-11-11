@@ -21,22 +21,22 @@ Kjøres opp med:
 2. Frontend er nå tilgjengelig på [localhost:5173](http://localhost:5173)
 
 
-### Alt. 2: Mot lokal backend 
+### Alt. 2: Mot lokal backend (med auth)
 
 For å kjøre mot backend lokalt må du koble til wonderwall og mock-oauth2-server. Dette gjøres automatisk ved å 
 kjøre docker-compose, men først les biten under. 
 
-Opprett en fil som heter `.env` (i samme mappe som denne README-filen). Filen skal inneholde følgende variabler. 
+**Steg 1:** Det må være mulig å nå `host.docker.internal`, så pass på at du legger til dette i `/etc/hosts`:
+
+`127.0.0.1 host.docker.internal`
+
+**Steg 2:** Opprett en fil som heter `.env` (i samme mappe som denne README-filen). Filen skal inneholde følgende variabler. 
 Dersom du ikke oppgir en API_URL vil server defaulte til mock-data. API_URL brukes ved eksempelvis kjøring av 
 APIet (backend) lokalt sammen med frontend. \
-Du trenger kun legge til de variablene som er aktuelle. De som mangler 
-vil defaulte til tom/false.
+Du trenger kun legge til de variablene som er aktuelle. De som mangler vil defaulte til mock.
 
-#### .env config som brukes av docker-compose
+**.env config som brukes av docker-compose**
 ```
-BREV_DEV=<TOM ELLER TRUE/FALSE>
-VILKAARSVURDERING_DEV=<TOM ELLER TRUE/FALSE>
-
 API_URL=<TOM ELLER URL TIL LOKALT API>
 BREV_API_URL=<TOM ELLER URL TIL LOKALT API>
 VILKAARSVURDERING_API_URL=<TOM ELLER URL TIL LOKALT API>

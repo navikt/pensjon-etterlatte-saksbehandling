@@ -96,7 +96,7 @@ internal class VilkaarsvurderingRoutesTest {
         ).serialize()
     }
 
-    @Test
+    /*@Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
             application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
@@ -123,7 +123,7 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-4", vilkaar.hovedvilkaar.paragraf.lenke)
             assertNull(vilkaar.vurdering)
         }
-    }
+    }*/
 
     @Test
     fun `skal opprette vilkaarsvurdering basert paa behandling dersom en ikke finnes`() {
@@ -147,7 +147,7 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
-    @Test
+    /*@Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes`() {
         testApplication {
             application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
@@ -163,7 +163,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             assertEquals(response.status, HttpStatusCode.PreconditionFailed)
         }
-    }
+    }*/
 
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {

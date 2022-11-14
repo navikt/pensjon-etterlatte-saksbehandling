@@ -22,6 +22,7 @@ import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
@@ -41,7 +42,7 @@ fun Application.restModule(
     vilkaarsvurderingService: VilkaarsvurderingService,
     behandlingKlient: BehandlingKlient,
     grunnlagKlient: GrunnlagKlient,
-    vilkaarsvurderingRepository: VilkaarsvurderingRepositoryImpl
+    vilkaarsvurderingRepository: VilkaarsvurderingRepository? = null
 ) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))

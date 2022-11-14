@@ -70,7 +70,13 @@ internal class VilkaarsvurderingRoutesTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlagMedVersjon(any(), any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery {
+            grunnlagKlient.hentGrunnlagMedVersjon(
+                any(),
+                any(),
+                any()
+            )
+        } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
     @AfterAll
@@ -124,8 +130,6 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
 
-            println(VirkningstidspunktTestData.virkningstidsunkt().toJson())
-
             val nyBehandlingId = UUID.randomUUID()
             val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -140,6 +144,24 @@ internal class VilkaarsvurderingRoutesTest {
                 VirkningstidspunktTestData.virkningstidsunkt().dato
             )
             assertNull(vilkaarsvurdering.resultat)
+        }
+    }
+
+    @Test
+    fun `skal kaste feil dersom virkningstidspunkt ikke finnes`() {
+        testApplication {
+            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
+            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling().apply {
+                every { virkningstidspunkt } returns null
+            }
+
+            val nyBehandlingId = UUID.randomUUID()
+            val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            assertEquals(response.status, HttpStatusCode.PreconditionFailed)
         }
     }
 

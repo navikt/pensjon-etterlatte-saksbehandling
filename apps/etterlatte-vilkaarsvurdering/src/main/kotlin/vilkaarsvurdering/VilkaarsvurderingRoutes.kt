@@ -38,34 +38,6 @@ fun Route.vilkaarsvurdering(
         val logger = application.log
 
         get("/{behandlingId}") {
-            withBehandlingId { behandlingId ->
-                logger.info("Henter vilkårsvurdering for $behandlingId")
-                when (val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)) {
-                    null -> {
-                        val accessToken = getAccessToken(call)
-                        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-
-                        if (behandling.kanStarteVilkaarsvurdering()) {
-                            val nyVilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(
-                                behandlingId = behandlingId,
-                                sakType = SakType.BARNEPENSJON, // todo: Støtte for omstillingsstønad
-                                behandlingType = behandling.behandlingType!!,
-                                virkningstidspunkt = behandling.virkningstidspunkt!!,
-                                grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken),
-                                revurderingAarsak = behandling.revurderingsaarsak
-                            )
-                            call.respond(nyVilkaarsvurdering)
-                        } else {
-                            logger.info(
-                                "Kan ikke opprette vilkårsvurdering for $behandlingId før virkningstidspunkt er satt"
-                            )
-                            call.respond(HttpStatusCode.PreconditionFailed)
-                        }
-                    }
-                    else -> call.respond(vilkaarsvurdering.toDto())
-                }
-            }
-
             val behandlingsIder = "91d84faa-860a-489f-8a20-eea7a643a21b\n" +
                 "551b44f9-c32a-4557-9eab-09aa82cb2492\n" +
                 "03947f04-f907-4941-bcf2-595d2f519de5\n" +
@@ -117,6 +89,33 @@ fun Route.vilkaarsvurdering(
                 val behandling = behandlingKlient.hentBehandling(UUID.fromString(it), accessToken)
                 val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
                 vilkaarsvurderingRepository?.leggtilMetadata(UUID.fromString(it), grunnlag.metadata)
+            }
+            withBehandlingId { behandlingId ->
+                logger.info("Henter vilkårsvurdering for $behandlingId")
+                when (val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)) {
+                    null -> {
+                        val accessToken = getAccessToken(call)
+                        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+
+                        if (behandling.kanStarteVilkaarsvurdering()) {
+                            val nyVilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(
+                                behandlingId = behandlingId,
+                                sakType = SakType.BARNEPENSJON, // todo: Støtte for omstillingsstønad
+                                behandlingType = behandling.behandlingType!!,
+                                virkningstidspunkt = behandling.virkningstidspunkt!!,
+                                grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken),
+                                revurderingAarsak = behandling.revurderingsaarsak
+                            )
+                            call.respond(nyVilkaarsvurdering)
+                        } else {
+                            logger.info(
+                                "Kan ikke opprette vilkårsvurdering for $behandlingId før virkningstidspunkt er satt"
+                            )
+                            call.respond(HttpStatusCode.PreconditionFailed)
+                        }
+                    }
+                    else -> call.respond(vilkaarsvurdering.toDto())
+                }
             }
         }
 

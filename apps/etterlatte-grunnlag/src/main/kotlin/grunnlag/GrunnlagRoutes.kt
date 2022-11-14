@@ -16,7 +16,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
 
             when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(sakId)) {
                 null -> call.respond(HttpStatusCode.NotFound)
-                else -> call.respond(opplysningsgrunnlag.toJson())
+                else -> call.respond(opplysningsgrunnlag)
             }
         }
 
@@ -25,7 +25,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
             val versjon = call.parameters["versjon"]!!.toLong()
             when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagMedVersjon(sakId, versjon)) {
                 null -> call.respond(HttpStatusCode.NotFound)
-                else -> call.respond(opplysningsgrunnlag.toJson())
+                else -> call.respond(opplysningsgrunnlag)
             }
         }
 

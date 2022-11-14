@@ -62,6 +62,7 @@ import java.lang.Thread.sleep
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 class ApplicationTest {
@@ -170,12 +171,12 @@ class ApplicationTest {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    FastsettVirkningstidspunktRequest(LocalDate.parse("2022-01-01"))
+                    FastsettVirkningstidspunktRequest(YearMonth.parse("2021-01"))
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
                 val expected = FastsettVirkningstidspunktResponse(
-                    LocalDate.of(2022, 1, 1),
+                    YearMonth.of(2021, 1),
                     Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Instant.now())
                 )
                 assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)

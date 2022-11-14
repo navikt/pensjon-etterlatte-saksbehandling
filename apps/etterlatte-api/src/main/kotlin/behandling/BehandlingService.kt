@@ -14,7 +14,7 @@ import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
 import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
+import java.time.YearMonth
 
 data class PersonSakerResult(
     val person: Person,
@@ -148,7 +148,7 @@ class BehandlingService(
 
     suspend fun fastsettVirkningstidspunkt(
         behandlingId: String,
-        dato: LocalDate,
+        dato: YearMonth,
         accessToken: String
     ): VirkningstidspunktResponse {
         logger.info("Fastsetter virkningstidspunkt for behandling $behandlingId")

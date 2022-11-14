@@ -37,7 +37,7 @@ spec:
     - name: DOKDISTFORDEL_URL
       value: "https://dokdistfordeling-q1.nais.preprod.local/rest/v1"
     - name: DOKDISTFORDEL_SCOPE
-      value: "api://dev-fss.teamdokumenthandtering.saf/.default"
+      value: "api://dev-fss.teamdokumenthandtering.saf-q1/.default"
     - name: BREV_API_SCOPE
       value: "api://dev-gcp.etterlatte.etterlatte-brev-api/.default"
     - name: BREV_API_URL

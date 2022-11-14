@@ -34,7 +34,7 @@ class ApplicationBuilder {
     private val dataSource = dataSourceBuilder.dataSource()
     private val vilkaarsvurderingRepository = VilkaarsvurderingRepositoryImpl(dataSource)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    private val grunnlagKlient = GrunnlagKlientImpl(config, HttpClient())
+    private val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     private val vilkaarsvurderingService =
         VilkaarsvurderingService(vilkaarsvurderingRepository, ::publiser)
 

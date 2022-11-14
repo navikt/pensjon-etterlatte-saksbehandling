@@ -38,8 +38,7 @@ fun Route.vilkaarsvurdering(
         val logger = application.log
 
         get("/{behandlingId}") {
-            val behandlingsIder = "91d84faa-860a-489f-8a20-eea7a643a21b\n" +
-                "551b44f9-c32a-4557-9eab-09aa82cb2492\n" +
+            val behandlingsIder = "551b44f9-c32a-4557-9eab-09aa82cb2492\n" +
                 "03947f04-f907-4941-bcf2-595d2f519de5\n" +
                 "a35f91de-9c3d-4f74-bc81-210a74005c35\n" +
                 "185d91ea-e025-490d-b48a-d1c6c85063e0\n" +

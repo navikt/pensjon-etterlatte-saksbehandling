@@ -44,6 +44,7 @@ enum class Opplysningstype {
     INNTEKT,
     MEDLEMSKAPSPERIODE,
     ARBEIDSFORHOLD,
+    KOMMER_BARNET_TILGODE,
 
     SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

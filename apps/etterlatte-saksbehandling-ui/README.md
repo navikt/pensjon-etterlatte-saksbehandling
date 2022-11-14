@@ -5,14 +5,19 @@ Appen består av en React frontend skrevet i Typescript og en backend-for-fronte
 Når appen kjøres opp lokalt settes det også opp en mock-router som server statiske JSON for forskjellige behandlinger 
 for testing.
 
+---
+
 ## Kjøring lokalt
 
 Avhengigheter må installeres for at prosjektet skal kjøre. Dette kan du gjøre ved å kjøre kommandoen `yarn` i enten 
 ui sin rot, eller i [client](./client) og [server](./server) individuelt.
 
+Kjøres fra mappen `client` og/eller `server`. \
+Prosjektet bruker [Vite](https://vitejs.dev/).
+
 Det finnes to måter å kjøre opp frontend:
 
-### Alt. 1: Ren mock
+### Alt. 1: Ren mock _uten_ auth og docker
 
 Med ren mock vil frontend bruke lokale mockfiler for å simulere backend APIer. 
 
@@ -21,42 +26,44 @@ Kjøres opp med:
 2. Frontend er nå tilgjengelig på [localhost:5173](http://localhost:5173)
 
 
-### Alt. 2: Mot lokal backend (med auth)
+### Alt. 2: _Med_ auth og docker
 
-For å kjøre mot backend lokalt må du koble til wonderwall og mock-oauth2-server. Dette gjøres automatisk ved å 
-kjøre docker-compose, men først les biten under. 
-
-**Steg 1:** Det må være mulig å nå `host.docker.internal`, så pass på at du legger til dette i `/etc/hosts`:
+For å kjøre mot backend lokalt med docker må det være mulig å nå `host.docker.internal`, så pass på at du legger til 
+dette i `/etc/hosts`:
 
 `127.0.0.1 host.docker.internal`
 
-**Steg 2:** Opprett en fil som heter `.env` (i samme mappe som denne README-filen). Filen skal inneholde følgende variabler. 
-Dersom du ikke oppgir en API_URL vil server defaulte til mock-data. API_URL brukes ved eksempelvis kjøring av 
-APIet (backend) lokalt sammen med frontend. \
-Du trenger kun legge til de variablene som er aktuelle. De som mangler vil defaulte til mock.
 
-**.env config som brukes av docker-compose**
-```
-API_URL=<TOM ELLER URL TIL LOKALT API>
-BREV_API_URL=<TOM ELLER URL TIL LOKALT API>
-VILKAARSVURDERING_API_URL=<TOM ELLER URL TIL LOKALT API>
-```
+#### Variant A: Med gyldig token mot dev-gcp
 
-#### Oppsett av frontend
+For å kjøre mot dev-gcp må du først kjøre `get-secret.sh`. Dette henter ut secrets for lokal kjøring mot dev-gcp og
+lagrer de i en lokal fil (`.env.dev-gcp`). Denne filen skal inneholde en rekke miljøvariabler som brukes av frackend
+og wonderwall. 
 
-Kjøres fra mappen `client`. Prosjektet bruker [Vite](https://vitejs.dev/).
+Når `.env.dev-gcp` er opprettet kan du kjøre opp docker (dev-gcp varianten):
+
+1. Kjør `docker-compose -f ./docker-compose.dev-gcp.yml up -d` \
+   Dette starter wonderwall og frackend i docker, _med_ gyldig AzureAD config.
+2. Start frontend (client):
+   `yarn dev`
+3. Du når frontend *via* wonderwall på [localhost:3000](http://localhost:3000) \
+   Frontend kjører nå mot autentisert frackend og har gyldig Authorization i header.
+
+**NB:** Hvis du gjør endringer i frackend kan det hende du må bygge den på nytt. Kan gjøres ved å legge til
+`--build --force-recreate` i kommandoen over.
+
+
+#### Variant B: Med mock-oauth2 mot lokal backend
 
 1. Kjør `docker-compose up -d` \
-    Dette starter wonderwall, mock-oauth2-server, og frackend i docker.
+   Dette starter wonderwall, mock-oauth2-server, og frackend i docker.
 2. Start frontend (client):
-    `yarn dev`
+   `yarn dev`
 3. Du når frontend *via* wonderwall på [localhost:3000](http://localhost:3000) \
-    Frontend kjører nå mot autentisert frackend og har gyldig Authorization i header.
+   Frontend kjører nå mot autentisert frackend og har gyldig Authorization i header.
 
-## Miljøvariabler for lokal kjøring
-`BREV_DEV` kan settes til `true` hvis man vil gå mot en lokal instans av `etterlatte-brev-api`.
-`VILKAARSVURDERING_DEV` kan settes til `true` hvis man vil gå mot en lokal instans av `etterlatte-vilkaarsvurdering`.
 
+---
 
 ## Bygg og deploy
 Bygg og deploy kjøres via github workflows i roten på prosjektet

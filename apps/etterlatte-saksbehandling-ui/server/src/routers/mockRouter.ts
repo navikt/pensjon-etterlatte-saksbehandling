@@ -4,6 +4,26 @@ import personsokUtenSak from '../mockdata/personsokUtenSak.json'
 
 export const mockRouter = express.Router() // for å støtte dekoratør for innloggede flater
 
+mockRouter.get('/modiacontextholder/decorator', (req: Request, res: Response) => {
+  res.json({
+    ident: 'Z81549300',
+    navn: 'Truls Veileder',
+    fornavn: 'Truls',
+    etternavn: 'Veileder',
+    rolle: 'attestant',
+    enheter: [
+      {
+        enhetId: '0315',
+        navn: 'NAV Grünerløkka',
+      },
+      {
+        enhetId: '0316',
+        navn: 'NAV Gamle Oslo',
+      },
+    ],
+  })
+})
+
 mockRouter.get(`/personer/:fnr`, (req: Request, res: Response) => {
   const fnr = req.params.fnr
 

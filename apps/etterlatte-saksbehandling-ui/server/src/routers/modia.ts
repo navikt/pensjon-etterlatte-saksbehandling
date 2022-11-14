@@ -22,27 +22,6 @@ export interface ISaksbehandler {
 }
 
 const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> => {
-  if (process.env.NODE_ENV !== 'production') {
-    /* mulig det bør gjøre kall mot https://modiacontextholder.nais.adeo.no/modiacontextholder/api/decorator */
-    return {
-      ident: 'Z81549300',
-      navn: 'Truls Veileder',
-      fornavn: 'Truls',
-      etternavn: 'Veileder',
-      rolle: 'attestant',
-      enheter: [
-        {
-          enhetId: '0315',
-          navn: 'NAV Grünerløkka',
-        },
-        {
-          enhetId: '0316',
-          navn: 'NAV Gamle Oslo',
-        },
-      ],
-    }
-  }
-
   const auth = req.headers.authorization
   if (!auth) {
     return null
@@ -64,7 +43,7 @@ const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> =>
 const hentEnheter = async (req: Request, bearerToken: string): Promise<IEnhet[]> => {
   if (bearerToken) {
     try {
-      const oboToken = await getOboToken(req.headers.authorization, 'https://graph.microsoft.com/.default')
+      const oboToken = await getOboToken(bearerToken, 'https://graph.microsoft.com/.default')
       const query = 'officeLocation'
 
       const data = await fetch(`https://graph.microsoft.com/v1.0/me?$select=${query}`, {

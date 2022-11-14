@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 interface FoerstegangsbehandlingService {
@@ -30,7 +30,7 @@ interface FoerstegangsbehandlingService {
     ): Foerstegangsbehandling
 
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
-    fun fastsettVirkningstidspunkt(behandlingId: UUID, dato: LocalDate, ident: String): Virkningstidspunkt
+    fun fastsettVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt
     fun settKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
 }
 
@@ -86,7 +86,7 @@ class RealFoerstegangsbehandlingService(
         }
     }
 
-    override fun fastsettVirkningstidspunkt(behandlingId: UUID, dato: LocalDate, ident: String): Virkningstidspunkt {
+    override fun fastsettVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt {
         val behandling = inTransaction {
             behandlinger.hentBehandling(behandlingId) ?: throw RuntimeException("Fant ikke behandling")
         }

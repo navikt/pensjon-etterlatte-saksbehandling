@@ -33,7 +33,6 @@ import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
@@ -578,10 +577,11 @@ internal class BehandlingDaoIntegrationTest {
         behandlingRepo.opprettFoerstegangsbehandling(behandling)
 
         val saksbehandler = Grunnlagsopplysning.Saksbehandler("navIdent", Instant.now())
-        behandling.oppdaterVirkningstidspunkt(LocalDate.parse("2022-02-01"), saksbehandler)
+        val nyDato = YearMonth.of(2021, 2)
+        behandling.oppdaterVirkningstidspunkt(nyDato, saksbehandler)
         behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, behandling.hentVirkningstidspunkt()!!)
 
-        val expected = Virkningstidspunkt(YearMonth.of(2022, 2), saksbehandler)
+        val expected = Virkningstidspunkt(nyDato, saksbehandler)
         with(behandlingRepo.hentBehandling(behandling.id)) {
             val actual = (this as Foerstegangsbehandling).hentVirkningstidspunkt()
             assertEquals(expected, actual)

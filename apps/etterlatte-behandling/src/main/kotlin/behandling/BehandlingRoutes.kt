@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
-import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 fun Route.behandlingRoutes(
@@ -136,13 +136,6 @@ fun Route.behandlingRoutes(
                     "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
                 )
                 val body = call.receive<FastsettVirkningstidspunktRequest>()
-                if (body.dato.dayOfMonth != 1) {
-                    return@post call.respond(
-                        HttpStatusCode.BadRequest,
-                        "Virkningsdato må være første dagen i måneden"
-                    )
-                }
-
                 val virkningstidspunkt =
                     foerstegangsbehandlingService.fastsettVirkningstidspunkt(behandlingsId, body.dato, navIdent)
 
@@ -395,14 +388,14 @@ enum class HendelseType {
 
 data class ManueltOpphoerResponse(val behandlingId: String)
 
-internal data class FastsettVirkningstidspunktRequest(val dato: LocalDate)
+internal data class FastsettVirkningstidspunktRequest(val dato: YearMonth)
 internal data class FastsettVirkningstidspunktResponse(
-    val dato: LocalDate,
+    val dato: YearMonth,
     val kilde: Grunnlagsopplysning.Saksbehandler
 ) {
     companion object {
         fun from(virkningstidspunkt: Virkningstidspunkt) = FastsettVirkningstidspunktResponse(
-            LocalDate.of(virkningstidspunkt.dato.year, virkningstidspunkt.dato.month, 1),
+            virkningstidspunkt.dato,
             virkningstidspunkt.kilde
         )
     }

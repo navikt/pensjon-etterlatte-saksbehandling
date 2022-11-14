@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class BehandlingServiceTest {
@@ -261,19 +262,19 @@ internal class BehandlingServiceTest {
                 accessToken
             )
         } returns VirkningstidspunktResponse(
-            LocalDate.parse("2022-01-01"),
+            YearMonth.of(2022, 1),
             VirkningstidspunktResponse.Kilde("saksbehandler", Instant.now())
         )
 
         val respons = runBlocking {
             service.fastsettVirkningstidspunkt(
                 behandlingId = UUID.randomUUID().toString(),
-                dato = LocalDate.parse("2022-01-01"),
+                dato = YearMonth.of(2022, 1),
                 accessToken = accessToken
             )
         }
 
-        assertEquals(LocalDate.parse("2022-01-01"), respons.dato)
+        assertEquals(YearMonth.of(2022, 1), respons.dato)
         assertEquals("saksbehandler", respons.kilde.ident)
     }
 

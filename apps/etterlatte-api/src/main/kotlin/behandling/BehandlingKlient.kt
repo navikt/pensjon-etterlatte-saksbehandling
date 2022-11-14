@@ -16,7 +16,7 @@ import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.time.LocalDate
+import java.time.YearMonth
 
 interface EtterlatteBehandling {
     suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker
@@ -34,7 +34,7 @@ interface EtterlatteBehandling {
     suspend fun hentGrunnlagsendringshendelserForSak(sakId: Int, accessToken: String): GrunnlagsendringshendelseListe
     suspend fun fastsettVirkningstidspunkt(
         behandlingId: String,
-        dato: LocalDate,
+        dato: YearMonth,
         accessToken: String
     ): VirkningstidspunktResponse
 }
@@ -296,10 +296,10 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         }
     }
 
-    private data class BehandlingVirkningstidspunktRequest(val dato: LocalDate)
+    private data class BehandlingVirkningstidspunktRequest(val dato: YearMonth)
     override suspend fun fastsettVirkningstidspunkt(
         behandlingId: String,
-        dato: LocalDate,
+        dato: YearMonth,
         accessToken: String
     ): VirkningstidspunktResponse {
         val json = downstreamResourceClient.post(
@@ -319,6 +319,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
 }
 
 data class ManueltOpphoerResponse(val behandlingId: String)
-data class VirkningstidspunktResponse(val dato: LocalDate, val kilde: Kilde) {
+data class VirkningstidspunktResponse(val dato: YearMonth, val kilde: Kilde) {
     data class Kilde(val ident: String, val tidspunkt: Instant)
 }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -16,8 +17,10 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import org.slf4j.LoggerFactory
+import java.lang.RuntimeException
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRoute")
@@ -110,10 +113,15 @@ fun Route.behandlingRoute(service: BehandlingService) {
         post("virkningstidspunkt") {
             call.withUUID("behandlingId") {
                 val body = call.receive<VirkningstidspunktRequest>()
+
+                if (!body.isValid()) {
+                    return@withUUID call.respond(HttpStatusCode.BadRequest)
+                }
+
                 call.respond(
                     service.fastsettVirkningstidspunkt(
                         it.toString(),
-                        LocalDate.ofInstant(Instant.parse(body.dato), norskTidssone),
+                        body.dato,
                         getAccessToken(call)
                     )
                 )
@@ -139,7 +147,20 @@ fun Route.behandlingRoute(service: BehandlingService) {
     }
 }
 
-data class VirkningstidspunktRequest(val dato: String)
+data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String) {
+    val dato: YearMonth = try {
+        LocalDate.ofInstant(Instant.parse(_dato), norskTidssone).let {
+            YearMonth.of(it.year, it.month)
+        }
+    } catch (e: Exception) {
+        throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
+    }
+
+    fun isValid() = when (dato.year) {
+        in (0..9999) -> true
+        else -> false
+    }
+}
 
 suspend fun ApplicationCall.withUUID(parameter: String, onSuccess: (suspend (id: UUID) -> Unit)) {
     val id = this.parameters[parameter]

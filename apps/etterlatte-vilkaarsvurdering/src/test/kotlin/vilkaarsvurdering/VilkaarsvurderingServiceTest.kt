@@ -1,15 +1,18 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import GrunnlagTestData
+import behandling.VirkningstidspunktTestData
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldInclude
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -34,7 +37,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import vilkaarsvurdering.VilkaarsvurderingTestData
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -72,8 +74,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            LocalDate.of(2022, 1, 1),
-            objectMapper.createObjectNode(),
+            VirkningstidspunktTestData.virkningstidsunkt(),
             grunnlag,
             null
         )
@@ -196,8 +197,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.REVURDERING,
-            LocalDate.now(),
-            objectMapper.createObjectNode(),
+            VirkningstidspunktTestData.virkningstidsunkt(),
             grunnlag,
             RevurderingAarsak.SOEKER_DOD
         )
@@ -212,24 +212,29 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
-    fun `Skal publisere oppdatert vilkaarsvurdering paa kafka`() {
+    fun `Skal publisere vilkaarsvurdering paa kafka paa et format vedtaksvurering og beregning forstaar`() {
         val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
+        val emptyGrunnlag = Grunnlag.empty()
         val vilkaarsvurderingIntern = VilkaarsvurderingIntern(
             vilkaarsvurdering.behandlingId,
-            objectMapper.readTree("""{"skalBliMed": "21-01-01"}"""),
             emptyList(),
-            LocalDate.now(),
-            vilkaarsvurdering.resultat
+            VirkningstidspunktTestData.virkningstidsunkt(),
+            vilkaarsvurdering.resultat,
+            emptyGrunnlag.metadata
         )
         val payloadContent = slot<String>()
 
-        service.publiserVilkaarsvurdering(vilkaarsvurderingIntern)
+        service.publiserVilkaarsvurdering(vilkaarsvurderingIntern, emptyGrunnlag, detaljertBehandling())
 
         verify(exactly = 1) {
             sendToRapid.invoke(capture(payloadContent), vilkaarsvurdering.behandlingId)
         }
-        payloadContent.captured shouldInclude "skalBliMed"
         payloadContent.captured shouldInclude "vilkaarsvurdering"
+        payloadContent.captured shouldInclude "grunnlag"
+        payloadContent.captured shouldInclude "sak"
+        payloadContent.captured shouldInclude "virkningstidspunkt"
+        payloadContent.captured shouldInclude "behandling"
+        payloadContent.captured shouldInclude "fnrSoeker"
     }
 
     private fun opprettVilkaarsvurdering() {
@@ -237,11 +242,17 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            LocalDate.now(),
-            objectMapper.createObjectNode(),
+            VirkningstidspunktTestData.virkningstidsunkt(),
             GrunnlagTestData().hentOpplysningsgrunnlag(),
             null
         )
+    }
+
+    private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
+        every { id } returns UUID.randomUUID()
+        every { sak } returns 1L
+        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+        every { soeker } returns "10095512345"
     }
 
     private fun vilkaarsVurderingData() =

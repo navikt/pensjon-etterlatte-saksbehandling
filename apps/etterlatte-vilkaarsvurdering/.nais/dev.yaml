@@ -50,8 +50,20 @@ spec:
     - name: KAFKA_RESET_POLICY
     #sette tilbake til none senere
       value: latest
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
+    - name: ETTERLATTE_GRUNNLAG_URL
+      value: http://etterlatte-grunnlag/api
+    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
+      value: ce96a301-13db-4409-b277-5b27f464d08b
   accessPolicy:
     inbound:
       rules:
         - application: ey-sak-lokal
         - application: etterlatte-saksbehandling-ui
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+        - application: etterlatte-grunnlag

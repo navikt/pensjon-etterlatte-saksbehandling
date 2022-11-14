@@ -53,10 +53,17 @@ mockRouter.post(`/avbrytBehandling/:id`, (req: Request, res: Response) => {
 
 mockRouter.get(`/vilkaarsvurdering/:id`, (req: Request, res: Response) => {
   const id = req.params.id
-  const vilkaarsproving = require(`../mockdata/hentVilkaarsvurdering_${id}.json`)
-  setTimeout(() => {
-    res.json(vilkaarsproving)
-  }, 1000)
+
+  if (id == '14') {
+    setTimeout(() => {
+      res.sendStatus(412) // Precondition Failed
+    })
+  } else {
+    const vilkaarsproving = require(`../mockdata/hentVilkaarsvurdering_${id}.json`)
+    setTimeout(() => {
+      res.json(vilkaarsproving)
+    }, 1000)
+  }
 })
 
 mockRouter.post(`/vilkaarsvurdering/:id`, (req: Request, res: Response) => {

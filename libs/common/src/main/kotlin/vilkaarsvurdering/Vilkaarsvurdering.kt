@@ -1,14 +1,14 @@
 package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 data class Vilkaarsvurdering(
     val behandlingId: UUID,
     val vilkaar: List<Vilkaar>,
-    val virkningstidspunkt: LocalDate,
+    val virkningstidspunkt: Virkningstidspunkt,
     val resultat: VilkaarsvurderingResultat
 )
 

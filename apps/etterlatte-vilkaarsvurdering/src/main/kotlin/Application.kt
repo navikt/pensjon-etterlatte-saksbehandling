@@ -23,10 +23,11 @@ import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
+import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationBuilder
+import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.security.token.support.v2.tokenValidationSupport
-import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
 
@@ -35,7 +36,11 @@ fun main() {
     application.start()
 }
 
-fun Application.restModule(vilkaarsvurderingService: VilkaarsvurderingService) {
+fun Application.restModule(
+    vilkaarsvurderingService: VilkaarsvurderingService,
+    behandlingKlient: BehandlingKlient,
+    grunnlagKlient: GrunnlagKlient
+) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
@@ -62,9 +67,7 @@ fun Application.restModule(vilkaarsvurderingService: VilkaarsvurderingService) {
 
     routing {
         authenticate {
-            vilkaarsvurdering(vilkaarsvurderingService)
+            vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient, grunnlagKlient)
         }
     }
 }
-
-val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")

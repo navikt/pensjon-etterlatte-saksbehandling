@@ -12,6 +12,8 @@ import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -21,8 +23,10 @@ import no.nav.etterlatte.typer.Sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -51,7 +55,7 @@ internal class OppgaveServiceTest {
             Vilkaarsvurdering(
                 UUID.randomUUID(),
                 emptyList(),
-                LocalDate.now(),
+                Virkningstidspunkt(YearMonth.of(2022, 1), Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now())),
                 VilkaarsvurderingResultat(
                     VilkaarsvurderingUtfall.OPPFYLT,
                     "",

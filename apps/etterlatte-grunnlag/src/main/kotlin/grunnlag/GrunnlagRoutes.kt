@@ -20,6 +20,15 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
             }
         }
 
+        get("{sakId}/versjon/{versjon}") {
+            val sakId = call.parameters["sakId"]!!.toLong()
+            val versjon = call.parameters["versjon"]!!.toLong()
+            when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagMedVersjon(sakId, versjon)) {
+                null -> call.respond(HttpStatusCode.NotFound)
+                else -> call.respond(opplysningsgrunnlag.toJson())
+            }
+        }
+
         get("{sakId}/{opplysningType}") {
             val grunnlag = grunnlagService.hentGrunnlagAvType(
                 call.parameters["sakId"]!!.toLong(),

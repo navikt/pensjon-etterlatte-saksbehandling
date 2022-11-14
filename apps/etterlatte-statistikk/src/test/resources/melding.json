@@ -48,7 +48,14 @@
     "vilkaarsvurdering": {
       "behandlingId": "dbe1fb59-4740-4fd6-ac5d-0754792c2e8c",
       "vilkaar": [],
-      "virkningstidspunkt": "2022-10-24",
+      "virkningstidspunkt": {
+        "dato": "2022-11",
+        "kilde": {
+          "ident": "Z12345678",
+          "tidspunkt": "2022-11-11T13:46:43.602337Z",
+          "type": "saksbehandler"
+        }
+      },
       "resultat": {
         "utfall": "OPPFYLT",
         "kommentar": null,

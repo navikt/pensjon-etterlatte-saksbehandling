@@ -27,16 +27,16 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
         }
 
     override fun lagre(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern {
-        using(sessionOf(ds)) {
-            it.transaction { tx ->
+        using(sessionOf(ds)) { session ->
+            session.transaction { tx ->
                 queryOf(
                     statement = Queries.lagreVilkaarsvurdering,
                     paramMap = mapOf(
                         "behandlingId" to vilkaarsvurdering.behandlingId,
-                        "payload" to vilkaarsvurdering.payload.toJson(),
                         "vilkaar" to vilkaarsvurdering.vilkaar.toJson(),
                         "resultat" to vilkaarsvurdering.resultat?.toJson(),
-                        "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt
+                        "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt.toJson(),
+                        "metadata" to vilkaarsvurdering.grunnlagsmetadata.toJson()
                     )
                 ).let { query -> tx.run(query.asUpdate) }
             }
@@ -49,28 +49,28 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
     private fun toVilkaarsvurderingIntern(row: Row) = with(row) {
         VilkaarsvurderingIntern(
             behandlingId = uuid("behandlingId"),
-            payload = string("payload").let { payload -> objectMapper.readValue(payload) },
             vilkaar = string("vilkaar").let { vilkaar -> objectMapper.readValue(vilkaar) },
             resultat = stringOrNull("resultat").let { resultat ->
                 resultat?.let { objectMapper.readValue(it) }
             },
-            virkningstidspunkt = localDate("virkningstidspunkt")
+            virkningstidspunkt = string("virkningstidspunkt").let { virk -> objectMapper.readValue(virk) },
+            grunnlagsmetadata = string("metadata").let { metadata -> objectMapper.readValue(metadata) }
         )
     }
 }
 
 private object Queries {
     val hentVilkaarsvurdering = """
-        |SELECT behandlingId, payload, vilkaar, resultat, virkningstidspunkt 
+        |SELECT behandlingId, vilkaar, resultat, virkningstidspunkt, metadata 
         |FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID
     """.trimMargin()
 
     val lagreVilkaarsvurdering = """
-        |INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat, virkningstidspunkt) 
-        |VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::DATE) 
+        |INSERT INTO vilkaarsvurdering(behandlingId, vilkaar, resultat, virkningstidspunkt, metadata) 
+        |VALUES(:behandlingId::UUID, :vilkaar::JSONB, :resultat::JSONB, :virkningstidspunkt::JSONB, :metadata::JSONB) 
         |ON CONFLICT (behandlingId)  
         |DO UPDATE SET 
-        |   payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat,  
-        |   virkningstidspunkt = EXCLUDED.virkningstidspunkt
+        |   vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat,  
+        |   virkningstidspunkt = EXCLUDED.virkningstidspunkt, metadata = EXCLUDED.metadata
     """.trimMargin()
 }

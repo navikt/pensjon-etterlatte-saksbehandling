@@ -52,7 +52,7 @@ internal class LagreVilkaarsresultat(
                     behandling,
                     packet["fnrSoeker"].textValue(),
                     vilkaarsvurdering,
-                    vilkaarsvurdering.virkningstidspunkt // todo: kan vi komme i usync?
+                    vilkaarsvurdering.virkningstidspunkt.dato.atDay(1)
                 )
                 requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandling.id)).also {
                     context.publish(

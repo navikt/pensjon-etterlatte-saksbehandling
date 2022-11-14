@@ -119,6 +119,15 @@ internal class GrunnlagDaoIntegrationTest {
     }
 
     @Test
+    fun `Skal hente grunnlag opptil versjon på sak`() {
+        lagGrunnlagsopplysning(Opplysningstype.FOEDSELSDATO).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it) }
+        lagGrunnlagsopplysning(Opplysningstype.DOEDSDATO).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it) }
+
+        assertEquals(1, opplysningRepo.finnGrunnlagOpptilVersjon(1, 1).size)
+        assertEquals(2, opplysningRepo.finnGrunnlagOpptilVersjon(1, 2).size)
+    }
+
+    @Test
     fun `Skal hente opplysning fra nyeste hendelse basert paa sakId og opplysningType`() {
         val uuid = UUID.randomUUID()
 

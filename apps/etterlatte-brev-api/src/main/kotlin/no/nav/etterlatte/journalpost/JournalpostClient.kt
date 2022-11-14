@@ -82,7 +82,7 @@ class JournalpostClient(
 
     private suspend fun getToken(accessToken: String): String {
         val token = azureAdClient.getOnBehalfOfAccessTokenForResource(
-            listOf("api://dev-fss.teamdokumenthandtering.saf/.default"),
+            listOf("api://dev-fss.teamdokumenthandtering.saf-q1/.default"),
             accessToken
         )
         return token.get()?.accessToken ?: ""

@@ -14,7 +14,6 @@ import no.nav.etterlatte.apiModule
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.libs.common.serialize
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
@@ -97,7 +96,7 @@ internal class GrunnlagRoutesKtTest {
             }
 
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
-            Assertions.assertEquals(serialize(testData.toJson()), response.body<String>())
+            Assertions.assertEquals(serialize(testData), response.body<String>())
         }
     }
 }

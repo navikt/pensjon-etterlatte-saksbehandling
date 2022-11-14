@@ -50,3 +50,5 @@ spec:
         - application: etterlatte-brev-api
     external:
       - host: dokarkiv.dev-fss-pub.nais.io
+      - host: saf.dev-fss-pub.nais.io
+      - host: dokdistfordeling-q1.dev-fss-pub.nais.io

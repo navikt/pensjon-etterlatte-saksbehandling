@@ -44,7 +44,8 @@ class ApplicationBuilder {
                 restModule(
                     vilkaarsvurderingService = vilkaarsvurderingService,
                     behandlingKlient = behandlingKlient,
-                    grunnlagKlient = grunnlagKlient
+                    grunnlagKlient = grunnlagKlient,
+                    vilkaarsvurderingRepository = vilkaarsvurderingRepository
                 )
             }
             .build()

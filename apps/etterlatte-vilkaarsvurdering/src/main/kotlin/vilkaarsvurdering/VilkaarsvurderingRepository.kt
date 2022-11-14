@@ -5,6 +5,7 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import java.util.*
@@ -13,6 +14,7 @@ import javax.sql.DataSource
 interface VilkaarsvurderingRepository {
     fun hent(behandlingId: UUID): VilkaarsvurderingIntern?
     fun lagre(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern
+    fun leggtilMetadata(behandlingId: UUID, metadata: Metadata)
 }
 
 class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : VilkaarsvurderingRepository {
@@ -46,6 +48,20 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
         }
     }
 
+    override fun leggtilMetadata(behandlingId: UUID, metadata: Metadata) {
+        using(sessionOf(ds)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = Queries.setMetadata,
+                    paramMap = mapOf(
+                        "behandlingId" to behandlingId,
+                        "metadata" to metadata.toJson()
+                    )
+                ).let { query -> tx.run(query.asUpdate) }
+            }
+        }
+    }
+
     private fun toVilkaarsvurderingIntern(row: Row) = with(row) {
         VilkaarsvurderingIntern(
             behandlingId = uuid("behandlingId"),
@@ -72,5 +88,10 @@ private object Queries {
         |DO UPDATE SET 
         |   vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat,  
         |   virkningstidspunkt = EXCLUDED.virkningstidspunkt, metadata = EXCLUDED.metadata
+    """.trimMargin()
+    val setMetadata = """
+        |UPDATE vilkaarsvurdering
+        |set metadata = :metadata::JSONB
+        |WHERE behandlingId = :behandlingId::UUID
     """.trimMargin()
 }

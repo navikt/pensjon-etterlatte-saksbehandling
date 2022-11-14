@@ -23,7 +23,8 @@ import java.util.*
 class JournalpostClient(
     private val httpClient: HttpClient,
     private val restApiUrl: String,
-    private val graphqlApiUrl: String
+    private val graphqlApiUrl: String,
+    private val safScope: String
 ) : JournalpostService {
 
     val configLocation: String? = null
@@ -82,7 +83,7 @@ class JournalpostClient(
 
     private suspend fun getToken(accessToken: String): String {
         val token = azureAdClient.getOnBehalfOfAccessTokenForResource(
-            listOf("api://dev-fss.teamdokumenthandtering.saf-q1/.default"),
+            listOf(safScope),
             accessToken
         )
         return token.get()?.accessToken ?: ""

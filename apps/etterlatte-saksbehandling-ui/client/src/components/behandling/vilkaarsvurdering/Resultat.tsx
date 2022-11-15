@@ -17,14 +17,14 @@ import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterStringDato } from '~utils/formattering'
 
 type Props = {
-  dato: string
+  virkningstidspunkt: string
   vilkaarsvurdering: Vilkaarsvurdering
   oppdaterVilkaar: (vilkaarsvurdering: Vilkaarsvurdering) => void
   behandlingId: string
 }
 const MIN_KOMMENTAR_LENGDE = 1
 
-export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVilkaar, behandlingId }) => {
+export const Resultat: React.FC<Props> = ({ virkningstidspunkt, vilkaarsvurdering, oppdaterVilkaar, behandlingId }) => {
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
@@ -92,7 +92,7 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
               <StatusIcon status={status} noLeftPadding /> {`${resultatTekst()}`}
             </TekstWrapper>
             {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
-              <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(dato)}</BodyShort>
+              <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(virkningstidspunkt)}</BodyShort>
             )}
             <Kommentar>
               <Heading size="xsmall">Begrunnelse</Heading>

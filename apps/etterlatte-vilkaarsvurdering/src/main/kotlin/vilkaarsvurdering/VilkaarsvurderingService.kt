@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonRevurderingSoekerDoedVilkaar
 import no.nav.helse.rapids_rivers.JsonMessage
+import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
 class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
@@ -25,7 +26,7 @@ class UgyldigSakTypeException(override val message: String) : RuntimeException(m
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val sendToRapid: (String, UUID) -> Unit
-) {
+) : VedlikeholdService {
 
     fun hentVilkaarsvurdering(behandlingId: UUID): VilkaarsvurderingIntern? {
         return vilkaarsvurderingRepository.hent(behandlingId)
@@ -182,4 +183,8 @@ class VilkaarsvurderingService(
         } else {
             vilkaar
         }
+
+    override fun slettSak(sakId: Long) {
+        vilkaarsvurderingRepository.slettVilkaarsvurderingerISak(sakId)
+    }
 }

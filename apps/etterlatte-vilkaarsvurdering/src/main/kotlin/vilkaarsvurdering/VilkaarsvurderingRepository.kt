@@ -13,6 +13,7 @@ import javax.sql.DataSource
 interface VilkaarsvurderingRepository {
     fun hent(behandlingId: UUID): VilkaarsvurderingIntern?
     fun lagre(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern
+    fun slettVilkaarsvurderingerISak(sakId: Long)
 }
 
 class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : VilkaarsvurderingRepository {
@@ -46,6 +47,17 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
         }
     }
 
+    override fun slettVilkaarsvurderingerISak(sakId: Long) {
+        using(sessionOf(ds)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = Queries.slettVilkaarsvurderingerISak,
+                    paramMap = mapOf("sakId" to sakId.toString())
+                ).let { query -> tx.run(query.asExecute) }
+            }
+        }
+    }
+
     private fun toVilkaarsvurderingIntern(row: Row) = with(row) {
         VilkaarsvurderingIntern(
             behandlingId = uuid("behandlingId"),
@@ -73,4 +85,6 @@ private object Queries {
         |   vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat,  
         |   virkningstidspunkt = EXCLUDED.virkningstidspunkt, metadata = EXCLUDED.metadata
     """.trimMargin()
+
+    const val slettVilkaarsvurderingerISak = "DELETE FROM vilkaarsvurdering WHERE metadata->>'sakId' = :sakId::TEXT"
 }

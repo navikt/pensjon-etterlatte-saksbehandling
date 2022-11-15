@@ -127,7 +127,7 @@ internal class BrevRepositoryIntegrationTest {
 
         val brev = opprettBrev("1")
 
-        assertTrue(db.setBestillingId(brev.id, journalpostId))
+        assertTrue(db.setBestillingsId(brev.id, journalpostId))
     }
 
     @Test

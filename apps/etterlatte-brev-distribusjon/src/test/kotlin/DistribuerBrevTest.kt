@@ -47,6 +47,6 @@ class DistribuerBrevTest {
 
         inspector.message(0).get(eventNameKey).asText() shouldBe BrevEventTypes.DISTRIBUERT.toString()
         inspector.message(0).get("brevId").asLong() shouldBe brevId
-        inspector.message(0).get("bestillingId").asText() shouldNotBe null
+        inspector.message(0).get("bestillingsId").asText() shouldNotBe null
     }
 }

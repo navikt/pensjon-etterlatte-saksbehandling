@@ -27,7 +27,7 @@ internal class JournalfoerBrev(
         River(rapidsConnection).apply {
             eventName(BrevEventTypes.FERDIGSTILT.toString())
             validate { it.requireKey("brevId", "payload") }
-            validate { it.rejectKey("bestillingId", "journalpostResponse") }
+            validate { it.rejectKey("bestillingsId", "journalpostResponse") }
             correlationId()
         }.register(this)
     }

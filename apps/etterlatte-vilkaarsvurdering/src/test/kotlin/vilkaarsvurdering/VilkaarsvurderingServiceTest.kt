@@ -31,6 +31,9 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -235,6 +238,19 @@ internal class VilkaarsvurderingServiceTest {
         payloadContent.captured shouldInclude "virkningstidspunkt"
         payloadContent.captured shouldInclude "behandling"
         payloadContent.captured shouldInclude "fnrSoeker"
+    }
+
+    @Test
+    fun `Skal slette alle vilkaarsvurderinger i en sak ved vedlikehold`() {
+        opprettVilkaarsvurdering()
+
+        val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)
+        assertNotNull(vilkaarsvurdering)
+        assertEquals(vilkaarsvurdering?.grunnlagsmetadata?.sakId, 1)
+
+        service.slettSak(1)
+
+        assertNull(service.hentVilkaarsvurdering(uuid))
     }
 
     private fun opprettVilkaarsvurdering() {

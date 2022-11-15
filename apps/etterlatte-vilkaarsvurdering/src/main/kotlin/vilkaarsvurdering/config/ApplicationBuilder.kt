@@ -18,6 +18,7 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlientImpl
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlientImpl
 import no.nav.helse.rapids_rivers.RapidApplication
+import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 import java.util.*
 
 class ApplicationBuilder {
@@ -48,6 +49,7 @@ class ApplicationBuilder {
                 )
             }
             .build()
+            .apply { registrerVedlikeholdsriver(vilkaarsvurderingService) }
 
     fun start() = rapidsConnection.start()
     private fun publiser(melding: String, key: UUID) {

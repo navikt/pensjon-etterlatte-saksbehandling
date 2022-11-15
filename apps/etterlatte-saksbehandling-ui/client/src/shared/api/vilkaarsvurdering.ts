@@ -32,7 +32,12 @@ export const lagreTotalVurdering = async (
 export interface Vilkaarsvurdering {
   vilkaar: Vilkaar[]
   resultat?: VilkaarsvurderingVurdertResultat
-  virkningstidspunkt: string
+  virkningstidspunkt: Virkningstidspunkt
+}
+
+export interface Virkningstidspunkt {
+  dato: string
+  kilde: KildeSaksbehandler
 }
 
 export interface Vilkaar {

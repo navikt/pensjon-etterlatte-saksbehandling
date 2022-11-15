@@ -72,7 +72,7 @@ export const Inngangsvilkaar = () => {
           ))}
 
           <Resultat
-            virkningstidspunkt={vilkaarsvurdering.virkningstidspunkt}
+            virkningstidspunktDato={vilkaarsvurdering.virkningstidspunkt.dato}
             vilkaarsvurdering={vilkaarsvurdering}
             oppdaterVilkaar={oppdaterVilkaarsvurdering}
             behandlingId={behandlingId}

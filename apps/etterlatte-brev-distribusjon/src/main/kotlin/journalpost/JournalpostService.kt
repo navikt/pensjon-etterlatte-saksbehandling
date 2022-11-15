@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.common.journalpost.JournalPostType
 import no.nav.etterlatte.libs.common.journalpost.JournalpostDokument
 import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
+import no.nav.etterlatte.libs.common.journalpost.Sak
+import no.nav.etterlatte.libs.common.journalpost.Sakstype
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -49,7 +51,7 @@ class JournalpostServiceImpl(
             avsenderMottaker = melding.mottaker.tilAvsenderMottaker(),
             bruker = melding.bruker,
             eksternReferanseId = "${melding.behandlingId}.${melding.brevId}",
-            // sak = {...}
+            sak = Sak(Sakstype.GENERELL_SAK), // Todo: Kan ta inn behandlingsid som fagsakId
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(melding)),
             tema = "PEN", // https://confluence.adeo.no/display/BOA/Tema, // Todo: Skal byttes til EYB eller EYO
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal

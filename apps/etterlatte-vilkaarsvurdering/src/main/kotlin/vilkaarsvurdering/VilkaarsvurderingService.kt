@@ -134,6 +134,7 @@ class VilkaarsvurderingService(
                     behandling.sak
                 )
             }
+            .apply { this["sakId"] = behandling.sak }
             .apply { this["fnrSoeker"] = behandling.soeker!! }
             .apply {
                 this["behandling"] =

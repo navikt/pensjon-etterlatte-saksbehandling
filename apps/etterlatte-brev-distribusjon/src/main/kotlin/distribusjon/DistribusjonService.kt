@@ -31,6 +31,6 @@ class DistribusjonServiceImpl(private val klient: DistribusjonKlient) : Distribu
             dokumentProdApp = "etterlate-brev-api"
         )
 
-        klient.distribuerJournalpost(request).bestillingId
+        klient.distribuerJournalpost(request).bestillingsId
     }
 }

@@ -7,7 +7,6 @@ import { VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
 import { RequestStatus } from './utils'
 import Spinner from '~shared/Spinner'
-import { format } from 'date-fns'
 import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 

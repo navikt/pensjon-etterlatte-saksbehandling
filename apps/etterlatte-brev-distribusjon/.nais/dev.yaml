@@ -35,7 +35,7 @@ spec:
     - name: AZURE_DOKARKIV_SCOPE
       value: "api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default"
     - name: DOKDISTFORDEL_URL
-      value: "https://dokdistfordeling-q1.nais.preprod.local/rest/v1"
+      value: "https://dokdistfordeling-q1.dev-fss-pub.nais.io/rest/v1"
     - name: DOKDISTFORDEL_SCOPE
       value: "api://dev-fss.teamdokumenthandtering.saf-q1/.default"
     - name: BREV_API_SCOPE

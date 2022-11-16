@@ -1,12 +1,12 @@
-import { IKommerBarnetTilgode, JaNei, JaNeiRec } from '~store/reducers/BehandlingReducer'
+import { IKommerBarnetTilgode, JaNei, JaNeiRec, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { GyldighetIcon } from '~shared/icons/gyldigIcon'
 import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
-import { CaseworkerfilledIcon } from '~shared/icons/caseworkerfilledIcon'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { EndreVurdering } from './EndreVurdering'
 import { formaterStringDato } from '~utils/formattering'
 import { svarTilVurderingsstatus } from '../../utils'
+import { Edit } from '@navikt/ds-icons'
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerBarnetTilgode,
@@ -27,9 +27,14 @@ export const KommerBarnetTilGodeVurdering = ({
   return (
     <VurderingsContainer>
       <div>
-        {kommerBarnetTilgode?.svar && (
-          <GyldighetIcon status={svarTilVurderingsstatus(kommerBarnetTilgode.svar)} large={true} />
-        )}
+        <GyldighetIcon
+          large
+          status={
+            kommerBarnetTilgode?.svar
+              ? svarTilVurderingsstatus(kommerBarnetTilgode.svar)
+              : VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+          }
+        />
       </div>
       {redigeringsModus ? (
         <EndreVurdering
@@ -50,13 +55,15 @@ export const KommerBarnetTilGodeVurdering = ({
           <Undertekst gray={false}>
             Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
           </Undertekst>
-          <div>{kommerBarnetTilgode?.svar ? JaNeiRec[kommerBarnetTilgode?.svar] : '-'}</div>
-          <BegrunnelseWrapper>
-            <div style={{ fontWeight: 'bold' }}>Begrunnelse</div>
-            <div>{kommerBarnetTilgode?.begrunnelse ?? ''}</div>
-          </BegrunnelseWrapper>
+          {kommerBarnetTilgode?.svar && <div>{JaNeiRec[kommerBarnetTilgode.svar]}</div>}
+          {kommerBarnetTilgode?.begrunnelse && (
+            <BegrunnelseWrapper>
+              <Bold>Begrunnelse</Bold>
+              <div>{kommerBarnetTilgode.begrunnelse}</div>
+            </BegrunnelseWrapper>
+          )}
           <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
-            <CaseworkerfilledIcon /> <span className={'text'}> Rediger vurdering</span>
+            <Edit /> Rediger
           </RedigerWrapper>
         </div>
       )}
@@ -80,6 +87,10 @@ export const RedigerWrapper = styled.div`
   }
 `
 
+const Bold = styled.div`
+  font-weight: bold;
+`
+
 export const RadioGroupWrapper = styled.div`
   margin-top: 0.5em;
   margin-bottom: 1em;
@@ -93,5 +104,5 @@ const BegrunnelseWrapper = styled.div`
   background-color: ${'#EFECF4'};
   padding: 0.1em 0.5em;
   border-radius: 4px;
-  margin-right: 0.9em;
+  margin: 0.9em 0.9em 0.9em 0;
 `

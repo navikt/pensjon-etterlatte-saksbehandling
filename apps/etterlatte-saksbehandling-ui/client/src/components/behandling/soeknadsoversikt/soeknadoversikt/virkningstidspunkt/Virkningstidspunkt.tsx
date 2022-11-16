@@ -132,13 +132,11 @@ const Virkningstidspunkt = () => {
                 <div>
                   {behandling.virkningstidspunkt ? (
                     <>
-                      <Undertekst gray>Manuellt av {behandling.virkningstidspunkt?.kilde.ident ?? ''}</Undertekst>
+                      <Undertekst gray>Manuelt av {behandling.virkningstidspunkt.kilde.ident}</Undertekst>
                       <Undertekst gray>
-                        Sist endret{' '}
-                        {behandling.virkningstidspunkt?.kilde.tidspunkt
-                          ? `${formaterStringDato(behandling.virkningstidspunkt?.kilde.tidspunkt)}
-                          kl.${formaterStringTidspunkt(behandling.virkningstidspunkt?.kilde.tidspunkt)}`
-                          : ''}
+                        {`Sist endret ${formaterStringDato(
+                          behandling.virkningstidspunkt.kilde.tidspunkt
+                        )} kl.${formaterStringTidspunkt(behandling.virkningstidspunkt.kilde.tidspunkt)}`}
                       </Undertekst>
                       <RedigerWrapper onClick={() => setRediger(true)}>
                         <Edit /> Rediger

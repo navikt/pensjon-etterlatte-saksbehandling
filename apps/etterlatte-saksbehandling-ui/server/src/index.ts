@@ -18,7 +18,6 @@ const app = express()
 app.set('trust proxy', 1)
 app.use('/', express.static(clientPath))
 app.use(requestLogger(isDev))
-app.use(express.json())
 
 app.use(['/health/isAlive', '/health/isReady'], (req: Request, res: Response) => {
   res.send('OK')
@@ -48,6 +47,8 @@ if (isDev) {
 
   app.use('/brev', tokenMiddleware(ApiConfig.brev.scope), proxy(ApiConfig.brev.url!!))
 }
+// Body parser må komme etter proxy middleware
+app.use(express.json())
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)

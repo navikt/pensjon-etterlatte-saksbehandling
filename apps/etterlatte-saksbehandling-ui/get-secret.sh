@@ -38,10 +38,11 @@ addSecretToEnvFile() {
         | .["WONDERWALL_OPENID_CLIENT_JWK"] = .AZURE_APP_JWK
         | .["WONDERWALL_OPENID_WELL_KNOWN_URL"] = .AZURE_APP_WELL_KNOWN_URL
         | to_entries[] | (.key | ascii_upcase) +"=" + .value' \
+      | sed -r "s/^(WONDERWALL_OPENID_CLIENT_JWK)=(\{.*\})$/\1='\2'/g" \
       > .env.dev-gcp
 
   if [ $? -eq 0 ]; then
-    info "Secret saved to .env.dev-gcp"
+    info "Secrets saved to .env.dev-gcp"
   else
     error "Unhandled error on 'kubectl get secret' ..."
   fi

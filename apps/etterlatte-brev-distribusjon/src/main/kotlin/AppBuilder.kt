@@ -44,7 +44,6 @@ class AppBuilder {
     }
 
     private fun httpClient(scope: String) = HttpClient(OkHttp) {
-        expectSuccess = true
         install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
 
         install(Auth) {

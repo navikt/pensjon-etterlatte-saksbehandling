@@ -14,28 +14,30 @@ import no.nav.etterlatte.libs.common.distribusjon.DistribuerJournalpostRequest
 import no.nav.etterlatte.libs.common.distribusjon.DistribuerJournalpostResponse
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
-import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 
 class DistribusjonKlient(private val client: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(DistribusjonKlient::class.java)
 
-    suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse = try {
-        val response = client.post("$url/distribuerjournalpost") {
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            header(X_CORRELATION_ID, getXCorrelationId())
-            setBody(request)
+    suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse =
+        try {
+            client.post("$url/distribuerjournalpost") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                header(X_CORRELATION_ID, getXCorrelationId())
+                setBody(request)
+            }.let {
+                when (it.status) {
+                    HttpStatusCode.OK -> it.body()
+                    HttpStatusCode.Conflict -> it.body()
+                    else -> throw ResponseException(it, "Ukjent respons fra dokumentdistribusjon")
+                }
+            }
+        } catch (exception: Exception) {
+            logger.error("Feil i kall mot dokumentdistribusjon: ", exception)
+            throw DistribusjonException("Feil i kall mot dokumentdistribusjon", exception)
         }
-        if (response.status in listOf(HttpStatusCode.OK, HttpStatusCode.Conflict)) {
-            response.body()
-        } else {
-            throw ResponseException(response,"Ukjent respons fra dokumentdistribusjon")
-        }
-    } catch (exception: Exception) {
-        logger.error("Feil i kall mot dokumentdistribusjon: ", exception)
-        throw DistribusjonException("Feil i kall mot dokumentdistribusjon", exception)
-    }
 }
+
 
 open class DistribusjonException(msg: String, cause: Throwable) : Exception(msg, cause)

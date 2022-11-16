@@ -28,9 +28,6 @@ class JournalpostKlient(private val client: HttpClient, private val url: String)
             setBody(request)
         }.body()
     } catch (responseException: ResponseException) {
-        logger.error("Feil i kall mot Dokarkiv: ", responseException)
-        logger.error("Feilen kom etter følgende request: $request", request) // Todo: Fjerne denne
-
         throw when (responseException.response.status.value) {
             HttpStatusCode.Conflict.value -> DuplikatJournalpostException("Duplikat journalpost", responseException)
             else -> JournalpostException("Feil i kall mot Dokarkiv", responseException)

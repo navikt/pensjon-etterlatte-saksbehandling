@@ -1,7 +1,7 @@
 version: "3"
-name: saksbehandling-ui-dev-gcp
+#name: saksbehandling-ui-dev-gcp
 services:
-  frackend:
+  frackend-dev-gcp:
     container_name: frackend
     build:
       context: server
@@ -18,7 +18,7 @@ services:
     env_file:
       - .env.dev-gcp # Opprettes med script get-secret.sh. Les README
 
-  wonderwall:
+  wonderwall-dev-gcp:
     container_name: wonderwall
     image: ghcr.io/nais/wonderwall:latest
     restart: on-failure

@@ -55,6 +55,16 @@ Når `.env.dev-gcp` er opprettet kan du kjøre opp docker (dev-gcp varianten):
 
 #### Variant B: Med mock-oauth2 mot lokal backend
 
+For å kjøre frackend med mock-oauth2 må du lage en fil som heter `.env`. I den filen kan du legge til lenke til 
+backend API som skal testes. Nøkler/endepunkter som ikke er spesifisert vil returnere mockdata. Gyldige nøkler er: 
+
+```
+API_URL=
+BREV_API_URL=
+VILKAARSVURDERING_API_URL=
+BEHANDLING_API_URL=
+```
+
 1. Kjør `docker-compose up -d` \
    Dette starter wonderwall, mock-oauth2-server, og frackend i docker.
 2. Start frontend (client):

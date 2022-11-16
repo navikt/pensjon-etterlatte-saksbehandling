@@ -1,7 +1,7 @@
 version: "3"
-name: saksbehandling-ui-mock-auth
+#name: saksbehandling-ui-mock-auth
 services:
-  frackend:
+  frackend-mock-auth:
     container_name: frackend
     build:
       context: server
@@ -18,7 +18,7 @@ services:
     env_file:
       - .env # Du må manuelt opprette .env-filen. Les README!
 
-  wonderwall:
+  wonderwall-mock-auth:
     container_name: wonderwall
     image: ghcr.io/nais/wonderwall:latest
     depends_on:
@@ -37,7 +37,7 @@ services:
       WONDERWALL_AUTO_LOGIN: true
       WONDERWALL_LOG_FORMAT: text
 
-  auth:
+  mock-oauth2:
     container_name: mock-oauth2-server
     image: ghcr.io/navikt/mock-oauth2-server:0.5.5
     ports:

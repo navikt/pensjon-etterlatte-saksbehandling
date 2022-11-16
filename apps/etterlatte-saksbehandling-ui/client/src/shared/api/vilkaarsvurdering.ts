@@ -14,7 +14,7 @@ export const vurderVilkaar = async (
   })
 
 export const slettVurdering = async (behandlingId: string, type: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
-  apiClient.delete(`/vilkaarsvurdering/${behandlingId}/${type}`, true)
+  apiClient.delete(`/vilkaarsvurdering/${behandlingId}/${type}`)
 
 export const slettTotalVurdering = async (behandlingId: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
   apiClient.delete(`/vilkaarsvurdering/resultat/${behandlingId}`)
@@ -72,13 +72,17 @@ interface KildePdl {
 
 export interface Hovedvilkaar {
   type: string
-  paragraf: Paragraf
+  tittel: string
+  beskrivelse: string
+  lovreferanse: Paragraf
   resultat?: VurderingsResultat
 }
 
 export interface Unntaksvilkaar {
   type: string
-  paragraf: Paragraf
+  tittel: string
+  beskrivelse?: string
+  lovreferanse: Paragraf
   resultat?: VurderingsResultat
 }
 
@@ -90,9 +94,7 @@ export interface VurdertResultat {
 
 export interface Paragraf {
   paragraf: string
-  tittel: string
   lenke: string
-  lovtekst: string
 }
 
 export enum VurderingsResultat {

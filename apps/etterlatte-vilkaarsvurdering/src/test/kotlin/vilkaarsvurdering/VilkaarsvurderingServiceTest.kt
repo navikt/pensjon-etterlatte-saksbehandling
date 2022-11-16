@@ -18,13 +18,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
-import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningsType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
@@ -40,6 +37,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import vilkaarsvurdering.VilkaarsvurderingTestData
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -90,16 +88,14 @@ internal class VilkaarsvurderingServiceTest {
             vilkaar.grunnlag!! shouldHaveSize 3
 
             requireNotNull(vilkaar.grunnlag?.get(0)).let {
-                it.opplysningsType shouldBe VilkaarOpplysningsType.FOEDSELSDATO
-                val opplysning: Foedselsdato = objectMapper.readValue(it.opplysning.toJson())
-                opplysning.foedselsdato shouldBe grunnlag.soeker.hentFoedselsdato()?.verdi
-                opplysning.foedselsnummer shouldBe grunnlag.soeker.hentFoedselsnummer()?.verdi
+                it.opplysningsType shouldBe VilkaarOpplysningType.SOEKER_FOEDSELSDATO
+                val opplysning: LocalDate = objectMapper.readValue(it.opplysning!!.toJson())
+                opplysning shouldBe grunnlag.soeker.hentFoedselsdato()?.verdi
             }
             requireNotNull(vilkaar.grunnlag?.get(1)).let {
-                it.opplysningsType shouldBe VilkaarOpplysningsType.DOEDSDATO
-                val opplysning: Doedsdato = objectMapper.readValue(it.opplysning.toJson())
-                opplysning.foedselsnummer shouldBe grunnlag.hentAvdoed().hentFoedselsnummer()?.verdi
-                opplysning.doedsdato shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
+                it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
+                val opplysning: LocalDate? = objectMapper.readValue(it.opplysning!!.toJson())
+                opplysning shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
             }
         }
     }

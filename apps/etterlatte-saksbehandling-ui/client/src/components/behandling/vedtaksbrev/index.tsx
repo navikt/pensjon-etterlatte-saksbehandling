@@ -74,7 +74,7 @@ export const Vedtaksbrev = () => {
         .filter((v) => v.hovedvilkaar.resultat === VurderingsResultat.IKKE_OPPFYLT)
         .map((v) => ({
           value: v.hovedvilkaar.type,
-          label: `${v.hovedvilkaar.paragraf.paragraf}: ${v.hovedvilkaar.paragraf.tittel}`,
+          label: `${v.hovedvilkaar.lovreferanse.paragraf}: ${v.hovedvilkaar.tittel}`,
         }))
 
       const unntaksvilkaar = vilkaarsvurdering.vilkaar
@@ -82,7 +82,7 @@ export const Vedtaksbrev = () => {
         .filter((v) => !!v && v.resultat === VurderingsResultat.IKKE_OPPFYLT)
         .map((v) => ({
           value: v!!.type,
-          label: `${v!!.paragraf?.paragraf}: ${v!!.paragraf?.tittel}`,
+          label: `${v!!.lovreferanse?.paragraf}: ${v!!.tittel}`,
         }))
 
       const vilkaar = [...hovedvilkaar, ...unntaksvilkaar]

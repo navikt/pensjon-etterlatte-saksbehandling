@@ -133,7 +133,7 @@ export const Vurdering = ({
             {oppfyltUnntaksvilkaar && (
               <VilkaarVurdertInformasjon>
                 <Heading size="xsmall">Unntak er oppfylt</Heading>
-                <BodyShort size="small">{oppfyltUnntaksvilkaar?.paragraf.tittel}</BodyShort>
+                <BodyShort size="small">{oppfyltUnntaksvilkaar?.tittel}</BodyShort>
               </VilkaarVurdertInformasjon>
             )}
             {vilkaar.vurdering?.kommentar && (
@@ -192,7 +192,7 @@ export const Vurdering = ({
                     {vilkaar.unntaksvilkaar.map((unntakvilkaar) => {
                       return (
                         <Radio key={unntakvilkaar.type} value={unntakvilkaar.type}>
-                          {unntakvilkaar.paragraf.tittel}
+                          {unntakvilkaar.tittel}
                         </Radio>
                       )
                     })}

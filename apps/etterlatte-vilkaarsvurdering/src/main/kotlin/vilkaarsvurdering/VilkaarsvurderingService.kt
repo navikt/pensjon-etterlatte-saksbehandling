@@ -14,8 +14,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonRevurderingSoekerDoedVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
 import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
@@ -36,7 +35,7 @@ class VilkaarsvurderingService(
         revurderingAarsak: RevurderingAarsak
     ): List<Vilkaar> {
         return when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> barnepensjonRevurderingSoekerDoedVilkaar()
+            RevurderingAarsak.SOEKER_DOD -> BarnepensjonVilkaar.loependevilkaar()
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )
@@ -58,15 +57,11 @@ class VilkaarsvurderingService(
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
                                 behandlingId = behandlingId,
-                                vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(
-                                    grunnlag,
-                                    virkningstidspunkt
-                                ),
+                                vilkaar = BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt),
                                 virkningstidspunkt = virkningstidspunkt,
                                 grunnlagsmetadata = grunnlag.metadata
                             )
                         )
-
                     BehandlingType.REVURDERING ->
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
@@ -76,7 +71,6 @@ class VilkaarsvurderingService(
                                 grunnlagsmetadata = grunnlag.metadata
                             )
                         )
-
                     else ->
                         throw VilkaarsvurderingFinnesIkkeException(
                             "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"

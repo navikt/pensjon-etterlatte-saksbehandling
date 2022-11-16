@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Hovedvilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Paragraf
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Unntaksvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
@@ -36,7 +36,7 @@ object BarnepensjonVilkaar {
             tittel = "Formål",
             beskrivelse =
             "Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde.",
-            lovreferanse = Paragraf(
+            lovreferanse = Lovreferanse(
                 paragraf = "§ 18-1",
                 ledd = 1,
                 lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-1"
@@ -49,7 +49,7 @@ object BarnepensjonVilkaar {
             type = VilkaarType.DOEDSFALL_FORELDER,
             tittel = "Dødsfall forelder",
             beskrivelse = "En eller begge foreldrene er registrert død",
-            lovreferanse = Paragraf(
+            lovreferanse = Lovreferanse(
                 paragraf = "§ 18-4",
                 ledd = 2,
                 lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4"
@@ -65,7 +65,7 @@ object BarnepensjonVilkaar {
             type = VilkaarType.ALDER_BARN,
             tittel = "Barnets alder",
             beskrivelse = "Barnet er under 18 år (på virkningstidspunkt)",
-            lovreferanse = Paragraf(
+            lovreferanse = Lovreferanse(
                 paragraf = "§ 18-4",
                 ledd = 1,
                 lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4"
@@ -88,7 +88,7 @@ object BarnepensjonVilkaar {
             type = VilkaarType.FORTSATT_MEDLEMSKAP,
             tittel = "Barnets medlemskap",
             beskrivelse = "Barnet er medlem i trygden (fra virkningstidspunkt)",
-            lovreferanse = Paragraf(
+            lovreferanse = Lovreferanse(
                 paragraf = "§ 18-3",
                 ledd = 1,
                 lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-3"
@@ -108,7 +108,7 @@ object BarnepensjonVilkaar {
             beskrivelse =
             "Avdød har vært medlem eller mottatt pensjon/uføretrygd fra folketrygden de " +
                 "siste fem årene fram til dødsfallet",
-            lovreferanse = Paragraf(
+            lovreferanse = Lovreferanse(
                 paragraf = "§ 18-2",
                 ledd = 1,
                 lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-2"
@@ -126,7 +126,7 @@ object BarnepensjonVilkaar {
             type = VilkaarType.YRKESSKADE_AVDOED,
             tittel = "Yrkesskade",
             beskrivelse = "Dødsfallet skyldes en godkjent yrkes-skade/sykdom",
-            lovreferanse = Paragraf(
+            lovreferanse = Lovreferanse(
                 paragraf = "§ 18-11",
                 ledd = 1,
                 lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-11"
@@ -137,7 +137,7 @@ object BarnepensjonVilkaar {
     private fun beggeForeldreDoedeUtdanningHovedbeskjeftigelse() = Unntaksvilkaar(
         type = VilkaarType.ALDER_BARN_UNNTAK_UTDANNING,
         tittel = "Begge foreldrene er døde og barnet har utdanning som hovedbeskjeftigelse",
-        lovreferanse = Paragraf(
+        lovreferanse = Lovreferanse(
             paragraf = "§ 18-4",
             ledd = 3
         )
@@ -146,7 +146,7 @@ object BarnepensjonVilkaar {
     private fun minstEttBarnForedreloestBarnekullMedlemTrygden() = Unntaksvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRELOEST_BARN_I_KULL_MEDLEM_TRYGDEN,
         tittel = "Minst ett av barna i et foreldreløst barnekull er medlem i trygden",
-        lovreferanse = Paragraf(
+        lovreferanse = Lovreferanse(
             paragraf = "§ 18-3",
             ledd = 2,
             bokstav = "c"
@@ -156,7 +156,7 @@ object BarnepensjonVilkaar {
     private fun avdoedMindreEnn20AarsSamletBotidRettTilTilleggspensjon() = Unntaksvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_AVDOED_MINDRE_20_AAR_BOTID_RETT_TILLEGGSPENSJON,
         tittel = "Minst ett av barna i et foreldreløst barnekull er medlem i trygden",
-        lovreferanse = Paragraf(
+        lovreferanse = Lovreferanse(
             paragraf = "§ 18-3",
             ledd = 2,
             bokstav = "b"
@@ -166,7 +166,7 @@ object BarnepensjonVilkaar {
     private fun enForelderMinst20AarsSamletBotid() = Unntaksvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRE_MINST_20_AAR_SAMLET_BOTID,
         tittel = "En av foreldrene har minst 20 års samlet botid",
-        lovreferanse = Paragraf(
+        lovreferanse = Lovreferanse(
             paragraf = "§ 18-3",
             ledd = 2,
             bokstav = "a"
@@ -176,7 +176,7 @@ object BarnepensjonVilkaar {
     private fun avdoedMedlemITrygdenIkkeFylt26Aar() = Unntaksvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR,
         tittel = "Avdøde medlem av trygden ved dødsfallet og ikke fylt 26 år",
-        lovreferanse = Paragraf(
+        lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 3,
             bokstav = "a"
@@ -186,7 +186,7 @@ object BarnepensjonVilkaar {
     private fun avdoedMedlemEtter16AarMedUnntakAvMaksimum5Aar() = Unntaksvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR,
         tittel = "Avdøde medlem av trygden ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år",
-        lovreferanse = Paragraf(
+        lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 3,
             bokstav = "b"
@@ -196,7 +196,7 @@ object BarnepensjonVilkaar {
     private fun avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon() = Unntaksvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_HALV_MINSTEPENSJON,
         tittel = "Avdøde kunne tilstås en ytelse på grunnlag av tidligere opptjening",
-        lovreferanse = Paragraf(
+        lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 6
         )

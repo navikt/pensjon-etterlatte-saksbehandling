@@ -23,7 +23,7 @@ data class Hovedvilkaar(
     val type: VilkaarType,
     val tittel: String,
     val beskrivelse: String? = null,
-    val lovreferanse: Paragraf,
+    val lovreferanse: Lovreferanse,
     val resultat: Utfall? = null
 )
 
@@ -31,11 +31,11 @@ data class Unntaksvilkaar(
     val type: VilkaarType,
     val tittel: String,
     val beskrivelse: String? = null,
-    val lovreferanse: Paragraf,
+    val lovreferanse: Lovreferanse,
     val resultat: Utfall? = null
 )
 
-data class Paragraf(
+data class Lovreferanse(
     val paragraf: String,
     val ledd: Int? = null,
     val bokstav: String? = null,

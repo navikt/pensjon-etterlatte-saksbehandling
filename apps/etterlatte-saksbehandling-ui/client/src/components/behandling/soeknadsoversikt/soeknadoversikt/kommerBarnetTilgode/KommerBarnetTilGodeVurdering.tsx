@@ -4,7 +4,7 @@ import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { EndreVurdering } from './EndreVurdering'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
 import { svarTilVurderingsstatus } from '../../utils'
 import { Edit } from '@navikt/ds-icons'
 
@@ -16,9 +16,7 @@ export const KommerBarnetTilGodeVurdering = ({
   const [redigeringsModus, setRedigeringsModus] = useState(false)
 
   const tittel =
-    kommerBarnetTilgode === null
-      ? 'Ikke vurdert'
-      : kommerBarnetTilgode?.svar === JaNei.JA
+    kommerBarnetTilgode?.svar === JaNei.JA
       ? 'Sannsynlig pensjonen kommer barnet til gode'
       : kommerBarnetTilgode?.svar === JaNei.NEI
       ? 'Ikke sannsynlig pensjonen kommer barnet til gode'
@@ -44,15 +42,19 @@ export const KommerBarnetTilGodeVurdering = ({
       ) : (
         <div>
           <VurderingsTitle>{tittel}</VurderingsTitle>
-          {kommerBarnetTilgode?.kilde?.ident && (
-            <Undertekst gray={true}>{`Endret manuelt av ${kommerBarnetTilgode.kilde.ident}`}</Undertekst>
+          {kommerBarnetTilgode?.kilde ? (
+            <>
+              <Undertekst gray>{`Manuelt av ${kommerBarnetTilgode.kilde.ident}`}</Undertekst>
+              <Undertekst gray spacing>{`Sist endret ${formaterStringDato(
+                kommerBarnetTilgode.kilde.tidspunkt
+              )} kl.${formaterStringTidspunkt(kommerBarnetTilgode.kilde.tidspunkt)}`}</Undertekst>
+            </>
+          ) : (
+            <Undertekst gray spacing>
+              Ikke vurdert
+            </Undertekst>
           )}
-          <Undertekst gray={true}>
-            {kommerBarnetTilgode?.kilde?.tidspunkt
-              ? `Sist endret ${formaterStringDato(kommerBarnetTilgode.kilde.tidspunkt)}`
-              : 'Ikke vurdert'}
-          </Undertekst>
-          <Undertekst gray={false}>
+          <Undertekst spacing>
             Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
           </Undertekst>
           {kommerBarnetTilgode?.svar && <div>{JaNeiRec[kommerBarnetTilgode.svar]}</div>}

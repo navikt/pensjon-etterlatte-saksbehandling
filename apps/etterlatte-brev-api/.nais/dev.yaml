@@ -57,6 +57,7 @@ spec:
         - application: ey-pdfgen
         - application: etterlatte-brreg
         - application: etterlatte-pdl-proxy
+        - application: etterlatte-vedtaksvurdering
     inbound:
       rules:
         - application: ey-sak-lokal

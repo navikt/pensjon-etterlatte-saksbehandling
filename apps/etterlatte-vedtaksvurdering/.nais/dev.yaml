@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  ingresses:
+    - "https://etterlatte-vedtaksvurdering-api.dev.intern.nav.no"
   gcp:
     sqlInstances:
       - type: POSTGRES_14

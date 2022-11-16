@@ -1,16 +1,13 @@
-import express from 'express'
-import cors from 'cors'
+import express, { Request, Response } from 'express'
 import path from 'path'
-import { appConf } from './config/config'
+import { appConf, ApiConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
-import { healthRouter } from './routers/health'
 import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
-import { expressProxy } from './routers/proxy'
 import { logger } from './utils/logger'
-import brev from './routers/brev'
-import { lokalProxy } from './routers/lokalproxy'
 import { requestLogger } from './middleware/logging'
+import { tokenMiddleware } from './middleware/getOboToken'
+import { proxy } from './middleware/proxy'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -22,35 +19,37 @@ app.set('trust proxy', 1)
 app.use('/', express.static(clientPath))
 app.use(requestLogger(isDev))
 app.use(express.json())
-app.use('/health', healthRouter)
+
+app.use(['/health/isAlive', '/health/isReady'], (req: Request, res: Response) => {
+  res.send('OK')
+})
 
 if (isDev) {
-  app.use(cors({ origin: 'http://localhost:3000' }))
-  app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
-  if (process.env.VILKAARSVURDERING_DEV) {
-    app.use('/api/vilkaarsvurdering', lokalProxy('http://localhost:8087/api/vilkaarsvurdering'))
-  }
-  if (process.env.BREV_DEV) {
-    app.use('/brev', brev)
-  }
+  // TODO: Legge til resterende mocks
+  logger.info('Mocking all endpoints')
   app.use('/api', mockRouter)
 } else {
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
+  app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
+
   app.use(
     '/api/vilkaarsvurdering',
-    expressProxy(`${process.env.VILKAARSVURDERING_API_URL}`, 'api://f4cf400f-8ef9-406f-baf1-8218f8f7edac/.default')
+    tokenMiddleware(ApiConfig.vilkaarsvurdering.scope),
+    proxy(ApiConfig.vilkaarsvurdering.url!!)
   )
-  app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
+
   app.use(
     '/api/behandling/:behandlingsid/kommerbarnettilgode',
-    expressProxy(`${process.env.BEHANDLING_API_URL}`, 'api://59967ac8-009c-492e-a618-e5a0f6b3e4e4/.default')
+    tokenMiddleware(ApiConfig.behandling.scope),
+    proxy(ApiConfig.behandling.url!!)
   )
 
-  app.use('/api', expressProxy(`${process.env.API_URL}`, 'api://783cea60-43b5-459c-bdd3-de3325bd716a/.default'))
-  app.use('/brev', expressProxy(`${process.env.BREV_API_URL}`, 'api://d6add52a-5807-49cd-a181-76908efee836/.default'))
+  app.use('/api', tokenMiddleware(ApiConfig.api.scope), proxy(ApiConfig.api.url!!))
+
+  app.use('/brev', tokenMiddleware(ApiConfig.brev.scope), proxy(ApiConfig.brev.url!!))
 }
 
-app.use(/^(?!.*\/(internal|static)\/).*$/, (req: any, res: any) => {
+app.use(/^(?!.*\/(internal|static)\/).*$/, (req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)
 })
 

@@ -1,25 +1,33 @@
 import fetch from 'node-fetch'
 import { logger } from '../utils/logger'
+import { Request, Response, NextFunction } from 'express'
+import { AdConfig } from '../config/config'
 
-export const getOboToken = async (auth: any, scope: string): Promise<string> => {
+export const tokenMiddleware = (scope: string) => async (req: Request, res: Response, next: NextFunction) => {
+  const bearerToken = req.headers?.authorization?.split(' ')[1]
+
+  if (!bearerToken) return next(new Error('Ikke autentisert'))
+
+  getOboToken(bearerToken, scope)
+    .then((token) => {
+      res.locals.token = token
+      return next()
+    })
+    .catch((error) => next(error))
+}
+
+export const getOboToken = async (bearerToken: string, scope: string): Promise<string> => {
   try {
-    if (!auth) {
-      throw new Error('Ikke autentisert')
-    }
-    const bearerToken = auth.split(' ')[1]
-    //const parsedToken = parseJwt(bearerToken);
-    const tokenEndpoint = process.env.AZURE_OPENID_CONFIG_TOKEN_ENDPOINT || ''
-
     const body: any = {
-      client_id: process.env.AZURE_APP_CLIENT_ID,
-      client_secret: process.env.AZURE_APP_CLIENT_SECRET,
+      client_id: AdConfig.clientId,
+      client_secret: AdConfig.clientSecret,
       scope,
       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
       assertion: bearerToken,
       requested_token_use: 'on_behalf_of',
     }
 
-    const response = await fetch(tokenEndpoint, {
+    const response = await fetch(AdConfig.tokenEndpoint!!, {
       method: 'post',
       body: Object.keys(body)
         .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(body[key]))

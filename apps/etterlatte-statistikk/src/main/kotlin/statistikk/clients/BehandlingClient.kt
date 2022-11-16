@@ -9,13 +9,18 @@ import java.util.UUID
 
 interface BehandlingClient {
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
+    suspend fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling
 }
 
 class BehandlingClientImpl(private val behandlingHttpClient: HttpClient) : BehandlingClient {
 
     override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri {
+        return hentDetaljertBehandling(behandlingId).toPersongalleri()
+    }
+
+    override suspend fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling {
         return behandlingHttpClient.get("behandlinger/$behandlingId")
-            .body<DetaljertBehandling>().toPersongalleri()
+            .body()
     }
 }
 

@@ -72,7 +72,8 @@ object BarnepensjonVilkaar {
             )
         ),
         unntaksvilkaar = listOf(
-            beggeForeldreDoedeUtdanningHovedbeskjeftigelse()
+            beggeForeldreDoedeUtdanningHovedbeskjeftigelse(),
+            beggeForeldreDoedeLaerlingPraktikantInntektUnder2G()
         ),
         grunnlag = with(grunnlag) {
             val virkningstidspunktBehandling = virkningstidspunkt.toVilkaarsgrunnlag()
@@ -117,7 +118,9 @@ object BarnepensjonVilkaar {
         unntaksvilkaar = listOf(
             avdoedMedlemITrygdenIkkeFylt26Aar(),
             avdoedMedlemEtter16AarMedUnntakAvMaksimum5Aar(),
-            avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon()
+            avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon(),
+            avdoedHaddeTidsromMedAvtalefestetPensjon(),
+            avdoedHaddeTidsromMedPensjonFraLovfestetPensjonsordning()
         )
     )
 
@@ -136,7 +139,18 @@ object BarnepensjonVilkaar {
 
     private fun beggeForeldreDoedeUtdanningHovedbeskjeftigelse() = Unntaksvilkaar(
         type = VilkaarType.ALDER_BARN_UNNTAK_UTDANNING,
-        tittel = "Begge foreldrene er døde og barnet har utdanning som hovedbeskjeftigelse",
+        tittel = "Ja. Barnet er foreldreløs og har utdanning som hovedbeskjeftigelse",
+        lovreferanse = Lovreferanse(
+            paragraf = "§ 18-4",
+            ledd = 3
+        )
+    )
+
+    private fun beggeForeldreDoedeLaerlingPraktikantInntektUnder2G() = Unntaksvilkaar(
+        type = VilkaarType.ALDER_BARN_UNNTAK_LAERLING_PRAKTIKANT,
+        tittel =
+        "Ja. Barnet er foreldreløs og er lærling/praktikant med en inntekt etter skatt på mindre enn to " +
+            "ganger grunnbeløpet",
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-4",
             ledd = 3
@@ -145,7 +159,7 @@ object BarnepensjonVilkaar {
 
     private fun minstEttBarnForedreloestBarnekullMedlemTrygden() = Unntaksvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRELOEST_BARN_I_KULL_MEDLEM_TRYGDEN,
-        tittel = "Minst ett av barna i et foreldreløst barnekull er medlem i trygden",
+        tittel = "Ja. Minst ett av barna i et foreldreløst barnekull er medlem i trygden",
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-3",
             ledd = 2,
@@ -155,7 +169,7 @@ object BarnepensjonVilkaar {
 
     private fun avdoedMindreEnn20AarsSamletBotidRettTilTilleggspensjon() = Unntaksvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_AVDOED_MINDRE_20_AAR_BOTID_RETT_TILLEGGSPENSJON,
-        tittel = "Minst ett av barna i et foreldreløst barnekull er medlem i trygden",
+        tittel = "Ja. Den avdøde har mindre enn 20 års botid, men har opptjent rett til tilleggspensjon",
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-3",
             ledd = 2,
@@ -165,7 +179,7 @@ object BarnepensjonVilkaar {
 
     private fun enForelderMinst20AarsSamletBotid() = Unntaksvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRE_MINST_20_AAR_SAMLET_BOTID,
-        tittel = "En av foreldrene har minst 20 års samlet botid",
+        tittel = "Ja. En av foreldrene har minst 20 års samlet botid",
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-3",
             ledd = 2,
@@ -175,7 +189,9 @@ object BarnepensjonVilkaar {
 
     private fun avdoedMedlemITrygdenIkkeFylt26Aar() = Unntaksvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR,
-        tittel = "Avdøde medlem av trygden ved dødsfallet og ikke fylt 26 år",
+        tittel =
+        "Ja. Avdøde var medlem ved dødsfallet og hadde ikke fylt 26 år (oppfylles tidligst fra tidspunktet " +
+            "avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde",
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 3,
@@ -185,7 +201,9 @@ object BarnepensjonVilkaar {
 
     private fun avdoedMedlemEtter16AarMedUnntakAvMaksimum5Aar() = Unntaksvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR,
-        tittel = "Avdøde medlem av trygden ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år",
+        tittel =
+        "Ja. Avdøde var medlem ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år " +
+            "(oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)",
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 3,
@@ -195,10 +213,34 @@ object BarnepensjonVilkaar {
 
     private fun avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon() = Unntaksvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_HALV_MINSTEPENSJON,
-        tittel = "Avdøde kunne tilstås en ytelse på grunnlag av tidligere opptjening",
+        tittel =
+        "Ja. Avdøde var medlem ved dødsfallet og kunne fått en ytelse på minst 1 G (har minst 20 års " +
+            "medlemskap, eller opptjent rett til tilleggspensjon høyere enn særtillegget)",
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 6
+        )
+    )
+
+    private fun avdoedHaddeTidsromMedAvtalefestetPensjon() = Unntaksvilkaar(
+        type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_AVTALEFESTET_PENSJON,
+        tittel =
+        "Ja. Avdøde hadde tidsrom med avtalefestet pensjon med statstilskott, som skal likestilles med tidsrom " +
+            "med pensjon fra folketrygden",
+        lovreferanse = Lovreferanse(
+            paragraf = "§ 18-2",
+            ledd = 5
+        )
+    )
+
+    private fun avdoedHaddeTidsromMedPensjonFraLovfestetPensjonsordning() = Unntaksvilkaar(
+        type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_LOVFESTET_PENSJONSORDNING,
+        tittel =
+        "Ja. Avdøde hadde tidsrom med pensjon fra en lovfestet pensjonsordning som er tilpasset " +
+            "folketrygden ved at det ikke gis ordinær barnepensjon",
+        lovreferanse = Lovreferanse(
+            paragraf = "§ 18-2",
+            ledd = 5
         )
     )
 

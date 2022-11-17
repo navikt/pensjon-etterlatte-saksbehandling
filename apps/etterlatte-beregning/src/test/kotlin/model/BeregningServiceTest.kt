@@ -1,5 +1,6 @@
 package model
 
+import BeregningRepository
 import GrunnlagTestData
 import grunnlag.kilde
 import io.mockk.mockk
@@ -24,7 +25,7 @@ internal class BeregningServiceTest {
 
     private val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
     private val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-
+    private val beregningRepository = mockk<BeregningRepository>()
     private val testData = GrunnlagTestData(
         opplysningsmapSoeskenOverrides = mapOf(
             Opplysningstype.FOEDSELSDATO to Opplysning.Konstant(
@@ -36,7 +37,7 @@ internal class BeregningServiceTest {
     )
     private val opplysningsgrunnlag = testData.hentOpplysningsgrunnlag()
 
-    private val beregningsperioder = BeregningService().beregnResultat(
+    private val beregningsperioder = BeregningService(beregningRepository).beregnResultat(
         opplysningsgrunnlag,
         YearMonth.of(2021, 2),
         YearMonth.of(2021, 9),
@@ -69,7 +70,7 @@ internal class BeregningServiceTest {
     fun `ved revurdering og ikke oppfylte vilkaar skal beregningsresultat settes til kr 0`() {
         val virkFOM = YearMonth.of(2022, 5)
         val virkTOM = YearMonth.of(2022, 10)
-        val resultat = BeregningService().beregnResultat(
+        val resultat = BeregningService(beregningRepository).beregnResultat(
             grunnlag = Grunnlag.empty(),
             virkFOM = virkFOM,
             virkTOM = virkTOM,
@@ -85,7 +86,7 @@ internal class BeregningServiceTest {
     @Test
     fun `ved manuelt opphoer skal virkFOM settes til foerste i maaneden etter doedsdato`() {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val resultat = BeregningService().beregnResultat(
+        val resultat = BeregningService(beregningRepository).beregnResultat(
             grunnlag = grunnlag,
             virkFOM = mockk(),
             virkTOM = mockk(),

@@ -1,3 +1,7 @@
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import org.flywaydb.core.Flyway
+
 class DataSourceBuilder(
     private val jdbcUrl: String,
     private val username: String,
@@ -18,9 +22,8 @@ class DataSourceBuilder(
 
     fun dataSource() = dataSource
 
-    fun migrate() =
-        Flyway.configure()
-            .dataSource(dataSource)
-            .load()
-            .migrate()
+    fun migrate() = Flyway.configure()
+        .dataSource(dataSource)
+        .load()
+        .migrate()
 }

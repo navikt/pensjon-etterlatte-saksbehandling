@@ -1,5 +1,6 @@
 package no.nav.etterlatte.model
 
+import BeregningRepository
 import model.Grunnbeloep
 import model.finnSoeskenperiode.FinnSoeskenPeriode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -22,20 +23,32 @@ import java.time.YearMonth
 import java.util.*
 
 // TODO hvordan håndtere vedtakstidspunkt?
-class BeregningService {
+class BeregningService(private val beregningRepository: BeregningRepository) {
 
-    fun bekreftberegnetresulat() {
-        val id = repo.get(id)
-        if (id == null) {
-            throw exception
-        }
-        return repo.update(id)
+    fun hentBeregning(beregningId: UUID): BeregningsResultat = beregningRepository.hent(beregningId)
+
+    fun bekreftberegnetresulat(beregningId: UUID): BeregningsResultat {
+        val beregningsResultat: BeregningsResultat = beregningRepository.hent(beregningId)
+        return beregningRepository.lagre(beregningsResultat, Beregningstyper.BPGP) // TODO: Ikke BPGP
     }
+
+    fun lagreBeregning(behandlingId: UUID): BeregningsResultat {
+        // TODO lag klient fetch grunnlag og vilkårsvurdering
+        val beregning = beregnResultat(
+            Grunnlag.empty(),
+            YearMonth.now(),
+            YearMonth.now().plusMonths(1L),
+            null,
+            BehandlingType.FØRSTEGANGSBEHANDLING
+        )
+        return beregningRepository.lagre(beregning, Beregningstyper.BPGP) // TODO: Ikke BPGP
+    }
+
     fun beregnResultat(
         grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
-        vilkaarsvurdering: Vilkaarsvurdering,
+        vilkaarsvurdering: Vilkaarsvurdering? = null,
         behandlingType: BehandlingType
     ): BeregningsResultat {
         return when (behandlingType) {
@@ -53,7 +66,7 @@ class BeregningService {
             }
 
             BehandlingType.REVURDERING -> {
-                when (vilkaarsvurdering.resultat.utfall) {
+                when (vilkaarsvurdering?.resultat?.utfall) {
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
                         BeregningsResultat(
                             id = UUID.randomUUID(),

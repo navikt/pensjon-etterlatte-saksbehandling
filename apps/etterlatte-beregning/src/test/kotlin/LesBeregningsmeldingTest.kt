@@ -1,3 +1,4 @@
+import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -12,8 +13,10 @@ internal class LesBeregningsmeldingTest {
         private fun readFile(file: String) =
             Companion::class.java.getResource(file)?.readText() ?: throw FileNotFoundException("Fant ikke filen $file")
     }
-
-    private val inspector = spyk(TestRapid().apply { LesBeregningsmelding(this, BeregningService()) })
+    private val beregningRepository = mockk<BeregningRepository>()
+    private val inspector = spyk(
+        TestRapid().apply { LesBeregningsmelding(this, BeregningService(beregningRepository)) }
+    )
 
     @Test
     fun `skal beregne en melding som er vilkaarsvurdert og legge melding med beregning paa kafka`() {

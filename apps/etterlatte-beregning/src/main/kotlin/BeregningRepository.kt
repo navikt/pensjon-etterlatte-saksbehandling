@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.plugins.NotFoundException
 import kotliquery.Row
 import kotliquery.queryOf
@@ -5,20 +6,19 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
-import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.objectMapper
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 interface BeregningRepository {
-    fun lagre(beregning: BeregningsResultat, beregningstyper: Beregningstyper)
+    fun lagre(beregning: BeregningsResultat, beregningstyper: Beregningstyper): BeregningsResultat
     fun hent(id: UUID): BeregningsResultat
 }
 
 class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRepository {
-    override fun lagre(beregning: BeregningsResultat, beregningstyper: Beregningstyper) {
+    override fun lagre(beregning: BeregningsResultat, beregningstyper: Beregningstyper): BeregningsResultat {
         using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 queryOf(
@@ -27,6 +27,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                 ).let { query -> tx.run(query.asUpdate) }
             }
         }
+        return hent(beregning.id)
     }
 
     override fun hent(id: UUID): BeregningsResultat = using(sessionOf(dataSource)) {
@@ -34,7 +35,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
             queryOf(
                 statement = Queries.hentBeregning,
                 paramMap = mapOf("beregningId" to id)
-            ).let { query -> it.run(query.map(::toBeregning).asSingle) }
+            ).let { query -> tx.run(query.map(::toBeregning).asSingle) }
         }
     } ?: throw NotFoundException("Beregning med id $id finnes ikke i databasen")
 
@@ -45,9 +46,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
             endringskode = Endringskode.NY,
             resultat = BeregningsResultatType.BEREGNET,
             beregnetDato = localDateTime(DatabaseColumns.BeregnetDato.navn),
-            beregningsperioder = objectMapper.readValue<List<Beregningsperiode>>(
-                string(DatabaseColumns.Beregningsperioder.navn)
-            )
+            beregningsperioder = objectMapper.readValue(string(DatabaseColumns.Beregningsperioder.navn))
         )
     }
 }
@@ -62,7 +61,7 @@ private enum class DatabaseColumns(val navn: String) {
 }
 
 private object Queries {
-    val hentBeregning = """
+    val hentBeregning = """x
         |SELECT * 
         |FROM beregning WHERE beregningId = :beregningId::UUID
     """.trimMargin()

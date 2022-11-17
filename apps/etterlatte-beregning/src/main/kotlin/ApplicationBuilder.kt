@@ -37,7 +37,8 @@ class ApplicationBuilder {
     ).apply { migrate() }
 
     private val dataSource = dataSourceBuilder.dataSource()
-    private val beregningService = BeregningService()
+    private val beregningRepository = BeregningRepositoryImpl(dataSource)
+    private val beregningService = BeregningService(beregningRepository)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {

@@ -4,7 +4,7 @@ import no.nav.etterlatte.brev.model.mapper.finnAvdoed
 import no.nav.etterlatte.brev.model.mapper.finnBarn
 import no.nav.etterlatte.brev.model.mapper.finnMottaker
 import no.nav.etterlatte.brev.model.mapper.finnUtbetalingsinfo
-import no.nav.etterlatte.domene.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import java.time.LocalDate

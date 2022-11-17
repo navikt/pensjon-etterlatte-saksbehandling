@@ -1,8 +1,8 @@
 package no.nav.etterlatte.statistikk.statistikk
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.domene.vedtak.Vedtak
-import no.nav.etterlatte.domene.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.statistikk.clients.BehandlingClient
 import no.nav.etterlatte.statistikk.database.StatistikkRepository

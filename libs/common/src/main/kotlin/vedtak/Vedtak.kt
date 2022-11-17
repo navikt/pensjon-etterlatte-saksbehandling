@@ -1,4 +1,4 @@
-package no.nav.etterlatte.domene.vedtak
+package no.nav.etterlatte.libs.common.vedtak
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model.mapper
 
 import no.nav.etterlatte.brev.model.Avdoed
-import no.nav.etterlatte.domene.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.helse.rapids_rivers.asLocalDate
 

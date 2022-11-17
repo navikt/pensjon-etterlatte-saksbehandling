@@ -1,16 +1,17 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.domene.vedtak.Attestasjon
-import no.nav.etterlatte.domene.vedtak.Behandling
-import no.nav.etterlatte.domene.vedtak.Beregningsperiode
-import no.nav.etterlatte.domene.vedtak.BilagMedSammendrag
-import no.nav.etterlatte.domene.vedtak.Periode
-import no.nav.etterlatte.domene.vedtak.Sak
-import no.nav.etterlatte.domene.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.domene.vedtak.VedtakFattet
-import no.nav.etterlatte.domene.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
+import no.nav.etterlatte.libs.common.vedtak.BilagMedSammendrag
+import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.Sak
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.Vedtak as VedtakDTO
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
@@ -37,22 +38,22 @@ class VedtakKanIkkeFattes(vedtak: Vedtak) : Exception("Vedtak ${vedtak.id} kan i
     val vedtakId: Long = vedtak.id
 }
 
-class VedtakKanIkkeAttesteresAlleredeAttestert(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+class VedtakKanIkkeAttesteresAlleredeAttestert(vedtak: VedtakDTO) :
     Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det allerede er attestert") {
     val vedtakId: Long = vedtak.vedtakId
 }
 
-class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: VedtakDTO) :
     Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det ikke er fattet") {
     val vedtakId: Long = vedtak.vedtakId
 }
 
-class VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+class VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak: VedtakDTO) :
     Exception("Vedtak ${vedtak.vedtakId} kan ikke underkjennes da det ikke er fattet") {
     val vedtakId: Long = vedtak.vedtakId
 }
 
-class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: VedtakDTO) :
     Exception("Vedtak ${vedtak.vedtakId} kan ikke underkjennes da det allerede er attestert") {
     val vedtakId: Long = vedtak.vedtakId
 }
@@ -155,10 +156,10 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)
     }
 
-    private fun hentFellesVedtak(behandlingId: UUID): no.nav.etterlatte.domene.vedtak.Vedtak? {
+    private fun hentFellesVedtak(behandlingId: UUID): VedtakDTO? {
         // Placeholder for tingene som må inn for å fylle vedtaksmodellen
         return repository.hentVedtak(behandlingId)?.let { vedtak ->
-            no.nav.etterlatte.domene.vedtak.Vedtak(
+            VedtakDTO(
                 vedtakId = vedtak.id,
                 virk = Periode(
                     vedtak.virkningsDato?.let(YearMonth::from)
@@ -228,7 +229,7 @@ class VedtaksvurderingService(
         }
     }
 
-    fun fattVedtak(behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
+    fun fattVedtak(behandlingId: UUID, saksbehandler: String): VedtakDTO {
         val v = requireNotNull(hentVedtak(behandlingId)).also {
             if (it.vedtakFattet == true) throw KanIkkeEndreFattetVedtak(it)
         }
@@ -246,7 +247,7 @@ class VedtaksvurderingService(
     fun attesterVedtak(
         behandlingId: UUID,
         saksbehandler: String
-    ): no.nav.etterlatte.domene.vedtak.Vedtak {
+    ): VedtakDTO {
         val vedtak = requireNotNull(hentFellesVedtak(behandlingId)).also {
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
@@ -276,7 +277,7 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)!!
     }
 
-    fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) =
+    fun utbetalingsperioderFraVedtak(vedtak: VedtakDTO) =
         utbetalingsperioderFraVedtak(vedtak.type, vedtak.virk, vedtak.beregning?.sammendrag ?: emptyList())
 
     fun utbetalingsperioderFraVedtak(

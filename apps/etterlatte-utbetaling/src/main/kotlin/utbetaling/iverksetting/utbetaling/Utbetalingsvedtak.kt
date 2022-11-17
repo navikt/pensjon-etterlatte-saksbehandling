@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import java.math.BigDecimal
 import java.time.YearMonth
 

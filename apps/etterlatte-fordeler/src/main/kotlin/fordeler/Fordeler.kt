@@ -62,19 +62,23 @@ internal class Fordeler(
                     }
 
                     is FordelerResultat.IkkeGyldigForBehandling -> {
-                        logger.info("Avbrutt fordeling: ${resultat.ikkeOppfylteKriterier}")
+                        logger.info(
+                            "Avbrutt fordeling for søknad (${packet.soeknadId()}): ${resultat.ikkeOppfylteKriterier}"
+                        )
                         fordelerMetricLogger.logMetricIkkeFordelt(resultat)
                     }
 
                     is FordelerResultat.UgyldigHendelse -> {
-                        logger.error("Avbrutt fordeling: ${resultat.message}")
+                        logger.error("Avbrutt fordeling for søknad (${packet.soeknadId()}): ${resultat.message}")
                     }
                 }
             } catch (e: JsonMappingException) {
-                sikkerLogg.error("Feil under deserialisering", e)
-                logger.error("Feil under deserialisering. Sjekk sikkerlogg for detaljer")
+                sikkerLogg.error("Feil under deserialisering av søknad (${packet.soeknadId()})", e)
+                logger.error(
+                    "Feil under deserialisering av søknad (${packet.soeknadId()}). Sjekk sikkerlogg for detaljer"
+                )
             } catch (e: Exception) {
-                logger.error("Uhåndtert feilsituasjon", e)
+                logger.error("Uhåndtert feilsituasjon for søknad (${packet.soeknadId()})", e)
             }
         }
 

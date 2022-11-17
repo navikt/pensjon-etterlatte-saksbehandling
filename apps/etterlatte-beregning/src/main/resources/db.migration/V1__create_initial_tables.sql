@@ -3,5 +3,6 @@ create TABLE beregning (
     behanldingId UUID NOT NULL,
     beregnetDato TIMESTAMP,
     beregningsperioder JSONB,
-    grunnlagMetadata JSONB
+    sakId BIGINT,
+    versjon BIGINT
 );

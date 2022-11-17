@@ -9,6 +9,7 @@ import kotliquery.using
 import nav.no.etterlatte.model.Beregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import java.util.*
 import javax.sql.DataSource
 
@@ -30,7 +31,8 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                         "behandlingId" to beregning.behandlingId,
                         "beregnetDato" to beregning.beregnetDato,
                         "beregningsperioder" to beregning.beregningsperioder.toJson(),
-                        "grunnlagMetadata" to beregning.grunnlagMetadata.toJson()
+                        "sakId" to beregning.grunnlagMetadata.sakId,
+                        "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
                     )
                 ).let { query -> tx.run(query.asUpdate) }
             }
@@ -54,7 +56,10 @@ private fun toBeregning(row: Row) = with(row) {
         behandlingId = uuid(DatabaseColumns.BehandlingId.navn),
         beregnetDato = localDateTime(DatabaseColumns.BeregnetDato.navn),
         beregningsperioder = objectMapper.readValue(string(DatabaseColumns.Beregningsperioder.navn)),
-        grunnlagMetadata = objectMapper.readValue(string(DatabaseColumns.GrunnlagMetadata.navn))
+        grunnlagMetadata = Metadata(
+            sakId = long(DatabaseColumns.SakId.navn),
+            versjon = long(DatabaseColumns.GrunnlagVersjon.navn)
+        )
     )
 }
 
@@ -63,7 +68,8 @@ private enum class DatabaseColumns(val navn: String) {
     BehandlingId("behandlingId"),
     Beregningsperioder("beregningsperioder"),
     BeregnetDato("beregnetDato"),
-    GrunnlagMetadata("grunnlagMetadata")
+    SakId("sakId"),
+    GrunnlagVersjon("grunnlagVersjon")
 }
 
 private object Queries {
@@ -73,8 +79,8 @@ private object Queries {
     """.trimMargin()
 
     val lagreBeregning = """
-        |INSERT INTO beregning(${DatabaseColumns.BeregningId.navn}, ${DatabaseColumns.BehandlingId.navn}, ${DatabaseColumns.BeregnetDato.navn}, ${DatabaseColumns.Beregningsperioder.navn}, ${DatabaseColumns.GrunnlagMetadata.navn}) 
-        |VALUES(:beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :beregningsperioder::JSONB, :grunnlagMetadata::JSONB) 
+        |INSERT INTO beregning(${DatabaseColumns.BeregningId.navn}, ${DatabaseColumns.BehandlingId.navn}, ${DatabaseColumns.BeregnetDato.navn}, ${DatabaseColumns.Beregningsperioder.navn}, ${DatabaseColumns.SakId.navn}, ${DatabaseColumns.GrunnlagVersjon.navn}) 
+        |VALUES(:beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :beregningsperioder::JSONB, :sakId::BIGINT, :grunnlagVersjon::BIGINT) 
         |ON CONFLICT (${DatabaseColumns.BeregningId.navn})
         |DO UPDATE SET 
         |   ${DatabaseColumns.Beregningsperioder.navn} = EXCLUDED.${DatabaseColumns.Beregningsperioder.navn}, ${DatabaseColumns.BeregnetDato} = EXCLUDED.${DatabaseColumns.BeregnetDato}

@@ -50,7 +50,7 @@ class StatistikkRepository(private val datasource: DataSource) {
 
     fun slettSak(sakId: Long) {
         connection.use {
-            it.prepareStatement(Queries.slettStonadsstatistikkForSak).apply {
+            it.prepareStatement(Queries.SLETT_STOENADSTATISTIKK_FOR_SAK).apply {
                 setLong(1, sakId)
                 execute()
             }
@@ -88,7 +88,7 @@ inline fun <reified T> PreparedStatement.setJsonb(parameterIndex: Int, jsonb: T)
     return this
 }
 
-fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedStatement = this.apply {
+private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedStatement = this.apply {
     setString(1, stoenadsrad.fnrSoeker)
     setJsonb(2, stoenadsrad.fnrForeldre)
     setJsonb(3, stoenadsrad.fnrSoesken)
@@ -119,7 +119,7 @@ private object Queries {
         |   tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, vedtakLoependeTom 
         |FROM stoenad
     """.trimMargin()
-    val slettStonadsstatistikkForSak = "DELETE FROM stoenad WHERE sakId = ?"
+    const val SLETT_STOENADSTATISTIKK_FOR_SAK = "DELETE FROM stoenad WHERE sakId = ?"
 }
 
 data class StoenadRad(

@@ -3,23 +3,34 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.statistikk.statistikk.StatistikkService
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.statistikk.service.StatistikkService
+import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
-class StatistikkRiver(
+class VedtakhendelserRiver(
     rapidsConnection: RapidsConnection,
     private val service: StatistikkService
 ) : River.PacketListener {
 
+    val vedtakshendelser = listOf(
+        "VEDTAK:FATTET",
+        "VEDTAK:ATTESTERT",
+        "VEDTAK:UNDERKJENT",
+        "VEDTAK:AVKORTET",
+        "VEDTAK:BEREGNET",
+        "VEDTAK:VILKAARSVURDERT",
+        "VEDTAK:IVERKSATT"
+    )
+
     val logger = LoggerFactory.getLogger(this::class.java)
     init {
         River(rapidsConnection).apply {
-            eventName("VEDTAK:ATTESTERT")
+            validate { it.demandAny(eventNameKey, vedtakshendelser) }
             validate { it.requireKey("vedtak") }
             correlationId()
         }.register(this)
@@ -28,17 +39,25 @@ class StatistikkRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             try {
-                service.registrerStatistikkForVedtak(objectMapper.treeToValue(packet["vedtak"]))
-                    ?.also {
+                val vedtakshendelse = enumValueOf<VedtakHendelse>(packet[eventNameKey].textValue().split(":")[1])
+                service.registrerStatistikkForVedtak(objectMapper.treeToValue(packet["vedtak"]), vedtakshendelse)
+                    .also { (sakRad, stoenadRad) ->
+                        if (sakRad == null && stoenadRad == null) {
+                            logger.info(
+                                "Ingen statistikk registrert for pakken med korrelasjonsid ${packet.correlationId}"
+                            )
+                            return@also
+                        }
                         context.publish(
                             objectMapper.writeValueAsString(
-                                mapOf(
+                                listOfNotNull(
                                     "@event_name" to "STATISTIKK:REGISTRERT",
-                                    "soeknad_rad" to objectMapper.writeValueAsString(it)
-                                )
+                                    sakRad?.let { "sak_rad" to objectMapper.writeValueAsString(it) },
+                                    stoenadRad?.let { "stoenad_rad" to objectMapper.writeValueAsString(it) }
+                                ).toMap()
                             )
                         )
-                    } ?: logger.info("Registrerte ikke statistikk på grunn av whatever")
+                    }
             } catch (e: Exception) {
                 logger.error(
                     """Kunne ikke mappe ut statistikk for vedtaket i pakken med korrelasjonsid ${packet.correlationId}. 

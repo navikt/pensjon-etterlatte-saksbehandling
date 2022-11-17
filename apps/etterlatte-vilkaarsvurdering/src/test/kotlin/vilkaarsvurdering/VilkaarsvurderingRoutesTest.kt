@@ -18,7 +18,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -66,7 +65,12 @@ internal class VilkaarsvurderingRoutesTest {
             postgreSQLContainer.password
         ).apply { migrate() }
         vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepositoryImpl(ds.dataSource()), sendToRapid)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepositoryImpl(ds.dataSource()),
+                behandlingKlient,
+                grunnlagKlient,
+                sendToRapid
+            )
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -99,7 +103,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -128,7 +132,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vilkaarsvurdering basert paa behandling dersom en ikke finnes`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             val nyBehandlingId = UUID.randomUUID()
             val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
@@ -150,25 +154,26 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
-            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling().apply {
+            application { restModule(vilkaarsvurderingServiceImpl) }
+            val nyBehandlingId = UUID.randomUUID()
+
+            coEvery { behandlingKlient.hentBehandling(nyBehandlingId, any()) } returns detaljertBehandling().apply {
                 every { virkningstidspunkt } returns null
             }
 
-            val nyBehandlingId = UUID.randomUUID()
             val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            assertEquals(response.status, HttpStatusCode.PreconditionFailed)
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
     }
 
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -206,7 +211,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -270,7 +275,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -316,7 +321,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl, behandlingKlient, grunnlagKlient) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
             val resultat = VurdertVilkaarsvurderingResultatDto(
@@ -352,14 +357,10 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
-    private fun opprettVilkaarsvurdering() {
+    private suspend fun opprettVilkaarsvurdering() {
         vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(
             behandlingId,
-            SakType.BARNEPENSJON,
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            VirkningstidspunktTestData.virkningstidsunkt(),
-            grunnlag,
-            null
+            "token"
         )
     }
 
@@ -374,7 +375,6 @@ internal class VilkaarsvurderingRoutesTest {
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         const val ISSUER_ID = "azure"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }

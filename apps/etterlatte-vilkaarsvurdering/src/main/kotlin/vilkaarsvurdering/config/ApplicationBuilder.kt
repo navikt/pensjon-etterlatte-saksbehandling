@@ -37,15 +37,13 @@ class ApplicationBuilder {
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     private val vilkaarsvurderingService =
-        VilkaarsvurderingService(vilkaarsvurderingRepository, ::publiser)
+        VilkaarsvurderingService(vilkaarsvurderingRepository, behandlingKlient, grunnlagKlient, ::publiser)
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {
                 restModule(
-                    vilkaarsvurderingService = vilkaarsvurderingService,
-                    behandlingKlient = behandlingKlient,
-                    grunnlagKlient = grunnlagKlient
+                    vilkaarsvurderingService = vilkaarsvurderingService
                 )
             }
             .build()

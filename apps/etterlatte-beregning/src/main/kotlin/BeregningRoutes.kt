@@ -23,7 +23,8 @@ fun Route.beregning(beregningService: BeregningService) {
 
         post("/{behandlingsid}/opprett") {
             withUUID("behandlingsid") {
-                val beregning = beregningService.lagreBeregning(it)
+                val accessToken = getAccessToken(call)
+                val beregning = beregningService.lagreBeregning(it, accessToken)
                 call.respond(beregning)
             }
         }

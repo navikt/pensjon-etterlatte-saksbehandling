@@ -23,6 +23,14 @@ import java.util.*
 
 // TODO hvordan håndtere vedtakstidspunkt?
 class BeregningService {
+
+    fun bekreftberegnetresulat() {
+        val id = repo.get(id)
+        if (id == null) {
+            throw exception
+        }
+        return repo.update(id)
+    }
     fun beregnResultat(
         grunnlag: Grunnlag,
         virkFOM: YearMonth,

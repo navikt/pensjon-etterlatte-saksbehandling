@@ -8,11 +8,16 @@ import no.nav.etterlatte.model.BeregningService
 
 fun Route.beregning(beregningService: BeregningService) {
     route("api/beregning") {
-        get("{behandlingid}") {
+        get("{beregningsid}") {
         }
         post("opprett") {
+            val beregningsid = beregningService.beregnResultat()
+            // sakogbehandlingklient.oppdater(beregningsid)
+            return ok
         }
-        post("oppdater") {
+        post("oppdater/{beregningsid}") {
+            val beregningsid = beregningService.bekretftberegnetresulat()
+            return ok
         }
     }
 }

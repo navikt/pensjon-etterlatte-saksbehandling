@@ -2,6 +2,8 @@ package no.nav.etterlatte.statistikk.database
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import no.nav.etterlatte.statistikk.utils.toTidspunkt
 import no.nav.etterlatte.statistikk.utils.toTimestamp
@@ -86,6 +88,12 @@ class SakstatistikkRepository(private val datasource: DataSource) {
             """.trimIndent()
         )
         return statement.executeQuery().toList { tilSakRad() }
+    }
+
+    fun slettSak(sakId: Long) {
+        val statement = connection.prepareStatement("DELETE FROM sak WHERE sak_id = ?")
+        statement.setLong(1, sakId)
+        statement.executeUpdate()
     }
 }
 

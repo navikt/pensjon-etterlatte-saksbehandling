@@ -117,6 +117,7 @@ class StatistikkService(
 
     override fun slettSak(sakId: Long) {
         stoenadRepository.slettSak(sakId)
+        sakRepository.slettSak(sakId)
     }
 
     private fun behandlingTilSakRad(behandling: Behandling, behandlingHendelse: BehandlingHendelse): SakRad {

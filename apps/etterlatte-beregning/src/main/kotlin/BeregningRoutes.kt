@@ -9,42 +9,40 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.model.BeregningService
+import nav.no.etterlatte.model.BeregningService
+import nav.no.etterlatte.model.getAccessToken
 import java.util.*
 
 fun Route.beregning(beregningService: BeregningService) {
     route("api/beregning") {
         get("/{beregningsid}") {
-            withUUID("beregningsid") {
+            withBehandlingId {
                 val beregning = beregningService.hentBeregning(it)
                 call.respond(beregning)
             }
         }
 
         post("/{behandlingsid}/opprett") {
-            withUUID("behandlingsid") {
+            withBehandlingId {
                 val accessToken = getAccessToken(call)
                 val beregning = beregningService.lagreBeregning(it, accessToken)
                 call.respond(beregning)
             }
         }
 
-        post("/bekreft/{beregningsid}") {
-            withUUID("beregningsid") {
-                val beregning = beregningService.bekreftberegnetresulat(beregningId = it)
+        post("/bekreft/{behandlingId}") {
+            withBehandlingId {
+                val beregning = beregningService.bekreftberegnetresulat(it)
                 call.respond(beregning)
             }
         }
     }
 }
 
-private suspend inline fun PipelineContext<*, ApplicationCall>.withUUID(
-    parameter: String,
-    onSuccess: (id: UUID) -> Unit
-) {
-    val id = call.parameters[parameter]
+private suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSuccess: (id: UUID) -> Unit) {
+    val id = call.parameters["behandlingId"]
     if (id == null) {
-        call.respond(HttpStatusCode.BadRequest, "Fant ikke $parameter")
+        call.respond(HttpStatusCode.BadRequest, "Fant ikke behandlingId")
     }
 
     try {

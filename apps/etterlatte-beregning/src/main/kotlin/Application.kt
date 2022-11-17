@@ -1,6 +1,6 @@
 package no.nav.etterlatte
 
-import ApplicationBuilder
+import nav.no.etterlatte.ApplicationBuilder
 
 fun main() {
     val application = ApplicationBuilder()

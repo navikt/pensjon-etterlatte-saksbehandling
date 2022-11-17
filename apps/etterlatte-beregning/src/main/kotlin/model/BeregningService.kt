@@ -1,9 +1,8 @@
-package no.nav.etterlatte.model
+package nav.no.etterlatte.model
 
-import BeregningRepository
-import model.Grunnbeloep
 import model.finnSoeskenperiode.FinnSoeskenPeriode
 import model.vilkaarsvurdering.VilkaarsvurderingKlient
+import nav.no.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -18,6 +17,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.model.Soeskenjustering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -29,25 +29,33 @@ class BeregningService(
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) {
 
-    fun hentBeregning(beregningId: UUID): BeregningsResultat = beregningRepository.hent(beregningId)
+    fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
 
-    fun bekreftberegnetresulat(beregningId: UUID): BeregningsResultat {
-        val beregningsResultat: BeregningsResultat = beregningRepository.hent(beregningId)
-        return beregningRepository.lagre(beregningsResultat, Beregningstyper.BPGP) // TODO: Ikke BPGP
+    fun bekreftberegnetresulat(behandlingId: UUID): Beregning {
+        val beregning: Beregning = beregningRepository.hent(behandlingId)
+        return beregningRepository.lagre(beregning)
     }
 
-    suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): BeregningsResultat {
+    suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
         // TODO lag klient fetch grunnlag og vilkårsvurdering
         val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
 
-        val beregning = beregnResultat(
+        val beregningResultat = beregnResultat(
             Grunnlag.empty(),
             YearMonth.now(),
             YearMonth.now().plusMonths(1L),
             vilkaarsvurdering,
             BehandlingType.FØRSTEGANGSBEHANDLING
         )
-        return beregningRepository.lagre(beregning, Beregningstyper.BPGP) // TODO: Ikke BPGP
+        val beregning = Beregning(
+            beregningId = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            beregnetDato = beregningResultat.beregnetDato,
+            beregningsperioder = beregningResultat.beregningsperioder,
+            grunnlagMetadata = Grunnlag.empty().metadata
+        )
+
+        return beregningRepository.lagre(beregning)
     }
 
     fun beregnResultat(
@@ -56,7 +64,7 @@ class BeregningService(
         virkTOM: YearMonth,
         vilkaarsvurdering: Vilkaarsvurdering,
         behandlingType: BehandlingType
-    ): BeregningsResultat {
+    ): BeregningsResultat { // TODO: Bruk vår interne model
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)

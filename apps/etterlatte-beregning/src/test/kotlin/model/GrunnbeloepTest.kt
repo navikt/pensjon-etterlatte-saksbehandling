@@ -1,5 +1,6 @@
 package model
 
+import nav.no.etterlatte.model.Grunnbeloep
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.YearMonth

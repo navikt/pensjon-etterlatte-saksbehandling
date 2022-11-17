@@ -1,3 +1,4 @@
+import { BodyShort } from '@navikt/ds-react'
 import styled from 'styled-components'
 
 export const Innhold = styled.div`
@@ -52,12 +53,8 @@ export const InfoWrapper = styled.div`
   flex-grow: 1;
 `
 
-export const Undertekst = styled.div<{ gray: boolean }>`
-  display: flex;
-  margin-bottom: 1em;
-  margin-top: 0.3em;
-  max-width: 250px;
-  color: ${(props) => (props.gray ? '#707070' : '#000000')};
+export const Undertekst = styled(BodyShort)<{ $gray: boolean }>`
+  ${(props) => (props.$gray ? 'color: var(--navds-semantic-color-text-muted)' : null)};
 `
 
 export const DetailWrapper = styled.div`

@@ -34,7 +34,7 @@ const Virkningstidspunkt = () => {
   const dispatch = useAppDispatch()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
-  const [rediger, setRediger] = useState(behandling.virkningstidspunkt === null)
+  const [rediger, setRediger] = useState(false)
   const [formData, setFormData] = useState<Date | null>(
     behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
   )
@@ -61,7 +61,9 @@ const Virkningstidspunkt = () => {
           <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
           <Info
             label="Virkningstidspunkt"
-            tekst={behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt.dato) : 'Ikke satt'}
+            tekst={
+              behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt.dato) : 'Ikke vurdert'
+            }
           />
         </InfobokserWrapper>
 
@@ -132,19 +134,19 @@ const Virkningstidspunkt = () => {
                 <div>
                   {behandling.virkningstidspunkt ? (
                     <>
-                      <Undertekst gray>Manuelt av {behandling.virkningstidspunkt.kilde.ident}</Undertekst>
-                      <Undertekst gray>
+                      <Undertekst $gray>Manuelt av {behandling.virkningstidspunkt.kilde.ident}</Undertekst>
+                      <Undertekst $gray spacing>
                         {`Sist endret ${formaterStringDato(
                           behandling.virkningstidspunkt.kilde.tidspunkt
                         )} kl.${formaterStringTidspunkt(behandling.virkningstidspunkt.kilde.tidspunkt)}`}
                       </Undertekst>
-                      <RedigerWrapper onClick={() => setRediger(true)}>
-                        <Edit /> Rediger
-                      </RedigerWrapper>
                     </>
                   ) : (
-                    <Undertekst gray>Ikke satt</Undertekst>
+                    <Undertekst $gray>Ikke vurdert</Undertekst>
                   )}
+                  <RedigerWrapper onClick={() => setRediger(true)}>
+                    <Edit /> Rediger
+                  </RedigerWrapper>
                 </div>
               )}
             </div>

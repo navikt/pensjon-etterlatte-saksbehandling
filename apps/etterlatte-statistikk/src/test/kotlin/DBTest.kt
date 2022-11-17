@@ -1,8 +1,13 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.DataSourceBuilder
+import no.nav.etterlatte.statistikk.database.SakRad
+import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
 import no.nav.etterlatte.statistikk.database.StatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRad
+import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -41,7 +46,7 @@ internal class DBTest {
     }
 
     @Test
-    fun testDB() {
+    fun testStatitstikkRepo() {
         val repo = StatistikkRepository.using(dataSource)
         repo.lagreStoenadsrad(
             StoenadRad(
@@ -74,5 +79,36 @@ internal class DBTest {
                 listOf("23427249697", "18458822782")
             )
         }
+    }
+
+    @Test
+    fun testSakRepo() {
+        val repo = SakstatistikkRepository.using(dataSource)
+        val lagretRad = repo.lagreRad(
+            SakRad(
+                id = -2,
+                behandlingId = UUID.randomUUID(),
+                sakId = 1337,
+                mottattTidspunkt = Tidspunkt.now(),
+                registrertTidspunkt = Tidspunkt.now(),
+                ferdigbehandletTidspunkt = null,
+                vedtakTidspunkt = null,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingStatus = VedtakHendelse.IVERKSATT,
+                behandlingResultat = "wow",
+                resultatBegrunnelse = "for en begrunnelse",
+                behandlingMetode = "manuell",
+                opprettetAv = "test",
+                ansvarligBeslutter = "test testesen",
+                aktorId = "12345678911",
+                datoFoersteUtbetaling = LocalDate.now(),
+                tekniskTid = Tidspunkt.now(),
+                sakYtelse = "En ytelse",
+                vedtakLoependeFom = LocalDate.now(),
+                vedtakLoependeTom = LocalDate.now().plusYears(3)
+            )
+        )
+
+        Assertions.assertEquals(repo.hentRader()[0], lagretRad)
     }
 }

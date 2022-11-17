@@ -29,6 +29,14 @@ import java.util.*
 
 class ApplicationBuilder {
     private val env = System.getenv()
+    private val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
+    private val dataSourceBuilder = DataSourceBuilder(
+        jdbcUrl = properties.jdbcUrl,
+        username = properties.dbUsername,
+        password = properties.dbPassword
+    ).apply { migrate() }
+
+    private val dataSource = dataSourceBuilder.dataSource()
     private val beregningService = BeregningService()
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
@@ -39,7 +47,6 @@ class ApplicationBuilder {
             }
             .build()
             .also { LesBeregningsmelding(it, beregningService) }
-    // .apply { registrerVedlikeholdsriver() } TODO?
 
     fun start() = rapidsConnection.start()
 

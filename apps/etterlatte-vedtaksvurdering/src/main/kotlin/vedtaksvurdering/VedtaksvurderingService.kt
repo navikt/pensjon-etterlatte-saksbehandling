@@ -156,7 +156,7 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)
     }
 
-    private fun hentFellesVedtak(behandlingId: UUID): VedtakDTO? {
+    fun hentFellesVedtak(behandlingId: UUID): VedtakDTO? {
         // Placeholder for tingene som må inn for å fylle vedtaksmodellen
         return repository.hentVedtak(behandlingId)?.let { vedtak ->
             VedtakDTO(

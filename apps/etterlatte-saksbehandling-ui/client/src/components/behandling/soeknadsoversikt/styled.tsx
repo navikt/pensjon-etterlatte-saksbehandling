@@ -53,8 +53,8 @@ export const InfoWrapper = styled.div`
   flex-grow: 1;
 `
 
-export const Undertekst = styled(BodyShort)<{ gray: boolean }>`
-  color: ${(props) => (props.gray ? 'var(--navds-semantic-color-text-muted)' : '')};
+export const Undertekst = styled(BodyShort)<{ $gray: boolean }>`
+  ${(props) => (props.$gray ? 'color: var(--navds-semantic-color-text-muted)' : null)};
 `
 
 export const DetailWrapper = styled.div`

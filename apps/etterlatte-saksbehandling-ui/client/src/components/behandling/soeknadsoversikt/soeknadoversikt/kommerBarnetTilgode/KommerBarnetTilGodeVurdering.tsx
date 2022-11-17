@@ -44,13 +44,13 @@ export const KommerBarnetTilGodeVurdering = ({
           <VurderingsTitle>{tittel}</VurderingsTitle>
           {kommerBarnetTilgode?.kilde ? (
             <>
-              <Undertekst gray>{`Manuelt av ${kommerBarnetTilgode.kilde.ident}`}</Undertekst>
-              <Undertekst gray spacing>{`Sist endret ${formaterStringDato(
+              <Undertekst $gray>{`Manuelt av ${kommerBarnetTilgode.kilde.ident}`}</Undertekst>
+              <Undertekst $gray spacing>{`Sist endret ${formaterStringDato(
                 kommerBarnetTilgode.kilde.tidspunkt
               )} kl.${formaterStringTidspunkt(kommerBarnetTilgode.kilde.tidspunkt)}`}</Undertekst>
             </>
           ) : (
-            <Undertekst gray spacing>
+            <Undertekst $gray spacing>
               Ikke vurdert
             </Undertekst>
           )}

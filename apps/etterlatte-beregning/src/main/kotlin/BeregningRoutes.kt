@@ -1,4 +1,4 @@
-package model
+package nav.no.etterlatte
 
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get

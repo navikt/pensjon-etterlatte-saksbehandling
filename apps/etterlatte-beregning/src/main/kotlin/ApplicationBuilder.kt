@@ -14,6 +14,7 @@ class ApplicationBuilder {
                 )
             }
             .build()
+            .also { LesBeregningsmelding(it, beregningService) }
     // .apply { registrerVedlikeholdsriver() } TODO?
 
     fun start() = rapidsConnection.start()

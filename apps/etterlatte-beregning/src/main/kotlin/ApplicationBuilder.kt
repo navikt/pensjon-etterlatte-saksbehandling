@@ -33,6 +33,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 
 class ApplicationBuilder {
     private val env = System.getenv()
@@ -100,7 +101,7 @@ fun Application.restModule(
 }
 
 private fun httpClient() = HttpClient(OkHttp) {
-    install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+    install(ClientContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
     defaultRequest {

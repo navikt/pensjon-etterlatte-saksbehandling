@@ -9,7 +9,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import model.getAccessToken
 import no.nav.etterlatte.model.BeregningService
 import java.util.*
 

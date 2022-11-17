@@ -1,4 +1,4 @@
-package model
+package nav.no.etterlatte
 
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.ApplicationCall

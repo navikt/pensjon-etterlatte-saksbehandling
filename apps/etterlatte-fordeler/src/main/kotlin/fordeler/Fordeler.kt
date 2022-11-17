@@ -91,5 +91,5 @@ internal class Fordeler(
         return this
     }
 
-    private fun JsonMessage.soeknadId(): Int = get(SoeknadInnsendt.lagretSoeknadIdKey).intValue()
+    private fun JsonMessage.soeknadId(): String = get(SoeknadInnsendt.lagretSoeknadIdKey).textValue()
 }

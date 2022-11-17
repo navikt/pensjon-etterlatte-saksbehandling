@@ -4,6 +4,7 @@ import BeregningRepository
 import GrunnlagTestData
 import grunnlag.kilde
 import io.mockk.mockk
+import model.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Endringskode
@@ -26,6 +27,7 @@ internal class BeregningServiceTest {
     private val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
     private val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
     private val beregningRepository = mockk<BeregningRepository>()
+    private val vilkaarsvurderingKlientImpl = mockk<VilkaarsvurderingKlient>()
     private val testData = GrunnlagTestData(
         opplysningsmapSoeskenOverrides = mapOf(
             Opplysningstype.FOEDSELSDATO to Opplysning.Konstant(
@@ -37,7 +39,7 @@ internal class BeregningServiceTest {
     )
     private val opplysningsgrunnlag = testData.hentOpplysningsgrunnlag()
 
-    private val beregningsperioder = BeregningService(beregningRepository).beregnResultat(
+    private val beregningsperioder = BeregningService(beregningRepository, vilkaarsvurderingKlientImpl).beregnResultat(
         opplysningsgrunnlag,
         YearMonth.of(2021, 2),
         YearMonth.of(2021, 9),
@@ -70,7 +72,7 @@ internal class BeregningServiceTest {
     fun `ved revurdering og ikke oppfylte vilkaar skal beregningsresultat settes til kr 0`() {
         val virkFOM = YearMonth.of(2022, 5)
         val virkTOM = YearMonth.of(2022, 10)
-        val resultat = BeregningService(beregningRepository).beregnResultat(
+        val resultat = BeregningService(beregningRepository, vilkaarsvurderingKlientImpl).beregnResultat(
             grunnlag = Grunnlag.empty(),
             virkFOM = virkFOM,
             virkTOM = virkTOM,
@@ -86,7 +88,7 @@ internal class BeregningServiceTest {
     @Test
     fun `ved manuelt opphoer skal virkFOM settes til foerste i maaneden etter doedsdato`() {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val resultat = BeregningService(beregningRepository).beregnResultat(
+        val resultat = BeregningService(beregningRepository, vilkaarsvurderingKlientImpl).beregnResultat(
             grunnlag = grunnlag,
             virkFOM = mockk(),
             virkTOM = mockk(),

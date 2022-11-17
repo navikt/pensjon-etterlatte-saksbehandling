@@ -3,6 +3,7 @@ package no.nav.etterlatte.model
 import BeregningRepository
 import model.Grunnbeloep
 import model.finnSoeskenperiode.FinnSoeskenPeriode
+import model.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -23,7 +24,10 @@ import java.time.YearMonth
 import java.util.*
 
 // TODO hvordan håndtere vedtakstidspunkt?
-class BeregningService(private val beregningRepository: BeregningRepository) {
+class BeregningService(
+    private val beregningRepository: BeregningRepository,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
+) {
 
     fun hentBeregning(beregningId: UUID): BeregningsResultat = beregningRepository.hent(beregningId)
 
@@ -32,13 +36,15 @@ class BeregningService(private val beregningRepository: BeregningRepository) {
         return beregningRepository.lagre(beregningsResultat, Beregningstyper.BPGP) // TODO: Ikke BPGP
     }
 
-    fun lagreBeregning(behandlingId: UUID): BeregningsResultat {
+    suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): BeregningsResultat {
         // TODO lag klient fetch grunnlag og vilkårsvurdering
+        val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
+
         val beregning = beregnResultat(
             Grunnlag.empty(),
             YearMonth.now(),
             YearMonth.now().plusMonths(1L),
-            null,
+            vilkaarsvurdering,
             BehandlingType.FØRSTEGANGSBEHANDLING
         )
         return beregningRepository.lagre(beregning, Beregningstyper.BPGP) // TODO: Ikke BPGP
@@ -48,7 +54,7 @@ class BeregningService(private val beregningRepository: BeregningRepository) {
         grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
-        vilkaarsvurdering: Vilkaarsvurdering? = null,
+        vilkaarsvurdering: Vilkaarsvurdering,
         behandlingType: BehandlingType
     ): BeregningsResultat {
         return when (behandlingType) {
@@ -66,7 +72,7 @@ class BeregningService(private val beregningRepository: BeregningRepository) {
             }
 
             BehandlingType.REVURDERING -> {
-                when (vilkaarsvurdering?.resultat?.utfall) {
+                when (vilkaarsvurdering.resultat.utfall) {
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
                         BeregningsResultat(
                             id = UUID.randomUUID(),

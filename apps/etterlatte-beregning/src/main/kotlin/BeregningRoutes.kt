@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import model.getAccessToken
 import no.nav.etterlatte.model.BeregningService
 import java.util.*
 
@@ -23,7 +24,8 @@ fun Route.beregning(beregningService: BeregningService) {
 
         post("/{behandlingsid}/opprett") {
             withUUID("behandlingsid") {
-                val beregning = beregningService.lagreBeregning(it)
+                val accessToken = getAccessToken(call)
+                val beregning = beregningService.lagreBeregning(it, accessToken)
                 call.respond(beregning)
             }
         }

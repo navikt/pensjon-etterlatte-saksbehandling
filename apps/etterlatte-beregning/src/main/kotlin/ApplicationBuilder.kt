@@ -1,4 +1,9 @@
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
@@ -17,9 +22,11 @@ import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.routing
+import model.vilkaarsvurdering.VilkaarsvurderingKlientImpl
 import nav.no.etterlatte.beregning
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -35,10 +42,12 @@ class ApplicationBuilder {
         username = properties.dbUsername,
         password = properties.dbPassword
     ).apply { migrate() }
+    private val config: Config = ConfigFactory.load()
 
     private val dataSource = dataSourceBuilder.dataSource()
     private val beregningRepository = BeregningRepositoryImpl(dataSource)
-    private val beregningService = BeregningService(beregningRepository)
+    private val vilkaarsvurderingKlientImpl = VilkaarsvurderingKlientImpl(config, httpClient())
+    private val beregningService = BeregningService(beregningRepository, vilkaarsvurderingKlientImpl)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {
@@ -89,6 +98,15 @@ fun Application.restModule(
         }
     }
 }
+
+private fun httpClient() = HttpClient(OkHttp) {
+    install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+    }
+    defaultRequest {
+        header(X_CORRELATION_ID, getCorrelationId())
+    }
+}.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
 fun Map<String, String>.withConsumerGroupId() =
     this.toMutableMap().apply {

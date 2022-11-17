@@ -19,6 +19,8 @@ dependencies {
     implementation(Ktor2.ClientAuth)
     implementation(NavFelles.TokenValidationKtor2)
 
+    implementation(project(":libs:ktor2client-onbehalfof"))
+
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.ModuleKotlin)
 

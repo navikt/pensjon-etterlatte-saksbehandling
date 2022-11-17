@@ -5,8 +5,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
-import no.nav.etterlatte.statistikk.utils.toTidspunkt
-import no.nav.etterlatte.statistikk.utils.toTimestamp
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet

@@ -14,7 +14,8 @@ data class BehandlingsOppgave(
     val sak: Sak,
     val regdato: ZonedDateTime,
     val fristDato: LocalDate,
-    val behandlingsType: BehandlingType
+    val behandlingsType: BehandlingType,
+    val antallSoesken: Int
 )
 
 data class OppgaveListe(val oppgaver: List<BehandlingsOppgave>)

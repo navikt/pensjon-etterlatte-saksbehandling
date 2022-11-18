@@ -19,7 +19,7 @@ data class Oppgave(
     val beskrivelse: String,
     val saksbehandler: String,
     val handling: Handling,
-    val antallSoesken: Int?
+    val antallSoesken: Int
 )
 
 data class Oppgaver(val oppgaver: List<Oppgave>)
@@ -28,17 +28,13 @@ enum class Handling {
     BEHANDLE
 }
 
-class OppgaveService(private val behandlingKlient: BehandlingKlient, private val vedtakKlient: EtterlatteVedtak) {
+class OppgaveService(private val behandlingKlient: BehandlingKlient) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
     suspend fun hentAlleOppgaver(accessToken: String): Oppgaver {
         logger.info("Henter alle oppgaver")
 
         val behandlingsoppgaver = behandlingKlient.hentOppgaver(accessToken).oppgaver
-        val vedtakListe = vedtakKlient.hentVedtakBolk(
-            behandlingsidenter = behandlingsoppgaver.map { it.behandlingId.toString() },
-            accessToken = accessToken
-        ).associateBy { it.behandlingId }
 
         return Oppgaver(
             behandlingsoppgaver.map {
@@ -55,19 +51,9 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient, private val
                     beskrivelse = "",
                     saksbehandler = "",
                     handling = Handling.BEHANDLE,
-                    antallSoesken = 0
-                    // TODO dette må kanskje hentes fra behandling i stedet?
-                    // antallSoesken = vedtakListe[it.behandlingId]?.kommerSoekerTilgodeResultat?.familieforhold
-                    //    ?.let { familieforhold -> hentAntallSøsken(familieforhold) }
+                    antallSoesken = it.antallSoesken
                 )
             }
         )
     }
 }
-
-/*
-private fun hentAntallSøsken(familiemedlemmer: Familiemedlemmer): Int? {
-    return familiemedlemmer.avdoed.barn?.let {
-        (it.size - 1).coerceAtLeast(0)
-    }
-}*/

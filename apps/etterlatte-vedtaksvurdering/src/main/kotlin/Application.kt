@@ -7,7 +7,6 @@ import no.nav.etterlatte.vedtaksvurdering.rivers.FattVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreAvkorting
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreBeregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
-import no.nav.etterlatte.vedtaksvurdering.rivers.LagreKommerSoekerTilgodeResultat
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreVilkaarsresultat
 import no.nav.etterlatte.vedtaksvurdering.rivers.UnderkjennVedtak
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -37,7 +36,6 @@ fun app(env: Map<String, String> = System.getenv()) {
         LagreAvkorting(this, vedtaksvurderingService)
         LagreVilkaarsresultat(this, vedtaksvurderingService)
         LagreBeregningsresultat(this, vedtaksvurderingService)
-        LagreKommerSoekerTilgodeResultat(this, vedtaksvurderingService)
         FattVedtak(this, vedtaksvurderingService)
         AttesterVedtak(this, vedtaksvurderingService)
         UnderkjennVedtak(this, vedtaksvurderingService)

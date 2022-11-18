@@ -16,8 +16,8 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.revurdering

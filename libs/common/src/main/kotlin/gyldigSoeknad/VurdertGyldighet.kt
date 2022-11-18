@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.common.gyldigSoeknad
 
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import java.time.LocalDateTime
 
 data class VurdertGyldighet(
@@ -14,3 +13,9 @@ data class GyldighetsResultat(
     val vurderinger: List<VurdertGyldighet>,
     val vurdertDato: LocalDateTime
 )
+
+enum class VurderingsResultat(val prioritet: Int) {
+    OPPFYLT(1),
+    KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING(2),
+    IKKE_OPPFYLT(3)
+}

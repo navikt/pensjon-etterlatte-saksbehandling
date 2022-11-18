@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
-import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -56,16 +55,19 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient, private val
                     beskrivelse = "",
                     saksbehandler = "",
                     handling = Handling.BEHANDLE,
-                    antallSoesken = vedtakListe[it.behandlingId]?.kommerSoekerTilgodeResultat?.familieforhold
-                        ?.let { familieforhold -> hentAntallSøsken(familieforhold) }
+                    antallSoesken = 0
+                    // TODO dette må kanskje hentes fra behandling i stedet?
+                    // antallSoesken = vedtakListe[it.behandlingId]?.kommerSoekerTilgodeResultat?.familieforhold
+                    //    ?.let { familieforhold -> hentAntallSøsken(familieforhold) }
                 )
             }
         )
     }
 }
 
+/*
 private fun hentAntallSøsken(familiemedlemmer: Familiemedlemmer): Int? {
     return familiemedlemmer.avdoed.barn?.let {
         (it.size - 1).coerceAtLeast(0)
     }
-}
+}*/

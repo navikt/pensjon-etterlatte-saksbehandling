@@ -11,15 +11,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
-import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
-import no.nav.etterlatte.libs.common.vikaar.PersoninfoAvdoed
-import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
-import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.vedtaksvurdering.database.DataSourceBuilder
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import org.junit.jupiter.api.AfterAll
@@ -99,50 +90,6 @@ internal class DBTest {
         )
     }
 
-    fun leggtilkommersoekertilgoderesultat() {
-        val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
-        val now = LocalDateTime.now()
-
-        vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(
-            sakId,
-            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
-            "fnr",
-            KommerSoekerTilgode(
-                VilkaarResultat(
-                    VurderingsResultat.OPPFYLT,
-                    emptyList(),
-                    now
-                ),
-
-                Familiemedlemmer(
-                    avdoed = PersoninfoAvdoed(
-                        "Navn",
-                        Foedselsnummer.of("03108718357"),
-                        PersonRolle.AVDOED,
-                        listOf(),
-                        LocalDate.of(2020, 1, 1),
-                        barn = listOf(Foedselsnummer.of("03108718357"))
-                    ),
-                    soeker = PersoninfoSoeker(
-                        "Navn",
-                        Foedselsnummer.of("03108718357"),
-                        PersonRolle.BARN,
-                        listOf(),
-                        null,
-                        LocalDate.of(2010, 1, 1)
-                    ),
-                    gjenlevendeForelder = PersoninfoGjenlevendeForelder(
-                        "Navn",
-                        Foedselsnummer.of("03108718357"),
-                        PersonRolle.BARN,
-                        listOf()
-                    )
-                )
-            )
-        )
-    }
-
     fun leggtilavkortingsresultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
@@ -178,7 +125,6 @@ internal class DBTest {
         leggtilvilkaarsresultat()
         val vilkaarsvurdert = vedtaksvurderingService.hentVedtak(sakId, uuid)
         Assertions.assertEquals(VedtakStatus.VILKAARSVURDERT, vilkaarsvurdert?.vedtakStatus)
-        leggtilkommersoekertilgoderesultat()
         leggtilberegningsresultat()
         val beregnet = vedtaksvurderingService.hentVedtak(sakId, uuid)
         Assertions.assertEquals(VedtakStatus.BEREGNET, beregnet?.vedtakStatus)
@@ -188,7 +134,6 @@ internal class DBTest {
         assert(vedtaket?.avkortingsResultat != null)
         assert(vedtaket?.beregningsResultat?.grunnlagVersjon == 0.toLong())
         assert(vedtaket?.vilkaarsResultat != null)
-        assert(vedtaket?.kommerSoekerTilgodeResultat != null)
         assert(vedtaket?.vedtakStatus != null)
         Assertions.assertNotNull(vedtaket?.virkningsDato)
 

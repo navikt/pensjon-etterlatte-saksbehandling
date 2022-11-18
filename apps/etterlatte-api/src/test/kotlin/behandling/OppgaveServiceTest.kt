@@ -67,7 +67,6 @@ internal class OppgaveServiceTest {
             null,
             null,
             null,
-            null,
             null
         )
         val behandlingId = UUID.randomUUID()

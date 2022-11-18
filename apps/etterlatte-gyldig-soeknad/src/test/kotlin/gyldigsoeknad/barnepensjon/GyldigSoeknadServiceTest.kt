@@ -3,6 +3,7 @@ package no.nav.etterlatte.gyldigsoeknad.barnepensjon
 import io.mockk.mockk
 import no.nav.etterlatte.gyldigsoeknad.client.PdlClient
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.InnsenderHarForeldreansvarGrunnlag
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfoGyldighet
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlagTyper.InnsenderErForelderGrunnlag
@@ -14,7 +15,6 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException

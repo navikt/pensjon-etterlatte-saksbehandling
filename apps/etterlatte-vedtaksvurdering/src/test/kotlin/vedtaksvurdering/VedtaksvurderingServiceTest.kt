@@ -49,7 +49,6 @@ internal class VedtaksvurderingServiceTest {
         null,
         null,
         null,
-        null,
         BehandlingType.FØRSTEGANGSBEHANDLING
     )
     private val fattetVedtak = vedtakSomIkkeErFattet.copy(vedtakFattet = true)

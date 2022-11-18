@@ -93,8 +93,9 @@ class RealFoerstegangsbehandlingService(
 
         when (behandling) {
             is Foerstegangsbehandling -> {
-                behandling.oppdaterVirkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler(ident, Instant.now()))
-                val virkningstidspunkt = behandling.hentVirkningstidspunkt()!!
+                val oppdatertBehandling =
+                    behandling.oppdaterVirkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler(ident, Instant.now()))
+                val virkningstidspunkt = oppdatertBehandling.virkningstidspunkt!!
 
                 inTransaction {
                     behandlinger.lagreNyttVirkningstidspunkt(
@@ -116,10 +117,32 @@ class RealFoerstegangsbehandlingService(
     }
 
     override fun settKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
-        inTransaction {
-            behandlinger.lagreKommerBarnetTilgode(
-                behandlingId,
-                kommerBarnetTilgode
+        val behandling = inTransaction {
+            behandlinger.hentBehandling(behandlingId)
+                ?: throw RuntimeException(
+                    "Kunne ikke sette kommer barnet til gode. Fant ikke behandling med id $behandlingId"
+                )
+        }
+
+        when (behandling) {
+            is Foerstegangsbehandling -> {
+                val oppdatertBehandling =
+                    behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+
+                inTransaction {
+                    behandlinger.lagreKommerBarnetTilgode(
+                        behandlingId,
+                        oppdatertBehandling.kommerBarnetTilgode!!
+                    )
+                }
+            }
+
+            is ManueltOpphoer -> throw RuntimeException(
+                "Kan ikke endre kommer barnet til gode for ${ManueltOpphoer::class.java.simpleName}"
+            )
+
+            is Revurdering -> throw RuntimeException(
+                "Kan ikke endre kommer barnet til gode for ${Revurdering::class.java.simpleName}"
             )
         }
     }

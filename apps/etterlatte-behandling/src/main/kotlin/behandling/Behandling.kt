@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import java.lang.RuntimeException
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -68,17 +67,25 @@ data class Foerstegangsbehandling(
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
-    private var virkningstidspunkt: Virkningstidspunkt?,
+    val virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?
 ) : Behandling {
     fun hentVirkningstidspunkt() = virkningstidspunkt
-    fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler) {
-        if (BehandlingStatus.kanRedigeres().contains(this.status)) {
-            virkningstidspunkt = Virkningstidspunkt(dato, kilde)
-        } else {
+    fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler): Foerstegangsbehandling {
+        if (!BehandlingStatus.kanRedigeres().contains(this.status)) {
             throw RuntimeException("Kan ikke endre virkningstidspunkt for behandling som ikke er under behandling.")
         }
+
+        return this.copy(virkningstidspunkt = Virkningstidspunkt(dato, kilde))
+    }
+
+    fun oppdaterKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode): Foerstegangsbehandling {
+        if (!BehandlingStatus.kanRedigeres().contains(this.status)) {
+            throw RuntimeException("Kan ikke endre kommer barnet til gode for behandling som ikke er under behandling")
+        }
+
+        return this.copy(kommerBarnetTilgode = kommerBarnetTilgode)
     }
 }
 

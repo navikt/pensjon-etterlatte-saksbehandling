@@ -51,7 +51,7 @@ class ApplicationContext {
     private val sakstatistikkRepository: SakstatistikkRepository by lazy {
         SakstatistikkRepository(datasourceBuilder.dataSource)
     }
-    private val datasourceBuilder: DataSourceBuilder by lazy { DataSourceBuilder(env) }
+    private val datasourceBuilder: DataSourceBuilder by lazy { DataSourceBuilder(env).also { it.migrate() } }
 
     private val httpClient: HttpClient by lazy {
         HttpClient(OkHttp) {

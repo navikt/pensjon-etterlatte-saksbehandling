@@ -7,12 +7,11 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import nav.no.etterlatte.model.Beregning
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import nav.no.etterlatte.model.Beregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import java.util.*
 import javax.sql.DataSource
 
@@ -73,15 +72,15 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
 private fun toBeregning(row: Row, tx: TransactionalSession): Beregning = with(row) {
     val beregningId = uuid(BeregningDatabaseColumns.BeregningId.navn)
 
-    val beregningsperiodes = queryOf(
+    val beregningsperioder = queryOf(
         statement = Queries.hentBeregningsperioder,
         paramMap = mapOf("beregningId" to beregningId)
     ).let { query ->
         tx.run(
             query.map {
-                val beregningsperioder: List<Beregningsperiode> =
-                    objectMapper.readValue(string(BeregningDatabaseColumns.Beregningsperioder.navn))
-                beregningsperioder
+                objectMapper.readValue<List<Beregningsperiode>>(
+                    string(BeregningDatabaseColumns.Beregningsperioder.navn)
+                )
             }.asSingle
         )
     } ?: emptyList()
@@ -90,7 +89,7 @@ private fun toBeregning(row: Row, tx: TransactionalSession): Beregning = with(ro
         beregningId = beregningId,
         behandlingId = uuid(BeregningDatabaseColumns.BehandlingId.navn),
         beregnetDato = localDateTime(BeregningDatabaseColumns.BeregnetDato.navn),
-        beregningsperioder = beregningsperiodes,
+        beregningsperioder = beregningsperioder,
         grunnlagMetadata = Metadata(
             sakId = long(BeregningDatabaseColumns.SakId.navn),
             versjon = long(BeregningDatabaseColumns.GrunnlagVersjon.navn)

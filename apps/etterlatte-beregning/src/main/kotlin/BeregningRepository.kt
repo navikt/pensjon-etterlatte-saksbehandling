@@ -34,13 +34,13 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                             "beregningId" to beregning.beregningId,
                             "behandlingId" to beregning.behandlingId,
                             "beregnetDato" to beregning.beregnetDato,
-                            "beregningsperioder" to beregning.beregningsperioder?.toJson(),
+                            "beregningsperioder" to beregning.beregningsperioder.toJson(),
                             "sakId" to beregning.grunnlagMetadata.sakId,
                             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
                         )
                     ).let { query -> tx.run(query.asUpdate) }
 
-                    beregning.beregningsperioder?.forEach {
+                    beregning.beregningsperioder.forEach {
                         queryOf(
                             statement = Queries.lagreBeregningPeriode,
                             paramMap = mapOf(
@@ -61,7 +61,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
     }
 
     override fun hent(behandlingId: UUID): Beregning = using(sessionOf(dataSource)) { session ->
-        session.transaction { tx -> // TODO: Få inn henting av beregningsperioder
+        session.transaction { tx ->
             queryOf(
                 statement = Queries.hentBeregning,
                 paramMap = mapOf("behandlingId" to behandlingId)
@@ -84,8 +84,7 @@ private fun toBeregning(row: Row, tx: TransactionalSession): Beregning = with(ro
                 beregningsperioder
             }.asSingle
         )
-    }
-    // TODO: throwe hvis null?
+    } ?: emptyList()
 
     Beregning(
         beregningId = beregningId,

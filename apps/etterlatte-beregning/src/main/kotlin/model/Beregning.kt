@@ -8,7 +8,7 @@ import java.util.*
 data class Beregning(
     val beregningId: UUID,
     val behandlingId: UUID,
-    val beregningsperioder: List<Beregningsperiode>,
+    val beregningsperioder: List<Beregningsperiode>?,
     val beregnetDato: LocalDateTime,
     val grunnlagMetadata: Metadata
 )

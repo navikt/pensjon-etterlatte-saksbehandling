@@ -3,9 +3,12 @@ package nav.no.etterlatte
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.plugins.NotFoundException
 import kotliquery.Row
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import nav.no.etterlatte.model.Beregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -31,13 +34,13 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                             "beregningId" to beregning.beregningId,
                             "behandlingId" to beregning.behandlingId,
                             "beregnetDato" to beregning.beregnetDato,
-                            "beregningsperioder" to beregning.beregningsperioder.toJson(),
+                            "beregningsperioder" to beregning.beregningsperioder?.toJson(),
                             "sakId" to beregning.grunnlagMetadata.sakId,
                             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
                         )
                     ).let { query -> tx.run(query.asUpdate) }
 
-                    beregning.beregningsperioder.forEach {
+                    beregning.beregningsperioder?.forEach {
                         queryOf(
                             statement = Queries.lagreBeregningPeriode,
                             paramMap = mapOf(
@@ -57,22 +60,38 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
         return hent(beregning.behandlingId)
     }
 
-    override fun hent(behandlingId: UUID): Beregning = using(sessionOf(dataSource)) {
-        it.transaction { tx -> // TODO: Få inn henting av beregningsperioder
+    override fun hent(behandlingId: UUID): Beregning = using(sessionOf(dataSource)) { session ->
+        session.transaction { tx -> // TODO: Få inn henting av beregningsperioder
             queryOf(
                 statement = Queries.hentBeregning,
                 paramMap = mapOf("behandlingId" to behandlingId)
-            ).let { query -> tx.run(query.map(::toBeregning).asSingle) }
+            ).let { query -> tx.run(query.map { toBeregning(it, tx) }.asSingle) }
         }
     } ?: throw NotFoundException("Beregning med id $behandlingId finnes ikke i databasen")
 }
 
-private fun toBeregning(row: Row) = with(row) {
+private fun toBeregning(row: Row, tx: TransactionalSession): Beregning = with(row) {
+    val beregningId = uuid(BeregningDatabaseColumns.BeregningId.navn)
+
+    val beregningsperiodes = queryOf(
+        statement = Queries.hentBeregningsperioder,
+        paramMap = mapOf("beregningId" to beregningId)
+    ).let { query ->
+        tx.run(
+            query.map {
+                val beregningsperioder: List<Beregningsperiode> =
+                    objectMapper.readValue(string(BeregningDatabaseColumns.Beregningsperioder.navn))
+                beregningsperioder
+            }.asSingle
+        )
+    }
+    // TODO: throwe hvis null?
+
     Beregning(
-        beregningId = uuid(BeregningDatabaseColumns.BeregningId.navn),
+        beregningId = beregningId,
         behandlingId = uuid(BeregningDatabaseColumns.BehandlingId.navn),
         beregnetDato = localDateTime(BeregningDatabaseColumns.BeregnetDato.navn),
-        beregningsperioder = objectMapper.readValue(string(BeregningDatabaseColumns.Beregningsperioder.navn)),
+        beregningsperioder = beregningsperiodes,
         grunnlagMetadata = Metadata(
             sakId = long(BeregningDatabaseColumns.SakId.navn),
             versjon = long(BeregningDatabaseColumns.GrunnlagVersjon.navn)

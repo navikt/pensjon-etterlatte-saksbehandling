@@ -1,9 +1,9 @@
 import io.mockk.mockk
 import io.mockk.spyk
 import model.vilkaarsvurdering.VilkaarsvurderingKlient
-import nav.no.etterlatte.BeregningRepository
-import nav.no.etterlatte.LesBeregningsmelding
-import nav.no.etterlatte.model.BeregningService
+import no.nav.etterlatte.BeregningRepository
+import no.nav.etterlatte.LesBeregningsmelding
+import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

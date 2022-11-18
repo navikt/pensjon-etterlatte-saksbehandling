@@ -1,4 +1,4 @@
-package nav.no.etterlatte
+package no.nav.etterlatte
 
 class ApplicationProperties(
     val jdbcUrl: String,

@@ -1,8 +1,8 @@
-package nav.no.etterlatte.model
+package no.nav.etterlatte.model
 
 import model.finnSoeskenperiode.FinnSoeskenPeriode
 import model.vilkaarsvurdering.VilkaarsvurderingKlient
-import nav.no.etterlatte.BeregningRepository
+import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.model.Soeskenjustering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth

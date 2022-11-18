@@ -1,4 +1,4 @@
-package nav.no.etterlatte
+package no.nav.etterlatte
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

@@ -1,4 +1,4 @@
-package nav.no.etterlatte
+package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.plugins.NotFoundException
@@ -7,11 +7,11 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import nav.no.etterlatte.model.Beregning
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.model.Beregning
 import java.util.*
 import javax.sql.DataSource
 

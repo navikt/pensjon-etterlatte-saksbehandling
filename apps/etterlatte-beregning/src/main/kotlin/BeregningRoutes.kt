@@ -1,4 +1,4 @@
-package nav.no.etterlatte
+package no.nav.etterlatte
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -9,8 +9,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import nav.no.etterlatte.model.BeregningService
-import nav.no.etterlatte.model.getAccessToken
+import no.nav.etterlatte.model.BeregningService
+import no.nav.etterlatte.model.getAccessToken
 import java.util.*
 
 fun Route.beregning(beregningService: BeregningService) {

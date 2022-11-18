@@ -8,6 +8,7 @@ create TABLE beregning (
 );
 
 create TABLE beregningsperiode (
+    id UUID UNIQUE DEFAULT gen_random_uuid() PRIMARY KEY NOT NULL,
     beregningId UUID NOT NULL,
     CONSTRAINT beregning FOREIGN KEY(beregningId) REFERENCES beregning(beregningId),
 

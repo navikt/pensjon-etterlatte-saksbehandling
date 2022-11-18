@@ -130,9 +130,6 @@ private object Queries {
     val lagreBeregning = """
         |INSERT INTO beregning(${BeregningDatabaseColumns.BeregningId.navn}, ${BeregningDatabaseColumns.BehandlingId.navn}, ${BeregningDatabaseColumns.BeregnetDato.navn}, ${BeregningDatabaseColumns.Beregningsperioder.navn}, ${BeregningDatabaseColumns.SakId.navn}, ${BeregningDatabaseColumns.GrunnlagVersjon.navn}) 
         |VALUES(:beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :beregningsperioder::JSONB, :sakId::BIGINT, :grunnlagVersjon::BIGINT) 
-        |ON CONFLICT (${BeregningDatabaseColumns.BeregningId.navn})
-        |DO UPDATE SET 
-        |   ${BeregningDatabaseColumns.Beregningsperioder.navn} = EXCLUDED.${BeregningDatabaseColumns.Beregningsperioder.navn}, ${BeregningDatabaseColumns.BeregnetDato} = EXCLUDED.${BeregningDatabaseColumns.BeregnetDato}
     """.trimMargin()
 
     val lagreBeregningPeriode = """

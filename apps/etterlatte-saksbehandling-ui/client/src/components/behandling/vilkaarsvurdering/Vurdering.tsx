@@ -156,7 +156,7 @@ export const Vurdering = ({
       )}
       {aktivVurdering && (
         <>
-          <VurderingsTitle>Er vilkåret oppfylt?</VurderingsTitle>
+          <VurderingsTitle>Er hovedvilkår oppfylt?</VurderingsTitle>
           <RadioGroupWrapper>
             <RadioGroup
               legend=""

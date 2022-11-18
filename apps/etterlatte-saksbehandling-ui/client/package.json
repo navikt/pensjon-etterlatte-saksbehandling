@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "tsc && eslint src --ext .ts,.tsx && vite build",
     "test": "vitest",
+    "preview": "vite preview --port 5173",
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
@@ -13,6 +14,7 @@
     "@navikt/ds-react": "^1.5.4",
     "@navikt/navspa": "^6.0.1",
     "@reduxjs/toolkit": "^1.9.0",
+    "bowser": "^2.11.0",
     "date-fns": "^2.29.3",
     "react": "^18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
@@ -25,6 +27,7 @@
     "react-table": "^7.8.0",
     "react-tabs": "^5.1.0",
     "redux": "^4.2.0",
+    "stacktrace-js": "^2.0.2",
     "styled-components": "^5.3.6"
   },
   "devDependencies": {

@@ -35,6 +35,8 @@ export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering>('behandl
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const resetBeregning = createAction('behandling/beregning/reset')
+export const loggError = createAction<any>('loggError')
+export const loggInfo = createAction<any>('loggInfo')
 
 export interface IBehandlingReducer {
   behandling: IDetaljertBehandling

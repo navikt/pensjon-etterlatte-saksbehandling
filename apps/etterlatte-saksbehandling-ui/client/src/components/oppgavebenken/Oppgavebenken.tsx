@@ -30,11 +30,20 @@ const Oppgavebenken = () => {
   const [oppgaveFelter, setOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter(saksbehandlerNavn))
   const [globalFilter, setGlobalFilter] = useState<string | undefined>('')
   const [filterPar, setFilterPar] = useState<Array<FilterPar>>([])
+  const [val, setVal] = useState<boolean>(false)
 
   useEffect(() => {
     const filterPar = hentFilterFraOppgaveObject(oppgaveFelter)
     setFilterPar(filterPar)
   }, [oppgaveFelter])
+
+  const createError = () => {
+    const scriptError = document.querySelector('#script-error')
+    scriptError!!.addEventListener('click', () => {
+      const badCode = 'const s;'
+      eval(badCode)
+    })
+  }
 
   const hentFilterFraOppgaveObject = (oppgaveFelter: IOppgaveFelter): Array<FilterPar> => {
     const setValue = (value: string | undefined) => {
@@ -62,10 +71,14 @@ const Oppgavebenken = () => {
 
   const data: ReadonlyArray<IOppgave> = React.useMemo(() => oppgaver, [oppgaver])
   const columns: ReadonlyArray<Column<IOppgave>> = React.useMemo(() => kolonner, [])
-
+  if (val) {
+    throw new Error('I crashed!')
+  }
   return (
     <OppgavebenkContainer>
       <>
+        <button onClick={() => setVal(true)}>Klikk her for å generere feil med errorcomponent</button>
+        <button onClick={createError}>Test; klikk her for å få teste feil-logging</button>
         <OppgaveHeader
           oppgaveFelter={oppgaveFelter}
           setOppgaveFelter={setOppgaveFelter}

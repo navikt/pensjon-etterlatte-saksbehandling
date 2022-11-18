@@ -4,7 +4,7 @@ import { appConf, ApiConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
-import { logger } from './utils/logger'
+import { frontendLogger, logger } from './utils/logger'
 import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
@@ -28,6 +28,16 @@ if (isDev) {
   logger.info('Mocking all endpoints')
   app.use('/api', mockRouter)
 } else {
+  app.post('/api/logg', express.json(), (req, res) => {
+    let body = req.body
+    if (body.type && body.type === 'info') {
+      frontendLogger.info('Request', req.body)
+    } else {
+      frontendLogger.error('Request', req.body)
+    }
+    res.sendStatus(200)
+  })
+
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
   app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
@@ -51,6 +61,9 @@ if (isDev) {
 
   app.use('/api', tokenMiddleware(ApiConfig.api.scope), proxy(ApiConfig.api.url!!))
 }
+
+// Body parser må komme etter proxy middleware
+app.use(express.json())
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)

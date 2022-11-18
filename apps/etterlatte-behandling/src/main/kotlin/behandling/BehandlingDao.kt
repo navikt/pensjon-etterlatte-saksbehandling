@@ -212,6 +212,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         fritekstAarsak = rs.getString("fritekst_aarsak")
     )
 
+    private fun ResultSet.asRolleSak() = Pair(this.getString("rolle"), this.getLong("sak_id"))
+
     fun alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr: String): List<Long> {
         return connection().prepareStatement(
             """
@@ -475,6 +477,31 @@ class BehandlingDao(private val connection: () -> Connection) {
         statement.setString(1, kommerBarnetTilgode.toJson())
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
+    }
+
+    /*sjekker om et fnr opptrer i persongalleriet til behandlinger. Returnerer rollen og saksnr.*/
+    fun sakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<String, Long>> {
+        val statement = connection().prepareStatement(
+            """
+              SELECT (
+                SELECT string_agg(col, ', ' ORDER BY col) AS rolle
+                FROM jsonb_each_text(to_jsonb(json_build_object('innsender', behandling.innsender, 'soeker', behandling.soeker, 'gjenlevende', behandling.gjenlevende, 'avdoed', behandling.avdoed, 'soesken', behandling.soesken))) t(col, val)
+                WHERE t.val LIKE '%' || ? || '%'
+              ), sak_id
+              FROM behandling
+              WHERE (
+                SELECT string_agg(col, ', ' ORDER BY col)
+                FROM jsonb_each_text(to_jsonb(json_build_object('innsender', behandling.innsender, 'soeker', behandling.soeker, 'gjenlevende', behandling.gjenlevende, 'avdoed', behandling.avdoed, 'soesken', behandling.soesken))) t(col, val)
+                WHERE t.val LIKE '%' || ? || '%'
+              ) IS NOT NULL;
+            """.trimIndent()
+        ).also {
+            it.setString(1, fnr)
+            it.setString(2, fnr)
+        }
+        return statement.executeQuery().toList {
+            asRolleSak()
+        }
     }
 }
 

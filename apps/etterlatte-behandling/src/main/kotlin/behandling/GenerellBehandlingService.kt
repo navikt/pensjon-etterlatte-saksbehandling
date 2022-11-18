@@ -9,8 +9,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.util.UUID
-import kotlin.IllegalStateException
+import java.util.*
 
 interface GenerellBehandlingService {
 
@@ -35,6 +34,7 @@ interface GenerellBehandlingService {
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
     fun alleSakIderForSoekerMedFnr(fnr: String): List<Long>
     fun hentDetaljertBehandling(behandlingsId: UUID): DetaljertBehandling?
+    fun hentSakerMedFnrIPersongalleri(fnr: String): List<Pair<String, Long>>
 }
 
 class RealGenerellBehandlingService(
@@ -171,4 +171,12 @@ class RealGenerellBehandlingService(
             behandlinger.alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr)
         }
     }
+
+    override fun hentSakerMedFnrIPersongalleri(fnr: String): List<Pair<String, Long>> {
+        return inTransaction {
+            behandlinger.sakerOgRollerMedFnrIPersongalleri(fnr)
+        }
+    }
+
+    enum class Rolle { SOEKER, INNSENDER, SOESKEN, AVDOED, GJENLEVENDE }
 }

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -586,5 +587,48 @@ internal class BehandlingDaoIntegrationTest {
             val actual = (this as Foerstegangsbehandling).hentVirkningstidspunkt()
             assertEquals(expected, actual)
         }
+    }
+
+    @Test
+    fun `skal hente ut saksnr og rolle for saker hvor et fnr opptrer`() {
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+
+        listOf(
+            foerstegangsbehandling(
+                sak = sak1,
+                persongalleri = Persongalleri(
+                    soeker = "11111",
+                    innsender = "22222",
+                    soesken = listOf("33333", "44444"),
+                    avdoed = listOf("55555"),
+                    gjenlevende = listOf("66666")
+                )
+            ),
+            foerstegangsbehandling(
+                sak = sak1,
+                persongalleri = Persongalleri(
+                    soeker = "77777",
+                    innsender = "88888",
+                    soesken = listOf("99999"),
+                    avdoed = listOf("00000"),
+                    gjenlevende = listOf("01010")
+                )
+            ),
+            foerstegangsbehandling(
+                sak = sak1,
+                persongalleri = Persongalleri(
+                    soeker = "02020",
+                    innsender = "03030",
+                    soesken = listOf("11111", "04040", "05050"),
+                    avdoed = listOf("06060", "07070"),
+                    gjenlevende = listOf("11111")
+                )
+            )
+        ).forEach {
+            behandlingRepo.opprettFoerstegangsbehandling(it)
+        }
+
+        val x = behandlingRepo.sakerOgRollerMedFnrIPersongalleri("11111")
+        println(x)
     }
 }

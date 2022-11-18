@@ -1,3 +1,5 @@
+package nav.no.etterlatte
+
 class ApplicationProperties(
     val jdbcUrl: String,
     val dbUsername: String,

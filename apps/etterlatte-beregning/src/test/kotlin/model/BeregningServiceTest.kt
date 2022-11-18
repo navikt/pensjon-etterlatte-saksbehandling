@@ -1,10 +1,12 @@
 package model
 
-import BeregningRepository
 import GrunnlagTestData
 import grunnlag.kilde
 import io.mockk.mockk
 import model.vilkaarsvurdering.VilkaarsvurderingKlient
+import nav.no.etterlatte.BeregningRepository
+import nav.no.etterlatte.model.BeregningService
+import nav.no.etterlatte.model.beregnSisteTom
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Endringskode
@@ -12,8 +14,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.model.BeregningService
-import no.nav.etterlatte.model.beregnSisteTom
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

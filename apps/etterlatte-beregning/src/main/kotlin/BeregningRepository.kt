@@ -1,76 +1,142 @@
+package nav.no.etterlatte
+
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.plugins.NotFoundException
 import kotliquery.Row
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.Endringskode
+import nav.no.etterlatte.model.Beregning
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import java.util.*
 import javax.sql.DataSource
 
 interface BeregningRepository {
-    fun lagre(beregning: BeregningsResultat, beregningstyper: Beregningstyper): BeregningsResultat
-    fun hent(id: UUID): BeregningsResultat
+    fun lagre(beregning: Beregning): Beregning
+    fun hent(behandlingId: UUID): Beregning
 }
 
 class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRepository {
-    override fun lagre(beregning: BeregningsResultat, beregningstyper: Beregningstyper): BeregningsResultat {
-        using(sessionOf(dataSource)) {
-            it.transaction { tx ->
-                queryOf(
-                    statement = Queries.lagreBeregning,
-                    paramMap = mapOf("beregningstype" to beregningstyper, "beregning" to beregning)
-                ).let { query -> tx.run(query.asUpdate) }
+    override fun lagre(
+        beregning: Beregning
+    ): Beregning {
+        using(sessionOf(dataSource)) { session ->
+            session.transaction { tx ->
+                {
+                    queryOf(
+                        statement = Queries.lagreBeregning,
+                        paramMap = mapOf(
+                            "beregningId" to beregning.beregningId,
+                            "behandlingId" to beregning.behandlingId,
+                            "beregnetDato" to beregning.beregnetDato,
+                            "beregningsperioder" to beregning.beregningsperioder.toJson(),
+                            "sakId" to beregning.grunnlagMetadata.sakId,
+                            "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
+                        )
+                    ).let { query -> tx.run(query.asUpdate) }
+
+                    beregning.beregningsperioder.forEach {
+                        queryOf(
+                            statement = Queries.lagreBeregningPeriode,
+                            paramMap = mapOf(
+                                "beregningId" to beregning.beregningId,
+                                "datoFOM" to it.datoFOM,
+                                "datoTOM" to it.datoTOM,
+                                "utbetaltBeloep" to it.utbetaltBeloep,
+                                "soeskenFlokk" to it.soeskenFlokk,
+                                "grunnbeloepMnd" to it.grunnbelopMnd,
+                                "grunnbeloep" to it.grunnbelopMnd
+                            )
+                        ).let { query -> tx.run(query.asUpdate) }
+                    }
+                }
             }
         }
-        return hent(beregning.id)
+        return hent(beregning.behandlingId)
     }
 
-    override fun hent(id: UUID): BeregningsResultat = using(sessionOf(dataSource)) {
-        it.transaction { tx ->
+    override fun hent(behandlingId: UUID): Beregning = using(sessionOf(dataSource)) { session ->
+        session.transaction { tx ->
             queryOf(
                 statement = Queries.hentBeregning,
-                paramMap = mapOf("beregningId" to id)
-            ).let { query -> tx.run(query.map(::toBeregning).asSingle) }
+                paramMap = mapOf("behandlingId" to behandlingId)
+            ).let { query -> tx.run(query.map { toBeregning(it, tx) }.asSingle) }
         }
-    } ?: throw NotFoundException("Beregning med id $id finnes ikke i databasen")
-
-    private fun toBeregning(row: Row) = with(row) {
-        BeregningsResultat(
-            id = uuid(DatabaseColumns.BeregningId.navn),
-            type = Beregningstyper.valueOf(string(DatabaseColumns.Beregningstype.navn)),
-            endringskode = Endringskode.NY,
-            resultat = BeregningsResultatType.BEREGNET,
-            beregnetDato = localDateTime(DatabaseColumns.BeregnetDato.navn),
-            beregningsperioder = objectMapper.readValue(string(DatabaseColumns.Beregningsperioder.navn))
-        )
-    }
+    } ?: throw NotFoundException("Beregning med id $behandlingId finnes ikke i databasen")
 }
 
-private enum class DatabaseColumns(val navn: String) {
+private fun toBeregning(row: Row, tx: TransactionalSession): Beregning = with(row) {
+    val beregningId = uuid(BeregningDatabaseColumns.BeregningId.navn)
+
+    val beregningsperioder = queryOf(
+        statement = Queries.hentBeregningsperioder,
+        paramMap = mapOf("beregningId" to beregningId)
+    ).let { query ->
+        tx.run(
+            query.map {
+                objectMapper.readValue<List<Beregningsperiode>>(
+                    string(BeregningDatabaseColumns.Beregningsperioder.navn)
+                )
+            }.asSingle
+        )
+    } ?: emptyList()
+
+    Beregning(
+        beregningId = beregningId,
+        behandlingId = uuid(BeregningDatabaseColumns.BehandlingId.navn),
+        beregnetDato = localDateTime(BeregningDatabaseColumns.BeregnetDato.navn),
+        beregningsperioder = beregningsperioder,
+        grunnlagMetadata = Metadata(
+            sakId = long(BeregningDatabaseColumns.SakId.navn),
+            versjon = long(BeregningDatabaseColumns.GrunnlagVersjon.navn)
+        )
+    )
+}
+
+private enum class BeregningDatabaseColumns(val navn: String) {
     BeregningId("beregningId"),
-    Beregningstype("beregningstype"),
-    Beregning("beregning"),
+    BehandlingId("behandlingId"),
     Beregningsperioder("beregningsperioder"),
     BeregnetDato("beregnetDato"),
-    Grunnlagsversjon("grunnlagsversjon")
+    SakId("sakId"),
+    GrunnlagVersjon("grunnlagVersjon")
+}
+
+private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
+    BeregningId("beregningId"),
+    DatoFOM("datoFOM"),
+    DatoTOM("datoTOM"),
+    UtbetaltBeloep("utbetaltBeloep"),
+    SoeskenFlokk("soeskenFlokk"),
+    GrunnbeloepMnd("grunnbeloepMnd"),
+    Grunnbeloep("grunnbeloep")
 }
 
 private object Queries {
-    val hentBeregning = """x
+    val hentBeregning = """
         |SELECT * 
-        |FROM beregning WHERE beregningId = :beregningId::UUID
+        |FROM beregning WHERE ${BeregningDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
+    """.trimMargin()
+
+    val hentBeregningsperioder = """
+        |SELECT * 
+        |FROM beregningsperioder WHERE ${BeregningsperiodeDatabaseColumns.BeregningId.navn} = :beregningId::UUID
     """.trimMargin()
 
     val lagreBeregning = """
-        |INSERT INTO beregning(beregningId, beregningstype, beregning) 
-        |VALUES(:beregningId::UUID, :beregningstype::TEXT, :beregning::JSONB) 
-        |ON CONFLICT (behandlingId)  
+        |INSERT INTO beregning(${BeregningDatabaseColumns.BeregningId.navn}, ${BeregningDatabaseColumns.BehandlingId.navn}, ${BeregningDatabaseColumns.BeregnetDato.navn}, ${BeregningDatabaseColumns.Beregningsperioder.navn}, ${BeregningDatabaseColumns.SakId.navn}, ${BeregningDatabaseColumns.GrunnlagVersjon.navn}) 
+        |VALUES(:beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :beregningsperioder::JSONB, :sakId::BIGINT, :grunnlagVersjon::BIGINT) 
+        |ON CONFLICT (${BeregningDatabaseColumns.BeregningId.navn})
         |DO UPDATE SET 
-        |   BEREGNINGSTYPE = EXCLUDED.beregningstype, beregning = EXCLUDED.beregning,  
+        |   ${BeregningDatabaseColumns.Beregningsperioder.navn} = EXCLUDED.${BeregningDatabaseColumns.Beregningsperioder.navn}, ${BeregningDatabaseColumns.BeregnetDato} = EXCLUDED.${BeregningDatabaseColumns.BeregnetDato}
+    """.trimMargin()
+
+    val lagreBeregningPeriode = """
+        |INSERT INTO beregningsperiode(${BeregningsperiodeDatabaseColumns.BeregningId.navn}, ${BeregningsperiodeDatabaseColumns.DatoFOM.navn}, ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, ${BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn}, ${BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn}, ${BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn}, ${BeregningsperiodeDatabaseColumns.Grunnbeloep.navn}) 
+        |VALUES(:beregningId::UUID, :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, :grunnbeloep::BIGINT) 
     """.trimMargin()
 }

@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
 import no.nav.etterlatte.libs.common.avkorting.Endringskode

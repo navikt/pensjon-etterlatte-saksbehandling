@@ -1,40 +1,83 @@
 package no.nav.etterlatte.libs.common.vedtak
 
+import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import java.math.BigDecimal
-import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZonedDateTime
+import java.util.*
+import java.util.Objects.isNull
 
 data class Vedtak(
-    val vedtakId: String,
-    val behandlingsId: String,
-    val sakId: String,
-    val saksbehandlerId: String,
-    val sakIdGjelderFnr: String,
-    val aktorFoedselsdato: LocalDate,
-    val behandlingstype: Endringskode,
-    val beregningsperioder: List<Beregningsperiode>,
-    val oppdragsenheter: List<Oppdragsenhet>,
-    val attestasjon: Attestasjon
+    val vedtakId: Long, // Løpenummer (BIGSERIAL)
+    val virk: Periode,
+    val sak: Sak,
+    val behandling: Behandling,
+    val type: VedtakType,
+    val grunnlag: List<Grunnlagsopplysning<ObjectNode>>,
+    val vilkaarsvurdering: Vilkaarsvurdering?,
+    val beregning: BilagMedSammendrag<List<Beregningsperiode>>?,
+    val avkorting: BilagMedSammendrag<List<Beregningsperiode>>?,
+    val pensjonTilUtbetaling: List<Utbetalingsperiode>?,
+    val vedtakFattet: VedtakFattet?,
+    val attestasjon: Attestasjon?
 )
 
-data class Oppdragsenhet(
-    val enhetsType: Enhetstype, // lengde: 4
-    val enhetsnummer: String, // lengde: maks 13, men egentlig enhetsnummer 4 siffer
-    val datoEnhetFOM: LocalDate
+data class Behandling(
+    val type: BehandlingType,
+    val id: UUID
 )
 
-enum class Endringskode() {
-    NY,
-    ENDRING
+data class Sak(val ident: String, val sakType: String, val id: Long)
+
+data class Periode(
+    val fom: YearMonth,
+    val tom: YearMonth?
+) {
+    init {
+        require(isNull(tom) || fom == tom || fom.isBefore(tom))
+    }
 }
 
-enum class Enhetstype(s: String) { // TODO finne ut forkortelse til Behandlende og evt. andre enhetstyper
-    BOSTED("BOS")
-}
+data class BilagMedSammendrag<T>(
+    val bilag: ObjectNode,
+    val sammendrag: T
+)
+
+data class VedtakFattet(
+    val ansvarligSaksbehandler: String,
+    val ansvarligEnhet: String,
+    val tidspunkt: ZonedDateTime
+)
 
 data class Beregningsperiode(
-    val delytelsesId: String,
-    val ytelseskomponent: String,
-    val datoFOM: LocalDate,
-    val datoTOM: LocalDate,
-    val belop: BigDecimal
+    val periode: Periode,
+    val beloep: BigDecimal
 )
+
+data class Utbetalingsperiode(
+    val id: Long,
+    val periode: Periode,
+    val beloep: BigDecimal?,
+    val type: UtbetalingsperiodeType
+)
+
+enum class UtbetalingsperiodeType {
+    OPPHOER, UTBETALING // TODO: trenger vi en ENDRING-type her?
+}
+
+data class Attestasjon(
+    val attestant: String,
+    val attesterendeEnhet: String, // aktuell?
+    val tidspunkt: ZonedDateTime
+)
+
+enum class BehandlingAarsak {
+    SOEKNAD
+}
+
+enum class VedtakType {
+    INNVILGELSE, OPPHOER, AVSLAG, ENDRING
+}

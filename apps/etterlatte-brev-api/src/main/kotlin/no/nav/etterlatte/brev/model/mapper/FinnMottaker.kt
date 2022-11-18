@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.model.mapper
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.domene.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person

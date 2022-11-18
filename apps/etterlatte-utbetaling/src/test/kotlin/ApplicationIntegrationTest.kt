@@ -5,7 +5,7 @@ import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT

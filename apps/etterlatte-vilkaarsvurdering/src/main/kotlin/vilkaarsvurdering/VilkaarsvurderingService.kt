@@ -1,7 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import no.nav.etterlatte.domene.vedtak.Behandling
-import no.nav.etterlatte.domene.vedtak.Sak
+import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Sak
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak

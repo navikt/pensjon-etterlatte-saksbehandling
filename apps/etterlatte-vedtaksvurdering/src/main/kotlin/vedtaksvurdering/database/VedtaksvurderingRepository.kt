@@ -1,10 +1,10 @@
 package no.nav.etterlatte.vedtaksvurdering.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.domene.vedtak.Behandling
-import no.nav.etterlatte.domene.vedtak.Periode
-import no.nav.etterlatte.domene.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus

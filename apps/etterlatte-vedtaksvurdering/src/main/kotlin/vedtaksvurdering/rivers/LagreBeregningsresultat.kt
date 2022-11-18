@@ -3,7 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.rivers
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper

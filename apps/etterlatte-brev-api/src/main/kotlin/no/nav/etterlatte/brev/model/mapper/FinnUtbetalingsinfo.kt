@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model.mapper
 
 import no.nav.etterlatte.brev.model.Utbetalingsinfo
-import no.nav.etterlatte.domene.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import java.time.LocalDate
 
 fun Vedtak.finnUtbetalingsinfo() = Utbetalingsinfo(

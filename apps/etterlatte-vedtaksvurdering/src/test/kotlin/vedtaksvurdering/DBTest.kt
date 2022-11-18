@@ -1,7 +1,7 @@
 package vedtaksvurdering
 
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

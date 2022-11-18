@@ -1,16 +1,17 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.domene.vedtak.Attestasjon
-import no.nav.etterlatte.domene.vedtak.Behandling
-import no.nav.etterlatte.domene.vedtak.Beregningsperiode
-import no.nav.etterlatte.domene.vedtak.BilagMedSammendrag
-import no.nav.etterlatte.domene.vedtak.Periode
-import no.nav.etterlatte.domene.vedtak.Sak
-import no.nav.etterlatte.domene.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.domene.vedtak.VedtakFattet
-import no.nav.etterlatte.domene.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
+import no.nav.etterlatte.libs.common.vedtak.BilagMedSammendrag
+import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.Sak
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
@@ -18,7 +19,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.vedtaksvurdering.database.Vedtak
+import no.nav.etterlatte.vedtaksvurdering.database.Vedtak as VedtakEntity
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.math.BigDecimal
@@ -28,31 +29,31 @@ import java.time.YearMonth
 import java.time.ZoneOffset
 import java.util.*
 
-class KanIkkeEndreFattetVedtak(vedtak: Vedtak) :
+class KanIkkeEndreFattetVedtak(vedtak: VedtakEntity) :
     Exception("Vedtak ${vedtak.id} kan ikke oppdateres fordi det allerede er fattet") {
     val vedtakId: Long = vedtak.id
 }
 
-class VedtakKanIkkeFattes(vedtak: Vedtak) : Exception("Vedtak ${vedtak.id} kan ikke fattes") {
+class VedtakKanIkkeFattes(vedtak: VedtakEntity) : Exception("Vedtak ${vedtak.id} kan ikke fattes") {
     val vedtakId: Long = vedtak.id
 }
 
-class VedtakKanIkkeAttesteresAlleredeAttestert(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+class VedtakKanIkkeAttesteresAlleredeAttestert(vedtak: Vedtak) :
     Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det allerede er attestert") {
     val vedtakId: Long = vedtak.vedtakId
 }
 
-class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: Vedtak) :
     Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det ikke er fattet") {
     val vedtakId: Long = vedtak.vedtakId
 }
 
-class VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+class VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak: Vedtak) :
     Exception("Vedtak ${vedtak.vedtakId} kan ikke underkjennes da det ikke er fattet") {
     val vedtakId: Long = vedtak.vedtakId
 }
 
-class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: Vedtak) :
     Exception("Vedtak ${vedtak.vedtakId} kan ikke underkjennes da det allerede er attestert") {
     val vedtakId: Long = vedtak.vedtakId
 }
@@ -93,7 +94,7 @@ class VedtaksvurderingService(
         }
     }
 
-    private fun migrer(vedtak: Vedtak, fnr: String, virkningsDato: LocalDate?) {
+    private fun migrer(vedtak: VedtakEntity, fnr: String, virkningsDato: LocalDate?) {
         if (vedtak.fnr == null) { // Migrere v2 til v3
             repository.lagreFnr(vedtak.sakId, vedtak.behandlingId, fnr)
         }
@@ -143,22 +144,22 @@ class VedtaksvurderingService(
         }
     }
 
-    fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> {
+    fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<VedtakEntity> {
         return repository.hentVedtakBolk(behandlingsidenter)
     }
 
-    fun hentVedtak(sakId: String, behandlingId: UUID): Vedtak? {
+    fun hentVedtak(sakId: String, behandlingId: UUID): VedtakEntity? {
         return repository.hentVedtak(sakId, behandlingId)
     }
 
-    fun hentVedtak(behandlingId: UUID): Vedtak? {
+    fun hentVedtak(behandlingId: UUID): VedtakEntity? {
         return repository.hentVedtak(behandlingId)
     }
 
-    private fun hentFellesVedtak(behandlingId: UUID): no.nav.etterlatte.domene.vedtak.Vedtak? {
+    fun hentFellesVedtak(behandlingId: UUID): Vedtak? {
         // Placeholder for tingene som må inn for å fylle vedtaksmodellen
         return repository.hentVedtak(behandlingId)?.let { vedtak ->
-            no.nav.etterlatte.domene.vedtak.Vedtak(
+            Vedtak(
                 vedtakId = vedtak.id,
                 virk = Periode(
                     vedtak.virkningsDato?.let(YearMonth::from)
@@ -228,7 +229,7 @@ class VedtaksvurderingService(
         }
     }
 
-    fun fattVedtak(behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
+    fun fattVedtak(behandlingId: UUID, saksbehandler: String): Vedtak {
         val v = requireNotNull(hentVedtak(behandlingId)).also {
             if (it.vedtakFattet == true) throw KanIkkeEndreFattetVedtak(it)
         }
@@ -246,7 +247,7 @@ class VedtaksvurderingService(
     fun attesterVedtak(
         behandlingId: UUID,
         saksbehandler: String
-    ): no.nav.etterlatte.domene.vedtak.Vedtak {
+    ): Vedtak {
         val vedtak = requireNotNull(hentFellesVedtak(behandlingId)).also {
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
@@ -267,7 +268,7 @@ class VedtaksvurderingService(
 
     fun underkjennVedtak(
         behandlingId: UUID
-    ): Vedtak {
+    ): VedtakEntity {
         val vedtak = requireNotNull(hentFellesVedtak(behandlingId)).also {
             require(it.vedtakFattet != null) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
             require(it.attestasjon == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
@@ -276,7 +277,7 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)!!
     }
 
-    fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) =
+    fun utbetalingsperioderFraVedtak(vedtak: Vedtak) =
         utbetalingsperioderFraVedtak(vedtak.type, vedtak.virk, vedtak.beregning?.sammendrag ?: emptyList())
 
     fun utbetalingsperioderFraVedtak(

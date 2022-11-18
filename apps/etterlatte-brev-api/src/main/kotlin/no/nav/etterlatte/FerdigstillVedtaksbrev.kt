@@ -2,7 +2,7 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.brev.BrevService
-import no.nav.etterlatte.domene.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName

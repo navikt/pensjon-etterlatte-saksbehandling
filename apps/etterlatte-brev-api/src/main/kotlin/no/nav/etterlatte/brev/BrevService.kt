@@ -7,8 +7,8 @@ import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.model.mapper.finnBarn
 import no.nav.etterlatte.db.BrevRepository
-import no.nav.etterlatte.domene.vedtak.Vedtak
-import no.nav.etterlatte.domene.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes

@@ -31,6 +31,7 @@ class BehandlinghendelseRiver(
     init {
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, behandlingshendelser) }
+            validate { it.interestedIn("behandling") }
             validate { it.requireKey("behandling.id") }
             validate { it.requireKey("behandling.sak") }
             validate { it.requireKey("behandling.behandlingOpprettet") }

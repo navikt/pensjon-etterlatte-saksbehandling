@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
-import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -61,7 +60,7 @@ class SakstatistikkRepository(private val datasource: DataSource) {
         ferdigbehandletTidspunkt = getTimestamp("ferdigbehandlet_tid")?.toTidspunkt(),
         vedtakTidspunkt = getTimestamp("vedtak_tid")?.toTidspunkt(),
         behandlingType = enumValueOf(getString("behandling_type")),
-        behandlingStatus = getString("behandling_status")?.let { enumValueOf<VedtakHendelse>(it) },
+        behandlingStatus = getString("behandling_status"),
         behandlingResultat = getString("behandling_resultat"),
         resultatBegrunnelse = getString("resultat_begrunnelse"),
         behandlingMetode = getString("behandling_metode"),
@@ -104,7 +103,7 @@ data class SakRad(
     val ferdigbehandletTidspunkt: Tidspunkt?,
     val vedtakTidspunkt: Tidspunkt?,
     val behandlingType: BehandlingType,
-    val behandlingStatus: VedtakHendelse?,
+    val behandlingStatus: String?,
     val behandlingResultat: String?,
     val resultatBegrunnelse: String?,
     val behandlingMetode: String?,
@@ -126,7 +125,7 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = thi
     setTimestamp(5, sakRad.ferdigbehandletTidspunkt?.toTimestamp())
     setTimestamp(6, sakRad.vedtakTidspunkt?.toTimestamp())
     setString(7, sakRad.behandlingType.name)
-    setString(8, sakRad.behandlingStatus?.name)
+    setString(8, sakRad.behandlingStatus)
     setString(9, sakRad.behandlingResultat)
     setString(10, sakRad.resultatBegrunnelse)
     setString(11, sakRad.behandlingMetode)

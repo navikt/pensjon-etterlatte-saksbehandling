@@ -94,7 +94,7 @@ internal class DBTest {
                 ferdigbehandletTidspunkt = null,
                 vedtakTidspunkt = null,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                behandlingStatus = VedtakHendelse.IVERKSATT,
+                behandlingStatus = VedtakHendelse.IVERKSATT.name,
                 behandlingResultat = "wow",
                 resultatBegrunnelse = "for en begrunnelse",
                 behandlingMetode = "manuell",

@@ -1,11 +1,11 @@
 package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingClient
 import no.nav.etterlatte.statistikk.database.SakRad
 import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
@@ -57,7 +57,7 @@ class StatistikkService(
             ferdigbehandletTidspunkt = vedtak.vedtakFattet?.tidspunkt?.toTidspunkt(),
             vedtakTidspunkt = vedtak.vedtakFattet?.tidspunkt?.toTidspunkt(),
             behandlingType = vedtak.behandling.type,
-            behandlingStatus = hendelse,
+            behandlingStatus = hendelse.name,
             behandlingResultat = null,
             resultatBegrunnelse = null,
             behandlingMetode = "",
@@ -130,7 +130,7 @@ class StatistikkService(
             ferdigbehandletTidspunkt = null,
             vedtakTidspunkt = null,
             behandlingType = behandling.type,
-            behandlingStatus = null,
+            behandlingStatus = behandlingHendelse.name,
             behandlingResultat = null,
             resultatBegrunnelse = null,
             behandlingMetode = null,

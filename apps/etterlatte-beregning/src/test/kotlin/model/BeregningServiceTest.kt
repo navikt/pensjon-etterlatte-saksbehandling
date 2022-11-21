@@ -3,7 +3,6 @@ package model
 import GrunnlagTestData
 import grunnlag.kilde
 import io.mockk.mockk
-import model.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -13,6 +12,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.model.BeregningService
+import no.nav.etterlatte.model.VilkaarsvurderingKlient
 import no.nav.etterlatte.model.beregnSisteTom
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested

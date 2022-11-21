@@ -13,6 +13,7 @@ dependencies {
 
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:common"))
+    implementation(Database.Postgresql)
     implementation(Database.HikariCP)
     implementation(Database.FlywayDB)
     implementation(Database.KotliQuery)

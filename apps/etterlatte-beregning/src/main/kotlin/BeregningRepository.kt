@@ -28,24 +28,22 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
     ): Beregning {
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
-                beregning.beregningsperioder.forEach {
-                    queryOf(
-                        statement = Queries.lagreBeregningsperiode,
-                        paramMap = mapOf(
-                            "beregningId" to beregning.beregningId,
-                            "behandlingId" to beregning.behandlingId,
-                            "beregnetDato" to beregning.beregnetDato,
-                            "datoFOM" to it.datoFOM,
-                            "datoTOM" to it.datoTOM,
-                            "utbetaltBeloep" to it.utbetaltBeloep,
-                            "soeskenFlokk" to it.soeskenFlokk,
-                            "grunnbeloepMnd" to it.grunnbelopMnd,
-                            "grunnbeloep" to it.grunnbelopMnd,
-                            "sakId" to beregning.grunnlagMetadata.sakId,
-                            "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
-                        )
-                    ).let { query -> tx.run(query.asUpdate) }
+                val queries = beregning.beregningsperioder.map {
+                    mapOf(
+                        "beregningId" to beregning.beregningId,
+                        "behandlingId" to beregning.behandlingId,
+                        "beregnetDato" to beregning.beregnetDato,
+                        "datoFOM" to it.datoFOM,
+                        "datoTOM" to it.datoTOM,
+                        "utbetaltBeloep" to it.utbetaltBeloep,
+                        "soeskenFlokk" to it.soeskenFlokk,
+                        "grunnbeloepMnd" to it.grunnbelopMnd,
+                        "grunnbeloep" to it.grunnbelopMnd,
+                        "sakId" to beregning.grunnlagMetadata.sakId,
+                        "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
+                    )
                 }
+                tx.batchPreparedNamedStatement(Queries.lagreBeregningsperiode, queries)
             }
         }
         return hent(beregning.behandlingId)

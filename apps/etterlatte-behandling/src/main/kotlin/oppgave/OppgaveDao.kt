@@ -1,5 +1,7 @@
 package no.nav.etterlatte.oppgave
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -22,7 +24,8 @@ data class Oppgave(
     val sak: Sak,
     val regdato: ZonedDateTime,
     val fristDato: LocalDate,
-    val behandlingsType: BehandlingType
+    val behandlingsType: BehandlingType,
+    val antallSoesken: Int
 )
 
 class OppgaveDao(private val datasource: DataSource) {
@@ -45,9 +48,9 @@ class OppgaveDao(private val datasource: DataSource) {
             val stmt = it.prepareStatement(
                 """
                 |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status, oppgave_status, behandling_opprettet,
-                |behandlingstype
-                |FROM behandling b inner join sak s on b.sak_id = s.id  
-                |where status in ${
+                |behandlingstype, soesken 
+                |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
+                |WHERE status IN ${
                 aktuelleStatuser.joinToString(
                     separator = ", ",
                     prefix = "(",
@@ -69,11 +72,17 @@ class OppgaveDao(private val datasource: DataSource) {
                     Sak(getString("fnr"), enumValueOf(getString("sakType")), getLong("sak_id")),
                     mottattDato,
                     mottattDato.toLocalDate().plusMonths(1),
-                    BehandlingType.valueOf(getString("behandlingstype"))
+                    BehandlingType.valueOf(getString("behandlingstype")),
+                    antallSoesken(getString("soesken"))
                 )
             }.also {
                 println("""Hentet oppgaveliste for bruker med roller $roller. Fant ${it.size} oppgaver""")
             }
         }
+    }
+
+    private fun antallSoesken(soesken: String): Int {
+        val soeskenList: List<String> = objectMapper.readValue(soesken)
+        return soeskenList.size
     }
 }

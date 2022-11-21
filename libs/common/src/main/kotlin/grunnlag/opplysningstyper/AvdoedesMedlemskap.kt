@@ -3,8 +3,6 @@ package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import java.time.LocalDate
 import java.util.*
 
@@ -64,14 +62,8 @@ enum class PeriodeType {
     OFFENTLIG_YTELSE
 }
 
-data class AvdoedesMedlemskapVurdering(
-    val grunnlag: AvdoedesMedlemskapGrunnlag,
-    val perioder: List<VurdertMedlemskapsperiode>,
-    val gaps: List<Gap>
-)
-
 data class AvdoedesMedlemskapGrunnlag(
-    val inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
+    // val inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
     val arbeidsforholdOpplysning: Opplysning.Periodisert<AaregResponse?>,
     val doedsdato: LocalDate
 )

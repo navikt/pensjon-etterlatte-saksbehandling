@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.vedtaksvurdering.database.Vedtak as VedtakEntity
@@ -117,24 +116,6 @@ class VedtaksvurderingService(
                 throw KanIkkeEndreFattetVedtak(vedtak)
             }
             repository.oppdaterBeregningsgrunnlag(sakId, behandling.id, beregningsResultat)
-        }
-    }
-
-    fun lagreKommerSoekerTilgodeResultat(
-        sakId: String,
-        behandling: Behandling,
-        fnr: String,
-        kommerSoekerTilgodeResultat: KommerSoekerTilgode
-    ) {
-        val vedtak = repository.hentVedtak(sakId, behandling.id)
-
-        if (vedtak == null) {
-            repository.lagreKommerSoekerTilgodeResultat(sakId, behandling, fnr, kommerSoekerTilgodeResultat)
-        } else {
-            if (vedtak.vedtakFattet == true) {
-                throw KanIkkeEndreFattetVedtak(vedtak)
-            }
-            repository.oppdaterKommerSoekerTilgodeResultat(sakId, behandling.id, kommerSoekerTilgodeResultat)
         }
     }
 

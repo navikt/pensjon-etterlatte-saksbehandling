@@ -9,14 +9,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {
@@ -36,14 +30,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {
@@ -172,10 +160,7 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "foreldre": [
-                    "22128202440",
-                    "03108718357"
-                  ]
+                  "foreldre": ["22128202440", "03108718357"]
                 }
               },
               {
@@ -711,279 +696,6 @@
     ],
     "vurdertDato": "2022-03-30T14:36:17.984583465Z"
   },
-  "kommerSoekerTilgode": {
-    "kommerSoekerTilgodeVurdering": {
-      "resultat": "OPPFYLT",
-      "vilkaar": [
-        {
-          "navn": "GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE",
-          "resultat": "OPPFYLT",
-          "kriterier": [
-            {
-              "navn": "SAMME_BOSTEDSADRESSE",
-              "resultat": "OPPFYLT",
-              "basertPaaOpplysninger": [
-                {
-                  "id": "576ad249-fdbe-43a5-9f47-c73361a959af",
-                  "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
-                  "kilde": {
-                    "navn": "pdl",
-                    "tidspunktForInnhenting": "2022-05-31T10:53:28.328011116Z",
-                    "registersReferanse": null,
-                    "type": "pdl"
-                  },
-                  "opplysning": {
-                    "bostedadresse": [
-                      {
-                        "type": "VEGADRESSE",
-                        "aktiv": true,
-                        "coAdresseNavn": null,
-                        "adresseLinje1": "Bøveien 937",
-                        "adresseLinje2": null,
-                        "adresseLinje3": null,
-                        "postnr": "8475",
-                        "poststed": null,
-                        "land": null,
-                        "kilde": "FREG",
-                        "gyldigFraOgMed": "1999-01-01T00:00:00",
-                        "gyldigTilOgMed": null
-                      }
-                    ]
-                  }
-                },
-                {
-                  "id": "589130e9-afcb-4161-a46f-5efcc2f683a3",
-                  "kriterieOpplysningsType": "BOSTEDADRESSE_GJENLEVENDE",
-                  "kilde": {
-                    "navn": "pdl",
-                    "tidspunktForInnhenting": "2022-05-31T10:53:29.158238926Z",
-                    "registersReferanse": null,
-                    "type": "pdl"
-                  },
-                  "opplysning": {
-                    "bostedadresse": [
-                      {
-                        "type": "VEGADRESSE",
-                        "aktiv": true,
-                        "coAdresseNavn": null,
-                        "adresseLinje1": "Bøveien 937",
-                        "adresseLinje2": null,
-                        "adresseLinje3": null,
-                        "postnr": "8475",
-                        "poststed": null,
-                        "land": null,
-                        "kilde": "FREG",
-                        "gyldigFraOgMed": "1999-01-01T00:00:00",
-                        "gyldigTilOgMed": null
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          ],
-          "vurdertDato": "2022-05-31T12:53:36.206922854"
-        },
-        {
-          "navn": "BARN_INGEN_OPPGITT_UTLANDSADRESSE",
-          "resultat": "OPPFYLT",
-          "kriterier": [
-            {
-              "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
-              "resultat": "OPPFYLT",
-              "basertPaaOpplysninger": [
-                {
-                  "id": "227929fb-fbf1-4e3e-b773-6de8d6882eaf",
-                  "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
-                  "kilde": {
-                    "fnr": "03108718357",
-                    "mottatDato": "2022-02-14T14:37:24.573612786Z",
-                    "type": "privatperson"
-                  },
-                  "opplysning": {
-                    "adresseIUtlandet": "NEI",
-                    "land": null,
-                    "adresse": null
-                  }
-                }
-              ]
-            }
-          ],
-          "vurdertDato": "2022-06-09T14:55:02.300204975"
-        },
-        {
-          "navn": "BARN_BOR_PAA_AVDOEDES_ADRESSE",
-          "resultat": "OPPFYLT",
-          "kriterier": [
-            {
-              "navn": "SAMME_BOSTEDSADRESSE",
-              "resultat": "OPPFYLT",
-              "basertPaaOpplysninger": [
-                {
-                  "id": "7ffa5198-0053-4b89-903e-abcca4587045",
-                  "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
-                  "kilde": {
-                    "navn": "pdl",
-                    "tidspunktForInnhenting": "2022-06-09T12:54:50.836075533Z",
-                    "registersReferanse": null,
-                    "type": "pdl"
-                  },
-                  "opplysning": {
-                    "bostedadresse": [
-                      {
-                        "type": "VEGADRESSE",
-                        "aktiv": true,
-                        "coAdresseNavn": null,
-                        "adresseLinje1": "Bøveien 937",
-                        "adresseLinje2": null,
-                        "adresseLinje3": null,
-                        "postnr": "8475",
-                        "poststed": null,
-                        "land": null,
-                        "kilde": "FREG",
-                        "gyldigFraOgMed": "1999-01-01T00:00:00",
-                        "gyldigTilOgMed": null
-                      }
-                    ]
-                  }
-                },
-                {
-                  "id": "3421ece1-744d-4ede-8b00-4504b594307f",
-                  "kriterieOpplysningsType": "BOSTEDADRESSE_AVDOED",
-                  "kilde": {
-                    "navn": "pdl",
-                    "tidspunktForInnhenting": "2022-06-09T12:54:52.091602239Z",
-                    "registersReferanse": null,
-                    "type": "pdl"
-                  },
-                  "opplysning": {
-                    "bostedadresse": [
-                      {
-                        "type": "VEGADRESSE",
-                        "aktiv": true,
-                        "coAdresseNavn": null,
-                        "adresseLinje1": "Bøveien 937",
-                        "adresseLinje2": null,
-                        "adresseLinje3": null,
-                        "postnr": "8475",
-                        "poststed": null,
-                        "land": null,
-                        "kilde": "FREG",
-                        "gyldigFraOgMed": "1999-01-01T00:00:00",
-                        "gyldigTilOgMed": null
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          ],
-          "vurdertDato": "2022-06-09T14:55:02.300217685"
-        }
-      ],
-      "vurdertDato": "2022-05-31T12:53:36.206922854"
-    },
-    "familieforhold": {
-      "avdoed": {
-        "navn": "VAKKER LAPP",
-        "fnr": "22128202440",
-        "rolle": "AVDOED",
-        "bostedadresser": [
-          {
-            "type": "VEGADRESSE",
-            "aktiv": true,
-            "coAdresseNavn": null,
-            "adresseLinje1": "Bøveien 937",
-            "adresseLinje2": null,
-            "adresseLinje3": null,
-            "postnr": "8475",
-            "poststed": null,
-            "land": null,
-            "kilde": "FREG",
-            "gyldigFraOgMed": "1999-01-01T00:00:00",
-            "gyldigTilOgMed": null
-          }
-        ],
-        "doedsdato": "2022-01-01"
-      },
-      "soeker": {
-        "navn": "TALENTFULL BLYANT",
-        "fnr": "12101376212",
-        "rolle": "BARN",
-        "bostedadresser": [
-          {
-            "type": "VEGADRESSE",
-            "aktiv": true,
-            "coAdresseNavn": null,
-            "adresseLinje1": "Bøveien 937",
-            "adresseLinje2": null,
-            "adresseLinje3": null,
-            "postnr": "8475",
-            "poststed": null,
-            "land": null,
-            "kilde": "FREG",
-            "gyldigFraOgMed": "1999-01-01T00:00:00",
-            "gyldigTilOgMed": null
-          }
-        ],
-        "soeknadAdresse": {
-          "adresseIUtlandet": "NEI",
-          "land": "Costa Rica",
-          "adresse": "Palmeveien 7, 1234 Susogdus"
-        },
-        "foedselsdato": "2015-01-01"
-      },
-      "gjenlevendeForelder": {
-        "navn": "BRÅKETE POTET",
-        "fnr": "03108718357",
-        "rolle": "GJENLEVENDE",
-        "bostedadresser": [
-          {
-            "type": "VEGADRESSE",
-            "aktiv": true,
-            "coAdresseNavn": null,
-            "adresseLinje1": "Bøveien 937",
-            "adresseLinje2": null,
-            "adresseLinje3": null,
-            "postnr": "8475",
-            "poststed": null,
-            "land": null,
-            "kilde": "FREG",
-            "gyldigFraOgMed": "1999-01-01T00:00:00",
-            "gyldigTilOgMed": null
-          },
-          {
-            "type": "VEGADRESSE",
-            "aktiv": false,
-            "coAdresseNavn": null,
-            "adresseLinje1": "Kodeveien 9",
-            "adresseLinje2": null,
-            "adresseLinje3": null,
-            "postnr": "0485",
-            "poststed": "Oslo",
-            "land": null,
-            "kilde": "FREG",
-            "gyldigFraOgMed": "2000-01-01T00:00:00",
-            "gyldigTilOgMed": "2022-02-01T00:00:00"
-          },
-          {
-            "type": "VEGADRESSE",
-            "aktiv": false,
-            "coAdresseNavn": null,
-            "adresseLinje1": "Gammel adresse 9",
-            "adresseLinje2": null,
-            "adresseLinje3": null,
-            "postnr": "0485",
-            "poststed": "Oslo",
-            "land": null,
-            "kilde": "FREG",
-            "gyldigFraOgMed": "1999-01-01T00:00:00",
-            "gyldigTilOgMed": "2000-01-01T00:00:00"
-          }
-        ]
-      }
-    }
-  },
   "beregning": null,
   "avkortning": null,
   "saksbehandlerId": null,
@@ -1193,10 +905,7 @@
         "familieRelasjon": {
           "ansvarligeForeldre": null,
           "foreldre": null,
-          "barn": [
-            "12101376212",
-            "03108718357"
-          ]
+          "barn": ["12101376212", "03108718357"]
         }
       }
     }

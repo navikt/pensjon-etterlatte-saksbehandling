@@ -71,9 +71,11 @@ data class Foerstegangsbehandling(
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?
 ) : Behandling {
+    private val kanRedigeres: Boolean
+        get() = this.status.kanRedigeres()
     fun hentVirkningstidspunkt() = virkningstidspunkt
     fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler): Foerstegangsbehandling {
-        if (!BehandlingStatus.kanRedigeres().contains(this.status)) {
+        if (kanRedigeres) {
             throw RuntimeException("Kan ikke endre virkningstidspunkt for behandling som ikke er under behandling.")
         }
 
@@ -81,7 +83,7 @@ data class Foerstegangsbehandling(
     }
 
     fun oppdaterKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode): Foerstegangsbehandling {
-        if (!BehandlingStatus.kanRedigeres().contains(this.status)) {
+        if (kanRedigeres) {
             throw RuntimeException("Kan ikke endre kommer barnet til gode for behandling som ikke er under behandling")
         }
 

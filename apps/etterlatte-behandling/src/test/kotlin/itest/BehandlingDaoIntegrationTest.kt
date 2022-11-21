@@ -592,7 +592,7 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     @Test
-    fun `skal lagre kommer soeker til gode for en behandling`() {
+    fun `skal lagre kommer barnet til gode for en behandling`() {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
         val behandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.OPPRETTET)
 

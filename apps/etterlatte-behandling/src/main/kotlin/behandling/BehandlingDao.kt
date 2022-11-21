@@ -212,7 +212,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         fritekstAarsak = rs.getString("fritekst_aarsak")
     )
 
-    private fun ResultSet.asRolleSak() = Pair(this.getString("rolle"), this.getLong("sak_id"))
+    private fun ResultSet.asRolleSak() =
+        Pair(this.getString("rolle"), this.getLong("sak_id"))
 
     fun alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr: String): List<Long> {
         return connection().prepareStatement(
@@ -466,21 +467,23 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun lagreNyttVirkningstidspunkt(behandlingId: UUID, virkningstidspunkt: Virkningstidspunkt) {
-        val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
+        val statement =
+            connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
         statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
     }
 
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
-        val statement = connection().prepareStatement("UPDATE behandling SET kommer_barnet_tilgode = ? where id = ?")
+        val statement =
+            connection().prepareStatement("UPDATE behandling SET kommer_barnet_tilgode = ? where id = ?")
         statement.setString(1, kommerBarnetTilgode.toJson())
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
     }
 
-    /*sjekker om et fnr opptrer i persongalleriet til behandlinger. Returnerer rollen og saksnr.*/
-    fun sakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<String, Long>> {
+    /*sjekker om et fnr opptrer i persongalleriet til behandlinger. Returnerer rollen og saksnr som Pair*/
+    fun sakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>> {
         val statement = connection().prepareStatement(
             """
               SELECT (
@@ -501,6 +504,10 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
         return statement.executeQuery().toList {
             asRolleSak()
+        }.flatMap { par ->
+            par.first.split(", ").map {
+                Pair(Saksrolle.enumVedNavnEllerUkjent(it), par.second)
+            }
         }
     }
 }

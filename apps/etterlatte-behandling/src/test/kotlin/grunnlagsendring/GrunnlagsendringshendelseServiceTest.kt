@@ -96,7 +96,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             pdlService
         )
 
-        val lagredeGrunnlagsendringshendelser = grunnlagsendringshendelseService.opprettSoekerDoedHendelse(
+        val lagredeGrunnlagsendringshendelser = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
                 avdoedFnr = "Soeker",
                 doedsdato = LocalDate.of(2022, 1, 1),
@@ -107,8 +107,8 @@ internal class GrunnlagsendringshendelseServiceTest {
             "oppretter grunnlagshendringer i databasen for doedshendelser",
             { assertEquals(1, lagredeGrunnlagsendringshendelser.size) },
             { assertEquals(sakId, opprettGrunnlagsendringshendelse.captured.sakId) },
-            { assertEquals(GrunnlagsendringsType.SOEKER_DOED, opprettGrunnlagsendringshendelse.captured.type) },
-            { assertTrue(opprettGrunnlagsendringshendelse.captured.data is Grunnlagsinformasjon.SoekerDoed) },
+            { assertEquals(GrunnlagsendringsType.DOEDSFALL, opprettGrunnlagsendringshendelse.captured.type) },
+            { assertTrue(opprettGrunnlagsendringshendelse.captured.data is Grunnlagsinformasjon.Doedsfall) },
             { assertTrue(opprettGrunnlagsendringshendelse.captured.opprettet >= LocalDateTime.now().minusSeconds(10)) },
             { assertEquals(1, lagredeGrunnlagsendringshendelser.size) },
             { assertEquals(grunnlagsendringshendelse.id, lagredeGrunnlagsendringshendelser.first().id) },
@@ -225,7 +225,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             revurderingService,
             pdlService
         )
-        grunnlagsendringshendelseService.opprettSoekerDoedHendelse(
+        grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
                 avdoedFnr = "Soeker",
                 doedsdato = LocalDate.of(2022, 1, 1),
@@ -236,7 +236,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         assertEquals(listOf(1L, 2L), sakerArg.captured)
         assertEquals(GrunnlagsendringStatus.IKKE_VURDERT, foerStatusArg.captured)
         assertEquals(GrunnlagsendringStatus.FORKASTET, etterStatusArg.captured)
-        assertEquals(GrunnlagsendringsType.SOEKER_DOED, typeArg.captured)
+        assertEquals(GrunnlagsendringsType.DOEDSFALL, typeArg.captured)
     }
 
     @Test
@@ -263,7 +263,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     capture(sakerArg),
                     GrunnlagsendringStatus.IKKE_VURDERT,
                     GrunnlagsendringStatus.FORKASTET,
-                    GrunnlagsendringsType.SOEKER_DOED
+                    GrunnlagsendringsType.DOEDSFALL
                 )
             } returns Unit
         }
@@ -312,14 +312,14 @@ internal class GrunnlagsendringshendelseServiceTest {
                     capture(sakerArg),
                     GrunnlagsendringStatus.IKKE_VURDERT,
                     GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
-                    GrunnlagsendringsType.SOEKER_DOED
+                    GrunnlagsendringsType.DOEDSFALL
                 )
             } returns Unit
             every {
                 settBehandlingIdForTattMedIBehandling(
                     any(),
                     capture(behandlingReferanse),
-                    GrunnlagsendringsType.SOEKER_DOED
+                    GrunnlagsendringsType.DOEDSFALL
                 )
             } returns Unit
         }
@@ -391,7 +391,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     capture(sakerArg),
                     GrunnlagsendringStatus.IKKE_VURDERT,
                     GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
-                    GrunnlagsendringsType.SOEKER_DOED
+                    GrunnlagsendringsType.DOEDSFALL
                 )
             } returns Unit
         }

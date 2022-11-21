@@ -9,6 +9,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import org.slf4j.LoggerFactory
 import java.util.*
 
 interface GenerellBehandlingService {
@@ -34,7 +35,7 @@ interface GenerellBehandlingService {
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
     fun alleSakIderForSoekerMedFnr(fnr: String): List<Long>
     fun hentDetaljertBehandling(behandlingsId: UUID): DetaljertBehandling?
-    fun hentSakerMedFnrIPersongalleri(fnr: String): List<Pair<String, Long>>
+    fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
 }
 
 class RealGenerellBehandlingService(
@@ -45,6 +46,10 @@ class RealGenerellBehandlingService(
     private val hendelser: HendelseDao,
     private val manueltOpphoerService: ManueltOpphoerService
 ) : GenerellBehandlingService {
+
+    companion object {
+        val logger = LoggerFactory.getLogger(RealGenerellBehandlingService::class.java)
+    }
 
     override fun hentBehandlinger(): List<Behandling> {
         return inTransaction { behandlinger.alleBehandlinger() }
@@ -172,11 +177,33 @@ class RealGenerellBehandlingService(
         }
     }
 
-    override fun hentSakerMedFnrIPersongalleri(fnr: String): List<Pair<String, Long>> {
+    override fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>> {
         return inTransaction {
             behandlinger.sakerOgRollerMedFnrIPersongalleri(fnr)
         }
     }
+}
 
-    enum class Rolle { SOEKER, INNSENDER, SOESKEN, AVDOED, GJENLEVENDE }
+enum class Saksrolle {
+    SOEKER,
+    INNSENDER,
+    SOESKEN,
+    AVDOED,
+    GJENLEVENDE,
+    UKJENT;
+
+    companion object {
+        val log = LoggerFactory.getLogger(Saksrolle::class.java)
+        fun enumVedNavnEllerUkjent(rolle: String) =
+            try {
+                Saksrolle.valueOf(rolle.uppercase())
+            } catch (e: Exception) {
+                log.error(
+                    "Kunne ikke bestemme rolle fra kolonnen $rolle i databasen. Dette betyr at kolonne-navnet i " +
+                        "databasen verdien er hentet fra ikke samsvarer med noen av enum-verdiene til Saksrolle. " +
+                        "Setter rolle som ukjent"
+                )
+                UKJENT
+            }
+    }
 }

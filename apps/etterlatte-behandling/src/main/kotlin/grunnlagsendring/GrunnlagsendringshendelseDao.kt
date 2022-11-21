@@ -164,13 +164,13 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
 
     private fun ResultSet.asGrunnlagsendringshendelse(): Grunnlagsendringshendelse {
         return when (val type = GrunnlagsendringsType.valueOf(getString("type"))) {
-            GrunnlagsendringsType.SOEKER_DOED -> {
+            GrunnlagsendringsType.DOEDSFALL -> {
                 Grunnlagsendringshendelse(
                     getObject("id") as UUID,
                     getLong("sak_id"),
                     type,
                     getTimestamp("opprettet").toLocalDateTime(),
-                    objectMapper.readValue(getString("data"), Grunnlagsinformasjon.SoekerDoed::class.java),
+                    objectMapper.readValue(getString("data"), Grunnlagsinformasjon.Doedsfall::class.java),
                     GrunnlagsendringStatus.valueOf(getString("status")),
                     getObject("behandling_id")?.let { it as UUID }
                 )

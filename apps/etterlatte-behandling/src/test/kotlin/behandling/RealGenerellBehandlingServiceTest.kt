@@ -225,6 +225,18 @@ class RealGenerellBehandlingServiceTest {
         }
     }
 
+    @Test
+    fun `skal sette rett enum for rolle eller ukjent rolle`() {
+        val kjentRolle = "gjenlevende"
+        val ukjentRolle = "abcde"
+
+        val resKjentRolle = Saksrolle.enumVedNavnEllerUkjent(kjentRolle)
+        val resUkjentRolle = Saksrolle.enumVedNavnEllerUkjent(ukjentRolle)
+
+        assertEquals(Saksrolle.GJENLEVENDE, resKjentRolle)
+        assertEquals(Saksrolle.UKJENT, resUkjentRolle)
+    }
+
     private fun lagRealGenerellBehandlingService(
         behandlinger: BehandlingDao,
         hendelseKanal: SendChannel<Pair<UUID, BehandlingHendelseType>>,

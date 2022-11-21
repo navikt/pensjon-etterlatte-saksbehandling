@@ -10,8 +10,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon.Doedsfall
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon.ForelderBarnRelasjon
-import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon.SoekerDoed
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon.Utflytting
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
@@ -44,28 +44,28 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettDoedshendelser(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
-        return opprettSoekerDoedHendelse(doedshendelse)
+        return opprettDoedshendelse(doedshendelse)
     }
 
-    fun opprettSoekerDoedHendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
+    fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
         // finner saker med loepende utbetalinger
-        generellBehandlingService.alleSakIderForSoekerMedFnr(doedshendelse.avdoedFnr).let { saker ->
+        generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(doedshendelse.avdoedFnr).let { rolleOgSak ->
             inTransaction {
                 // Forkast Ikke-vurderte doedshendelser i samme sak - ny hendelse erstatter tidligere ikke-vurderte
                 grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                    saker = saker,
+                    saker = rolleOgSak.map { it.second },
                     foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
                     etterStatus = GrunnlagsendringStatus.FORKASTET,
-                    type = GrunnlagsendringsType.SOEKER_DOED
+                    type = GrunnlagsendringsType.DOEDSFALL
                 )
-                saker.map { sakId ->
+                rolleOgSak.map {
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(
                             id = UUID.randomUUID(),
-                            sakId = sakId,
-                            type = GrunnlagsendringsType.SOEKER_DOED,
+                            sakId = it.second,
+                            type = GrunnlagsendringsType.DOEDSFALL,
                             opprettet = LocalDateTime.now(),
-                            data = SoekerDoed(hendelse = doedshendelse)
+                            data = Doedsfall(hendelse = doedshendelse)
                         )
                     )
                 }
@@ -82,7 +82,7 @@ class GrunnlagsendringshendelseService(
         ikkeVurderteHendelser(minutterGamle)
             .forEach { hendelse ->
                 when (val data = hendelse.data) {
-                    is SoekerDoed -> verifiserOgHaandterSoekerErDoed(data, hendelse.sakId)
+                    is Doedsfall -> verifiserOgHaandterSoekerErDoed(data, hendelse.sakId)
                     is Utflytting -> verifiserOgHaandterSoekerErUtflyttet(data, hendelse.sakId)
                     is ForelderBarnRelasjon -> verifiserOgHaandterForelderBarnRelasjon(data, hendelse.sakId)
                     null -> Unit
@@ -90,13 +90,13 @@ class GrunnlagsendringshendelseService(
             }
     }
 
-    private fun verifiserOgHaandterSoekerErDoed(data: SoekerDoed, sakId: Long) {
+    private fun verifiserOgHaandterSoekerErDoed(data: Doedsfall, sakId: Long) {
         val fnr = data.hendelse.avdoedFnr
         if (soekerErDoed(fnr)) {
             haandterSoekerDoed(sakId, data)
         } else {
             logger.info("Person med fnr $fnr er ikke doed i FDL. Forkaster hendelse.")
-            forkastHendelse(sakId, GrunnlagsendringsType.SOEKER_DOED)
+            forkastHendelse(sakId, GrunnlagsendringsType.DOEDSFALL)
         }
     }
 
@@ -181,12 +181,13 @@ class GrunnlagsendringshendelseService(
         - Dette boer kanskje fanges opp?
         Se EY-976
      */
-    private fun haandterSoekerDoed(sakId: Long, data: SoekerDoed) {
+    private fun haandterSoekerDoed(sakId: Long, data: Doedsfall) {
         val behandlingerISak = generellBehandlingService.hentBehandlingerISak(sakId)
 
         // Har vi en eksisterende behandling som ikke er avbrutt?
         val sisteBehandling = behandlingerISak
-            .`siste ikke-avbrutte behandling`() ?: return // TODO("Se på ekstra håndtering her, kanskje slette data") øh 19.10.2022
+            .`siste ikke-avbrutte behandling`()
+            ?: return // TODO("Se på ekstra håndtering her, kanskje slette data") øh 19.10.2022
 
         val harAlleredeEtManueltOpphoer = behandlingerISak.any { it.type == BehandlingType.MANUELT_OPPHOER }
         val harAlleredeOpphoerDoedsfall =
@@ -209,7 +210,7 @@ class GrunnlagsendringshendelseService(
                         saker = listOf(sakId),
                         foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
                         etterStatus = GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
-                        type = GrunnlagsendringsType.SOEKER_DOED
+                        type = GrunnlagsendringsType.DOEDSFALL
                     )
                 }
             }
@@ -225,12 +226,12 @@ class GrunnlagsendringshendelseService(
                             saker = listOf(sakId),
                             foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
                             etterStatus = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
-                            type = GrunnlagsendringsType.SOEKER_DOED
+                            type = GrunnlagsendringsType.DOEDSFALL
                         )
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
                             sak = sakId,
                             behandlingId = it.id,
-                            type = GrunnlagsendringsType.SOEKER_DOED
+                            type = GrunnlagsendringsType.DOEDSFALL
                         )
                     }
                 }

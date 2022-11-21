@@ -114,7 +114,7 @@ fun persongalleri(
 fun grunnlagsendringshendelse(
     id: UUID = UUID.randomUUID(),
     sakId: Long = 1,
-    type: GrunnlagsendringsType = GrunnlagsendringsType.SOEKER_DOED,
+    type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = LocalDateTime.now(),
     data: Grunnlagsinformasjon,
     status: GrunnlagsendringStatus = GrunnlagsendringStatus.IKKE_VURDERT,
@@ -134,7 +134,7 @@ fun grunnlagsinformasjonDoedshendelse(
     doedsdato: LocalDate = LocalDate.of(2022, 1, 1),
     endringstype: Endringstype = Endringstype.OPPRETTET
 ) =
-    Grunnlagsinformasjon.SoekerDoed(
+    Grunnlagsinformasjon.Doedsfall(
         Doedshendelse(avdoedFnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
     )
 

@@ -104,7 +104,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         val doedshendelse = grunnlagsendringshendelse(
             id = uuidDoed,
             sakId = sakid,
-            type = GrunnlagsendringsType.SOEKER_DOED,
+            type = GrunnlagsendringsType.DOEDSFALL,
             data = grunnlagsinfoDoed
         )
         val utflyttingsHendelse = grunnlagsendringshendelse(
@@ -128,7 +128,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         val forelderBarnRelasjonHendelseFraDatabase =
             grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(uuidForelderBarn)
 
-        assertTrue(doedshendelseFraDatabase?.data is Grunnlagsinformasjon.SoekerDoed)
+        assertTrue(doedshendelseFraDatabase?.data is Grunnlagsinformasjon.Doedsfall)
         assertTrue(utflyttingHendelseFraDatabase?.data is Grunnlagsinformasjon.Utflytting)
         assertTrue(forelderBarnRelasjonHendelseFraDatabase?.data is Grunnlagsinformasjon.ForelderBarnRelasjon)
     }
@@ -256,7 +256,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             saker = listOf(sak1, sak2),
             foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
             etterStatus = GrunnlagsendringStatus.FORKASTET,
-            type = GrunnlagsendringsType.SOEKER_DOED
+            type = GrunnlagsendringsType.DOEDSFALL
         )
         val hendelserEtterOppdatertStatus = grunnlagsendringshendelsesRepo.hentAlleGrunnlagsendringshendelser()
         assertAll(
@@ -272,7 +272,7 @@ internal class GrunnlagsendringshendelseDaoTest {
     fun `settBehandlingIdForTattMedIBehandling skal sette referanse til behandling`() {
         val hendelseId = UUID.randomUUID()
         val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
-        val grunnlagsendringstype = GrunnlagsendringsType.SOEKER_DOED
+        val grunnlagsendringstype = GrunnlagsendringsType.DOEDSFALL
         val revurderingId = UUID.randomUUID()
         val revurdering = revurdering(id = revurderingId, sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         behandlingRepo.opprettRevurdering(revurdering)
@@ -317,7 +317,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             saker = listOf(sak1, sak2),
             foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
             etterStatus = GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
-            type = GrunnlagsendringsType.SOEKER_DOED
+            type = GrunnlagsendringsType.DOEDSFALL
         )
 
         val resultat = grunnlagsendringshendelsesRepo.hentGyldigeGrunnlagsendringshendelserISak(sak1)

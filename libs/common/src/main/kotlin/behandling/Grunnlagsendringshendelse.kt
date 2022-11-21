@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class Grunnlagsendringshendelse(
     val id: UUID,
@@ -26,8 +26,8 @@ sealed class Grunnlagsinformasjon {
         val hendelse: UtflyttingsHendelse
     ) : Grunnlagsinformasjon()
 
-    @JsonTypeName("SOEKER_DOED")
-    data class SoekerDoed(
+    @JsonTypeName("DOEDSFALL") // FØR: "SOEKER_DOED"
+    data class Doedsfall(
         val hendelse: Doedshendelse
     ) : Grunnlagsinformasjon()
 
@@ -38,12 +38,13 @@ sealed class Grunnlagsinformasjon {
 }
 
 enum class GrunnlagsendringsType {
-    SOEKER_DOED, UTFLYTTING, FORELDER_BARN_RELASJON
+    DOEDSFALL, UTFLYTTING, FORELDER_BARN_RELASJON
 }
 
 enum class GrunnlagsendringStatus {
     IKKE_VURDERT,
     TATT_MED_I_BEHANDLING,
     GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
-    FORKASTET
+    FORKASTET,
+    VURDERT_SOM_IKKE_RELEVANT
 }

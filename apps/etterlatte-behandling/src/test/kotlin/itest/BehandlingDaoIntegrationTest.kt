@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.Revurdering
+import no.nav.etterlatte.behandling.Saksrolle
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -592,6 +593,7 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `skal hente ut saksnr og rolle for saker hvor et fnr opptrer`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val sak2 = sakRepo.opprettSak("321", SakType.BARNEPENSJON).id
 
         listOf(
             foerstegangsbehandling(
@@ -615,12 +617,12 @@ internal class BehandlingDaoIntegrationTest {
                 )
             ),
             foerstegangsbehandling(
-                sak = sak1,
+                sak = sak2,
                 persongalleri = Persongalleri(
-                    soeker = "02020",
-                    innsender = "03030",
+                    soeker = "11111",
+                    innsender = "11111",
                     soesken = listOf("11111", "04040", "05050"),
-                    avdoed = listOf("06060", "07070"),
+                    avdoed = listOf("06060", "11111"),
                     gjenlevende = listOf("11111")
                 )
             )
@@ -628,7 +630,19 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.opprettFoerstegangsbehandling(it)
         }
 
-        val x = behandlingRepo.sakerOgRollerMedFnrIPersongalleri("11111")
-        println(x)
+        val sakerOgRoller = behandlingRepo.sakerOgRollerMedFnrIPersongalleri("11111")
+        assertEquals(6, sakerOgRoller.size)
+        assertEquals(Saksrolle.SOEKER, sakerOgRoller[0].first)
+        assertEquals(1, sakerOgRoller[0].second)
+        assertEquals(Saksrolle.AVDOED, sakerOgRoller[1].first)
+        assertEquals(2, sakerOgRoller[1].second)
+        assertEquals(Saksrolle.GJENLEVENDE, sakerOgRoller[2].first)
+        assertEquals(2, sakerOgRoller[2].second)
+        assertEquals(Saksrolle.INNSENDER, sakerOgRoller[3].first)
+        assertEquals(2, sakerOgRoller[3].second)
+        assertEquals(Saksrolle.SOEKER, sakerOgRoller[4].first)
+        assertEquals(2, sakerOgRoller[4].second)
+        assertEquals(Saksrolle.SOESKEN, sakerOgRoller[5].first)
+        assertEquals(2, sakerOgRoller[5].second)
     }
 }

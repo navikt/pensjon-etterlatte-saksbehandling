@@ -12,7 +12,7 @@ import no.nav.etterlatte.getAccessToken
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.LocalDate
@@ -76,7 +76,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
         post("/beregningsgrunnlag/{behandlingId}") {
             try {
                 val behandlingId = call.parameters["behandlingId"]
-                val body = call.receive<List<SoeskenMedIBeregning>>()
+                val body = call.receive<SoeskenMedIBeregningDTO>()
 
                 if (behandlingId == null) { // todo ai: trekk ut
                     call.response.status(HttpStatusCode(400, "Bad request"))
@@ -85,7 +85,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
                     call.respond(
                         service.lagreSoeskenMedIBeregning(
                             behandlingId,
-                            body.map { it.toDomain() },
+                            body.soeskenMedIBeregning,
                             call.navIdent,
                             getAccessToken(call)
                         )
@@ -132,9 +132,6 @@ data class AvdoedesMedlemskapsperiodeClientRequest(
     val tilDato: LocalDate
 )
 
-private data class SoeskenMedIBeregning(val foedselsnummer: Foedselsnummer, val skalBrukes: Boolean) {
-    fun toDomain() = no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning(
-        this.foedselsnummer,
-        this.skalBrukes
-    )
-}
+private data class SoeskenMedIBeregningDTO(
+    val soeskenMedIBeregning: List<SoeskenMedIBeregning>
+)

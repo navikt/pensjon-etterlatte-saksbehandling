@@ -1,7 +1,6 @@
 package no.nav.etterlatte.model
 
 import model.finnSoeskenperiode.FinnSoeskenPeriode
-import model.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat

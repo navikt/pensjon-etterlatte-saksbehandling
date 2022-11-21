@@ -1,4 +1,4 @@
-package model.vilkaarsvurdering
+package no.nav.etterlatte.model
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth

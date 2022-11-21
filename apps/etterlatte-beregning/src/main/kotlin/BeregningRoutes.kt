@@ -29,13 +29,6 @@ fun Route.beregning(beregningService: BeregningService) {
                 call.respond(beregning)
             }
         }
-
-        post("/bekreft/{behandlingId}") {
-            withBehandlingId {
-                val beregning = beregningService.bekreftberegnetresulat(it)
-                call.respond(beregning)
-            }
-        }
     }
 }
 

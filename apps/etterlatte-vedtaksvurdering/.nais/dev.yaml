@@ -44,3 +44,4 @@ spec:
       rules:
         - application: etterlatte-api
         - application: etterlatte-brev-api
+        - application: etterlatte-brev-api-lokal

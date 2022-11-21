@@ -1,7 +1,8 @@
 package no.nav.etterlatte.model
 
-import model.Grunnbeloep
 import model.finnSoeskenperiode.FinnSoeskenPeriode
+import model.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -22,14 +23,42 @@ import java.time.YearMonth
 import java.util.*
 
 // TODO hvordan håndtere vedtakstidspunkt?
-class BeregningService {
+class BeregningService(
+    private val beregningRepository: BeregningRepository,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
+) {
+
+    fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
+
+    suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
+        // TODO lag klient fetch grunnlag og vilkårsvurdering
+        val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
+
+        val beregningResultat = beregnResultat(
+            Grunnlag.empty(),
+            YearMonth.now(),
+            YearMonth.now().plusMonths(1L),
+            vilkaarsvurdering,
+            BehandlingType.FØRSTEGANGSBEHANDLING
+        )
+        val beregning = Beregning(
+            beregningId = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            beregnetDato = beregningResultat.beregnetDato,
+            beregningsperioder = beregningResultat.beregningsperioder,
+            grunnlagMetadata = Grunnlag.empty().metadata
+        )
+
+        return beregningRepository.lagre(beregning)
+    }
+
     fun beregnResultat(
         grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
         vilkaarsvurdering: Vilkaarsvurdering,
         behandlingType: BehandlingType
-    ): BeregningsResultat {
+    ): BeregningsResultat { // TODO: Bruk vår interne model
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)

@@ -1,3 +1,5 @@
+package no.nav.etterlatte
+
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext

@@ -1,4 +1,8 @@
+import io.mockk.mockk
 import io.mockk.spyk
+import model.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.BeregningRepository
+import no.nav.etterlatte.LesBeregningsmelding
 import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -12,8 +16,16 @@ internal class LesBeregningsmeldingTest {
         private fun readFile(file: String) =
             Companion::class.java.getResource(file)?.readText() ?: throw FileNotFoundException("Fant ikke filen $file")
     }
-
-    private val inspector = spyk(TestRapid().apply { LesBeregningsmelding(this, BeregningService()) })
+    private val vilkaarsvurderingKlientImpl = mockk<VilkaarsvurderingKlient>()
+    private val beregningRepository = mockk<BeregningRepository>()
+    private val inspector = spyk(
+        TestRapid().apply {
+            LesBeregningsmelding(
+                this,
+                BeregningService(beregningRepository, vilkaarsvurderingKlientImpl)
+            )
+        }
+    )
 
     @Test
     fun `skal beregne en melding som er vilkaarsvurdert og legge melding med beregning paa kafka`() {

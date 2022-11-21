@@ -1,15 +1,15 @@
 package no.nav.etterlatte.vedtaksvurdering.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import org.slf4j.LoggerFactory
 import java.sql.Date
@@ -300,9 +300,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     }
 
     private fun ResultSet.toVedtak() = Vedtak(
-        id = getLong(8),
         sakId = getString(1),
-        sakType = getString(16),
         behandlingId = getObject(2) as UUID,
         saksbehandlerId = getString(3),
         avkortingsResultat = getString(4)?.let {
@@ -315,12 +313,14 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         beregningsResultat = getJsonObject(5),
         vilkaarsResultat = getJsonObject(6),
         vedtakFattet = getBoolean(7),
+        id = getLong(8),
         fnr = getString(9),
         datoFattet = getTimestamp(10)?.toInstant(),
         datoattestert = getTimestamp(11)?.toInstant(),
         attestant = getString(12),
         virkningsDato = getDate(13)?.toLocalDate(),
         vedtakStatus = getString(14)?.let { VedtakStatus.valueOf(it) },
+        sakType = getString(15),
         behandlingType = getString(16)?.let { BehandlingType.valueOf(it) }
             ?: BehandlingType.FØRSTEGANGSBEHANDLING // TODO: Hacky å defaulte her, må ses på
     )

@@ -19,6 +19,9 @@ Ved endring i filen kan denne kommandoen kjøres (OBS: dette innebærer at alle 
 kubectl apply -f .deploy/azure-ey-sak-lokal.yaml
 ```
 
+**NB:** Ved kjøring av en eller flere backend(s) lokalt kan det være lurt å installere
+[EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ. Uten denne må du manuelt kopiere
+fra .env-filen til appen sine miljøvariabler.
 
 ## Apper
 

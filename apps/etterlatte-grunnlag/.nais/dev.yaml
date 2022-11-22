@@ -48,3 +48,4 @@ spec:
       rules:
         - application: etterlatte-api
         - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-brev-api

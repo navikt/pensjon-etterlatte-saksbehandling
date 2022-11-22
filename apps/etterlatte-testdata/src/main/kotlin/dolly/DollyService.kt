@@ -16,7 +16,7 @@ class DollyService(
             .find { it.epost?.uppercase() == username.uppercase() }
             ?: throw Exception("Bruker med epost = $username finnes ikke i Dolly.")
 
-        dollyClient.hentBrukersGrupper(bruker.brukerId!!, accessToken)
+        dollyClient.hentBrukersGrupper(bruker.brukerId!!, accessToken).contents
             .find { it.navn == testdataGruppe.navn }?.id
     }
 

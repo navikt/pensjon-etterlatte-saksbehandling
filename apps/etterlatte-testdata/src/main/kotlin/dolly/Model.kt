@@ -8,6 +8,14 @@ data class Bruker(val brukerId: String?, val brukerType: String?, val navIdent: 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Gruppe(val id: Long, val navn: String, val hensikt: String)
 
+data class HentGruppeResponse(
+    val antallPages: Int,
+    val pageNo: Int,
+    val pageSize: Int,
+    val antallElementer: Int,
+    val contents: List<Gruppe>
+)
+
 data class OpprettGruppeRequest(val navn: String, val hensikt: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)

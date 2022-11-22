@@ -13,4 +13,4 @@ CREATE TABLE beregningsperiode (
     grunnlagVersjon BIGINT
 );
 
-CREATE INDEX index_name ON beregningsperiode (beregningId);
+CREATE INDEX index_name ON beregningsperiode (behandlingId);

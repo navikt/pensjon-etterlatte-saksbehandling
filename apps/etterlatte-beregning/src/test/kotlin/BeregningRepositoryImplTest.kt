@@ -44,7 +44,7 @@ internal class BeregningRepositoryImplTest {
     }
 
     @Test
-    fun lagreoghent() {
+    fun lagreOgHent() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         val beregningResultat = BeregningService(beregningRepository, mockk()).beregnResultat(

@@ -66,10 +66,10 @@ internal class BeregningRepositoryImplTest {
                 versjon = beregningResultat.grunnlagVersjon
             )
         )
-        beregningRepository.lagre(beregningLagret)
+        val lagretBeregning = beregningRepository.lagre(beregningLagret)
 
         val beregningHentet = beregningRepository.hent(behandlingId)
 
-        assertEquals(beregningLagret.toJson(), beregningHentet.toJson())
+        assertEquals(lagretBeregning.toJson(), beregningHentet.toJson())
     }
 }

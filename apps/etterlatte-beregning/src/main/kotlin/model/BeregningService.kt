@@ -57,7 +57,7 @@ class BeregningService(
         virkTOM: YearMonth,
         vilkaarsvurdering: Vilkaarsvurdering,
         behandlingType: BehandlingType
-    ): BeregningsResultat { // TODO: Bruk vår interne model
+    ): BeregningsResultat { // TODO: Bruk vår interne model i jira
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)

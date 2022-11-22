@@ -16,7 +16,7 @@ import { Column, GridContainer } from '~shared/styled'
 import { PdfVisning } from '../pdf-visning'
 import { MottakerComponent } from './mottaker'
 import { isEmptyAddressObject } from './last-opp'
-import { IBrev } from '../index'
+import { IBrev } from '../Brev'
 import { useAppSelector } from '~store/Store'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 

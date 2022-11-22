@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { IBehandlingInfo } from './types'
-import { BehandlingInfo } from '../attestering'
+import { BehandlingInfo } from '../attestering/Attestering'
 import { IHendelseType } from '~store/reducers/BehandlingReducer'
 import { useAppSelector } from '~store/Store'
 import { Button } from '@navikt/ds-react'

@@ -43,7 +43,35 @@ internal class BeregningRepositoryImplTest {
     }
 
     @Test
-    fun lagreOgHent() {
+    fun `lagre() skal returnere samme data som faktisk ble lagret`() {
+        val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        val beregningResultat = BeregningService(beregningRepository, mockk()).beregnResultat(
+            opplysningsgrunnlag,
+            YearMonth.of(2021, 2),
+            YearMonth.of(2021, 9),
+            mockkClass(Vilkaarsvurdering::class),
+            BehandlingType.FØRSTEGANGSBEHANDLING
+        )
+        val behandlingId = UUID.randomUUID()
+
+        val beregning = Beregning(
+            beregningId = beregningResultat.id,
+            behandlingId = behandlingId,
+            beregningsperioder = beregningResultat.beregningsperioder,
+            beregnetDato = beregningResultat.beregnetDato,
+            grunnlagMetadata = Metadata(
+                sakId = 0,
+                versjon = beregningResultat.grunnlagVersjon
+            )
+        )
+        val lagretBeregning = beregningRepository.lagre(beregning)
+
+        assertEquals(beregning, lagretBeregning)
+    }
+
+    @Test
+    fun `det som hentes ut skal være likt det som originalt ble lagret`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         val beregningResultat = BeregningService(beregningRepository, mockk()).beregnResultat(
@@ -65,10 +93,10 @@ internal class BeregningRepositoryImplTest {
                 versjon = beregningResultat.grunnlagVersjon
             )
         )
-        val lagretBeregning = beregningRepository.lagre(beregningLagret)
+        beregningRepository.lagre(beregningLagret)
 
         val beregningHentet = beregningRepository.hent(behandlingId)
 
-        assertEquals(lagretBeregning, beregningHentet)
+        assertEquals(beregningLagret, beregningHentet)
     }
 }

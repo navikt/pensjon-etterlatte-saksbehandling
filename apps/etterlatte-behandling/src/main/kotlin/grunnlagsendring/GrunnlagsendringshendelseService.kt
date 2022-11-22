@@ -15,8 +15,6 @@ import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon.Doedsfall
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon.ForelderBarnRelasjon
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon.Utflytting
 import no.nav.etterlatte.libs.common.behandling.KorrektIPDL
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -94,13 +92,13 @@ class GrunnlagsendringshendelseService(
     private fun verifiserOgHaandterSoekerErUtflyttet(data: Utflytting, sakId: Long, hendelseId: UUID) {
         val fnr = data.hendelse.fnr
         val soekerHarUtflytting = soekerHarUtflytting(fnr)
-        haandterSoekerErUtflyttet(sakId, soekerHarUtflytting, hendelseId)
+        haandterSoekerErUtflyttet(soekerHarUtflytting, hendelseId)
     }
 
     private fun verifiserOgHaandterForelderBarnRelasjon(data: ForelderBarnRelasjon, sakId: Long, hendelseId: UUID) {
         val fnr = data.hendelse.fnr
         val forelderBarnRelasjonErGyldig = forelderBarnRelasjonErGyldig(fnr)
-        haandterForelderBarnRelasjon(sakId, forelderBarnRelasjonErGyldig, hendelseId)
+        haandterForelderBarnRelasjon(forelderBarnRelasjonErGyldig, hendelseId)
     }
 
     /*
@@ -108,7 +106,7 @@ class GrunnlagsendringshendelseService(
     uten at doedsdato eksisterer. Finn i saa fall ut hvordan doed kan bekreftes i pdl.
     https://pdldocs-navno.msappproxy.net/ekstern/index.html#_dødsfall
      */
-    private fun soekerErDoed(fnr: String): Boolean {
+    private fun soekerErDoed(fnr: String): KorrektIPDL {
         return pdlService.hentPdlModell(
             foedselsnummer = fnr,
             rolle = PersonRolle.BARN
@@ -117,41 +115,47 @@ class GrunnlagsendringshendelseService(
                 "Person med fnr $fnr er doed i pdl " +
                     "med doedsdato: $doedsdato"
             )
-            true
-        } ?: false
+            KorrektIPDL.JA
+        } ?: KorrektIPDL.NEI
     }
 
-    private fun soekerHarUtflytting(fnr: String): Boolean {
-        return !pdlService.hentPdlModell(
-            foedselsnummer = fnr,
-            rolle = PersonRolle.BARN
-        ).utland?.utflyttingFraNorge.isNullOrEmpty()
+    private fun soekerHarUtflytting(fnr: String): KorrektIPDL {
+        return if (!pdlService.hentPdlModell(
+                foedselsnummer = fnr,
+                rolle = PersonRolle.BARN
+            ).utland?.utflyttingFraNorge.isNullOrEmpty()
+        ) {
+            KorrektIPDL.JA
+        } else {
+            KorrektIPDL.NEI
+        }
     }
 
-    private fun forelderBarnRelasjonErGyldig(fnr: String): Boolean {
-        // I første omgang sier vi at alle hendelesene her er 'gyldige', dvs vi oppretter en hendelse
-        //  for de og viser de fram i frontend
-        return true
+    /*
+    TODO: sjekk om forelder-barn-relasjon er gyldig
+     */
+    private fun forelderBarnRelasjonErGyldig(fnr: String): KorrektIPDL {
+        return KorrektIPDL.IKKE_SJEKKET
     }
 
-    private fun haandterSoekerErUtflyttet(sakId: Long, bekreftetIPDL: Boolean, hendelseId: UUID) {
+    private fun haandterSoekerErUtflyttet(korrektIPDL: KorrektIPDL, hendelseId: UUID) {
         inTransaction {
-            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                saker = listOf(sakId),
+            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
+                hendelseId = hendelseId,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                type = GrunnlagsendringsType.UTFLYTTING
+                korrektIPDL = korrektIPDL
             )
         }
     }
 
-    private fun haandterForelderBarnRelasjon(sakId: Long, bekreftetIPDL: Boolean, hendelseId: UUID) {
+    private fun haandterForelderBarnRelasjon(korrektIPDL: KorrektIPDL, hendelseId: UUID) {
         inTransaction {
-            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                saker = listOf(sakId),
+            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
+                hendelseId = hendelseId,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                type = GrunnlagsendringsType.FORELDER_BARN_RELASJON
+                korrektIPDL = korrektIPDL
             )
         }
     }
@@ -164,72 +168,45 @@ class GrunnlagsendringshendelseService(
         - Dette boer kanskje fanges opp?
         Se EY-976
      */
-    private fun haandterDoedsfall(sakId: Long, data: Doedsfall, bekreftetIPDL: Boolean, hendelseId: UUID) {
+    private fun haandterDoedsfall(sakId: Long, data: Doedsfall, korrektIPDL: KorrektIPDL, hendelseId: UUID) {
         val behandlingerISak = generellBehandlingService.hentBehandlingerISak(sakId)
 
         // Har vi en eksisterende behandling som ikke er avbrutt?
         val sisteBehandling = behandlingerISak
             .`siste ikke-avbrutte behandling`()
             ?: run {
-                forkastHendelse(hendelseId)
+                forkastHendelse(hendelseId, korrektIPDL)
                 return
             }
 
         val harAlleredeEtManueltOpphoer = behandlingerISak.any { it.type == BehandlingType.MANUELT_OPPHOER }
         if (harAlleredeEtManueltOpphoer) {
-            forkastHendelse(hendelseId)
+            forkastHendelse(hendelseId, korrektIPDL)
             return
         }
 
-        // BARE HÅNDTER DETTE CASET: sett som SJEKKET_AV_JOBB
         when (sisteBehandling.status) {
             in underBehandling() + iverksattEllerAttestert() -> {
-                logger.info(
-                    "Behandling ${sisteBehandling.id} med status ${sisteBehandling.status} er under " +
-                        "behandling -> setter status til SJEKKET_AV_JOBB."
-                )
                 inTransaction {
-                    grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                        saker = listOf(sakId),
+                    grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
+                        hendelseId = hendelseId,
                         foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                         etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                        type = GrunnlagsendringsType.DOEDSFALL
+                        korrektIPDL = korrektIPDL
                     )
                 }
             }
-            // IKKE AUTOMATISK REVURDERING
-            in iverksattEllerAttestert() -> {
-                revurderingService.startRevurdering(
-                    forrigeBehandling = sisteBehandling,
-                    pdlHendelse = data.hendelse,
-                    revurderingAarsak = RevurderingAarsak.SOEKER_DOD
-                ).also {
-                    inTransaction {
-                        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                            saker = listOf(sakId),
-                            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-                            etterStatus = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
-                            type = GrunnlagsendringsType.DOEDSFALL
-                        )
-                        grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
-                            sak = sakId,
-                            behandlingId = it.id,
-                            type = GrunnlagsendringsType.DOEDSFALL
-                        )
-                    }
-                }
-            }
-
-            else -> {}
+            else -> forkastHendelse(hendelseId, korrektIPDL)
         }
     }
 
-    private fun forkastHendelse(hendelseId: UUID) =
+    private fun forkastHendelse(hendelseId: UUID, korrektIPDL: KorrektIPDL) =
         inTransaction {
             grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
                 hendelseId = hendelseId,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-                etterStatus = GrunnlagsendringStatus.FORKASTET
+                etterStatus = GrunnlagsendringStatus.FORKASTET,
+                korrektIPDL = korrektIPDL
             )
         }
 
@@ -240,21 +217,19 @@ class GrunnlagsendringshendelseService(
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse) {
         val tidspunktForMottakAvHendelse = LocalDateTime.now()
 
-        generellBehandlingService.alleSakIderForSoekerMedFnr(utflyttingsHendelse.fnr).also {
+        generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(utflyttingsHendelse.fnr).map { rolleOgSak ->
             inTransaction {
-                it.forEach { sakId ->
-                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                        Grunnlagsendringshendelse(
-                            id = UUID.randomUUID(),
-                            sakId = sakId,
-                            type = GrunnlagsendringsType.UTFLYTTING,
-                            opprettet = tidspunktForMottakAvHendelse,
-                            data = Utflytting(hendelse = utflyttingsHendelse),
-                            hendelseGjelderRolle = Saksrolle.UKJENT // TODO: hent rolle
-
-                        )
+                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                    Grunnlagsendringshendelse(
+                        id = UUID.randomUUID(),
+                        sakId = rolleOgSak.second,
+                        type = GrunnlagsendringsType.UTFLYTTING,
+                        opprettet = tidspunktForMottakAvHendelse,
+                        data = Utflytting(hendelse = utflyttingsHendelse),
+                        hendelseGjelderRolle = rolleOgSak.first,
+                        korrektIPDL = KorrektIPDL.IKKE_SJEKKET
                     )
-                }
+                )
             }
         }
     }
@@ -262,21 +237,21 @@ class GrunnlagsendringshendelseService(
     fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse) {
         val tidspunktForMottakAvHendelse = LocalDateTime.now()
 
-        generellBehandlingService.alleSakIderForSoekerMedFnr(forelderBarnRelasjonHendelse.fnr).also {
-            inTransaction {
-                it.forEach { sakId ->
+        generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(forelderBarnRelasjonHendelse.fnr)
+            .map { rolleOgSak ->
+                inTransaction {
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(
                             id = UUID.randomUUID(),
-                            sakId = sakId,
+                            sakId = rolleOgSak.second,
                             type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
                             opprettet = tidspunktForMottakAvHendelse,
                             data = ForelderBarnRelasjon(hendelse = forelderBarnRelasjonHendelse),
-                            hendelseGjelderRolle = Saksrolle.UKJENT // TODO: hent rolle
+                            hendelseGjelderRolle = rolleOgSak.first,
+                            korrektIPDL = KorrektIPDL.IKKE_SJEKKET
                         )
                     )
                 }
             }
-        }
     }
 }

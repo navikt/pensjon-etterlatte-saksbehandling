@@ -73,45 +73,23 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
     fun oppdaterGrunnlagsendringStatus(
         hendelseId: UUID,
         foerStatus: GrunnlagsendringStatus,
-        etterStatus: GrunnlagsendringStatus
+        etterStatus: GrunnlagsendringStatus,
+        korrektIPDL: KorrektIPDL
     ) {
         with(connection()) {
             prepareStatement(
                 """
                    UPDATE grunnlagsendringshendelse
-                   SET status = ?
+                   SET status = ?,
+                   korrekt_i_pdl = ?
                    WHERE id = ?
                    AND status = ?
                 """.trimIndent()
             ).use {
                 it.setString(1, etterStatus.name)
-                it.setObject(2, hendelseId)
-                it.setString(3, foerStatus.name)
-                it.executeUpdate()
-            }
-        }
-    }
-
-    fun oppdaterGrunnlagsendringStatusForType(
-        saker: List<Long>,
-        foerStatus: GrunnlagsendringStatus,
-        etterStatus: GrunnlagsendringStatus,
-        type: GrunnlagsendringsType
-    ) {
-        with(connection()) {
-            prepareStatement(
-                """
-                   UPDATE grunnlagsendringshendelse
-                   SET status = ?
-                   WHERE sak_id = ANY(?)
-                   AND status = ?
-                   AND type = ?
-                """.trimIndent()
-            ).use {
-                it.setString(1, etterStatus.name)
-                it.setArray(2, createArrayOf("bigint", saker.toTypedArray()))
-                it.setString(3, foerStatus.name)
-                it.setString(4, type.name)
+                it.setString(2, korrektIPDL.name)
+                it.setObject(3, hendelseId)
+                it.setString(4, foerStatus.name)
                 it.executeUpdate()
             }
         }

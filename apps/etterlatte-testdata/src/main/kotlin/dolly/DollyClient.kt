@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.toJson
 
 interface DollyClient {
     suspend fun hentDollyBrukere(accessToken: String): List<Bruker>
-    suspend fun hentBrukersGrupper(brukerId: String, accessToken: String): List<Gruppe>
+    suspend fun hentBrukersGrupper(brukerId: String, accessToken: String): HentGruppeResponse
     suspend fun opprettTestGruppe(gruppe: OpprettGruppeRequest, accessToken: String): Gruppe
     suspend fun opprettBestilling(bestilling: String, gruppeId: Long, accessToken: String): BestillingStatus
     suspend fun hentTestGruppeBestillinger(
@@ -36,7 +36,7 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
             header(HttpHeaders.Authorization, "Bearer $accessToken")
         }.body()
 
-    override suspend fun hentBrukersGrupper(brukerId: String, accessToken: String): List<Gruppe> =
+    override suspend fun hentBrukersGrupper(brukerId: String, accessToken: String): HentGruppeResponse =
         httpClient.get("$dollyUrl/gruppe?brukerId=$brukerId") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
         }.body()

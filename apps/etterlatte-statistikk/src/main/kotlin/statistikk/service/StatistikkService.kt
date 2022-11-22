@@ -63,9 +63,9 @@ class StatistikkService(
             behandlingMetode = "",
             opprettetAv = null,
             ansvarligBeslutter = vedtak.vedtakFattet?.ansvarligSaksbehandler,
-            aktorId = detaljertBehandling.soeker!!,
+            aktorId = vedtak.sak.ident,
             datoFoersteUtbetaling = vedtak.vedtakFattet?.let {
-                vedtak.pensjonTilUtbetaling?.minBy { it.periode.fom }?.periode?.fom?.atDay(
+                vedtak.pensjonTilUtbetaling?.minByOrNull { it.periode.fom }?.periode?.fom?.atDay(
                     20
                 )
             },

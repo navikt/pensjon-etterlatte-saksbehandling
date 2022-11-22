@@ -46,7 +46,7 @@ enum class GrunnlagsendringsType {
 
 enum class GrunnlagsendringStatus {
     VENTER_PAA_JOBB, // naar hendelsen registreres // FØR: IKKE_VURDERT
-    SJEKKET_AV_JOBB, // skifte til noe som indikerer at venteperiode er utført? FØR: GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING
+    SJEKKET_AV_JOBB, // skifte til noe som indikerer at venteperiode er utført? FØR: ED_I_BEHANDLING
     TATT_MED_I_BEHANDLING, // tatt med i behandling av saksbehandler
     FORKASTET,
     VURDERT_SOM_IKKE_RELEVANT

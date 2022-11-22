@@ -26,7 +26,7 @@ fun Route.grunnlagsendringshendelseRoute(
         post("/doedshendelse") {
             val doedshendelse = call.receive<Doedshendelse>()
             logger.info("Mottar en doedshendelse fra PDL")
-            grunnlagsendringshendelseService.opprettDoedshendelser(doedshendelse)
+            grunnlagsendringshendelseService.opprettDoedshendelse(doedshendelse)
             call.respond(HttpStatusCode.OK)
         }
 

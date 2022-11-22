@@ -9,6 +9,7 @@ import no.nav.etterlatte.grunnlagsinformasjonUtflyttingshendelse
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
+import no.nav.etterlatte.libs.common.behandling.KorrektIPDL
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.revurdering
@@ -189,14 +190,14 @@ internal class GrunnlagsendringshendelseDaoTest {
                 opprettet = LocalDateTime.now().minusMinutes(30),
                 data = grunnlagsinformasjonDoedshendelse()
             ).copy(
-                status = GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB
             ),
             grunnlagsendringshendelse(
                 sakId = sakid,
                 opprettet = LocalDateTime.now().minusDays(4),
                 data = grunnlagsinformasjonDoedshendelse()
             ).copy(
-                status = GrunnlagsendringStatus.IKKE_VURDERT
+                status = GrunnlagsendringStatus.VENTER_PAA_JOBB
             ),
             grunnlagsendringshendelse(
                 sakId = sakid,
@@ -216,53 +217,44 @@ internal class GrunnlagsendringshendelseDaoTest {
         assertEquals(
             alleHendelser.map { it.status }.toSet(),
             setOf(
-                GrunnlagsendringStatus.IKKE_VURDERT,
+                GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
-                GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
+                GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 GrunnlagsendringStatus.FORKASTET
             )
         )
         val uhaandterteHendelser = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserMedStatuserISak(
             sakid,
-            listOf(GrunnlagsendringStatus.IKKE_VURDERT, GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING)
+            listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB)
         )
         assertEquals(uhaandterteHendelser.size, 2)
     }
 
     @Test
-    fun `oppdaterGrunnlagsendringStatuForType skal oppdatere status for grunnlagsendringshendelser`() {
+    fun `oppdaterGrunnlagsendringStatus skal oppdatere grunnlagsendringshendelser`() {
         val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
-        val sak2 = sakRepo.opprettSak("4321", SakType.BARNEPENSJON).id
+        val id1 = UUID.randomUUID()
 
-        listOf(
-            grunnlagsendringshendelse(
-                sakId = sak1,
-                data = grunnlagsinformasjonDoedshendelse()
-            ),
-            grunnlagsendringshendelse(
-                sakId = sak1,
-                data = grunnlagsinformasjonDoedshendelse()
-            ),
-            grunnlagsendringshendelse(
-                sakId = sak2,
-                data = grunnlagsinformasjonDoedshendelse()
-            )
-        ).forEach {
+        grunnlagsendringshendelse(
+            id = id1,
+            sakId = sak1,
+            data = grunnlagsinformasjonDoedshendelse()
+        ).also {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
 
         val hendelserFoerOppdatertStatus = grunnlagsendringshendelsesRepo.hentAlleGrunnlagsendringshendelser()
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusForType(
-            saker = listOf(sak1, sak2),
-            foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+            hendelseId = id1,
+            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
             etterStatus = GrunnlagsendringStatus.FORKASTET,
-            type = GrunnlagsendringsType.DOEDSFALL
+            korrektIPDL = KorrektIPDL.IKKE_SJEKKET
         )
         val hendelserEtterOppdatertStatus = grunnlagsendringshendelsesRepo.hentAlleGrunnlagsendringshendelser()
         assertAll(
             "skal oppdatere statuser for grunnlagsendringshendelser",
             { assertEquals(hendelserFoerOppdatertStatus.size, hendelserEtterOppdatertStatus.size) },
-            { assertTrue(hendelserFoerOppdatertStatus.all { it.status == GrunnlagsendringStatus.IKKE_VURDERT }) },
+            { assertTrue(hendelserFoerOppdatertStatus.all { it.status == GrunnlagsendringStatus.VENTER_PAA_JOBB }) },
             { assertTrue(hendelserEtterOppdatertStatus.all { it.status == GrunnlagsendringStatus.FORKASTET }) }
 
         )
@@ -293,36 +285,54 @@ internal class GrunnlagsendringshendelseDaoTest {
     }
 
     @Test
-    fun `hentGyldigeGrunnlagsendringshendelserISak skal hente alle grunnlagsendringshendelser med status GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING`() { // ktlint-disable max-line-length
+    fun `hentGyldigeGrunnlagsendringshendelserISak skal hente alle grunnlagsendringshendelser med status SJEKKET_AV_JOBB`() { // ktlint-disable max-line-length
         val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
         val sak2 = sakRepo.opprettSak("4321", SakType.BARNEPENSJON).id
+        val id1 = UUID.randomUUID()
+        val id2 = UUID.randomUUID()
+        val id3 = UUID.randomUUID()
 
         listOf(
             grunnlagsendringshendelse(
+                id = id1,
                 sakId = sak1,
                 data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
-                sakId = sak1,
+                id = id2,
+                sakId = sak2,
                 data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
+                id = id3,
                 sakId = sak2,
                 data = grunnlagsinformasjonDoedshendelse()
             )
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
-        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusForType(
-            saker = listOf(sak1, sak2),
-            foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
-            etterStatus = GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
-            type = GrunnlagsendringsType.DOEDSFALL
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+            hendelseId = id1,
+            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+            etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            korrektIPDL = KorrektIPDL.JA
+        )
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+            hendelseId = id2,
+            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+            etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            korrektIPDL = KorrektIPDL.JA
+        )
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatus(
+            hendelseId = id3,
+            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+            etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            korrektIPDL = KorrektIPDL.JA
         )
 
-        val resultat = grunnlagsendringshendelsesRepo.hentGyldigeGrunnlagsendringshendelserISak(sak1)
+        val resultat = grunnlagsendringshendelsesRepo.hentGyldigeGrunnlagsendringshendelserISak(sak2)
 
         assertEquals(2, resultat.size)
-        assertTrue(resultat.all { it.status == GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING })
+        assertTrue(resultat.all { it.status == GrunnlagsendringStatus.SJEKKET_AV_JOBB })
     }
 }

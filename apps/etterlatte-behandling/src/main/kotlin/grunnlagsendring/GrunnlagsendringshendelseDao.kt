@@ -24,7 +24,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             val stmt = prepareStatement(
                 """
                 INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, data, status, hendelse_gjelder_rolle, korrekt_i_pdl)
-                VALUES(?, ?, ?, ?, to_json(?::json), ?, ?)
+                VALUES(?, ?, ?, ?, to_json(?::json), ?, ?, ?)
                 """.trimIndent()
             )
             with(hendelse) {

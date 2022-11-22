@@ -33,6 +33,8 @@ class GrunnlagsendringshendelseService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /* Henter grunnlagsendringshendelser med status SJEKKET_AV_JOBB */
+    /* TODO: gjør slik at dersom det ligger en ikke-klar hendelse på saken så hentes ingen hendelser*/
+    /* fiks også test: hentGyldigeGrunnlagsendringshendelserISak skal hente alle grunnlagsendringshendelser med...*/
     fun hentGyldigeHendelserForSak(sakId: Long) = inTransaction {
         grunnlagsendringshendelseDao.hentGyldigeGrunnlagsendringshendelserISak(sakId)
     }
@@ -44,7 +46,7 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    fun opprettDoedshendelser(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
+    fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
         generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(doedshendelse.avdoedFnr).map { rolleOgSak ->
             inTransaction {
                 grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(

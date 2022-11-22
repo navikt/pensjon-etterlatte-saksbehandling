@@ -118,7 +118,7 @@ fun grunnlagsendringshendelse(
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = LocalDateTime.now(),
     data: Grunnlagsinformasjon,
-    status: GrunnlagsendringStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+    status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     behandlingId: UUID? = null,
     hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER
 ) = Grunnlagsendringshendelse(

@@ -8,6 +8,7 @@ import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.revurdering
@@ -578,12 +580,35 @@ internal class BehandlingDaoIntegrationTest {
 
         val saksbehandler = Grunnlagsopplysning.Saksbehandler("navIdent", Instant.now())
         val nyDato = YearMonth.of(2021, 2)
-        behandling.oppdaterVirkningstidspunkt(nyDato, saksbehandler)
-        behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, behandling.hentVirkningstidspunkt()!!)
+        behandling.oppdaterVirkningstidspunkt(nyDato, saksbehandler).let {
+            behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.hentVirkningstidspunkt()!!)
+        }
 
         val expected = Virkningstidspunkt(nyDato, saksbehandler)
         with(behandlingRepo.hentBehandling(behandling.id)) {
             val actual = (this as Foerstegangsbehandling).hentVirkningstidspunkt()
+            assertEquals(expected, actual)
+        }
+    }
+
+    @Test
+    fun `skal lagre kommer barnet til gode for en behandling`() {
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val behandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.OPPRETTET)
+
+        behandlingRepo.opprettFoerstegangsbehandling(behandling)
+
+        val kommerBarnetTilgode = KommerBarnetTilgode(
+            JaNeiVetIkke.JA,
+            "begrunnelse",
+            Grunnlagsopplysning.Saksbehandler("navIdent", Instant.now())
+        )
+        behandlingRepo.lagreKommerBarnetTilgode(behandling.id, kommerBarnetTilgode)
+
+        with(behandlingRepo.hentBehandling(behandling.id)) {
+            val expected = kommerBarnetTilgode
+            val actual = (this as Foerstegangsbehandling).kommerBarnetTilgode
+
             assertEquals(expected, actual)
         }
     }

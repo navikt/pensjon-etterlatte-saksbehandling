@@ -55,7 +55,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "02051272059",
+        "svar": "12101376212",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {
@@ -81,7 +81,7 @@
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "02051272059",
+            "svar": "12101376212",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"

@@ -99,7 +99,7 @@ fun grunnlag(): List<Grunnlagsopplysning<ObjectNode>> = """
             "type": "BARN",
             "fornavn": "kirsten",
             "etternavn": "jakobsen",
-            "foedselsnummer": "02051272059",
+            "foedselsnummer": "12101376212",
             "statsborgerskap": "Norge",
             "utenlandsadresse": {
               "adresseIUtlandet": "NEI",
@@ -111,7 +111,7 @@ fun grunnlag(): List<Grunnlagsopplysning<ObjectNode>> = """
                 "type": "FORELDER",
                 "fornavn": "GØYAL",
                 "etternavn": "HØYSTAKK",
-                "foedselsnummer": "02051272059"
+                "foedselsnummer": "12101376212"
               },
               {
                 "type": "FORELDER",
@@ -278,7 +278,7 @@ fun grunnlag(): List<Grunnlagsopplysning<ObjectNode>> = """
               "ansvarligeForeldre": null,
               "foreldre": null,
               "barn": [
-                "02051272059"
+                "12101376212"
               ]
             }
           },
@@ -332,7 +332,7 @@ fun grunnlag(): List<Grunnlagsopplysning<ObjectNode>> = """
               "ansvarligeForeldre": null,
               "foreldre": null,
               "barn": [
-                "02051272059"
+                "12101376212"
               ]
             }
           },
@@ -351,7 +351,7 @@ fun grunnlag(): List<Grunnlagsopplysning<ObjectNode>> = """
           "opplysning": {
             "fornavn": "TALENTFULL",
             "etternavn": "BLYANT",
-            "foedselsnummer": "02051272059",
+            "foedselsnummer": "12101376212",
             "foedselsdato": "2013-10-12",
             "foedselsaar": 2013,
             "foedeland": "NOR",

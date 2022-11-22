@@ -42,7 +42,7 @@
         "type": "BARN",
         "fornavn": "kirsten",
         "etternavn": "jakobsen",
-        "foedselsnummer": "02051272059",
+        "foedselsnummer": "12101376212",
         "statsborgerskap": "Norge",
         "utenlandsadresse": {
           "adresseIUtlandet": "NEI",
@@ -54,7 +54,7 @@
             "type": "FORELDER",
             "fornavn": "GØYAL",
             "etternavn": "HØYSTAKK",
-            "foedselsnummer": "02051272059"
+            "foedselsnummer": "12101376212"
           },
           {
             "type": "FORELDER",
@@ -183,7 +183,7 @@
       "opplysningType": "PERSONGALLERI_V1",
       "meta": {},
       "opplysning": {
-        "soeker": "02051272059",
+        "soeker": "12101376212",
         "innsender": "03108718357",
         "soesken": [],
         "avdoed": [
@@ -253,7 +253,7 @@
         "opplysning": {
           "fornavn": "TALENTFULL",
           "etternavn": "BLYANT",
-          "foedselsnummer": "02051272059",
+          "foedselsnummer": "12101376212",
           "foedselsdato": "2013-10-12",
           "foedselsaar": 2013,
           "foedeland": "NOR",
@@ -402,14 +402,14 @@
             "ansvarligeForeldre": null,
             "foreldre": null,
             "barn": [
-              "02051272059"
+              "12101376212"
             ]
           },
           "avdoedesBarn": [
             {
               "fornavn": "TALENTFULL",
               "etternavn": "BLYANT",
-              "foedselsnummer": "02051272059",
+              "foedselsnummer": "12101376212",
               "foedselsdato": "2013-10-12",
               "foedselsaar": 2013,
               "foedeland": "NOR",
@@ -496,7 +496,7 @@
           "type": "BARN",
           "fornavn": "kirsten",
           "etternavn": "jakobsen",
-          "foedselsnummer": "02051272059",
+          "foedselsnummer": "12101376212",
           "statsborgerskap": "Norge",
           "utenlandsadresse": {
             "adresseIUtlandet": "NEI",
@@ -508,7 +508,7 @@
               "type": "FORELDER",
               "fornavn": "GØYAL",
               "etternavn": "HØYSTAKK",
-              "foedselsnummer": "02051272059"
+              "foedselsnummer": "12101376212"
             },
             {
               "type": "FORELDER",
@@ -637,7 +637,7 @@
         "opplysningType": "PERSONGALLERI_V1",
         "meta": {},
         "opplysning": {
-          "soeker": "02051272059",
+          "soeker": "12101376212",
           "innsender": "03108718357",
           "soesken": [],
           "avdoed": [
@@ -684,7 +684,7 @@
         "opplysning": {
           "fornavn": "TALENTFULL",
           "etternavn": "BLYANT",
-          "foedselsnummer": "02051272059",
+          "foedselsnummer": "12101376212",
           "foedselsdato": "2013-10-12",
           "foedselsaar": 2013,
           "foedeland": "NOR",
@@ -833,14 +833,14 @@
             "ansvarligeForeldre": null,
             "foreldre": null,
             "barn": [
-              "02051272059"
+              "12101376212"
             ]
           },
           "avdoedesBarn": [
             {
               "fornavn": "TALENTFULL",
               "etternavn": "BLYANT",
-              "foedselsnummer": "02051272059",
+              "foedselsnummer": "12101376212",
               "foedselsdato": "2013-10-12",
               "foedselsaar": 2013,
               "foedeland": "NOR",
@@ -927,7 +927,7 @@
           "type": "BARN",
           "fornavn": "kirsten",
           "etternavn": "jakobsen",
-          "foedselsnummer": "02051272059",
+          "foedselsnummer": "12101376212",
           "statsborgerskap": "Norge",
           "utenlandsadresse": {
             "adresseIUtlandet": "NEI",
@@ -939,7 +939,7 @@
               "type": "FORELDER",
               "fornavn": "GØYAL",
               "etternavn": "HØYSTAKK",
-              "foedselsnummer": "02051272059"
+              "foedselsnummer": "12101376212"
             },
             {
               "type": "FORELDER",
@@ -1068,7 +1068,7 @@
         "opplysningType": "PERSONGALLERI_V1",
         "meta": {},
         "opplysning": {
-          "soeker": "02051272059",
+          "soeker": "12101376212",
           "innsender": "03108718357",
           "soesken": [],
           "avdoed": [

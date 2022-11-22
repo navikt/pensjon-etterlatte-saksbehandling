@@ -25,7 +25,7 @@ class DistribusjonServiceImpl(private val klient: DistribusjonKlient) : Distribu
     ): BestillingsID = runBlocking {
         val request = DistribuerJournalpostRequest(
             journalpostId = journalpostId,
-            bestillendeFagsystem = "EY", // todo: felles fagsystemkode
+            bestillendeFagsystem = "EY",
             distribusjonstype = type,
             distribusjonstidspunkt = tidspunkt,
             dokumentProdApp = "etterlate-brev-api"

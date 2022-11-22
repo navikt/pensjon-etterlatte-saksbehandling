@@ -12,7 +12,7 @@
   "behandlingOpprettet": "2022-06-14T15:44:02.427522",
   "sistEndret": "2022-06-14T15:44:02.433757",
   "soeknadMottattDato": "2022-02-14T14:37:24.573613",
-  "fnrSoeker": "02051272059",
+  "fnrSoeker": "12101376212",
   "gyldighetsproeving": {
     "resultat": "OPPFYLT",
     "vurderinger": [
@@ -210,7 +210,7 @@
         "opplysningType": "PERSONGALLERI_V1",
         "meta": {},
         "opplysning": {
-          "soeker": "02051272059",
+          "soeker": "12101376212",
           "innsender": "03108718357",
           "soesken": [],
           "avdoed": [
@@ -259,7 +259,7 @@
           "type": "BARN",
           "fornavn": "kirsten",
           "etternavn": "jakobsen",
-          "foedselsnummer": "02051272059",
+          "foedselsnummer": "12101376212",
           "statsborgerskap": "Norge",
           "utenlandsadresse": {
             "adresseIUtlandet": "NEI",
@@ -271,7 +271,7 @@
               "type": "FORELDER",
               "fornavn": "GØYAL",
               "etternavn": "HØYSTAKK",
-              "foedselsnummer": "02051272059"
+              "foedselsnummer": "12101376212"
             },
             {
               "type": "FORELDER",
@@ -303,7 +303,7 @@
         "opplysning": {
           "fornavn": "TALENTFULL",
           "etternavn": "BLYANT",
-          "foedselsnummer": "02051272059",
+          "foedselsnummer": "12101376212",
           "foedselsdato": "2013-10-12",
           "foedselsaar": 2013,
           "foedeland": "NOR",
@@ -450,7 +450,7 @@
             "ansvarligeForeldre": null,
             "foreldre": null,
             "barn": [
-              "02051272059"
+              "12101376212"
             ]
           },
           "vergemaalEllerFremtidsfullmakt": null
@@ -677,7 +677,7 @@
       },
       "soeker": {
         "navn": "TALENTFULL BLYANT",
-        "fnr": "02051272059",
+        "fnr": "12101376212",
         "rolle": "AVDOED",
         "bostedadresser": [
           {

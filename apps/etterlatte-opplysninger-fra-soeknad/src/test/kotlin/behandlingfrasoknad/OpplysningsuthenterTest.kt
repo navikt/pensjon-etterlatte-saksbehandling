@@ -75,7 +75,7 @@ internal class OpplysningsuthenterTest {
                 assertEquals(PersonType.BARN, type)
                 assertEquals("kirsten", fornavn)
                 assertEquals("jakobsen", etternavn)
-                assertEquals("02051272059", foedselsnummer.value)
+                assertEquals("12101376212", foedselsnummer.value)
                 assertEquals("Norge", statsborgerskap)
                 assertEquals(JaNeiVetIkke.NEI, utenlandsadresse.adresseIUtlandet)
                 assertEquals("GØYAL", foreldre[0].fornavn)

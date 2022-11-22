@@ -43,7 +43,7 @@ data class JournalpostDokument(
 data class Sak (
     val sakstype: Sakstype,
     val fagsakId: String? = null,
-    val fagsaksystem: String? = null // Todo: Finn ut om vi har en fagsystemskode
+    val fagsaksystem: String? = "EY"
 )
 
 enum class Sakstype() {

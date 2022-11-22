@@ -51,9 +51,9 @@ class JournalpostServiceImpl(
             avsenderMottaker = melding.mottaker.tilAvsenderMottaker(),
             bruker = melding.bruker,
             eksternReferanseId = "${melding.behandlingId}.${melding.brevId}",
-            sak = Sak(Sakstype.GENERELL_SAK), // Todo: Kan ta inn behandlingsid som fagsakId
+            sak = Sak(Sakstype.FAGSAK, melding.behandlingId),
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(melding)),
-            tema = "PEN", // https://confluence.adeo.no/display/BOA/Tema, // Todo: Skal byttes til EYB eller EYO
+            tema = "PEN", // https://confluence.adeo.no/display/BOA/Tema, // Todo: Bytt til EYB før release
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
             journalfoerendeEnhet = melding.journalfoerendeEnhet
         )
@@ -61,11 +61,11 @@ class JournalpostServiceImpl(
 }
 
 private fun Mottaker.tilAvsenderMottaker() = when {
-    foedselsnummer != null -> AvsenderMottaker(id = "22107622946") // Bytt ut med foedselsnummer!!.value
+    foedselsnummer != null -> AvsenderMottaker(id = foedselsnummer!!.value)
     orgnummer != null -> AvsenderMottaker(id = orgnummer, idType = "ORGNR")
     adresse != null -> {
-        val navn = "${adresse!!.fornavn} ${adresse!!.etternavn}"
-        AvsenderMottaker(id = null, navn = navn, idType = null, land = adresse!!.land)
+        val mottakerNavn = "${adresse!!.fornavn} ${adresse!!.etternavn}"
+        AvsenderMottaker(id = null, navn = mottakerNavn, idType = null, land = adresse!!.land)
     }
     else -> throw Exception("Ingen brevmottaker spesifisert")
 }

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningsperiodeDAO
 import java.lang.IllegalStateException
@@ -30,15 +31,16 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
             session.transaction { tx ->
                 val queries = beregning.beregningsperioder.map {
                     mapOf(
+                        "id" to UUID.randomUUID(),
                         "beregningId" to beregning.beregningId,
                         "behandlingId" to beregning.behandlingId,
                         "beregnetDato" to beregning.beregnetDato,
-                        "datoFOM" to it.datoFOM,
-                        "datoTOM" to it.datoTOM,
+                        "datoFOM" to it.datoFOM.toString(),
+                        "datoTOM" to it.datoTOM?.toString(),
                         "utbetaltBeloep" to it.utbetaltBeloep,
-                        "soeskenFlokk" to it.soeskenFlokk,
+                        "soeskenFlokk" to it.soeskenFlokk?.toJson(),
                         "grunnbeloepMnd" to it.grunnbelopMnd,
-                        "grunnbeloep" to it.grunnbelopMnd,
+                        "grunnbeloep" to it.grunnbelop,
                         "sakId" to beregning.grunnlagMetadata.sakId,
                         "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
                     )
@@ -70,9 +72,11 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
         behandlingId = uuid(BeregningsperiodeDatabaseColumns.BehandlingId.navn),
         beregnetDato = localDateTime(BeregningsperiodeDatabaseColumns.BeregnetDato.navn),
         datoFOM = YearMonth.parse(string(BeregningsperiodeDatabaseColumns.DatoFOM.navn)),
-        datoTOM = YearMonth.parse(string(BeregningsperiodeDatabaseColumns.DatoTOM.navn)),
+        datoTOM = stringOrNull(BeregningsperiodeDatabaseColumns.DatoTOM.navn)?.let { YearMonth.parse(it) },
         utbetaltBeloep = int(BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn),
-        soeskenFlokk = objectMapper.readValue(string(BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn)),
+        soeskenFlokk = stringOrNull(BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn)?.let {
+            objectMapper.readValue(it)
+        },
         grunnbelopMnd = int(BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn),
         grunnbelop = int(BeregningsperiodeDatabaseColumns.Grunnbeloep.navn),
         grunnlagMetadata = Metadata(
@@ -96,7 +100,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
         grunnlagMetadata = basePeriode.grunnlagMetadata,
         beregningsperioder = beregningsperioder.map {
             Beregningsperiode(
-                delytelsesId = "", // TODO sj: Dette feltet må mappes riktig / finne ut hvilken informasjon vi trenger
+                delytelsesId = "BP", // TODO sj: Dette feltet må mappes riktig / finne ut hvilken informasjon vi trenger
                 type = Beregningstyper.GP, // TODO sj: Dette feltet må mappes riktig
                 datoFOM = it.datoFOM,
                 datoTOM = it.datoTOM,
@@ -111,6 +115,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
 }
 
 private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
+    Id("id"),
     BeregningId("beregningId"),
     BehandlingId("behandlingId"),
     BeregnetDato("beregnetDato"),
@@ -127,11 +132,11 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
 private object Queries {
     val hentBeregning = """
         |SELECT * 
-        |FROM beregning WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
+        |FROM beregningsperiode WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
     """.trimMargin()
 
     val lagreBeregningsperiode = """
-        |INSERT INTO beregningsperiode(${BeregningsperiodeDatabaseColumns.BeregningId.navn}, ${BeregningsperiodeDatabaseColumns.BehandlingId.navn}, ${BeregningsperiodeDatabaseColumns.BeregnetDato.navn}, ${BeregningsperiodeDatabaseColumns.DatoFOM.navn}, ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, ${BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn}, ${BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn}, ${BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn}, ${BeregningsperiodeDatabaseColumns.Grunnbeloep.navn}, ${BeregningsperiodeDatabaseColumns.SakId.navn}, ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}) 
-        |VALUES(:beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT) 
+        |INSERT INTO beregningsperiode(${BeregningsperiodeDatabaseColumns.Id.navn}, ${BeregningsperiodeDatabaseColumns.BeregningId.navn}, ${BeregningsperiodeDatabaseColumns.BehandlingId.navn}, ${BeregningsperiodeDatabaseColumns.BeregnetDato.navn}, ${BeregningsperiodeDatabaseColumns.DatoFOM.navn}, ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, ${BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn}, ${BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn}, ${BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn}, ${BeregningsperiodeDatabaseColumns.Grunnbeloep.navn}, ${BeregningsperiodeDatabaseColumns.SakId.navn}, ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}) 
+        |VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT) 
     """.trimMargin()
 }

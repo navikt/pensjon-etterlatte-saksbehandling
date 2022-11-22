@@ -30,7 +30,7 @@ class BeregningService(
     fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
-        // TODO lag klient fetch grunnlag og vilkårsvurdering
+        // TODO: lag klient fetch grunnlag
         val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
 
         val beregningResultat = beregnResultat(

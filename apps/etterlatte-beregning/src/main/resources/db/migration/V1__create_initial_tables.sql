@@ -1,5 +1,5 @@
-create TABLE beregningsperiode (
-    id UUID UNIQUE DEFAULT gen_random_uuid() PRIMARY KEY NOT NULL,
+CREATE TABLE beregningsperiode (
+    id UUID PRIMARY KEY,
     beregningId UUID NOT NULL,
     behandlingId UUID NOT NULL,
     beregnetDato TIMESTAMP,

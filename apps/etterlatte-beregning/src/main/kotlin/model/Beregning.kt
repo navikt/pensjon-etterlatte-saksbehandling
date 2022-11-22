@@ -12,9 +12,9 @@ data class BeregningsperiodeDAO(
     val behandlingId: UUID,
     val beregnetDato: LocalDateTime,
     val datoFOM: YearMonth,
-    val datoTOM: YearMonth,
+    val datoTOM: YearMonth?,
     val utbetaltBeloep: Int,
-    val soeskenFlokk: List<Person>,
+    val soeskenFlokk: List<Person>?,
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val grunnlagMetadata: Metadata

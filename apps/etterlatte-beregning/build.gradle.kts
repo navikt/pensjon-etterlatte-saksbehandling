@@ -18,6 +18,9 @@ dependencies {
     implementation(Database.FlywayDB)
     implementation(Database.KotliQuery)
 
+    testImplementation(TestContainer.Jupiter)
+    testImplementation(TestContainer.Postgresql)
+
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
     testImplementation(project(":libs:testdata"))

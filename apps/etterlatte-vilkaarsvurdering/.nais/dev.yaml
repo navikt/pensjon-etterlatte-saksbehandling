@@ -61,7 +61,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: ey-sak-lokal
+        - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-saksbehandling-ui
     outbound:
       rules:

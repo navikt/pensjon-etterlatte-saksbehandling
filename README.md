@@ -6,6 +6,23 @@ installert.
 
 Monorepo for ny saksbehandlingsløsning for ytelser til etterlatte
 
+### AzureAD secrets på lokal maskin
+
+Tokens/secrets som gjør det mulig å gå mot dev-gcp fra lokal maskin.\
+Kan hentes ved å kjøre følgende kommando:
+```
+./get-secret.sh apps/<app_du_vil_lage_secrets_for>
+```
+
+Ved endring i filen kan denne kommandoen kjøres (OBS: dette innebærer at alle må hente tokens på nytt):
+```
+kubectl apply -f .deploy/azure-ey-sak-lokal.yaml
+```
+
+**NB:** Ved kjøring av en eller flere backend(s) lokalt kan det være lurt å installere
+[EnvFile](https://plugins.jetbrains.com/plugin/7861-envfile) i IntelliJ. Uten denne må du manuelt kopiere
+fra .env-filen til appen sine miljøvariabler.
+
 ## Apper
 
 [etterlatte-api](apps/etterlatte-api) \

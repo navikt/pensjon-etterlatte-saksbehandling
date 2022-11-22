@@ -62,13 +62,13 @@ spec:
         - application: etterlatte-pdltjenester
     inbound:
       rules:
-        - application: ey-sak-lokal
+        - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-api
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-oppdater-behandling
         - application: etterlatte-statistikk
         - application: etterlatte-vilkaarsvurdering
-        - application: etterlatte-saksbehandling-ui
         - application: etterlatte-opplysninger-fra-soeknad
           permissions:
             roles:

@@ -5,12 +5,11 @@ import no.nav.etterlatte.BeregningRepositoryImpl
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -70,6 +69,6 @@ internal class BeregningRepositoryImplTest {
 
         val beregningHentet = beregningRepository.hent(behandlingId)
 
-        assertTrue(lagretBeregning.toJson() == beregningHentet.toJson())
+        assertEquals(lagretBeregning, beregningHentet)
     }
 }

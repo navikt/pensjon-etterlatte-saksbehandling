@@ -4,7 +4,6 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.Revurdering
-import no.nav.etterlatte.behandling.Saksrolle
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -633,16 +633,16 @@ internal class BehandlingDaoIntegrationTest {
         val sakerOgRoller = behandlingRepo.sakerOgRollerMedFnrIPersongalleri("11111")
         assertEquals(6, sakerOgRoller.size)
         assertEquals(Saksrolle.SOEKER, sakerOgRoller[0].first)
-        assertEquals(1, sakerOgRoller[0].second)
+        assertEquals(sak1, sakerOgRoller[0].second)
         assertEquals(Saksrolle.AVDOED, sakerOgRoller[1].first)
-        assertEquals(2, sakerOgRoller[1].second)
+        assertEquals(sak2, sakerOgRoller[1].second)
         assertEquals(Saksrolle.GJENLEVENDE, sakerOgRoller[2].first)
-        assertEquals(2, sakerOgRoller[2].second)
+        assertEquals(sak2, sakerOgRoller[2].second)
         assertEquals(Saksrolle.INNSENDER, sakerOgRoller[3].first)
-        assertEquals(2, sakerOgRoller[3].second)
+        assertEquals(sak2, sakerOgRoller[3].second)
         assertEquals(Saksrolle.SOEKER, sakerOgRoller[4].first)
-        assertEquals(2, sakerOgRoller[4].second)
+        assertEquals(sak2, sakerOgRoller[4].second)
         assertEquals(Saksrolle.SOESKEN, sakerOgRoller[5].first)
-        assertEquals(2, sakerOgRoller[5].second)
+        assertEquals(sak2, sakerOgRoller[5].second)
     }
 }

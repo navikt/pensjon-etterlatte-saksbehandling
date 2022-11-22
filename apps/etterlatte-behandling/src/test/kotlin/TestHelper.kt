@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -118,7 +119,8 @@ fun grunnlagsendringshendelse(
     opprettet: LocalDateTime = LocalDateTime.now(),
     data: Grunnlagsinformasjon,
     status: GrunnlagsendringStatus = GrunnlagsendringStatus.IKKE_VURDERT,
-    behandlingId: UUID? = null
+    behandlingId: UUID? = null,
+    hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER
 ) = Grunnlagsendringshendelse(
     id = id,
     sakId = sakId,
@@ -126,7 +128,8 @@ fun grunnlagsendringshendelse(
     opprettet = opprettet,
     data = data,
     status = status,
-    behandlingId = behandlingId
+    behandlingId = behandlingId,
+    hendelseGjelderRolle = hendelseGjelderRolle
 )
 
 fun grunnlagsinformasjonDoedshendelse(

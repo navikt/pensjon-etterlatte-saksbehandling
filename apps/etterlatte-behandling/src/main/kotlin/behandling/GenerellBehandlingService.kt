@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -181,29 +182,5 @@ class RealGenerellBehandlingService(
         return inTransaction {
             behandlinger.sakerOgRollerMedFnrIPersongalleri(fnr)
         }
-    }
-}
-
-enum class Saksrolle {
-    SOEKER,
-    INNSENDER,
-    SOESKEN,
-    AVDOED,
-    GJENLEVENDE,
-    UKJENT;
-
-    companion object {
-        val log = LoggerFactory.getLogger(Saksrolle::class.java)
-        fun enumVedNavnEllerUkjent(rolle: String) =
-            try {
-                Saksrolle.valueOf(rolle.uppercase())
-            } catch (e: Exception) {
-                log.error(
-                    "Kunne ikke bestemme rolle fra kolonnen $rolle i databasen. Dette betyr at kolonne-navnet i " +
-                        "databasen verdien er hentet fra ikke samsvarer med noen av enum-verdiene til Saksrolle. " +
-                        "Setter rolle som ukjent"
-                )
-                UKJENT
-            }
     }
 }

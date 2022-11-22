@@ -7,6 +7,8 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
+import no.nav.etterlatte.libs.common.behandling.KorrektIPDL
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
@@ -21,8 +23,8 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         with(connection()) {
             val stmt = prepareStatement(
                 """
-                INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, data, status)
-                VALUES(?, ?, ?, ?, to_json(?::json), ?)
+                INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, data, status, hendelse_gjelder_rolle, korrekt_i_pdl)
+                VALUES(?, ?, ?, ?, to_json(?::json), ?, ?)
                 """.trimIndent()
             )
             with(hendelse) {
@@ -32,6 +34,8 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 stmt.setTimestamp(4, Timestamp.from(opprettet.atZone(ZoneId.systemDefault()).toInstant()))
                 hendelse.data?.let { stmt.setString(5, objectMapper.writeValueAsString(hendelse.data)) }
                 stmt.setString(6, status.name)
+                stmt.setString(7, hendelseGjelderRolle.name)
+                stmt.setString(8, korrektIPDL.name)
             }
             stmt.executeUpdate()
         }.let {
@@ -44,7 +48,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         with(connection()) {
             val stmt = prepareStatement(
                 """
-                    SELECT id, sak_id, type, opprettet, data, status, behandling_id
+                    SELECT id, sak_id, type, opprettet, data, status, behandling_id, hendelse_gjelder_rolle, korrekt_i_pdl
                     FROM grunnlagsendringshendelse
                     WHERE id = ?
                 """.trimIndent()
@@ -58,11 +62,33 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         with(connection()) {
             val stmt = prepareStatement(
                 """
-                    SELECT id, sak_id, type, opprettet, data, status, behandling_id
+                    SELECT id, sak_id, type, opprettet, data, status, behandling_id, hendelse_gjelder_rolle, korrekt_i_pdl
                     FROM grunnlagsendringshendelse
                 """.trimIndent()
             )
             return stmt.executeQuery().toList { asGrunnlagsendringshendelse() }
+        }
+    }
+
+    fun oppdaterGrunnlagsendringStatus(
+        hendelseId: UUID,
+        foerStatus: GrunnlagsendringStatus,
+        etterStatus: GrunnlagsendringStatus
+    ) {
+        with(connection()) {
+            prepareStatement(
+                """
+                   UPDATE grunnlagsendringshendelse
+                   SET status = ?
+                   WHERE id = ?
+                   AND status = ?
+                """.trimIndent()
+            ).use {
+                it.setString(1, etterStatus.name)
+                it.setObject(2, hendelseId)
+                it.setString(3, foerStatus.name)
+                it.executeUpdate()
+            }
         }
     }
 
@@ -121,14 +147,14 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         with(connection()) {
             prepareStatement(
                 """
-                   SELECT id, sak_id, type, opprettet, data, status, behandling_id
+                   SELECT id, sak_id, type, opprettet, data, status, behandling_id, hendelse_gjelder_rolle, korrekt_i_pdl
                    FROM grunnlagsendringshendelse
                    WHERE opprettet <= ?
                    AND status = ?
                 """.trimIndent()
             ).use {
                 it.setTimestamp(1, Timestamp.from(Instant.now().minus(minutter, ChronoUnit.MINUTES)))
-                it.setString(2, GrunnlagsendringStatus.IKKE_VURDERT.name)
+                it.setString(2, GrunnlagsendringStatus.VENTER_PAA_JOBB.name)
                 return it.executeQuery().toList { asGrunnlagsendringshendelse() }
             }
         }
@@ -141,7 +167,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         with(connection()) {
             prepareStatement(
                 """
-                    SELECT id, sak_id, type, opprettet, data, status, behandling_id
+                    SELECT id, sak_id, type, opprettet, data, status, behandling_id, hendelse_gjelder_rolle, korrekt_i_pdl
                     FROM grunnlagsendringshendelse
                     WHERE sak_id = ?
                     AND status = ANY(?)
@@ -159,7 +185,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         sakId: Long
     ): List<Grunnlagsendringshendelse> = hentGrunnlagsendringshendelserMedStatuserISak(
         sakId,
-        listOf(GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING)
+        listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)
     )
 
     private fun ResultSet.asGrunnlagsendringshendelse(): Grunnlagsendringshendelse {
@@ -172,7 +198,9 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                     getTimestamp("opprettet").toLocalDateTime(),
                     objectMapper.readValue(getString("data"), Grunnlagsinformasjon.Doedsfall::class.java),
                     GrunnlagsendringStatus.valueOf(getString("status")),
-                    getObject("behandling_id")?.let { it as UUID }
+                    getObject("behandling_id")?.let { it as UUID },
+                    Saksrolle.valueOf(getString("hendelse_gjelder_rolle")),
+                    KorrektIPDL.valueOf(getString("korrekt_i_pdl"))
                 )
             }
             GrunnlagsendringsType.UTFLYTTING -> {
@@ -183,7 +211,9 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                     getTimestamp("opprettet").toLocalDateTime(),
                     objectMapper.readValue(getString("data"), Grunnlagsinformasjon.Utflytting::class.java),
                     GrunnlagsendringStatus.valueOf(getString("status")),
-                    getObject("behandling_id")?.let { it as UUID }
+                    getObject("behandling_id")?.let { it as UUID },
+                    Saksrolle.valueOf(getString("hendelse_gjelder_rolle")),
+                    KorrektIPDL.valueOf(getString("korrekt_i_pdl"))
                 )
             }
             GrunnlagsendringsType.FORELDER_BARN_RELASJON -> {
@@ -194,7 +224,9 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                     getTimestamp("opprettet").toLocalDateTime(),
                     objectMapper.readValue(getString("data"), Grunnlagsinformasjon.ForelderBarnRelasjon::class.java),
                     GrunnlagsendringStatus.valueOf(getString("status")),
-                    getObject("behandling_id")?.let { it as UUID }
+                    getObject("behandling_id")?.let { it as UUID },
+                    Saksrolle.valueOf(getString("hendelse_gjelder_rolle")),
+                    KorrektIPDL.valueOf(getString("korrekt_i_pdl"))
                 )
             }
         }

@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -70,6 +70,6 @@ internal class BeregningRepositoryImplTest {
 
         val beregningHentet = beregningRepository.hent(behandlingId)
 
-        assertEquals(lagretBeregning.toJson(), beregningHentet.toJson())
+        assertTrue(lagretBeregning.toJson() == beregningHentet.toJson())
     }
 }

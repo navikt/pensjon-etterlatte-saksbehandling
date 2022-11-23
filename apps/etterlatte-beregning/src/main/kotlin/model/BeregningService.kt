@@ -18,29 +18,33 @@ import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.model.behandling.BehandlingKlient
+import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-// TODO hvordan håndtere vedtakstidspunkt?
 class BeregningService(
     private val beregningRepository: BeregningRepository,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val grunnlagKlient: GrunnlagKlient,
+    private val behandlingKlient: BehandlingKlient
 ) {
 
     fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
-        // TODO: lag klient fetch grunnlag
         val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
 
         val beregningResultat = beregnResultat(
-            Grunnlag.empty(),
-            YearMonth.now(),
-            YearMonth.now().plusMonths(1L),
+            grunnlag,
+            behandling.virkningstidspunkt!!.dato,
+            YearMonth.now().plusMonths(3),
             vilkaarsvurdering,
-            BehandlingType.FØRSTEGANGSBEHANDLING
+            behandling.behandlingType!!
         )
         val beregning = Beregning(
             beregningId = UUID.randomUUID(),

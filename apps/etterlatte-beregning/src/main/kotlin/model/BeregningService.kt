@@ -14,6 +14,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDate
@@ -30,7 +32,7 @@ class BeregningService(
     fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
-        // TODO lag klient fetch grunnlag og vilkårsvurdering
+        // TODO: lag klient fetch grunnlag
         val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
 
         val beregningResultat = beregnResultat(
@@ -43,7 +45,7 @@ class BeregningService(
         val beregning = Beregning(
             beregningId = UUID.randomUUID(),
             behandlingId = behandlingId,
-            beregnetDato = beregningResultat.beregnetDato,
+            beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
             beregningsperioder = beregningResultat.beregningsperioder,
             grunnlagMetadata = Grunnlag.empty().metadata
         )
@@ -57,7 +59,7 @@ class BeregningService(
         virkTOM: YearMonth,
         vilkaarsvurdering: Vilkaarsvurdering,
         behandlingType: BehandlingType
-    ): BeregningsResultat { // TODO: Bruk vår interne model
+    ): BeregningsResultat { // TODO: Bruk vår interne model i jira
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)

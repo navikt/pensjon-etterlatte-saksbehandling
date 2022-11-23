@@ -20,9 +20,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
-class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
-class UgyldigSakTypeException(override val message: String) : RuntimeException(message)
-
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingKlient: BehandlingKlient,
@@ -69,12 +66,12 @@ class VilkaarsvurderingService(
                             )
                         )
                     else ->
-                        throw VilkaarsvurderingFinnesIkkeException(
+                        throw IllegalArgumentException(
                             "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                         )
                 }
             SakType.OMSTILLINGSSTOENAD ->
-                throw UgyldigSakTypeException("Støtter ikke vilkårsvurdering for sakType=$sakType")
+                throw IllegalArgumentException("Støtter ikke vilkårsvurdering for sakType=$sakType")
         }
     }
 

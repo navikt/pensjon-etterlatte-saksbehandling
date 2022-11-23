@@ -41,7 +41,7 @@ class BeregningService(
 
         val beregningResultat = beregnResultat(
             grunnlag,
-            YearMonth.parse(behandling.virkningstidspunkt.toString()),
+            behandling.virkningstidspunkt!!.dato,
             YearMonth.now().plusMonths(3),
             vilkaarsvurdering,
             behandling.behandlingType!!

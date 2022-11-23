@@ -36,16 +36,11 @@ fun Route.vilkaarsvurdering(
             withBehandlingId { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
 
-                val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
-                if (vilkaarsvurdering != null) {
-                    call.respond(vilkaarsvurdering.toDto())
-                } else {
-                    val opprettetVilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(
-                        behandlingId = behandlingId,
-                        accessToken = getAccessToken(call)
-                    )
-                    call.respond(opprettetVilkaarsvurdering.toDto())
-                }
+                val vilkaarsvurdering = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
+                    behandlingId = behandlingId,
+                    accessToken = getAccessToken(call)
+                )
+                call.respond(vilkaarsvurdering.toDto())
             }
         }
 
@@ -57,7 +52,8 @@ fun Route.vilkaarsvurdering(
                 val oppdatertVilkaarsvurdering =
                     vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
                         behandlingId = behandlingId,
-                        vurdertVilkaar = toVurdertVilkaar(vurdertVilkaarDto, saksbehandler)
+                        vurdertVilkaar = toVurdertVilkaar(vurdertVilkaarDto, saksbehandler),
+                        accessToken = getAccessToken(call)
                     )
 
                 call.respond(oppdatertVilkaarsvurdering)
@@ -70,7 +66,11 @@ fun Route.vilkaarsvurdering(
 
                 logger.info("Sletter vurdering på vilkår $vilkaarType for $behandlingId")
                 val oppdatertVilkaarsvurdering =
-                    vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
+                    vilkaarsvurderingService.slettVurderingPaaVilkaar(
+                        behandlingId = behandlingId,
+                        hovedVilkaarType = vilkaarType,
+                        accessToken = getAccessToken(call)
+                    )
 
                 call.respond(oppdatertVilkaarsvurdering)
             }

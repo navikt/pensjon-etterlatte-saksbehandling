@@ -16,6 +16,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
@@ -229,13 +230,13 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vurdertVilkaar = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
-                ?.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+            val vurdertVilkaar = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(behandlingId, oboToken)
+                .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertNotNull(vurdertVilkaar)
-            assertNotNull(vurdertVilkaar?.vurdering)
-            assertNotNull(vurdertVilkaar?.hovedvilkaar?.resultat)
-            assertEquals(Utfall.OPPFYLT, vurdertVilkaar?.hovedvilkaar?.resultat)
+            assertNotNull(vurdertVilkaar.vurdering)
+            assertNotNull(vurdertVilkaar.hovedvilkaar.resultat)
+            assertEquals(Utfall.OPPFYLT, vurdertVilkaar.hovedvilkaar.resultat)
 
             val vurdertVilkaarMedUnntakDto = VurdertVilkaarDto(
                 hovedvilkaar = VilkaarTypeOgUtfall(
@@ -256,13 +257,16 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vurdertVilkaarPaaUnntak = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
-                ?.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+            val vurdertVilkaarPaaUnntak = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
+                behandlingId,
+                oboToken
+            )
+                .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
-            assertEquals(Utfall.IKKE_OPPFYLT, vurdertVilkaarPaaUnntak?.hovedvilkaar?.resultat)
-            assertNotNull(vurdertVilkaarPaaUnntak?.vurdering)
-            assertNotNull(vurdertVilkaarPaaUnntak?.unntaksvilkaar)
-            vurdertVilkaarPaaUnntak?.unntaksvilkaar?.forEach {
+            assertEquals(Utfall.IKKE_OPPFYLT, vurdertVilkaarPaaUnntak.hovedvilkaar.resultat)
+            assertNotNull(vurdertVilkaarPaaUnntak.vurdering)
+            assertNotNull(vurdertVilkaarPaaUnntak.unntaksvilkaar)
+            vurdertVilkaarPaaUnntak.unntaksvilkaar?.forEach {
                 if (it.type === VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR) {
                     assertEquals(Utfall.OPPFYLT, it.resultat)
                 } else {
@@ -293,12 +297,12 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vurdertVilkaar = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
-                ?.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+            val vurdertVilkaar = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(behandlingId, oboToken)
+                .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertNotNull(vurdertVilkaar)
-            assertNotNull(vurdertVilkaar?.vurdering)
-            assertNotNull(vurdertVilkaar?.hovedvilkaar?.resultat)
+            assertNotNull(vurdertVilkaar.vurdering)
+            assertNotNull(vurdertVilkaar.hovedvilkaar.resultat)
 
             val response = client
                 .delete("/api/vilkaarsvurdering/$behandlingId/${vurdertVilkaarDto.hovedvilkaar.type}") {
@@ -306,13 +310,16 @@ internal class VilkaarsvurderingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val vurdertVilkaarSlettet = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
-                ?.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+            val vurdertVilkaarSlettet = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
+                behandlingId,
+                oboToken
+            ).vilkaar
+                .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertEquals(HttpStatusCode.OK, response.status)
-            assertNull(vurdertVilkaarSlettet?.vurdering)
-            assertNull(vurdertVilkaarSlettet?.hovedvilkaar?.resultat)
-            vurdertVilkaarSlettet?.unntaksvilkaar?.forEach {
+            assertNull(vurdertVilkaarSlettet.vurdering)
+            assertNull(vurdertVilkaarSlettet.hovedvilkaar.resultat)
+            vurdertVilkaarSlettet.unntaksvilkaar?.forEach {
                 assertNull(it.resultat)
             }
         }
@@ -357,11 +364,13 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
-    private suspend fun opprettVilkaarsvurdering() {
-        vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(
-            behandlingId,
-            "token"
-        )
+    private fun opprettVilkaarsvurdering() {
+        runBlocking {
+            vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
+                behandlingId,
+                oboToken
+            )
+        }
     }
 
     private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
@@ -375,6 +384,7 @@ internal class VilkaarsvurderingRoutesTest {
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
+        val oboToken = "token"
         const val ISSUER_ID = "azure"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }

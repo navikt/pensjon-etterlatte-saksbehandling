@@ -30,11 +30,10 @@ class VilkaarsvurderingService(
     private val sendToRapid: (String, UUID) -> Unit
 ) : VedlikeholdService {
 
-    fun hentVilkaarsvurdering(behandlingId: UUID): VilkaarsvurderingIntern? {
-        return vilkaarsvurderingRepository.hent(behandlingId)
-    }
+    suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingIntern =
+        vilkaarsvurderingRepository.hent(behandlingId) ?: opprettVilkaarsvurdering(behandlingId, accessToken)
 
-    suspend fun opprettVilkaarsvurdering(
+    private suspend fun opprettVilkaarsvurdering(
         behandlingId: UUID,
         accessToken: String
     ): VilkaarsvurderingIntern {
@@ -109,26 +108,34 @@ class VilkaarsvurderingService(
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): VilkaarsvurderingIntern {
-        return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
+    suspend fun oppdaterVurderingPaaVilkaar(
+        behandlingId: UUID,
+        vurdertVilkaar: VurdertVilkaar,
+        accessToken: String
+    ): VilkaarsvurderingIntern {
+        return hentEllerOpprettVilkaarsvurdering(behandlingId, accessToken).let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
                     oppdaterVurdering(it, vurdertVilkaar)
                 }
             )
             vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
-        } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
+        }
     }
 
-    fun slettVurderingPaaVilkaar(behandlingId: UUID, hovedVilkaarType: VilkaarType): VilkaarsvurderingIntern {
-        return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
+    suspend fun slettVurderingPaaVilkaar(
+        behandlingId: UUID,
+        hovedVilkaarType: VilkaarType,
+        accessToken: String
+    ): VilkaarsvurderingIntern {
+        return hentEllerOpprettVilkaarsvurdering(behandlingId, accessToken).let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
                     slettVurdering(it, hovedVilkaarType)
                 }
             )
             vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
-        } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
+        }
     }
 
     fun publiserVilkaarsvurdering(

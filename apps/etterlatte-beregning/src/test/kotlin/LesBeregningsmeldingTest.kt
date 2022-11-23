@@ -22,7 +22,7 @@ internal class LesBeregningsmeldingTest {
         TestRapid().apply {
             LesBeregningsmelding(
                 this,
-                BeregningService(beregningRepository, vilkaarsvurderingKlientImpl)
+                BeregningService(beregningRepository, vilkaarsvurderingKlientImpl, mockk(), mockk())
             )
         }
     )

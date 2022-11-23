@@ -48,7 +48,7 @@ internal class BeregningRepositoryImplTest {
     fun `lagre() skal returnere samme data som faktisk ble lagret`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        val beregningResultat = BeregningService(beregningRepository, mockk()).beregnResultat(
+        val beregningResultat = BeregningService(beregningRepository, mockk(), mockk(), mockk()).beregnResultat(
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2021, 9),
@@ -76,7 +76,7 @@ internal class BeregningRepositoryImplTest {
     fun `det som hentes ut skal være likt det som originalt ble lagret`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        val beregningResultat = BeregningService(beregningRepository, mockk()).beregnResultat(
+        val beregningResultat = BeregningService(beregningRepository, mockk(), mockk(), mockk()).beregnResultat(
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2021, 9),

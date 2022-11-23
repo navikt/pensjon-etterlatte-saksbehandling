@@ -13,7 +13,9 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.model.BeregningService
 import no.nav.etterlatte.model.VilkaarsvurderingKlient
+import no.nav.etterlatte.model.behandling.BehandlingKlientImpl
 import no.nav.etterlatte.model.beregnSisteTom
+import no.nav.etterlatte.model.grunnlag.GrunnlagKlientImpl
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -28,6 +30,8 @@ internal class BeregningServiceTest {
     private val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
     private val beregningRepository = mockk<BeregningRepository>()
     private val vilkaarsvurderingKlientImpl = mockk<VilkaarsvurderingKlient>()
+    private val grunnlagKlientImpl = mockk<GrunnlagKlientImpl>()
+    private val behandlingKlientImpl = mockk<BehandlingKlientImpl>()
     private val testData = GrunnlagTestData(
         opplysningsmapSoeskenOverrides = mapOf(
             Opplysningstype.FOEDSELSDATO to Opplysning.Konstant(
@@ -39,7 +43,12 @@ internal class BeregningServiceTest {
     )
     private val opplysningsgrunnlag = testData.hentOpplysningsgrunnlag()
 
-    private val beregningsperioder = BeregningService(beregningRepository, vilkaarsvurderingKlientImpl).beregnResultat(
+    private val beregningsperioder = BeregningService(
+        beregningRepository,
+        vilkaarsvurderingKlientImpl,
+        grunnlagKlientImpl,
+        behandlingKlientImpl
+    ).beregnResultat(
         opplysningsgrunnlag,
         YearMonth.of(2021, 2),
         YearMonth.of(2021, 9),
@@ -72,7 +81,12 @@ internal class BeregningServiceTest {
     fun `ved revurdering og ikke oppfylte vilkaar skal beregningsresultat settes til kr 0`() {
         val virkFOM = YearMonth.of(2022, 5)
         val virkTOM = YearMonth.of(2022, 10)
-        val resultat = BeregningService(beregningRepository, vilkaarsvurderingKlientImpl).beregnResultat(
+        val resultat = BeregningService(
+            beregningRepository,
+            vilkaarsvurderingKlientImpl,
+            grunnlagKlientImpl,
+            behandlingKlientImpl
+        ).beregnResultat(
             grunnlag = Grunnlag.empty(),
             virkFOM = virkFOM,
             virkTOM = virkTOM,
@@ -88,7 +102,12 @@ internal class BeregningServiceTest {
     @Test
     fun `ved manuelt opphoer skal virkFOM settes til foerste i maaneden etter doedsdato`() {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val resultat = BeregningService(beregningRepository, vilkaarsvurderingKlientImpl).beregnResultat(
+        val resultat = BeregningService(
+            beregningRepository,
+            vilkaarsvurderingKlientImpl,
+            grunnlagKlientImpl,
+            behandlingKlientImpl
+        ).beregnResultat(
             grunnlag = grunnlag,
             virkFOM = mockk(),
             virkTOM = mockk(),

@@ -14,6 +14,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDate
@@ -43,7 +45,7 @@ class BeregningService(
         val beregning = Beregning(
             beregningId = UUID.randomUUID(),
             behandlingId = behandlingId,
-            beregnetDato = beregningResultat.beregnetDato,
+            beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
             beregningsperioder = beregningResultat.beregningsperioder,
             grunnlagMetadata = Grunnlag.empty().metadata
         )

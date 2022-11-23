@@ -9,14 +9,14 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningsperiodeDAO
-import java.lang.IllegalStateException
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
-import kotlin.NoSuchElementException
 
 interface BeregningRepository {
     fun lagre(beregning: Beregning): Beregning
@@ -34,7 +34,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                         "id" to UUID.randomUUID(),
                         "beregningId" to beregning.beregningId,
                         "behandlingId" to beregning.behandlingId,
-                        "beregnetDato" to beregning.beregnetDato,
+                        "beregnetDato" to beregning.beregnetDato.toTimestamp(),
                         "datoFOM" to it.datoFOM.toString(),
                         "datoTOM" to it.datoTOM?.toString(),
                         "utbetaltBeloep" to it.utbetaltBeloep,
@@ -70,7 +70,7 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
     BeregningsperiodeDAO(
         beregningId = uuid(BeregningsperiodeDatabaseColumns.BeregningId.navn),
         behandlingId = uuid(BeregningsperiodeDatabaseColumns.BehandlingId.navn),
-        beregnetDato = localDateTime(BeregningsperiodeDatabaseColumns.BeregnetDato.navn),
+        beregnetDato = sqlTimestamp(BeregningsperiodeDatabaseColumns.BeregnetDato.navn).toTidspunkt(),
         datoFOM = YearMonth.parse(string(BeregningsperiodeDatabaseColumns.DatoFOM.navn)),
         datoTOM = stringOrNull(BeregningsperiodeDatabaseColumns.DatoTOM.navn)?.let { YearMonth.parse(it) },
         utbetaltBeloep = int(BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn),

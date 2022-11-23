@@ -5,6 +5,8 @@ import no.nav.etterlatte.BeregningRepositoryImpl
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
@@ -59,7 +61,7 @@ internal class BeregningRepositoryImplTest {
             beregningId = beregningResultat.id,
             behandlingId = behandlingId,
             beregningsperioder = beregningResultat.beregningsperioder,
-            beregnetDato = beregningResultat.beregnetDato,
+            beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
             grunnlagMetadata = Metadata(
                 sakId = 0,
                 versjon = beregningResultat.grunnlagVersjon
@@ -87,7 +89,7 @@ internal class BeregningRepositoryImplTest {
             beregningId = beregningResultat.id,
             behandlingId = behandlingId,
             beregningsperioder = beregningResultat.beregningsperioder,
-            beregnetDato = beregningResultat.beregnetDato,
+            beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
             grunnlagMetadata = Metadata(
                 sakId = 0,
                 versjon = beregningResultat.grunnlagVersjon

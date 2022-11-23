@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
-import { Alert, Button, Label, Loader } from '@navikt/ds-react'
+import { Alert, Button, Label } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
 import { GyldighetIcon } from '~shared/icons/gyldigIcon'
 import { oppdaterVirkningstidspunkt, VurderingsResultat } from '~store/reducers/BehandlingReducer'
@@ -117,10 +117,11 @@ const Virkningstidspunkt = () => {
                           setRediger(false)
                         })
                       }}
+                      loading={isPending(virkningstidspunkt)}
                       size="small"
                       variant="primary"
                     >
-                      Lagre {isPending(virkningstidspunkt) && <Loader />}
+                      Lagre
                     </Button>
                     <Button size="small" variant="secondary" onClick={() => setRediger(false)}>
                       Avbryt

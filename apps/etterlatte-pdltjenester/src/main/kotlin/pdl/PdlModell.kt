@@ -391,7 +391,7 @@ data class PdlForelderBarnRelasjon(
     val folkeregistermetadata: PdlFolkeregistermetadata? = null,
     val metadata: PdlMetadata,
     val minRolleForPerson: PdlForelderBarnRelasjonRolle? = null,
-    val relatertPersonsIdent: String,
+    val relatertPersonsIdent: String?,
     val relatertPersonsRolle: PdlForelderBarnRelasjonRolle
 )
 

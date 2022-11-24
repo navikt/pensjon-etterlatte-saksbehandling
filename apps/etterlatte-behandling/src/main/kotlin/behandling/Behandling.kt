@@ -41,7 +41,6 @@ sealed interface Behandling {
                 is Foerstegangsbehandling -> hentVirkningstidspunkt()
                 is ManueltOpphoer -> null
                 is Revurdering -> null
-                else -> null
             },
             kommerBarnetTilgode = kommerBarnetTilgode
         )

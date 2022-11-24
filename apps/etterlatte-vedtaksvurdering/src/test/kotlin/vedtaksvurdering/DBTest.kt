@@ -1,7 +1,6 @@
 package vedtaksvurdering
 
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -11,6 +10,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.vedtaksvurdering.database.DataSourceBuilder
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import org.junit.jupiter.api.AfterAll

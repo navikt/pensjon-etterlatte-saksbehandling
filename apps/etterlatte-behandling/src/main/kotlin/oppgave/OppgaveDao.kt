@@ -5,13 +5,16 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsOppgave
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.sak.Sak
+import java.sql.Connection
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
-import javax.sql.DataSource
 
 enum class Rolle {
     SAKSBEHANDLER, ATTESTANT
@@ -28,37 +31,21 @@ data class Oppgave(
     val antallSoesken: Int
 )
 
-class OppgaveDao(private val datasource: DataSource) {
+class OppgaveDao(private val connection: () -> Connection) {
 
-    fun finnOppgaverForRoller(roller: List<Rolle>): List<Oppgave> {
-        val aktuelleStatuser = roller.flatMap {
-            when (it) {
-                Rolle.SAKSBEHANDLER -> listOf(
-                    BehandlingStatus.UNDER_BEHANDLING,
-                    BehandlingStatus.GYLDIG_SOEKNAD,
-                    BehandlingStatus.RETURNERT
-                )
-                Rolle.ATTESTANT -> listOf(BehandlingStatus.FATTET_VEDTAK)
-            }
-        }.distinct()
+    fun finnOppgaverMedStatuser(statuser: List<BehandlingStatus>): List<Oppgave> {
+        if (statuser.isEmpty()) return emptyList()
 
-        if (aktuelleStatuser.isEmpty()) return emptyList()
-
-        datasource.connection.use {
+        connection().use {
             val stmt = it.prepareStatement(
                 """
                 |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status, oppgave_status, behandling_opprettet,
                 |behandlingstype, soesken 
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
-                |WHERE status IN ${
-                aktuelleStatuser.joinToString(
-                    separator = ", ",
-                    prefix = "(",
-                    postfix = ")"
-                ) { "'${it.name}'" }
-                }
+                |WHERE status = ANY(?)
                 """.trimMargin()
             )
+            stmt.setArray(1, it.createArrayOf("text", statuser.toTypedArray()))
             return stmt.executeQuery().toList {
                 val mottattDato = getTimestamp("soekand_mottatt_dato")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
                     ?: getTimestamp("behandling_opprettet")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
@@ -76,7 +63,31 @@ class OppgaveDao(private val datasource: DataSource) {
                     antallSoesken(getString("soesken"))
                 )
             }.also {
-                println("""Hentet oppgaveliste for bruker med roller $roller. Fant ${it.size} oppgaver""")
+                println("""Hentet oppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver""")
+            }
+        }
+    }
+
+    fun finnOppgaverFraGrunnlagsendringshendelser(): List<GrunnlagsendringsOppgave> {
+        connection().use { connection ->
+            val stmt = connection.prepareStatement(
+                """
+                SELECT g.sak_id, g.type, g.behandling_id, g.opprettet, s.fnr, s.saktype 
+                FROM grunnlagsendringshendelse g 
+                INNER JOIN sak s ON g.sak_id = s.id
+                WHERE status = ?
+                """.trimIndent()
+            )
+            stmt.setString(1, GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING.name)
+            return stmt.executeQuery().toList {
+                GrunnlagsendringsOppgave(
+                    sakId = getLong("sak_id"),
+                    sakType = enumValueOf(getString("saktype")),
+                    type = enumValueOf(getString("type")),
+                    opprettet = getTimestamp("opprettet").toLocalDateTime(),
+                    bruker = Foedselsnummer.of(getString("fnr")),
+                    behandlingId = getObject("behandling_id")?.let { it as UUID }
+                )
             }
         }
     }

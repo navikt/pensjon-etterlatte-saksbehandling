@@ -1,5 +1,18 @@
 [
   {
+    "sakId": 6,
+    "status": "OPPRETTET",
+    "oppgaveStatus": "NY",
+    "soeknadType": "Barnepensjon",
+    "behandlingType": "HENDELSE",
+    "beskrivelse": "Utflytting søker",
+    "regdato": "2022-10-21T05:47:08.644",
+    "fristdato": "2022-11-29T05:47:08.644",
+    "fnr": "29081276127",
+    "saksbehandler": "Truls Veileder",
+    "handling": "SE_PAA_SAK"
+  },
+  {
     "behandlingsId": "9",
     "sakId": 6,
     "status": "OPPRETTET",

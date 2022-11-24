@@ -1,10 +1,12 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsOppgave
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.objectMapper
@@ -30,13 +32,14 @@ interface EtterlatteBehandling {
     suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean
     suspend fun opprettManueltOpphoer(manueltOpphoerRequest: ManueltOpphoerRequest, accessToken: String):
         Result<ManueltOpphoerResponse>
-
     suspend fun hentGrunnlagsendringshendelserForSak(sakId: Int, accessToken: String): GrunnlagsendringshendelseListe
     suspend fun fastsettVirkningstidspunkt(
         behandlingId: String,
         dato: YearMonth,
         accessToken: String
     ): VirkningstidspunktResponse
+
+    suspend fun hentUhaandterteGrunnlagshendelser(accessToken: String): List<GrunnlagsendringsOppgave>
 }
 
 data class GrunnlagsendringshendelseListe(val hendelser: List<Grunnlagsendringshendelse>)
@@ -266,7 +269,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                         }
                     )
             logger.info("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} vellykket: $json")
-            val response = objectMapper.readValue(json.toString(), ManueltOpphoerResponse::class.java)
+            val response: ManueltOpphoerResponse = objectMapper.readValue(json.toString())
             Result.success(response)
         } catch (e: Exception) {
             logger.error("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} feilet. ", e)
@@ -289,7 +292,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                         throw Error(throwableErrorMessage.message, throwableErrorMessage.throwable)
                     }
                 )
-            objectMapper.readValue(json.toString(), GrunnlagsendringshendelseListe::class.java)
+            objectMapper.readValue(json.toString())
         } catch (e: Exception) {
             logger.error("Kunne ikke hente grunnlagsendringshendelser for sak med id $sakId på grunn av feil", e)
             throw e
@@ -314,9 +317,26 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                 }
             )
 
-        return objectMapper.readValue(json.toString(), VirkningstidspunktResponse::class.java)
+        return objectMapper.readValue(json.toString())
+    }
+
+    override suspend fun hentUhaandterteGrunnlagshendelser(accessToken: String): List<GrunnlagsendringsOppgave> {
+        val json = downstreamResourceClient.get(
+            Resource(clientId, "$resourceUrl/oppgaver/endringshendelser"),
+            accessToken
+        )
+            .mapBoth(
+                success = { res -> res.response },
+                failure = {
+                    throw Error(it.message, it.throwable)
+                }
+            )
+        val res: GrunnlagsendringsoppgaverDto = objectMapper.readValue(json.toString())
+        return res.oppgaver
     }
 }
+
+data class GrunnlagsendringsoppgaverDto(val oppgaver: List<GrunnlagsendringsOppgave>)
 
 data class ManueltOpphoerResponse(val behandlingId: String)
 data class VirkningstidspunktResponse(val dato: YearMonth, val kilde: Kilde) {

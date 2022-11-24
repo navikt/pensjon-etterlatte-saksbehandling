@@ -3,17 +3,26 @@ import { Button } from '@navikt/ds-react'
 import { handlinger, Handlinger } from '../typer/oppgavebenken'
 import { useNavigate } from 'react-router-dom'
 
-const HandlingerKnapp: React.FC<{ handling: Handlinger; behandlingsId: string }> = ({ handling, behandlingsId }) => {
+const HandlingerKnapp: React.FC<{ handling: Handlinger; behandlingsId?: string; person: string }> = ({
+  handling,
+  behandlingsId,
+  person,
+}) => {
   const navigate = useNavigate()
 
-  const goToBehandling = () => {
-    navigate(`behandling/${behandlingsId}`)
+  const utfoerHandling = () => {
+    switch (handling) {
+      case Handlinger.BEHANDLE:
+        navigate(`behandling/${behandlingsId}`)
+        break
+      case Handlinger.SE_PAA_SAK:
+        navigate(`person/${person}`)
+        break
+    }
   }
 
-  //TODO skru på denne funksjonaliteten etter oppgavhåndteringer avklart
-  //return sakErTildeltInnloggetSaksbehandler ? (
   return (
-    <Button size={'small'} onClick={goToBehandling} variant={'secondary'}>
+    <Button size={'small'} onClick={utfoerHandling} variant={'secondary'}>
       {handlinger[handling]?.navn}
     </Button>
   )

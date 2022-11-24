@@ -40,7 +40,6 @@ import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
@@ -105,7 +104,7 @@ fun Application.module(beanFactory: BeanFactory) {
                 beanFactory.revurderingService(),
                 beanFactory.manueltOpphoerService()
             )
-            oppgaveRoutes(OppgaveDao(ds.dataSource))
+            oppgaveRoutes(beanFactory.oppgaveService())
             grunnlagsendringshendelseRoute(beanFactory.grunnlagsendringshendelseService())
         }
     }

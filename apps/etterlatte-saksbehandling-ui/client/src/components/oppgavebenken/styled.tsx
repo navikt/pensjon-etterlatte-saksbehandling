@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 import { BehandlingTypeFilter, SoeknadTypeFilter } from './typer/oppgavebenken'
+import React from 'react'
 
 export const FilterElement = styled.div`
   margin-bottom: 2rem;
@@ -22,6 +23,8 @@ const colors = {
   [SoeknadTypeFilter.VELG]: '#ffffff',
   [SoeknadTypeFilter.GJENLEVENDEPENSJON]: '#337885',
   [SoeknadTypeFilter.BARNEPENSJON]: '#5da499',
+  [BehandlingTypeFilter.HENDELSE]: 'rgba(193, 203, 51, 1)',
+  [BehandlingTypeFilter.MANUELT_OPPHOER]: 'rgba(0, 91, 130, 1)',
 }
 
 export const ColorTag: React.FC<{ type: BehandlingTypeFilter | SoeknadTypeFilter; label: string }> = ({

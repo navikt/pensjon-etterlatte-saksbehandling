@@ -44,10 +44,6 @@ class PdlService(
             foedselsnummer = fnr,
             rolle = PersonRolle.BARN
         ).doedsdato?.let { doedsdato ->
-            logger.info(
-                "Person med fnr $fnr er doed i pdl " +
-                    "med doedsdato: $doedsdato"
-            )
             KorrektIPDL.JA
         } ?: KorrektIPDL.NEI
     }

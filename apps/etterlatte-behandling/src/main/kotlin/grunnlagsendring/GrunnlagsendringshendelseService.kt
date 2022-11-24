@@ -34,6 +34,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun hentAlleHendelserForSak(sakId: Long) = inTransaction {
+        logger.info("Henter alle hendelser for sak $sakId")
         grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
             GrunnlagsendringStatus.values().toList()
@@ -49,6 +50,7 @@ class GrunnlagsendringshendelseService(
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
         generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(doedshendelse.avdoedFnr).map { rolleOgSak ->
             inTransaction {
+                logger.info("Oppretter grunnlagsendringshendelse for doedshendelse: $doedshendelse")
                 grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                     Grunnlagsendringshendelse(
                         id = UUID.randomUUID(),
@@ -68,6 +70,7 @@ class GrunnlagsendringshendelseService(
 
         generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(utflyttingsHendelse.fnr).map { rolleOgSak ->
             inTransaction {
+                logger.info("Oppretter grunnlagsendringshendelse for utflyttingshendelse: $utflyttingsHendelse")
                 grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                     Grunnlagsendringshendelse(
                         id = UUID.randomUUID(),
@@ -89,6 +92,10 @@ class GrunnlagsendringshendelseService(
         generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(forelderBarnRelasjonHendelse.fnr)
             .map { rolleOgSak ->
                 inTransaction {
+                    logger.info(
+                        "Oppretter grunnlagsendringshendelse for forelder-barn-relasjon-hendelse: " +
+                            "$forelderBarnRelasjonHendelse"
+                    )
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(
                             id = UUID.randomUUID(),
@@ -136,6 +143,10 @@ class GrunnlagsendringshendelseService(
 
     private fun haandterSoekerErUtflyttet(korrektIPDL: KorrektIPDL, hendelseId: UUID) {
         inTransaction {
+            logger.info(
+                "Grunnlagsendringshendelse for utflytting med id $hendelseId er naa sjekket av jobb " +
+                    "og har korrektIPDL-verdi: ${korrektIPDL.name}"
+            )
             grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
                 hendelseId = hendelseId,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
@@ -147,6 +158,10 @@ class GrunnlagsendringshendelseService(
 
     private fun haandterForelderBarnRelasjon(korrektIPDL: KorrektIPDL, hendelseId: UUID) {
         inTransaction {
+            logger.info(
+                "Grunnlagsendringshendelse for forelder-barn-relasjon med id $hendelseId er naa sjekket av jobb " +
+                    "og har korrektIPDL-verdi: ${korrektIPDL.name}"
+            )
             grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
                 hendelseId = hendelseId,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
@@ -176,6 +191,10 @@ class GrunnlagsendringshendelseService(
         when (sisteBehandling.status) {
             in underBehandling() + iverksattEllerAttestert() -> {
                 inTransaction {
+                    logger.info(
+                        "Grunnlagsendringshendelse for doedsfall med id $hendelseId er naa sjekket av jobb " +
+                            "og har korrektIPDL-verdi: ${korrektIPDL.name}"
+                    )
                     grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
                         hendelseId = hendelseId,
                         foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
@@ -190,6 +209,7 @@ class GrunnlagsendringshendelseService(
 
     private fun forkastHendelse(hendelseId: UUID, korrektIPDL: KorrektIPDL) =
         inTransaction {
+            logger.info("Forkaster grunnlagsendringshendelse med id $hendelseId.")
             grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
                 hendelseId = hendelseId,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,

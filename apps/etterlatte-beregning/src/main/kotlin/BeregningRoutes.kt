@@ -15,14 +15,14 @@ import java.util.*
 
 fun Route.beregning(beregningService: BeregningService) {
     route("/api/beregning") {
-        get("/{beregningsid}") {
+        get("/{behandlingId}") {
             withBehandlingId {
                 val beregning = beregningService.hentBeregning(it)
                 call.respond(beregning)
             }
         }
 
-        post("/{behandlingsid}/opprett") {
+        post("/{behandlingId}") {
             withBehandlingId {
                 val accessToken = getAccessToken(call)
                 val beregning = beregningService.lagreBeregning(it, accessToken)

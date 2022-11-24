@@ -49,14 +49,15 @@ class PdlService(
     }
 
     fun personHarUtflytting(fnr: String): KorrektIPDL {
-        return if (!hentPdlModell(
-                foedselsnummer = fnr,
-                rolle = PersonRolle.BARN
-            ).utland?.utflyttingFraNorge.isNullOrEmpty()
-        ) {
-            KorrektIPDL.JA
-        } else {
+        val brukerHarIkkeUtflytting = hentPdlModell(
+            foedselsnummer = fnr,
+            rolle = PersonRolle.BARN
+        ).utland?.utflyttingFraNorge.isNullOrEmpty()
+
+        return if (brukerHarIkkeUtflytting) {
             KorrektIPDL.NEI
+        } else {
+            KorrektIPDL.JA
         }
     }
 

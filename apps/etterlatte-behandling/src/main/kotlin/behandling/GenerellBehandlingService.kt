@@ -48,9 +48,7 @@ class RealGenerellBehandlingService(
     private val manueltOpphoerService: ManueltOpphoerService
 ) : GenerellBehandlingService {
 
-    companion object {
-        val logger = LoggerFactory.getLogger(RealGenerellBehandlingService::class.java)
-    }
+    val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun hentBehandlinger(): List<Behandling> {
         return inTransaction { behandlinger.alleBehandlinger() }
@@ -86,13 +84,12 @@ class RealGenerellBehandlingService(
             if (!behandling.status.kanAvbrytes()) {
                 throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
             }
-            behandlinger.avbrytBehandling(behandlingId)
-                .also {
-                    hendelser.behandlingAvbrutt(behandling, saksbehandler)
-                    runBlocking {
-                        behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
-                    }
+            behandlinger.avbrytBehandling(behandlingId).also {
+                hendelser.behandlingAvbrutt(behandling, saksbehandler)
+                runBlocking {
+                    behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
                 }
+            }
         }
     }
 

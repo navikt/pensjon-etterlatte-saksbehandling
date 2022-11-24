@@ -22,6 +22,11 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import java.time.Instant
 import java.time.LocalDate
@@ -177,3 +182,27 @@ fun kommerBarnetTilgode(
     begrunnelse: String = "En begrunnelse",
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("S01", Instant.now())
 ) = KommerBarnetTilgode(svar, begrunnelse, kilde)
+
+fun mockPerson(
+    doedsdato: LocalDate? = null,
+    utland: Utland? = null
+) = Person(
+    fornavn = "Test",
+    etternavn = "Testulfsen",
+    foedselsnummer = Foedselsnummer.of("70078749472"),
+    foedselsdato = LocalDate.parse("2020-06-10"),
+    foedselsaar = 1985,
+    foedeland = null,
+    doedsdato = doedsdato,
+    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+    bostedsadresse = null,
+    deltBostedsadresse = null,
+    kontaktadresse = null,
+    oppholdsadresse = null,
+    sivilstatus = null,
+    statsborgerskap = null,
+    utland = utland,
+    familieRelasjon = FamilieRelasjon(null, null, null),
+    avdoedesBarn = null,
+    vergemaalEllerFremtidsfullmakt = null
+)

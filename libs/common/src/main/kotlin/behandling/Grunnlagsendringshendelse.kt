@@ -29,7 +29,7 @@ sealed class Grunnlagsinformasjon {
         val hendelse: UtflyttingsHendelse
     ) : Grunnlagsinformasjon()
 
-    @JsonTypeName("DOEDSFALL") // FØR: "SOEKER_DOED"
+    @JsonTypeName("DOEDSFALL")
     data class Doedsfall(
         val hendelse: Doedshendelse
     ) : Grunnlagsinformasjon()

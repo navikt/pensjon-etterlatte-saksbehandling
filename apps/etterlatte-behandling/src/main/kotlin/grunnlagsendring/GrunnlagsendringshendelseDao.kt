@@ -96,24 +96,21 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
     }
 
     fun settBehandlingIdForTattMedIBehandling(
-        sak: Long,
-        behandlingId: UUID,
-        type: GrunnlagsendringsType
+        grlaghendelseId: UUID,
+        behandlingId: UUID
     ) {
         with(connection()) {
             prepareStatement(
                 """
                    UPDATE grunnlagsendringshendelse
                    SET behandling_id = ?
-                   WHERE sak_id = ?
+                   WHERE id = ?
                    AND status = ?
-                   AND type = ?
                 """.trimIndent()
             ).use {
                 it.setObject(1, behandlingId)
-                it.setLong(2, sak)
+                it.setObject(2, grlaghendelseId)
                 it.setString(3, GrunnlagsendringStatus.TATT_MED_I_BEHANDLING.name)
-                it.setString(4, type.name)
                 it.executeUpdate()
             }
         }
@@ -159,7 +156,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
-    fun hentGyldigeGrunnlagsendringshendelserISak(
+    fun hentGrunnlagsendringshendelserSomErSjekketAvJobb(
         sakId: Long
     ): List<Grunnlagsendringshendelse> = hentGrunnlagsendringshendelserMedStatuserISak(
         sakId,

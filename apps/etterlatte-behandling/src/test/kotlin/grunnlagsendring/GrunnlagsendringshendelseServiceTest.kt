@@ -3,12 +3,10 @@ package no.nav.etterlatte.grunnlagsendring
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GenerellBehandlingService
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendringshendelse
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
@@ -86,12 +84,10 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { alleSakIderForSoekerMedFnr("Soeker") } returns listOf(1L)
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val revurderingService = mockk<RevurderingService>()
         val pdlService = mockk<PdlService>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
-            revurderingService,
             pdlService
         )
 
@@ -146,12 +142,10 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { alleSakIderForSoekerMedFnr("Soeker") } returns listOf(1L)
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val revurderingService = mockk<RevurderingService>()
         val pdlService = mockk<PdlService>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
-            revurderingService,
             pdlService
         )
 
@@ -222,6 +216,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { hentPdlModell(avdoedFnr, PersonRolle.BARN) } returns mockk {
                 every { doedsdato } returns LocalDate.of(2022, 10, 8)
             }
+            every { personErDoed(avdoedFnr) } returns KorrektIPDL.JA
         }
         val behandlingId = UUID.randomUUID()
         val generellBehandlingService = mockk<GenerellBehandlingService> {
@@ -233,16 +228,13 @@ internal class GrunnlagsendringshendelseServiceTest {
                 }
             )
         }
-        val revurderingService = mockk<RevurderingService>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
-            revurderingService,
             pdlService
         )
         grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(minutter)
 
         assertEquals(grlg_id, idArg.captured)
-        verify(exactly = 0) { revurderingService.startRevurdering(any(), any(), any()) }
     }
 }

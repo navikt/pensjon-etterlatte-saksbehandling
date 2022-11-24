@@ -279,7 +279,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
-        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(sak1, revurderingId, grunnlagsendringstype)
+        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(hendelseId, revurderingId)
         val lagretHendelse = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(hendelseId)
         assertEquals(revurderingId, lagretHendelse?.behandlingId)
     }
@@ -330,7 +330,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             korrektIPDL = KorrektIPDL.JA
         )
 
-        val resultat = grunnlagsendringshendelsesRepo.hentGyldigeGrunnlagsendringshendelserISak(sak2)
+        val resultat = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sak2)
 
         assertEquals(2, resultat.size)
         assertTrue(resultat.all { it.status == GrunnlagsendringStatus.SJEKKET_AV_JOBB })

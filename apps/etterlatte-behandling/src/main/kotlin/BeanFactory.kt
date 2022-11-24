@@ -138,7 +138,6 @@ abstract class CommonFactory : BeanFactory {
         GrunnlagsendringshendelseService(
             grunnlagsendringshendelseDao(),
             generellBehandlingService(),
-            revurderingService(),
             pdlService()
         )
 

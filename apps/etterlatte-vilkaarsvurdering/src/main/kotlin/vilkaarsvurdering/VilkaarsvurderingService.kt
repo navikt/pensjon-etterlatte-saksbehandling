@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -15,44 +14,42 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
+import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
-class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
-class UgyldigSakTypeException(override val message: String) : RuntimeException(message)
+class VirkningstidspunktIkkeSattException(message: String) : RuntimeException(message)
 
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
+    private val behandlingKlient: BehandlingKlient,
+    private val grunnlagKlient: GrunnlagKlient,
     private val sendToRapid: (String, UUID) -> Unit
 ) : VedlikeholdService {
 
-    fun hentVilkaarsvurdering(behandlingId: UUID): VilkaarsvurderingIntern? {
-        return vilkaarsvurderingRepository.hent(behandlingId)
-    }
+    suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingIntern =
+        vilkaarsvurderingRepository.hent(behandlingId) ?: opprettVilkaarsvurdering(behandlingId, accessToken)
 
-    private fun mapVilkaarRevurdering(
-        revurderingAarsak: RevurderingAarsak
-    ): List<Vilkaar> {
-        return when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> BarnepensjonVilkaar.loependevilkaar()
-            RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
-                "Du kan ikke ha et manuelt opphør på en revurdering"
-            )
-        }
-    }
-
-    fun opprettVilkaarsvurdering(
+    private suspend fun opprettVilkaarsvurdering(
         behandlingId: UUID,
-        sakType: SakType,
-        behandlingType: BehandlingType,
-        virkningstidspunkt: Virkningstidspunkt,
-        grunnlag: Grunnlag,
-        revurderingAarsak: RevurderingAarsak?
+        accessToken: String
     ): VilkaarsvurderingIntern {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
+        val sakType = SakType.BARNEPENSJON // TODO Hardkodet - bør kunne hentes fra behandling
+
+        val virkningstidspunkt = behandling.virkningstidspunkt
+            ?: throw VirkningstidspunktIkkeSattException("Virkningstidspunkt ikke satt for behandling $behandlingId")
+
+        requireNotNull(behandling.behandlingType) { // TODO gir det mening at denne er optional?!
+            "BehandlingType ikke satt for behandling $behandlingId"
+        }
+
         return when (sakType) {
             SakType.BARNEPENSJON ->
-                when (behandlingType) {
+                when (behandling.behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
@@ -66,25 +63,44 @@ class VilkaarsvurderingService(
                         vilkaarsvurderingRepository.lagre(
                             VilkaarsvurderingIntern(
                                 behandlingId = behandlingId,
-                                vilkaar = mapVilkaarRevurdering(requireNotNull(revurderingAarsak)),
+                                vilkaar = mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak)),
                                 virkningstidspunkt = virkningstidspunkt,
                                 grunnlagsmetadata = grunnlag.metadata
                             )
                         )
                     else ->
-                        throw VilkaarsvurderingFinnesIkkeException(
-                            "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"
+                        throw IllegalArgumentException(
+                            "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                         )
                 }
             SakType.OMSTILLINGSSTOENAD ->
-                throw UgyldigSakTypeException("Støtter ikke vilkårsvurdering for sakType=$sakType")
+                throw IllegalArgumentException("Støtter ikke vilkårsvurdering for sakType=$sakType")
         }
     }
 
-    fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): VilkaarsvurderingIntern {
-        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
+    suspend fun oppdaterTotalVurdering(
+        behandlingId: UUID,
+        resultat: VilkaarsvurderingResultat,
+        accessToken: String
+    ): VilkaarsvurderingIntern {
+        val oppdatertVilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = resultat))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
+
+        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+
+        publiserVilkaarsvurdering(
+            vilkaarsvurdering = oppdatertVilkaarsvurdering,
+            grunnlag = grunnlagKlient
+                .hentGrunnlagMedVersjon(
+                    oppdatertVilkaarsvurdering.grunnlagsmetadata.sakId,
+                    oppdatertVilkaarsvurdering.grunnlagsmetadata.versjon,
+                    accessToken
+                ),
+            behandling = behandling
+        )
+
+        return oppdatertVilkaarsvurdering
     }
 
     fun slettTotalVurdering(behandlingId: UUID): VilkaarsvurderingIntern {
@@ -93,26 +109,32 @@ class VilkaarsvurderingService(
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): VilkaarsvurderingIntern {
-        return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
+    fun oppdaterVurderingPaaVilkaar(
+        behandlingId: UUID,
+        vurdertVilkaar: VurdertVilkaar
+    ): VilkaarsvurderingIntern {
+        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
                     oppdaterVurdering(it, vurdertVilkaar)
                 }
             )
             vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
-        } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
+        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun slettVurderingPaaVilkaar(behandlingId: UUID, hovedVilkaarType: VilkaarType): VilkaarsvurderingIntern {
-        return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
+    fun slettVurderingPaaVilkaar(
+        behandlingId: UUID,
+        hovedVilkaarType: VilkaarType
+    ): VilkaarsvurderingIntern {
+        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
                     slettVurdering(it, hovedVilkaarType)
                 }
             )
             vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
-        } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
+        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
     fun publiserVilkaarsvurdering(
@@ -140,6 +162,17 @@ class VilkaarsvurderingService(
             .apply { this["grunnlag"] = grunnlag }
 
         sendToRapid(message.toJson(), vilkaarsvurdering.behandlingId)
+    }
+
+    private fun mapVilkaarRevurdering(
+        revurderingAarsak: RevurderingAarsak
+    ): List<Vilkaar> {
+        return when (revurderingAarsak) {
+            RevurderingAarsak.SOEKER_DOD -> BarnepensjonVilkaar.loependevilkaar()
+            RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
+                "Du kan ikke ha et manuelt opphør på en revurdering"
+            )
+        }
     }
 
     private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar): Vilkaar =

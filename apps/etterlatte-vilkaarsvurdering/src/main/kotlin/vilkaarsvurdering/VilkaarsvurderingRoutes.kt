@@ -1,9 +1,11 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
+import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -14,24 +16,18 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
-import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
-import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDateTime
 import java.util.*
 
 fun Route.vilkaarsvurdering(
-    vilkaarsvurderingService: VilkaarsvurderingService,
-    behandlingKlient: BehandlingKlient,
-    grunnlagKlient: GrunnlagKlient
+    vilkaarsvurderingService: VilkaarsvurderingService
 ) {
     route("/api/vilkaarsvurdering") {
         val logger = application.log
@@ -39,29 +35,16 @@ fun Route.vilkaarsvurdering(
         get("/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
-                when (val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)) {
-                    null -> {
-                        val accessToken = getAccessToken(call)
-                        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
 
-                        if (behandling.kanStarteVilkaarsvurdering()) {
-                            val nyVilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(
-                                behandlingId = behandlingId,
-                                sakType = SakType.BARNEPENSJON, // todo: Støtte for omstillingsstønad
-                                behandlingType = behandling.behandlingType!!,
-                                virkningstidspunkt = behandling.virkningstidspunkt!!,
-                                grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken),
-                                revurderingAarsak = behandling.revurderingsaarsak
-                            )
-                            call.respond(nyVilkaarsvurdering)
-                        } else {
-                            logger.info(
-                                "Kan ikke opprette vilkårsvurdering for $behandlingId før virkningstidspunkt er satt"
-                            )
-                            call.respond(HttpStatusCode.PreconditionFailed)
-                        }
-                    }
-                    else -> call.respond(vilkaarsvurdering.toDto())
+                try {
+                    val vilkaarsvurdering = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
+                        behandlingId = behandlingId,
+                        accessToken = getAccessToken(call)
+                    )
+                    call.respond(vilkaarsvurdering.toDto())
+                } catch (e: VirkningstidspunktIkkeSattException) {
+                    logger.info("Virkningstidspunkt ikke satt for behandling $behandlingId")
+                    call.respond(HttpStatusCode.PreconditionFailed)
                 }
             }
         }
@@ -73,8 +56,8 @@ fun Route.vilkaarsvurdering(
                 logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
                 val oppdatertVilkaarsvurdering =
                     vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
-                        behandlingId,
-                        toVurdertVilkaar(vurdertVilkaarDto, saksbehandler)
+                        behandlingId = behandlingId,
+                        vurdertVilkaar = toVurdertVilkaar(vurdertVilkaarDto, saksbehandler)
                     )
 
                 call.respond(oppdatertVilkaarsvurdering)
@@ -87,7 +70,10 @@ fun Route.vilkaarsvurdering(
 
                 logger.info("Sletter vurdering på vilkår $vilkaarType for $behandlingId")
                 val oppdatertVilkaarsvurdering =
-                    vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
+                    vilkaarsvurderingService.slettVurderingPaaVilkaar(
+                        behandlingId = behandlingId,
+                        hovedVilkaarType = vilkaarType
+                    )
 
                 call.respond(oppdatertVilkaarsvurdering)
             }
@@ -99,22 +85,10 @@ fun Route.vilkaarsvurdering(
                     val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
 
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
-
-                    val accessToken = getAccessToken(call)
-                    val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
                     val oppdatertVilkaarsvurdering = vilkaarsvurderingService.oppdaterTotalVurdering(
-                        behandlingId,
-                        toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler)
-                    )
-                    vilkaarsvurderingService.publiserVilkaarsvurdering(
-                        vilkaarsvurdering = oppdatertVilkaarsvurdering,
-                        grunnlag = grunnlagKlient
-                            .hentGrunnlagMedVersjon(
-                                behandling.sak,
-                                oppdatertVilkaarsvurdering.grunnlagsmetadata.versjon,
-                                accessToken
-                            ),
-                        behandling = behandling
+                        behandlingId = behandlingId,
+                        resultat = toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler),
+                        accessToken = getAccessToken(call)
                     )
 
                     call.respond(oppdatertVilkaarsvurdering)
@@ -153,6 +127,14 @@ private inline val PipelineContext<*, ApplicationCall>.saksbehandler: String
             ?.jwtTokenClaims?.getStringClaim("NAVident")
     )
 
+private fun getAccessToken(call: ApplicationCall): String {
+    val authHeader = call.request.parseAuthorizationHeader()
+    if (!(authHeader == null || authHeader !is HttpAuthHeader.Single || authHeader.authScheme != "Bearer")) {
+        return authHeader.blob
+    }
+    throw Exception("Missing authorization header")
+}
+
 private fun toVurdertVilkaar(vurdertVilkaarDto: VurdertVilkaarDto, saksbehandler: String) =
     VurdertVilkaar(
         hovedvilkaar = vurdertVilkaarDto.hovedvilkaar,
@@ -163,9 +145,6 @@ private fun toVurdertVilkaar(vurdertVilkaarDto: VurdertVilkaarDto, saksbehandler
             saksbehandler = saksbehandler
         )
     )
-
-private fun DetaljertBehandling.kanStarteVilkaarsvurdering() =
-    this.virkningstidspunkt != null && this.behandlingType != null
 
 private fun toVilkaarsvurderingResultat(
     vurdertResultatDto: VurdertVilkaarsvurderingResultatDto,

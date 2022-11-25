@@ -20,6 +20,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
+class VirkningstidspunktIkkeSattException(message: String) : RuntimeException(message)
+
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingKlient: BehandlingKlient,
@@ -37,9 +39,10 @@ class VilkaarsvurderingService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
         val sakType = SakType.BARNEPENSJON // TODO Hardkodet - bør kunne hentes fra behandling
-        val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt) {
-            "Virkningstidspunkt ikke satt for behandling $behandlingId"
-        }
+
+        val virkningstidspunkt = behandling.virkningstidspunkt
+            ?: throw VirkningstidspunktIkkeSattException("Virkningstidspunkt ikke satt for behandling $behandlingId")
+
         requireNotNull(behandling.behandlingType) { // TODO gir det mening at denne er optional?!
             "BehandlingType ikke satt for behandling $behandlingId"
         }
@@ -83,6 +86,7 @@ class VilkaarsvurderingService(
         val oppdatertVilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = resultat))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
+
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
 
         publiserVilkaarsvurdering(
@@ -105,34 +109,32 @@ class VilkaarsvurderingService(
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    suspend fun oppdaterVurderingPaaVilkaar(
+    fun oppdaterVurderingPaaVilkaar(
         behandlingId: UUID,
-        vurdertVilkaar: VurdertVilkaar,
-        accessToken: String
+        vurdertVilkaar: VurdertVilkaar
     ): VilkaarsvurderingIntern {
-        return hentEllerOpprettVilkaarsvurdering(behandlingId, accessToken).let { vilkaarsvurdering ->
+        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
                     oppdaterVurdering(it, vurdertVilkaar)
                 }
             )
             vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
-        }
+        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    suspend fun slettVurderingPaaVilkaar(
+    fun slettVurderingPaaVilkaar(
         behandlingId: UUID,
-        hovedVilkaarType: VilkaarType,
-        accessToken: String
+        hovedVilkaarType: VilkaarType
     ): VilkaarsvurderingIntern {
-        return hentEllerOpprettVilkaarsvurdering(behandlingId, accessToken).let { vilkaarsvurdering ->
+        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
                     slettVurdering(it, hovedVilkaarType)
                 }
             )
             vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
-        }
+        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
     fun publiserVilkaarsvurdering(

@@ -132,9 +132,7 @@ internal class VilkaarsvurderingServiceTest {
             vurdering = vurdering
         )
 
-        val vilkaarsvurderingOppdatert = runBlocking {
-            service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar, accesstoken)
-        }
+        val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar)
 
         vilkaarsvurderingOppdatert shouldNotBe null
         vilkaarsvurderingOppdatert.vilkaar
@@ -166,9 +164,7 @@ internal class VilkaarsvurderingServiceTest {
             vurdering = vurdering
         )
 
-        val vilkaarsvurderingOppdatert = runBlocking {
-            service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar, accesstoken)
-        }
+        val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar)
 
         vilkaarsvurderingOppdatert shouldNotBe null
         vilkaarsvurderingOppdatert.vilkaar
@@ -196,9 +192,7 @@ internal class VilkaarsvurderingServiceTest {
             vurdering = vurdering
         )
 
-        val vilkaarsvurderingOppdatert = runBlocking {
-            service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar, accesstoken)
-        }
+        val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar)
 
         vilkaarsvurderingOppdatert shouldNotBe null
         vilkaarsvurderingOppdatert.vilkaar
@@ -273,15 +267,13 @@ internal class VilkaarsvurderingServiceTest {
 
     @Test
     fun `Skal slette alle vilkaarsvurderinger i en sak ved vedlikehold`() {
-        runBlocking { opprettVilkaarsvurdering() }
-
         val vilkaarsvurdering = runBlocking { service.hentEllerOpprettVilkaarsvurdering(uuid, accesstoken) }
         assertNotNull(vilkaarsvurdering)
         assertEquals(vilkaarsvurdering.grunnlagsmetadata.sakId, 1)
 
         service.slettSak(1)
 
-        assertNull(runBlocking { repository.hent(uuid) })
+        assertNull(repository.hent(uuid))
     }
 
     private suspend fun opprettVilkaarsvurdering() {

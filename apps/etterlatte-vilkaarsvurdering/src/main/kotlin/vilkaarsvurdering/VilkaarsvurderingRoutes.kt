@@ -36,11 +36,16 @@ fun Route.vilkaarsvurdering(
             withBehandlingId { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
 
-                val vilkaarsvurdering = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
-                    behandlingId = behandlingId,
-                    accessToken = getAccessToken(call)
-                )
-                call.respond(vilkaarsvurdering.toDto())
+                try {
+                    val vilkaarsvurdering = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
+                        behandlingId = behandlingId,
+                        accessToken = getAccessToken(call)
+                    )
+                    call.respond(vilkaarsvurdering.toDto())
+                } catch (e: VirkningstidspunktIkkeSattException) {
+                    logger.info("Virkningstidspunkt ikke satt for behandling $behandlingId")
+                    call.respond(HttpStatusCode.PreconditionFailed)
+                }
             }
         }
 
@@ -52,8 +57,7 @@ fun Route.vilkaarsvurdering(
                 val oppdatertVilkaarsvurdering =
                     vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
                         behandlingId = behandlingId,
-                        vurdertVilkaar = toVurdertVilkaar(vurdertVilkaarDto, saksbehandler),
-                        accessToken = getAccessToken(call)
+                        vurdertVilkaar = toVurdertVilkaar(vurdertVilkaarDto, saksbehandler)
                     )
 
                 call.respond(oppdatertVilkaarsvurdering)
@@ -68,8 +72,7 @@ fun Route.vilkaarsvurdering(
                 val oppdatertVilkaarsvurdering =
                     vilkaarsvurderingService.slettVurderingPaaVilkaar(
                         behandlingId = behandlingId,
-                        hovedVilkaarType = vilkaarType,
-                        accessToken = getAccessToken(call)
+                        hovedVilkaarType = vilkaarType
                     )
 
                 call.respond(oppdatertVilkaarsvurdering)

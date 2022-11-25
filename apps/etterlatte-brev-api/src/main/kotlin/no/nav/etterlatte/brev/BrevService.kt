@@ -7,8 +7,6 @@ import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.model.mapper.finnBarn
 import no.nav.etterlatte.db.BrevRepository
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
@@ -25,6 +23,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.norg2.Norg2Klient
 import no.nav.etterlatte.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.vedtak.VedtakService

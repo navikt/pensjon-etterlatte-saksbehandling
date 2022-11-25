@@ -16,6 +16,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -223,6 +224,18 @@ class RealGenerellBehandlingServiceTest {
         coVerify {
             hendelseskanalMock.send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT))
         }
+    }
+
+    @Test
+    fun `skal sette rett enum for rolle eller ukjent rolle`() {
+        val kjentRolle = "gjenlevende"
+        val ukjentRolle = "abcde"
+
+        val resKjentRolle = Saksrolle.enumVedNavnEllerUkjent(kjentRolle)
+        val resUkjentRolle = Saksrolle.enumVedNavnEllerUkjent(ukjentRolle)
+
+        assertEquals(Saksrolle.GJENLEVENDE, resKjentRolle)
+        assertEquals(Saksrolle.UKJENT, resUkjentRolle)
     }
 
     private fun lagRealGenerellBehandlingService(

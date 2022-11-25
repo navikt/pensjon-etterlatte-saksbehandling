@@ -1,6 +1,10 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
@@ -9,16 +13,11 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Sak
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.vedtaksvurdering.database.Vedtak as VedtakEntity
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.math.BigDecimal
@@ -27,6 +26,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZoneOffset
 import java.util.*
+import no.nav.etterlatte.vedtaksvurdering.database.Vedtak as VedtakEntity
 
 class KanIkkeEndreFattetVedtak(vedtak: VedtakEntity) :
     Exception("Vedtak ${vedtak.id} kan ikke oppdateres fordi det allerede er fattet") {

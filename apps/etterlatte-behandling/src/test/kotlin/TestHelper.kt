@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -21,6 +22,11 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import java.time.Instant
 import java.time.LocalDate
@@ -114,11 +120,12 @@ fun persongalleri(
 fun grunnlagsendringshendelse(
     id: UUID = UUID.randomUUID(),
     sakId: Long = 1,
-    type: GrunnlagsendringsType = GrunnlagsendringsType.SOEKER_DOED,
+    type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = LocalDateTime.now(),
     data: Grunnlagsinformasjon,
-    status: GrunnlagsendringStatus = GrunnlagsendringStatus.IKKE_VURDERT,
-    behandlingId: UUID? = null
+    status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+    behandlingId: UUID? = null,
+    hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER
 ) = Grunnlagsendringshendelse(
     id = id,
     sakId = sakId,
@@ -126,7 +133,8 @@ fun grunnlagsendringshendelse(
     opprettet = opprettet,
     data = data,
     status = status,
-    behandlingId = behandlingId
+    behandlingId = behandlingId,
+    hendelseGjelderRolle = hendelseGjelderRolle
 )
 
 fun grunnlagsinformasjonDoedshendelse(
@@ -134,7 +142,7 @@ fun grunnlagsinformasjonDoedshendelse(
     doedsdato: LocalDate = LocalDate.of(2022, 1, 1),
     endringstype: Endringstype = Endringstype.OPPRETTET
 ) =
-    Grunnlagsinformasjon.SoekerDoed(
+    Grunnlagsinformasjon.Doedsfall(
         Doedshendelse(avdoedFnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
     )
 
@@ -174,3 +182,27 @@ fun kommerBarnetTilgode(
     begrunnelse: String = "En begrunnelse",
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("S01", Instant.now())
 ) = KommerBarnetTilgode(svar, begrunnelse, kilde)
+
+fun mockPerson(
+    doedsdato: LocalDate? = null,
+    utland: Utland? = null
+) = Person(
+    fornavn = "Test",
+    etternavn = "Testulfsen",
+    foedselsnummer = Foedselsnummer.of("70078749472"),
+    foedselsdato = LocalDate.parse("2020-06-10"),
+    foedselsaar = 1985,
+    foedeland = null,
+    doedsdato = doedsdato,
+    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+    bostedsadresse = null,
+    deltBostedsadresse = null,
+    kontaktadresse = null,
+    oppholdsadresse = null,
+    sivilstatus = null,
+    statsborgerskap = null,
+    utland = utland,
+    familieRelasjon = FamilieRelasjon(null, null, null),
+    avdoedesBarn = null,
+    vergemaalEllerFremtidsfullmakt = null
+)

@@ -8,9 +8,10 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.util.UUID
-import kotlin.IllegalStateException
+import org.slf4j.LoggerFactory
+import java.util.*
 
 interface GenerellBehandlingService {
 
@@ -35,6 +36,7 @@ interface GenerellBehandlingService {
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
     fun alleSakIderForSoekerMedFnr(fnr: String): List<Long>
     fun hentDetaljertBehandling(behandlingsId: UUID): DetaljertBehandling?
+    fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
 }
 
 class RealGenerellBehandlingService(
@@ -45,6 +47,8 @@ class RealGenerellBehandlingService(
     private val hendelser: HendelseDao,
     private val manueltOpphoerService: ManueltOpphoerService
 ) : GenerellBehandlingService {
+
+    val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun hentBehandlinger(): List<Behandling> {
         return inTransaction { behandlinger.alleBehandlinger() }
@@ -80,13 +84,12 @@ class RealGenerellBehandlingService(
             if (!behandling.status.kanAvbrytes()) {
                 throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
             }
-            behandlinger.avbrytBehandling(behandlingId)
-                .also {
-                    hendelser.behandlingAvbrutt(behandling, saksbehandler)
-                    runBlocking {
-                        behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
-                    }
+            behandlinger.avbrytBehandling(behandlingId).also {
+                hendelser.behandlingAvbrutt(behandling, saksbehandler)
+                runBlocking {
+                    behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
                 }
+            }
         }
     }
 
@@ -169,6 +172,12 @@ class RealGenerellBehandlingService(
     override fun alleSakIderForSoekerMedFnr(fnr: String): List<Long> {
         return inTransaction {
             behandlinger.alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr)
+        }
+    }
+
+    override fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>> {
+        return inTransaction {
+            behandlinger.sakerOgRollerMedFnrIPersongalleri(fnr)
         }
     }
 }

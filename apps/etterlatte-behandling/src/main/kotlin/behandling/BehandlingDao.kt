@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import java.sql.Connection
@@ -211,6 +212,9 @@ class BehandlingDao(private val connection: () -> Connection) {
         opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
         fritekstAarsak = rs.getString("fritekst_aarsak")
     )
+
+    private fun ResultSet.asRolleSak() =
+        Pair(this.getString("rolle"), this.getLong("sak_id"))
 
     fun alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr: String): List<Long> {
         return connection().prepareStatement(
@@ -464,17 +468,48 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun lagreNyttVirkningstidspunkt(behandlingId: UUID, virkningstidspunkt: Virkningstidspunkt) {
-        val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
+        val statement =
+            connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
         statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
     }
 
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
-        val statement = connection().prepareStatement("UPDATE behandling SET kommer_barnet_tilgode = ? where id = ?")
+        val statement =
+            connection().prepareStatement("UPDATE behandling SET kommer_barnet_tilgode = ? where id = ?")
         statement.setString(1, kommerBarnetTilgode.toJson())
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
+    }
+
+    /*sjekker om et fnr opptrer i persongalleriet til behandlinger. Returnerer rollen og saksnr som Pair*/
+    fun sakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>> {
+        val statement = connection().prepareStatement(
+            """
+              SELECT (
+                SELECT string_agg(col, ', ' ORDER BY col) AS rolle
+                FROM jsonb_each_text(to_jsonb(json_build_object('innsender', behandling.innsender, 'soeker', behandling.soeker, 'gjenlevende', behandling.gjenlevende, 'avdoed', behandling.avdoed, 'soesken', behandling.soesken))) t(col, val)
+                WHERE t.val LIKE '%' || ? || '%'
+              ), sak_id
+              FROM behandling
+              WHERE (
+                SELECT string_agg(col, ', ' ORDER BY col)
+                FROM jsonb_each_text(to_jsonb(json_build_object('innsender', behandling.innsender, 'soeker', behandling.soeker, 'gjenlevende', behandling.gjenlevende, 'avdoed', behandling.avdoed, 'soesken', behandling.soesken))) t(col, val)
+                WHERE t.val LIKE '%' || ? || '%'
+              ) IS NOT NULL;
+            """.trimIndent()
+        ).also {
+            it.setString(1, fnr)
+            it.setString(2, fnr)
+        }
+        return statement.executeQuery().toList {
+            asRolleSak()
+        }.flatMap { par ->
+            par.first.split(", ").map {
+                Pair(Saksrolle.enumVedNavnEllerUkjent(it), par.second)
+            }
+        }
     }
 }
 

@@ -5,12 +5,12 @@ import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.config.ApplicationProperties

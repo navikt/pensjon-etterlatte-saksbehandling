@@ -31,6 +31,7 @@ include(
     "libs:ktor2client-auth-clientcredentials",
     "libs:common",
     "libs:ktor2client-onbehalfof",
+    "libs:ktor2rest",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-kafka",
     "libs:testdata",

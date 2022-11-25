@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
@@ -36,7 +36,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         saktype: String,
         behandling: Behandling,
         fnr: String,
-        vilkaarsresultat: Vilkaarsvurdering,
+        vilkaarsresultat: VilkaarsvurderingDto,
         virkningsDato: LocalDate?
     ) {
         logger.info("Lagrer vilkaarsresultat")
@@ -58,7 +58,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         sakId: String,
         saktype: String,
         behandlingsId: UUID,
-        vilkaarsresultat: Vilkaarsvurdering
+        vilkaarsresultat: VilkaarsvurderingDto
     ) {
         logger.info("Lagrer vilkaarsresultat")
         connection.use {
@@ -334,7 +334,7 @@ data class Vedtak(
     val saksbehandlerId: String?,
     val avkortingsResultat: AvkortingsResultat?,
     val beregningsResultat: BeregningsResultat?,
-    val vilkaarsResultat: Vilkaarsvurdering?,
+    val vilkaarsResultat: VilkaarsvurderingDto?,
     val vedtakFattet: Boolean?,
     val fnr: String?,
     val datoFattet: Instant?,

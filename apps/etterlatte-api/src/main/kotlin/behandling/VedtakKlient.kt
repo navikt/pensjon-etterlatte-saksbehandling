@@ -7,7 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -79,7 +79,7 @@ data class Vedtak(
     val saksbehandlerId: String?,
     val avkortingsResultat: AvkortingsResultat?,
     val beregningsResultat: BeregningsResultat?,
-    val vilkaarsResultat: Vilkaarsvurdering?,
+    val vilkaarsResultat: VilkaarsvurderingDto?,
     val virkningsDato: LocalDate?,
     val vedtakFattet: Boolean?,
     val datoFattet: Instant?,

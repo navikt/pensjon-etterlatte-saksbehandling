@@ -11,11 +11,13 @@ import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultatDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VirkningstidspunktDto
 import no.nav.etterlatte.typer.BehandlingsOppgave
 import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Sak
@@ -48,12 +50,15 @@ internal class OppgaveServiceTest {
             null,
             null,
             null,
-            Vilkaarsvurdering(
+            VilkaarsvurderingDto(
                 UUID.randomUUID(),
-                emptyList(),
-                Virkningstidspunkt(YearMonth.of(2022, 1), Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now())),
-                VilkaarsvurderingResultat(
-                    VilkaarsvurderingUtfall.OPPFYLT,
+                objectMapper.createObjectNode(),
+                VirkningstidspunktDto(
+                    YearMonth.of(2022, 1),
+                    Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now()).toJsonNode()
+                ),
+                VilkaarsvurderingResultatDto(
+                    VilkaarsvurderingUtfallDto.OPPFYLT,
                     "",
                     LocalDateTime.now(),
                     "ABV"

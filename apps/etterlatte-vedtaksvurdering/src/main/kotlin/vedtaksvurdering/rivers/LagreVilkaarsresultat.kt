@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -42,7 +42,7 @@ internal class LagreVilkaarsresultat(
 
             val sakId = packet["sak.id"].toString()
             val sakType = packet["sak.sakType"].textValue()
-            val vilkaarsvurdering: Vilkaarsvurdering = objectMapper.readValue(
+            val vilkaarsvurdering: VilkaarsvurderingDto = objectMapper.readValue(
                 packet["vilkaarsvurdering"].toString()
             )
             try {

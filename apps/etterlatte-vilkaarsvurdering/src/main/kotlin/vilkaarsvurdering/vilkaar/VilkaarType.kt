@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.vilkaarsvurdering
+package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
 enum class VilkaarType {
     FORMAAL,

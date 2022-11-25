@@ -13,14 +13,21 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultatDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VirkningstidspunktDto
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDateTime
 import java.util.*
 
@@ -148,4 +155,26 @@ data class VurdertVilkaarDto(
 data class VurdertVilkaarsvurderingResultatDto(
     val resultat: VilkaarsvurderingUtfall,
     val kommentar: String?
+)
+
+fun Vilkaarsvurdering.toDto() = VilkaarsvurderingDto(
+    behandlingId = behandlingId,
+    vilkaar = vilkaar.toJsonNode(),
+    virkningstidspunkt = virkningstidspunkt.toDto(),
+    resultat = resultat?.toDto()
+)
+
+fun VilkaarsvurderingResultat.toDto() = VilkaarsvurderingResultatDto(
+    utfall = when (utfall) {
+        VilkaarsvurderingUtfall.OPPFYLT -> VilkaarsvurderingUtfallDto.OPPFYLT
+        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VilkaarsvurderingUtfallDto.IKKE_OPPFYLT
+    },
+    kommentar = kommentar,
+    saksbehandler = saksbehandler,
+    tidspunkt = tidspunkt
+)
+
+fun Virkningstidspunkt.toDto() = VirkningstidspunktDto(
+    dato = dato,
+    kilde = kilde.toJsonNode()
 )

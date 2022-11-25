@@ -5,8 +5,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreVilkaarsresultat
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -30,7 +30,7 @@ internal class LesVilkaarsmeldingTest {
     @Test
     fun `skal lese melding`() {
         println(objectMapper.writeValueAsString(VilkaarsvurderingTestData.oppfylt))
-        val vilkarsres = slot<Vilkaarsvurdering>()
+        val vilkarsres = slot<VilkaarsvurderingDto>()
         every {
             vedtaksvurderingServiceMock.lagreVilkaarsresultat(
                 any(),
@@ -42,6 +42,6 @@ internal class LesVilkaarsmeldingTest {
             )
         } returns Unit
         inspector.apply { sendTestMessage(melding) }.inspektør
-        Assertions.assertEquals(VilkaarsvurderingUtfall.OPPFYLT, vilkarsres.captured.resultat.utfall)
+        Assertions.assertEquals(VilkaarsvurderingUtfallDto.OPPFYLT, vilkarsres.captured.resultat?.utfall)
     }
 }

@@ -21,14 +21,16 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -113,7 +115,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
+            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), Vilkaarsvurdering::class.java)
             val vilkaar = vilkaarsvurdering.vilkaar.first()
 
             assertEquals(HttpStatusCode.OK, response.status)
@@ -141,7 +143,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
+            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), Vilkaarsvurdering::class.java)
 
             assertEquals(nyBehandlingId, vilkaarsvurdering.behandlingId)
             assertEquals(
@@ -194,7 +196,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), Vilkaarsvurdering::class.java)
             val oppdatertVilkaar = oppdatertVilkaarsvurdering.vilkaar.find {
                 it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type
             }
@@ -342,7 +344,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
             assertEquals(resultat.resultat, oppdatertVilkaarsvurdering?.resultat?.utfall)
@@ -357,7 +359,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val slettetVilkaarsvurdering = objectMapper
-                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
+                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
             assertEquals(HttpStatusCode.OK, sletteResponse.status)
             assertEquals(behandlingId, slettetVilkaarsvurdering.behandlingId)
             assertEquals(null, slettetVilkaarsvurdering?.resultat)

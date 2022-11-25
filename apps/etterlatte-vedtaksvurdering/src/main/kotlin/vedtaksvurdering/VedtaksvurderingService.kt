@@ -16,8 +16,8 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.math.BigDecimal
@@ -78,7 +78,7 @@ class VedtaksvurderingService(
         sakType: String,
         behandling: Behandling,
         fnr: String,
-        vilkaarsvurdering: Vilkaarsvurdering,
+        vilkaarsvurdering: VilkaarsvurderingDto,
         virkningsDato: LocalDate?
     ) {
         val vedtak = repository.hentVedtak(sakId, behandling.id)
@@ -150,7 +150,7 @@ class VedtaksvurderingService(
                 ), // må få inn dette på toppnivå?
                 sak = Sak(vedtak.fnr!!, vedtak.sakType!!, vedtak.sakId.toLong()),
                 behandling = Behandling(vedtak.behandlingType, behandlingId),
-                type = if (vedtak.vilkaarsResultat?.resultat?.utfall == VilkaarsvurderingUtfall.OPPFYLT) {
+                type = if (vedtak.vilkaarsResultat?.resultat?.utfall == VilkaarsvurderingUtfallDto.OPPFYLT) {
                     VedtakType.INNVILGELSE
                 } else if (vedtak.behandlingType == BehandlingType.REVURDERING) {
                     VedtakType.OPPHOER

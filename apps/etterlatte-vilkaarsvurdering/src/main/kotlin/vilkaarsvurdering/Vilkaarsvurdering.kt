@@ -1,7 +1,9 @@
-package no.nav.etterlatte.libs.common.vilkaarsvurdering
+package no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarType
 import java.time.LocalDateTime
 import java.util.*
 
@@ -9,7 +11,8 @@ data class Vilkaarsvurdering(
     val behandlingId: UUID,
     val vilkaar: List<Vilkaar>,
     val virkningstidspunkt: Virkningstidspunkt,
-    val resultat: VilkaarsvurderingResultat
+    val resultat: VilkaarsvurderingResultat? = null,
+    val grunnlagsmetadata: Metadata
 )
 
 data class Vilkaar(

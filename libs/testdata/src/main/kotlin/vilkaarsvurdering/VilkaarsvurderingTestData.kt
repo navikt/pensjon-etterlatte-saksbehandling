@@ -1,26 +1,43 @@
 package vilkaarsvurdering
 
 import behandling.VirkningstidspunktTestData
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultatDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VirkningstidspunktDto
 import java.time.LocalDateTime
 import java.util.*
 
 class VilkaarsvurderingTestData {
     companion object {
-        val oppfylt = Vilkaarsvurdering(
+        val oppfylt = VilkaarsvurderingDto(
             UUID.randomUUID(),
-            emptyList(),
-            VirkningstidspunktTestData.virkningstidsunkt(),
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, LocalDateTime.now(), "ABCDEF")
+            objectMapper.createObjectNode(),
+            VirkningstidspunktTestData.virkningstidsunkt().let {
+                VirkningstidspunktDto(it.dato, it.kilde.toJsonNode())
+            },
+            VilkaarsvurderingResultatDto(
+                VilkaarsvurderingUtfallDto.OPPFYLT,
+                null,
+                LocalDateTime.now(),
+                "ABCDEF"
+            )
         )
 
-        val ikkeOppfylt = Vilkaarsvurdering(
+        val ikkeOppfylt = VilkaarsvurderingDto(
             UUID.randomUUID(),
-            emptyList(),
-            VirkningstidspunktTestData.virkningstidsunkt(),
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.IKKE_OPPFYLT, null, LocalDateTime.now(), "ABCDEF")
+            objectMapper.createObjectNode(),
+            VirkningstidspunktTestData.virkningstidsunkt().let {
+                VirkningstidspunktDto(it.dato, it.kilde.toJsonNode())
+            },
+            VilkaarsvurderingResultatDto(
+                VilkaarsvurderingUtfallDto.IKKE_OPPFYLT,
+                null,
+                LocalDateTime.now(),
+                "ABCDEF"
+            )
         )
     }
 }

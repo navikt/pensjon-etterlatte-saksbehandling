@@ -7,27 +7,28 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaarsvurdering
 import java.util.*
 import javax.sql.DataSource
 
 interface VilkaarsvurderingRepository {
-    fun hent(behandlingId: UUID): VilkaarsvurderingIntern?
-    fun lagre(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern
+    fun hent(behandlingId: UUID): Vilkaarsvurdering?
+    fun lagre(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering
     fun slettVilkaarsvurderingerISak(sakId: Long)
 }
 
 class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : VilkaarsvurderingRepository {
 
-    override fun hent(behandlingId: UUID): VilkaarsvurderingIntern? =
+    override fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->
             queryOf(
                 statement = Queries.hentVilkaarsvurdering,
                 paramMap = mapOf("behandlingId" to behandlingId)
             )
-                .let { query -> session.run(query.map(::toVilkaarsvurderingIntern).asSingle) }
+                .let { query -> session.run(query.map(::toVilkaarsvurdering).asSingle) }
         }
 
-    override fun lagre(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern {
+    override fun lagre(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
                 queryOf(
@@ -58,8 +59,8 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
         }
     }
 
-    private fun toVilkaarsvurderingIntern(row: Row) = with(row) {
-        VilkaarsvurderingIntern(
+    private fun toVilkaarsvurdering(row: Row) = with(row) {
+        Vilkaarsvurdering(
             behandlingId = uuid("behandlingId"),
             vilkaar = string("vilkaar").let { vilkaar -> objectMapper.readValue(vilkaar) },
             resultat = stringOrNull("resultat").let { resultat ->

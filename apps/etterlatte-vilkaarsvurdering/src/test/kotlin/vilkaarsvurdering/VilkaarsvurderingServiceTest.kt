@@ -17,19 +17,23 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarOpplysningType
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VurdertVilkaar
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -39,7 +43,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -241,9 +244,10 @@ internal class VilkaarsvurderingServiceTest {
 
     @Test
     fun `Skal publisere vilkaarsvurdering paa kafka paa et format vedtaksvurering og beregning forstaar`() {
-        val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
+        val vilkaarsvurdering = oppfyltVilkaarsvurdering()
+
         val emptyGrunnlag = Grunnlag.empty()
-        val vilkaarsvurderingIntern = VilkaarsvurderingIntern(
+        val vilkaarsvurderingIntern = Vilkaarsvurdering(
             vilkaarsvurdering.behandlingId,
             emptyList(),
             VirkningstidspunktTestData.virkningstidsunkt(),
@@ -282,6 +286,14 @@ internal class VilkaarsvurderingServiceTest {
             accesstoken
         )
     }
+
+    private fun oppfyltVilkaarsvurdering() = Vilkaarsvurdering(
+        UUID.randomUUID(),
+        emptyList(),
+        VirkningstidspunktTestData.virkningstidsunkt(),
+        VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, LocalDateTime.now(), "ABCDEF"),
+        Metadata(1, 1)
+    )
 
     private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
         every { id } returns UUID.randomUUID()

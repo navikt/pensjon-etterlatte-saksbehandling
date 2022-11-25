@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -31,9 +30,11 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultatDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VirkningstidspunktDto
 import no.nav.etterlatte.typer.LagretHendelse
 import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Sak
@@ -134,11 +135,14 @@ internal class BehandlingServiceTest {
             null,
             null,
             null,
-            Vilkaarsvurdering(
+            VilkaarsvurderingDto(
                 UUID.randomUUID(),
-                emptyList(),
-                Virkningstidspunkt(YearMonth.of(2022, 1), Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now())),
-                VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), "ABV")
+                objectMapper.createObjectNode(),
+                VirkningstidspunktDto(
+                    YearMonth.of(2022, 1),
+                    Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now()).toJsonNode()
+                ),
+                VilkaarsvurderingResultatDto(VilkaarsvurderingUtfallDto.OPPFYLT, "", LocalDateTime.now(), "ABV")
             ),
             null,
             null,
@@ -227,7 +231,7 @@ internal class BehandlingServiceTest {
 
         assertEquals(behandlingid, respons.id)
         assertEquals(4, respons.sak)
-        assertEquals(VilkaarsvurderingUtfall.OPPFYLT, respons.vilkårsprøving?.resultat?.utfall)
+        assertEquals(VilkaarsvurderingUtfallDto.OPPFYLT, respons.vilkårsprøving?.resultat?.utfall)
         assertEquals(2, respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.size)
         assertEquals("TestKari", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(0)!!.fornavn)
         assertEquals("TestOla", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(1)!!.fornavn)

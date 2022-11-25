@@ -8,14 +8,15 @@ import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Sak
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VurdertVilkaar
 import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
@@ -29,13 +30,13 @@ class VilkaarsvurderingService(
     private val sendToRapid: (String, UUID) -> Unit
 ) : VedlikeholdService {
 
-    suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingIntern =
+    suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering =
         vilkaarsvurderingRepository.hent(behandlingId) ?: opprettVilkaarsvurdering(behandlingId, accessToken)
 
     private suspend fun opprettVilkaarsvurdering(
         behandlingId: UUID,
         accessToken: String
-    ): VilkaarsvurderingIntern {
+    ): Vilkaarsvurdering {
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
         val sakType = SakType.BARNEPENSJON // TODO Hardkodet - bør kunne hentes fra behandling
@@ -52,7 +53,7 @@ class VilkaarsvurderingService(
                 when (behandling.behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
-                            VilkaarsvurderingIntern(
+                            Vilkaarsvurdering(
                                 behandlingId = behandlingId,
                                 vilkaar = BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt),
                                 virkningstidspunkt = virkningstidspunkt,
@@ -61,7 +62,7 @@ class VilkaarsvurderingService(
                         )
                     BehandlingType.REVURDERING ->
                         vilkaarsvurderingRepository.lagre(
-                            VilkaarsvurderingIntern(
+                            Vilkaarsvurdering(
                                 behandlingId = behandlingId,
                                 vilkaar = mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak)),
                                 virkningstidspunkt = virkningstidspunkt,
@@ -82,7 +83,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         resultat: VilkaarsvurderingResultat,
         accessToken: String
-    ): VilkaarsvurderingIntern {
+    ): Vilkaarsvurdering {
         val oppdatertVilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = resultat))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
@@ -103,7 +104,7 @@ class VilkaarsvurderingService(
         return oppdatertVilkaarsvurdering
     }
 
-    fun slettTotalVurdering(behandlingId: UUID): VilkaarsvurderingIntern {
+    fun slettTotalVurdering(behandlingId: UUID): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = null))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
@@ -112,7 +113,7 @@ class VilkaarsvurderingService(
     fun oppdaterVurderingPaaVilkaar(
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
-    ): VilkaarsvurderingIntern {
+    ): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
@@ -126,7 +127,7 @@ class VilkaarsvurderingService(
     fun slettVurderingPaaVilkaar(
         behandlingId: UUID,
         hovedVilkaarType: VilkaarType
-    ): VilkaarsvurderingIntern {
+    ): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
@@ -138,7 +139,7 @@ class VilkaarsvurderingService(
     }
 
     fun publiserVilkaarsvurdering(
-        vilkaarsvurdering: VilkaarsvurderingIntern,
+        vilkaarsvurdering: Vilkaarsvurdering,
         grunnlag: Grunnlag,
         behandling: DetaljertBehandling
     ) {
@@ -157,7 +158,7 @@ class VilkaarsvurderingService(
                 this["behandling"] =
                     Behandling(behandling.behandlingType!!, behandling.id)
             }
-            .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDomain() }
+            .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDto() }
             .apply { this["virkningstidspunkt"] = vilkaarsvurdering.virkningstidspunkt.dato }
             .apply { this["grunnlag"] = grunnlag }
 

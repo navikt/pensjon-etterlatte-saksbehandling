@@ -43,7 +43,9 @@ internal class LesBeregningsmelding(
                     grunnlag = objectMapper.readValue(grunnlag),
                     virkFOM = YearMonth.parse(packet["virkningstidspunkt"].asText()),
                     virkTOM = tom,
-                    vilkaarsvurdering = objectMapper.readValue(packet["vilkaarsvurdering"].toString()),
+                    vilkaarsvurderingUtfall = objectMapper.readValue(
+                        packet["vilkaarsvurdering.resultat.utfall"].toString()
+                    ),
                     behandlingType = objectMapper.readValue(packet["behandling.type"].toString())
                 )
                 packet["beregning"] = beregningsResultat

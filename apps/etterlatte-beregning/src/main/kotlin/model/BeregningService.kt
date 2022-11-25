@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.behandling.BehandlingKlient
 import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
@@ -32,7 +31,33 @@ class BeregningService(
     private val behandlingKlient: BehandlingKlient
 ) {
 
-    fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
+    suspend fun hentBeregning(behandlingId: UUID, accessToken: String): Beregning {
+        val beregning: Beregning = beregningRepository.hent(behandlingId)
+        val grunnlag: Grunnlag = grunnlagKlient.hentGrunnlag(beregning.grunnlagMetadata.sakId, accessToken)
+
+        if (grunnlag.metadata.versjon > beregning.grunnlagMetadata.versjon) {
+            val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+            val beregningResultat = beregnResultat(
+                grunnlag,
+                behandling.virkningstidspunkt!!.dato, // alle beregningsperioder får samme fom? hvorfor?
+                YearMonth.now().plusMonths(3),
+                VilkaarsvurderingUtfall.OPPFYLT,
+                behandling.behandlingType!!
+            )
+
+            val oppdatertBeregning = Beregning(
+                beregningId = beregning.beregningId,
+                behandlingId = behandlingId,
+                beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
+                beregningsperioder = beregningResultat.beregningsperioder,
+                grunnlagMetadata = Grunnlag.empty().metadata
+            )
+
+            return beregningRepository.oppdaterBeregning(oppdatertBeregning)
+        } else {
+            return beregning
+        }
+    }
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
         val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
@@ -43,7 +68,7 @@ class BeregningService(
             grunnlag,
             behandling.virkningstidspunkt!!.dato,
             YearMonth.now().plusMonths(3),
-            vilkaarsvurdering,
+            vilkaarsvurdering.resultat.utfall,
             behandling.behandlingType!!
         )
         val beregning = Beregning(
@@ -61,7 +86,7 @@ class BeregningService(
         grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
-        vilkaarsvurdering: Vilkaarsvurdering,
+        vilkaarsvurderingUtfall: VilkaarsvurderingUtfall,
         behandlingType: BehandlingType
     ): BeregningsResultat { // TODO: Bruk vår interne model i jira
         return when (behandlingType) {
@@ -79,7 +104,7 @@ class BeregningService(
             }
 
             BehandlingType.REVURDERING -> {
-                when (vilkaarsvurdering.resultat.utfall) {
+                when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
                         BeregningsResultat(
                             id = UUID.randomUUID(),

@@ -52,7 +52,7 @@ internal class BeregningServiceTest {
         opplysningsgrunnlag,
         YearMonth.of(2021, 2),
         YearMonth.of(2021, 9),
-        vilkaarsvurdering,
+        vilkaarsvurdering.resultat.utfall,
         behandlingType
 
     ).beregningsperioder
@@ -90,7 +90,7 @@ internal class BeregningServiceTest {
             grunnlag = Grunnlag.empty(),
             virkFOM = virkFOM,
             virkTOM = virkTOM,
-            vilkaarsvurdering = VilkaarsvurderingTestData.ikkeOppfylt,
+            vilkaarsvurderingUtfall = VilkaarsvurderingTestData.ikkeOppfylt.resultat.utfall,
             behandlingType = BehandlingType.REVURDERING
         )
         assertEquals(virkFOM, resultat.beregningsperioder.first().datoFOM)
@@ -111,7 +111,7 @@ internal class BeregningServiceTest {
             grunnlag = grunnlag,
             virkFOM = mockk(),
             virkTOM = mockk(),
-            vilkaarsvurdering = mockk(),
+            vilkaarsvurderingUtfall = mockk(),
             behandlingType = BehandlingType.MANUELT_OPPHOER
         )
 

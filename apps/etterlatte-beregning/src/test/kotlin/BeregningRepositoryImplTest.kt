@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll
@@ -52,7 +52,7 @@ internal class BeregningRepositoryImplTest {
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2021, 9),
-            mockkClass(Vilkaarsvurdering::class),
+            mockkClass(VilkaarsvurderingUtfall::class),
             BehandlingType.FØRSTEGANGSBEHANDLING
         )
         val behandlingId = UUID.randomUUID()
@@ -80,7 +80,7 @@ internal class BeregningRepositoryImplTest {
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2021, 9),
-            mockkClass(Vilkaarsvurdering::class),
+            mockkClass(VilkaarsvurderingUtfall::class),
             BehandlingType.FØRSTEGANGSBEHANDLING
         )
         val behandlingId = UUID.randomUUID()

@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningsperiodeDAO
+import java.io.Serializable
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
@@ -21,6 +22,7 @@ import javax.sql.DataSource
 interface BeregningRepository {
     fun lagre(beregning: Beregning): Beregning
     fun hent(behandlingId: UUID): Beregning
+    fun oppdaterBeregning(behandlingId: UUID, beregning: Beregning): Beregning
 }
 
 class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRepository {
@@ -30,22 +32,9 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 val queries = beregning.beregningsperioder.map {
-                    mapOf(
-                        "id" to UUID.randomUUID(),
-                        "beregningId" to beregning.beregningId,
-                        "behandlingId" to beregning.behandlingId,
-                        "beregnetDato" to beregning.beregnetDato.toTimestamp(),
-                        "datoFOM" to it.datoFOM.toString(),
-                        "datoTOM" to it.datoTOM?.toString(),
-                        "utbetaltBeloep" to it.utbetaltBeloep,
-                        "soeskenFlokk" to it.soeskenFlokk?.toJson(),
-                        "grunnbeloepMnd" to it.grunnbelopMnd,
-                        "grunnbeloep" to it.grunnbelop,
-                        "sakId" to beregning.grunnlagMetadata.sakId,
-                        "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
-                    )
+                    createMapFromBeregningsperiode(it, beregning)
                 }
-                tx.batchPreparedNamedStatement(Queries.lagreBeregningsperiode, queries)
+                tx.batchPreparedNamedStatement(Queries.lagreBeregningsperioder, queries)
             }
         }
         return hent(beregning.behandlingId)
@@ -63,6 +52,44 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
             }
             toBeregning(beregningsperioder)
         }
+    }
+
+    override fun oppdaterBeregning(behandlingId: UUID, beregning: Beregning): Beregning {
+        using(sessionOf(dataSource)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = Queries.slettBeregning,
+                    paramMap = mapOf("behandlingId" to behandlingId)
+                ).let { query ->
+                    tx.run(query.asUpdate)
+                }
+                val queries = beregning.beregningsperioder.map {
+                    createMapFromBeregningsperiode(it, beregning)
+                }
+                tx.batchPreparedNamedStatement(Queries.lagreBeregningsperioder, queries)
+            }
+        }
+        return hent(beregning.behandlingId)
+    }
+
+    fun createMapFromBeregningsperiode(
+        beregningsperiode: Beregningsperiode,
+        beregning: Beregning
+    ): Map<String, Serializable?> {
+        return mapOf(
+            "id" to UUID.randomUUID(),
+            "beregningId" to beregning.beregningId,
+            "behandlingId" to beregning.behandlingId,
+            "beregnetDato" to beregning.beregnetDato.toTimestamp(),
+            "datoFOM" to beregningsperiode.datoFOM.toString(),
+            "datoTOM" to beregningsperiode.datoTOM?.toString(),
+            "utbetaltBeloep" to beregningsperiode.utbetaltBeloep,
+            "soeskenFlokk" to beregningsperiode.soeskenFlokk?.toJson(),
+            "grunnbeloepMnd" to beregningsperiode.grunnbelopMnd,
+            "grunnbeloep" to beregningsperiode.grunnbelop,
+            "sakId" to beregning.grunnlagMetadata.sakId,
+            "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
+        )
     }
 }
 
@@ -135,8 +162,13 @@ private object Queries {
         |FROM beregningsperiode WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
     """.trimMargin()
 
-    val lagreBeregningsperiode = """
+    val lagreBeregningsperioder = """
         |INSERT INTO beregningsperiode(${BeregningsperiodeDatabaseColumns.Id.navn}, ${BeregningsperiodeDatabaseColumns.BeregningId.navn}, ${BeregningsperiodeDatabaseColumns.BehandlingId.navn}, ${BeregningsperiodeDatabaseColumns.BeregnetDato.navn}, ${BeregningsperiodeDatabaseColumns.DatoFOM.navn}, ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, ${BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn}, ${BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn}, ${BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn}, ${BeregningsperiodeDatabaseColumns.Grunnbeloep.navn}, ${BeregningsperiodeDatabaseColumns.SakId.navn}, ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}) 
         |VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT) 
+    """.trimMargin()
+
+    val slettBeregning = """
+        |DELETE FROM beregningsperiode
+        |WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
     """.trimMargin()
 }

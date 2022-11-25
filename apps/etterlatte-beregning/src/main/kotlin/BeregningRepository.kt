@@ -22,7 +22,7 @@ import javax.sql.DataSource
 interface BeregningRepository {
     fun lagre(beregning: Beregning): Beregning
     fun hent(behandlingId: UUID): Beregning
-    fun oppdaterBeregning(behandlingId: UUID, beregning: Beregning): Beregning
+    fun oppdaterBeregning(beregning: Beregning): Beregning
 }
 
 class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRepository {
@@ -54,12 +54,12 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
         }
     }
 
-    override fun oppdaterBeregning(behandlingId: UUID, beregning: Beregning): Beregning {
+    override fun oppdaterBeregning(beregning: Beregning): Beregning {
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 queryOf(
                     statement = Queries.slettBeregning,
-                    paramMap = mapOf("behandlingId" to behandlingId)
+                    paramMap = mapOf("behandlingId" to beregning.behandlingId)
                 ).let { query ->
                     tx.run(query.asUpdate)
                 }

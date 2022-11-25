@@ -17,7 +17,7 @@ Prosjektet bruker [Vite](https://vitejs.dev/).
 
 Det finnes to måter å kjøre opp frontend:
 
-### Alt. 1: Ren mock _uten_ auth og docker
+### Alternativ 1: Ren mock _uten_ auth og docker
 
 Med ren mock vil frontend bruke lokale mockfiler for å simulere backend APIer. 
 
@@ -26,7 +26,7 @@ Kjøres opp med:
 2. Frontend er nå tilgjengelig på [localhost:5173](http://localhost:5173)
 
 
-### Alt. 2: _Med_ auth og docker
+### Alternativ 2: _Med_ auth og docker
 
 For å kjøre mot backend lokalt med docker må det være mulig å nå `host.docker.internal`, så pass på at du legger til 
 dette i `/etc/hosts`:
@@ -36,9 +36,15 @@ dette i `/etc/hosts`:
 
 #### Variant A: Med gyldig token mot dev-gcp
 
-For å kjøre mot dev-gcp må du først kjøre `get-secret.sh`. Dette henter ut secrets for lokal kjøring mot dev-gcp og
-lagrer de i en lokal fil (`.env.dev-gcp`). Denne filen skal inneholde en rekke miljøvariabler som brukes av frackend
-og wonderwall. 
+For å kjøre mot dev-gcp må du først kjøre `get-secret.sh` ([../../get-secret.sh](../../get-secret.sh)). \
+Felles bruksanvisning til scriptet finner du på [prosjektets rot](../..). 
+
+Scriptet henter ut secrets for lokal kjøring mot dev-gcp og lagrer de i en lokal fil (`.env.dev-gcp`). 
+Denne filen skal inneholde en rekke miljøvariabler som brukes av frackend og wonderwall. 
+
+Om du ønsker å gå mot en backend-app lokalt kan du legge til miljøvariabler for dette i `.env.dev-gcp`. \
+Se i filen [config.ts](./server/src/config/config.ts) for å se gyldige nøkler. Trenger kun legge til de 
+du skal benytte deg av lokalt. Resten vil automatisk gå mot dev.
 
 Når `.env.dev-gcp` er opprettet kan du kjøre opp docker (dev-gcp varianten):
 

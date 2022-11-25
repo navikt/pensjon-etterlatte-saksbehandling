@@ -67,17 +67,27 @@ data class Foerstegangsbehandling(
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
-    private var virkningstidspunkt: Virkningstidspunkt?,
+    val virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?
 ) : Behandling {
+    private val kanRedigeres: Boolean
+        get() = this.status.kanRedigeres()
     fun hentVirkningstidspunkt() = virkningstidspunkt
-    fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler) {
-        if (BehandlingStatus.kanRedigeres().contains(this.status)) {
-            virkningstidspunkt = Virkningstidspunkt(dato, kilde)
-        } else {
+    fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler): Foerstegangsbehandling {
+        if (kanRedigeres) {
             throw RuntimeException("Kan ikke endre virkningstidspunkt for behandling som ikke er under behandling.")
         }
+
+        return this.copy(virkningstidspunkt = Virkningstidspunkt(dato, kilde))
+    }
+
+    fun oppdaterKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode): Foerstegangsbehandling {
+        if (kanRedigeres) {
+            throw RuntimeException("Kan ikke endre kommer barnet til gode for behandling som ikke er under behandling")
+        }
+
+        return this.copy(kommerBarnetTilgode = kommerBarnetTilgode)
     }
 }
 

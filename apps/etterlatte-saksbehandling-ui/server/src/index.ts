@@ -47,8 +47,6 @@ if (isDev) {
 
   app.use('/brev', tokenMiddleware(ApiConfig.brev.scope), proxy(ApiConfig.brev.url!!))
 }
-// Body parser må komme etter proxy middleware
-app.use(express.json())
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)

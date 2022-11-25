@@ -1,7 +1,7 @@
 package no.nav.etterlatte.model
 
-import model.Grunnbeloep
 import model.finnSoeskenperiode.FinnSoeskenPeriode
+import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -14,22 +14,56 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.model.behandling.BehandlingKlient
+import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-// TODO hvordan håndtere vedtakstidspunkt?
-class BeregningService {
+class BeregningService(
+    private val beregningRepository: BeregningRepository,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val grunnlagKlient: GrunnlagKlient,
+    private val behandlingKlient: BehandlingKlient
+) {
+
+    fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
+
+    suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
+        val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
+
+        val beregningResultat = beregnResultat(
+            grunnlag,
+            behandling.virkningstidspunkt!!.dato,
+            YearMonth.now().plusMonths(3),
+            vilkaarsvurdering,
+            behandling.behandlingType!!
+        )
+        val beregning = Beregning(
+            beregningId = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
+            beregningsperioder = beregningResultat.beregningsperioder,
+            grunnlagMetadata = Grunnlag.empty().metadata
+        )
+
+        return beregningRepository.lagre(beregning)
+    }
+
     fun beregnResultat(
         grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
         vilkaarsvurdering: Vilkaarsvurdering,
         behandlingType: BehandlingType
-    ): BeregningsResultat {
+    ): BeregningsResultat { // TODO: Bruk vår interne model i jira
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)

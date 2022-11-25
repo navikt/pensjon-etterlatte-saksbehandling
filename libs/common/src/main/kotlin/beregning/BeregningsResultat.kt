@@ -21,7 +21,7 @@ enum class BeregningsResultatType {
     BEREGNET, FAARIKKEPAENG;
 }
 
-data class BeregningsResultat(
+data class BeregningsResultat( // TODO: Fiks mapping fra intern
     val id: UUID,
     val type: Beregningstyper,
     val endringskode: Endringskode,

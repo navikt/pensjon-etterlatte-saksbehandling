@@ -1,8 +1,8 @@
 package no.nav.etterlatte.brev.model.mapper
 
 import no.nav.etterlatte.brev.model.Barn
-import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 
 fun Vedtak.finnBarn(): Barn = this.grunnlag
     .find { it.opplysningType === Opplysningstype.SOEKER_PDL_V1 }!!

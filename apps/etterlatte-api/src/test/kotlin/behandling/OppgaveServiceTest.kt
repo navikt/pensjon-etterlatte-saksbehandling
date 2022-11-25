@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingKlient
-import no.nav.etterlatte.behandling.EtterlatteVedtak
 import no.nav.etterlatte.behandling.OppgaveService
 import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -33,9 +32,6 @@ import java.util.*
 internal class OppgaveServiceTest {
     @MockK
     lateinit var behandlingKlient: BehandlingKlient
-
-    @MockK
-    lateinit var vedtakKlient: EtterlatteVedtak
 
     @InjectMockKs
     lateinit var service: OppgaveService
@@ -67,7 +63,6 @@ internal class OppgaveServiceTest {
             null,
             null,
             null,
-            null,
             null
         )
         val behandlingId = UUID.randomUUID()
@@ -80,12 +75,11 @@ internal class OppgaveServiceTest {
                     Sak("ident", "saktype", 1),
                     ZonedDateTime.now(),
                     LocalDate.now(),
-                    BehandlingType.REVURDERING
+                    BehandlingType.REVURDERING,
+                    1
                 )
             )
         )
-        coEvery { vedtakKlient.hentVedtak(UUID.randomUUID().toString(), accessToken) } returns vedtak
-        coEvery { vedtakKlient.hentVedtakBolk(listOf(behandlingId.toString()), accessToken) } returns listOf(vedtak)
 
         val resultat = runBlocking { service.hentAlleOppgaver(accessToken) }
 

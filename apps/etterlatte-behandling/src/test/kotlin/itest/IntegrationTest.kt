@@ -25,6 +25,7 @@ import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktRequest
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.HendelseDao
+import no.nav.etterlatte.behandling.KommerBarnetTilgodeJson
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
@@ -43,13 +44,14 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.module
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
@@ -181,6 +183,14 @@ class ApplicationTest {
                 )
                 assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)
                 assertEquals(expected.kilde.ident, it.body<FastsettVirkningstidspunktResponse>().kilde.ident)
+            }
+
+            client.post("/api/behandling/$behandlingId/kommerbarnettilgode") {
+                addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(KommerBarnetTilgodeJson(JaNeiVetIkke.JA, "begrunnelse"))
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {

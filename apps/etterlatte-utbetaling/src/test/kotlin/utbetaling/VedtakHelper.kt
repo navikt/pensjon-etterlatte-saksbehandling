@@ -1,16 +1,16 @@
 package no.nav.etterlatte.utbetaling
 
-import no.nav.etterlatte.domene.vedtak.Attestasjon
-import no.nav.etterlatte.domene.vedtak.Behandling
-import no.nav.etterlatte.domene.vedtak.Periode
-import no.nav.etterlatte.domene.vedtak.Sak
-import no.nav.etterlatte.domene.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.domene.vedtak.Vedtak
-import no.nav.etterlatte.domene.vedtak.VedtakFattet
-import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.Sak
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth

@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom'
 import { Column, GridContainer } from '~shared/styled'
 import { PdfVisning } from '../pdf-visning'
 import { MottakerComponent } from './mottaker'
-import { IBrev } from '../index'
+import { IBrev } from '../Brev'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 
 const CustomModal = styled(Modal)`

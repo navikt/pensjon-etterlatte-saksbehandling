@@ -1,19 +1,11 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -27,12 +19,6 @@ interface EtterlatteGrunnlag {
         opplysningsType: Opplysningstype,
         accessToken: String
     ): Grunnlagsopplysning<Person>?
-
-    suspend fun finnPerioder(
-        sakId: Long,
-        opplysningsType: Opplysningstype,
-        accessToken: String
-    ): Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>?
 }
 
 class GrunnlagKlient(config: Config, private val httpClient: HttpClient) : EtterlatteGrunnlag {
@@ -68,40 +54,6 @@ class GrunnlagKlient(config: Config, private val httpClient: HttpClient) : Etter
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
             logger.error("Henting av opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.", e)
-            throw e
-        }
-    }
-
-    override suspend fun finnPerioder(
-        sakId: Long,
-        opplysningsType: Opplysningstype,
-        accessToken: String
-    ): Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>? {
-        try {
-            logger.info("Finner perioder på ($opplysningsType) fra grunnlag for sak med id $sakId.")
-
-            val token = azureAdClient.getOnBehalfOfAccessTokenForResource(
-                listOf("api://$clientId/.default"),
-                accessToken
-            ).get()?.accessToken ?: ""
-
-            val response = httpClient.get("$resourceUrl/grunnlag/$sakId/$opplysningsType") {
-                header("Authorization", "Bearer $token")
-                accept(ContentType.Application.Json)
-            }
-
-            return when (response.status) {
-                HttpStatusCode.OK -> objectMapper.readValue<Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>>(
-                    response.bodyAsText()
-                )
-                HttpStatusCode.NotFound -> null
-                else -> throw Exception("Feil i kall mot grunnlag. Status: ${response.status}")
-            }
-        } catch (e: Exception) {
-            logger.error(
-                "Henting av perioder på opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.",
-                e
-            )
             throw e
         }
     }

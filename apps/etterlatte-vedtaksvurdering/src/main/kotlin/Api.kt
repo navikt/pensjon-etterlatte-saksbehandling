@@ -34,6 +34,16 @@ fun Route.Api(service: VedtaksvurderingService) {
         }
     }
 
+    get("behandlinger/{behandlingId}/fellesvedtak") {
+        val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+        val vedtaksresultat = service.hentFellesVedtak(behandlingId)
+        if (vedtaksresultat == null) {
+            call.response.status(HttpStatusCode.NotFound)
+        } else {
+            call.respond(vedtaksresultat)
+        }
+    }
+
     post("vedtak") {
         logger.debug("Request om vedtak bolk")
         val request = call.receive<VedtakBolkRequest>()

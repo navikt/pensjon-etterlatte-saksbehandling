@@ -1,3 +1,5 @@
+package no.nav.etterlatte.libs.ktor
+
 import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -53,6 +55,7 @@ fun Application.restModule(
     }
 
     routing {
+        healthApi()
         authenticate {
             route()
         }

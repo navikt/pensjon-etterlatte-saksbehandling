@@ -1,3 +1,4 @@
+package no.nav.etterlatte.libs.ktor
 
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -84,27 +85,39 @@ class KtorRestTest {
         }
     }
 
+    @Test
+    fun `skal svare paa helsesjekk uten autentisering`() {
+        testApplication {
+            application { restModule { testRoute1() } }
+
+            val response1 = client.get("/health/isalive")
+            val response2 = client.get("/health/isready")
+            assertEquals(HttpStatusCode.OK, response1.status)
+            assertEquals(HttpStatusCode.OK, response2.status)
+        }
+    }
+
+    private fun Route.testRoute1() {
+        route("/api/test") {
+            get("/") {
+                call.respond(HttpStatusCode.OK)
+            }
+            get("/exceptionhandler") {
+                throw RuntimeException("Noe feilet")
+            }
+        }
+    }
+
+    private fun Route.testRoute2() {
+        route("/api/test2") {
+            get("/") {
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }
+
     companion object {
         const val CLIENT_ID = "azure-id for saksbehandler"
         const val ISSUER_ID = "azure"
-    }
-}
-
-fun Route.testRoute1() {
-    route("/api/test") {
-        get("/") {
-            call.respond(HttpStatusCode.OK)
-        }
-        get("/exceptionhandler") {
-            throw RuntimeException("Noe feilet")
-        }
-    }
-}
-
-fun Route.testRoute2() {
-    route("/api/test2") {
-        get("/") {
-            call.respond(HttpStatusCode.OK)
-        }
     }
 }

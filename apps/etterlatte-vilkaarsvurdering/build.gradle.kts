@@ -17,7 +17,7 @@ dependencies {
     implementation(Ktor2.ClientAuth)
 
     implementation(project(":libs:ktor2client-onbehalfof"))
-    implementation(project(":libs:ktor2rest"))
+    implementation(project(":libs:etterlatte-ktor"))
 
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.ModuleKotlin)

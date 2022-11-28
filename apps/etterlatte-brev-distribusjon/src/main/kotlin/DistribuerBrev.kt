@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.distribusjon.DistribusjonService
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
-import no.nav.etterlatte.libs.common.distribusjon.BestillingID
+import no.nav.etterlatte.libs.common.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -29,7 +29,7 @@ internal class DistribuerBrev(
         River(rapidsConnection).apply {
             eventName(BrevEventTypes.JOURNALFOERT.toString())
             validate { it.requireKey("brevId", "payload", "journalpostResponse") }
-            validate { it.rejectKey("bestillingId") }
+            validate { it.rejectKey("bestillingsId") }
             correlationId()
         }.register(this)
     }
@@ -39,14 +39,14 @@ internal class DistribuerBrev(
             logger.info("Starter distribuering av brev.")
             val distMelding = packet.distribusjonsMelding()
 
-            val bestillingId = distribusjonService.distribuerJournalpost(
+            val bestillingsId = distribusjonService.distribuerJournalpost(
                 journalpostId = packet.journalpostId(),
                 type = distMelding.distribusjonType,
                 tidspunkt = DistribusjonsTidspunktType.KJERNETID, // todo: dobbeltsjekk.
                 adresse = distMelding.mottakerAdresse
             )
 
-            rapidsConnection.svarSuksess(packet, bestillingId)
+            rapidsConnection.svarSuksess(packet, bestillingsId)
         }
     }
 
@@ -64,11 +64,11 @@ internal class DistribuerBrev(
         throw ex
     }
 
-    private fun RapidsConnection.svarSuksess(packet: JsonMessage, bestillingId: BestillingID) {
+    private fun RapidsConnection.svarSuksess(packet: JsonMessage, bestillingsId: BestillingsID) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
         packet[eventNameKey] = BrevEventTypes.DISTRIBUERT.toString()
-        packet["bestillingId"] = bestillingId
+        packet["bestillingsId"] = bestillingsId
 
         publish(packet.toJson())
     }

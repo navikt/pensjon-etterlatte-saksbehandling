@@ -22,6 +22,7 @@ spec:
   azure:
     application:
       enabled: true
+      tenant: trygdeetaten.no
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -34,16 +35,20 @@ spec:
     - name: AZURE_DOKARKIV_SCOPE
       value: "api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default"
     - name: DOKDISTFORDEL_URL
-      value: "https://dokdistfordeling-q1.nais.preprod.local/rest/v1"
+      value: "https://dokdistfordeling-q1.dev-fss-pub.nais.io/rest/v1"
     - name: DOKDISTFORDEL_SCOPE
-      value: "api://dev-fss.teamdokumenthandtering.saf/.default"
+      value: "api://dev-fss.teamdokumenthandtering.saf-q1/.default"
     - name: BREV_API_SCOPE
       value: "api://dev-gcp.etterlatte.etterlatte-brev-api/.default"
     - name: BREV_API_URL
       value: "http://etterlatte-brev-api/brev"
     - name: BREV_LOCAL_DEV
-      value: "true"
+      value: "false"
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-brev-api
+    external:
+      - host: dokarkiv.dev-fss-pub.nais.io
+      - host: saf.dev-fss-pub.nais.io
+      - host: dokdistfordeling-q1.dev-fss-pub.nais.io

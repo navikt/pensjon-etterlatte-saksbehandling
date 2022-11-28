@@ -137,10 +137,10 @@ class BrevRepository private constructor(private val ds: DataSource) {
             .executeUpdate() > 0
     }
 
-    fun setBestillingId(brevId: Long, bestillingId: String): Boolean = connection.use {
+    fun setBestillingsId(brevId: Long, bestillingsId: String): Boolean = connection.use {
         it.prepareStatement("UPDATE brev SET bestilling_id = ? WHERE id = ?")
             .apply {
-                setString(1, bestillingId)
+                setString(1, bestillingsId)
                 setLong(2, brevId)
             }
             .executeUpdate() > 0

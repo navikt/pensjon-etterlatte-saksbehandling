@@ -1,7 +1,7 @@
 package no.nav.etterlatte.distribusjon
 
 import no.nav.etterlatte.libs.common.brev.model.Adresse
-import no.nav.etterlatte.libs.common.distribusjon.BestillingID
+import no.nav.etterlatte.libs.common.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import java.util.*
@@ -12,7 +12,7 @@ class DistribusjonServiceMock : DistribusjonService {
         type: DistribusjonsType,
         tidspunkt: DistribusjonsTidspunktType,
         adresse: Adresse?
-    ): BestillingID {
+    ): BestillingsID {
         return UUID.randomUUID().toString()
     }
 }

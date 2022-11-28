@@ -11,7 +11,10 @@ import no.nav.etterlatte.libs.common.journalpost.JournalPostType
 import no.nav.etterlatte.libs.common.journalpost.JournalpostDokument
 import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
+import no.nav.etterlatte.libs.common.journalpost.Sak
+import no.nav.etterlatte.libs.common.journalpost.Sakstype
 import org.slf4j.LoggerFactory
+import java.util.*
 
 interface JournalpostService {
     fun journalfoer(melding: DistribusjonMelding): JournalpostResponse
@@ -27,7 +30,10 @@ class JournalpostServiceImpl(
         logger.info("Oppretter journalpost for brev med id=${melding.brevId}")
 
         val brevDokument = brevService.hentBrevInnhold(melding.brevId)
+        logger.info("Oppretter journalpost med brevinnhold", brevDokument)
+
         val request = mapTilJournalpostRequest(melding, brevDokument)
+        logger.info("Oppretter journalpost med request", brevDokument)
 
         client.opprettJournalpost(request, true)
     }
@@ -45,9 +51,9 @@ class JournalpostServiceImpl(
             avsenderMottaker = melding.mottaker.tilAvsenderMottaker(),
             bruker = melding.bruker,
             eksternReferanseId = "${melding.behandlingId}.${melding.brevId}",
-            // sak = {...}
+            sak = Sak(Sakstype.FAGSAK, melding.behandlingId),
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(melding)),
-            tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema,
+            tema = "PEN", // https://confluence.adeo.no/display/BOA/Tema, // Todo: Bytt til EYB før release
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
             journalfoerendeEnhet = melding.journalfoerendeEnhet
         )
@@ -58,8 +64,8 @@ private fun Mottaker.tilAvsenderMottaker() = when {
     foedselsnummer != null -> AvsenderMottaker(id = foedselsnummer!!.value)
     orgnummer != null -> AvsenderMottaker(id = orgnummer, idType = "ORGNR")
     adresse != null -> {
-        val navn = "${adresse!!.fornavn} ${adresse!!.etternavn}"
-        AvsenderMottaker(id = null, navn = navn, idType = null, land = adresse!!.land)
+        val mottakerNavn = "${adresse!!.fornavn} ${adresse!!.etternavn}"
+        AvsenderMottaker(id = null, navn = mottakerNavn, idType = null, land = adresse!!.land)
     }
     else -> throw Exception("Ingen brevmottaker spesifisert")
 }
@@ -67,5 +73,5 @@ private fun Mottaker.tilAvsenderMottaker() = when {
 private fun ByteArray.tilJournalpostDokument(melding: DistribusjonMelding) = JournalpostDokument(
     tittel = melding.tittel,
     brevkode = melding.brevKode,
-    dokumentvarianter = listOf(DokumentVariant.ArkivPDF(this.toString()))
+    dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(this)))
 )

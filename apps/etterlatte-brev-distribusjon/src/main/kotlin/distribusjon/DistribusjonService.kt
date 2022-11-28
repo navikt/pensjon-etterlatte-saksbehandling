@@ -2,7 +2,7 @@ package no.nav.etterlatte.distribusjon
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.brev.model.Adresse
-import no.nav.etterlatte.libs.common.distribusjon.BestillingID
+import no.nav.etterlatte.libs.common.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.distribusjon.DistribuerJournalpostRequest
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
@@ -13,7 +13,7 @@ interface DistribusjonService {
         type: DistribusjonsType,
         tidspunkt: DistribusjonsTidspunktType,
         adresse: Adresse? = null
-    ): BestillingID
+    ): BestillingsID
 }
 
 class DistribusjonServiceImpl(private val klient: DistribusjonKlient) : DistribusjonService {
@@ -22,15 +22,15 @@ class DistribusjonServiceImpl(private val klient: DistribusjonKlient) : Distribu
         type: DistribusjonsType,
         tidspunkt: DistribusjonsTidspunktType,
         adresse: Adresse?
-    ): BestillingID = runBlocking {
+    ): BestillingsID = runBlocking {
         val request = DistribuerJournalpostRequest(
             journalpostId = journalpostId,
-            bestillendeFagsystem = "EY", // todo: felles fagsystemkode
+            bestillendeFagsystem = "EY",
             distribusjonstype = type,
             distribusjonstidspunkt = tidspunkt,
             dokumentProdApp = "etterlate-brev-api"
         )
 
-        klient.distribuerJournalpost(request).bestillingId
+        klient.distribuerJournalpost(request).bestillingsId
     }
 }

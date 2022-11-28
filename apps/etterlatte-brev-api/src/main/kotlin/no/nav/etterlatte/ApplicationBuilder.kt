@@ -70,7 +70,8 @@ class ApplicationBuilder {
         JournalpostClient(
             httpClient(),
             env["HENT_DOKUMENT_URL"]!!,
-            env["SAF_GRAPHQL_URL"]!!
+            env["SAF_GRAPHQL_URL"]!!,
+            env["SAF_SCOPE"]!!
         )
     }
 
@@ -89,6 +90,7 @@ class ApplicationBuilder {
                     }
                 })
                 OppdaterDistribusjonStatus(this, db)
+                FerdigstillVedtaksbrev(this, brevService)
             }
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)

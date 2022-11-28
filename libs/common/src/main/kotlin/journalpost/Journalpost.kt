@@ -16,6 +16,7 @@ data class JournalpostRequest(
     val journalfoerendeEnhet: String?,
     val avsenderMottaker: AvsenderMottaker,
     val bruker: Bruker,
+    val sak: Sak,
     val eksternReferanseId: String,
     val dokumenter: List<JournalpostDokument>
 )
@@ -38,6 +39,17 @@ data class JournalpostDokument(
     val brevkode: String = "XX.YY-ZZ",
     val dokumentvarianter: List<DokumentVariant>
 )
+
+data class Sak (
+    val sakstype: Sakstype,
+    val fagsakId: String? = null,
+    val fagsaksystem: String? = "EY"
+)
+
+enum class Sakstype() {
+    FAGSAK,
+    GENERELL_SAK
+}
 
 sealed class DokumentVariant {
     abstract val filtype: String

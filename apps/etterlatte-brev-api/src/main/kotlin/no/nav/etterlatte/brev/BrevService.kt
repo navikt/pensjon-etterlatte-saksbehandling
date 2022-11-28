@@ -159,7 +159,7 @@ class BrevService(
             distribusjonType = if (brev.erVedtaksbrev) DistribusjonsType.VEDTAK else DistribusjonsType.VIKTIG,
             brevId = brev.id,
             mottaker = brev.mottaker,
-            bruker = Bruker(vedtak.finnBarn().fnr),
+            bruker = Bruker(vedtak.sak.ident),
             tittel = brev.tittel,
             brevKode = "XX.YY-ZZ",
             journalfoerendeEnhet = vedtak.vedtakFattet!!.ansvarligEnhet

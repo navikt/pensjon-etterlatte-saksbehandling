@@ -905,7 +905,10 @@
         "familieRelasjon": {
           "ansvarligeForeldre": null,
           "foreldre": null,
-          "barn": ["12101376212", "03108718357"]
+          "barn": [
+            "12101376212",
+            "03108718357"
+          ]
         }
       }
     }

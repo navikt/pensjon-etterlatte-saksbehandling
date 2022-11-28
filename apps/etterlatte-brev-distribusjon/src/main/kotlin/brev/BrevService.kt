@@ -2,8 +2,8 @@ package no.nav.etterlatte.brev
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
@@ -19,7 +19,7 @@ class BrevServiceImpl(private val client: HttpClient, private val url: String) :
         logger.info("Forsøker å hente innhold for brev med id = $id")
 
         try {
-            return client.get("$url/$id/pdf") {
+            return client.post("$url/$id/pdf") {
                 header(X_CORRELATION_ID, getXCorrelationId())
             }.body()
         } catch (ex: Exception) {

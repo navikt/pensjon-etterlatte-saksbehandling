@@ -43,21 +43,21 @@ class OppdaterDistribusjonStatusTest {
         verify(exactly = 1) { db.oppdaterStatus(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) }
         verify(exactly = 1) { db.setJournalpostId(brevId, journalpostResponse.journalpostId) }
         verify(exactly = 0) { db.oppdaterStatus(brevId, Status.DISTRIBUERT, any()) }
-        verify(exactly = 0) { db.setBestillingId(brevId, any()) }
+        verify(exactly = 0) { db.setBestillingsId(brevId, any()) }
 
         confirmVerified(db)
     }
 
     @Test
     fun `Skal lagre ned distribusjons-detaljer ved svar fra brev-distribusjon`() {
-        val bestillingId = UUID.randomUUID().toString()
+        val bestillingsId = UUID.randomUUID().toString()
         val melding = JsonMessage.newMessage(
             mapOf(
                 eventNameKey to BrevEventTypes.DISTRIBUERT.toString(),
                 "brevId" to brevId,
                 correlationIdKey to UUID.randomUUID().toString(),
                 "journalpostResponse" to journalpostResponse.toJson(),
-                "bestillingId" to bestillingId
+                "bestillingsId" to bestillingsId
             )
         )
 
@@ -66,7 +66,7 @@ class OppdaterDistribusjonStatusTest {
         verify(exactly = 0) { db.oppdaterStatus(brevId, Status.JOURNALFOERT, any()) }
         verify(exactly = 0) { db.setJournalpostId(brevId, any()) }
         verify(exactly = 1) { db.oppdaterStatus(brevId, Status.DISTRIBUERT, any()) }
-        verify(exactly = 1) { db.setBestillingId(brevId, bestillingId) }
+        verify(exactly = 1) { db.setBestillingsId(brevId, bestillingsId) }
 
         confirmVerified(db)
     }

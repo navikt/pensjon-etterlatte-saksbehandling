@@ -50,7 +50,7 @@ class BeregningService(
             behandlingId = behandlingId,
             beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
             beregningsperioder = beregningResultat.beregningsperioder,
-            grunnlagMetadata = Grunnlag.empty().metadata
+            grunnlagMetadata = grunnlag.metadata
         )
 
         return beregningRepository.lagreEllerOppdaterBeregning(beregning)

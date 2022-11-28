@@ -69,12 +69,13 @@ const Beregningsgrunnlag = () => {
         onSubmit={handleSubmit(async (formValues) => {
           if (formValues.beregningsgrunnlag.length !== 0) {
             setIsLoading(true)
-            const fetchBeregning = await opprettBeregning(behandling.id)
-              .then(() => next())
-              .catch((err) => console.error({ err }))
+            const fetchBeregning = async () =>
+              await opprettBeregning(behandling.id)
+                .then(() => next())
+                .catch((err) => console.error({ err }))
 
             await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
-              .then(() => fetchBeregning)
+              .then(() => fetchBeregning())
               .catch((err) => console.error({ err }))
               .finally(() => setIsLoading(false))
           }

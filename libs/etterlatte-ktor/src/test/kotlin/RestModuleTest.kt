@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class KtorRestTest {
+class RestModuleTest {
 
     private val server = MockOAuth2Server()
 
@@ -76,8 +76,7 @@ class KtorRestTest {
         testApplication {
             application { restModule { testRoute1() } }
 
-            val response = client.get("/api/test/exceptionhandler") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            val response = client.get("/api/test/shouldfail") {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
@@ -102,7 +101,7 @@ class KtorRestTest {
             get("/") {
                 call.respond(HttpStatusCode.OK)
             }
-            get("/exceptionhandler") {
+            get("/shouldfail") {
                 throw RuntimeException("Noe feilet")
             }
         }

@@ -12,6 +12,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlientImpl
@@ -19,7 +20,6 @@ import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlientImpl
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
-import restModule
 import java.util.*
 
 class ApplicationBuilder {

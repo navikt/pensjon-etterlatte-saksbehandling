@@ -31,4 +31,8 @@ export const ApiConfig = {
     url: process.env.BREV_API_URL || 'https://etterlatte-brev-api.dev.intern.nav.no',
     scope: process.env.BREV_API_SCOPE || 'api://d6add52a-5807-49cd-a181-76908efee836/.default',
   },
+  beregning: {
+    url: process.env.BEREGNING_API_URL || 'https://etterlatte-beregning.dev.intern.nav.no',
+    scope: process.env.BEREGNING_API_SCOPE || 'api://b07cf335-11fb-4efa-bd46-11f51afd5052/.default',
+  },
 }

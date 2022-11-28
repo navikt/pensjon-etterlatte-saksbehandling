@@ -31,33 +31,7 @@ class BeregningService(
     private val behandlingKlient: BehandlingKlient
 ) {
 
-    suspend fun hentBeregning(behandlingId: UUID, accessToken: String): Beregning {
-        val beregning: Beregning = beregningRepository.hent(behandlingId)
-        val grunnlag: Grunnlag = grunnlagKlient.hentGrunnlag(beregning.grunnlagMetadata.sakId, accessToken)
-
-        if (grunnlag.metadata.versjon > beregning.grunnlagMetadata.versjon) {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-            val beregningResultat = beregnResultat(
-                grunnlag,
-                behandling.virkningstidspunkt!!.dato, // alle beregningsperioder får samme fom? hvorfor?
-                YearMonth.now().plusMonths(3),
-                VilkaarsvurderingUtfall.OPPFYLT,
-                behandling.behandlingType!!
-            )
-
-            val oppdatertBeregning = Beregning(
-                beregningId = beregning.beregningId,
-                behandlingId = behandlingId,
-                beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
-                beregningsperioder = beregningResultat.beregningsperioder,
-                grunnlagMetadata = Grunnlag.empty().metadata
-            )
-
-            return beregningRepository.oppdaterBeregning(oppdatertBeregning)
-        } else {
-            return beregning
-        }
-    }
+    fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
         val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
@@ -79,7 +53,7 @@ class BeregningService(
             grunnlagMetadata = Grunnlag.empty().metadata
         )
 
-        return beregningRepository.lagre(beregning)
+        return beregningRepository.lagreEllerOppdaterBeregning(beregning)
     }
 
     fun beregnResultat(

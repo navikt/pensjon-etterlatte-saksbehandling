@@ -67,7 +67,7 @@ internal class BeregningRepositoryImplTest {
                 versjon = beregningResultat.grunnlagVersjon
             )
         )
-        val lagretBeregning = beregningRepository.lagre(beregning)
+        val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
 
         assertEquals(beregning, lagretBeregning)
     }
@@ -95,7 +95,7 @@ internal class BeregningRepositoryImplTest {
                 versjon = beregningResultat.grunnlagVersjon
             )
         )
-        beregningRepository.lagre(beregningLagret)
+        beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
 
         val beregningHentet = beregningRepository.hent(behandlingId)
 
@@ -103,7 +103,7 @@ internal class BeregningRepositoryImplTest {
     }
 
     @Test
-    fun `skal oppdatere beregning`() {
+    fun `skal oppdatere og eller lagre beregning`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         val beregningResultat = BeregningService(beregningRepository, mockk(), mockk(), mockk()).beregnResultat(
@@ -125,7 +125,7 @@ internal class BeregningRepositoryImplTest {
                 versjon = beregningResultat.grunnlagVersjon
             )
         )
-        beregningRepository.lagre(beregningLagret)
+        beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
 
         val beregningHentet = beregningRepository.hent(behandlingId)
 
@@ -149,7 +149,7 @@ internal class BeregningRepositoryImplTest {
                 versjon = nyBeregning.grunnlagVersjon + 1
             )
         )
-        beregningRepository.oppdaterBeregning(nyBeregningMapped)
+        beregningRepository.lagreEllerOppdaterBeregning(nyBeregningMapped)
         val beregningHentetNy = beregningRepository.hent(behandlingId)
 
         assertEquals(nyBeregningMapped, beregningHentetNy)

@@ -17,8 +17,7 @@ fun Route.beregning(beregningService: BeregningService) {
     route("api/beregning") {
         get("/{beregningsid}") {
             withBehandlingId {
-                val accessToken = getAccessToken(call)
-                val beregning = beregningService.hentBeregning(it, accessToken)
+                val beregning = beregningService.hentBeregning(it)
                 call.respond(beregning)
             }
         }

@@ -14,7 +14,7 @@ import no.nav.etterlatte.model.getAccessToken
 import java.util.*
 
 fun Route.beregning(beregningService: BeregningService) {
-    route("api/beregning") {
+    route("/api/beregning") {
         get("/{beregningsid}") {
             withBehandlingId {
                 val beregning = beregningService.hentBeregning(it)

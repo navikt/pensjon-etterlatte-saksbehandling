@@ -27,10 +27,6 @@ import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarType
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Utfall
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarTypeOgUtfall
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -51,8 +47,18 @@ internal class VilkaarsvurderingRoutesTest {
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val token: String by lazy {
+        server.issueToken(
+            issuerId = ISSUER_ID,
+            audience = CLIENT_ID,
+            claims = mapOf(
+                "navn" to "John Doe",
+                "NAVident" to "Saksbehandler01"
+            )
+        ).serialize()
+    }
 
-    private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
+    private lateinit var vilkaarsvurderingService: VilkaarsvurderingService
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
@@ -67,7 +73,8 @@ internal class VilkaarsvurderingRoutesTest {
             postgreSQLContainer.username,
             postgreSQLContainer.password
         ).apply { migrate() }
-        vilkaarsvurderingServiceImpl =
+
+        vilkaarsvurderingService =
             VilkaarsvurderingService(
                 VilkaarsvurderingRepositoryImpl(ds.dataSource()),
                 behandlingKlient,
@@ -92,21 +99,10 @@ internal class VilkaarsvurderingRoutesTest {
         postgreSQLContainer.stop()
     }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = ISSUER_ID,
-            audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01"
-            )
-        ).serialize()
-    }
-
     @Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingService) } }
 
             opprettVilkaarsvurdering()
 
@@ -115,27 +111,33 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), Vilkaarsvurdering::class.java)
-            val vilkaar = vilkaarsvurdering.vilkaar.first()
+            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
+            val alleVilkaar: List<Vilkaar> = objectMapper
+                .readerForListOf(Vilkaar::class.java)
+                .readValue(vilkaarsvurdering.vilkaar)
+            val foersteVilkaar = alleVilkaar.first()
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(behandlingId, vilkaarsvurdering.behandlingId)
-            assertEquals(VilkaarType.DOEDSFALL_FORELDER, vilkaar.hovedvilkaar.type)
-            assertEquals("§ 18-4", vilkaar.hovedvilkaar.lovreferanse.paragraf)
-            assertEquals("Dødsfall forelder", vilkaar.hovedvilkaar.tittel)
+            assertEquals(VilkaarType.DOEDSFALL_FORELDER, foersteVilkaar.hovedvilkaar.type)
+            assertEquals("§ 18-4", foersteVilkaar.hovedvilkaar.lovreferanse.paragraf)
+            assertEquals("Dødsfall forelder", foersteVilkaar.hovedvilkaar.tittel)
             assertEquals(
                 "En eller begge foreldrene er registrert død",
-                vilkaar.hovedvilkaar.beskrivelse
+                foersteVilkaar.hovedvilkaar.beskrivelse
             )
-            assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-4", vilkaar.hovedvilkaar.lovreferanse.lenke)
-            assertNull(vilkaar.vurdering)
+            assertEquals(
+                "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4",
+                foersteVilkaar.hovedvilkaar.lovreferanse.lenke
+            )
+            assertNull(foersteVilkaar.vurdering)
         }
     }
 
     @Test
     fun `skal opprette vilkaarsvurdering basert paa behandling dersom en ikke finnes`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingService) } }
 
             val nyBehandlingId = UUID.randomUUID()
             val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
@@ -143,7 +145,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), Vilkaarsvurdering::class.java)
+            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
 
             assertEquals(nyBehandlingId, vilkaarsvurdering.behandlingId)
             assertEquals(
@@ -157,7 +159,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingService) } }
             val nyBehandlingId = UUID.randomUUID()
 
             coEvery { behandlingKlient.hentBehandling(nyBehandlingId, any()) } returns detaljertBehandling().apply {
@@ -176,7 +178,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingService) } }
 
             opprettVilkaarsvurdering()
 
@@ -214,7 +216,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingService) } }
 
             opprettVilkaarsvurdering()
 
@@ -232,7 +234,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vurdertVilkaar = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(behandlingId, oboToken)
+            val vurdertVilkaar = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(behandlingId, oboToken)
                 .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertNotNull(vurdertVilkaar)
@@ -259,7 +261,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vurdertVilkaarPaaUnntak = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
+            val vurdertVilkaarPaaUnntak = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
                 behandlingId,
                 oboToken
             )
@@ -281,7 +283,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingService) } }
 
             opprettVilkaarsvurdering()
 
@@ -299,7 +301,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vurdertVilkaar = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(behandlingId, oboToken)
+            val vurdertVilkaar = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(behandlingId, oboToken)
                 .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertNotNull(vurdertVilkaar)
@@ -312,7 +314,7 @@ internal class VilkaarsvurderingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val vurdertVilkaarSlettet = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
+            val vurdertVilkaarSlettet = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
                 behandlingId,
                 oboToken
             ).vilkaar
@@ -330,7 +332,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingService) } }
 
             opprettVilkaarsvurdering()
             val resultat = VurdertVilkaarsvurderingResultatDto(
@@ -345,9 +347,10 @@ internal class VilkaarsvurderingRoutesTest {
 
             val oppdatertVilkaarsvurdering = objectMapper
                 .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
+
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
-            assertEquals(resultat.resultat, oppdatertVilkaarsvurdering?.resultat?.utfall)
+            assertEquals(resultat.resultat.toString(), oppdatertVilkaarsvurdering?.resultat?.utfall.toString())
             assertEquals(resultat.kommentar, oppdatertVilkaarsvurdering?.resultat?.kommentar)
             assertEquals("Saksbehandler01", oppdatertVilkaarsvurdering?.resultat?.saksbehandler)
             assertNotNull(oppdatertVilkaarsvurdering?.resultat?.tidspunkt)
@@ -368,7 +371,7 @@ internal class VilkaarsvurderingRoutesTest {
 
     private fun opprettVilkaarsvurdering() {
         runBlocking {
-            vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
+            vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
                 behandlingId,
                 oboToken
             )

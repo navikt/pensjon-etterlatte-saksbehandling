@@ -12,11 +12,6 @@ import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarType
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Utfall
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VurdertVilkaar
 import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*

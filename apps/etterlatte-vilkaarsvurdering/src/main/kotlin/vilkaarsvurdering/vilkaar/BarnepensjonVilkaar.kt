@@ -5,12 +5,12 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Hovedvilkaar
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Lovreferanse
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Unntaksvilkaar
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarOpplysningType
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaarsgrunnlag
+import no.nav.etterlatte.vilkaarsvurdering.Hovedvilkaar
+import no.nav.etterlatte.vilkaarsvurdering.Lovreferanse
+import no.nav.etterlatte.vilkaarsvurdering.Unntaksvilkaar
+import no.nav.etterlatte.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarOpplysningType
+import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsgrunnlag
 import java.util.*
 
 object BarnepensjonVilkaar {

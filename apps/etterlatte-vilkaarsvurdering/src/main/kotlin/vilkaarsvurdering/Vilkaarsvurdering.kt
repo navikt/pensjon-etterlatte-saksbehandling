@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
+package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning

@@ -22,12 +22,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VirkningstidspunktDto
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarType
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarTypeOgUtfall
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDateTime
 import java.util.*
 

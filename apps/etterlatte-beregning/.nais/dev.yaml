@@ -58,3 +58,6 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-behandling
+    inbound:
+      rules:
+        - application: etterlatte-saksbehandling-ui

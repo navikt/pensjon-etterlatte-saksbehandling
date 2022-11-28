@@ -20,25 +20,11 @@ import java.util.*
 import javax.sql.DataSource
 
 interface BeregningRepository {
-    fun lagre(beregning: Beregning): Beregning
     fun hent(behandlingId: UUID): Beregning
-    fun oppdaterBeregning(beregning: Beregning): Beregning
+    fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning
 }
 
 class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRepository {
-    override fun lagre(
-        beregning: Beregning
-    ): Beregning {
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                val queries = beregning.beregningsperioder.map {
-                    createMapFromBeregningsperiode(it, beregning)
-                }
-                tx.batchPreparedNamedStatement(Queries.lagreBeregningsperioder, queries)
-            }
-        }
-        return hent(beregning.behandlingId)
-    }
 
     override fun hent(behandlingId: UUID): Beregning = using(sessionOf(dataSource)) { session ->
         session.transaction { tx ->
@@ -54,7 +40,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
         }
     }
 
-    override fun oppdaterBeregning(beregning: Beregning): Beregning {
+    override fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning {
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 queryOf(

@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll
@@ -52,7 +52,7 @@ internal class BeregningRepositoryImplTest {
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2021, 9),
-            mockkClass(Vilkaarsvurdering::class),
+            mockkClass(VilkaarsvurderingUtfall::class),
             BehandlingType.FØRSTEGANGSBEHANDLING
         )
         val behandlingId = UUID.randomUUID()
@@ -67,7 +67,7 @@ internal class BeregningRepositoryImplTest {
                 versjon = beregningResultat.grunnlagVersjon
             )
         )
-        val lagretBeregning = beregningRepository.lagre(beregning)
+        val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
 
         assertEquals(beregning, lagretBeregning)
     }
@@ -80,7 +80,7 @@ internal class BeregningRepositoryImplTest {
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2021, 9),
-            mockkClass(Vilkaarsvurdering::class),
+            mockkClass(VilkaarsvurderingUtfall::class),
             BehandlingType.FØRSTEGANGSBEHANDLING
         )
         val behandlingId = UUID.randomUUID()
@@ -95,7 +95,7 @@ internal class BeregningRepositoryImplTest {
                 versjon = beregningResultat.grunnlagVersjon
             )
         )
-        beregningRepository.lagre(beregningLagret)
+        beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
 
         val beregningHentet = beregningRepository.hent(behandlingId)
 
@@ -103,14 +103,14 @@ internal class BeregningRepositoryImplTest {
     }
 
     @Test
-    fun `skal oppdatere beregning`() {
+    fun `skal oppdatere og eller lagre beregning`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         val beregningResultat = BeregningService(beregningRepository, mockk(), mockk(), mockk()).beregnResultat(
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2021, 9),
-            mockkClass(Vilkaarsvurdering::class),
+            mockkClass(VilkaarsvurderingUtfall::class),
             BehandlingType.FØRSTEGANGSBEHANDLING
         )
         val behandlingId = UUID.randomUUID()
@@ -125,7 +125,7 @@ internal class BeregningRepositoryImplTest {
                 versjon = beregningResultat.grunnlagVersjon
             )
         )
-        beregningRepository.lagre(beregningLagret)
+        beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
 
         val beregningHentet = beregningRepository.hent(behandlingId)
 
@@ -135,7 +135,7 @@ internal class BeregningRepositoryImplTest {
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2024, 12),
-            mockkClass(Vilkaarsvurdering::class),
+            mockkClass(VilkaarsvurderingUtfall::class),
             BehandlingType.FØRSTEGANGSBEHANDLING
         )
 
@@ -149,7 +149,7 @@ internal class BeregningRepositoryImplTest {
                 versjon = nyBeregning.grunnlagVersjon + 1
             )
         )
-        beregningRepository.oppdaterBeregning(nyBeregningMapped)
+        beregningRepository.lagreEllerOppdaterBeregning(nyBeregningMapped)
         val beregningHentetNy = beregningRepository.hent(behandlingId)
 
         assertEquals(nyBeregningMapped, beregningHentetNy)

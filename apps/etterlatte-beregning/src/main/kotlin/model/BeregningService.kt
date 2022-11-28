@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.behandling.BehandlingKlient
 import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
@@ -43,7 +42,7 @@ class BeregningService(
             grunnlag,
             behandling.virkningstidspunkt!!.dato,
             YearMonth.now().plusMonths(3),
-            vilkaarsvurdering,
+            vilkaarsvurdering.resultat.utfall,
             behandling.behandlingType!!
         )
         val beregning = Beregning(
@@ -54,14 +53,14 @@ class BeregningService(
             grunnlagMetadata = Grunnlag.empty().metadata
         )
 
-        return beregningRepository.lagre(beregning)
+        return beregningRepository.lagreEllerOppdaterBeregning(beregning)
     }
 
     fun beregnResultat(
         grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
-        vilkaarsvurdering: Vilkaarsvurdering,
+        vilkaarsvurderingUtfall: VilkaarsvurderingUtfall,
         behandlingType: BehandlingType
     ): BeregningsResultat { // TODO: Bruk vår interne model i jira
         return when (behandlingType) {
@@ -79,7 +78,7 @@ class BeregningService(
             }
 
             BehandlingType.REVURDERING -> {
-                when (vilkaarsvurdering.resultat.utfall) {
+                when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
                         BeregningsResultat(
                             id = UUID.randomUUID(),

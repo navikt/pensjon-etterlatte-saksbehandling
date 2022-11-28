@@ -45,7 +45,6 @@ class AppBuilder {
 
     private fun httpClient(scope: String) = HttpClient(OkHttp) {
         install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-
         install(Auth) {
             clientCredential {
                 config = env.toMutableMap()

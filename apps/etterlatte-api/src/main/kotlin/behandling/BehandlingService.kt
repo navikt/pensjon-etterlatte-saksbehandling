@@ -99,6 +99,7 @@ class BehandlingService(
             gyldighetsprøving = behandling.await().gyldighetsproeving,
             kommerBarnetTilgode = behandling.await().kommerBarnetTilgode,
             vilkårsprøving = vedtak.await()?.vilkaarsResultat,
+            // TODO sj: Dette blir feil beregning EY-1230
             beregning = vedtak.await()?.beregningsResultat,
             avkortning = vedtak.await()?.avkortingsResultat,
             saksbehandlerId = vedtak.await()?.saksbehandlerId,

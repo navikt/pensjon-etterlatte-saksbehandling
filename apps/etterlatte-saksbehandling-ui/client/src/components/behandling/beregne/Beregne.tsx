@@ -5,41 +5,25 @@ import { formaterStringDato } from '~utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
-import { oppdaterBeregning, resetBeregning } from '~store/reducers/BehandlingReducer'
+import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
-import { RequestStatus } from '~components/behandling/vilkaarsvurdering/utils'
-import { Sammendrag } from '~components/behandling/beregne/Sammendrag'
+import { Sammendrag } from './Sammendrag'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { Button } from '@navikt/ds-react'
+import { Alert, Button } from '@navikt/ds-react'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import styled from 'styled-components'
+import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 
 export const Beregne = () => {
   const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const dispatch = useAppDispatch()
-  const [status, setStatus] = useState<RequestStatus>(RequestStatus.notStarted)
-
-  const laster = status === RequestStatus.notStarted || status === RequestStatus.isloading
-  const ok = status === RequestStatus.ok
-  const error = status === RequestStatus.error
+  const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
 
   useEffect(() => {
-    const fetchBeregning = async () => {
-      setStatus(RequestStatus.isloading)
-      const response = await hentBeregning(behandling.id)
-
-      if (response.status === 'ok') {
-        dispatch(oppdaterBeregning(response.data))
-        setStatus(RequestStatus.ok)
-      } else {
-        dispatch(resetBeregning())
-        setStatus(RequestStatus.error)
-      }
-    }
-    fetchBeregning().catch(() => setStatus(RequestStatus.error))
+    hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
   }, [])
 
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
@@ -62,14 +46,14 @@ export const Beregne = () => {
             Vilkårsresultat: <strong>{formaterVedtaksResultat(vedtaksresultat, virkningstidspunkt)}</strong>
           </div>
         </InfoWrapper>
-        {laster ? (
+        {isPendingOrInitial(beregning) ? (
           <Spinner visible label="Laster" />
-        ) : ok ? (
+        ) : isSuccess(beregning) ? (
           <Sammendrag beregning={behandling.beregning!!} soeker={behandling.søker} />
-        ) : error ? (
-          'Fant ingen beregning'
+        ) : isFailure(beregning) ? (
+          <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
         ) : (
-          'Noe uventet har skjedd'
+          <ApiErrorAlert>Noe uventet har skjedd</ApiErrorAlert>
         )}
       </ContentHeader>
       {behandles ? (
@@ -85,15 +69,18 @@ export const Beregne = () => {
   )
 }
 
-export const InfoWrapper = styled.div`
+const InfoWrapper = styled.div`
   margin-top: 5em;
   max-width: 500px;
   .text {
     margin: 2em 0 5em 0;
   }
 `
-export const DetailWrapper = styled.div`
+const DetailWrapper = styled.div`
   display: flex;
   max-width: 400px;
   margin-left: 0;
+`
+const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
+  margin-top: 8px;
 `

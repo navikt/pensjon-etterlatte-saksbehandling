@@ -4,7 +4,7 @@ export const hentBeregning = async (behandlingId: string): Promise<ApiResponse<B
   return apiClient.get(`/beregning/${behandlingId}`)
 }
 
-export const opprettBeregning = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
+export const opprettEllerEndreBeregning = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
   return apiClient.post(`/beregning/${behandlingId}`, {})
 }
 

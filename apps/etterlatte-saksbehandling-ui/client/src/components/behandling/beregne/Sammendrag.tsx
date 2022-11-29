@@ -31,9 +31,12 @@ export const Sammendrag = ({ beregning, soeker }: Props) => {
     return (
       <>
         {soeskenFlokk.length} barn
-        <IconButton size="small" ref={ref} onClick={() => setIsOpen(true)}>
-          <InformationColored title="Få mer informasjon om beregningsgrunnlaget" />
-        </IconButton>
+        <IconButton
+          size="small"
+          ref={ref}
+          onClick={() => setIsOpen(true)}
+          icon={<InformationColored title="Få mer informasjon om beregningsgrunnlaget" />}
+        />
         <Popover anchorEl={ref.current} open={isOpen} onClose={() => setIsOpen(false)} placement="top">
           <PopoverContent>
             <Heading level="1" size="small">
@@ -121,6 +124,8 @@ const PopoverContent = styled(Popover.Content)`
 `
 
 const IconButton = styled(Button)`
+  height: 1.25rem;
+  width: 1.25rem;
   border-radius: 50%;
   padding: 0;
   min-width: 0;

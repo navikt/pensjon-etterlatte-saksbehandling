@@ -26,6 +26,7 @@ internal class BeregningRepositoryImplTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private lateinit var beregningRepository: BeregningRepository
+    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
     fun beforeAll() {
@@ -48,13 +49,20 @@ internal class BeregningRepositoryImplTest {
     fun `lagre() skal returnere samme data som faktisk ble lagret`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        val beregningResultat = BeregningService(beregningRepository, mockk(), mockk(), mockk()).beregnResultat(
-            opplysningsgrunnlag,
-            YearMonth.of(2021, 2),
-            YearMonth.of(2021, 9),
-            mockkClass(VilkaarsvurderingUtfall::class),
-            BehandlingType.FØRSTEGANGSBEHANDLING
+        val beregningResultat = BeregningService(
+            beregningRepository,
+            mockk(),
+            mockk(),
+            mockk(),
+            sendToRapid
         )
+            .beregnResultat(
+                opplysningsgrunnlag,
+                YearMonth.of(2021, 2),
+                YearMonth.of(2021, 9),
+                mockkClass(VilkaarsvurderingUtfall::class),
+                BehandlingType.FØRSTEGANGSBEHANDLING
+            )
         val behandlingId = UUID.randomUUID()
 
         val beregning = Beregning(
@@ -76,13 +84,20 @@ internal class BeregningRepositoryImplTest {
     fun `det som hentes ut skal være likt det som originalt ble lagret`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        val beregningResultat = BeregningService(beregningRepository, mockk(), mockk(), mockk()).beregnResultat(
-            opplysningsgrunnlag,
-            YearMonth.of(2021, 2),
-            YearMonth.of(2021, 9),
-            mockkClass(VilkaarsvurderingUtfall::class),
-            BehandlingType.FØRSTEGANGSBEHANDLING
+        val beregningResultat = BeregningService(
+            beregningRepository,
+            mockk(),
+            mockk(),
+            mockk(),
+            sendToRapid
         )
+            .beregnResultat(
+                opplysningsgrunnlag,
+                YearMonth.of(2021, 2),
+                YearMonth.of(2021, 9),
+                mockkClass(VilkaarsvurderingUtfall::class),
+                BehandlingType.FØRSTEGANGSBEHANDLING
+            )
         val behandlingId = UUID.randomUUID()
 
         val beregningLagret = Beregning(
@@ -106,7 +121,13 @@ internal class BeregningRepositoryImplTest {
     fun `skal oppdatere og eller lagre beregning`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        val beregningResultat = BeregningService(beregningRepository, mockk(), mockk(), mockk()).beregnResultat(
+        val beregningResultat = BeregningService(
+            beregningRepository,
+            mockk(),
+            mockk(),
+            mockk(),
+            sendToRapid
+        ).beregnResultat(
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2021, 9),
@@ -131,7 +152,7 @@ internal class BeregningRepositoryImplTest {
 
         assertEquals(beregningLagret, beregningHentet)
 
-        val nyBeregning = BeregningService(beregningRepository, mockk(), mockk(), mockk()).beregnResultat(
+        val nyBeregning = BeregningService(beregningRepository, mockk(), mockk(), mockk(), sendToRapid).beregnResultat(
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2024, 12),

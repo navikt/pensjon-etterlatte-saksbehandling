@@ -10,12 +10,12 @@ import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsHendelser
 import no.nav.etterlatte.behandling.GenerellBehandlingService
-import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.RealGenerellBehandlingService
 import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService

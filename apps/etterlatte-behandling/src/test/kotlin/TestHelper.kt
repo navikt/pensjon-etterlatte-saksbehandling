@@ -4,7 +4,6 @@ import no.nav.etterlatte.behandling.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
@@ -97,7 +96,6 @@ fun manueltOpphoer(
     sistEndret = LocalDateTime.now(),
     status = BehandlingStatus.OPPRETTET,
     oppgaveStatus = OppgaveStatus.NY,
-    type = BehandlingType.MANUELT_OPPHOER,
     persongalleri = persongalleri,
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak

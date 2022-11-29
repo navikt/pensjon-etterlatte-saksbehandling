@@ -34,7 +34,7 @@ class OppgaveDao(private val datasource: DataSource) {
         val aktuelleStatuser = roller.flatMap {
             when (it) {
                 Rolle.SAKSBEHANDLER -> listOf(
-                    BehandlingStatus.UNDER_BEHANDLING,
+                    BehandlingStatus.VILKAARSVURDERING,
                     BehandlingStatus.GYLDIG_SOEKNAD,
                     BehandlingStatus.RETURNERT
                 )

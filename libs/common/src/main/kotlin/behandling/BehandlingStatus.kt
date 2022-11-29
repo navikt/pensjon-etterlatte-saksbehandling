@@ -4,7 +4,7 @@ enum class BehandlingStatus {
     OPPRETTET,
     GYLDIG_SOEKNAD,
     IKKE_GYLDIG_SOEKNAD,
-    UNDER_BEHANDLING,
+    VILKAARSVURDERING,
     FATTET_VEDTAK,
     ATTESTERT,
     RETURNERT,
@@ -15,13 +15,13 @@ enum class BehandlingStatus {
         return this !in iverksattEllerAttestert() && this != AVBRUTT
     }
 
-    fun kanRedigeres() = this !in redigerbar()
+    fun kanRedigeres() = this in redigerbar()
 
     companion object {
         fun underBehandling() = listOf(
             OPPRETTET,
             GYLDIG_SOEKNAD,
-            UNDER_BEHANDLING,
+            VILKAARSVURDERING,
             RETURNERT,
             FATTET_VEDTAK
         )

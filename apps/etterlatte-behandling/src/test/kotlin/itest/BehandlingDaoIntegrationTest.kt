@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.revurdering
@@ -419,13 +420,13 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
         val endretTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
         val behandlingMedNyStatus =
-            behandling.copy(status = BehandlingStatus.UNDER_BEHANDLING, sistEndret = endretTidspunkt)
+            behandling.copy(status = BehandlingStatus.VILKAARSVURDERING, sistEndret = endretTidspunkt)
         behandlingRepo.lagreStatus(behandlingMedNyStatus)
         val behandlingEtterStatusendring =
             behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
 
         assertEquals(BehandlingStatus.OPPRETTET, behandlingFoerStatusendring!!.status)
-        assertEquals(BehandlingStatus.UNDER_BEHANDLING, behandlingEtterStatusendring!!.status)
+        assertEquals(BehandlingStatus.VILKAARSVURDERING, behandlingEtterStatusendring!!.status)
         assertEquals(endretTidspunkt, behandlingEtterStatusendring.sistEndret)
     }
 
@@ -669,5 +670,47 @@ internal class BehandlingDaoIntegrationTest {
         assertEquals(sak2, sakerOgRoller[4].second)
         assertEquals(Saksrolle.SOESKEN, sakerOgRoller[5].first)
         assertEquals(sak2, sakerOgRoller[5].second)
+    }
+
+    @Test
+    fun `kan oppdatere og lagre ny status for behandling`() {
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val foerstegangsbehandling = foerstegangsbehandling(
+            sak = sak,
+            persongalleri = Persongalleri(
+                soeker = "11111",
+                innsender = "22222",
+                soesken = listOf("33333", "44444"),
+                avdoed = listOf("55555"),
+                gjenlevende = listOf("66666")
+            )
+        )
+        behandlingRepo.opprettFoerstegangsbehandling(foerstegangsbehandling)
+
+        val saksbehandler = Grunnlagsopplysning.Saksbehandler("saksbehandler01", Tidspunkt.now().instant)
+
+        val kommerBarnetTilgode = KommerBarnetTilgode(JaNeiVetIkke.JA, "", saksbehandler)
+        val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler)
+        val gyldighetsResultat = GyldighetsResultat(VurderingsResultat.OPPFYLT, listOf(), LocalDateTime.now())
+
+        foerstegangsbehandling
+            .oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
+            .oppdaterGyldighetsproeving(gyldighetsResultat)
+            .tilVilkaarsvurdering()
+            .let {
+                behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
+                behandlingRepo.lagreGyldighetsproving(it)
+                behandlingRepo.lagreKommerBarnetTilgode(it.id, it.kommerBarnetTilgode!!)
+                behandlingRepo.lagreStatusOgOppgaveStatus(it.id, it.status, it.oppgaveStatus, it.sistEndret)
+            }
+
+        with(behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling) {
+            assertEquals(this.status, BehandlingStatus.VILKAARSVURDERING)
+            assertEquals(this.kommerBarnetTilgode, kommerBarnetTilgode)
+            assertEquals(this.virkningstidspunkt, virkningstidspunkt)
+            assertEquals(this.gyldighetsproeving, gyldighetsResultat)
+            assert(this.sistEndret > foerstegangsbehandling.sistEndret)
+        }
     }
 }

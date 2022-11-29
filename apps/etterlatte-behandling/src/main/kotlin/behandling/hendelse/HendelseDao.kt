@@ -1,5 +1,6 @@
-package no.nav.etterlatte.behandling
+package no.nav.etterlatte.behandling.hendelse
 
+import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -99,7 +100,7 @@ class HendelseDao(private val connection: () -> Connection) {
         }
     }
 
-    fun lagreHendelse(hendelse: UlagretHendelse) {
+    private fun lagreHendelse(hendelse: UlagretHendelse) {
         val stmt = connection().prepareStatement(
             """
             |INSERT INTO behandlinghendelse(hendelse, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse) 
@@ -131,29 +132,3 @@ fun PreparedStatement.setLong(index: Int, value: Long?) =
 fun ResultSet.getTidspunkt(name: String) = getTimestamp(name)?.toInstant()?.toTidspunkt()
 fun ResultSet.getUUID(name: String) = getObject(name) as UUID
 fun ResultSet.getLongOrNull(name: String) = getLong(name).takeIf { !wasNull() }
-
-data class LagretHendelse(
-    val id: Long,
-    val hendelse: String,
-    val opprettet: Tidspunkt,
-    val inntruffet: Tidspunkt?,
-    val vedtakId: Long?,
-    val behandlingId: UUID,
-    val sakId: Long,
-    val ident: String?,
-    val identType: String?,
-    val kommentar: String?,
-    val valgtBegrunnelse: String?
-)
-
-data class UlagretHendelse(
-    val hendelse: String,
-    val inntruffet: Tidspunkt?,
-    val vedtakId: Long?,
-    val behandlingId: UUID,
-    val sakId: Long,
-    val ident: String?,
-    val identType: String?,
-    val kommentar: String?,
-    val valgtBegrunnelse: String?
-)

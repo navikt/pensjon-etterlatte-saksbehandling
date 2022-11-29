@@ -24,11 +24,11 @@ import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktRequest
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
-import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.KommerBarnetTilgodeJson
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -192,6 +192,10 @@ class ApplicationTest {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
+
+            client.post("/behandlinger/$behandlingId/vilkaarsvurder") {
+                addAuthSaksbehandler()
+            }.also { assertEquals(HttpStatusCode.OK, it.status) }
 
             client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
                 addAuthSaksbehandler()

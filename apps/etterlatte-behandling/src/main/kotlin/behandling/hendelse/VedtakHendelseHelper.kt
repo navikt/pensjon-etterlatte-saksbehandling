@@ -1,5 +1,7 @@
-package no.nav.etterlatte.behandling
+package no.nav.etterlatte.behandling.hendelse
 
+import no.nav.etterlatte.behandling.Behandling
+import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -22,7 +24,7 @@ fun HendelseType.tilBehandlingStatus(behandling: Behandling) = when (this) {
         if (behandling.behandlingKanIkkeSettesUnderBehandling()) {
             behandling.status
         } else {
-            BehandlingStatus.UNDER_BEHANDLING
+            BehandlingStatus.VILKAARSVURDERING
         }
     }
     HendelseType.IVERKSATT -> BehandlingStatus.IVERKSATT

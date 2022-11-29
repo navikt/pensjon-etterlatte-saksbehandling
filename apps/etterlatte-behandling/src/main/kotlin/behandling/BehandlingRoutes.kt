@@ -17,6 +17,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
@@ -56,14 +58,12 @@ fun Route.behandlingRoutes(
                 body.begrunnelse,
                 Grunnlagsopplysning.Saksbehandler(navIdent, Instant.now())
             )
-            foerstegangsbehandlingService.settKommerBarnetTilgode(
-                behandlingsId,
-                kommerBarnetTilgode
-            )
+            foerstegangsbehandlingService.lagreKommerBarnetTilgode(behandlingsId, kommerBarnetTilgode)
 
             call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
         }
     }
+
     route("/behandlinger") {
         get {
             call.respond(
@@ -137,13 +137,33 @@ fun Route.behandlingRoutes(
                 )
                 val body = call.receive<FastsettVirkningstidspunktRequest>()
                 val virkningstidspunkt =
-                    foerstegangsbehandlingService.fastsettVirkningstidspunkt(behandlingsId, body.dato, navIdent)
+                    foerstegangsbehandlingService.lagreVirkningstidspunkt(behandlingsId, body.dato, navIdent)
 
                 call.respondText(
                     contentType = ContentType.Application.Json,
                     status = HttpStatusCode.OK,
                     text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
                 )
+            }
+
+            post("/vilkaarsvurder") {
+                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            post("/fatteVedtak") {
+                foerstegangsbehandlingService.settFattetVedtak(behandlingsId)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            post("/returner") {
+                foerstegangsbehandlingService.settReturnert(behandlingsId)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            post("/iverksett") {
+                foerstegangsbehandlingService.settIverksatt(behandlingsId)
+                call.respond(HttpStatusCode.OK)
             }
         }
 
@@ -192,7 +212,7 @@ fun Route.behandlingRoutes(
         route("/foerstegangsbehandling") {
             get {
                 call.respond(
-                    foerstegangsbehandlingService.hentBehandling(behandlingsId)?.let {
+                    foerstegangsbehandlingService.hentFoerstegangsbehandling(behandlingsId)?.let {
                         DetaljertBehandling(
                             id = it.id,
                             sak = it.sak,

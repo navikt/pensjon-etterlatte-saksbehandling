@@ -171,7 +171,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         persongalleri = hentPersongalleri(rs),
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
         oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) }
@@ -193,7 +192,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
         oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
         revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) }
@@ -207,7 +205,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
         oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
         opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
         fritekstAarsak = rs.getString("fritekst_aarsak")
@@ -377,6 +374,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         statement.executeUpdate()
     }
 
+    // TODO ai: brukes kun i test
     fun lagreStatus(lagretBehandling: Behandling) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }
@@ -397,6 +395,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         )
     }
 
+    // TODO ai: Brukes kun i test
     fun lagreOppgaveStatus(behandling: Behandling) {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET oppgave_status = ?, sist_endret = ? WHERE id = ?")

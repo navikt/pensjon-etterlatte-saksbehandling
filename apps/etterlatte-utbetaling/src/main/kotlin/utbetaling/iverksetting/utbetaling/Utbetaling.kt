@@ -37,6 +37,7 @@ data class Kvittering(
 data class Utbetaling(
     val id: UUID,
     val sakId: SakId,
+    val sakType: Saktype,
     val behandlingId: BehandlingId,
     val vedtakId: VedtakId,
     val opprettet: Tidspunkt,

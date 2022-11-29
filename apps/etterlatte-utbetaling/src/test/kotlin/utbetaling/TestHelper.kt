@@ -14,6 +14,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Periode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.PeriodeForUtbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Sak
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingshendelse
@@ -56,7 +57,9 @@ fun utbetalingsvedtak(
     ),
     sak = Sak(
         id = 1,
-        ident = "12345678913"
+        ident = "12345678913",
+        sakType = Saktype.BARNEPENSJON
+
     ),
     vedtakFattet = VedtakFattet(
         ansvarligSaksbehandler = "12345678"
@@ -105,6 +108,7 @@ fun oppdragMedFeiletKvittering(
 fun utbetaling(
     id: UUID = UUID.randomUUID(),
     sakId: SakId = SakId(1),
+    sakType: Saktype = Saktype.BARNEPENSJON,
     vedtakId: Long = 1,
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
     opprettet: Tidspunkt = Tidspunkt.now(),
@@ -131,6 +135,7 @@ fun utbetaling(
         id = id,
         vedtakId = VedtakId(vedtakId),
         behandlingId = BehandlingId(behandlingId, behandlingId.toUUID30()),
+        sakType = sakType,
         sakId = sakId,
         vedtak = utbetalingsvedtak(vedtakId),
         opprettet = opprettet,

@@ -28,6 +28,7 @@ class UtbetalingMapper(
     private fun utbetaling() = Utbetaling(
         id = utbetalingId,
         sakId = SakId(vedtak.sak.id),
+        sakType = vedtak.sak.sakType,
         behandlingId = BehandlingId(
             vedtak.behandling.id,
             vedtak.behandling.id.toUUID30()

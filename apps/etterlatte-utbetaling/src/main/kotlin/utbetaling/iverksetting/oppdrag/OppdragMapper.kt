@@ -23,7 +23,7 @@ object OppdragMapper {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1"
             kodeEndring = if (foerstegangsbehandling) "NY" else "ENDR"
-            kodeFagomraade = "BARNEPE"
+            kodeFagomraade = "BARNEPE" // TODO: bruk saktype fra utbetaling.
             fagsystemId = utbetaling.sakId.value.toString()
             utbetFrekvens = "MND"
             oppdragGjelderId = utbetaling.stoenadsmottaker.value
@@ -33,7 +33,8 @@ object OppdragMapper {
             avstemming115 = Avstemming115().apply {
                 nokkelAvstemming = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
                 tidspktMelding = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
-                kodeKomponent = "ETTERLAT"
+                kodeKomponent = "ETTERLAT" // felles for alle etterlatteytelser
+                // https://nav-it.slack.com/archives/C03793FA1EE/p1649233182935959
             }
 
             oppdragsEnhet120.add(
@@ -62,7 +63,7 @@ object OppdragMapper {
 
                         vedtakId = utbetaling.vedtakId.value.toString()
                         delytelseId = it.id.value.toString()
-                        kodeKlassifik = "BARNEPENSJON-OPTP"
+                        kodeKlassifik = "BARNEPENSJON-OPTP" // klassekode. TODO: Bruk saktype fra utbetaling
                         datoVedtakFom = it.periode.fra.toXMLDate()
                         datoVedtakTom = it.periode.til?.toXMLDate()
                         sats = it.beloep

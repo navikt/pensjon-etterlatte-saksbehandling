@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.behandling.BehandlingKlient
 import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
@@ -64,7 +65,7 @@ class BeregningService(
             .apply { // trengs av lagreberegning i vedtak, fjerne?
                 this["sakId"] = behandling.sak
                 this["fnrSoeker"] = behandling.soeker!!
-                this["behandling"] = behandling
+                this["behandling"] = Behandling(behandling.behandlingType!!, behandling.id)
             }
         sendToRapid(message.toJson(), behandling.id)
         return lagretBeregning

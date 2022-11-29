@@ -57,7 +57,8 @@ class ApplicationBuilder {
         beregningRepository,
         vilkaarsvurderingKlientImpl,
         grunnlagKlientImpl,
-        behandlingKlient
+        behandlingKlient,
+        ::publiser
     )
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
@@ -69,11 +70,11 @@ class ApplicationBuilder {
             .build()
             .also { LesBeregningsmelding(it, beregningService) }
 
-    fun start() = rapidsConnection.start()
-
     private fun publiser(melding: String, key: UUID) {
         rapidsConnection.publish(message = melding, key = key.toString())
     }
+
+    fun start() = rapidsConnection.start()
 }
 
 fun Application.restModule(

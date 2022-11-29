@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class LesBeregningsmeldingTest {
@@ -18,11 +19,12 @@ internal class LesBeregningsmeldingTest {
     }
     private val vilkaarsvurderingKlientImpl = mockk<VilkaarsvurderingKlient>()
     private val beregningRepository = mockk<BeregningRepository>()
+    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
     private val inspector = spyk(
         TestRapid().apply {
             LesBeregningsmelding(
                 this,
-                BeregningService(beregningRepository, vilkaarsvurderingKlientImpl, mockk(), mockk())
+                BeregningService(beregningRepository, vilkaarsvurderingKlientImpl, mockk(), mockk(), sendToRapid)
             )
         }
     )

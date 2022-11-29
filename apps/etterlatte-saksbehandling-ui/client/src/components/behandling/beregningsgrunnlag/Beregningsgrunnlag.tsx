@@ -6,14 +6,14 @@ import { Barn } from '../soeknadsoversikt/familieforhold/personer/Barn'
 import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
 import styled from 'styled-components'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { hentBehandling, lagreSoeskenMedIBeregning } from '~shared/api/behandling'
+import { lagreSoeskenMedIBeregning } from '~shared/api/behandling'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { Controller, useForm } from 'react-hook-form'
 import { formaterStringDato } from '~utils/formattering'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppDispatch, useAppSelector } from '~store/Store'
-import { addBehandling } from '~store/reducers/BehandlingReducer'
+import { useAppSelector } from '~store/Store'
+import { opprettBeregning } from '~shared/api/beregning'
 
 interface SoeskenMedIBeregning {
   foedselsnummer: string
@@ -22,7 +22,6 @@ interface SoeskenMedIBeregning {
 
 const Beregningsgrunnlag = () => {
   const { next } = useBehandlingRoutes()
-  const dispatch = useAppDispatch()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const [isLoading, setIsLoading] = useState(false)
@@ -70,17 +69,16 @@ const Beregningsgrunnlag = () => {
         onSubmit={handleSubmit(async (formValues) => {
           if (formValues.beregningsgrunnlag.length !== 0) {
             setIsLoading(true)
+            const fetchBeregning = async () =>
+              await opprettBeregning(behandling.id)
+                .then(() => next())
+                .catch((err) => console.error({ err }))
+
             await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
+              .then(() => fetchBeregning())
+              .catch((err) => console.error({ err }))
+              .finally(() => setIsLoading(false))
           }
-          await hentBehandling(behandling.id).then((response) => {
-            setIsLoading(false)
-            if (response.status === 'ok' && response.data) {
-              dispatch(addBehandling(response.data))
-              next()
-            } else {
-              console.error({ response })
-            }
-          })
         })}
       >
         {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}

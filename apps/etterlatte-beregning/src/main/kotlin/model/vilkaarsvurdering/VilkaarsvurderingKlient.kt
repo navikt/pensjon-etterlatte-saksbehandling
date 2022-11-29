@@ -33,7 +33,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                 .get(
                     resource = Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/vilkaarsvudering/$behandlingId"
+                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"
                     ),
                     accessToken = accessToken
                 )

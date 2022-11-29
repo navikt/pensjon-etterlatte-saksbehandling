@@ -1,5 +1,6 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { Vilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
+import { Beregning } from '~shared/api/beregning'
 
 export interface IDetaljertBehandling {
   id: string
@@ -7,7 +8,7 @@ export interface IDetaljertBehandling {
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   vilkårsprøving?: Vilkaarsvurdering
-  beregning?: IBeregning
+  beregning?: Beregning
   avkortning?: any //todo legg med type når denne er klar
   saksbehandlerId?: string
   fastsatt: boolean
@@ -59,27 +60,6 @@ export enum IBehandlingStatus {
   ATTESTERT = 'ATTESTERT',
   IVERKSATT = 'IVERKSATT',
   AVBRUTT = 'AVBRUTT',
-}
-
-export interface IBeregning {
-  id: string
-  type: string
-  endringkode: string
-  resultat: string
-  beregningsperioder: IBeregningsperiode[]
-  beregnetDato: string
-  grunnlagVerson: number
-}
-
-export interface IBeregningsperiode {
-  delytelseId: string
-  type: string
-  datoFOM: string
-  datoTOM: string
-  grunnbelopMnd: number
-  grunnbelop: number
-  soeskenFlokk: IPerson[] | null
-  utbetaltBeloep: number
 }
 
 export interface IKommerBarnetTilgode {
@@ -362,6 +342,8 @@ export const resetBehandling = createAction('behandling/reset')
 export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
 export const updateVilkaarsvurdering = createAction<Vilkaarsvurdering>('behandling/update_vilkaarsvurdering')
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
+export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
+export const resetBeregning = createAction('behandling/beregning/reset')
 
 export interface IBehandlingReducer {
   behandling: IDetaljertBehandling
@@ -384,5 +366,11 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterKommerBarnetTilgode, (state, action) => {
     state.behandling.kommerBarnetTilgode = action.payload
+  })
+  builder.addCase(oppdaterBeregning, (state, action) => {
+    state.behandling.beregning = action.payload
+  })
+  builder.addCase(resetBeregning, (state) => {
+    state.behandling.beregning = detaljertBehandlingInitialState.beregning
   })
 })

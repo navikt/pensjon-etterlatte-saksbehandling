@@ -1,11 +1,11 @@
-import { BodyShort, Button, Label, Popover, Table } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Label, Popover, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { Heading } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
-import { useAppSelector } from '~store/Store'
 import { InformationColored } from '@navikt/ds-icons'
 import { differenceInYears, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
+import { Beregning } from '~shared/api/beregning'
+import { IPdlPerson } from '~store/reducers/BehandlingReducer'
 
 interface ToolTipPerson {
   fornavn: string
@@ -14,9 +14,13 @@ interface ToolTipPerson {
   foedselsdato: string | Date
 }
 
-export const Sammendrag = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
-  const beregningsperioder = behandling?.beregning?.beregningsperioder
+interface Props {
+  beregning: Beregning
+  soeker?: IPdlPerson
+}
+
+export const Sammendrag = ({ beregning, soeker }: Props) => {
+  const beregningsperioder = beregning.beregningsperioder
 
   const GjelderTooltip = ({ soesken, soeker }: { soesken: ToolTipPerson[]; soeker: ToolTipPerson }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -84,8 +88,8 @@ export const Sammendrag = () => {
               <Table.DataCell>Mangler</Table.DataCell>
               <Table.DataCell>{beregning.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
-                {beregning.soeskenFlokk && behandling?.søker ? (
-                  <GjelderTooltip soesken={beregning.soeskenFlokk} soeker={behandling.søker} />
+                {beregning.soeskenFlokk && soeker ? (
+                  <GjelderTooltip soesken={beregning.soeskenFlokk} soeker={soeker} />
                 ) : (
                   '-'
                 )}

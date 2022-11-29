@@ -24,33 +24,42 @@ echo "export PDFGEN_HOME=$(find ~/ -type d -name ey-pdfgen -print -quit 2>/dev/n
 ```
 
 
-##### 1. Kjør docker compose
+#### 1. Kjør docker compose
 
 ```shell
 docker compose up -d
 ```
 
-##### 2. Opprett/oppdater app config i IntelliJ
+#### 2. Opprett/oppdater app config i IntelliJ
+
+**Med auth mot dev-gcp:** \
+Kjør scriptet `get-secret.sh` fra prosjektets [rotmappe](../..). 
+
+`$ ./get-secret.sh apps/etterlatte-brev-api`
+
+Om du skal kjøre med frontend og wonderwall må du også kjøre (fra [rotmappe](../..)): 
+
+`$ ./get-secret.sh apps/etterlatte-saksbehandling-ui`
 
 Copy-paste dette inn i "environment variables".
 
 ```
-DB_JDBC_URL=jdbc:postgresql://localhost:5432/postgres;
-DB_USERNAME=postgres;
-DB_PASSWORD=postgres;
-BREV_LOCAL_DEV=true;
-KAFKA_RAPID_TOPIC=brev;
-KAFKA_BOOTSTRAP_SERVERS=0.0.0.0:9092;
-KAFKA_CONSUMER_GROUP_ID=0;
-NAIS_APP_NAME=etterlatte-brev-api;
-HTTP_PORT=8085;
-ETTERLATTE_PDFGEN_URL=http://localhost:8081/api/v1/genpdf/brev;
-NORG2_URL=https://norg2.dev-fss-pub.nais.io/norg2/api/v1;
-HENT_DOKUMENT_URL=https://saf-q1.dev.intern.nav.no/rest/hentdokument;
-SAF_GRAPHQL_URL=https://saf-q1.dev.intern.nav.no/graphql;
-ETTERLATTE_PROXY_URL="";
+ETTERLATTE_BRREG_URL=host.docker.internal:9091;
+ETTERLATTE_GRUNNLAG_CLIENT_ID=ce96a301-13db-4409-b277-5b27f464d08b;
+ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.dev.intern.nav.no;
+ETTERLATTE_PDFGEN_URL=http://host.docker.internal:8081/api/v1/genpdf/brev;
 ETTERLATTE_PROXY_OUTBOUND_SCOPE="";
-ETTERLATTE_BRREG_URL="";
+ETTERLATTE_PROXY_URL=host.docker.internal:9091;
+ETTERLATTE_VEDTAK_CLIENT_ID=069b1b2c-0a06-4cc9-8418-f100b8ff71be;
+ETTERLATTE_VEDTAK_URL=http://host.docker.internal:9091;
+HTTP_PORT=8084;
+KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:9092;
+KAFKA_CONSUMER_GROUP_ID=0;
+KAFKA_RAPID_TOPIC=brev;
+NAIS_APP_NAME=etterlatte-brev-api;
+NORG2_URL=https://norg2.dev-fss-pub.nais.io/norg2/api/v1;
+SAF_BASE_URL=host.docker.internal:9091;
+SAF_SCOPE=dev-fss:saf:saf;
 ```
 
 **OBS:** Siden vi går mot Norg2 APIet i dev (fra lokal maskin) må du koble til Naisdevice.

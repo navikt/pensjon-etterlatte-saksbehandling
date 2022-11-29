@@ -70,12 +70,10 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
             call.respond(brev)
         }
 
-        post("behandling/{behandlingId}/vedtak") {
+        post("behandling/{sakId}/{behandlingId}/vedtak") {
+            val sakId = call.parameters["sakId"]!!.toLong()
             val behandlingId = call.parameters["behandlingId"]!!
-            val vedtakType = call.request.queryParameters["vedtakType"]!!
-                .let { VedtakType.valueOf(it) }
-
-            val brev = service.oppdaterVedtaksbrev(behandlingId, vedtakType)
+            val brev = service.oppdaterVedtaksbrev(sakId, behandlingId, getAccessToken(call))
 
             call.respond(brev)
         }

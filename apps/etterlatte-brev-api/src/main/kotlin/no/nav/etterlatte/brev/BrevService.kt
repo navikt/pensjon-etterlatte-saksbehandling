@@ -3,11 +3,14 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.adresse.AdresseService
 import no.nav.etterlatte.brev.model.AnnetBrevRequest
 import no.nav.etterlatte.brev.model.Avsender
+import no.nav.etterlatte.brev.model.Mottaker as BrevMottaker
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
-import no.nav.etterlatte.brev.model.mapper.finnBarn
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
+import no.nav.etterlatte.grunnlag.Persongalleri
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.brev.model.BrevID
@@ -31,12 +34,12 @@ import no.nav.etterlatte.vedtak.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.util.*
-import no.nav.etterlatte.brev.model.Mottaker as BrevMottaker
 
 class BrevService(
     private val db: BrevRepository,
     private val pdfGenerator: PdfGeneratorKlient,
     private val vedtakService: VedtakService,
+    private val grunnlagService: GrunnlagService,
     private val norg2Klient: Norg2Klient,
     private val grunnbeloepKlient: GrunnbeloepKlient,
     private val adresseService: AdresseService,
@@ -83,9 +86,11 @@ class BrevService(
         return db.opprettBrev(UlagretBrev(behandlingId, brevInnhold.mal, mottaker, false, brevInnhold.data))
     }
 
-    suspend fun oppdaterVedtaksbrev(behandlingId: String, vedtakType: VedtakType): BrevID {
-        val vedtak = vedtakService.hentVedtak(behandlingId).copy(type = vedtakType)
-        val nyttBrev = opprettNyttBrevFraVedtak(vedtak, behandlingId)
+    suspend fun oppdaterVedtaksbrev(sakId: Long, behandlingId: String, accessToken: String = ""): BrevID {
+        val vedtak = vedtakService.hentVedtak(behandlingId, accessToken)
+        val grunnlag = grunnlagService.hentGrunnlag(sakId, accessToken)
+
+        val nyttBrev = opprettNyttBrevFraVedtak(vedtak, grunnlag, behandlingId)
 
         val vedtaksbrev = db.hentBrevForBehandling(behandlingId)
             .find { it.erVedtaksbrev }
@@ -102,12 +107,12 @@ class BrevService(
         .find { it.erVedtaksbrev }
         .let { brev ->
             require(brev != null) {
-                "Klarte ikke finne vedtaksbrev for attestert vedtak med vedtakId = ${vedtak.vedtakId}"
+                "Klarte ikke finne vedtaksbrev for attestert vedtak med behandlingsId '${vedtak.behandling.id}'"
             }
             ferdigstill(brev, vedtak)
         }
 
-    fun ferdigstillBrev(id: BrevID): Brev {
+    suspend fun ferdigstillBrev(id: BrevID): Brev {
         val brev: Brev = db.hentBrev(id)
 
         if (brev.erVedtaksbrev) {
@@ -115,7 +120,7 @@ class BrevService(
         }
 
         // todo: vedtak må byttes ut med grunnlag for å fungere på behandlinger også.
-        val vedtak = vedtakService.hentVedtak(brev.behandlingId)
+        val vedtak = vedtakService.hentVedtak(brev.behandlingId, "") // TODO: token
 
         return ferdigstill(brev, vedtak)
     }
@@ -127,13 +132,20 @@ class BrevService(
         return brev
     }
 
-    private suspend fun opprettNyttBrevFraVedtak(vedtak: Vedtak, behandlingId: String? = null): UlagretBrev {
-        val avsender = hentAvsender(vedtak.vedtakFattet!!.ansvarligEnhet)
+    private suspend fun opprettNyttBrevFraVedtak(
+        vedtak: Vedtak,
+        grunnlag: Persongalleri,
+        behandlingId: String? = null
+    ): UlagretBrev {
+        val enhet = vedtak.vedtakFattet?.ansvarligEnhet
+            ?: "0805" // TODO: Midlertidig Porsgrunn inntil vedtak inneholder gyldig enhet
+        val avsender = hentAvsender(enhet)
         val grunnbeloep = grunnbeloepKlient.hentGrunnbeloep()
+        val mottaker = hentMottaker(grunnlag.innsender.fnr)
 
         val brevRequest = when (vedtak.type) {
-            VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(vedtak, avsender, grunnbeloep)
-            VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(vedtak, avsender)
+            VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(vedtak, grunnlag, avsender, mottaker, grunnbeloep)
+            VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(vedtak, grunnlag, avsender)
             else -> throw Exception("Vedtakstype er ikke støttet: ${vedtak.type}")
         }
 
@@ -142,16 +154,25 @@ class BrevService(
         logger.info("Generert brev for vedtak (vedtakId=${vedtak.vedtakId}) med størrelse: ${pdf.size}")
 
         val tittel = "Vedtak om ${vedtak.type.name.lowercase()}"
-        val mottaker = Mottaker(Foedselsnummer.of(vedtak.finnBarn().fnr))
 
         return UlagretBrev(
             behandlingId = behandlingId ?: vedtak.behandling.id.toString(),
             tittel,
-            mottaker,
+            Mottaker(
+                foedselsnummer = Foedselsnummer.of(grunnlag.innsender.fnr),
+                adresse = Adresse(
+                    grunnlag.innsender.navn
+                    // TODO: skrive om objekter
+                )
+            ),
             true,
             pdf
         )
     }
+
+    private suspend fun hentMottaker(ident: String): BrevMottaker =
+        adresseService.hentMottakerAdresse(ident)
+            .let { BrevMottaker.fraRegoppslag(it) }
 
     private fun opprettDistribusjonsmelding(brev: Brev, vedtak: Vedtak): String =
         DistribusjonMelding(

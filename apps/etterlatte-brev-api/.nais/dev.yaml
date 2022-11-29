@@ -39,10 +39,8 @@ spec:
       value: https://norg2.dev-fss-pub.nais.io/norg2/api/v1
     - name: ETTERLATTE_PDFGEN_URL
       value: http://ey-pdfgen/api/v1/genpdf/brev
-    - name: HENT_DOKUMENT_URL
-      value: https://saf.dev-fss-pub.nais.io/rest/hentdokument
-    - name: SAF_GRAPHQL_URL
-      value: https://saf.dev-fss-pub.nais.io/graphql
+    - name: SAF_BASE_URL
+      value: https://saf.dev-fss-pub.nais.io
     - name: SAF_SCOPE
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
     - name: KAFKA_RAPID_TOPIC
@@ -53,6 +51,14 @@ spec:
       value: dev-fss:etterlatte:etterlatte-proxy
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
       value: api://dev-fss.etterlatte.etterlatte-proxy/.default
+    - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+    - name: ETTERLATTE_VEDTAKSVURDERING_API
+      value: https://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_GRUNNLAG_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
+    - name: ETTERLATTE_GRUNNLAG_API
+      value: https://etterlatte-grunnlag
   accessPolicy:
     outbound:
       rules:

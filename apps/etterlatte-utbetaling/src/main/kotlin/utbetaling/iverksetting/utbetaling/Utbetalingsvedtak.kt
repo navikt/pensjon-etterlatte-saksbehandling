@@ -66,7 +66,7 @@ data class Periode(
 )
 
 enum class UtbetalingsperiodeType {
-    OPPHOER, UTBETALING; // TODO: trenger vi en ENDRING-type her?
+    OPPHOER, UTBETALING;
 }
 
 fun no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType.toUtbetalingsperiodeType() =

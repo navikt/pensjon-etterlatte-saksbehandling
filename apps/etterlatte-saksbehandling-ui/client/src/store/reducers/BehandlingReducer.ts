@@ -1,6 +1,7 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { Vilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { Beregning } from '~shared/api/beregning'
+import { KildeSaksbehandler, KildeType } from '~shared/types/kilde'
 
 export interface IDetaljertBehandling {
   id: string
@@ -65,10 +66,7 @@ export enum IBehandlingStatus {
 export interface IKommerBarnetTilgode {
   svar: JaNei
   begrunnelse: string
-  kilde: {
-    ident: string
-    tidspunkt: string
-  }
+  kilde: KildeSaksbehandler
 }
 
 export enum JaNei {
@@ -131,15 +129,6 @@ export enum OpplysningsType {
 
   soeknad_mottatt = 'SOEKNAD_MOTTATT_DATO',
   innsender = 'INNSENDER_SOEKNAD_V1',
-}
-
-export enum KildeType {
-  saksbehandler = 'saksbehandler',
-  privatperson = 'privatperson',
-  a_ordningen = 'a-ordningen',
-  aa_registeret = 'aa-registeret',
-  vilkaarskomponenten = 'vilkaarskomponenten',
-  pdl = 'pdl',
 }
 
 export enum VurderingsResultat {

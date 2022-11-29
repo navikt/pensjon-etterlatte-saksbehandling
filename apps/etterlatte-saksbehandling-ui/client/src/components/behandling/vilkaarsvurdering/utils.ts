@@ -1,5 +1,6 @@
-import { ISvar, KildeType } from '~store/reducers/BehandlingReducer'
+import { ISvar } from '~store/reducers/BehandlingReducer'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { KildeType } from '~shared/types/kilde'
 
 export const svarTilTotalResultat = (svar: ISvar) => {
   switch (svar) {

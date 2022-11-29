@@ -1,4 +1,4 @@
-import { IDetaljertBehandling, Virkningstidspunkt } from '~store/reducers/BehandlingReducer'
+import { IDetaljertBehandling, IKommerBarnetTilgode, Virkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { apiClient, ApiResponse } from './apiClient'
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {
@@ -32,12 +32,15 @@ export const underkjennVedtak = async (
   return apiClient.post(`/underkjennVedtak/${behandlingId}`, { kommentar, valgtBegrunnelse })
 }
 
-export const lagreBegrunnelseKommerBarnetTilgode = async (
-  behandlingsId: string,
-  begrunnelse: string,
+export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
+  behandlingId: string
+  begrunnelse: string
   svar: string
-): Promise<ApiResponse<any>> => {
-  return apiClient.post(`/behandling/${behandlingsId}/kommerbarnettilgode`, { svar, begrunnelse })
+}): Promise<ApiResponse<IKommerBarnetTilgode>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/kommerbarnettilgode`, {
+    svar: args.svar,
+    begrunnelse: args.begrunnelse,
+  })
 }
 
 export const lagreSoeskenMedIBeregning = async (

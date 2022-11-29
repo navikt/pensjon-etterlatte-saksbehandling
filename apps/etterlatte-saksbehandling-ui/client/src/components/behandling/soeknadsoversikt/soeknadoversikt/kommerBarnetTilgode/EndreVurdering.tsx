@@ -1,10 +1,12 @@
-import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { Alert, Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { RadioGroupWrapper } from './KommerBarnetTilGodeVurdering'
 import { lagreBegrunnelseKommerBarnetTilgode } from '~shared/api/behandling'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { IKommerBarnetTilgode, JaNei, oppdaterKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { VurderingsTitle, Undertekst } from '../../styled'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import styled from 'styled-components'
 
 export const EndreVurdering = ({
   setRedigeringsModusFalse,
@@ -15,33 +17,22 @@ export const EndreVurdering = ({
 }) => {
   const behandlingId = useAppSelector((state) => state.behandlingReducer.behandling.id)
   const dispatch = useAppDispatch()
-  const [svar, setSvar] = useState<JaNei>()
+  const [svar, setSvar] = useState<JaNei | undefined>(kommerBarnetTilgode?.svar)
   const [radioError, setRadioError] = useState<string>()
-  const [kommentar, setKommentar] = useState<string>(kommerBarnetTilgode?.begrunnelse || '')
+  const [begrunnelse, setBegrunnelse] = useState<string>(kommerBarnetTilgode?.begrunnelse || '')
   const [begrunnelseError, setBegrunnelseError] = useState<string>()
+  const [kommerBarnetTilGode, setKommerBarnetTilGode] = useApiCall(lagreBegrunnelseKommerBarnetTilgode)
 
   function lagreBegrunnelseKlikket() {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
-    kommentar.length < 11 ? setBegrunnelseError('Begrunnelsen må være minst 10 tegn') : setBegrunnelseError(undefined)
+    begrunnelse.length < 11 ? setBegrunnelseError('Begrunnelsen må være minst 10 tegn') : setBegrunnelseError(undefined)
 
     if (radioError === undefined && begrunnelseError === undefined && svar !== undefined)
-      lagreBegrunnelseKommerBarnetTilgode(behandlingId, kommentar, svar.toString()).then((response) => {
-        if (response.status === 'ok') {
-          dispatch(oppdaterKommerBarnetTilgode(response.data))
-          reset()
-        }
+      setKommerBarnetTilGode({ behandlingId, begrunnelse, svar }, (response) => {
+        dispatch(oppdaterKommerBarnetTilgode(response))
+        setRedigeringsModusFalse()
       })
-  }
-
-  useEffect(() => {
-    if (kommerBarnetTilgode && kommerBarnetTilgode.svar) {
-      setSvar(kommerBarnetTilgode.svar)
-    }
-  }, [])
-
-  function reset() {
-    setRedigeringsModusFalse()
   }
 
   return (
@@ -73,16 +64,17 @@ export const EndreVurdering = ({
         label="Begrunnelse"
         hideLabel={false}
         placeholder="Forklar begrunnelsen"
-        value={kommentar}
+        value={begrunnelse}
         onChange={(e) => {
-          setKommentar(e.target.value)
-          kommentar.length > 10 && setBegrunnelseError(undefined)
+          setBegrunnelse(e.target.value)
+          begrunnelse.length > 10 && setBegrunnelseError(undefined)
         }}
         minRows={3}
         size="small"
         error={begrunnelseError ? begrunnelseError : false}
       />
       <Button
+        loading={isPending(kommerBarnetTilGode)}
         style={{ marginTop: '10px' }}
         variant={'primary'}
         size={'small'}
@@ -90,14 +82,14 @@ export const EndreVurdering = ({
       >
         Lagre
       </Button>
-      <Button
-        style={{ marginTop: '10px', marginLeft: '10px' }}
-        variant={'secondary'}
-        size={'small'}
-        onClick={() => reset()}
-      >
+      <Button style={{ marginLeft: '10px' }} variant={'secondary'} size={'small'} onClick={setRedigeringsModusFalse}>
         Avbryt
       </Button>
+      {isFailure(kommerBarnetTilGode) && <ApiErrorAlert variant="error">Kunne ikke lagre vurdering</ApiErrorAlert>}
     </div>
   )
 }
+
+const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
+  margin-top: 8px;
+`

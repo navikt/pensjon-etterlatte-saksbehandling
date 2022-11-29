@@ -1,5 +1,5 @@
+import { Kilde, KildeSaksbehandler } from '~shared/types/kilde'
 import { apiClient, ApiResponse } from './apiClient'
-import { KildeType } from '~store/reducers/BehandlingReducer'
 
 export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
   apiClient.get<Vilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}`)
@@ -52,22 +52,6 @@ export interface Vilkaarsgrunnlag<T> {
   opplysningsType: string
   kilde: Kilde
   opplysning: T
-}
-
-export type Kilde = KildeSaksbehandler | KildePdl
-
-interface KildeSaksbehandler {
-  type: KildeType.saksbehandler
-  tidspunkt: string
-  ident: string
-}
-
-interface KildePdl {
-  type: KildeType.pdl
-  tidspunktForInnhenting: string
-  navn: string
-  registersReferanse: string
-  opplysningId: string
 }
 
 export interface Hovedvilkaar {

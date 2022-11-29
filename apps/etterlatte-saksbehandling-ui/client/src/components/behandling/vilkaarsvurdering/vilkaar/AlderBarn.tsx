@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { VilkaarColumn } from '../styled'
 import { hentKildenavn } from '../utils'
 import { formaterStringDato } from '~utils/formattering'
-import { KildeType } from '~store/reducers/BehandlingReducer'
+import { KildeType } from '~shared/types/kilde'
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
   const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'SOEKER_FOEDSELSDATO')

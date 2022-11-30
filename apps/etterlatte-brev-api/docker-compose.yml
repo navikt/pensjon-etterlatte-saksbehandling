@@ -23,6 +23,7 @@ services:
 
   kafka:
     image: 'bitnami/kafka:latest'
+    restart: on-failure
     ports:
       - '9092:9092'
     environment:

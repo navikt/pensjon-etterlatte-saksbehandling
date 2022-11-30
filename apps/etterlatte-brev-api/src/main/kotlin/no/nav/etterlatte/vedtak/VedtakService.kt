@@ -27,6 +27,8 @@ class VedtakServiceImpl(config: Config, httpClient: HttpClient) : VedtakService 
 
     override suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak {
         try {
+            logger.info("Henter vedtaksvurdering (behandlingId: $behandlingId)")
+
             val json =
                 downstreamResourceClient.get(
                     Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/fellesvedtak"),

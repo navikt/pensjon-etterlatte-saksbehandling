@@ -84,7 +84,7 @@ class ApplicationBuilder {
     private fun httpClient() = HttpClient(OkHttp) {
         expectSuccess = true
         install(ContentNegotiation) {
-            jackson { objectMapper }
+            jackson()
         }
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())

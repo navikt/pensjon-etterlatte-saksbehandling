@@ -17,8 +17,6 @@ const behandlingRoutes = [
 ] as const
 
 const revurderingBehandlingRoutes = () => behandlingRoutes.filter((route) => route.erRevurderingRoute)
-const foerstegangBehandlingRoutes = (soekerHarSoesken: boolean) =>
-  soekerHarSoesken ? behandlingRoutes : behandlingRoutes.filter((route) => route.path !== 'beregningsgrunnlag')
 
 function useRouteNavigation() {
   const [currentRoute, setCurrentRoute] = useState<string | undefined>()
@@ -41,13 +39,12 @@ function useRouteNavigation() {
 export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
-  const soekerHarSoesken = (behandling?.familieforhold?.avdoede?.opplysning.avdoedesBarn?.length ?? 0) > 1
 
   const aktuelleRoutes =
     behandling?.behandlingType === IBehandlingsType.REVURDERING ||
     behandling?.behandlingType === IBehandlingsType.MANUELT_OPPHOER
       ? revurderingBehandlingRoutes()
-      : foerstegangBehandlingRoutes(soekerHarSoesken)
+      : behandlingRoutes
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1

@@ -24,7 +24,6 @@ internal class LesBeregningsmeldingTest {
     }
 
     private val inspector = TestRapid().apply { LagreBeregningsresultat(this, vedtaksvurderingServiceMock) }
-    // private val beregningsresultatMock = mockk<BeregningsResultat>()
 
     @Test
     fun `skal lese melding`() {

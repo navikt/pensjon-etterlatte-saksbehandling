@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -54,7 +55,7 @@ internal class LagreBeregningsresultat(
                 endringskode = Endringskode.NY,
                 resultat = BeregningsResultatType.BEREGNET,
                 beregningsperioder = beregningDTO.beregningsperioder,
-                beregnetDato = LocalDateTime.from(beregningDTO.beregnetDato),
+                beregnetDato = LocalDateTime.from(beregningDTO.beregnetDato.toNorskTid()),
                 grunnlagVersjon = beregningDTO.grunnlagMetadata.versjon
             )
 

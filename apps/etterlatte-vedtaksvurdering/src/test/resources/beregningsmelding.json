@@ -976,10 +976,8 @@
     }
   },
   "beregning": {
-    "id": "b43743e4-63ea-4b08-a782-50e80edfd7c7",
-    "type": "GP",
-    "endringskode": "NY",
-    "resultat": "BEREGNET",
+    "beregningId": "b43743e4-63ea-4b08-a782-50e80edfd7c7",
+    "behandlingId": "77826f44-fc2b-4bd4-a029-c48c1fa92378",
     "beregningsperioder": [
       {
         "delytelsesId": "BP",
@@ -1000,7 +998,10 @@
         "grunnbelopMnd": 8867
       }
     ],
-    "beregnetDato": "2022-06-14T15:44:05.414031233",
-    "grunnlagVerson": 0
+    "beregnetDato": "2022-11-30T15:50:07.538683Z",
+    "grunnlagMetadata": {
+      "sakId": 1,
+      "versjon": 0
+    }
   }
 }

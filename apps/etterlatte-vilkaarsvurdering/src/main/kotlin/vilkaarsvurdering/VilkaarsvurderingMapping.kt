@@ -31,7 +31,10 @@ fun VurdertVilkaarDto.toDomain(saksbehandler: String, tidspunkt: LocalDateTime) 
 
 fun VurdertVilkaarsvurderingResultatDto.toDomain(saksbehandler: String, tidspunkt: LocalDateTime) =
     VilkaarsvurderingResultat(
-        utfall = VilkaarsvurderingUtfall.valueOf(resultat.name),
+        utfall = when (resultat) {
+            VilkaarsvurderingUtfallDto.OPPFYLT -> VilkaarsvurderingUtfall.OPPFYLT
+            VilkaarsvurderingUtfallDto.IKKE_OPPFYLT -> VilkaarsvurderingUtfall.IKKE_OPPFYLT
+        },
         kommentar = kommentar,
         tidspunkt = tidspunkt,
         saksbehandler = saksbehandler
@@ -39,7 +42,11 @@ fun VurdertVilkaarsvurderingResultatDto.toDomain(saksbehandler: String, tidspunk
 
 private fun VilkaarTypeOgUtfallDto.toDomain() = VilkaarTypeOgUtfall(
     type = VilkaarType.valueOf(type.name),
-    resultat = Utfall.valueOf(resultat.name)
+    resultat = when (resultat) {
+        UtfallDto.IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT
+        UtfallDto.OPPFYLT -> Utfall.OPPFYLT
+        UtfallDto.IKKE_VURDERT -> Utfall.IKKE_VURDERT
+    }
 )
 
 fun Vilkaarsvurdering.toDto() = VilkaarsvurderingDto(
@@ -50,7 +57,10 @@ fun Vilkaarsvurdering.toDto() = VilkaarsvurderingDto(
 )
 
 private fun VilkaarsvurderingResultat.toDto() = VilkaarsvurderingResultatDto(
-    utfall = VilkaarsvurderingUtfallDto.valueOf(utfall.name),
+    utfall = when (utfall) {
+        VilkaarsvurderingUtfall.OPPFYLT -> VilkaarsvurderingUtfallDto.OPPFYLT
+        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VilkaarsvurderingUtfallDto.IKKE_OPPFYLT
+    },
     kommentar = kommentar,
     saksbehandler = saksbehandler,
     tidspunkt = tidspunkt

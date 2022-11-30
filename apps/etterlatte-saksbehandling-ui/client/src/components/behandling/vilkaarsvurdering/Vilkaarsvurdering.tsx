@@ -1,7 +1,7 @@
 import { Content, Header } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { hentVilkaarsvurdering, Vilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
+import { hentVilkaarsvurdering, IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
 import { VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
@@ -10,14 +10,14 @@ import Spinner from '~shared/Spinner'
 import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 
-export const Inngangsvilkaar = () => {
+export const Vilkaarsvurdering = () => {
   const location = useLocation()
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
-  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering | undefined>(undefined)
+  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<IVilkaarsvurdering | undefined>(undefined)
   const [status, setStatus] = useState<RequestStatus>(RequestStatus.notStarted)
 
-  const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering: Vilkaarsvurdering) => {
+  const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering: IVilkaarsvurdering) => {
     setVilkaarsvurdering(oppdatertVilkaarsvurdering)
     if (oppdatertVilkaarsvurdering.resultat) {
       dispatch(updateVilkaarsvurdering(oppdatertVilkaarsvurdering))

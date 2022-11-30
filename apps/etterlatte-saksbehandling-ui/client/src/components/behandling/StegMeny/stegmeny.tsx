@@ -31,7 +31,7 @@ export const StegMeny = () => {
         </>
       )}
       <li className={classNames({ disabled: !gyldighet })}>
-        <NavLink to="inngangsvilkaar">Vilkårsvurdering</NavLink>
+        <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
       </li>
       <Separator />
       {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && soekerHarSoesken && (

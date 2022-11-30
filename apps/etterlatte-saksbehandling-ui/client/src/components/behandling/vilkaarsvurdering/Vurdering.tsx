@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import {
   slettVurdering,
   Vilkaar,
-  Vilkaarsvurdering,
+  IVilkaarsvurdering,
   VurderingsResultat,
   vurderVilkaar,
 } from '~shared/api/vilkaarsvurdering'
@@ -19,7 +19,7 @@ export const Vurdering = ({
   behandlingId,
 }: {
   vilkaar: Vilkaar
-  oppdaterVilkaar: (vilkaarsvurdering: Vilkaarsvurdering) => void
+  oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string
 }) => {
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)

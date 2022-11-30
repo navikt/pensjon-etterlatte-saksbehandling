@@ -1,35 +1,35 @@
 import { Kilde, KildeSaksbehandler } from '~shared/types/kilde'
 import { apiClient, ApiResponse } from './apiClient'
 
-export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
-  apiClient.get<Vilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}`)
+export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
+  apiClient.get<IVilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}`)
 
 export const vurderVilkaar = async (
   behandlingId: string,
   request: VurderVilkaarRequest
-): Promise<ApiResponse<Vilkaarsvurdering>> =>
+): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.post(`/vilkaarsvurdering/${behandlingId}`, {
     ...request,
     kommentar: request.kommentar,
   })
 
-export const slettVurdering = async (behandlingId: string, type: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
+export const slettVurdering = async (behandlingId: string, type: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.delete(`/vilkaarsvurdering/${behandlingId}/${type}`)
 
-export const slettTotalVurdering = async (behandlingId: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
+export const slettTotalVurdering = async (behandlingId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.delete(`/vilkaarsvurdering/resultat/${behandlingId}`)
 
 export const lagreTotalVurdering = async (
   behandlingId: string,
   resultat: VilkaarsvurderingResultat,
   kommentar: string
-): Promise<ApiResponse<Vilkaarsvurdering>> =>
+): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.post(`/vilkaarsvurdering/resultat/${behandlingId}`, {
     resultat: resultat,
     kommentar: kommentar,
   })
 
-export interface Vilkaarsvurdering {
+export interface IVilkaarsvurdering {
   vilkaar: Vilkaar[]
   resultat?: VilkaarsvurderingVurdertResultat
   virkningstidspunkt: Virkningstidspunkt

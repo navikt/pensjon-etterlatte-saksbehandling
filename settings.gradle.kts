@@ -34,5 +34,6 @@ include(
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-kafka",
     "libs:testdata",
+    "libs:etterlatte-regler",
     "jobs:test-fordeler"
 )

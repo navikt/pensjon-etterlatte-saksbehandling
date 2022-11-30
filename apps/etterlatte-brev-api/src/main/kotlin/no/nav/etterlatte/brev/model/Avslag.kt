@@ -1,14 +1,12 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.brev.model.mapper.finnAvdoed
-import no.nav.etterlatte.brev.model.mapper.finnBarn
-import no.nav.etterlatte.brev.model.mapper.finnMottaker
+import no.nav.etterlatte.grunnlag.Persongalleri
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 
 data class AvslagBrevRequest(
     val saksnummer: String,
-    val barn: Barn,
+    val barn: Soeker,
     val avdoed: Avdoed,
     val aktuelleParagrafer: List<String>,
     override val spraak: Spraak,
@@ -18,14 +16,14 @@ data class AvslagBrevRequest(
     override fun templateName(): String = "avslag"
 
     companion object {
-        fun fraVedtak(vedtak: Vedtak, avsender: Avsender): AvslagBrevRequest = AvslagBrevRequest(
+        fun fraVedtak(vedtak: Vedtak, grunnlag: Persongalleri, avsender: Avsender): AvslagBrevRequest = AvslagBrevRequest(
             saksnummer = vedtak.sak.id.toString(),
-            barn = vedtak.finnBarn(),
-            avdoed = vedtak.finnAvdoed(),
+            barn = grunnlag.soeker,
+            avdoed = grunnlag.avdoed,
             aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår?
             spraak = Spraak.NB, // todo, må hentes.
             avsender = avsender,
-            mottaker = vedtak.finnMottaker()
+            mottaker = Mottaker(grunnlag.innsender.navn),
         )
     }
 }

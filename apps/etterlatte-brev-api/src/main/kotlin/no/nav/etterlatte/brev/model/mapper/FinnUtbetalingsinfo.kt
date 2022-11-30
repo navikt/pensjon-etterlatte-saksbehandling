@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import java.time.LocalDate
 
 fun Vedtak.finnUtbetalingsinfo() = Utbetalingsinfo(
-    beloep = this.pensjonTilUtbetaling!![0].beloep!!.toDouble(),
+    beloep = this.beregning!!.sammendrag[0].beloep,
     virkningsdato = LocalDate.of(this.virk.fom.year, this.virk.fom.month, 1),
     kontonummer = "<todo: Ikke tilgjengelig>"
 )

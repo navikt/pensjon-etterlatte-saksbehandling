@@ -34,13 +34,16 @@ export const opprettBrevFraPDF = async (behandlingId: string, mottaker: Mottaker
   })
 }
 
-export const opprettEllerOppdaterBrevForVedtak = async (behandlingId: string, vedtakType: string): Promise<any> =>
-  await fetch(`/brev/behandling/${behandlingId}/vedtak?vedtakType=${vedtakType}`, {
+export const opprettEllerOppdaterBrevForVedtak = async (sak: number, behandlingId: string): Promise<any> =>
+  await fetch(`/brev/behandling/${sak}/${behandlingId}/vedtak`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-  }).then((res) => res.text())
+  }).then((res) => {
+    if (res.status == 200) return res.text()
+    else throw Error('Feil ved oppretting/oppdatering av vedtaksbrev')
+  })
 
 export const ferdigstillBrev = async (brevId: string): Promise<any> =>
   await fetch(`/brev/${brevId}/ferdigstill`, {

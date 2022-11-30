@@ -18,8 +18,6 @@ import {
   VilkaarsvurderingResultat,
   VurderingsResultat,
 } from '~shared/api/vilkaarsvurdering'
-import { useVedtaksResultat } from '../useVedtaksResultat'
-
 interface VilkaarOption {
   value: string
   label: string
@@ -27,8 +25,7 @@ interface VilkaarOption {
 
 export const Vedtaksbrev = () => {
   const { behandlingId } = useParams()
-  const vedtaksresultat = useVedtaksResultat()
-  const { soeknadMottattDato, behandlingType } = useAppSelector((state) => state.behandlingReducer.behandling)
+  const { sak, soeknadMottattDato, behandlingType } = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const [fileURL, setFileURL] = useState<string>()
   const [vedtaksbrevId, setVedtaksbrevId] = useState<string>()
@@ -37,22 +34,6 @@ export const Vedtaksbrev = () => {
   const [valgtVilkaarType, setValgtVilkaarType] = useState<string>()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
-
-  // TODO: Dette er midlertidig kun for demo
-  const vedtakType = () => {
-    switch (vedtaksresultat) {
-      case 'opphoer':
-        return 'OPPHOER'
-      case 'innvilget':
-        return 'INNVILGELSE'
-      case 'avslag':
-        return 'AVSLAG'
-      case 'endring':
-        return 'ENDRING'
-      case 'uavklart':
-        return 'UAVKLART'
-    }
-  }
 
   useEffect(() => {
     if (!vedtaksbrevId) return
@@ -104,13 +85,12 @@ export const Vedtaksbrev = () => {
       }
     })
 
-    opprettEllerOppdaterBrevForVedtak(behandlingId!!, vedtakType())
-      .then((res) => {
-        console.log(res)
-        setVedtaksbrevId(res)
+    opprettEllerOppdaterBrevForVedtak(sak, behandlingId!!)
+      .then((id) => {
+        setVedtaksbrevId(id)
       })
       .catch((e) => setError(e.message))
-  }, [])
+  }, [behandlingId])
 
   return (
     <Content>

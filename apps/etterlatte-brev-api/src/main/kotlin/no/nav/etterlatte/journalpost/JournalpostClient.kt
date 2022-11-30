@@ -22,21 +22,20 @@ import java.util.*
 
 class JournalpostClient(
     private val httpClient: HttpClient,
-    private val restApiUrl: String,
-    private val graphqlApiUrl: String,
+    private val baseUrl: String,
     private val safScope: String
 ) : JournalpostService {
 
-    val configLocation: String? = null
+    private val configLocation: String? = null
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
-    val azureAdClient = AzureAdClient(config, httpClient)
+    private val azureAdClient = AzureAdClient(config, httpClient)
 
     override suspend fun hentDokumentPDF(
         journalpostId: String,
         dokumentInfoId: String,
         accessToken: String
     ): ByteArray = try {
-        httpClient.get("$restApiUrl/$journalpostId/$dokumentInfoId/ARKIV") {
+        httpClient.get("$baseUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV") {
             header("Authorization", "Bearer ${getToken(accessToken)}")
             header("Content-Type", "application/json")
             header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
@@ -62,7 +61,7 @@ class JournalpostClient(
         )
 
         return retry<JournalpostResponse> {
-            httpClient.post(graphqlApiUrl) {
+            httpClient.post("$baseUrl/graphql") {
                 header("Authorization", "Bearer ${getToken(accessToken)}")
                 accept(ContentType.Application.Json)
                 setBody(TextContent(request.toJson(), ContentType.Application.Json))

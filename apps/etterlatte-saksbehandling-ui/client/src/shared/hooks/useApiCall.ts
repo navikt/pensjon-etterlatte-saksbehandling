@@ -3,7 +3,7 @@ import { ApiError, ApiResponse } from '../api/apiClient'
 
 export function useApiCall<T, U>(
   fn: (req: T) => Promise<ApiResponse<U>>
-): [Result<U>, (args: T, onSuccess?: (result: U) => void, onError?: (error: any) => void) => void, () => void] {
+): [Result<U>, (args: T, onSuccess?: (result: U) => void, onError?: (error: ApiError) => void) => void, () => void] {
   const [apiResult, setApiResult] = useState<Result<U>>(initial)
 
   const callFn = React.useCallback(

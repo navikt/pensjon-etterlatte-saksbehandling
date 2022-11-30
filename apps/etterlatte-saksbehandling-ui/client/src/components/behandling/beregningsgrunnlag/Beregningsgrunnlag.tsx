@@ -46,10 +46,7 @@ const Beregningsgrunnlag = () => {
     },
   })
 
-  const lagBeregning = async () =>
-    await opprettEllerEndreBeregning(behandling.id)
-      .then(() => next())
-      .catch((err) => console.error({ err }))
+  const lagBeregning = () => opprettEllerEndreBeregning(behandling.id).then(() => next())
 
   const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
 
@@ -77,7 +74,6 @@ const Beregningsgrunnlag = () => {
 
             await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
               .then(() => lagBeregning())
-              .catch((err) => console.error({ err }))
               .finally(() => setIsLoading(false))
           }
         })}

@@ -5,8 +5,6 @@ import no.nav.etterlatte.BeregningRepositoryImpl
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
@@ -48,7 +46,7 @@ internal class BeregningRepositoryImplTest {
     @Test
     fun `lagre() skal returnere samme data som faktisk ble lagret`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
+        val behandlingId = UUID.randomUUID()
         val beregningResultat = BeregningService(
             beregningRepository,
             mockk(),
@@ -56,23 +54,23 @@ internal class BeregningRepositoryImplTest {
             mockk(),
             sendToRapid
         )
-            .beregnResultat(
+            .lagBeregning(
                 opplysningsgrunnlag,
                 YearMonth.of(2021, 2),
                 YearMonth.of(2021, 9),
                 mockkClass(VilkaarsvurderingUtfall::class),
-                BehandlingType.FØRSTEGANGSBEHANDLING
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingId
             )
-        val behandlingId = UUID.randomUUID()
 
         val beregning = Beregning(
-            beregningId = beregningResultat.id,
+            beregningId = beregningResultat.beregningId,
             behandlingId = behandlingId,
             beregningsperioder = beregningResultat.beregningsperioder,
-            beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
+            beregnetDato = beregningResultat.beregnetDato,
             grunnlagMetadata = Metadata(
                 sakId = 0,
-                versjon = beregningResultat.grunnlagVersjon
+                versjon = beregningResultat.grunnlagMetadata.versjon
             )
         )
         val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
@@ -83,7 +81,7 @@ internal class BeregningRepositoryImplTest {
     @Test
     fun `det som hentes ut skal være likt det som originalt ble lagret`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
+        val behandlingId = UUID.randomUUID()
         val beregningResultat = BeregningService(
             beregningRepository,
             mockk(),
@@ -91,23 +89,23 @@ internal class BeregningRepositoryImplTest {
             mockk(),
             sendToRapid
         )
-            .beregnResultat(
+            .lagBeregning(
                 opplysningsgrunnlag,
                 YearMonth.of(2021, 2),
                 YearMonth.of(2021, 9),
                 mockkClass(VilkaarsvurderingUtfall::class),
-                BehandlingType.FØRSTEGANGSBEHANDLING
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingId
             )
-        val behandlingId = UUID.randomUUID()
 
         val beregningLagret = Beregning(
-            beregningId = beregningResultat.id,
+            beregningId = beregningResultat.beregningId,
             behandlingId = behandlingId,
             beregningsperioder = beregningResultat.beregningsperioder,
-            beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
+            beregnetDato = beregningResultat.beregnetDato,
             grunnlagMetadata = Metadata(
                 sakId = 0,
-                versjon = beregningResultat.grunnlagVersjon
+                versjon = beregningResultat.grunnlagMetadata.versjon
             )
         )
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
@@ -120,30 +118,30 @@ internal class BeregningRepositoryImplTest {
     @Test
     fun `skal oppdatere og eller lagre beregning`() {
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
+        val behandlingId = UUID.randomUUID()
         val beregningResultat = BeregningService(
             beregningRepository,
             mockk(),
             mockk(),
             mockk(),
             sendToRapid
-        ).beregnResultat(
+        ).lagBeregning(
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2021, 9),
             mockkClass(VilkaarsvurderingUtfall::class),
-            BehandlingType.FØRSTEGANGSBEHANDLING
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingId
         )
-        val behandlingId = UUID.randomUUID()
 
         val beregningLagret = Beregning(
-            beregningId = beregningResultat.id,
+            beregningId = beregningResultat.beregningId,
             behandlingId = behandlingId,
             beregningsperioder = beregningResultat.beregningsperioder,
-            beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
+            beregnetDato = beregningResultat.beregnetDato,
             grunnlagMetadata = Metadata(
                 sakId = opplysningsgrunnlag.metadata.sakId,
-                versjon = beregningResultat.grunnlagVersjon
+                versjon = beregningResultat.grunnlagMetadata.versjon
             )
         )
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
@@ -152,22 +150,23 @@ internal class BeregningRepositoryImplTest {
 
         assertEquals(beregningLagret, beregningHentet)
 
-        val nyBeregning = BeregningService(beregningRepository, mockk(), mockk(), mockk(), sendToRapid).beregnResultat(
+        val nyBeregning = BeregningService(beregningRepository, mockk(), mockk(), mockk(), sendToRapid).lagBeregning(
             opplysningsgrunnlag,
             YearMonth.of(2021, 2),
             YearMonth.of(2024, 12),
             mockkClass(VilkaarsvurderingUtfall::class),
-            BehandlingType.FØRSTEGANGSBEHANDLING
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingId
         )
 
         val nyBeregningMapped = Beregning(
-            beregningId = nyBeregning.id,
+            beregningId = nyBeregning.beregningId,
             behandlingId = behandlingId,
             beregningsperioder = nyBeregning.beregningsperioder,
-            beregnetDato = nyBeregning.beregnetDato.toTidspunkt(norskTidssone),
+            beregnetDato = nyBeregning.beregnetDato,
             grunnlagMetadata = Metadata(
                 sakId = opplysningsgrunnlag.metadata.sakId,
-                versjon = nyBeregning.grunnlagVersjon + 1
+                versjon = nyBeregning.grunnlagMetadata.versjon + 1
             )
         )
         beregningRepository.lagreEllerOppdaterBeregning(nyBeregningMapped)

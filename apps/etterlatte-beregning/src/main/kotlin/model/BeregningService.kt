@@ -3,11 +3,8 @@ package no.nav.etterlatte.model
 import model.finnSoeskenperiode.FinnSoeskenPeriode
 import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.beregning.erInklusiv
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
@@ -42,27 +39,22 @@ class BeregningService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
 
-        val beregningResultat = beregnResultat(
+        val beregning = lagBeregning(
             grunnlag,
             behandling.virkningstidspunkt!!.dato,
             YearMonth.now().plusMonths(3),
             vilkaarsvurdering.resultat.utfall,
-            behandling.behandlingType!!
+            behandling.behandlingType!!,
+            behandlingId
         )
-        val beregning = Beregning(
-            beregningId = UUID.randomUUID(),
-            behandlingId = behandlingId,
-            beregnetDato = beregningResultat.beregnetDato.toTidspunkt(norskTidssone),
-            beregningsperioder = beregningResultat.beregningsperioder,
-            grunnlagMetadata = grunnlag.metadata
-        )
+
         val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
         val message = JsonMessage.newMessage(BehandlingGrunnlagEndret.eventName)
             .apply {
                 this["vilkaarsvurdering"] = vilkaarsvurdering
-                this["beregning"] = beregningResultat
+                this["beregning"] = lagretBeregning
             }
-            .apply { // trengs av lagreberegning i vedtak, fjerne?
+            .apply { // trengs av lagreberegning i vedtak + beregning, fjerne?
                 this["sakId"] = behandling.sak
                 this["fnrSoeker"] = behandling.soeker!!
                 this["behandling"] = Behandling(behandling.behandlingType!!, behandling.id)
@@ -71,35 +63,32 @@ class BeregningService(
         return lagretBeregning
     }
 
-    fun beregnResultat(
+    fun lagBeregning(
         grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
         vilkaarsvurderingUtfall: VilkaarsvurderingUtfall,
-        behandlingType: BehandlingType
-    ): BeregningsResultat { // TODO: Bruk vår interne model i jira
+        behandlingType: BehandlingType,
+        behandlingId: UUID
+    ): Beregning {
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
-                BeregningsResultat(
-                    id = UUID.randomUUID(),
-                    type = Beregningstyper.GP,
-                    endringskode = Endringskode.NY,
-                    resultat = BeregningsResultatType.BEREGNET,
+                Beregning(
+                    beregningId = UUID.randomUUID(),
+                    behandlingId = behandlingId,
                     beregningsperioder = beregningsperioder,
-                    beregnetDato = LocalDateTime.now(),
-                    grunnlagVersjon = grunnlag.hentVersjon()
+                    beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
+                    grunnlagMetadata = grunnlag.metadata
                 )
             }
 
             BehandlingType.REVURDERING -> {
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
-                        BeregningsResultat(
-                            id = UUID.randomUUID(),
-                            type = Beregningstyper.GP,
-                            endringskode = Endringskode.REVURDERING,
-                            resultat = BeregningsResultatType.BEREGNET,
+                        Beregning(
+                            beregningId = UUID.randomUUID(),
+                            behandlingId = behandlingId,
                             beregningsperioder = listOf(
                                 Beregningsperiode(
                                     delytelsesId = "BP",
@@ -112,32 +101,28 @@ class BeregningService(
                                     grunnbelop = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløp
                                 )
                             ),
-                            beregnetDato = LocalDateTime.now(),
-                            grunnlagVersjon = grunnlag.hentVersjon()
+                            beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
+                            grunnlagMetadata = grunnlag.metadata
                         )
                     }
 
                     else -> {
                         val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
-                        BeregningsResultat(
-                            id = UUID.randomUUID(),
-                            type = Beregningstyper.GP,
-                            endringskode = Endringskode.REVURDERING,
-                            resultat = BeregningsResultatType.BEREGNET,
+                        Beregning(
+                            beregningId = UUID.randomUUID(),
+                            behandlingId = behandlingId,
                             beregningsperioder = beregningsperioder,
-                            beregnetDato = LocalDateTime.now(),
-                            grunnlagVersjon = grunnlag.hentVersjon()
+                            beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
+                            grunnlagMetadata = grunnlag.metadata
                         )
                     }
                 }
             }
             BehandlingType.MANUELT_OPPHOER -> {
                 val datoFom = foersteVirkFraDoedsdato(grunnlag.hentAvdoed().hentDoedsdato()?.verdi!!)
-                return BeregningsResultat(
-                    id = UUID.randomUUID(),
-                    type = Beregningstyper.GP,
-                    endringskode = Endringskode.REVURDERING,
-                    resultat = BeregningsResultatType.BEREGNET,
+                return Beregning(
+                    beregningId = UUID.randomUUID(),
+                    behandlingId = behandlingId,
                     beregningsperioder = listOf(
                         Beregningsperiode(
                             delytelsesId = "BP",
@@ -150,8 +135,8 @@ class BeregningService(
                             grunnbelop = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløp
                         )
                     ),
-                    beregnetDato = LocalDateTime.now(),
-                    grunnlagVersjon = grunnlag.hentVersjon()
+                    beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
+                    grunnlagMetadata = grunnlag.metadata
                 )
             }
         }

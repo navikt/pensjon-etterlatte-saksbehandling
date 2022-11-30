@@ -5,8 +5,6 @@ import grunnlag.kilde
 import io.mockk.mockk
 import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
-import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -29,6 +27,7 @@ internal class BeregningServiceTest {
 
     private val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
     private val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+    private val behandlingId = randomUUID()
     private val beregningRepository = mockk<BeregningRepository>()
     private val vilkaarsvurderingKlientImpl = mockk<VilkaarsvurderingKlient>()
     private val grunnlagKlientImpl = mockk<GrunnlagKlientImpl>()
@@ -51,13 +50,13 @@ internal class BeregningServiceTest {
         grunnlagKlientImpl,
         behandlingKlientImpl,
         sendToRapid
-    ).beregnResultat(
+    ).lagBeregning(
         opplysningsgrunnlag,
         YearMonth.of(2021, 2),
         YearMonth.of(2021, 9),
         vilkaarsvurdering.resultat.utfall,
-        behandlingType
-
+        behandlingType,
+        behandlingId
     ).beregningsperioder
 
     @Test
@@ -90,17 +89,17 @@ internal class BeregningServiceTest {
             grunnlagKlientImpl,
             behandlingKlientImpl,
             sendToRapid
-        ).beregnResultat(
+        ).lagBeregning(
             grunnlag = Grunnlag.empty(),
             virkFOM = virkFOM,
             virkTOM = virkTOM,
             vilkaarsvurderingUtfall = VilkaarsvurderingTestData.ikkeOppfylt.resultat.utfall,
-            behandlingType = BehandlingType.REVURDERING
+            behandlingType = BehandlingType.REVURDERING,
+            behandlingId
         )
         assertEquals(virkFOM, resultat.beregningsperioder.first().datoFOM)
         assertEquals(null, resultat.beregningsperioder.first().datoTOM)
         assertEquals(0, resultat.beregningsperioder.first().utbetaltBeloep)
-        assertEquals(Endringskode.REVURDERING, resultat.endringskode)
     }
 
     @Test
@@ -112,15 +111,15 @@ internal class BeregningServiceTest {
             grunnlagKlientImpl,
             behandlingKlientImpl,
             sendToRapid
-        ).beregnResultat(
+        ).lagBeregning(
             grunnlag = grunnlag,
             virkFOM = mockk(),
             virkTOM = mockk(),
             vilkaarsvurderingUtfall = mockk(),
-            behandlingType = BehandlingType.MANUELT_OPPHOER
+            behandlingType = BehandlingType.MANUELT_OPPHOER,
+            behandlingId
         )
 
-        assertEquals(BeregningsResultatType.BEREGNET, resultat.resultat)
         assertEquals(1, resultat.beregningsperioder.size)
         assertEquals(YearMonth.of(2022, 9), resultat.beregningsperioder.first().datoFOM)
     }

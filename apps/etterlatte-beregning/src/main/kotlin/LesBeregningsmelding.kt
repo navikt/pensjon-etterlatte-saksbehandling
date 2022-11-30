@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -26,7 +27,7 @@ internal class LesBeregningsmelding(
             eventName("BEHANDLING:GRUNNLAGENDRET")
             validate { it.requireKey("vilkaarsvurdering") }
             validate { it.requireKey("virkningstidspunkt") }
-            validate { it.requireKey("behandling.type") }
+            validate { it.requireKey("behandling") }
             validate { it.rejectKey("beregning") }
             validate { it.interestedIn(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
             correlationId()
@@ -43,14 +44,17 @@ internal class LesBeregningsmelding(
                 val vilkaarsvurdering: Vilkaarsvurdering = objectMapper.readValue(
                     packet["vilkaarsvurdering"].toString()
                 )
-                val beregningsResultat = beregning.beregnResultat(
+
+                val behandling: Behandling = objectMapper.readValue(packet["behandling"].toString())
+                val beregning = beregning.lagBeregning(
                     grunnlag = objectMapper.readValue(grunnlag),
                     virkFOM = YearMonth.parse(packet["virkningstidspunkt"].asText()),
                     virkTOM = tom,
                     vilkaarsvurderingUtfall = vilkaarsvurdering.resultat.utfall,
-                    behandlingType = objectMapper.readValue(packet["behandling.type"].toString())
+                    behandlingType = behandling.type,
+                    behandlingId = behandling.id
                 )
-                packet["beregning"] = beregningsResultat
+                packet["beregning"] = beregning
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")
             } catch (e: Exception) {

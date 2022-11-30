@@ -5,7 +5,7 @@ import { VilkaarsVurderingKnapper } from '../handlinger/vilkaarsvurderingKnapper
 import {
   lagreTotalVurdering,
   slettTotalVurdering,
-  Vilkaarsvurdering,
+  IVilkaarsvurdering,
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarBorder } from './styled'
@@ -18,8 +18,8 @@ import { formaterStringDato } from '~utils/formattering'
 
 type Props = {
   virkningstidspunktDato: string
-  vilkaarsvurdering: Vilkaarsvurdering
-  oppdaterVilkaar: (vilkaarsvurdering: Vilkaarsvurdering) => void
+  vilkaarsvurdering: IVilkaarsvurdering
+  oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string
 }
 const MIN_KOMMENTAR_LENGDE = 1

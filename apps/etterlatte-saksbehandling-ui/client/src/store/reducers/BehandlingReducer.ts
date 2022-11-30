@@ -1,5 +1,5 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
-import { Vilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
+import { IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { Beregning } from '~shared/api/beregning'
 import { KildeSaksbehandler, KildeType } from '~shared/types/kilde'
 
@@ -8,7 +8,7 @@ export interface IDetaljertBehandling {
   sak: number
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
-  vilkårsprøving?: Vilkaarsvurdering
+  vilkårsprøving?: IVilkaarsvurdering
   beregning?: Beregning
   avkortning?: any //todo legg med type når denne er klar
   saksbehandlerId?: string
@@ -329,7 +329,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
 export const addBehandling = createAction<IDetaljertBehandling>('behandling/add')
 export const resetBehandling = createAction('behandling/reset')
 export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
-export const updateVilkaarsvurdering = createAction<Vilkaarsvurdering>('behandling/update_vilkaarsvurdering')
+export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering>('behandling/update_vilkaarsvurdering')
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const resetBeregning = createAction('behandling/beregning/reset')

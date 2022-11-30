@@ -14,7 +14,7 @@ import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import { PdfVisning } from '../brev/pdf-visning'
 import {
   hentVilkaarsvurdering,
-  Vilkaarsvurdering,
+  IVilkaarsvurdering,
   VilkaarsvurderingResultat,
   VurderingsResultat,
 } from '~shared/api/vilkaarsvurdering'
@@ -32,7 +32,7 @@ export const Vedtaksbrev = () => {
 
   const [fileURL, setFileURL] = useState<string>()
   const [vedtaksbrevId, setVedtaksbrevId] = useState<string>()
-  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering | undefined>(undefined)
+  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<IVilkaarsvurdering | undefined>(undefined)
   const [ikkeOpfylteVilkaar, setIkkeOppfylteVilkaar] = useState<VilkaarOption[]>([])
   const [valgtVilkaarType, setValgtVilkaarType] = useState<string>()
   const [loading, setLoading] = useState(true)

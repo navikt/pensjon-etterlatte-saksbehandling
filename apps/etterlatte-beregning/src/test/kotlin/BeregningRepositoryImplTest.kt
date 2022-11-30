@@ -4,13 +4,18 @@ import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.BeregningRepositoryImpl
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.YearMonth
@@ -41,25 +46,28 @@ internal class BeregningRepositoryImplTest {
         postgreSQLContainer.stop()
     }
 
-    @Test
-    fun `lagre() skal returnere samme data som faktisk ble lagret`() {
-        val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val behandlingId = UUID.randomUUID()
-        val beregning = BeregningService(
+    private fun initiellBeregning(
+        opplysningsgrunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+    ): Beregning {
+        return BeregningService(
             beregningRepository,
             mockk(),
             mockk(),
             mockk(),
             sendToRapid
         ).lagBeregning(
-            opplysningsgrunnlag,
-            YearMonth.of(2021, 2),
-            YearMonth.of(2021, 9),
-            mockkClass(VilkaarsvurderingUtfall::class),
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            behandlingId
+            grunnlag = opplysningsgrunnlag,
+            virkFOM = YearMonth.of(2021, 2),
+            virkTOM = YearMonth.of(2021, 9),
+            vilkaarsvurderingUtfall = mockkClass(VilkaarsvurderingUtfall::class),
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingId = UUID.randomUUID()
         )
+    }
 
+    @Test
+    fun `lagre() skal returnere samme data som faktisk ble lagret`() {
+        val beregning = initiellBeregning()
         val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
 
         assertEquals(beregning, lagretBeregning)
@@ -67,67 +75,53 @@ internal class BeregningRepositoryImplTest {
 
     @Test
     fun `det som hentes ut skal være likt det som originalt ble lagret`() {
-        val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val behandlingId = UUID.randomUUID()
-        val beregningLagret = BeregningService(
-            beregningRepository,
-            mockk(),
-            mockk(),
-            mockk(),
-            sendToRapid
-        ).lagBeregning(
-            opplysningsgrunnlag,
-            YearMonth.of(2021, 2),
-            YearMonth.of(2021, 9),
-            mockkClass(VilkaarsvurderingUtfall::class),
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            behandlingId
-        )
-
+        val beregningLagret = initiellBeregning()
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
 
-        val beregningHentet = beregningRepository.hent(behandlingId)
+        val beregningHentet = beregningRepository.hent(beregningLagret.behandlingId)
 
         assertEquals(beregningLagret, beregningHentet)
     }
 
     @Test
     fun `skal oppdatere og eller lagre beregning`() {
-        val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val behandlingId = UUID.randomUUID()
-        val beregningLagret = BeregningService(
-            beregningRepository,
-            mockk(),
-            mockk(),
-            mockk(),
-            sendToRapid
-        ).lagBeregning(
-            opplysningsgrunnlag,
-            YearMonth.of(2021, 2),
-            YearMonth.of(2021, 9),
-            mockkClass(VilkaarsvurderingUtfall::class),
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            behandlingId
-        )
+        val beregningLagret = initiellBeregning()
 
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
-
-        val beregningHentet = beregningRepository.hent(behandlingId)
+        val beregningHentet = beregningRepository.hent(beregningLagret.behandlingId)
 
         assertEquals(beregningLagret, beregningHentet)
 
-        val nyBeregning = BeregningService(beregningRepository, mockk(), mockk(), mockk(), sendToRapid).lagBeregning(
-            opplysningsgrunnlag,
-            YearMonth.of(2021, 2),
-            YearMonth.of(2024, 12),
-            mockkClass(VilkaarsvurderingUtfall::class),
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            behandlingId
-        )
+        val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
+        val nyBeregning = BeregningService(beregningRepository, mockk(), mockk(), mockk(), sendToRapid).lagBeregning(
+            grunnlag = opplysningsgrunnlag,
+            virkFOM = YearMonth.of(2021, 2),
+            virkTOM = YearMonth.of(2024, 12),
+            vilkaarsvurderingUtfall = mockkClass(VilkaarsvurderingUtfall::class),
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingId = beregningLagret.behandlingId
+        ).copy(
+            grunnlagMetadata = Metadata(
+                sakId = beregningLagret.grunnlagMetadata.sakId,
+                versjon = beregningLagret.grunnlagMetadata.versjon + 1
+            )
+        )
         beregningRepository.lagreEllerOppdaterBeregning(nyBeregning)
-        val beregningHentetNy = beregningRepository.hent(behandlingId)
+        val beregningHentetNy = beregningRepository.hent(beregningLagret.behandlingId)
 
         assertEquals(nyBeregning, beregningHentetNy)
+    }
+
+    @Test
+    fun `skal slette alle beregningperioder basert på sakId`() {
+        val beregning = initiellBeregning()
+        val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
+
+        assertDoesNotThrow { beregningRepository.hent(beregning.behandlingId) }
+
+        beregningRepository.slettBeregningsperioderISak(lagretBeregning.grunnlagMetadata.sakId)
+
+        assertThrows<NoSuchElementException> { beregningRepository.hent(beregning.behandlingId) }
     }
 }

@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.behandling.BehandlingKlient
 import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
 import no.nav.helse.rapids_rivers.JsonMessage
+import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -30,7 +31,7 @@ class BeregningService(
     private val grunnlagKlient: GrunnlagKlient,
     private val behandlingKlient: BehandlingKlient,
     private val sendToRapid: (String, UUID) -> Unit
-) {
+) : VedlikeholdService {
 
     fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
 
@@ -191,6 +192,10 @@ class BeregningService(
         if (fom.isBefore(virkFOM)) virkFOM else fom
 
     private fun foersteVirkFraDoedsdato(dødsdato: LocalDate): YearMonth = YearMonth.from(dødsdato).plusMonths(1)
+
+    override fun slettSak(sakId: Long) {
+        beregningRepository.slettBeregningsperioderISak(sakId)
+    }
 }
 
 fun beregnSisteTom(fødselsdato: LocalDate, tom: YearMonth): YearMonth? {

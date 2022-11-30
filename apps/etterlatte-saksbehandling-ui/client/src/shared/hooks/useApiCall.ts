@@ -3,11 +3,11 @@ import { ApiError, ApiResponse } from '../api/apiClient'
 
 export function useApiCall<T, U>(
   fn: (req: T) => Promise<ApiResponse<U>>
-): [Result<U>, (args: T, onSuccess?: (result: U) => void) => void, () => void] {
+): [Result<U>, (args: T, onSuccess?: (result: U) => void, onError?: (error: ApiError) => void) => void, () => void] {
   const [apiResult, setApiResult] = useState<Result<U>>(initial)
 
   const callFn = React.useCallback(
-    async (args: T, onSuccess?: (result: U) => void) => {
+    async (args: T, onSuccess?: (result: U) => void, onError?: (error: any) => void) => {
       if (!isPending(apiResult)) {
         setApiResult(pending)
 
@@ -17,6 +17,7 @@ export function useApiCall<T, U>(
           onSuccess?.(res.data)
         } else {
           setApiResult(error(res))
+          onError?.(res.error)
         }
       }
     },
@@ -41,6 +42,7 @@ export const isPending = (result: Result<unknown>): result is Pending => result.
 export const isSuccess = <T>(result: Result<T>): result is Success<T> => result.status === 'success'
 export const isFailure = (result: Result<unknown>): result is Error<ApiError> => result.status === 'error'
 export const isInitial = (result: Result<unknown>): result is Initial => result.status === 'initial'
+export const isPendingOrInitial = (result: Result<unknown>) => isPending(result) || isInitial(result)
 
 const initial = <A = never>(): Result<A> => ({ status: 'initial' })
 const pending = <A = never>(): Result<A> => ({ status: 'pending' })

@@ -13,7 +13,7 @@ import { formaterStringDato } from '~utils/formattering'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppSelector } from '~store/Store'
-import { opprettBeregning } from '~shared/api/beregning'
+import { opprettEllerEndreBeregning } from '~shared/api/beregning'
 
 interface SoeskenMedIBeregning {
   foedselsnummer: string
@@ -46,6 +46,8 @@ const Beregningsgrunnlag = () => {
     },
   })
 
+  const lagBeregning = () => opprettEllerEndreBeregning(behandling.id).then(() => next())
+
   const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
 
   return (
@@ -69,14 +71,9 @@ const Beregningsgrunnlag = () => {
         onSubmit={handleSubmit(async (formValues) => {
           if (formValues.beregningsgrunnlag.length !== 0) {
             setIsLoading(true)
-            const fetchBeregning = async () =>
-              await opprettBeregning(behandling.id)
-                .then(() => next())
-                .catch((err) => console.error({ err }))
 
             await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
-              .then(() => fetchBeregning())
-              .catch((err) => console.error({ err }))
+              .then(() => lagBeregning())
               .finally(() => setIsLoading(false))
           }
         })}

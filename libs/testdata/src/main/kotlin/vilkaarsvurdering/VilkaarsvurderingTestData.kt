@@ -1,7 +1,6 @@
 package vilkaarsvurdering
 
 import behandling.VirkningstidspunktTestData
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultatDto
@@ -14,7 +13,7 @@ class VilkaarsvurderingTestData {
     companion object {
         val oppfylt = VilkaarsvurderingDto(
             UUID.randomUUID(),
-            objectMapper.createObjectNode(),
+            emptyList(),
             VirkningstidspunktTestData.virkningstidsunkt().let {
                 VirkningstidspunktDto(it.dato, it.kilde.toJsonNode())
             },
@@ -28,7 +27,7 @@ class VilkaarsvurderingTestData {
 
         val ikkeOppfylt = VilkaarsvurderingDto(
             UUID.randomUUID(),
-            objectMapper.createObjectNode(),
+            emptyList(),
             VirkningstidspunktTestData.virkningstidsunkt().let {
                 VirkningstidspunktDto(it.dato, it.kilde.toJsonNode())
             },

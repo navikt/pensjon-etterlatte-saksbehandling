@@ -137,7 +137,7 @@ internal class BehandlingServiceTest {
             null,
             VilkaarsvurderingDto(
                 UUID.randomUUID(),
-                objectMapper.createObjectNode(),
+                emptyList(),
                 VirkningstidspunktDto(
                     YearMonth.of(2022, 1),
                     Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now()).toJsonNode()

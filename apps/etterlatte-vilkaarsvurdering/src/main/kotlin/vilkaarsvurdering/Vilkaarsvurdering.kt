@@ -22,7 +22,7 @@ data class Vilkaar(
     val grunnlag: List<Vilkaarsgrunnlag<out Any?>>? = null
 )
 
-data class Hovedvilkaar(
+data class EnkeltVilkaar(
     val type: VilkaarType,
     val tittel: String,
     val beskrivelse: String? = null,
@@ -30,13 +30,8 @@ data class Hovedvilkaar(
     val resultat: Utfall? = null
 )
 
-data class Unntaksvilkaar(
-    val type: VilkaarType,
-    val tittel: String,
-    val beskrivelse: String? = null,
-    val lovreferanse: Lovreferanse,
-    val resultat: Utfall? = null
-)
+typealias Hovedvilkaar = EnkeltVilkaar
+typealias Unntaksvilkaar = EnkeltVilkaar
 
 data class Lovreferanse(
     val paragraf: String,

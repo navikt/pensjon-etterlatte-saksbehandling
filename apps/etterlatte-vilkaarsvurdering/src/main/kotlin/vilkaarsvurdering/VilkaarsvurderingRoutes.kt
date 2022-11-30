@@ -15,12 +15,8 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultatDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VirkningstidspunktDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaarDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.VilkaarType
 import java.time.LocalDateTime
 import java.util.*
@@ -56,7 +52,7 @@ fun Route.vilkaarsvurdering(
                 val oppdatertVilkaarsvurdering =
                     vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
                         behandlingId = behandlingId,
-                        vurdertVilkaar = toVurdertVilkaar(vurdertVilkaarDto, saksbehandler)
+                        vurdertVilkaar = vurdertVilkaarDto.toDomain(saksbehandler, LocalDateTime.now())
                     )
 
                 call.respond(oppdatertVilkaarsvurdering)
@@ -86,7 +82,7 @@ fun Route.vilkaarsvurdering(
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
                     val oppdatertVilkaarsvurdering = vilkaarsvurderingService.oppdaterTotalVurdering(
                         behandlingId = behandlingId,
-                        resultat = toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler),
+                        resultat = vurdertResultatDto.toDomain(saksbehandler, LocalDateTime.now()),
                         accessToken = accesstoken
                     )
 
@@ -118,57 +114,3 @@ private suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
         call.respond(HttpStatusCode.BadRequest, "behandlingId må være en UUID")
     }
 }
-
-private fun toVurdertVilkaar(vurdertVilkaarDto: VurdertVilkaarDto, saksbehandler: String) =
-    VurdertVilkaar(
-        hovedvilkaar = vurdertVilkaarDto.hovedvilkaar,
-        unntaksvilkaar = vurdertVilkaarDto.unntaksvilkaar,
-        vurdering = VilkaarVurderingData(
-            kommentar = vurdertVilkaarDto.kommentar,
-            tidspunkt = LocalDateTime.now(),
-            saksbehandler = saksbehandler
-        )
-    )
-
-private fun toVilkaarsvurderingResultat(
-    vurdertResultatDto: VurdertVilkaarsvurderingResultatDto,
-    saksbehandler: String
-) = VilkaarsvurderingResultat(
-    vurdertResultatDto.resultat,
-    vurdertResultatDto.kommentar,
-    LocalDateTime.now(),
-    saksbehandler
-)
-
-data class VurdertVilkaarDto(
-    val hovedvilkaar: VilkaarTypeOgUtfall,
-    val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
-    val kommentar: String?
-)
-
-data class VurdertVilkaarsvurderingResultatDto(
-    val resultat: VilkaarsvurderingUtfall,
-    val kommentar: String?
-)
-
-fun Vilkaarsvurdering.toDto() = VilkaarsvurderingDto(
-    behandlingId = behandlingId,
-    vilkaar = vilkaar.toJsonNode(),
-    virkningstidspunkt = virkningstidspunkt.toDto(),
-    resultat = resultat?.toDto()
-)
-
-fun VilkaarsvurderingResultat.toDto() = VilkaarsvurderingResultatDto(
-    utfall = when (utfall) {
-        VilkaarsvurderingUtfall.OPPFYLT -> VilkaarsvurderingUtfallDto.OPPFYLT
-        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VilkaarsvurderingUtfallDto.IKKE_OPPFYLT
-    },
-    kommentar = kommentar,
-    saksbehandler = saksbehandler,
-    tidspunkt = tidspunkt
-)
-
-fun Virkningstidspunkt.toDto() = VirkningstidspunktDto(
-    dato = dato,
-    kilde = kilde.toJsonNode()
-)

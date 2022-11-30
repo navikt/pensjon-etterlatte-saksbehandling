@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultatDto
@@ -52,7 +51,7 @@ internal class OppgaveServiceTest {
             null,
             VilkaarsvurderingDto(
                 UUID.randomUUID(),
-                objectMapper.createObjectNode(),
+                emptyList(),
                 VirkningstidspunktDto(
                     YearMonth.of(2022, 1),
                     Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now()).toJsonNode()

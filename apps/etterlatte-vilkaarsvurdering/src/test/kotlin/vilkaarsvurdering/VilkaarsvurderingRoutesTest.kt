@@ -22,7 +22,13 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.UtfallDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfallDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaarDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
@@ -112,14 +118,11 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
-            val alleVilkaar: List<Vilkaar> = objectMapper
-                .readerForListOf(Vilkaar::class.java)
-                .readValue(vilkaarsvurdering.vilkaar)
-            val foersteVilkaar = alleVilkaar.first()
+            val foersteVilkaar = vilkaarsvurdering.vilkaar.first()
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(behandlingId, vilkaarsvurdering.behandlingId)
-            assertEquals(VilkaarType.DOEDSFALL_FORELDER, foersteVilkaar.hovedvilkaar.type)
+            assertEquals(VilkaarType.DOEDSFALL_FORELDER.name, foersteVilkaar.hovedvilkaar.type.name)
             assertEquals("§ 18-4", foersteVilkaar.hovedvilkaar.lovreferanse.paragraf)
             assertEquals("Dødsfall forelder", foersteVilkaar.hovedvilkaar.tittel)
             assertEquals(
@@ -183,9 +186,9 @@ internal class VilkaarsvurderingRoutesTest {
             opprettVilkaarsvurdering()
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
-                hovedvilkaar = VilkaarTypeOgUtfall(
-                    VilkaarType.DOEDSFALL_FORELDER,
-                    Utfall.OPPFYLT
+                hovedvilkaar = VilkaarTypeOgUtfallDto(
+                    VilkaarTypeDto.DOEDSFALL_FORELDER,
+                    UtfallDto.OPPFYLT
                 ),
                 unntaksvilkaar = null,
                 kommentar = "Søker oppfyller vilkåret"
@@ -198,15 +201,15 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), Vilkaarsvurdering::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
             val oppdatertVilkaar = oppdatertVilkaarsvurdering.vilkaar.find {
-                it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type
+                it.hovedvilkaar.type.name == vurdertVilkaarDto.hovedvilkaar.type.name
             }
 
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
-            assertEquals(vurdertVilkaarDto.hovedvilkaar.type, oppdatertVilkaar?.hovedvilkaar?.type)
-            assertEquals(vurdertVilkaarDto.hovedvilkaar.resultat, oppdatertVilkaar?.hovedvilkaar?.resultat)
+            assertEquals(vurdertVilkaarDto.hovedvilkaar.type.name, oppdatertVilkaar?.hovedvilkaar?.type?.name)
+            assertEquals(vurdertVilkaarDto.hovedvilkaar.resultat.name, oppdatertVilkaar?.hovedvilkaar?.resultat?.name)
             assertEquals(vurdertVilkaarDto.kommentar, oppdatertVilkaar?.vurdering?.kommentar)
             assertEquals("Saksbehandler01", oppdatertVilkaar?.vurdering?.saksbehandler)
             assertNotNull(oppdatertVilkaar?.vurdering?.tidspunkt)
@@ -221,9 +224,9 @@ internal class VilkaarsvurderingRoutesTest {
             opprettVilkaarsvurdering()
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
-                hovedvilkaar = VilkaarTypeOgUtfall(
-                    type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
-                    resultat = Utfall.OPPFYLT
+                hovedvilkaar = VilkaarTypeOgUtfallDto(
+                    type = VilkaarTypeDto.FORUTGAAENDE_MEDLEMSKAP,
+                    resultat = UtfallDto.OPPFYLT
                 ),
                 kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.FORUTGAAENDE_MEDLEMSKAP}"
             )
@@ -235,7 +238,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val vurdertVilkaar = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(behandlingId, oboToken)
-                .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                .vilkaar.first { it.hovedvilkaar.type.name == vurdertVilkaarDto.hovedvilkaar.type.name }
 
             assertNotNull(vurdertVilkaar)
             assertNotNull(vurdertVilkaar.vurdering)
@@ -243,13 +246,13 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(Utfall.OPPFYLT, vurdertVilkaar.hovedvilkaar.resultat)
 
             val vurdertVilkaarMedUnntakDto = VurdertVilkaarDto(
-                hovedvilkaar = VilkaarTypeOgUtfall(
-                    type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
-                    resultat = Utfall.IKKE_OPPFYLT
+                hovedvilkaar = VilkaarTypeOgUtfallDto(
+                    type = VilkaarTypeDto.FORUTGAAENDE_MEDLEMSKAP,
+                    resultat = UtfallDto.IKKE_OPPFYLT
                 ),
-                unntaksvilkaar = VilkaarTypeOgUtfall(
-                    type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR,
-                    resultat = Utfall.OPPFYLT
+                unntaksvilkaar = VilkaarTypeOgUtfallDto(
+                    type = VilkaarTypeDto.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR,
+                    resultat = UtfallDto.OPPFYLT
                 ),
                 kommentar = "Søker oppfyller unntaksvilkåret " +
                     "${VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR}"
@@ -265,7 +268,7 @@ internal class VilkaarsvurderingRoutesTest {
                 behandlingId,
                 oboToken
             )
-                .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                .vilkaar.first { it.hovedvilkaar.type.name == vurdertVilkaarDto.hovedvilkaar.type.name }
 
             assertEquals(Utfall.IKKE_OPPFYLT, vurdertVilkaarPaaUnntak.hovedvilkaar.resultat)
             assertNotNull(vurdertVilkaarPaaUnntak.vurdering)
@@ -288,9 +291,9 @@ internal class VilkaarsvurderingRoutesTest {
             opprettVilkaarsvurdering()
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
-                hovedvilkaar = VilkaarTypeOgUtfall(
-                    type = VilkaarType.DOEDSFALL_FORELDER,
-                    resultat = Utfall.OPPFYLT
+                hovedvilkaar = VilkaarTypeOgUtfallDto(
+                    type = VilkaarTypeDto.DOEDSFALL_FORELDER,
+                    resultat = UtfallDto.OPPFYLT
                 ),
                 kommentar = "Søker oppfyller vilkåret"
             )
@@ -302,7 +305,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val vurdertVilkaar = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(behandlingId, oboToken)
-                .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                .vilkaar.first { it.hovedvilkaar.type.name == vurdertVilkaarDto.hovedvilkaar.type.name }
 
             assertNotNull(vurdertVilkaar)
             assertNotNull(vurdertVilkaar.vurdering)
@@ -318,7 +321,7 @@ internal class VilkaarsvurderingRoutesTest {
                 behandlingId,
                 oboToken
             ).vilkaar
-                .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+                .first { it.hovedvilkaar.type.name == vurdertVilkaarDto.hovedvilkaar.type.name }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertNull(vurdertVilkaarSlettet.vurdering)
@@ -336,7 +339,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             opprettVilkaarsvurdering()
             val resultat = VurdertVilkaarsvurderingResultatDto(
-                resultat = VilkaarsvurderingUtfall.OPPFYLT,
+                resultat = VilkaarsvurderingUtfallDto.OPPFYLT,
                 kommentar = "Søker oppfyller vurderingen"
             )
             val oppdatertVilkaarsvurderingResponse = client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {

@@ -38,7 +38,6 @@ export const Vedtaksbrev = () => {
   useEffect(() => {
     if (!vedtaksbrevId) return
 
-    console.log('genererer pdf')
     genererPdf(vedtaksbrevId)
       .then((file) => URL.createObjectURL(file))
       .then((url) => setFileURL(url))

@@ -16,7 +16,8 @@ import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.journalpost.JournalpostClient
+import no.nav.etterlatte.dokument.JournalpostClient
+import no.nav.etterlatte.dokument.dokumentRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -33,7 +34,6 @@ class ApplicationBuilder {
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }
-    private val localDevelopment: Boolean = env["BREV_LOCAL_DEV"].toBoolean()
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env["ETTERLATTE_PDFGEN_URL"]!!)
     private val vedtakService = VedtakServiceImpl(config, httpClient())
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
@@ -62,8 +62,9 @@ class ApplicationBuilder {
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
-                apiModule(localDevelopment) {
-                    brevRoute(brevService, mottakerService, journalpostService)
+                apiModule {
+                    brevRoute(brevService, mottakerService)
+                    dokumentRoute(journalpostService)
                 }
             }
             .build()

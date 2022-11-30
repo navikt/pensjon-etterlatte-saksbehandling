@@ -17,17 +17,14 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.journalpost.JournalpostService
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
-import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
 
-fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, journalpostService: JournalpostService) {
-    val logger = LoggerFactory.getLogger(BrevService::class.java)
+fun Route.brevRoute(service: BrevService, mottakerService: MottakerService) {
+    val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
 
     route("brev") {
         get("maler") {
@@ -135,35 +132,6 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
 
             call.respond(brev)
         }
-
-        get("dokumenter/{fnr}") {
-            val accessToken = try {
-                getAccessToken(call)
-            } catch (ex: Exception) {
-                logger.error("Bearer not found", ex)
-                throw ex
-            }
-
-            val fnr = call.parameters["fnr"]!!
-            val innhold = journalpostService.hentDokumenter(fnr, BrukerIdType.FNR, accessToken)
-
-            call.respond(innhold)
-        }
-
-        post("dokumenter/{journalpostId}/{dokumentInfoId}") {
-            val accessToken = try {
-                getAccessToken(call)
-            } catch (ex: Exception) {
-                logger.error("Bearer not found", ex)
-                throw ex
-            }
-
-            val journalpostId = call.parameters["journalpostId"]!!
-            val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-            val innhold = journalpostService.hentDokumentPDF(journalpostId, dokumentInfoId, accessToken)
-
-            call.respond(innhold)
-        }
     }
 }
 
@@ -183,7 +151,7 @@ data class FilData(
     val filNavn: String
 )
 
-private fun getAccessToken(call: ApplicationCall): String {
+fun getAccessToken(call: ApplicationCall): String {
     val authHeader = call.request.parseAuthorizationHeader()
     if (!(authHeader == null || authHeader !is HttpAuthHeader.Single || authHeader.authScheme != "Bearer")) {
         return authHeader.blob

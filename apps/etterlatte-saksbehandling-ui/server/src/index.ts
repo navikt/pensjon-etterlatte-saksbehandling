@@ -45,9 +45,9 @@ if (isDev) {
 
   app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url!!))
 
-  app.use('/api', tokenMiddleware(ApiConfig.api.scope), proxy(ApiConfig.api.url!!))
+  app.use(['/api/brev', '/api/dokumenter'], tokenMiddleware(ApiConfig.brev.scope), proxy(ApiConfig.brev.url!!))
 
-  app.use('/brev', tokenMiddleware(ApiConfig.brev.scope), proxy(ApiConfig.brev.url!!))
+  app.use('/api', tokenMiddleware(ApiConfig.api.scope), proxy(ApiConfig.api.url!!))
 }
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: Request, res: Response) => {

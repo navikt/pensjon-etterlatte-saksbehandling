@@ -52,7 +52,7 @@ class BeregningService(
         val message = JsonMessage.newMessage(BehandlingGrunnlagEndret.eventName)
             .apply {
                 this["vilkaarsvurdering"] = vilkaarsvurdering
-                this["beregning"] = lagretBeregning
+                this["beregning"] = lagretBeregning.toDTO()
             }
             .apply { // trengs av lagreberegning i vedtak + beregning, fjerne?
                 this["sakId"] = behandling.sak

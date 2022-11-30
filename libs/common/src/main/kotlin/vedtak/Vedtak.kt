@@ -65,7 +65,7 @@ data class Utbetalingsperiode(
 )
 
 enum class UtbetalingsperiodeType {
-    OPPHOER, UTBETALING // TODO: trenger vi en ENDRING-type her?
+    OPPHOER, UTBETALING
 }
 
 data class Attestasjon(

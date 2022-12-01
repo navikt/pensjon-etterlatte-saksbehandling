@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.model.BeregningService
 import no.nav.etterlatte.model.getAccessToken
 import java.util.*
@@ -17,19 +18,22 @@ fun Route.beregning(beregningService: BeregningService) {
     route("/api/beregning") {
         get("/{behandlingId}") {
             withBehandlingId {
-                val beregning = beregningService.hentBeregning(it)
-                call.respond(beregning)
+                val beregning = beregningService.hentBeregning(it).toDTO()
+                call.respondWithBeregningDTO(beregning)
             }
         }
 
         post("/{behandlingId}") {
             withBehandlingId {
                 val accessToken = getAccessToken(call)
-                val beregning = beregningService.lagreBeregning(it, accessToken)
-                call.respond(beregning)
+                val beregning = beregningService.lagreBeregning(it, accessToken).toDTO()
+                call.respondWithBeregningDTO(beregning)
             }
         }
     }
+}
+private suspend fun ApplicationCall.respondWithBeregningDTO(beregningDTO: BeregningDTO) {
+    response.pipeline.execute(this, beregningDTO)
 }
 
 private suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSuccess: (id: UUID) -> Unit) {

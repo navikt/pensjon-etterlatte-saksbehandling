@@ -3,18 +3,24 @@ package no.nav.etterlatte.vedtaksvurdering.rivers
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
+import no.nav.etterlatte.libs.common.beregning.Beregningstyper
+import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 internal class LagreBeregningsresultat(
     rapidsConnection: RapidsConnection,
@@ -38,9 +44,19 @@ internal class LagreBeregningsresultat(
         withLogContext(packet.correlationId) {
             val behandling = objectMapper.readValue<Behandling>(packet["behandling"].toString())
             val sakId = packet["sakId"].toString()
-            val beregningsResultat = objectMapper.readValue(
+            val beregningDTO = objectMapper.readValue(
                 packet["beregning"].toString(),
-                BeregningsResultat::class.java
+                BeregningDTO::class.java
+            )
+            // TODO: SOS Endre til å bruke beregningDTO i databasen til vedtak hvis det skal ha det senere etter omskrivning
+            val beregningsResultat = BeregningsResultat(
+                id = beregningDTO.beregningId,
+                type = Beregningstyper.GP,
+                endringskode = Endringskode.NY,
+                resultat = BeregningsResultatType.BEREGNET,
+                beregningsperioder = beregningDTO.beregningsperioder,
+                beregnetDato = LocalDateTime.from(beregningDTO.beregnetDato.toNorskTid()),
+                grunnlagVersjon = beregningDTO.grunnlagMetadata.versjon
             )
 
             try {

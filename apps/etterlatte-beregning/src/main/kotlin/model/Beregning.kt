@@ -1,5 +1,6 @@
 package no.nav.etterlatte.model
 
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.person.Person
@@ -26,4 +27,13 @@ data class Beregning(
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: Tidspunkt,
     val grunnlagMetadata: Metadata
-)
+) {
+    fun toDTO() =
+        BeregningDTO(
+            beregningId = beregningId,
+            behandlingId = behandlingId,
+            beregningsperioder = beregningsperioder,
+            beregnetDato = beregnetDato,
+            grunnlagMetadata = grunnlagMetadata
+        )
+}

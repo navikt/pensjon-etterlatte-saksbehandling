@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -41,7 +41,7 @@ internal class LesBeregningsmelding(
             try {
                 // TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
                 val tom = YearMonth.now().plusMonths(3)
-                val vilkaarsvurdering: Vilkaarsvurdering = objectMapper.readValue(
+                val vilkaarsvurdering: VilkaarsvurderingDto = objectMapper.readValue(
                     packet["vilkaarsvurdering"].toString()
                 )
 
@@ -50,7 +50,7 @@ internal class LesBeregningsmelding(
                     grunnlag = objectMapper.readValue(grunnlag),
                     virkFOM = YearMonth.parse(packet["virkningstidspunkt"].asText()),
                     virkTOM = tom,
-                    vilkaarsvurderingUtfall = vilkaarsvurdering.resultat.utfall,
+                    vilkaarsvurderingUtfall = vilkaarsvurdering.resultat!!.utfall,
                     behandlingType = behandling.type,
                     behandlingId = behandling.id
                 )

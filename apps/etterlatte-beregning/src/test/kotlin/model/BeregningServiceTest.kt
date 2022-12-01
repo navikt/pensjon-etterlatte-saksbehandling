@@ -54,7 +54,7 @@ internal class BeregningServiceTest {
         opplysningsgrunnlag,
         YearMonth.of(2021, 2),
         YearMonth.of(2021, 9),
-        vilkaarsvurdering.resultat.utfall,
+        vilkaarsvurdering.resultat!!.utfall,
         behandlingType,
         behandlingId
     ).beregningsperioder
@@ -93,7 +93,7 @@ internal class BeregningServiceTest {
             grunnlag = Grunnlag.empty(),
             virkFOM = virkFOM,
             virkTOM = virkTOM,
-            vilkaarsvurderingUtfall = VilkaarsvurderingTestData.ikkeOppfylt.resultat.utfall,
+            vilkaarsvurderingUtfall = VilkaarsvurderingTestData.ikkeOppfylt.resultat!!.utfall,
             behandlingType = BehandlingType.REVURDERING,
             behandlingId
         )

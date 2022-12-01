@@ -1,3 +1,4 @@
+
 import io.mockk.mockk
 import io.mockk.mockkClass
 import no.nav.etterlatte.BeregningRepository
@@ -6,7 +7,7 @@ import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll
@@ -59,7 +60,7 @@ internal class BeregningRepositoryImplTest {
             grunnlag = opplysningsgrunnlag,
             virkFOM = YearMonth.of(2021, 2),
             virkTOM = YearMonth.of(2021, 9),
-            vilkaarsvurderingUtfall = mockkClass(VilkaarsvurderingUtfall::class),
+            vilkaarsvurderingUtfall = mockkClass(VilkaarsvurderingUtfallDto::class),
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingId = UUID.randomUUID()
         )
@@ -98,7 +99,7 @@ internal class BeregningRepositoryImplTest {
             grunnlag = opplysningsgrunnlag,
             virkFOM = YearMonth.of(2021, 2),
             virkTOM = YearMonth.of(2024, 12),
-            vilkaarsvurderingUtfall = mockkClass(VilkaarsvurderingUtfall::class),
+            vilkaarsvurderingUtfall = mockkClass(VilkaarsvurderingUtfallDto::class),
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingId = beregningLagret.behandlingId
         ).copy(

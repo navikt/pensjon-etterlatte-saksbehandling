@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfallDto
 import no.nav.etterlatte.model.behandling.BehandlingKlient
 import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -44,7 +44,7 @@ class BeregningService(
             grunnlag,
             behandling.virkningstidspunkt!!.dato,
             YearMonth.now().plusMonths(3),
-            vilkaarsvurdering.resultat.utfall,
+            vilkaarsvurdering.resultat!!.utfall,
             behandling.behandlingType!!,
             behandlingId
         )
@@ -68,7 +68,7 @@ class BeregningService(
         grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
-        vilkaarsvurderingUtfall: VilkaarsvurderingUtfall,
+        vilkaarsvurderingUtfall: VilkaarsvurderingUtfallDto,
         behandlingType: BehandlingType,
         behandlingId: UUID
     ): Beregning {
@@ -86,7 +86,7 @@ class BeregningService(
 
             BehandlingType.REVURDERING -> {
                 when (vilkaarsvurderingUtfall) {
-                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
+                    VilkaarsvurderingUtfallDto.IKKE_OPPFYLT -> {
                         Beregning(
                             beregningId = UUID.randomUUID(),
                             behandlingId = behandlingId,

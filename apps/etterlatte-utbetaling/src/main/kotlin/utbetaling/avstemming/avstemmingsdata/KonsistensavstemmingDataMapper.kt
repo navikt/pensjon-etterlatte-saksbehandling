@@ -63,7 +63,7 @@ internal class KonsistensavstemmingDataMapper(
 
     private fun avstemmingsdata(kodeAksjon: KodeAksjon): Aksjonsdata =
         Aksjonsdata().apply {
-            val fagomraade = "BARBEPE"
+            val fagomraade = "BARNEPE"
             aksjonsType = kodeAksjon.name
             kildeType = KildeType.AVLEV.name
             avstemmingType = KONSAVSTEMMING
@@ -79,7 +79,7 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
     return Oppdragsdata().apply {
         fagomradeKode = "BARNEPE"
         fagsystemId = sakId.value.toString()
-        utbetalingsfrekvens = "MND"
+        utbetalingsfrekvens = OppdragDefaults.UTBETALINGSFREKVENS
         oppdragGjelderId = fnr.value
         oppdragGjelderFom = LocalDate.EPOCH.format(tidsstempelDatoOppdrag)
         saksbehandlerId = "" // TODO: hør med økonomi om denne skal fylles ut, og i såfall med hva

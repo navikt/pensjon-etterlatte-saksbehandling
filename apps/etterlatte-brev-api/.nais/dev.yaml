@@ -53,7 +53,7 @@ spec:
       value: api://dev-fss.etterlatte.etterlatte-proxy/.default
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
-    - name: ETTERLATTE_VEDTAKSVURDERING_URL
+    - name: ETTERLATTE_VEDTAK_URL
       value: https://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: ce96a301-13db-4409-b277-5b27f464d08b

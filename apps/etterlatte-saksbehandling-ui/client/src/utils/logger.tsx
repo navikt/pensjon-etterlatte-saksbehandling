@@ -1,6 +1,5 @@
 import Bowser from 'bowser'
 const browser: any = Bowser.getParser(window.navigator.userAgent)
-import * as StackTrace from 'stacktrace-js'
 import { apiClient } from '~shared/api/apiClient'
 import { store } from '~store/Store'
 import { loggError, loggInfo } from '~store/reducers/BehandlingReducer'
@@ -14,56 +13,36 @@ const defaultContext = {
 
 const loggFunc = (data: any) => apiClient.post('/logg', data)
 
+export interface IStackLineNoColumnNo {
+  readonly lineno: number
+  readonly columnno: number
+  readonly error: any
+}
+
 export const logger = {
-  info: (text: string) => {
-    const data = { type: 'info', jsonContent: { ...defaultContext, text } }
+  info: (stackLineNoColumnNo: IStackLineNoColumnNo) => {
+    const data = { type: 'info', stackInfo: stackLineNoColumnNo, jsonContent: { ...defaultContext } }
     loggFunc(data)
-      .then(() => {})
+      .then(() => store.dispatch(loggInfo(data)))
       .catch((err) => {
         console.error('Couldnt log info message: ', data, ' err: ', err)
       })
-    store.dispatch(loggInfo(data))
   },
-  error: (text: string) => {
-    const data = { type: 'error', jsonContent: { ...defaultContext, text } }
+  error: (stackLineNoColumnNo: IStackLineNoColumnNo) => {
+    const data = { type: 'error', stackInfo: stackLineNoColumnNo, jsonContent: { ...defaultContext } }
     loggFunc(data)
-      .then(() => {})
+      .then(() => store.dispatch(loggError(data)))
       .catch((err) => {
         console.error('Couldnt log error message: ', data, ' err: ', err)
       })
-    store.dispatch(loggError(data))
   },
-}
-
-export const joinStackTraceAndSendToServer = (stackframes: any) => {
-  const stringifiedStack = stackframes.map((sf: any) => sf.toString()).join('\n')
-  logger.error(`Sourcemapped stacktrace: \n + ${stringifiedStack}`)
-}
-
-export const logErrorWithStacktraceJS = (err: any) => {
-  StackTrace.fromError(err)
-    .then(joinStackTraceAndSendToServer)
-    .catch((err) => {
-      logger.error(`Could not parse stack, original: \n ${err}`)
-    })
-}
-
-export const generateStacktraceAndLog = (
-  lineno: number,
-  colno: number,
-  message: string,
-  filename: string,
-  error: any
-) => {
-  if (error) {
-    logErrorWithStacktraceJS(error)
-  }
 }
 
 export const setupWindowOnError = () => {
   addEventListener('error', (event) => {
-    const { message, colno, lineno, error, filename } = event
-    generateStacktraceAndLog(lineno, colno, message, filename, error)
+    const { error, lineno, colno, filename } = event
+    console.log('event: lineno:', lineno, ' colno: ', colno, ' filename: ', filename)
+    logger.error({ lineno: lineno, columnno: colno, error: error })
     if (error.stack?.indexOf('invokeGuardedCallbackDev') >= 0 && !error.alreadySeen) {
       error.alreadySeen = true
       event.preventDefault()

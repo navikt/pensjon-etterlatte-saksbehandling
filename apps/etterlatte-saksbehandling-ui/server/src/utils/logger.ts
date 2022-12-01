@@ -21,9 +21,6 @@ export const frontendLogger = winston.createLogger({
   format: process.env.NAIS_CLUSTER_NAME ? production : dev,
   defaultMeta: {
     service: 'etterlatte-saksbehandling-ui-client',
-    get x_correlation_id() {
-      return 'uuid1231231'
-    },
   },
 })
 

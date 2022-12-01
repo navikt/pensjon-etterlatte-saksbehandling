@@ -4,10 +4,11 @@ import { appConf, ApiConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
-import { frontendLogger, logger } from './utils/logger'
+import { logger } from './utils/logger'
 import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
+import { loggerRouter } from './routers/loggerRouter'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -28,15 +29,7 @@ if (isDev) {
   logger.info('Mocking all endpoints')
   app.use('/api', mockRouter)
 } else {
-  app.post('/api/logg', express.json(), (req, res) => {
-    let body = req.body
-    if (body.type && body.type === 'info') {
-      frontendLogger.info('Request', req.body)
-    } else {
-      frontendLogger.error('Request', req.body)
-    }
-    res.sendStatus(200)
-  })
+  app.use('/api/logg', loggerRouter)
 
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
   app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?

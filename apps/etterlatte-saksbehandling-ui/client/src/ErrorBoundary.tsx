@@ -1,6 +1,6 @@
 import React, { ErrorInfo } from 'react'
-import { logErrorWithStacktraceJS } from '~utils/logger'
-
+import { logger } from '~utils/logger'
+import ErrorStackParser from 'error-stack-parser'
 type Props = {
   children: JSX.Element
 }
@@ -16,8 +16,12 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('componentDidCatch errorinfo ', errorInfo, '\nerror', error)
-    logErrorWithStacktraceJS(error)
+    //error has stack perhaps
+    console.log('componentDidCatch errorinfo ', errorInfo, '\nerror', error)
+    //TODO: get lineno and colno here
+    const stackFrames = ErrorStackParser.parse(error)
+    const stackFrame = stackFrames[0]
+    logger.error({ lineno: stackFrame.lineNumber!!, columnno: stackFrame.columnNumber!!, error: error })
   }
 
   render() {

@@ -6,7 +6,8 @@
     "express": "^4.17.1",
     "http-proxy-middleware": "^2.0.6",
     "node-fetch": "^2.6.7",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "source-map" : "~0.7.4"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",

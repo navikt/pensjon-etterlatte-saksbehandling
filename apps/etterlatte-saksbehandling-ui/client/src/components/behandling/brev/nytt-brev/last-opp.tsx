@@ -76,7 +76,10 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev
   const [filNavn, setFilNavn] = useState<string>('')
 
   useEffect(() => {
-    hentMottakere().then((res) => setMottakere(res))
+    hentMottakere().then((res) => {
+      if (res.status === 'ok') setMottakere(res.data)
+      else setError(res.error)
+    })
   }, [])
 
   const opprett = () => {

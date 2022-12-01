@@ -33,7 +33,14 @@ export default function BrevModal({
     setIsOpen(true)
 
     genererPdf(brev.id)
-      .then((file) => URL.createObjectURL(file))
+      .then((res) => {
+        if (res.status === 'ok') {
+          return new Blob([res.data], { type: 'application/pdf' })
+        } else {
+          throw Error(res.error)
+        }
+      })
+      .then((file) => URL.createObjectURL(file!!))
       .then((url) => setFileURL(url))
       .catch((e) => setError(e.message))
       .finally(() => {

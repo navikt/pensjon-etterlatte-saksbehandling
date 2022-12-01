@@ -8,7 +8,7 @@ import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingsType } from '../fargetags/behandlingsType'
 import { SaksType, ISaksType } from '../fargetags/saksType'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { ferdigstillBrev, hentBrevForBehandling, hentDokumenter, Mottaker, slettBrev } from '~shared/api/brev'
+import { ferdigstillBrev, hentBrevForBehandling, Mottaker, slettBrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import { Journalpost } from '../types'
@@ -19,6 +19,7 @@ import Spinner from '~shared/Spinner'
 import LastOppBrev from './nytt-brev/last-opp'
 import { useAppSelector } from '~store/Store'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
+import { hentDokumenter } from '~shared/api/dokument'
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -36,9 +37,8 @@ export interface IBrev {
 }
 
 export const Brev = () => {
-  const { behandlingId } = useParams()
-  const { soeknadMottattDato, søker, behandlingType } = useAppSelector((state) => state.behandlingReducer.behandling)
-  const fnr = søker?.foedselsnummer ?? ''
+  const { behandlingId, fnr } = useParams()
+  const { soeknadMottattDato, behandlingType } = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const [brevListe, setBrevListe] = useState<IBrev[]>([])
   const [innkommendeBrevListe, setInnkommendeBrevListe] = useState<Journalpost[]>([])
@@ -48,22 +48,32 @@ export const Brev = () => {
 
   useEffect(() => {
     hentBrevForBehandling(behandlingId!!)
-      .then((res) => setBrevListe(res))
+      .then((res) => {
+        if (res.status === 'ok') setBrevListe(res.data)
+        else throw Error(res.error)
+      })
       .catch(() => setError(true))
 
+    if (!fnr) return
+
     hentDokumenter(fnr)
-      .then((res) => setInnkommendeBrevListe(res.data.dokumentoversiktBruker.journalposter))
+      .then((res) => {
+        if (res.status === 'ok') setInnkommendeBrevListe(res.data.data.dokumentoversiktBruker.journalposter)
+        else throw Error(res.error)
+      })
       .catch(() => setInnkommendeError(true))
       .finally(() => setInnkommendeHentet(true))
   }, [])
 
   const ferdigstill = (brevId: number): Promise<void> => {
-    return ferdigstillBrev(String(brevId)).then((brev: IBrev) => {
-      const nyListe: IBrev[] = brevListe.filter((v: IBrev) => v.id !== brevId)
-
-      nyListe.push(brev)
-
-      setBrevListe(nyListe)
+    return ferdigstillBrev(String(brevId)).then((res) => {
+      if (res.status === 'ok') {
+        const nyListe: IBrev[] = brevListe.filter((v: IBrev) => v.id !== brevId)
+        nyListe.push(res.data)
+        setBrevListe(nyListe)
+      } else {
+        setError(res.error)
+      }
     })
   }
 
@@ -131,7 +141,7 @@ export const Brev = () => {
             <SaksType type={ISaksType.BARNEPENSJON} />
           </div>
         </HeadingWrapper>
-        <Soeknadsdato mottattDato={soeknadMottattDato} />
+        {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
       </ContentHeader>
 
       <ContentContainer>

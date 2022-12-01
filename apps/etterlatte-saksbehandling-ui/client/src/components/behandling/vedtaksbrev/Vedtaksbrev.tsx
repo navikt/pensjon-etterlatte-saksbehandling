@@ -42,8 +42,15 @@ export const Vedtaksbrev = () => {
   useEffect(() => {
     if (!vedtaksbrevId) return
 
-    genererPdf(vedtaksbrevId)
-      .then((file) => URL.createObjectURL(file))
+    genererPdf(vedtaksbrevId!!)
+      .then((res) => {
+        if (res.status === 'ok') {
+          return new Blob([res.data], { type: 'application/pdf' })
+        } else {
+          throw Error(res.error)
+        }
+      })
+      .then((file) => URL.createObjectURL(file!!))
       .then((url) => setFileURL(url))
       .catch((e) => setError(e.message))
       .finally(() => {
@@ -89,11 +96,16 @@ export const Vedtaksbrev = () => {
       }
     })
 
-    opprettEllerOppdaterBrevForVedtak(sak, behandlingId!!)
-      .then((id) => {
-        setVedtaksbrevId(id)
-      })
-      .catch((e) => setError(e.message))
+    const fetchVedtaksbrev = async () => {
+      const brevResponse = await opprettEllerOppdaterBrevForVedtak(sak, behandlingId!!)
+
+      if (brevResponse.status === 'ok') {
+        setVedtaksbrevId(brevResponse.data)
+      } else {
+        setError(brevResponse.error)
+      }
+    }
+    fetchVedtaksbrev()
   }, [behandlingId])
 
   return (

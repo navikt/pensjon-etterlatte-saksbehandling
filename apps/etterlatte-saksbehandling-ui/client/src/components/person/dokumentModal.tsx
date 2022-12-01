@@ -1,6 +1,6 @@
 import { Button, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
-import { hentDokumentPDF } from '~shared/api/brev'
+import { hentDokumentPDF } from '~shared/api/dokument'
 import styled from 'styled-components'
 import { Findout } from '@navikt/ds-icons'
 import { PdfVisning } from '../behandling/brev/pdf-visning'
@@ -26,15 +26,23 @@ export default function DokumentModal({
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [hasLoaded, setHasLoaded] = useState<boolean>(false)
 
-  const open = (journalpostId: string, dokumentInfoId: string) => {
+  const open = async (journalpostId: string, dokumentInfoId: string) => {
     setIsOpen(true)
 
     hentDokumentPDF(journalpostId, dokumentInfoId)
-      .then((file) => URL.createObjectURL(file))
+      .then((res) => {
+        if (res.status === 'ok') {
+          return new Blob([res.data], { type: 'application/pdf' })
+        } else {
+          throw Error(res.error)
+        }
+      })
+      .then((file) => URL.createObjectURL(file!!))
       .then((url) => setFileURL(url))
       .catch((e) => setError(e.message))
       .finally(() => {
-        if (error) URL.revokeObjectURL(fileURL)
+        if (fileURL) URL.revokeObjectURL(fileURL)
+
         setHasLoaded(true)
       })
   }

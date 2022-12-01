@@ -1,7 +1,7 @@
 import { Dokumentliste } from './dokumentliste'
 import styled from 'styled-components'
 import { useEffect, useState } from 'react'
-import { hentDokumenter } from '~shared/api/brev'
+import { hentDokumenter } from '~shared/api/dokument'
 import { Journalpost } from '../behandling/types'
 
 export const Dokumentoversikt = (props: any) => {
@@ -11,10 +11,19 @@ export const Dokumentoversikt = (props: any) => {
 
   useEffect(() => {
     setDokumenterHentet(false)
-    hentDokumenter(props.fnr)
-      .then((res) => setDokumenter(res.data.dokumentoversiktBruker.journalposter))
-      .catch(() => setError(true))
-      .finally(() => setDokumenterHentet(true))
+
+    fetchDokumenter()
+
+    async function fetchDokumenter() {
+      const res = await hentDokumenter(props.fnr)
+
+      if (res.status === 'ok') {
+        setDokumenter(res.data.data.dokumentoversiktBruker.journalposter)
+        setDokumenterHentet(true)
+      } else {
+        setError(true)
+      }
+    }
   }, [props.fnr])
 
   return (

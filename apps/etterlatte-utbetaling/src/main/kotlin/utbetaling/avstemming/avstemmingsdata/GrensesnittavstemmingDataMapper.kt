@@ -2,6 +2,10 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.utbetaling.common.ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG
+import no.nav.etterlatte.utbetaling.common.OppdragDefaults
+import no.nav.etterlatte.utbetaling.common.tidsstempelMikroOppdrag
+import no.nav.etterlatte.utbetaling.common.tidsstempelTimeOppdrag
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
@@ -18,14 +22,13 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
 import java.math.BigDecimal
 import java.time.Instant
-import java.time.format.DateTimeFormatter
 
-class AvstemmingsdataMapper(
+class GrensesnittavstemmingDataMapper(
     private val utbetalinger: List<Utbetaling>,
     private val periodeFraOgMed: Tidspunkt,
     private val periodeTil: Tidspunkt,
     private val avstemmingId: UUIDBase64,
-    private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING
+    private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG
 ) {
     private val avstemmingsperiode = periode(utbetalinger)
 
@@ -54,17 +57,17 @@ class AvstemmingsdataMapper(
                 aksjonType = aksjonstype
                 kildeType = KildeType.AVLEV
                 avstemmingType = AvstemmingType.GRSN
-                avleverendeKomponentKode = "ETTERLAT"
-                mottakendeKomponentKode = "OS"
+                avleverendeKomponentKode = OppdragDefaults.AVLEVERENDE_KOMPONENTKODE
+                mottakendeKomponentKode = OppdragDefaults.MOTTAKENDE_KOMPONENTKODE
                 underkomponentKode = fagomraade
                 nokkelFom =
                     avstemmingsperiode?.start?.let {
                         Tidspunkt(it).toNorskTid()
-                    }?.format(tidsstempelMikro) ?: "0"
+                    }?.format(tidsstempelMikroOppdrag) ?: "0"
                 nokkelTom =
                     avstemmingsperiode?.endInclusive?.let {
                         Tidspunkt(it).toNorskTid()
-                    }?.format(tidsstempelMikro) ?: "0"
+                    }?.format(tidsstempelMikroOppdrag) ?: "0"
                 avleverendeAvstemmingId = avstemmingId.value
                 brukerId = fagomraade
             }
@@ -86,7 +89,7 @@ class AvstemmingsdataMapper(
                     this.detaljType = detaljType
                     offnr = it.stoenadsmottaker.value
                     avleverendeTransaksjonNokkel = it.sakId.value.toString()
-                    tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelMikro)
+                    tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelMikroOppdrag)
                     if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.kvittering != null) {
                         meldingKode = it.kvittering.kode
                         alvorlighetsgrad = it.kvittering.alvorlighetsgrad
@@ -155,8 +158,8 @@ class AvstemmingsdataMapper(
 
     private fun periodedata() =
         Periodedata().apply {
-            datoAvstemtFom = periodeFraOgMed.toNorskTid().format(tidsstempelTime)
-            datoAvstemtTom = periodeTil.toNorskTid().minusHours(1).format(tidsstempelTime)
+            datoAvstemtFom = periodeFraOgMed.toNorskTid().format(tidsstempelTimeOppdrag)
+            datoAvstemtTom = periodeTil.toNorskTid().minusHours(1).format(tidsstempelTimeOppdrag)
         }
 
     private fun periode(liste: List<Utbetaling>): ClosedRange<Instant>? {
@@ -168,11 +171,5 @@ class AvstemmingsdataMapper(
                 override val endInclusive = liste.maxOf { it.avstemmingsnoekkel.instant }
             }
         }
-    }
-
-    companion object {
-        private const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING = 70
-        private val tidsstempelTime = DateTimeFormatter.ofPattern("yyyyMMddHH")
-        private val tidsstempelMikro = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
     }
 }

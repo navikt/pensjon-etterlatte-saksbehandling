@@ -48,12 +48,12 @@ internal class GrensesnittavstemmingServiceTest {
 
         every { grensesnittavstemmingDao.hentSisteAvstemming() } returns grensesnittavstemming
         every { utbetalingDao.hentUtbetalinger(any(), any()) } returns utbetaling
-        every { avstemmingsdataSender.sendAvstemming(any()) } returns "message"
+        every { avstemmingsdataSender.sendGrensesnittavstemming(any()) } returns "message"
         every { grensesnittavstemmingDao.opprettAvstemming(any()) } returns 1
 
         grensesnittavstemmingService.startGrensesnittsavstemming(periode)
 
-        verify(exactly = 3) { avstemmingsdataSender.sendAvstemming(any()) }
+        verify(exactly = 3) { avstemmingsdataSender.sendGrensesnittavstemming(any()) }
         verify {
             grensesnittavstemmingDao.opprettAvstemming(
                 match {

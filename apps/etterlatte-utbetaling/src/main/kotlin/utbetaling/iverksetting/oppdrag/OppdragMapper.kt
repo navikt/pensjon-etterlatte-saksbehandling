@@ -1,6 +1,8 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.utbetaling.common.OppdragDefaults
+import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
 import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
@@ -10,9 +12,7 @@ import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import no.trygdeetaten.skjema.oppdrag.Oppdrag110
 import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
 import no.trygdeetaten.skjema.oppdrag.OppdragsLinje150
-import no.trygdeetaten.skjema.oppdrag.TfradragTillegg
 import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object OppdragMapper {
@@ -21,27 +21,26 @@ object OppdragMapper {
 
     fun oppdragFraUtbetaling(utbetaling: Utbetaling, foerstegangsbehandling: Boolean): Oppdrag {
         val oppdrag110 = Oppdrag110().apply {
-            kodeAksjon = "1"
+            kodeAksjon = OppdragDefaults.AKSJONSKODE_OPPDATER
             kodeEndring = if (foerstegangsbehandling) "NY" else "ENDR"
             kodeFagomraade = "BARNEPE" // TODO: bruk saktype fra utbetaling.
             fagsystemId = utbetaling.sakId.value.toString()
-            utbetFrekvens = "MND"
+            utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
             oppdragGjelderId = utbetaling.stoenadsmottaker.value
-            datoOppdragGjelderFom = LocalDate.parse("1900-01-01").toXMLDate()
+            datoOppdragGjelderFom = OppdragDefaults.DATO_OPPDRAG_GJELDER_FOM
             saksbehId = utbetaling.saksbehandler.value
 
             avstemming115 = Avstemming115().apply {
                 nokkelAvstemming = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
                 tidspktMelding = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
-                kodeKomponent = "ETTERLAT" // felles for alle etterlatteytelser
-                // https://nav-it.slack.com/archives/C03793FA1EE/p1649233182935959
+                kodeKomponent = OppdragDefaults.AVLEVERENDE_KOMPONENTKODE
             }
 
             oppdragsEnhet120.add(
                 OppdragsEnhet120().apply {
-                    typeEnhet = "BOS"
-                    enhet = "4819"
-                    datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()
+                    typeEnhet = OppdragDefaults.oppdragsenhet.typeEnhet
+                    enhet = OppdragDefaults.oppdragsenhet.enhet
+                    datoEnhetFom = OppdragDefaults.oppdragsenhet.datoEnhetFom
                 }
             )
 
@@ -67,9 +66,9 @@ object OppdragMapper {
                         datoVedtakFom = it.periode.fra.toXMLDate()
                         datoVedtakTom = it.periode.til?.toXMLDate()
                         sats = it.beloep
-                        fradragTillegg = TfradragTillegg.T
-                        typeSats = "MND"
-                        brukKjoreplan = "J"
+                        fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG
+                        typeSats = OppdragslinjeDefaults.UTBETALINGSFREKVENS
+                        brukKjoreplan = OppdragDefaults.KJOEREPLAN_SAMMEN_MED_NESTE_PLANLAGTE_UTBETALING
                         saksbehId = utbetaling.saksbehandler.value
                         utbetalesTilId = utbetaling.stoenadsmottaker.value
                         henvisning = utbetaling.behandlingId.shortValue.value

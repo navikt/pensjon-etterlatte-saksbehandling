@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.time.temporal.ChronoUnit
 
-internal class AvstemmingsdataMapperTest {
+internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `skal opprette avstemming fra utbetaling med startmelding, datamelding og sluttmelding`() {
@@ -32,8 +32,8 @@ internal class AvstemmingsdataMapperTest {
         val utbetalinger =
             listOf(utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))))
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
 
         val (startMelding, dataMelding, sluttMelding) = avstemmingsmelding
 
@@ -53,8 +53,9 @@ internal class AvstemmingsdataMapperTest {
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val grensesnittavstemmingDataMapper =
+            GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
 
         val (_, dataMelding1, dataMelding2, _) = avstemmingsmelding
 
@@ -76,8 +77,9 @@ internal class AvstemmingsdataMapperTest {
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val grensesnittavstemmingDataMapper =
+            GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
 
         val (_, dataMelding1, dataMelding2, _) = avstemmingsmelding
 
@@ -105,8 +107,8 @@ internal class AvstemmingsdataMapperTest {
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
 
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -122,8 +124,8 @@ internal class AvstemmingsdataMapperTest {
 
         val utbetalinger = listOf(utbetalingMedOpphoer())
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
 
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -147,13 +149,13 @@ internal class AvstemmingsdataMapperTest {
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.SENDT))),
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
-        val avstemmingsdataMapper = AvstemmingsdataMapper(
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
             utbetalinger = utbetalinger,
             periodeFraOgMed = fraOgMed,
             periodeTil = til,
             avstemmingId = UUIDBase64()
         )
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
 
         assertAll(
@@ -183,13 +185,13 @@ internal class AvstemmingsdataMapperTest {
 
         val utbetalinger = emptyList<Utbetaling>()
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
             utbetalinger = utbetalinger,
             periodeFraOgMed = fraOgMed,
             periodeTil = til,
             avstemmingId = UUIDBase64()
         )
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
 
         assertAll(
@@ -208,13 +210,13 @@ internal class AvstemmingsdataMapperTest {
 
         val utbetalinger = emptyList<Utbetaling>()
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
             utbetalinger = utbetalinger,
             periodeFraOgMed = fraOgMed,
             periodeTil = til,
             avstemmingId = UUIDBase64("1")
         )
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
 
         assertEquals(0, dataMelding.total.totalAntall)
@@ -227,13 +229,13 @@ internal class AvstemmingsdataMapperTest {
 
         val utbetalinger = emptyList<Utbetaling>()
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
             utbetalinger = utbetalinger,
             periodeFraOgMed = fraOgMed,
             periodeTil = til,
             avstemmingId = UUIDBase64()
         )
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
         val (startmelding, dataMelding, sluttmelding) = avstemmingsmelding
 
         assertAll(
@@ -321,13 +323,13 @@ internal class AvstemmingsdataMapperTest {
             )
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(
             utbetalinger = utbetalinger,
             periodeFraOgMed = fraOgMed,
             periodeTil = til,
             avstemmingId = UUIDBase64()
         )
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val avstemmingsmelding = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
         assertAll(
             "skal finne forste og siste avstemmingsnoekkel i liste",

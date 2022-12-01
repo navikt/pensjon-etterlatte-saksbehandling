@@ -2,8 +2,8 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.tidspunktMidnattIdag
-import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.GrensesnittavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -28,11 +28,12 @@ class GrensesnittsavstemmingService(
         val utbetalinger = utbetalingDao.hentUtbetalinger(periode.fraOgMed, periode.til)
         val avstemmingId = UUIDBase64()
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, periode.fraOgMed, periode.til, avstemmingId)
-        val avstemmingsdataListe = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val grensesnittavstemmingDataMapper =
+            GrensesnittavstemmingDataMapper(utbetalinger, periode.fraOgMed, periode.til, avstemmingId)
+        val avstemmingsdataListe = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
 
         val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
-            val sendtAvstemmingsdata = avstemmingsdataSender.sendAvstemming(avstemmingsdata)
+            val sendtAvstemmingsdata = avstemmingsdataSender.sendGrensesnittavstemming(avstemmingsdata)
             logger.info("Avstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag")
             sendtAvstemmingsdata
         }

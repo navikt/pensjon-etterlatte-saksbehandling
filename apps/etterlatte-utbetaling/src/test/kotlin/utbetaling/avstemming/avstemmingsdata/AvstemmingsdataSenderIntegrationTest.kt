@@ -53,10 +53,11 @@ internal class AvstemmingsdataSenderIntegrationTest {
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
-        val avstemmingsdata = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val grensesnittavstemmingDataMapper =
+            GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
+        val avstemmingsdata = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
 
-        val xml = avstemmingsdataSender.sendAvstemming(avstemmingsdata.first())
+        val xml = avstemmingsdataSender.sendGrensesnittavstemming(avstemmingsdata.first())
 
         assertNotNull(xml)
     }

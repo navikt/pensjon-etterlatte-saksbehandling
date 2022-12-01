@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-internal class AvstemmingsdataJaxbTest {
+internal class GrensesnittavstemmingsdataJaxbTest {
 
     private val formatterMicro = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
     private val formatterTime = DateTimeFormatter.ofPattern("yyyyMMddHH")
@@ -44,12 +44,12 @@ internal class AvstemmingsdataJaxbTest {
             ).let { it.copy(oppdrag = oppdrag(it), kvittering = kvittering(oppdragMedFeiletKvittering())) }
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetaling, fraOgMed, til, uuid)
-        val (startMelding, dataMelding, sluttMelding) = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val grensesnittavstemmingDataMapper = GrensesnittavstemmingDataMapper(utbetaling, fraOgMed, til, uuid)
+        val (startMelding, dataMelding, sluttMelding) = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
 
-        val startMeldingXml = AvstemmingsdataJaxb.toXml(startMelding)
-        val dataMeldingXml = AvstemmingsdataJaxb.toXml(dataMelding)
-        val sluttMeldingXml = AvstemmingsdataJaxb.toXml(sluttMelding)
+        val startMeldingXml = GrensesnittavstemmingsdataJaxb.toXml(startMelding)
+        val dataMeldingXml = GrensesnittavstemmingsdataJaxb.toXml(dataMelding)
+        val sluttMeldingXml = GrensesnittavstemmingsdataJaxb.toXml(sluttMelding)
 
         assertEquals(gyldigStartMelding(uuid, utbetaling.first().avstemmingsnoekkel), startMeldingXml)
         assertEquals(gyldigDataMelding(uuid, fraOgMed, til, utbetaling.first().avstemmingsnoekkel), dataMeldingXml)

@@ -9,6 +9,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.util.*
@@ -57,3 +58,8 @@ fun LocalDate.toXMLDate(): XMLGregorianCalendar {
 fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30).let { UUID30(it) }
 
 data class UUID30(val value: String)
+
+const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG = 70
+val tidsstempelTimeOppdrag = DateTimeFormatter.ofPattern("yyyyMMddHH")
+val tidsstempelMikroOppdrag = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
+val tidsstempelDatoOppdrag = DateTimeFormatter.ofPattern("yyyy-MM-dd")

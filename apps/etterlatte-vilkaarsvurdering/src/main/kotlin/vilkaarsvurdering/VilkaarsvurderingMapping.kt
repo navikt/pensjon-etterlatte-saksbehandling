@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.EnkeltVilkaarDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.LovreferanseDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.UtfallDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfallDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingDataDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -41,7 +40,7 @@ fun VurdertVilkaarsvurderingResultatDto.toDomain(saksbehandler: String, tidspunk
     )
 
 private fun VilkaarTypeOgUtfallDto.toDomain() = VilkaarTypeOgUtfall(
-    type = VilkaarType.valueOf(type.name),
+    type = VilkaarType.valueOf(type),
     resultat = when (resultat) {
         UtfallDto.IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT
         UtfallDto.OPPFYLT -> Utfall.OPPFYLT
@@ -79,7 +78,7 @@ private fun Vilkaar.toDto() = VilkaarDto(
 )
 
 private fun EnkeltVilkaar.toDto() = EnkeltVilkaarDto(
-    type = VilkaarTypeDto.valueOf(type.name),
+    type = type.name,
     tittel = tittel,
     beskrivelse = beskrivelse,
     lovreferanse = lovreferanse.toDto(),

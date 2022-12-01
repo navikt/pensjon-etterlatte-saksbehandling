@@ -1,12 +1,9 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
-import io.ktor.server.auth.parseAuthorizationHeader
-import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -22,7 +19,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import no.nav.etterlatte.libs.ktor.accesstoken
+import no.nav.etterlatte.libs.ktor.saksbehandler
 import java.time.LocalDateTime
 import java.util.*
 
@@ -39,7 +37,7 @@ fun Route.vilkaarsvurdering(
                 try {
                     val vilkaarsvurdering = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
                         behandlingId = behandlingId,
-                        accessToken = getAccessToken(call)
+                        accessToken = accesstoken
                     )
                     call.respond(vilkaarsvurdering.toDto())
                 } catch (e: VirkningstidspunktIkkeSattException) {
@@ -88,7 +86,7 @@ fun Route.vilkaarsvurdering(
                     val oppdatertVilkaarsvurdering = vilkaarsvurderingService.oppdaterTotalVurdering(
                         behandlingId = behandlingId,
                         resultat = toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler),
-                        accessToken = getAccessToken(call)
+                        accessToken = accesstoken
                     )
 
                     call.respond(oppdatertVilkaarsvurdering)
@@ -118,21 +116,6 @@ private suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     } catch (e: IllegalArgumentException) {
         call.respond(HttpStatusCode.BadRequest, "behandlingId må være en UUID")
     }
-}
-
-private inline val PipelineContext<*, ApplicationCall>.saksbehandler: String
-    get() = requireNotNull(
-        call.principal<TokenValidationContextPrincipal>()
-            ?.context?.getJwtToken("azure")
-            ?.jwtTokenClaims?.getStringClaim("NAVident")
-    )
-
-private fun getAccessToken(call: ApplicationCall): String {
-    val authHeader = call.request.parseAuthorizationHeader()
-    if (!(authHeader == null || authHeader !is HttpAuthHeader.Single || authHeader.authScheme != "Bearer")) {
-        return authHeader.blob
-    }
-    throw Exception("Missing authorization header")
 }
 
 private fun toVurdertVilkaar(vurdertVilkaarDto: VurdertVilkaarDto, saksbehandler: String) =

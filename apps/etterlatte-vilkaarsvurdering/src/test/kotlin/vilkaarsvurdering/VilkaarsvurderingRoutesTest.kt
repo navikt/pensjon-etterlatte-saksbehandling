@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.restModule
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
@@ -104,7 +104,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             opprettVilkaarsvurdering()
 
@@ -133,7 +133,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vilkaarsvurdering basert paa behandling dersom en ikke finnes`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val nyBehandlingId = UUID.randomUUID()
             val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
@@ -155,7 +155,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
             val nyBehandlingId = UUID.randomUUID()
 
             coEvery { behandlingKlient.hentBehandling(nyBehandlingId, any()) } returns detaljertBehandling().apply {
@@ -174,7 +174,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             opprettVilkaarsvurdering()
 
@@ -212,7 +212,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             opprettVilkaarsvurdering()
 
@@ -279,7 +279,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             opprettVilkaarsvurdering()
 
@@ -328,7 +328,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
-            application { restModule(vilkaarsvurderingServiceImpl) }
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             opprettVilkaarsvurdering()
             val resultat = VurdertVilkaarsvurderingResultatDto(

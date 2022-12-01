@@ -53,11 +53,11 @@ spec:
       value: api://dev-fss.etterlatte.etterlatte-proxy/.default
     - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
-    - name: ETTERLATTE_VEDTAKSVURDERING_API
+    - name: ETTERLATTE_VEDTAKSVURDERING_URL
       value: https://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_GRUNNLAG_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
-    - name: ETTERLATTE_GRUNNLAG_API
+    - name: ETTERLATTE_GRUNNLAG_URL
       value: https://etterlatte-grunnlag
   accessPolicy:
     outbound:

@@ -19,7 +19,10 @@ fun Route.beregning(beregningService: BeregningService) {
         get("/{behandlingId}") {
             withBehandlingId {
                 val beregning = beregningService.hentBeregning(it)
-                call.respond<BeregningDTO>(beregning.toDTO())
+                when(beregning) {
+                    null -> call.response.status(HttpStatusCode.NoContent)
+                    else -> call.respond<BeregningDTO>(beregning.toDTO())
+                }
             }
         }
 

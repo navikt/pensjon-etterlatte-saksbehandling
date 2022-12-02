@@ -1,42 +1,17 @@
 {
   "@event_name": "BEHANDLING:GRUNNLAGENDRET",
-  "@id": "425e4993-6e5e-4515-b20d-78fa0abdae00",
-  "@opprettet": "2022-12-02T13:31:57.356889395",
-  "system_read_count": 1,
+  "@id": "ee0d49be-2fb8-4228-9eb5-2859ed274fd8",
+  "@opprettet": "2022-12-02T15:58:58.9517871",
+  "system_read_count": 0,
   "system_participating_services": [
     {
-      "id": "273e1ffa-fc87-46f1-b5b9-3641b02fdf28",
-      "time": "2022-12-02T13:31:54.054116318",
-      "service": "etterlatte-vilkaarsvurdering",
-      "instance": "etterlatte-vilkaarsvurdering-6b5dcf9976-rwt9s",
-      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-vilkaarsvurdering:8dbde6835d9fad6fc51283b0d7a7acb197eacac6"
-    },
-    {
-      "id": "273e1ffa-fc87-46f1-b5b9-3641b02fdf28",
-      "time": "2022-12-02T13:31:54.147931032",
+      "id": "ee0d49be-2fb8-4228-9eb5-2859ed274fd8",
+      "time": "2022-12-02T15:58:58.951787100",
       "service": "etterlatte-beregning",
-      "instance": "etterlatte-beregning-54b49648bd-5jw5t",
-      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-beregning:72bb1e7845f9fb00e426d569314df74d26d66262"
-    },
-    {
-      "id": "425e4993-6e5e-4515-b20d-78fa0abdae00",
-      "time": "2022-12-02T13:31:57.356889395",
-      "service": "etterlatte-beregning",
-      "instance": "etterlatte-beregning-54b49648bd-5jw5t",
-      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-beregning:72bb1e7845f9fb00e426d569314df74d26d66262"
+      "instance": "etterlatte-beregning-b4768cd47-72zm2",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-beregning:a73ee75e09f3ad0c96deb145df62f88771f814bf"
     }
   ],
-  "sak": {
-    "ident": "02071256610",
-    "sakType": "BARNEPENSJON",
-    "id": 107
-  },
-  "sakId": 107,
-  "fnrSoeker": "02071256610",
-  "behandling": {
-    "type": "FØRSTEGANGSBEHANDLING",
-    "id": "04fae259-df69-4064-a1d1-b6156fda5da7"
-  },
   "vilkaarsvurdering": {
     "behandlingId": "04fae259-df69-4064-a1d1-b6156fda5da7",
     "vilkaar": [
@@ -319,7 +294,91 @@
       "saksbehandler": "Z994988"
     }
   },
-  "virkningstidspunkt": "2022-06",
+  "beregning": {
+    "beregningId": "08147dbc-814b-4503-8b15-17bcd291b591",
+    "behandlingId": "04fae259-df69-4064-a1d1-b6156fda5da7",
+    "beregningsperioder": [
+      {
+        "delytelsesId": "BP",
+        "type": "GP",
+        "datoFOM": "2022-06",
+        "datoTOM": null,
+        "utbetaltBeloep": 3019,
+        "soeskenFlokk": [
+          {
+            "fornavn": "Rolig",
+            "etternavn": "Gluten",
+            "foedselsnummer": "15121175484",
+            "foedselsdato": "2011-12-15",
+            "foedselsaar": 2011,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Ravnedalsveien 3",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "4616",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2022-11-29T12:25:01",
+                "gyldigTilOgMed": null
+              },
+              {
+                "type": "VEGADRESSE",
+                "aktiv": false,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Ravnedalsveien 3",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "4616",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2022-11-29T12:25:01",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "UOPPGITT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "21068204868",
+                "19488205989"
+              ],
+              "foreldre": [
+                "19488205989",
+                "21068204868"
+              ],
+              "barn": null
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": []
+          }
+        ],
+        "grunnbelopMnd": 9290,
+        "grunnbelop": 111477
+      }
+    ],
+    "beregnetDato": "2022-12-02T14:58:58.935013Z",
+    "grunnlagMetadata": {
+      "sakId": 107,
+      "versjon": 118
+    }
+  },
+  "sakId": 107,
   "grunnlag": {
     "soeker": {
       "NAVN": {
@@ -1756,93 +1815,9 @@
       "versjon": 110
     }
   },
-  "beregning": {
-    "beregningId": "7848c110-1fe4-4d7b-a9ec-1e4122ee422d",
-    "behandlingId": "04fae259-df69-4064-a1d1-b6156fda5da7",
-    "beregningsperioder": [
-      {
-        "delytelsesId": "BP",
-        "type": "GP",
-        "datoFOM": "2022-06",
-        "datoTOM": null,
-        "utbetaltBeloep": 3019,
-        "soeskenFlokk": [
-          {
-            "fornavn": "Rolig",
-            "etternavn": "Gluten",
-            "foedselsnummer": "15121175484",
-            "foedselsdato": "2011-12-15",
-            "foedselsaar": 2011,
-            "foedeland": "NOR",
-            "doedsdato": null,
-            "adressebeskyttelse": "UGRADERT",
-            "bostedsadresse": [
-              {
-                "type": "VEGADRESSE",
-                "aktiv": true,
-                "coAdresseNavn": null,
-                "adresseLinje1": "Ravnedalsveien 3",
-                "adresseLinje2": null,
-                "adresseLinje3": null,
-                "postnr": "4616",
-                "poststed": null,
-                "land": null,
-                "kilde": "FREG",
-                "gyldigFraOgMed": "2022-11-29T12:25:01",
-                "gyldigTilOgMed": null
-              },
-              {
-                "type": "VEGADRESSE",
-                "aktiv": false,
-                "coAdresseNavn": null,
-                "adresseLinje1": "Ravnedalsveien 3",
-                "adresseLinje2": null,
-                "adresseLinje3": null,
-                "postnr": "4616",
-                "poststed": null,
-                "land": null,
-                "kilde": "FREG",
-                "gyldigFraOgMed": "2022-11-29T12:25:01",
-                "gyldigTilOgMed": null
-              }
-            ],
-            "deltBostedsadresse": null,
-            "kontaktadresse": [],
-            "oppholdsadresse": [],
-            "sivilstatus": "UOPPGITT",
-            "statsborgerskap": "NOR",
-            "utland": {
-              "innflyttingTilNorge": [],
-              "utflyttingFraNorge": []
-            },
-            "familieRelasjon": {
-              "ansvarligeForeldre": [
-                "21068204868",
-                "19488205989"
-              ],
-              "foreldre": [
-                "19488205989",
-                "21068204868"
-              ],
-              "barn": null
-            },
-            "avdoedesBarn": null,
-            "vergemaalEllerFremtidsfullmakt": []
-          }
-        ],
-        "grunnbelopMnd": 9290,
-        "grunnbelop": 111477
-      }
-    ],
-    "beregnetDato": "2022-12-02T12:31:57.053996Z",
-    "grunnlagMetadata": {
-      "sakId": 107,
-      "versjon": 110
-    }
-  },
-  "@forårsaket_av": {
-    "id": "273e1ffa-fc87-46f1-b5b9-3641b02fdf28",
-    "opprettet": "2022-12-02T13:31:54.054116318",
-    "event_name": "BEHANDLING:GRUNNLAGENDRET"
+  "fnrSoeker": "02071256610",
+  "behandling": {
+    "type": "FØRSTEGANGSBEHANDLING",
+    "id": "04fae259-df69-4064-a1d1-b6156fda5da7"
   }
 }

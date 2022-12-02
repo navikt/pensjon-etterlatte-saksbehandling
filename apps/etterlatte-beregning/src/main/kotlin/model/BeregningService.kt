@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.beregning.erInklusiv
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
@@ -54,6 +55,7 @@ class BeregningService(
             .apply {
                 this["vilkaarsvurdering"] = vilkaarsvurdering
                 this["beregning"] = lagretBeregning.toDTO()
+                this[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey] = grunnlag
             }
             .apply { // trengs av lagreberegning i vedtak + beregning, fjerne?
                 this["sakId"] = behandling.sak

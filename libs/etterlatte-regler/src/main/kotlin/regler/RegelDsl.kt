@@ -6,6 +6,7 @@ import Konstant
 import Regel
 import RegelReferanse
 import SlaaSammenToRegler
+import java.math.BigDecimal
 
 data class RegelMeta(
     val versjon: String,
@@ -29,7 +30,7 @@ fun <C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel<G, D>> slaaSammenToRegle
     slaasammenFunksjon = slaaSammenFunksjon
 )
 
-fun <G, A : Regel<G, Int>, B : Regel<G, Double>> gangSammenToRegler(
+fun <G, A : Regel<G, BigDecimal>, B : Regel<G, BigDecimal>> gangSammenToRegler(
     versjon: String,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -41,7 +42,7 @@ fun <G, A : Regel<G, Int>, B : Regel<G, Double>> gangSammenToRegler(
     regelReferanse = regelReferanse,
     venstre = regel1,
     hoeyre = regel2,
-    slaasammenFunksjon = { a: Int, b: Double -> a * b }
+    slaasammenFunksjon = { a: BigDecimal, b: BigDecimal -> a * b }
 )
 
 fun <G, T : Any, A : FaktumNode<T>, S> finnFaktumIGrunnlag(
@@ -71,6 +72,7 @@ fun <G, S> definerKonstant(
 )
 
 infix fun <G, A> RegelMeta.kombinerer(regel1: Regel<G, A>) = this to regel1
+infix fun <G, A> RegelMeta.multipliser(regel1: Regel<G, A>) = this to regel1
 infix fun <G, A, B> Pair<RegelMeta, Regel<G, A>>.og(regel2: Regel<G, B>) = this to regel2
 infix fun <G, A : Any, B : Any, S> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>>.med(f: (A, B) -> S) =
     slaaSammenToRegler(
@@ -80,4 +82,13 @@ infix fun <G, A : Any, B : Any, S> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B
         first.second,
         second,
         f
+    )
+
+infix fun <G> Pair<RegelMeta, Regel<G, BigDecimal>>.med(b: Regel<G, BigDecimal>) =
+    gangSammenToRegler(
+        versjon = first.versjon,
+        beskrivelse = first.beskrivelse,
+        regelReferanse = first.regelReferanse,
+        regel1 = second,
+        regel2 = b
     )

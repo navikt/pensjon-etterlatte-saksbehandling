@@ -9,17 +9,18 @@ import Visitor
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.Instant
 
 class Barnepensjon1967Test {
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
     private val grunnlag = Barnepensjon1967Grunnlag(
-        grunnbeloep = FaktumNode(kilde = saksbehandler, beskrivelse = "Grunnbeløp", verdi = 100_550L),
+        grunnbeloep = FaktumNode(kilde = saksbehandler, beskrivelse = "Grunnbeløp", verdi = BigDecimal(100_550)),
         antallSoeskenIKullet = FaktumNode(kilde = saksbehandler, beskrivelse = "Antall søsken i kullet", verdi = 2),
         avdoedForelder = FaktumNode(
             kilde = saksbehandler,
             beskrivelse = "Avdød forelders trygdetid",
-            verdi = AvdoedForelder(trygdetid = 30)
+            verdi = AvdoedForelder(trygdetid = BigDecimal(30))
         )
     )
 

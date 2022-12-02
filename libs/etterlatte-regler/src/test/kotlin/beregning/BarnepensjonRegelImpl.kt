@@ -7,7 +7,6 @@ import RegelVisitor
 import SlaaSammenToRegler
 import SubsumsjonsNode
 import ToDoRegelReferanse
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import regler.RegelMeta
 import regler.kombinerer
 import regler.med
@@ -15,9 +14,6 @@ import regler.og
 import regler.slaaSammenToRegler
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.time.Instant
-
-private val regelKilde = Grunnlagsopplysning.RegelKilde("EtterlatteRegler", Instant.now(), "1")
 
 data class AvdoedForelder(val trygdetid: Int)
 data class Barnepensjon1967Grunnlag(

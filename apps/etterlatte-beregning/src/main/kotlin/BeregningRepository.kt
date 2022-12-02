@@ -20,24 +20,24 @@ import java.util.*
 import javax.sql.DataSource
 
 interface BeregningRepository {
-    fun hent(behandlingId: UUID): Beregning
+    fun hent(behandlingId: UUID): Beregning?
     fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning
     fun slettBeregningsperioderISak(sakId: Long)
 }
 
 class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRepository {
 
-    override fun hent(behandlingId: UUID): Beregning = using(sessionOf(dataSource)) { session ->
+    override fun hent(behandlingId: UUID): Beregning? = using(sessionOf(dataSource)) { session ->
         session.transaction { tx ->
             val beregningsperioder = queryOf(
                 statement = Queries.hentBeregning,
                 paramMap = mapOf("behandlingId" to behandlingId)
             ).let { query ->
                 tx.run(query.map { toBeregningsperiode(it) }.asList).ifEmpty {
-                    throw NoSuchElementException("Fant ingen beregningsperioder på beregningId $behandlingId")
+                    null
                 }
             }
-            toBeregning(beregningsperioder)
+            beregningsperioder?.let { toBeregning(beregningsperioder) }
         }
     }
 
@@ -56,7 +56,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                 tx.batchPreparedNamedStatement(Queries.lagreBeregningsperioder, queries)
             }
         }
-        return hent(beregning.behandlingId)
+        return hent(beregning.behandlingId)!!
     }
 
     override fun slettBeregningsperioderISak(sakId: Long) {

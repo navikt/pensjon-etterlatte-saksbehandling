@@ -11,11 +11,11 @@ import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.YearMonth
@@ -122,6 +122,7 @@ internal class BeregningRepositoryImplTest {
 
         beregningRepository.slettBeregningsperioderISak(lagretBeregning.grunnlagMetadata.sakId)
 
-        assertThrows<NoSuchElementException> { beregningRepository.hent(beregning.behandlingId) }
+        val emptyBeregning = beregningRepository.hent(beregning.behandlingId)
+        assertNull(emptyBeregning)
     }
 }

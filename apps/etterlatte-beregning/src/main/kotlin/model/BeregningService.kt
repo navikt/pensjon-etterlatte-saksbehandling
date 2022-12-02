@@ -33,7 +33,7 @@ class BeregningService(
     private val sendToRapid: (String, UUID) -> Unit
 ) : VedlikeholdService {
 
-    fun hentBeregning(behandlingId: UUID): Beregning = beregningRepository.hent(behandlingId)
+    fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
         val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)

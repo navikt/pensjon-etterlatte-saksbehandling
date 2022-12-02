@@ -7,6 +7,7 @@ import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BeregningKlient
 import no.nav.etterlatte.behandling.EtterlatteGrunnlag
 import no.nav.etterlatte.behandling.EtterlatteVedtak
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
@@ -61,6 +62,9 @@ internal class BehandlingServiceTest {
 
     @MockK
     lateinit var grunnlagKlient: EtterlatteGrunnlag
+
+    @MockK
+    lateinit var beregningKlient: BeregningKlient
 
     @InjectMockKs
     lateinit var service: BehandlingService
@@ -201,6 +205,7 @@ internal class BehandlingServiceTest {
         coEvery { behandlingKlient.hentBehandling(behandlingid.toString(), accessToken) } returns detaljertBehandling
         coEvery { vedtakKlient.hentVedtak(behandlingid.toString(), accessToken) } returns vedtak
         coEvery { behandlingKlient.hentHendelserForBehandling(behandlingid.toString(), accessToken) } returns hendelser
+        coEvery { beregningKlient.hentBeregning(behandlingid, accessToken) } returns null
         coEvery {
             grunnlagKlient.finnPersonOpplysning(
                 4L,

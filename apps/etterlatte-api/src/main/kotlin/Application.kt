@@ -10,6 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BeregningKlientImpl
 import no.nav.etterlatte.behandling.GrunnlagKlient
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.OppgaveService
@@ -29,6 +30,7 @@ class ApplicationContext(configLocation: String? = null) {
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val vedtakKlient = VedtakKlient(config, httpClient())
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
+    private val beregningKlient = BeregningKlientImpl(config, httpClient())
     private val rapid: KafkaProdusent<String, String> =
         GcpKafkaConfig.fromEnv().standardProducer(System.getenv().getValue("KAFKA_RAPID_TOPIC"))
 
@@ -36,7 +38,8 @@ class ApplicationContext(configLocation: String? = null) {
         behandlingKlient = behandlingKlient,
         pdlKlient = PdltjenesterKlient(config, httpClient()),
         vedtakKlient = vedtakKlient,
-        grunnlagKlient = grunnlagKlient
+        grunnlagKlient = grunnlagKlient,
+        beregningKlient = beregningKlient
     )
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
     val vedtakService = VedtakService(rapid)

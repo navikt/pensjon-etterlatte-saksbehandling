@@ -21,7 +21,7 @@ interface EtterlatteGrunnlag {
     ): Grunnlagsopplysning<Person>?
 }
 
-class GrunnlagKlient(config: Config, private val httpClient: HttpClient) : EtterlatteGrunnlag {
+class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnlag {
     private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)

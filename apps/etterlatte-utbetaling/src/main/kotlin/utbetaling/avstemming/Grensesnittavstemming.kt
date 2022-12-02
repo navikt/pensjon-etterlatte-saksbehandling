@@ -31,3 +31,7 @@ data class Grensesnittavstemming(
     val antallOppdrag: Int,
     val avstemmingsdata: String
 )
+
+enum class Avstemmingtype {
+    GRENSESNITTAVSTEMMING, KONSISTENSAVSTEMMING
+}

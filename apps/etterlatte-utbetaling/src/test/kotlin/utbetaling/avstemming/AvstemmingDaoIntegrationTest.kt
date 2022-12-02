@@ -18,12 +18,12 @@ import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class GrensesnittavstemmingDaoIntegrationTest {
+internal class AvstemmingDaoIntegrationTest {
 
     @Container
     private val postgreSQLContainer = TestContainers.postgreSQLContainer
     private val dataSource: DataSource
-    private val grensesnittavstemmingDao: GrensesnittavstemmingDao
+    private val avstemmingDao: AvstemmingDao
 
     init {
         postgreSQLContainer.start()
@@ -34,7 +34,7 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
             password = postgreSQLContainer.password
         ).run {
             dataSource = dataSource()
-            grensesnittavstemmingDao = GrensesnittavstemmingDao(dataSource)
+            avstemmingDao = AvstemmingDao(dataSource)
             migrate()
         }
     }
@@ -51,7 +51,7 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
             avstemmingsdata = ""
         )
 
-        val antallRaderOppdatert = grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming)
+        val antallRaderOppdatert = avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming)
 
         assertEquals(1, antallRaderOppdatert)
     }
@@ -90,11 +90,11 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
             avstemmingsdata = ""
         )
 
-        grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming1)
-        grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming3)
-        grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming2)
+        avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming1)
+        avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming3)
+        avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming2)
 
-        val nyesteAvstemming = grensesnittavstemmingDao.hentSisteAvstemming()
+        val nyesteAvstemming = avstemmingDao.hentSisteGrensesnittavstemming()
 
         assertEquals(now, nyesteAvstemming?.opprettet)
         assertEquals(1, nyesteAvstemming?.antallOppdrag)
@@ -102,7 +102,7 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
 
     @Test
     fun `skal gi null dersom det ikke finnes noen avstemming`() {
-        val nyesteAvstemming = grensesnittavstemmingDao.hentSisteAvstemming()
+        val nyesteAvstemming = avstemmingDao.hentSisteGrensesnittavstemming()
 
         assertNull(nyesteAvstemming)
     }

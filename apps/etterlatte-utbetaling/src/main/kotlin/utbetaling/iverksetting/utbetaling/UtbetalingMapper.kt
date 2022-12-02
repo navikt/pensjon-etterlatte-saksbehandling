@@ -41,7 +41,7 @@ class UtbetalingMapper(
         saksbehandler = NavIdent(vedtak.vedtakFattet.ansvarligSaksbehandler),
         attestant = NavIdent(vedtak.attestasjon.attestant),
         vedtak = vedtak,
-        utbetalingslinjer = utbetalingslinjer(),
+        utbetalingslinjer = utbetalingslinjer(vedtak.sak.sakType),
         utbetalingshendelser = listOf(
             Utbetalingshendelse(
                 utbetalingId = utbetalingId,
@@ -51,7 +51,7 @@ class UtbetalingMapper(
         )
     )
 
-    private fun utbetalingslinjer() = utbetalingsperioder.map {
+    private fun utbetalingslinjer(saktype: Saktype) = utbetalingsperioder.map {
         Utbetalingslinje(
             id = UtbetalingslinjeId(it.id),
             opprettet = opprettet,
@@ -66,7 +66,11 @@ class UtbetalingMapper(
                 UtbetalingsperiodeType.OPPHOER -> Utbetalingslinjetype.OPPHOER
                 UtbetalingsperiodeType.UTBETALING -> Utbetalingslinjetype.UTBETALING
             },
-            erstatterId = finnErstatterId(utbetalingslinjeId = it.id)
+            erstatterId = finnErstatterId(utbetalingslinjeId = it.id),
+            klassifikasjonskode = when (saktype) {
+                Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
+                Saktype.OMSTILLINGSSTOENAD -> TODO("Kanskje det er samme som over men vi kræsjer dette i stedet")
+            }
         )
     }
 

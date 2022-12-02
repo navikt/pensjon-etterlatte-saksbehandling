@@ -11,7 +11,6 @@ import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalAdjusters
 import java.util.*
 import javax.xml.datatype.DatatypeConstants
 import javax.xml.datatype.DatatypeFactory
@@ -42,11 +41,9 @@ fun tidspunktMidnattIdag(clock: Clock = Clock.systemUTC()): Tidspunkt =
         .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid
         .toTidspunkt()
 
-fun forsteDagIMaaneden(yearMonth: YearMonth) =
-    LocalDate.of(yearMonth.year, yearMonth.month, 1)
+fun forsteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atDay(1)
 
-fun sisteDagIMaaneden(yearMonth: YearMonth) =
-    forsteDagIMaaneden(yearMonth).with(TemporalAdjusters.lastDayOfMonth())
+fun sisteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atEndOfMonth()
 
 fun LocalDate.toXMLDate(): XMLGregorianCalendar {
     return DatatypeFactory.newInstance()

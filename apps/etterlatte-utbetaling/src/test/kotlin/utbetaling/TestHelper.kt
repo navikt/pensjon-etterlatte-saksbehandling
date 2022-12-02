@@ -10,6 +10,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Kvittering
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Periode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.PeriodeForUtbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Sak
@@ -154,20 +155,26 @@ fun utbetalingslinje(
     sakId: SakId = SakId(1),
     utbetalingslinjeId: Long = 1,
     type: Utbetalingslinjetype = Utbetalingslinjetype.UTBETALING,
+    erstatter: Long? = null,
     beloep: BigDecimal? = BigDecimal.valueOf(10000),
-    periodeFra: LocalDate = LocalDate.parse("2022-01-01")
+    periodeFra: LocalDate = LocalDate.parse("2022-01-01"),
+    periodeTil: LocalDate? = null,
+    opprettet: Tidspunkt = Tidspunkt.now(),
+    klassifikasjonskode: OppdragKlassifikasjonskode = OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
 ): Utbetalingslinje =
     Utbetalingslinje(
         id = UtbetalingslinjeId(utbetalingslinjeId),
         type = type,
         utbetalingId = utbetalingId,
-        erstatterId = null,
-        opprettet = Tidspunkt.now(),
+        erstatterId = erstatter?.let { UtbetalingslinjeId(it) },
+        opprettet = opprettet,
         sakId = sakId,
         periode = PeriodeForUtbetaling(
-            fra = periodeFra
+            fra = periodeFra,
+            til = periodeTil
         ),
-        beloep = beloep
+        beloep = beloep,
+        klassifikasjonskode = klassifikasjonskode
     )
 
 fun utbetalingMedOpphoer() = utbetaling(

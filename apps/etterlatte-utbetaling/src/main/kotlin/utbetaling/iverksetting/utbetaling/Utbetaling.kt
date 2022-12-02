@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
+import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -64,8 +65,25 @@ data class Utbetalingslinje(
     val opprettet: Tidspunkt,
     val sakId: SakId,
     val periode: PeriodeForUtbetaling,
-    val beloep: BigDecimal? = null
+    val beloep: BigDecimal? = null,
+    val klassifikasjonskode: OppdragKlassifikasjonskode
 )
+
+enum class OppdragKlassifikasjonskode(private val oppdragVerdi: String) {
+    BARNEPENSJON_OPTP("BARNEPENSJON-OPTP");
+
+    override fun toString(): String {
+        return oppdragVerdi
+    }
+
+    companion object {
+        fun fraString(string: String): OppdragKlassifikasjonskode = when (string) {
+            "BARNEPENSJON-OPTP" -> BARNEPENSJON_OPTP
+            "BARNEPENSJON_OPTP" -> BARNEPENSJON_OPTP
+            else -> throw IllegalArgumentException("$string er ikke en OppgragKlassifikasjonskode!")
+        }
+    }
+}
 
 data class Utbetalingshendelse(
     val id: UUID = UUID.randomUUID(),

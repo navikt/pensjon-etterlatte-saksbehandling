@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.common
 
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
 import no.trygdeetaten.skjema.oppdrag.TfradragTillegg
 import java.time.LocalDate
@@ -9,8 +10,8 @@ object OppdragDefaults {
 
     // https://nav-it.slack.com/archives/C03793FA1EE/p1649233182935959
     const val MOTTAKENDE_KOMPONENTKODE = "OS" // Oppdragsystemet
-    const val SAKSBEHANDLER_ID = "" // TODO: høre med økonomi om denne skal brukes og hva den skal være
-    const val KODE_KOMPONENT = ""
+    const val SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER = "EY" // Placeholder for å identifisere
+    val kodekomponent = OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
     const val UTBETALINGSFREKVENS = "MND"
     const val KJOEREPLAN_SAMMEN_MED_NESTE_PLANLAGTE_UTBETALING = "J"
     val DATO_OPPDRAG_GJELDER_FOM = LocalDate.EPOCH.toXMLDate()

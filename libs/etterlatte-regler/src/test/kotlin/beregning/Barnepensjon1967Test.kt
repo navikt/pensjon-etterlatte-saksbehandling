@@ -42,6 +42,6 @@ class Barnepensjon1967Test {
             }
         })
 
-        println(reduksjonMotFolketrygdRegel.anvend(grunnlag).toJson())
+        println(reduksjonMotFolketrygdRegel2.anvend(grunnlag).toJson())
     }
 }

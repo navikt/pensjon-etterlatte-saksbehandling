@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.person.Person
@@ -20,7 +20,7 @@ data class DetaljertBehandlingDto(
     val sak: Long,
     val gyldighetsprøving: GyldighetsResultat?,
     val vilkårsprøving: Vilkaarsvurdering?,
-    val beregning: BeregningsResultat?,
+    val beregning: BeregningDTO?,
     val avkortning: AvkortingsResultat?,
     val saksbehandlerId: String?,
     val fastsatt: Boolean?,

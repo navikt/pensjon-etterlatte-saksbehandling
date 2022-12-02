@@ -15,6 +15,7 @@ import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
+import java.util.*
 
 data class PersonSakerResult(
     val person: Person,
@@ -26,7 +27,8 @@ class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val pdlKlient: PdltjenesterKlient,
     private val vedtakKlient: EtterlatteVedtak,
-    private val grunnlagKlient: EtterlatteGrunnlag
+    private val grunnlagKlient: EtterlatteGrunnlag,
+    private val beregningKlient: BeregningKlient
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
@@ -92,7 +94,7 @@ class BehandlingService(
         val avdoed = async { grunnlagKlient.finnPersonOpplysning(sakId, AVDOED_PDL_V1, accessToken) }
         val gjenlevende = async { grunnlagKlient.finnPersonOpplysning(sakId, GJENLEVENDE_FORELDER_PDL_V1, accessToken) }
         val soeker = async { grunnlagKlient.finnPersonOpplysning(sakId, SOEKER_PDL_V1, accessToken) }
-
+        val beregning = async { beregningKlient.hentBeregning(UUID.fromString(behandlingId), accessToken) }
         DetaljertBehandlingDto(
             id = behandling.await().id,
             sak = sakId,
@@ -100,7 +102,7 @@ class BehandlingService(
             kommerBarnetTilgode = behandling.await().kommerBarnetTilgode,
             vilkårsprøving = vedtak.await()?.vilkaarsResultat,
             // TODO sj: Dette blir feil beregning EY-1230
-            beregning = vedtak.await()?.beregningsResultat,
+            beregning = beregning.await(),
             avkortning = vedtak.await()?.avkortingsResultat,
             saksbehandlerId = vedtak.await()?.saksbehandlerId,
             fastsatt = vedtak.await()?.vedtakFattet,

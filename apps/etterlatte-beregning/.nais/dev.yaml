@@ -64,3 +64,4 @@ spec:
       rules:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-api

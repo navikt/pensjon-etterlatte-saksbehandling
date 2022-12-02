@@ -38,8 +38,11 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                 )
                 .mapBoth(
                     success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
+                    failure = { throwableErrorMessage ->
+                        logger.error("Henting av beregning for en behandling feilet", throwableErrorMessage)
+                        null
+                    }
+                )?.response
             return json?.let { objectMapper.readValue(json.toString()) }
                 ?: run { null }
         } catch (e: Exception) {

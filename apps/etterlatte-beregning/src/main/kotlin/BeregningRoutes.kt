@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.model.BeregningService
 import no.nav.etterlatte.model.getAccessToken
 import java.util.*
@@ -19,7 +20,9 @@ fun Route.beregning(beregningService: BeregningService) {
             withBehandlingId {
                 val beregning = beregningService.hentBeregning(it)
                 when (beregning) {
-                    null -> call.respond(HttpStatusCode.NoContent)
+                    null -> {
+                        call.respond(HttpStatusCode.OK, objectMapper.createObjectNode())
+                    }
                     else -> call.respond(beregning.toDTO())
                 }
             }

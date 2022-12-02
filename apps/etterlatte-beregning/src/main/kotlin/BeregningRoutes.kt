@@ -18,22 +18,19 @@ fun Route.beregning(beregningService: BeregningService) {
     route("/api/beregning") {
         get("/{behandlingId}") {
             withBehandlingId {
-                val beregning = beregningService.hentBeregning(it).toDTO()
-                call.respondWithBeregningDTO(beregning)
+                val beregning = beregningService.hentBeregning(it)
+                call.respond<BeregningDTO>(beregning.toDTO())
             }
         }
 
         post("/{behandlingId}") {
             withBehandlingId {
                 val accessToken = getAccessToken(call)
-                val beregning = beregningService.lagreBeregning(it, accessToken).toDTO()
-                call.respondWithBeregningDTO(beregning)
+                val beregning = beregningService.lagreBeregning(it, accessToken)
+                call.respond<BeregningDTO>(beregning.toDTO())
             }
         }
     }
-}
-private suspend fun ApplicationCall.respondWithBeregningDTO(beregningDTO: BeregningDTO) {
-    response.pipeline.execute(this, beregningDTO)
 }
 
 private suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSuccess: (id: UUID) -> Unit) {

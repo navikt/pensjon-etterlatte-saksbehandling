@@ -9,7 +9,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.model.BeregningService
 import no.nav.etterlatte.model.getAccessToken
 import java.util.*
@@ -19,9 +18,9 @@ fun Route.beregning(beregningService: BeregningService) {
         get("/{behandlingId}") {
             withBehandlingId {
                 val beregning = beregningService.hentBeregning(it)
-                when(beregning) {
-                    null -> call.response.status(HttpStatusCode.NoContent)
-                    else -> call.respond<BeregningDTO>(beregning.toDTO())
+                when (beregning) {
+                    null -> call.respond(HttpStatusCode.NoContent)
+                    else -> call.respond(beregning.toDTO())
                 }
             }
         }
@@ -30,7 +29,7 @@ fun Route.beregning(beregningService: BeregningService) {
             withBehandlingId {
                 val accessToken = getAccessToken(call)
                 val beregning = beregningService.lagreBeregning(it, accessToken)
-                call.respond<BeregningDTO>(beregning.toDTO())
+                call.respond(beregning.toDTO())
             }
         }
     }

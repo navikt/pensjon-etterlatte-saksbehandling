@@ -24,7 +24,7 @@ class KonsistensavstemmingService(private val utbetalingDao: UtbetalingDao, priv
         val loependeYtelseFom = dag.atStartOfDay().toTidspunkt(ZoneId.of("Europe/Oslo"))
         val registrertFoerTom = dag.minusDays(1).atTime(LocalTime.MAX).toTidspunkt(ZoneId.of("Europe/Oslo"))
 
-        val relevaanteUtbetalinger = utbetalingDao.hentUtbetalingerForKonsistensavstemming(
+        val relevanteUtbetalinger = utbetalingDao.hentUtbetalingerForKonsistensavstemming(
             loependeFraOgMed = loependeYtelseFom,
             opprettetFramTilOgMed = registrertFoerTom,
             saktype = saktype
@@ -43,7 +43,7 @@ class KonsistensavstemmingService(private val utbetalingDao: UtbetalingDao, priv
          *
          * Inspirasjon og takk rettes mot su-se-bakover's implementasjon av tilsvarende
          */
-        val loependeUtbetalinger: List<OppdragForKonsistensavstemming> = relevaanteUtbetalinger
+        val loependeUtbetalinger: List<OppdragForKonsistensavstemming> = relevanteUtbetalinger
             .filter { it.opprettet <= registrertFoerTom.instant } // 1
             .groupBy { it.sakId } // 2
             .mapValues { entry -> // 3

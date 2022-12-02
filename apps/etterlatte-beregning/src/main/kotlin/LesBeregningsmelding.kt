@@ -54,7 +54,7 @@ internal class LesBeregningsmelding(
                     behandlingType = behandling.type,
                     behandlingId = behandling.id
                 )
-                packet["beregning"] = beregning
+                packet["beregning"] = beregning.toDTO()
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")
             } catch (e: Exception) {

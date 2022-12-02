@@ -37,7 +37,7 @@ internal class LesAvkortingsmelding(
 
                 packet["avkorting"] = avkortingsResultat
                 context.publish(packet.toJson())
-                logger.info("Publisert en beregning")
+                logger.info("Publisert en beregning fra avkorting")
             } catch (e: Exception) {
                 logger.error("spiser en melding på grunn av feil", e)
             }

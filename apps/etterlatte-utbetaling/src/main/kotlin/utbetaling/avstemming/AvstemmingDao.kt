@@ -40,10 +40,11 @@ class AvstemmingDao(private val dataSource: DataSource) {
                 statement = """
                     SELECT id, opprettet, periode_fra, periode_til, antall_oppdrag, avstemmingsdata
                     FROM avstemming 
-                    WHERE avstemmingtype = '${Avstemmingtype.GRENSESNITTAVSTEMMING.name}'
+                    WHERE avstemmingtype = :avstemmingtype
                     ORDER BY periode_til DESC 
                     LIMIT 1
-                    """
+                    """,
+                paramMap = mapOf("avstemmingtype" to Avstemmingtype.GRENSESNITTAVSTEMMING.name)
             )
                 .let { session.run(it.map(::toGrensesnittavstemming).asSingle) }
         }

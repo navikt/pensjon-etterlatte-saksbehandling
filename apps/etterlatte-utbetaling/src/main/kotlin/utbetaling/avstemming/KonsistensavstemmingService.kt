@@ -39,7 +39,7 @@ class KonsistensavstemmingService(private val utbetalingDao: UtbetalingDao, priv
          * 5. Mapper de sakene med oppdragslinjer igjen om til OppdragForKonsistensavstemming, og luker bort de sakene
          *      uten noen oppdragslinjer.
          *
-         * Bada bing bada bom
+         * Bada bing bada boom
          *
          * Inspirasjon og takk rettes mot su-se-bakover's implementasjon av tilsvarende
          */

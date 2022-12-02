@@ -65,8 +65,8 @@ object ReduksjonMotFolketrygdRegel :
         versjon = "1",
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
         regelReferanse = ToDoRegelReferanse(),
-        regel1 = BarnekullRegel,
-        regel2 = TrygdetidsFaktor,
+        venstre = BarnekullRegel,
+        hoeyre = TrygdetidsFaktor,
         slaasammenFunksjon = { barnekull, trygdetid ->
             val resultat = BigDecimal(barnekull * trygdetid.second / trygdetid.first)
             resultat.setScale(0, RoundingMode.HALF_UP).toInt()
@@ -84,8 +84,8 @@ object TrygdetidsFaktor :
         versjon = "1",
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
         regelReferanse = ToDoRegelReferanse(),
-        regel1 = MaksTrygdetidConstant,
-        regel2 = TrygdetidRegel,
+        venstre = MaksTrygdetidConstant,
+        hoeyre = TrygdetidRegel,
         slaasammenFunksjon = { maksTrygdetid, trygdetid ->
             maksTrygdetid to minOf(trygdetid, maksTrygdetid)
         }

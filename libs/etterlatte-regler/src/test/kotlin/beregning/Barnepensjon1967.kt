@@ -1,32 +1,24 @@
 package beregning.barnepensjon1967
 
 import FaktumNode
-import KonstantNode
 import Regel
-import RegelVisitor
-import SubsumsjonsNode
 import ToDoRegelReferanse
 import regler.RegelMeta
 import regler.definerKonstant
 import regler.finnFaktumIGrunnlag
+import regler.gangSammenToRegler
 import regler.kombinerer
 import regler.med
 import regler.og
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+data class AvdoedForelder(val trygdetid: Int)
 data class Barnepensjon1967Grunnlag(
     val grunnbeloep: FaktumNode<Long>,
     val antallSoeskenIKullet: FaktumNode<Int>,
     val avdoedForelder: FaktumNode<AvdoedForelder>
 )
-
-data class AvdoedForelder(val trygdetid: Int)
-
-fun reduksjonMotrygdetidFormel(barnekull: Double, trygdetid: Pair<Int, Int>) =
-    BigDecimal(barnekull * trygdetid.second / trygdetid.first)
-        .setScale(0, RoundingMode.HALF_UP)
-        .toInt()
 
 val trygdetidRegel: Regel<Barnepensjon1967Grunnlag, Int> =
     finnFaktumIGrunnlag(
@@ -63,41 +55,64 @@ val trygdetidsFaktor = RegelMeta("1", "Finn trygdetidsbrøk", ToDoRegelReferanse
     maksTrygdetid to minOf(trygdetid, maksTrygdetid)
 }
 
+val grunnbeloep: Regel<Barnepensjon1967Grunnlag, Int> =
+    finnFaktumIGrunnlag(
+        versjon = "1",
+        beskrivelse = "Finner grunnbeløp",
+        regelReferanse = ToDoRegelReferanse(),
+        finnFaktum = Barnepensjon1967Grunnlag::grunnbeloep,
+        finnFelt = { it.toInt() }
+    )
+
+val belopForFoersteBarn2 = gangSammenToRegler(
+    versjon = "1",
+    beskrivelse = "Satser i kr av for første barn",
+    regelReferanse = ToDoRegelReferanse(),
+    regel1 = grunnbeloep,
+    regel2 = prosentsatsFoersteBarnKonstant
+)
+
+val belopForFoersteBarn = RegelMeta(
+    versjon = "1",
+    beskrivelse = "Satser i kr av for første barn",
+    regelReferanse = ToDoRegelReferanse()
+) kombinerer prosentsatsFoersteBarnKonstant og grunnbeloep med { satsIG, G -> satsIG * G }
+
+val belopForEtterfoelgendeBarn = RegelMeta(
+    versjon = "1",
+    beskrivelse = "Satser i kr av for etterfølgende barn",
+    regelReferanse = ToDoRegelReferanse()
+) kombinerer prosentsatsEtterfoelgendeBarnKonstant og grunnbeloep med { satsIG, G -> satsIG * G }
+
+val antallSoeskenIKullet: Regel<Barnepensjon1967Grunnlag, Int> =
+    finnFaktumIGrunnlag(
+        versjon = "1",
+        beskrivelse = "Finner antall barn i kullet",
+        regelReferanse = ToDoRegelReferanse(),
+        finnFaktum = Barnepensjon1967Grunnlag::antallSoeskenIKullet,
+        finnFelt = { it }
+    )
+
+val satser = RegelMeta(
+    versjon = "1",
+    beskrivelse = "Satser i kr for barn",
+    regelReferanse = ToDoRegelReferanse()
+) kombinerer belopForFoersteBarn og belopForEtterfoelgendeBarn med { forste, etterfolgende -> forste to etterfolgende }
+
+val barnekullRegel = RegelMeta(
+    versjon = "1",
+    beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
+    regelReferanse = ToDoRegelReferanse()
+) kombinerer satser og antallSoeskenIKullet med { (foerstebarn, etterfoelgendeBarn), antallSoesken ->
+    (foerstebarn + (etterfoelgendeBarn * antallSoesken)) / (antallSoesken + 1)
+}
+
 val reduksjonMotFolketrygdRegel = RegelMeta(
     versjon = "1",
     beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
     regelReferanse = ToDoRegelReferanse()
-) kombinerer BarnekullRegel og trygdetidsFaktor med ::reduksjonMotrygdetidFormel
-
-object BarnekullRegel : Regel<Barnepensjon1967Grunnlag, Double> {
-    override val versjon: String = "1"
-    override val beskrivelse: String = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet"
-    override val regelReferanse = ToDoRegelReferanse()
-
-    override fun accept(visitor: RegelVisitor) {
-        TODO("Not yet implemented")
-    }
-
-    private val PROSENTSATS_FOERSTE_BARN =
-        KonstantNode(0.4, "Prosentsats benyttet for første barn")
-    private val PROSENTSATS_ETTERFOELGENDE_BARN =
-        KonstantNode(0.25, "Prosentsats benyttet for etterfølgende barn")
-
-    override fun anvend(grunnlag: Barnepensjon1967Grunnlag): SubsumsjonsNode<Double> {
-        val foersteBarn = grunnlag.grunnbeloep.verdi * PROSENTSATS_FOERSTE_BARN.verdi
-        val etterfoelgendeBarn =
-            grunnlag.grunnbeloep.verdi * PROSENTSATS_ETTERFOELGENDE_BARN.verdi * grunnlag.antallSoeskenIKullet.verdi
-
-        /** 40% av G til første barn, 25% til resten. Fordeles likt */
-        return SubsumsjonsNode(
-            verdi = (foersteBarn + etterfoelgendeBarn) / grunnlag.antallSoeskenIKullet.verdi.plus(1),
-            regel = this,
-            children = listOf(
-                grunnlag.grunnbeloep,
-                grunnlag.antallSoeskenIKullet,
-                PROSENTSATS_FOERSTE_BARN,
-                PROSENTSATS_ETTERFOELGENDE_BARN
-            )
-        )
-    }
+) kombinerer barnekullRegel og trygdetidsFaktor med { sats, (maksTrygdetid, faktiskTrygdetid) ->
+    BigDecimal(sats * faktiskTrygdetid / maksTrygdetid)
+        .setScale(0, RoundingMode.HALF_UP)
+        .toInt()
 }

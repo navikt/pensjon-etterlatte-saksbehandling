@@ -19,14 +19,29 @@ fun <C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel<G, D>> slaaSammenToRegle
     regelReferanse: RegelReferanse,
     regel1: A,
     regel2: B,
-    slaasammenFunksjon: (C, D) -> S
+    slaaSammenFunksjon: (C, D) -> S
 ) = SlaaSammenToRegler(
     versjon = versjon,
     beskrivelse = beskrivelse,
     regelReferanse = regelReferanse,
-    regel1 = regel1,
-    regel2 = regel2,
-    slaasammenFunksjon = slaasammenFunksjon
+    venstre = regel1,
+    hoeyre = regel2,
+    slaasammenFunksjon = slaaSammenFunksjon
+)
+
+fun <G, A : Regel<G, Int>, B : Regel<G, Double>> gangSammenToRegler(
+    versjon: String,
+    beskrivelse: String,
+    regelReferanse: RegelReferanse,
+    regel1: A,
+    regel2: B
+) = SlaaSammenToRegler(
+    versjon = versjon,
+    beskrivelse = beskrivelse,
+    regelReferanse = regelReferanse,
+    venstre = regel1,
+    hoeyre = regel2,
+    slaasammenFunksjon = { a: Int, b: Double -> a * b }
 )
 
 fun <G, T : Any, A : FaktumNode<T>, S> finnFaktumIGrunnlag(

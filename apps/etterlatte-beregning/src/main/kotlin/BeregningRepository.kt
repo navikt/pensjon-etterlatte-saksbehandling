@@ -56,7 +56,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                 tx.batchPreparedNamedStatement(Queries.lagreBeregningsperioder, queries)
             }
         }
-        return hent(beregning.behandlingId)
+        return hent(beregning.behandlingId)!!
     }
 
     override fun slettBeregningsperioderISak(sakId: Long) {

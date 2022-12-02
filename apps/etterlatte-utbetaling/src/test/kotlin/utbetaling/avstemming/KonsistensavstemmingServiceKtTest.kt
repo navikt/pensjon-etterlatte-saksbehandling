@@ -13,6 +13,12 @@ import java.time.LocalDate
 
 internal class KonsistensavstemmingServiceKtTest {
 
+    /**
+     * Utbetalingslinjene er sendt inn paa ulike tidspunkter.
+     * 1:   |-------->
+     * 2:       |---->
+     * 3: |---------->
+     */
     @Test
     fun `gjeldendelinjerForEnDato tar med linjer som er relevante for en gitt dato`() {
         val linje1 = utbetalingslinje(
@@ -36,12 +42,22 @@ internal class KonsistensavstemmingServiceKtTest {
 
         val linjer = listOf(linje1, linje2, linje3)
 
+        /* Case 1: Naa: linje 3 er eneste gjeldende */
         assertEquals(gjeldendeLinjerForEnDato(linjer, LocalDate.now()), listOf(linje3))
+        /* Case 2: Foer linje 3 er aktiv -> linje 1 og 2 er aktive */
         assertEquals(gjeldendeLinjerForEnDato(linjer, LocalDate.of(1998, 2, 25)), listOf(linje1, linje2))
+        /* Case 3: Etter linje 2 har tatt over for linje 1, men foer linje 3 er aktiv -> Linje 2 er aktiv */
         assertEquals(gjeldendeLinjerForEnDato(linjer, LocalDate.of(1998, 7, 25)), listOf(linje2))
+        /* Case 4: Foer linje 2 og 3 er aktive opprettet -> linje 1 er aktiv */
         assertEquals(gjeldendeLinjerForEnDato(linjer, LocalDate.of(1998, 1, 2)), listOf(linje1))
     }
 
+    /**
+     * Utbetalingslinjene er sendt inn paa ulike tidspunkter.
+     * 1:   |-------->
+     * 2:       |---->
+     * 3:         | (OPPHOER)
+     */
     @Test
     fun `gjeldendeLinjerForEnDato håndterer opphør korrekt`() {
         val linje1 = utbetalingslinje(
@@ -66,8 +82,11 @@ internal class KonsistensavstemmingServiceKtTest {
 
         val linjer = listOf(linje1, linje2, linje3)
 
+        /* Case 1: Naa: linje 3 har foert til opphoer -> ingen aktive utbetalingslinjer */
         assertEquals(gjeldendeLinjerForEnDato(linjer, LocalDate.now()), emptyList<Utbetalingslinje>())
+        /* Case 2: Foer linje 2 er aktiv, og foer linje 3 er opprettet -> linje 1 og 2 er aktive */
         assertEquals(gjeldendeLinjerForEnDato(linjer, LocalDate.of(1998, 2, 25)), listOf(linje1, linje2))
+        /* Case 3: Etter linje 1 er aktiv, kun linje 2 er aktiv, foer linje 3 er opprettet -> linje 2 er aktiv */
         assertEquals(gjeldendeLinjerForEnDato(linjer, LocalDate.of(1998, 7, 25)), listOf(linje2))
     }
 

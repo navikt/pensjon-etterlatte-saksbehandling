@@ -28,7 +28,7 @@ private val maksTrygdetid = definerKonstant<Barnepensjon1967Grunnlag, BigDecimal
     verdi = BigDecimal(40)
 )
 
-val trygdetidsFaktor = RegelMeta("1", "Finn trygdetidsbrøk", ToDoRegelReferanse()) kombinerer
+val trygdetidsFaktor = RegelMeta("1", "Finn trygdetidsfaktor", ToDoRegelReferanse()) kombinerer
     maksTrygdetid og trygdetidRegel med { maksTrygdetid, trygdetid ->
-    maksTrygdetid to minOf(trygdetid, maksTrygdetid)
+    minOf(trygdetid, maksTrygdetid) / maksTrygdetid
 }

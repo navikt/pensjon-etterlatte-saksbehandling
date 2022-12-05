@@ -56,7 +56,9 @@ open class SlaaSammenToRegler<C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel
     override val versjon: String,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
+    @JsonIgnore
     val venstre: A,
+    @JsonIgnore
     val hoeyre: B,
     @JsonIgnore
     val slaasammenFunksjon: (C, D) -> S

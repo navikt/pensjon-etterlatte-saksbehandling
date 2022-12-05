@@ -76,12 +76,12 @@ infix fun <G, A> RegelMeta.multipliser(regel1: Regel<G, A>) = this to regel1
 infix fun <G, A, B> Pair<RegelMeta, Regel<G, A>>.og(regel2: Regel<G, B>) = this to regel2
 infix fun <G, A : Any, B : Any, S> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>>.med(f: (A, B) -> S) =
     slaaSammenToRegler(
-        first.first.versjon,
-        first.first.beskrivelse,
-        first.first.regelReferanse,
-        first.second,
-        second,
-        f
+        versjon = first.first.versjon,
+        beskrivelse = first.first.beskrivelse,
+        regelReferanse = first.first.regelReferanse,
+        regel1 = first.second,
+        regel2 = second,
+        slaaSammenFunksjon = f
     )
 
 infix fun <G> Pair<RegelMeta, Regel<G, BigDecimal>>.med(b: Regel<G, BigDecimal>) =

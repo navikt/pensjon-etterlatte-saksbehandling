@@ -395,6 +395,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     private fun statusFraKvittering(alvorlighetsgrad: String) =
         when (alvorlighetsgrad) {
+            "00" -> UtbetalingStatus.GODKJENT
             "04" -> UtbetalingStatus.GODKJENT_MED_FEIL
             "08" -> UtbetalingStatus.AVVIST
             "12" -> UtbetalingStatus.FEILET

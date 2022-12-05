@@ -44,7 +44,7 @@ class AvstemmingDao(private val dataSource: DataSource) {
                     ORDER BY periode_til DESC 
                     LIMIT 1
                     """,
-                paramMap = mapOf("avstemmingtype" to Avstemmingtype.GRENSESNITTAVSTEMMING.name)
+                paramMap = mapOf("avstemmingtype" to Avstemmingtype.GRENSESNITTAVSTEMMING.name.param())
             )
                 .let { session.run(it.map(::toGrensesnittavstemming).asSingle) }
         }

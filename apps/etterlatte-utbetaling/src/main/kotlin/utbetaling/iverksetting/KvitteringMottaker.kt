@@ -88,7 +88,6 @@ class KvitteringMottaker(
     private fun oppdragGodkjent(utbetaling: Utbetaling) {
         logger.info("Utbetaling med vedtakId=${utbetaling.vedtakId.value} godkjent")
         sendUtbetalingEvent(utbetaling)
-        // sendVedtakHendelseIverksatt(utbetaling)
     }
 
     private fun oppdragGodkjentMedFeil(utbetaling: Utbetaling) {

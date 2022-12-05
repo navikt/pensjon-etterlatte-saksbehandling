@@ -3,7 +3,7 @@ package no.nav.etterlatte.utbetaling.config
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.utbetaling.common.Oppgavetrigger
 import no.nav.etterlatte.utbetaling.common.next
-import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittavstemmingDao
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
@@ -69,10 +69,10 @@ class ApplicationContext(
         queue = properties.mqAvstemmingQueue
     )
 
-    val grensesnittavstemmingDao = GrensesnittavstemmingDao(dataSource)
+    val avstemmingDao = AvstemmingDao(dataSource)
 
     val grensesnittsavstemmingService = GrensesnittsavstemmingService(
-        grensesnittavstemmingDao = grensesnittavstemmingDao,
+        avstemmingDao = avstemmingDao,
         avstemmingsdataSender = avstemmingsdataSender,
         utbetalingDao = utbetalingDao,
         clock = clock

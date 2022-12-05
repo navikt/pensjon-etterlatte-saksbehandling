@@ -62,7 +62,9 @@ object OppdragMapper {
 
                         vedtakId = utbetaling.vedtakId.value.toString()
                         delytelseId = it.id.value.toString()
-                        kodeKlassifik = "BARNEPENSJON-OPTP" // klassekode. TODO: Bruk saktype fra utbetaling
+                        // TODO: dobbeltsjekk dennne også med omstillingsstønad når vi
+                        //  går igjennom kodeFagomraade "BARNEPE"
+                        kodeKlassifik = OppdragDefaults.kodekomponent.toString()
                         datoVedtakFom = it.periode.fra.toXMLDate()
                         datoVedtakTom = it.periode.til?.toXMLDate()
                         sats = it.beloep

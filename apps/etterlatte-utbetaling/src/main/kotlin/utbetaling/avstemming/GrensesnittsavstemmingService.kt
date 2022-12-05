@@ -11,13 +11,13 @@ import java.time.Instant
 
 class GrensesnittsavstemmingService(
     private val avstemmingsdataSender: AvstemmingsdataSender,
-    private val grensesnittavstemmingDao: GrensesnittavstemmingDao,
+    private val avstemmingDao: AvstemmingDao,
     private val utbetalingDao: UtbetalingDao,
     private val clock: Clock
 ) {
 
     fun hentNestePeriode() = Avstemmingsperiode(
-        fraOgMed = grensesnittavstemmingDao.hentSisteAvstemming()?.periode?.til ?: MIN_INSTANT,
+        fraOgMed = avstemmingDao.hentSisteGrensesnittavstemming()?.periode?.til ?: MIN_INSTANT,
         til = tidspunktMidnattIdag(clock)
     )
 
@@ -38,7 +38,7 @@ class GrensesnittsavstemmingService(
             sendtAvstemmingsdata
         }
 
-        grensesnittavstemmingDao.opprettAvstemming(
+        avstemmingDao.opprettGrensesnittavstemming(
             Grensesnittavstemming(
                 id = avstemmingId,
                 periode = periode,

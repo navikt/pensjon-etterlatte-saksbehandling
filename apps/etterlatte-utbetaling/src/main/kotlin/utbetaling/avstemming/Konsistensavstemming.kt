@@ -1,12 +1,13 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.utbetaling.common.UUID30
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
+import java.math.BigDecimal
 import java.time.LocalDate
 
 data class Konsistensavstemming(
@@ -27,11 +28,11 @@ data class OppdragForKonsistensavstemming(
 )
 
 data class OppdragslinjeForKonsistensavstemming(
-    val id: UUID30,
+    val id: UtbetalingslinjeId,
     val opprettet: Tidspunkt,
     val fraOgMed: LocalDate,
-    val tilOgMed: LocalDate,
-    var forrigeUtbetalingslinjeId: UUID30?,
-    val beloep: Int,
+    val tilOgMed: LocalDate?,
+    var forrigeUtbetalingslinjeId: UtbetalingslinjeId?,
+    val beloep: BigDecimal?,
     val attestanter: List<NavIdent>
 )

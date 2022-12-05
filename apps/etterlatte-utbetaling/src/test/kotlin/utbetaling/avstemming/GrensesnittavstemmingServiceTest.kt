@@ -18,14 +18,14 @@ import java.time.temporal.ChronoUnit
 
 internal class GrensesnittavstemmingServiceTest {
 
-    private val grensesnittavstemmingDao: GrensesnittavstemmingDao = mockk()
+    private val avstemmingDao: AvstemmingDao = mockk()
     private val utbetalingDao: UtbetalingDao = mockk()
     private val avstemmingsdataSender: AvstemmingsdataSender = mockk()
     private val clock: Clock = Clock.systemUTC()
 
     private val grensesnittavstemmingService: GrensesnittsavstemmingService = GrensesnittsavstemmingService(
         avstemmingsdataSender = avstemmingsdataSender,
-        grensesnittavstemmingDao = grensesnittavstemmingDao,
+        avstemmingDao = avstemmingDao,
         utbetalingDao = utbetalingDao,
         clock = clock
     )
@@ -46,16 +46,16 @@ internal class GrensesnittavstemmingServiceTest {
             avstemmingsdata = ""
         )
 
-        every { grensesnittavstemmingDao.hentSisteAvstemming() } returns grensesnittavstemming
+        every { avstemmingDao.hentSisteGrensesnittavstemming() } returns grensesnittavstemming
         every { utbetalingDao.hentUtbetalinger(any(), any()) } returns utbetaling
         every { avstemmingsdataSender.sendGrensesnittavstemming(any()) } returns "message"
-        every { grensesnittavstemmingDao.opprettAvstemming(any()) } returns 1
+        every { avstemmingDao.opprettGrensesnittavstemming(any()) } returns 1
 
         grensesnittavstemmingService.startGrensesnittsavstemming(periode)
 
         verify(exactly = 3) { avstemmingsdataSender.sendGrensesnittavstemming(any()) }
         verify {
-            grensesnittavstemmingDao.opprettAvstemming(
+            avstemmingDao.opprettGrensesnittavstemming(
                 match {
                     it.antallOppdrag == 1 && it.periode.fraOgMed == periode.fraOgMed
                 }
@@ -67,7 +67,7 @@ internal class GrensesnittavstemmingServiceTest {
     fun `skal kaste feil dersom fraOgMed tidspunkt ikke er stoerre enn til tidspunkt i avstemmingsperiode`() {
         val midnattIdag = tidspunktMidnattIdag(clock)
 
-        every { grensesnittavstemmingDao.hentSisteAvstemming() } returns Grensesnittavstemming(
+        every { avstemmingDao.hentSisteGrensesnittavstemming() } returns Grensesnittavstemming(
             opprettet = Tidspunkt.now(),
             periode = Avstemmingsperiode(
                 fraOgMed = midnattIdag.minus(1, ChronoUnit.DAYS),

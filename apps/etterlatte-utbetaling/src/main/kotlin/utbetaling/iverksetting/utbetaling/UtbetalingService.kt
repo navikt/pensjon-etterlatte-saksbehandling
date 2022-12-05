@@ -62,7 +62,7 @@ class UtbetalingService(
 
         return when {
             utbetaling == null -> UtbetalingFinnesIkke(oppdrag.vedtakId())
-            utbetaling.ugyldigStatus() -> {
+            utbetaling.ugyldigStatusForAaMottaNyKvittering() -> {
                 UgyldigStatus(
                     utbetaling.status(),
                     utbetaling
@@ -97,7 +97,11 @@ class UtbetalingService(
         tidspunkt = Tidspunkt.now(clock)
     )
 
-    fun Utbetaling.ugyldigStatus() =
+    /**
+     * Hvis vi har en utbetaling og mottar en kvittering fra OS, er dette gyldig _hviss_
+     * utbetalingen har enten status sendt eller mottatt fra OS (hvis ikke har noe skjedd ut av sekvens)!
+     */
+    fun Utbetaling.ugyldigStatusForAaMottaNyKvittering() =
         this.status() != UtbetalingStatus.SENDT && this.status() != UtbetalingStatus.MOTTATT
 
     fun Utbetaling?.utbetalingEksisterer() = this != null && this.status() != UtbetalingStatus.MOTTATT

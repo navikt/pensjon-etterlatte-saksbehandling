@@ -13,6 +13,7 @@ import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsd
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Oppdragslinje
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Periode
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Totaldata
+import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class KonsistensavstemmingDataMapper(
@@ -56,8 +57,9 @@ internal class KonsistensavstemmingDataMapper(
     private fun totaldata(): Totaldata =
         Totaldata().apply {
             totalAntall = avstemming.loependeUtbetalinger.count().toBigInteger()
-            totalBelop = avstemming.loependeUtbetalinger.flatMap { it.utbetalingslinjer }.sumOf { it.beloep }
-                .toBigDecimal()
+            totalBelop = avstemming.loependeUtbetalinger
+                .flatMap { it.utbetalingslinjer }
+                .sumOf { it.beloep ?: BigDecimal.ZERO }
             fortegn = OppdragDefaults.TILLEGG.value()
         }
 
@@ -82,7 +84,7 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
         utbetalingsfrekvens = OppdragDefaults.UTBETALINGSFREKVENS
         oppdragGjelderId = fnr.value
         oppdragGjelderFom = LocalDate.EPOCH.format(tidsstempelDatoOppdrag)
-        saksbehandlerId = "" // TODO: hør med økonomi om denne skal fylles ut, og i såfall med hva
+        saksbehandlerId = OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER
         oppdragsenhetListe.addAll(
             listOf(OppdragDefaults.oppdragsenhet).map {
                 Enhet().apply {
@@ -96,12 +98,12 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
             utbetalingslinjer.map {
                 Oppdragslinje().apply {
                     delytelseId = it.id.toString()
-                    klassifikasjonKode = "BARNEPENSJON-OPTP" // TODO: hva skal stå her?
+                    klassifikasjonKode = OppdragDefaults.kodekomponent.toString()
                     vedtakPeriode = Periode().apply {
                         fom = it.fraOgMed.format(tidsstempelDatoOppdrag)
-                        tom = it.tilOgMed.format(tidsstempelDatoOppdrag)
+                        tom = it.tilOgMed?.format(tidsstempelDatoOppdrag)
                     }
-                    sats = it.beloep.toBigDecimal()
+                    sats = it.beloep
                     satstypeKode = OppdragslinjeDefaults.UTBETALINGSFREKVENS
                     fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG.value()
                     brukKjoreplan = OppdragslinjeDefaults.KJOEREPLAN_SAMMEN_MED_NESTE_PLANLAGTE_UTBETALING

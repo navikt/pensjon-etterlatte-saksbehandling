@@ -43,6 +43,7 @@ internal class LagreVirkningstidspunkt(
 
             try {
                 vedtaksvurderingService.lagreVirkningstidspunkt(sakId, behandling.id, virkningstidspunkt)
+                logger.info("Lagrer virkningstidspunkt i vedtak")
             } catch (e: KanIkkeEndreFattetVedtak) {
                 packet[eventNameKey] = "VEDTAK:ENDRING_FORKASTET"
                 packet["vedtakId"] = e.vedtakId

@@ -69,7 +69,6 @@ class ApplicationBuilder {
                 )
             }
             .build()
-            .also { LesBeregningsmelding(it, beregningService) }
             .also { it.registrerVedlikeholdsriver(beregningService) }
 
     private fun publiser(melding: String, key: UUID) {

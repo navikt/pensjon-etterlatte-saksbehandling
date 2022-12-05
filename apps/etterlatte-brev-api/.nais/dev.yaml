@@ -66,6 +66,7 @@ spec:
         - application: etterlatte-brreg
         - application: etterlatte-pdl-proxy
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-grunnlag
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal

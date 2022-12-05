@@ -26,6 +26,7 @@ interface FoerstegangsbehandlingService {
     fun lagreVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
     fun settVilkaarsvurdert(behandlingId: UUID)
+    fun settBeregnet(behandlingId: UUID)
     fun settFattetVedtak(behandlingId: UUID)
     fun settAttestert(behandlingId: UUID)
     fun settReturnert(behandlingId: UUID)
@@ -85,44 +86,33 @@ class RealFoerstegangsbehandlingService(
     }
 
     override fun settVilkaarsvurdert(behandlingId: UUID) {
-        hentFoerstegangsbehandling(behandlingId)
-            .tilVilkaarsvurdering()
-            .let { lagreNyBehandlingStatus(it) }
+        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert())
+    }
+
+    override fun settBeregnet(behandlingId: UUID) {
+        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilBeregnet())
     }
 
     override fun settFattetVedtak(behandlingId: UUID) {
-        hentFoerstegangsbehandling(behandlingId)
-            .tilFattetVedtak()
-            .let { lagreNyBehandlingStatus(it) }
+        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilFattetVedtak())
     }
 
     override fun settAttestert(behandlingId: UUID) {
-        hentFoerstegangsbehandling(behandlingId)
-            .tilAttestert()
-            .let { lagreNyBehandlingStatus(it) }
+        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilAttestert())
     }
 
     override fun settReturnert(behandlingId: UUID) {
-        hentFoerstegangsbehandling(behandlingId)
-            .tilReturnert()
-            .let { lagreNyBehandlingStatus(it) }
+        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilReturnert())
     }
 
     override fun settIverksatt(behandlingId: UUID) {
-        hentFoerstegangsbehandling(behandlingId)
-            .tilIverksatt()
-            .let { lagreNyBehandlingStatus(it) }
+        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilIverksatt())
     }
 
     private fun lagreNyBehandlingStatus(behandling: Foerstegangsbehandling) {
         inTransaction {
             behandling.let {
-                behandlinger.lagreStatusOgOppgaveStatus(
-                    it.id,
-                    it.status,
-                    it.oppgaveStatus,
-                    it.sistEndret
-                )
+                behandlinger.lagreStatus(it.id, it.status, it.sistEndret)
             }
         }
     }

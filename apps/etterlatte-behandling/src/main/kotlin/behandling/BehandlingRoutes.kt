@@ -58,9 +58,13 @@ fun Route.behandlingRoutes(
                 body.begrunnelse,
                 Grunnlagsopplysning.Saksbehandler(navIdent, Instant.now())
             )
-            foerstegangsbehandlingService.lagreKommerBarnetTilgode(behandlingsId, kommerBarnetTilgode)
 
-            call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
+            try {
+                foerstegangsbehandlingService.lagreKommerBarnetTilgode(behandlingsId, kommerBarnetTilgode)
+                call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
+            } catch (e: TilstandException.UgyldigtTilstand) {
+                call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
+            }
         }
     }
 
@@ -136,14 +140,19 @@ fun Route.behandlingRoutes(
                     "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
                 )
                 val body = call.receive<FastsettVirkningstidspunktRequest>()
-                val virkningstidspunkt =
-                    foerstegangsbehandlingService.lagreVirkningstidspunkt(behandlingsId, body.dato, navIdent)
 
-                call.respondText(
-                    contentType = ContentType.Application.Json,
-                    status = HttpStatusCode.OK,
-                    text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
-                )
+                try {
+                    val virkningstidspunkt =
+                        foerstegangsbehandlingService.lagreVirkningstidspunkt(behandlingsId, body.dato, navIdent)
+
+                    call.respondText(
+                        contentType = ContentType.Application.Json,
+                        status = HttpStatusCode.OK,
+                        text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
+                    )
+                } catch (e: TilstandException.UgyldigtTilstand) {
+                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+                }
             }
 
             post("/vilkaarsvurder") {
@@ -212,25 +221,8 @@ fun Route.behandlingRoutes(
         route("/foerstegangsbehandling") {
             get {
                 call.respond(
-                    foerstegangsbehandlingService.hentFoerstegangsbehandling(behandlingsId)?.let {
-                        DetaljertBehandling(
-                            id = it.id,
-                            sak = it.sak,
-                            behandlingOpprettet = it.behandlingOpprettet,
-                            sistEndret = it.sistEndret,
-                            soeknadMottattDato = it.soeknadMottattDato,
-                            innsender = it.persongalleri.innsender,
-                            soeker = it.persongalleri.soeker,
-                            gjenlevende = it.persongalleri.gjenlevende,
-                            avdoed = it.persongalleri.avdoed,
-                            soesken = it.persongalleri.soesken,
-                            gyldighetsproeving = it.gyldighetsproeving,
-                            status = it.status,
-                            virkningstidspunkt = it.hentVirkningstidspunkt(),
-                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                            kommerBarnetTilgode = it.kommerBarnetTilgode
-                        )
-                    } ?: HttpStatusCode.NotFound
+                    foerstegangsbehandlingService.hentFoerstegangsbehandling(behandlingsId)?.toDetaljertBehandling()
+                        ?: HttpStatusCode.NotFound
                 )
             }
 
@@ -283,25 +275,8 @@ fun Route.behandlingRoutes(
         route("/manueltopphoer") {
             get {
                 call.respond(
-                    manueltOpphoerService.hentManueltOpphoerInTransaction(behandlingsId)?.let {
-                        DetaljertBehandling(
-                            id = it.id,
-                            sak = it.sak,
-                            behandlingOpprettet = it.behandlingOpprettet,
-                            sistEndret = it.sistEndret,
-                            soeknadMottattDato = it.behandlingOpprettet,
-                            innsender = it.persongalleri.innsender,
-                            soeker = it.persongalleri.soeker,
-                            gjenlevende = it.persongalleri.gjenlevende,
-                            avdoed = it.persongalleri.avdoed,
-                            soesken = it.persongalleri.soesken,
-                            gyldighetsproeving = null,
-                            status = it.status,
-                            virkningstidspunkt = null,
-                            behandlingType = BehandlingType.MANUELT_OPPHOER,
-                            kommerBarnetTilgode = null
-                        )
-                    } ?: HttpStatusCode.NotFound
+                    manueltOpphoerService.hentManueltOpphoerInTransaction(behandlingsId)?.toDetaljertBehandling()
+                        ?: HttpStatusCode.NotFound
                 )
             }
             post {
@@ -402,10 +377,6 @@ data class VedtakHendelse(
 data class LagretHendelser(
     val hendelser: List<LagretHendelse>
 )
-
-enum class HendelseType {
-    FATTET, ATTESTERT, UNDERKJENT, VILKAARSVURDERT, BEREGNET, IVERKSATT
-}
 
 data class ManueltOpphoerResponse(val behandlingId: String)
 

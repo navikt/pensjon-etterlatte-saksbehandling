@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -25,7 +24,6 @@ internal class BehandlingTest {
         behandlingOpprettet = LocalDateTime.now(),
         sistEndret = LocalDateTime.now(),
         status = BehandlingStatus.OPPRETTET,
-        oppgaveStatus = OppgaveStatus.NY,
         persongalleri = Persongalleri(
             soeker = "",
             innsender = null,
@@ -50,11 +48,11 @@ internal class BehandlingTest {
         behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdering()
+            .tilVilkaarsvurdert()
             .let {
                 assertEquals(kommerBarnetTilgode, it.kommerBarnetTilgode)
                 assertEquals(virkningstidspunkt, it.virkningstidspunkt)
-                assertEquals(BehandlingStatus.VILKAARSVURDERING, it.status)
+                assertEquals(BehandlingStatus.VILKAARSVURDERT, it.status)
             }
     }
 
@@ -63,7 +61,7 @@ internal class BehandlingTest {
         val behandlingTilAttestering = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdering()
+            .tilVilkaarsvurdert()
             .tilFattetVedtak()
 
         assertThrows<TilstandException.UgyldigtTilstand> {
@@ -76,7 +74,7 @@ internal class BehandlingTest {
         val iverksattBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdering()
+            .tilVilkaarsvurdert()
             .tilFattetVedtak()
             .tilAttestert()
             .tilIverksatt()
@@ -91,7 +89,7 @@ internal class BehandlingTest {
 
     @Test
     fun `behandling må være fylt ut for å settes til VILKAARSVURDERING`() {
-        assertThrows<TilstandException.IkkeFyltUt> { behandling.tilVilkaarsvurdering() }
+        assertThrows<TilstandException.IkkeFyltUt> { behandling.tilVilkaarsvurdert() }
     }
 
     @Test
@@ -104,7 +102,7 @@ internal class BehandlingTest {
         val returnertBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdering()
+            .tilVilkaarsvurdert()
             .tilFattetVedtak()
             .tilReturnert()
 

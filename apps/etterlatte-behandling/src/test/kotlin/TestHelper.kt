@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -38,7 +37,6 @@ fun foerstegangsbehandling(
     behandlingOpprettet: LocalDateTime = LocalDateTime.now(),
     sistEndret: LocalDateTime = LocalDateTime.now(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-    oppgaveStatus: OppgaveStatus = OppgaveStatus.NY,
     soeknadMottattDato: LocalDateTime = LocalDateTime.now(),
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
@@ -50,7 +48,6 @@ fun foerstegangsbehandling(
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
-    oppgaveStatus = oppgaveStatus,
     soeknadMottattDato = soeknadMottattDato,
     persongalleri = persongalleri,
     gyldighetsproeving = gyldighetsproeving,
@@ -64,7 +61,6 @@ fun revurdering(
     behandlingOpprettet: LocalDateTime = LocalDateTime.now(),
     sistEndret: LocalDateTime = LocalDateTime.now(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-    oppgaveStatus: OppgaveStatus = OppgaveStatus.NY,
     persongalleri: Persongalleri = persongalleri(),
     revurderingAarsak: RevurderingAarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode()
@@ -74,7 +70,6 @@ fun revurdering(
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
-    oppgaveStatus = oppgaveStatus,
     persongalleri = persongalleri,
     revurderingsaarsak = revurderingAarsak,
     kommerBarnetTilgode = kommerBarnetTilgode
@@ -95,7 +90,6 @@ fun manueltOpphoer(
     behandlingOpprettet = LocalDateTime.now(),
     sistEndret = LocalDateTime.now(),
     status = BehandlingStatus.OPPRETTET,
-    oppgaveStatus = OppgaveStatus.NY,
     persongalleri = persongalleri,
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak

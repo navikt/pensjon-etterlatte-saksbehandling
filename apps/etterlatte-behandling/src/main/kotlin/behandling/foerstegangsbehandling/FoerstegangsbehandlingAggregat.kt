@@ -8,7 +8,6 @@ import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -18,8 +17,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
-
-class AvbruttBehandlingException(message: String) : RuntimeException(message)
 
 class FoerstegangsbehandlingAggregat(
     id: UUID,
@@ -46,7 +43,6 @@ class FoerstegangsbehandlingAggregat(
                 soeknadMottattDato = LocalDateTime.parse(mottattDato),
                 persongalleri = persongalleri,
                 gyldighetsproeving = null,
-                oppgaveStatus = OppgaveStatus.NY,
                 virkningstidspunkt = null,
                 kommerBarnetTilgode = null
             )
@@ -63,44 +59,24 @@ class FoerstegangsbehandlingAggregat(
         requireNotNull(behandlinger.hentBehandling(id, BehandlingType.FØRSTEGANGSBEHANDLING) as Foerstegangsbehandling)
 
     fun lagreGyldighetprøving(gyldighetsproeving: GyldighetsResultat) {
-        try {
-            lagretBehandling.oppdaterGyldighetsproeving(gyldighetsproeving).let {
+        lagretBehandling = lagretBehandling.oppdaterGyldighetsproeving(gyldighetsproeving)
+            .also {
                 behandlinger.lagreGyldighetsproving(it)
                 logger.info("behandling ${it.id} i sak ${it.sak} er gyldighetsprøvd")
             }
-        } catch (_: Exception) {
-            throw AvbruttBehandlingException(
-                "Det tillates ikke å gyldighetsprøve Behandling med id ${lagretBehandling.id} " +
-                    "og status: ${lagretBehandling.status}"
-            )
-        }
     }
 
     fun lagreVirkningstidspunkt(yearMonth: YearMonth, ident: String): Virkningstidspunkt {
-        try {
-            return lagretBehandling.oppdaterVirkningstidspunkt(
-                yearMonth,
-                Grunnlagsopplysning.Saksbehandler.create(ident)
-            )
-                .let {
-                    behandlinger.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
-                    it.virkningstidspunkt
-                }
-        } catch (_: Exception) {
-            // TODO ai: fiks
-            TODO()
-        }
+        lagretBehandling =
+            lagretBehandling.oppdaterVirkningstidspunkt(yearMonth, Grunnlagsopplysning.Saksbehandler.create(ident))
+                .also { behandlinger.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!) }
+
+        return lagretBehandling.virkningstidspunkt!!
     }
 
-    // Flytt fra service til aggregat
     fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
-        try {
-            lagretBehandling
-                .oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-                .let { behandlinger.lagreKommerBarnetTilgode(it.id, kommerBarnetTilgode) }
-        } catch (_: Exception) {
-            TODO()
-        }
+        lagretBehandling = lagretBehandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .also { behandlinger.lagreKommerBarnetTilgode(it.id, kommerBarnetTilgode) }
     }
 
     fun serialiserbarUtgave() = lagretBehandling.copy()

@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.sak.Sak
 import java.time.LocalDate
 import java.time.ZoneId
@@ -20,7 +19,6 @@ enum class Rolle {
 data class Oppgave(
     val behandlingId: UUID,
     val behandlingStatus: BehandlingStatus,
-    val oppgaveStatus: OppgaveStatus,
     val sak: Sak,
     val regdato: ZonedDateTime,
     val fristDato: LocalDate,
@@ -34,8 +32,8 @@ class OppgaveDao(private val datasource: DataSource) {
         val aktuelleStatuser = roller.flatMap {
             when (it) {
                 Rolle.SAKSBEHANDLER -> listOf(
-                    BehandlingStatus.VILKAARSVURDERING,
-                    BehandlingStatus.GYLDIG_SOEKNAD,
+                    BehandlingStatus.VILKAARSVURDERT,
+                    BehandlingStatus.OPPRETTET,
                     BehandlingStatus.RETURNERT
                 )
                 Rolle.ATTESTANT -> listOf(BehandlingStatus.FATTET_VEDTAK)
@@ -47,7 +45,7 @@ class OppgaveDao(private val datasource: DataSource) {
         datasource.connection.use {
             val stmt = it.prepareStatement(
                 """
-                |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status, oppgave_status, behandling_opprettet,
+                |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status, behandling_opprettet,
                 |behandlingstype, soesken 
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE status IN ${
@@ -68,7 +66,6 @@ class OppgaveDao(private val datasource: DataSource) {
                 Oppgave(
                     getObject("id") as UUID,
                     BehandlingStatus.valueOf(getString("status")),
-                    OppgaveStatus.valueOf(getString("oppgave_status")),
                     Sak(getString("fnr"), enumValueOf(getString("sakType")), getLong("sak_id")),
                     mottattDato,
                     mottattDato.toLocalDate().plusMonths(1),

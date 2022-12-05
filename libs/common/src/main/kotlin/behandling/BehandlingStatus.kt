@@ -2,9 +2,8 @@ package no.nav.etterlatte.libs.common.behandling
 
 enum class BehandlingStatus {
     OPPRETTET,
-    GYLDIG_SOEKNAD,
-    IKKE_GYLDIG_SOEKNAD,
-    VILKAARSVURDERING,
+    VILKAARSVURDERT,
+    BEREGNET,
     FATTET_VEDTAK,
     ATTESTERT,
     RETURNERT,
@@ -20,8 +19,8 @@ enum class BehandlingStatus {
     companion object {
         fun underBehandling() = listOf(
             OPPRETTET,
-            GYLDIG_SOEKNAD,
-            VILKAARSVURDERING,
+            VILKAARSVURDERT,
+            BEREGNET,
             RETURNERT,
             FATTET_VEDTAK
         )

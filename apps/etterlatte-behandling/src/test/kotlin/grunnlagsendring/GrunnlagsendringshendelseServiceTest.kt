@@ -222,7 +222,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { hentBehandlingerISak(sakId) } returns listOf(
                 mockk {
-                    every { status } returns BehandlingStatus.VILKAARSVURDERING
+                    every { status } returns BehandlingStatus.VILKAARSVURDERT
                     every { id } returns behandlingId
                     every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 }

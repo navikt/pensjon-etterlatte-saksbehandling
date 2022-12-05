@@ -88,7 +88,7 @@ export const Sammendrag = ({ beregning, soeker }: Props) => {
                 }`}
               </Table.DataCell>
               <Table.DataCell>{beregning.type == 'GP' ? 'Grunnpensjon' : beregning.type}</Table.DataCell>
-              <Table.DataCell>Mangler</Table.DataCell>
+              <Table.DataCell>40 år</Table.DataCell>
               <Table.DataCell>{beregning.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
                 {beregning.soeskenFlokk && soeker ? (

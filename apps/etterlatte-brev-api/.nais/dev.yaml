@@ -58,7 +58,7 @@ spec:
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: ce96a301-13db-4409-b277-5b27f464d08b
     - name: ETTERLATTE_GRUNNLAG_URL
-      value: https://etterlatte-grunnlag
+      value: http://etterlatte-grunnlag
   accessPolicy:
     outbound:
       rules:

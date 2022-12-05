@@ -102,7 +102,6 @@ class BehandlingService(
             kommerBarnetTilgode = behandling.await().kommerBarnetTilgode,
             vilkårsprøving = vedtak.await()?.vilkaarsResultat,
             beregning = beregning.await(),
-            avkortning = vedtak.await()?.avkortingsResultat,
             saksbehandlerId = vedtak.await()?.saksbehandlerId,
             fastsatt = vedtak.await()?.vedtakFattet,
             datoFattet = vedtak.await()?.datoFattet,

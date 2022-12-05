@@ -157,33 +157,6 @@
         }
       ]
     },
-    "avkorting": {
-      "bilag": {
-        "id": "4029d057-2c1b-46b2-b75f-2a79ab4547ec",
-        "type": "GP",
-        "endringskode": "NY",
-        "resultat": "BEREGNET",
-        "beregningsperioder": [
-          {
-            "avkortingsId": "1",
-            "type": "INNTEKT",
-            "datoFOM": "2022-09",
-            "datoTOM": null,
-            "belop": 9290
-          }
-        ],
-        "beregnetDato": "2022-09-19T16:30:09.52722902"
-      },
-      "sammendrag": [
-        {
-          "periode": {
-            "fom": "2022-09",
-            "tom": null
-          },
-          "beloep": 9290
-        }
-      ]
-    },
     "pensjonTilUtbetaling": [
       {
         "id": 49,

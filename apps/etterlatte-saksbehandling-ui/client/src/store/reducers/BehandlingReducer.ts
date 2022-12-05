@@ -10,7 +10,6 @@ export interface IDetaljertBehandling {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   vilkårsprøving?: IVilkaarsvurdering
   beregning?: Beregning
-  avkortning?: any //todo legg med type når denne er klar
   saksbehandlerId?: string
   fastsatt: boolean
   datoFattet?: string //kommer som Instant fra backend
@@ -39,7 +38,6 @@ export enum IHendelseType {
   BEHANDLING_OPPRETTET = 'BEHANDLING:OPPRETTET',
   VEDTAK_VILKAARSVURDERT = 'VEDTAK:VILKAARSVURDERT',
   VEDTAK_BEREGNET = 'VEDTAK:BEREGNET',
-  VEDTAK_AVKORTET = 'VEDTAK:AVKORTET',
   VEDTAK_FATTET = 'VEDTAK:FATTET',
   VEDTAK_UNDERKJENT = 'VEDTAK:UNDERKJENT',
   VEDTAK_ATTESTERT = 'VEDTAK:ATTESTERT',

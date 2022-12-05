@@ -24,7 +24,6 @@ internal class HendelserOmVedtak(
         "VEDTAK:FATTET",
         "VEDTAK:ATTESTERT",
         "VEDTAK:UNDERKJENT",
-        "VEDTAK:AVKORTET",
         "VEDTAK:BEREGNET",
         "VEDTAK:VILKAARSVURDERT",
         "VEDTAK:IVERKSATT"

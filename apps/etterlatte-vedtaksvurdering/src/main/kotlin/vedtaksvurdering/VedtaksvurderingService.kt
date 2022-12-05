@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
@@ -60,18 +59,6 @@ class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: Vedtak) :
 class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository
 ) : VedlikeholdService {
-
-    fun lagreAvkorting(sakId: String, behandling: Behandling, fnr: String, avkorting: AvkortingsResultat) {
-        val vedtak = repository.hentVedtak(sakId, behandling.id)
-        if (vedtak == null) {
-            repository.lagreAvkorting(sakId, behandling, fnr, avkorting)
-        } else {
-            if (vedtak.vedtakFattet == true) {
-                throw KanIkkeEndreFattetVedtak(vedtak)
-            }
-            repository.oppdaterAvkorting(sakId, behandling.id, avkorting)
-        }
-    }
 
     fun lagreVilkaarsresultat(
         sakId: String,
@@ -174,21 +161,6 @@ class VedtaksvurderingService(
                         }
                     )
                 }, // sammendraget bør lages av beregning
-                avkorting = vedtak.avkortingsResultat?.let { avkorting ->
-                    BilagMedSammendrag(
-                        objectMapper.valueToTree(avkorting) as ObjectNode,
-                        avkorting.beregningsperioder.map {
-                            Beregningsperiode(
-                                Periode(
-                                    YearMonth.from(it.datoFOM),
-                                    it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }
-                                        ?.let(YearMonth::from)
-                                ),
-                                BigDecimal.valueOf(it.belop.toLong())
-                            )
-                        }
-                    )
-                }, // sammendraget bør lages av avkorting,
                 pensjonTilUtbetaling = repository.hentUtbetalingsPerioder(vedtak.id),
                 vedtakFattet = vedtak.saksbehandlerId?.let { ansvarligSaksbehandler ->
                     VedtakFattet(
@@ -217,7 +189,7 @@ class VedtaksvurderingService(
 
         requireNotNull(hentFellesVedtak(behandlingId)).also {
             if (it.type == VedtakType.INNVILGELSE) {
-                if (it.beregning == null || it.avkorting == null) throw VedtakKanIkkeFattes(v)
+                if (it.beregning == null) throw VedtakKanIkkeFattes(v)
             }
             if (it.vilkaarsvurdering == null) throw VedtakKanIkkeFattes(v)
             repository.fattVedtak(saksbehandler, v.sakId, behandlingId)

@@ -23,7 +23,6 @@ include(
     "apps:etterlatte-grunnlag",
     "apps:etterlatte-brev-api",
     "apps:etterlatte-brev-distribusjon",
-    "apps:etterlatte-avkorting",
     "apps:etterlatte-tilbakekreving",
     "apps:etterlatte-hendelser-pdl",
     "apps:etterlatte-statistikk",

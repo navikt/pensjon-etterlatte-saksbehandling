@@ -1,8 +1,6 @@
 package vedtaksvurdering
 
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
@@ -90,24 +88,6 @@ internal class DBTest {
         )
     }
 
-    fun leggtilavkortingsresultat() {
-        val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
-        vedtaksvurderingService.lagreAvkorting(
-            sakId,
-            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
-            "fnr",
-            AvkortingsResultat(
-                UUID.randomUUID(),
-                Beregningstyper.BPGP,
-                no.nav.etterlatte.libs.common.avkorting.Endringskode.NY,
-                AvkortingsResultatType.BEREGNET,
-                emptyList(),
-                LocalDateTime.now()
-            )
-        )
-    }
-
     fun lagreIverksattVedtak() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
@@ -119,9 +99,6 @@ internal class DBTest {
     fun testDB() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
-        leggtilavkortingsresultat()
-        val avkortet = vedtaksvurderingService.hentVedtak(sakId, uuid)
-        Assertions.assertEquals(VedtakStatus.AVKORTET, avkortet?.vedtakStatus)
         leggtilvilkaarsresultat()
         val vilkaarsvurdert = vedtaksvurderingService.hentVedtak(sakId, uuid)
         Assertions.assertEquals(VedtakStatus.VILKAARSVURDERT, vilkaarsvurdert?.vedtakStatus)
@@ -131,7 +108,6 @@ internal class DBTest {
 
         val vedtaket = vedtaksvurderingService.hentVedtak(sakId, uuid)
         assert(vedtaket?.beregningsResultat != null)
-        assert(vedtaket?.avkortingsResultat != null)
         assert(vedtaket?.beregningsResultat?.grunnlagVersjon == 0.toLong())
         assert(vedtaket?.vilkaarsResultat != null)
         assert(vedtaket?.vedtakStatus != null)

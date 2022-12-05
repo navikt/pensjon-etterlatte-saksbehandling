@@ -131,7 +131,6 @@
     "beregnetDato": "2022-06-21T12:35:17.19221918",
     "grunnlagVerson": 0
   },
-  "avkortning": null,
   "saksbehandlerId": null,
   "fastsatt": false,
   "datoFattet": null,
@@ -175,19 +174,6 @@
       "hendelse": "VEDTAK:BEREGNET",
       "opprettet": "2022-07-14T09:10:55.145618Z",
       "inntruffet": "2022-07-14T09:10:54.750503Z",
-      "vedtakId": 107,
-      "behandlingId": "31f96b76-199a-472b-8cdf-7187c5392254",
-      "sakId": 3,
-      "ident": null,
-      "identType": null,
-      "kommentar": null,
-      "valgtBegrunnelse": null
-    },
-    {
-      "id": 195,
-      "hendelse": "VEDTAK:AVKORTET",
-      "opprettet": "2022-07-14T09:10:55.221277Z",
-      "inntruffet": "2022-07-14T09:10:54.765925Z",
       "vedtakId": 107,
       "behandlingId": "31f96b76-199a-472b-8cdf-7187c5392254",
       "sakId": 3,

@@ -62,22 +62,6 @@
     "beregnetDato": "2022-09-22T09:50:49.082103209",
     "grunnlagVersjon": 88
   },
-  "avkortning": {
-    "id": "cc5c239c-67bb-43b1-926c-7a9964201f45",
-    "type": "GP",
-    "endringskode": "NY",
-    "resultat": "BEREGNET",
-    "beregningsperioder": [
-      {
-        "avkortingsId": "1",
-        "type": "INNTEKT",
-        "datoFOM": "2022-09",
-        "datoTOM": null,
-        "belop": 9290
-      }
-    ],
-    "beregnetDato": "2022-09-22T09:50:49.090785288"
-  },
   "saksbehandlerId": null,
   "fastsatt": false,
   "datoFattet": null,
@@ -140,36 +124,10 @@
       "valgtBegrunnelse": null
     },
     {
-      "id": 6586,
-      "hendelse": "VEDTAK:AVKORTET",
-      "opprettet": "2022-09-22T07:50:47.428535Z",
-      "inntruffet": "2022-09-22T07:50:47.131936Z",
-      "vedtakId": 220,
-      "behandlingId": "a7a449da-5246-4603-be70-4689cfbf364f",
-      "sakId": 42,
-      "ident": null,
-      "identType": null,
-      "kommentar": null,
-      "valgtBegrunnelse": null
-    },
-    {
       "id": 6587,
       "hendelse": "VEDTAK:BEREGNET",
       "opprettet": "2022-09-22T07:50:47.487783Z",
       "inntruffet": "2022-09-22T07:50:47.225676Z",
-      "vedtakId": 220,
-      "behandlingId": "a7a449da-5246-4603-be70-4689cfbf364f",
-      "sakId": 42,
-      "ident": null,
-      "identType": null,
-      "kommentar": null,
-      "valgtBegrunnelse": null
-    },
-    {
-      "id": 6588,
-      "hendelse": "VEDTAK:AVKORTET",
-      "opprettet": "2022-09-22T07:50:47.514371Z",
-      "inntruffet": "2022-09-22T07:50:47.237886Z",
       "vedtakId": 220,
       "behandlingId": "a7a449da-5246-4603-be70-4689cfbf364f",
       "sakId": 42,
@@ -205,19 +163,6 @@
       "valgtBegrunnelse": null
     },
     {
-      "id": 6591,
-      "hendelse": "VEDTAK:AVKORTET",
-      "opprettet": "2022-09-22T07:50:47.786710Z",
-      "inntruffet": "2022-09-22T07:50:47.688798Z",
-      "vedtakId": 220,
-      "behandlingId": "a7a449da-5246-4603-be70-4689cfbf364f",
-      "sakId": 42,
-      "ident": null,
-      "identType": null,
-      "kommentar": null,
-      "valgtBegrunnelse": null
-    },
-    {
       "id": 6592,
       "hendelse": "VEDTAK:VILKAARSVURDERT",
       "opprettet": "2022-09-22T07:50:49.096388Z",
@@ -235,19 +180,6 @@
       "hendelse": "VEDTAK:BEREGNET",
       "opprettet": "2022-09-22T07:50:49.159440Z",
       "inntruffet": "2022-09-22T07:50:49.099542Z",
-      "vedtakId": 220,
-      "behandlingId": "a7a449da-5246-4603-be70-4689cfbf364f",
-      "sakId": 42,
-      "ident": null,
-      "identType": null,
-      "kommentar": null,
-      "valgtBegrunnelse": null
-    },
-    {
-      "id": 6594,
-      "hendelse": "VEDTAK:AVKORTET",
-      "opprettet": "2022-09-22T07:50:49.195782Z",
-      "inntruffet": "2022-09-22T07:50:49.148589Z",
       "vedtakId": 220,
       "behandlingId": "a7a449da-5246-4603-be70-4689cfbf364f",
       "sakId": 42,

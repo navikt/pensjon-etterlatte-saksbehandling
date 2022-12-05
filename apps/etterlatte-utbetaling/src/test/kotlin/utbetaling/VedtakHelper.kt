@@ -58,7 +58,6 @@ fun vedtak(
         tidspunkt = ZonedDateTime.now()
     ),
     pensjonTilUtbetaling = utbetalingsperioder,
-    avkorting = null,
     beregning = null,
     vilkaarsvurdering = null
 )
@@ -92,7 +91,6 @@ fun ugyldigVedtakTilUtbetaling(
         attesterendeEnhet = "123",
         tidspunkt = ZonedDateTime.now()
     ),
-    avkorting = null,
     beregning = null,
     vilkaarsvurdering = null
 )
@@ -129,7 +127,6 @@ fun revurderingVedtak(
         attesterendeEnhet = "123",
         tidspunkt = ZonedDateTime.now()
     ),
-    avkorting = null,
     beregning = null,
     vilkaarsvurdering = null
 )
@@ -164,7 +161,6 @@ fun opphoersVedtak(
         attesterendeEnhet = "123",
         tidspunkt = ZonedDateTime.now()
     ),
-    avkorting = null,
     beregning = null,
     vilkaarsvurdering = null
 )

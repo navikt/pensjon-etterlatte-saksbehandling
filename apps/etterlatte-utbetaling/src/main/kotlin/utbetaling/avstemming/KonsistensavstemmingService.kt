@@ -32,7 +32,7 @@ class KonsistensavstemmingService(
         dag: LocalDate,
         saktype: Saktype
     ): List<String> {
-        logger.info("Starter konsistensavstemming ooooooooooh booooooooooy")
+        logger.info("Starter konsistensavstemming for ${saktype.name} paa dato $dag")
         val konsistensavstemming = lagKonsistensavstemming(dag, saktype)
         val mappetKonsistensavstemming =
             KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding()
@@ -47,7 +47,7 @@ class KonsistensavstemmingService(
 
         // TODO: EY-1225 lagre ned konsistensavstemming i DB
 
-        logger.info("Konsistensavstemming for $dag utfoert.")
+        logger.info("Konsistensavstemming for ${saktype.name} paa dato $dag utfoert")
         return sendtAvstemmingsdata
     }
 

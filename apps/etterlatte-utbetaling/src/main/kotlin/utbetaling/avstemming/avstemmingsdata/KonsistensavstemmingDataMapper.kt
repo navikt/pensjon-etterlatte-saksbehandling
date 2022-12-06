@@ -1,10 +1,13 @@
 package utbetaling.avstemming.avstemmingsdata
 
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.OppdragForKonsistensavstemming
+import no.nav.etterlatte.utbetaling.common.ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
 import no.nav.etterlatte.utbetaling.common.tidsstempelDatoOppdrag
+import no.nav.etterlatte.utbetaling.common.tidsstempelMikroOppdrag
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Attestant
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Enhet
@@ -17,7 +20,8 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class KonsistensavstemmingDataMapper(
-    private val avstemming: Konsistensavstemming
+    private val avstemming: Konsistensavstemming,
+    private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG
 ) {
 
     fun opprettAvstemmingsmelding(): List<Konsistensavstemmingsdata> =
@@ -33,10 +37,11 @@ internal class KonsistensavstemmingDataMapper(
 
     private fun datameldinger(): List<Konsistensavstemmingsdata> {
         return avstemming.loependeUtbetalinger
+            .chunked(detaljerPrMelding)
             .map {
                 Konsistensavstemmingsdata().apply {
                     this.aksjonsdata = avstemmingsdata(KodeAksjon.DATA)
-                    this.oppdragsdataListe.addAll(listOf(it.toOppdragdata()))
+                    this.oppdragsdataListe.addAll(it.map { it.toOppdragdata() })
                 }
             }.ifEmpty {
                 listOf(
@@ -74,6 +79,7 @@ internal class KonsistensavstemmingDataMapper(
             underkomponentKode = fagomraade
             avleverendeAvstemmingId = avstemming.id.value
             brukerId = fagomraade
+            tidspunktAvstemmingTom = avstemming.opprettetTilOgMed.toNorskTid().format(tidsstempelMikroOppdrag)
         }
 }
 
@@ -97,7 +103,7 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
         oppdragslinjeListe.addAll(
             utbetalingslinjer.map {
                 Oppdragslinje().apply {
-                    delytelseId = it.id.toString()
+                    delytelseId = it.id.value.toString()
                     klassifikasjonKode = OppdragDefaults.kodekomponent.toString()
                     vedtakPeriode = Periode().apply {
                         fom = it.fraOgMed.format(tidsstempelDatoOppdrag)

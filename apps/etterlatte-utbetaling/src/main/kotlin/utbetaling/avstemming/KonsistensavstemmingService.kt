@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -12,17 +13,47 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
+import org.slf4j.LoggerFactory
+import utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
-class KonsistensavstemmingService(private val utbetalingDao: UtbetalingDao, private val avstemmingDao: AvstemmingDao) {
+class KonsistensavstemmingService(
+    private val utbetalingDao: UtbetalingDao,
+    private val avstemmingDao: AvstemmingDao,
+    private val avstemmingsdataSender: AvstemmingsdataSender
+) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    fun startKonsistensavstemming(
+        dag: LocalDate,
+        saktype: Saktype
+    ): List<String> {
+        logger.info("Starter konsistensavstemming ooooooooooh booooooooooy")
+        val konsistensavstemming = lagKonsistensavstemming(dag, saktype)
+        val mappetKonsistensavstemming =
+            KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding()
+        val sendtAvstemmingsdata = mappetKonsistensavstemming.mapIndexed { meldingNr, melding ->
+            val xmlMelding = avstemmingsdataSender.sendKonsistensavstemming(melding)
+            logger.info(
+                "Har sendt konsistensavstemmingsmelding ${meldingNr + 1} av ${mappetKonsistensavstemming.size}" +
+                    " for konsistensavstemming ${konsistensavstemming.id.value}"
+            )
+            xmlMelding
+        }
+
+        // TODO: EY-1225 lagre ned konsistensavstemming i DB
+
+        logger.info("Konsistensavstemming for $dag utfoert.")
+        return sendtAvstemmingsdata
+    }
 
     fun lagKonsistensavstemming(dag: LocalDate, saktype: Saktype): Konsistensavstemming {
-        val loependeYtelseFom = dag.atStartOfDay().toTidspunkt(ZoneId.of("Europe/Oslo"))
-        val registrertFoerTom = dag.minusDays(1).atTime(LocalTime.MAX).toTidspunkt(ZoneId.of("Europe/Oslo"))
+        val loependeYtelseFom = dag.atStartOfDay().toTidspunkt(norskTidssone)
+        val registrertFoerTom = dag.minusDays(1).atTime(LocalTime.MAX).toTidspunkt(norskTidssone)
 
         val relevanteUtbetalinger = utbetalingDao.hentUtbetalingerForKonsistensavstemming(
             loependeFraOgMed = loependeYtelseFom,

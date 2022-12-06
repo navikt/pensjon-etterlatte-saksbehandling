@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -29,7 +30,8 @@ data class Grensesnittavstemming(
     val opprettet: Tidspunkt,
     val periode: Avstemmingsperiode,
     val antallOppdrag: Int,
-    val avstemmingsdata: String
+    val avstemmingsdata: String,
+    val saktype: Saktype
 )
 
 enum class Avstemmingtype {

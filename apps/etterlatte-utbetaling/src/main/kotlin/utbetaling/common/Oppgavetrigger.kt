@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -35,7 +36,8 @@ class Oppgavetrigger(
                 when (oppgave.oppgavetype) {
                     Oppgavetype.START_GRENSESNITTAVSTEMMING -> {
                         logger.info("Oppgave: Grenseavsnittsavstemmings mottatt, starter grensesnittsavstemming")
-                        grensesnittsavstemmingService.startGrensesnittsavstemming()
+                        /* TODO: utvid packet til aa kunne bestemme avstemming for en saktype*/
+                        grensesnittsavstemmingService.startGrensesnittsavstemming(Saktype.BARNEPENSJON)
                     }
                     Oppgavetype.SETT_KVITTERING_MANUELT -> {
                         logger.info("Oppgave: sett kvittering manuelt mottatt, utfoerer oppgave")

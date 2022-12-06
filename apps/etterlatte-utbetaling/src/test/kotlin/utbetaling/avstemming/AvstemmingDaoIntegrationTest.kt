@@ -6,6 +6,7 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,7 +41,7 @@ internal class AvstemmingDaoIntegrationTest {
     }
 
     @Test
-    fun `skal opprette avstemming`() {
+    fun `skal opprette avstemming for Barnepensjon`() {
         val grensesnittavstemming = Grensesnittavstemming(
             periode = Avstemmingsperiode(
                 fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
@@ -48,7 +49,8 @@ internal class AvstemmingDaoIntegrationTest {
             ),
             antallOppdrag = 1,
             opprettet = Tidspunkt.now(),
-            avstemmingsdata = ""
+            avstemmingsdata = "",
+            saktype = Saktype.BARNEPENSJON
         )
 
         val antallRaderOppdatert = avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming)
@@ -67,7 +69,8 @@ internal class AvstemmingDaoIntegrationTest {
                 til = now
             ),
             antallOppdrag = 1,
-            avstemmingsdata = ""
+            avstemmingsdata = "",
+            saktype = Saktype.BARNEPENSJON
         )
 
         val grensesnittavstemming2 = Grensesnittavstemming(
@@ -77,7 +80,8 @@ internal class AvstemmingDaoIntegrationTest {
                 til = now.minus(1, ChronoUnit.DAYS)
             ),
             antallOppdrag = 2,
-            avstemmingsdata = ""
+            avstemmingsdata = "",
+            saktype = Saktype.BARNEPENSJON
         )
 
         val grensesnittavstemming3 = Grensesnittavstemming(
@@ -87,22 +91,21 @@ internal class AvstemmingDaoIntegrationTest {
                 til = now.minus(2, ChronoUnit.DAYS)
             ),
             antallOppdrag = 3,
-            avstemmingsdata = ""
+            avstemmingsdata = "",
+            saktype = Saktype.BARNEPENSJON
         )
 
         avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming1)
         avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming3)
         avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming2)
 
-        val nyesteAvstemming = avstemmingDao.hentSisteGrensesnittavstemming()
-
-        assertEquals(now, nyesteAvstemming?.opprettet)
-        assertEquals(1, nyesteAvstemming?.antallOppdrag)
+        val nyesteAvstemming = avstemmingDao.hentSisteGrensesnittavstemming(Saktype.BARNEPENSJON)
+        assertEquals(grensesnittavstemming1, nyesteAvstemming)
     }
 
     @Test
     fun `skal gi null dersom det ikke finnes noen avstemming`() {
-        val nyesteAvstemming = avstemmingDao.hentSisteGrensesnittavstemming()
+        val nyesteAvstemming = avstemmingDao.hentSisteGrensesnittavstemming(saktype = Saktype.BARNEPENSJON)
 
         assertNull(nyesteAvstemming)
     }

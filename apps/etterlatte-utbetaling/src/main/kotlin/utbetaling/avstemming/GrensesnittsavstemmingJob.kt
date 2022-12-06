@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.utbetaling.config.LeaderElection
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
@@ -43,8 +44,16 @@ class GrensesnittsavstemmingJob(
         fun run() {
             withLogContext {
                 if (leaderElection.isLeader()) {
-                    log.info("Starter $jobbNavn")
-                    grensesnittsavstemmingService.startGrensesnittsavstemming()
+                    Saktype.values().forEach {
+                        when (it) {
+                            Saktype.BARNEPENSJON -> {
+                                grensesnittsavstemmingService.startGrensesnittsavstemming(it)
+                            }
+                            Saktype.OMSTILLINGSSTOENAD -> {
+                                log.info("Grensesnittavstemming for omstillingsoeknad er ennaa ikke implementert")
+                            }
+                        }
+                    }
                 }
             }
         }

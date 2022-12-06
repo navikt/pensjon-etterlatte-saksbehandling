@@ -237,7 +237,11 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 }
         }
 
-    fun hentUtbetalinger(fraOgMed: Tidspunkt, til: Tidspunkt): List<Utbetaling> =
+    fun hentUtbetalingerForGrensesnittavstemming(
+        fraOgMed: Tidspunkt,
+        til: Tidspunkt,
+        saktype: Saktype
+    ): List<Utbetaling> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
@@ -246,10 +250,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, attestant, saktype
                     FROM utbetaling
                     WHERE avstemmingsnoekkel >= :fraOgMed AND avstemmingsnoekkel < :til
+                    AND saktype = :saktype
                     """,
                 paramMap = mapOf(
                     "fraOgMed" to Timestamp.from(fraOgMed.instant).param(),
-                    "til" to Timestamp.from(til.instant).param()
+                    "til" to Timestamp.from(til.instant).param(),
+                    "saktype" to saktype.name.param()
                 )
             )
                 .let {

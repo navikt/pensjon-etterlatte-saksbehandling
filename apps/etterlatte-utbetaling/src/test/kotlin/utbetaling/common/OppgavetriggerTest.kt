@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.readFile
@@ -32,7 +33,7 @@ internal class OppgavetriggerTest {
         } returns utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT)))
     }
     private val grensesnittsavstemmingService = mockk<GrensesnittsavstemmingService>() {
-        every { startGrensesnittsavstemming() } returns Unit
+        every { startGrensesnittsavstemming(Saktype.BARNEPENSJON) } returns Unit
     }
 
     private val inspector = TestRapid().apply {
@@ -48,7 +49,7 @@ internal class OppgavetriggerTest {
         inspector.apply { sendTestMessage(oppgave_grensesnittavstemming) }
 
         verify(timeout = 5000) {
-            grensesnittsavstemmingService.startGrensesnittsavstemming()
+            grensesnittsavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON)
         }
     }
 

@@ -3,7 +3,7 @@ package beregning.barnepensjon1967.trygdetidsfaktor
 import Regel
 import ToDoRegelReferanse
 import beregning.AvdoedForelder
-import beregning.Barnepensjon1967Grunnlag
+import beregning.BarnepensjonGrunnlag
 import beregning.barnepensjon1967.BP_1967_DATO
 import regler.RegelMeta
 import regler.definerKonstant
@@ -13,16 +13,16 @@ import regler.med
 import regler.og
 import java.math.BigDecimal
 
-private val trygdetidRegel: Regel<Barnepensjon1967Grunnlag, BigDecimal> =
+private val trygdetidRegel: Regel<BarnepensjonGrunnlag, BigDecimal> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner avdødes trygdetid",
         regelReferanse = ToDoRegelReferanse(),
-        finnFaktum = Barnepensjon1967Grunnlag::avdoedForelder,
+        finnFaktum = BarnepensjonGrunnlag::avdoedForelder,
         finnFelt = AvdoedForelder::trygdetid
     )
 
-private val maksTrygdetid = definerKonstant<Barnepensjon1967Grunnlag, BigDecimal>(
+private val maksTrygdetid = definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Full trygdetidsopptjening er 40 år",
     regelReferanse = ToDoRegelReferanse(),

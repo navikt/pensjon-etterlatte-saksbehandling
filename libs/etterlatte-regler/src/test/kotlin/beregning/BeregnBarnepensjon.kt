@@ -13,7 +13,7 @@ import java.math.BigDecimal
 import java.time.YearMonth
 
 data class AvdoedForelder(val trygdetid: BigDecimal)
-data class Barnepensjon1967Grunnlag(
+data class BarnepensjonGrunnlag(
     override val virkningstidspunkt: FaktumNode<YearMonth>,
     val grunnbeloep: FaktumNode<BigDecimal>,
     val antallSoeskenIKullet: FaktumNode<Int>,

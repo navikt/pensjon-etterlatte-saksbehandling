@@ -149,7 +149,7 @@ interface Visitor {
 }
 
 interface RegelVisitor {
-    fun visit(node: Regel<*, *>)
+    fun visit(regel: Regel<*, *>)
 }
 
 class FinnAlleReglerVisitor : Visitor {
@@ -166,4 +166,19 @@ fun Node<*>.finnAlleRegler(): List<String> {
     accept(finnAlleReglerVisitor)
 
     return finnAlleReglerVisitor.regler
+}
+
+class FinnRegelverkKnekkpunkter : RegelVisitor {
+    val knekkpunkter = mutableSetOf<LocalDate>()
+    override fun visit(regel: Regel<*, *>) {
+        knekkpunkter.add(regel.gjelderFra)
+    }
+}
+
+fun Regel<*, *>.finnAlleKnekkpunkter(): Set<LocalDate> {
+    val finnKnekkpunkterVisitor = FinnRegelverkKnekkpunkter()
+
+    accept(finnKnekkpunkterVisitor)
+
+    return finnKnekkpunkterVisitor.knekkpunkter
 }

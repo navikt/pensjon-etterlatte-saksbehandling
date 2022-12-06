@@ -1,24 +1,22 @@
 package beregning.barnepensjon1967
 
 import FaktumNode
-import Node
-import Regel
-import RegelVisitor
-import SubsumsjonsNode
-import Visitor
 import beregning.AvdoedForelder
-import beregning.Barnepensjon1967Grunnlag
+import beregning.BarnepensjonGrunnlag
 import beregning.beregnBarnepensjonRegel
+import finnAlleKnekkpunkter
+import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 import java.time.YearMonth
 
 class Barnepensjon1967Test {
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
-    private val grunnlag = Barnepensjon1967Grunnlag(
+    private val grunnlag = BarnepensjonGrunnlag(
         grunnbeloep = FaktumNode(kilde = saksbehandler, beskrivelse = "Grunnbeløp", verdi = BigDecimal(100_550)),
         antallSoeskenIKullet = FaktumNode(kilde = saksbehandler, beskrivelse = "Antall søsken i kullet", verdi = 2),
         avdoedForelder = FaktumNode(
@@ -35,22 +33,12 @@ class Barnepensjon1967Test {
 
     @Test
     fun `Regler skal representeres som et tre`() {
-        beregnBarnepensjonRegel.accept(object : RegelVisitor {
-            override fun visit(node: Regel<*, *>) {
-                println(node.beskrivelse)
-            }
-        })
-        println("---------------")
-        beregnBarnepensjonRegel.anvend(grunnlag).accept(object : Visitor {
-
-            override fun visit(node: Node<*>) {
-            }
-
-            override fun visit(node: SubsumsjonsNode<*>) {
-                println(node.regel.beskrivelse)
-            }
-        })
-
         println(beregnBarnepensjonRegel.anvend(grunnlag).toJson())
+    }
+
+    @Test
+    fun `Skal finne alle knekkpunktene i regelverket`() {
+        val knekkpunkter = beregnBarnepensjonRegel.finnAlleKnekkpunkter()
+        knekkpunkter.size shouldBe 2
     }
 }

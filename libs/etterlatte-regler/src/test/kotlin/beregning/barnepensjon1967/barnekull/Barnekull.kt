@@ -2,7 +2,7 @@ package beregning.barnepensjon1967.barnekull
 
 import Regel
 import ToDoRegelReferanse
-import beregning.Barnepensjon1967Grunnlag
+import beregning.BarnepensjonGrunnlag
 import beregning.barnepensjon1967.BP_1967_DATO
 import regler.RegelMeta
 import regler.definerKonstant
@@ -12,27 +12,26 @@ import regler.med
 import regler.multipliser
 import regler.og
 import java.math.BigDecimal
-import java.time.LocalDate
 
-private val grunnbeloep: Regel<Barnepensjon1967Grunnlag, BigDecimal> =
+private val grunnbeloep: Regel<BarnepensjonGrunnlag, BigDecimal> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner grunnbeløp",
         regelReferanse = ToDoRegelReferanse(),
-        finnFaktum = Barnepensjon1967Grunnlag::grunnbeloep,
+        finnFaktum = BarnepensjonGrunnlag::grunnbeloep,
         finnFelt = { it }
     )
 
-private val antallSoeskenIKullet: Regel<Barnepensjon1967Grunnlag, Int> =
+private val antallSoeskenIKullet: Regel<BarnepensjonGrunnlag, Int> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner antall barn i kullet",
         regelReferanse = ToDoRegelReferanse(),
-        finnFaktum = Barnepensjon1967Grunnlag::antallSoeskenIKullet,
+        finnFaktum = BarnepensjonGrunnlag::antallSoeskenIKullet,
         finnFelt = { it }
     )
 
-val prosentsatsFoersteBarnKonstant = definerKonstant<Barnepensjon1967Grunnlag, BigDecimal>(
+val prosentsatsFoersteBarnKonstant = definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Prosentsats benyttet for første barn",
     regelReferanse = ToDoRegelReferanse(),
@@ -45,7 +44,7 @@ private val belopForFoersteBarn = RegelMeta(
     regelReferanse = ToDoRegelReferanse()
 ) multipliser prosentsatsFoersteBarnKonstant med grunnbeloep
 
-val prosentsatsEtterfoelgendeBarnKonstant = definerKonstant<Barnepensjon1967Grunnlag, BigDecimal>(
+val prosentsatsEtterfoelgendeBarnKonstant = definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Prosentsats benyttet for etterfølgende barn",
     regelReferanse = ToDoRegelReferanse(),
@@ -53,7 +52,7 @@ val prosentsatsEtterfoelgendeBarnKonstant = definerKonstant<Barnepensjon1967Grun
 )
 
 private val belopForEtterfoelgendeBarn = RegelMeta(
-    gjelderFra = LocalDate.of(1972, 1, 1),
+    gjelderFra = BP_1967_DATO,
     beskrivelse = "Satser i kr av for etterfølgende barn",
     regelReferanse = ToDoRegelReferanse()
 ) multipliser prosentsatsEtterfoelgendeBarnKonstant med grunnbeloep

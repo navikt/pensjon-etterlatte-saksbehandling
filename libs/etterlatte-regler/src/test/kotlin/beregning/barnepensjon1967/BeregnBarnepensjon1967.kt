@@ -1,7 +1,7 @@
 package beregning.barnepensjon1967
 
 import ToDoRegelReferanse
-import beregning.Barnepensjon1967Grunnlag
+import beregning.BarnepensjonGrunnlag
 import beregning.barnepensjon1967.barnekull.barnekullRegel
 import beregning.barnepensjon1967.trygdetidsfaktor.trygdetidsFaktor
 import regler.RegelMeta
@@ -12,7 +12,7 @@ import regler.og
 import java.math.RoundingMode
 import java.time.LocalDate
 
-val BP_1967_DATO = LocalDate.of(1967, 1, 1)
+val BP_1967_DATO: LocalDate = LocalDate.of(1967, 1, 1)
 
 val reduksjonMotFolketrygdRegel = RegelMeta(
     gjelderFra = BP_1967_DATO,
@@ -22,7 +22,7 @@ val reduksjonMotFolketrygdRegel = RegelMeta(
     (sats * trygdetidsfaktor)
 }
 
-val kroneavrundingKonstant = definerKonstant<Barnepensjon1967Grunnlag, RoundingMode>(
+val kroneavrundingKonstant = definerKonstant<BarnepensjonGrunnlag, RoundingMode>(
     gjelderFra = BP_1967_DATO,
     beskrivelse = """
         Formel for avrunding til nærmeste krone. Dersom det er like langt, rund opp.

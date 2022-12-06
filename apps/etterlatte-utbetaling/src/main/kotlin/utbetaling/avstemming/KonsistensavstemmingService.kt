@@ -62,7 +62,7 @@ class KonsistensavstemmingService(
         )
 
         /**
-         * 1. Ta bort de utbetalingene som er oppdrettet etter konsistensavstemmingstidspunktet
+         * 1. Ta bort de utbetalingene som er opprettet etter konsistensavstemmingstidspunktet
          * 2. Grupper utbetalinger per sak
          * 3. Samle en liste av utbetalinger til en samlet utbetaling med mange utbetalingslinjer (ligner på struktur vi
          *      sender i konsistensavstemmingen)

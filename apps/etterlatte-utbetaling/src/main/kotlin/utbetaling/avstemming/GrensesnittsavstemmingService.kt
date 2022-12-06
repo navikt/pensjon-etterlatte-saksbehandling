@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.tidspunktMidnattIdag
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.GrensesnittavstemmingDataMapper
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -17,16 +18,18 @@ class GrensesnittsavstemmingService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentNestePeriode() = Avstemmingsperiode(
-        fraOgMed = avstemmingDao.hentSisteGrensesnittavstemming()?.periode?.til ?: MIN_INSTANT,
+    fun hentNestePeriode(saktype: Saktype) = Avstemmingsperiode(
+        fraOgMed = avstemmingDao.hentSisteGrensesnittavstemming(saktype)?.periode?.til ?: MIN_INSTANT,
         til = tidspunktMidnattIdag(clock)
     )
 
     fun startGrensesnittsavstemming(
-        periode: Avstemmingsperiode = hentNestePeriode()
+        saktype: Saktype,
+        periode: Avstemmingsperiode = hentNestePeriode(saktype)
     ) {
         logger.info("Grensesnittavstemmer fra ${periode.fraOgMed} til ${periode.til}")
-        val utbetalinger = utbetalingDao.hentUtbetalinger(periode.fraOgMed, periode.til)
+        val utbetalinger =
+            utbetalingDao.hentUtbetalingerForGrensesnittavstemming(periode.fraOgMed, periode.til, saktype)
         val avstemmingId = UUIDBase64()
 
         val grensesnittavstemmingDataMapper =
@@ -47,7 +50,8 @@ class GrensesnittsavstemmingService(
                 periode = periode,
                 antallOppdrag = utbetalinger.size,
                 opprettet = Tidspunkt.now(clock),
-                avstemmingsdata = sendtAvstemmingsdata.joinToString("\n")
+                avstemmingsdata = sendtAvstemmingsdata.joinToString("\n"),
+                saktype = saktype
             )
         )
 

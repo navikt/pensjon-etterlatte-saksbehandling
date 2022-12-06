@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.tidspunktMidnattIdag
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetaling
@@ -43,15 +44,25 @@ internal class GrensesnittavstemmingServiceTest {
             opprettet = Tidspunkt.now(),
             periode = periode,
             antallOppdrag = 10,
-            avstemmingsdata = ""
+            avstemmingsdata = "",
+            saktype = Saktype.BARNEPENSJON
         )
 
-        every { avstemmingDao.hentSisteGrensesnittavstemming() } returns grensesnittavstemming
-        every { utbetalingDao.hentUtbetalinger(any(), any()) } returns utbetaling
+        every {
+            avstemmingDao.hentSisteGrensesnittavstemming(saktype = Saktype.BARNEPENSJON)
+        } returns grensesnittavstemming
+
+        every {
+            utbetalingDao.hentUtbetalingerForGrensesnittavstemming(
+                any(),
+                any(),
+                Saktype.BARNEPENSJON
+            )
+        } returns utbetaling
         every { avstemmingsdataSender.sendGrensesnittavstemming(any()) } returns "message"
         every { avstemmingDao.opprettGrensesnittavstemming(any()) } returns 1
 
-        grensesnittavstemmingService.startGrensesnittsavstemming(periode)
+        grensesnittavstemmingService.startGrensesnittsavstemming(Saktype.BARNEPENSJON, periode)
 
         verify(exactly = 3) { avstemmingsdataSender.sendGrensesnittavstemming(any()) }
         verify {
@@ -67,18 +78,19 @@ internal class GrensesnittavstemmingServiceTest {
     fun `skal kaste feil dersom fraOgMed tidspunkt ikke er stoerre enn til tidspunkt i avstemmingsperiode`() {
         val midnattIdag = tidspunktMidnattIdag(clock)
 
-        every { avstemmingDao.hentSisteGrensesnittavstemming() } returns Grensesnittavstemming(
+        every { avstemmingDao.hentSisteGrensesnittavstemming(Saktype.BARNEPENSJON) } returns Grensesnittavstemming(
             opprettet = Tidspunkt.now(),
             periode = Avstemmingsperiode(
                 fraOgMed = midnattIdag.minus(1, ChronoUnit.DAYS),
                 til = midnattIdag
             ),
             antallOppdrag = 1,
-            avstemmingsdata = ""
+            avstemmingsdata = "",
+            saktype = Saktype.BARNEPENSJON
         )
 
         assertThrows<IllegalArgumentException> {
-            grensesnittavstemmingService.hentNestePeriode()
+            grensesnittavstemmingService.hentNestePeriode(Saktype.BARNEPENSJON)
         }
     }
 }

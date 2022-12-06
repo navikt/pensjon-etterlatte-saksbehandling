@@ -4,7 +4,6 @@ import no.nav.etterlatte.vedtaksvurdering.database.DataSourceBuilder
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.rivers.AttesterVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.FattVedtak
-import no.nav.etterlatte.vedtaksvurdering.rivers.LagreAvkorting
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreBeregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreVilkaarsresultat
@@ -33,7 +32,6 @@ fun app(env: Map<String, String> = System.getenv()) {
     ).withKtorModule {
         module(vedtaksvurderingService, localDev)
     }.build().apply {
-        LagreAvkorting(this, vedtaksvurderingService)
         LagreVilkaarsresultat(this, vedtaksvurderingService)
         LagreBeregningsresultat(this, vedtaksvurderingService)
         FattVedtak(this, vedtaksvurderingService)

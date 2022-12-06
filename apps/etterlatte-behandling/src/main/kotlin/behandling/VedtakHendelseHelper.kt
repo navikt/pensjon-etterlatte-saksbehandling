@@ -18,7 +18,7 @@ fun HendelseType.tilBehandlingStatus(behandling: Behandling) = when (this) {
     HendelseType.FATTET -> BehandlingStatus.FATTET_VEDTAK
     HendelseType.ATTESTERT -> BehandlingStatus.ATTESTERT
     HendelseType.UNDERKJENT -> BehandlingStatus.RETURNERT
-    HendelseType.VILKAARSVURDERT, HendelseType.BEREGNET, HendelseType.AVKORTET -> {
+    HendelseType.VILKAARSVURDERT, HendelseType.BEREGNET -> {
         if (behandling.behandlingKanIkkeSettesUnderBehandling()) {
             behandling.status
         } else {

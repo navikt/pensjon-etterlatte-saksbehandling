@@ -5,9 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
-import no.nav.etterlatte.libs.common.avkorting.Endringskode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -48,80 +45,9 @@ internal class VedtaksvurderingServiceTest {
         null,
         null,
         null,
-        null,
         BehandlingType.FØRSTEGANGSBEHANDLING
     )
     private val fattetVedtak = vedtakSomIkkeErFattet.copy(vedtakFattet = true)
-
-    @Test
-    fun `når avkorting lagres og vedtak finnes fra før, så skal vedtaket oppdateres`() {
-        val avkorting = AvkortingsResultat(
-            UUID.randomUUID(),
-            Beregningstyper.GP,
-            Endringskode.NY,
-            AvkortingsResultatType.BEREGNET,
-            emptyList(),
-            LocalDateTime.now()
-        )
-
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns vedtakSomIkkeErFattet
-        every { repositoryMock.oppdaterAvkorting(sakId, behandlingId, any()) } returns Unit
-        service.lagreAvkorting(sakId, Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId), fnr, avkorting)
-        verify { repositoryMock.oppdaterAvkorting(sakId, behandlingId, avkorting) }
-    }
-
-    @Test
-    fun `når avkorting lagres og vedtak ikke finnes fra før, så skal det opprettes nytt vedtak`() {
-        val avkorting = AvkortingsResultat(
-            UUID.randomUUID(),
-            Beregningstyper.GP,
-            Endringskode.NY,
-            AvkortingsResultatType.BEREGNET,
-            emptyList(),
-            LocalDateTime.now()
-        )
-
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
-        every {
-            repositoryMock.lagreAvkorting(
-                sakId,
-                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
-                fnr,
-                any()
-            )
-        } returns Unit
-        service.lagreAvkorting(sakId, Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId), fnr, avkorting)
-        verify {
-            repositoryMock.lagreAvkorting(
-                sakId,
-                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
-                fnr,
-                any()
-            )
-        }
-    }
-
-    @Test
-    fun `skal ikke lagre avkorting på fattet vedtak`() {
-        val avkorting = AvkortingsResultat(
-            UUID.randomUUID(),
-            Beregningstyper.GP,
-            Endringskode.NY,
-            AvkortingsResultatType.BEREGNET,
-            emptyList(),
-            LocalDateTime.now()
-        )
-
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns fattetVedtak
-        assertThrows<KanIkkeEndreFattetVedtak> {
-            service.lagreAvkorting(
-                sakId,
-                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
-                fnr,
-                avkorting
-            )
-        }
-    }
 
     @Test
     fun `når beregning lagres og vedtak finnes fra før, så skal vedtaket oppdateres`() {

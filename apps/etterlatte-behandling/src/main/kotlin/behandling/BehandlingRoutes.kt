@@ -384,7 +384,7 @@ data class LagretHendelser(
 )
 
 enum class HendelseType {
-    FATTET, ATTESTERT, UNDERKJENT, VILKAARSVURDERT, BEREGNET, AVKORTET, IVERKSATT
+    FATTET, ATTESTERT, UNDERKJENT, VILKAARSVURDERT, BEREGNET, IVERKSATT
 }
 
 data class ManueltOpphoerResponse(val behandlingId: String)

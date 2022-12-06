@@ -85,11 +85,6 @@
       "service": "etterlatte-beregning",
       "instance": "etterlatte-beregning-7f68c4d5bf-gc5wj",
       "time": "2022-06-14T15:44:05.410790732"
-    },
-    {
-      "service": "etterlatte-avkorting",
-      "instance": "etterlatte-avkorting-5576c8b8f9-vbrdw",
-      "time": "2022-06-14T15:44:05.423761027"
     }
   ],
   "@event_name": "BEHANDLING:GRUNNLAGENDRET",
@@ -999,28 +994,5 @@
     ],
     "beregnetDato": "2022-06-14T15:44:05.414031233",
     "grunnlagVerson": 0
-  },
-  "avkorting": {
-    "id": "8c6150e3-5e2e-42aa-9082-db83b1a184c2",
-    "type": "GP",
-    "endringskode": "NY",
-    "resultat": "BEREGNET",
-    "beregningsperioder": [
-      {
-        "avkortingsId": "1",
-        "type": "INNTEKT",
-        "datoFOM": "2022-03",
-        "datoTOM": "2022-04",
-        "belop": 8862
-      },
-      {
-        "avkortingsId": "2",
-        "type": "INNTEKT",
-        "datoFOM": "2022-05",
-        "datoTOM": null,
-        "belop": 9285
-      }
-    ],
-    "beregnetDato": "2022-06-14T15:44:05.424804384"
   }
 }

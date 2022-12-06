@@ -1,6 +1,5 @@
 package no.nav.etterlatte.saksbehandling.api.typer.klientside
 
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -21,7 +20,6 @@ data class DetaljertBehandlingDto(
     val gyldighetsprøving: GyldighetsResultat?,
     val vilkårsprøving: Vilkaarsvurdering?,
     val beregning: BeregningDTO?,
-    val avkortning: AvkortingsResultat?,
     val saksbehandlerId: String?,
     val fastsatt: Boolean?,
     val datoFattet: Instant?,

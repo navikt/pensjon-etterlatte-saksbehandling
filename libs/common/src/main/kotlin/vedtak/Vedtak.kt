@@ -19,7 +19,6 @@ data class Vedtak(
     val grunnlag: List<Grunnlagsopplysning<ObjectNode>>,
     val vilkaarsvurdering: Vilkaarsvurdering?,
     val beregning: BilagMedSammendrag<List<Beregningsperiode>>?,
-    val avkorting: BilagMedSammendrag<List<Beregningsperiode>>?,
     val pensjonTilUtbetaling: List<Utbetalingsperiode>?,
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?

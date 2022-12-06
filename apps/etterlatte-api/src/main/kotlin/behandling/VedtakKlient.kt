@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
@@ -77,7 +76,6 @@ data class Vedtak(
     val sakId: String,
     val behandlingId: UUID,
     val saksbehandlerId: String?,
-    val avkortingsResultat: AvkortingsResultat?,
     val beregningsResultat: BeregningsResultat?,
     val vilkaarsResultat: Vilkaarsvurdering?,
     val virkningsDato: LocalDate?,

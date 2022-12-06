@@ -161,7 +161,6 @@ enum class VedtakHendelse {
     FATTET,
     ATTESTERT,
     UNDERKJENT,
-    AVKORTET,
     BEREGNET,
     VILKAARSVURDERT,
     IVERKSATT

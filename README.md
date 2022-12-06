@@ -28,9 +28,6 @@ fra .env-filen til appen sine miljøvariabler.
 [etterlatte-api](apps/etterlatte-api) \
 Tjeneste som kobler frontend og backend sammen. Kallene gjøres i hovedsak via REST, med unntak av posting av data til grunnlag som lager en kafka-melding.
 
-[etterlatte-avkorting](apps/etterlatte-avkorting) \
-// TODO
-
 [etterlatte-behandling](apps/etterlatte-behandling) \
 Tjeneste som holder styr på behandlinger.
 
@@ -142,9 +139,7 @@ grunnlag --> database[(Database)]:::db
 
 vilkaar -.- t9[/"Vilkaarsvurdert behandling"/]:::msg -.-> vedtaksvurdering:::kafka
 t9 -.-> beregning:::kafka
-beregning -.- t11[/"Beregnet behandling"/]:::msg -.-> avkortning:::kafka
-t11 -.-> vedtaksvurdering
-avkortning -.- t12[/"Avkortet behandling"/]:::msg -.-> vedtaksvurdering
+beregning -.- t11[/"Beregnet behandling"/]:::msg -.-> vedtaksvurdering
 
 vedtaksvurdering <--> db2[(Database)]:::db
 vedtaksvurdering -.-> etterlatte-api

@@ -137,7 +137,6 @@ internal class BehandlingServiceTest {
             behandlingid,
             null,
             null,
-            null,
             Vilkaarsvurdering(
                 UUID.randomUUID(),
                 emptyList(),

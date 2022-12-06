@@ -7,25 +7,16 @@ import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.behandling.OppgaveService
-import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.typer.BehandlingsOppgave
 import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -42,29 +33,6 @@ internal class OppgaveServiceTest {
 
     @Test
     fun hentAlleOppgaver() {
-        val vedtak = Vedtak(
-            "4",
-            UUID.randomUUID(),
-            null,
-            null,
-            null,
-            Vilkaarsvurdering(
-                UUID.randomUUID(),
-                emptyList(),
-                Virkningstidspunkt(YearMonth.of(2022, 1), Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now())),
-                VilkaarsvurderingResultat(
-                    VilkaarsvurderingUtfall.OPPFYLT,
-                    "",
-                    LocalDateTime.now(),
-                    "ABV"
-                )
-            ),
-            null,
-            null,
-            null,
-            null,
-            null
-        )
         val behandlingId = UUID.randomUUID()
         coEvery { behandlingKlient.hentOppgaver(accessToken) } returns OppgaveListe(
             oppgaver = listOf(

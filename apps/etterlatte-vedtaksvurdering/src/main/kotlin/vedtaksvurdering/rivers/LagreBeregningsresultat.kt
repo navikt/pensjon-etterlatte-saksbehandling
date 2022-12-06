@@ -36,7 +36,6 @@ internal class LagreBeregningsresultat(
             validate { it.requireKey("fnrSoeker") }
             validate { it.requireKey("beregning") }
             correlationId()
-            validate { it.rejectKey("avkorting") }
         }.register(this)
     }
 

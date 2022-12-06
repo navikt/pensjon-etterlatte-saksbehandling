@@ -1,6 +1,12 @@
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.Instant
+import java.time.LocalDate
+import java.time.YearMonth
+
+interface RegelGrunnlag {
+    val virkningstidspunkt: FaktumNode<YearMonth>
+}
 
 sealed class Node<T>(
     open val verdi: T,
@@ -31,20 +37,11 @@ data class FaktumNode<T>(
     }
 }
 
-data class KonstantNode<T>(
-    override val verdi: T,
-    val beskrivelse: String
-) : Node<T>(verdi) {
-    override fun accept(visitor: Visitor) {
-        visitor.visit(this)
-    }
-}
-
 interface RegelReferanse
 data class ToDoRegelReferanse(val beskrivelse: String = "ToDo: Legg til referanse") : RegelReferanse
 
-interface Regel<G, S> {
-    val versjon: String
+interface Regel<G : RegelGrunnlag, S> {
+    val gjelderFra: LocalDate
     val beskrivelse: String
     val regelReferanse: RegelReferanse
 
@@ -52,8 +49,8 @@ interface Regel<G, S> {
     fun accept(visitor: RegelVisitor)
 }
 
-open class SlaaSammenToRegler<C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel<G, D>>(
-    override val versjon: String,
+open class SlaaSammenToRegler<C : Any, D : Any, G : RegelGrunnlag, S, A : Regel<G, C>, B : Regel<G, D>>(
+    override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
     @JsonIgnore
@@ -78,11 +75,36 @@ open class SlaaSammenToRegler<C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel
             children = listOf(verdi1, verdi2)
         )
     }
-    fun children() = listOf<Regel<*, *>>(venstre, hoeyre)
 }
 
-open class FinnFaktumIGrunnlagRegel<G, T : Any, A : FaktumNode<T>, S>(
-    override val versjon: String,
+open class VelgNyesteGyldigRegel<G : RegelGrunnlag, S : Any>(
+    override val gjelderFra: LocalDate,
+    override val beskrivelse: String,
+    override val regelReferanse: RegelReferanse,
+    @JsonIgnore
+    val regler: List<Regel<G, S>>
+) : Regel<G, S> {
+    override fun accept(visitor: RegelVisitor) {
+        visitor.visit(this)
+        regler.forEach { regel -> regel.accept(visitor) }
+    }
+
+    override fun anvend(grunnlag: G): SubsumsjonsNode<S> {
+        val regel = regler
+            .filter { it.gjelderFra <= grunnlag.virkningstidspunkt.verdi.atDay(1) }
+            .maxBy { it.gjelderFra }
+            .anvend(grunnlag)
+
+        return SubsumsjonsNode(
+            verdi = regel.verdi,
+            regel = this,
+            children = listOf(regel)
+        )
+    }
+}
+
+open class FinnFaktumIGrunnlagRegel<G : RegelGrunnlag, T : Any, A : FaktumNode<T>, S>(
+    override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
     @JsonIgnore
@@ -104,8 +126,8 @@ open class FinnFaktumIGrunnlagRegel<G, T : Any, A : FaktumNode<T>, S>(
     }
 }
 
-open class Konstant<G, S>(
-    override val versjon: String,
+open class Konstant<G : RegelGrunnlag, S>(
+    override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
     private val verdi: S

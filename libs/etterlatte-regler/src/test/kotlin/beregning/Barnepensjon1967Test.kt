@@ -6,11 +6,15 @@ import Regel
 import RegelVisitor
 import SubsumsjonsNode
 import Visitor
+import beregning.AvdoedForelder
+import beregning.Barnepensjon1967Grunnlag
+import beregning.beregnBarnepensjonRegel
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.YearMonth
 
 class Barnepensjon1967Test {
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
@@ -21,18 +25,23 @@ class Barnepensjon1967Test {
             kilde = saksbehandler,
             beskrivelse = "Avdød forelders trygdetid",
             verdi = AvdoedForelder(trygdetid = BigDecimal(30))
+        ),
+        virkningstidspunkt = FaktumNode(
+            kilde = saksbehandler,
+            beskrivelse = "Virkningstidspunkt",
+            verdi = YearMonth.of(2024, 1)
         )
     )
 
     @Test
     fun `Regler skal representeres som et tre`() {
-        reduksjonMotFolketrygdRegel.accept(object : RegelVisitor {
+        beregnBarnepensjonRegel.accept(object : RegelVisitor {
             override fun visit(node: Regel<*, *>) {
                 println(node.beskrivelse)
             }
         })
         println("---------------")
-        reduksjonMotFolketrygdRegel.anvend(grunnlag).accept(object : Visitor {
+        beregnBarnepensjonRegel.anvend(grunnlag).accept(object : Visitor {
 
             override fun visit(node: Node<*>) {
             }
@@ -42,6 +51,6 @@ class Barnepensjon1967Test {
             }
         })
 
-        println(reduksjonMotFolketrygdRegel2.anvend(grunnlag).toJson())
+        println(beregnBarnepensjonRegel.anvend(grunnlag).toJson())
     }
 }

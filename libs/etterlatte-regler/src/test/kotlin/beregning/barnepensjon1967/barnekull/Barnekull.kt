@@ -1,7 +1,6 @@
 package beregning.barnepensjon1967.barnekull
 
 import Regel
-import RegelGrunnlag
 import ToDoRegelReferanse
 import beregning.BarnepensjonGrunnlag
 import beregning.barnepensjon1967.BP_1967_DATO
@@ -13,6 +12,7 @@ import regler.med
 import regler.multipliser
 import regler.og
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 private val grunnbeloep: Regel<BarnepensjonGrunnlag, BigDecimal> =
     finnFaktumIGrunnlag(
@@ -36,7 +36,7 @@ val prosentsatsFoersteBarnKonstant = definerKonstant<BarnepensjonGrunnlag, BigDe
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Prosentsats benyttet for første barn",
     regelReferanse = ToDoRegelReferanse(),
-    verdi = BigDecimal(0.4)
+    verdi = 0.40.toBigDecimal()
 )
 
 private val belopForFoersteBarn = RegelMeta(
@@ -49,7 +49,7 @@ val prosentsatsEtterfoelgendeBarnKonstant = definerKonstant<BarnepensjonGrunnlag
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Prosentsats benyttet for etterfølgende barn",
     regelReferanse = ToDoRegelReferanse(),
-    verdi = BigDecimal(0.25)
+    verdi = 0.25.toBigDecimal()
 )
 
 private val belopForEtterfoelgendeBarn = RegelMeta(
@@ -58,18 +58,11 @@ private val belopForEtterfoelgendeBarn = RegelMeta(
     regelReferanse = ToDoRegelReferanse()
 ) multipliser (prosentsatsEtterfoelgendeBarnKonstant og grunnbeloep)
 
-private val satser = RegelMeta(
-    gjelderFra = BP_1967_DATO,
-    beskrivelse = "Satser i kr for barn",
-    regelReferanse = ToDoRegelReferanse()
-) kombinerer belopForFoersteBarn og belopForEtterfoelgendeBarn med { forste, etterfolgende ->
-    forste to etterfolgende
-}
-
 val barnekullRegel = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
     regelReferanse = ToDoRegelReferanse()
-) kombinerer satser og antallSoeskenIKullet med { (foerstebarnSats, etterfoelgendeBarnSats), antallSoesken ->
+) kombinerer belopForFoersteBarn og belopForEtterfoelgendeBarn og antallSoeskenIKullet med {
+        foerstebarnSats, etterfoelgendeBarnSats, antallSoesken ->
     (foerstebarnSats + (etterfoelgendeBarnSats * antallSoesken.toBigDecimal())) / (antallSoesken + 1).toBigDecimal()
 }

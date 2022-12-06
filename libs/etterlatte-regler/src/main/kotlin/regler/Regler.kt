@@ -55,25 +55,58 @@ open class SlaaSammenToRegler<C : Any, D : Any, G : RegelGrunnlag, S, A : Regel<
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
     @JsonIgnore
-    val venstre: A,
+    val regel1: A,
     @JsonIgnore
-    val hoeyre: B,
+    val regel2: B,
     @JsonIgnore
     val slaasammenFunksjon: (C, D) -> S
 ) : Regel<G, S> {
     override fun accept(visitor: RegelVisitor) {
         visitor.visit(this)
-        venstre.accept(visitor)
-        hoeyre.accept(visitor)
+        regel1.accept(visitor)
+        regel2.accept(visitor)
     }
 
     override fun anvend(grunnlag: G): SubsumsjonsNode<S> {
-        val verdi1 = venstre.anvend(grunnlag)
-        val verdi2 = hoeyre.anvend(grunnlag)
+        val verdi1 = regel1.anvend(grunnlag)
+        val verdi2 = regel2.anvend(grunnlag)
         return SubsumsjonsNode(
             verdi = slaasammenFunksjon(verdi1.verdi, verdi2.verdi),
             regel = this,
             children = listOf(verdi1, verdi2)
+        )
+    }
+}
+
+open class SlaaSammenTreRegler<D : Any, E : Any, F : Any, G : RegelGrunnlag, S, A : Regel<G, D>, B : Regel<G, E>, C :
+        Regel<G, F>>(
+    override val gjelderFra: LocalDate,
+    override val beskrivelse: String,
+    override val regelReferanse: RegelReferanse,
+    @JsonIgnore
+    val regel1: A,
+    @JsonIgnore
+    val regel2: B,
+    @JsonIgnore
+    val regel3: C,
+    @JsonIgnore
+    val slaasammenFunksjon: (D, E, F) -> S
+) : Regel<G, S> {
+    override fun accept(visitor: RegelVisitor) {
+        visitor.visit(this)
+        regel1.accept(visitor)
+        regel2.accept(visitor)
+        regel3.accept(visitor)
+    }
+
+    override fun anvend(grunnlag: G): SubsumsjonsNode<S> {
+        val verdi1 = regel1.anvend(grunnlag)
+        val verdi2 = regel2.anvend(grunnlag)
+        val verdi3 = regel3.anvend(grunnlag)
+        return SubsumsjonsNode(
+            verdi = slaasammenFunksjon(verdi1.verdi, verdi2.verdi, verdi3.verdi),
+            regel = this,
+            children = listOf(verdi1, verdi2, verdi3)
         )
     }
 }

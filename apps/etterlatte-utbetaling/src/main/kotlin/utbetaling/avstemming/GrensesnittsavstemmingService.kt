@@ -15,6 +15,7 @@ class GrensesnittsavstemmingService(
     private val utbetalingDao: UtbetalingDao,
     private val clock: Clock
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentNestePeriode() = Avstemmingsperiode(
         fraOgMed = avstemmingDao.hentSisteGrensesnittavstemming()?.periode?.til ?: MIN_INSTANT,
@@ -24,7 +25,7 @@ class GrensesnittsavstemmingService(
     fun startGrensesnittsavstemming(
         periode: Avstemmingsperiode = hentNestePeriode()
     ) {
-        logger.info("Avstemmer fra ${periode.fraOgMed} til ${periode.til}")
+        logger.info("Grensesnittavstemmer fra ${periode.fraOgMed} til ${periode.til}")
         val utbetalinger = utbetalingDao.hentUtbetalinger(periode.fraOgMed, periode.til)
         val avstemmingId = UUIDBase64()
 
@@ -34,7 +35,9 @@ class GrensesnittsavstemmingService(
 
         val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
             val sendtAvstemmingsdata = avstemmingsdataSender.sendGrensesnittavstemming(avstemmingsdata)
-            logger.info("Avstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag")
+            logger.info(
+                "Grensesnittavstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag"
+            )
             sendtAvstemmingsdata
         }
 
@@ -49,12 +52,12 @@ class GrensesnittsavstemmingService(
         )
 
         logger.info(
-            "Avstemming fra ${periode.fraOgMed} til ${periode.til} fullført - ${utbetalinger.size} oppdrag ble avstemt"
+            "Grensesnittsvstemming fra ${periode.fraOgMed} til ${periode.til} fullført" +
+                " - ${utbetalinger.size} oppdrag ble avstemt"
         )
     }
 
     companion object {
         private val MIN_INSTANT = Tidspunkt(Instant.EPOCH)
-        private val logger = LoggerFactory.getLogger(AvstemmingsdataSender::class.java)
     }
 }

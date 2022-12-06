@@ -64,6 +64,7 @@ spec:
         - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-beregning
+        - application: etterlatte-api
     outbound:
       rules:
         - application: etterlatte-behandling

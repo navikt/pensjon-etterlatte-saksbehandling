@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.OppgaveService
 import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.VedtakKlient
 import no.nav.etterlatte.behandling.VedtakService
+import no.nav.etterlatte.behandling.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
@@ -31,6 +32,7 @@ class ApplicationContext(configLocation: String? = null) {
     private val vedtakKlient = VedtakKlient(config, httpClient())
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val beregningKlient = BeregningKlientImpl(config, httpClient())
+    private val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
     private val rapid: KafkaProdusent<String, String> =
         GcpKafkaConfig.fromEnv().standardProducer(System.getenv().getValue("KAFKA_RAPID_TOPIC"))
 
@@ -39,7 +41,8 @@ class ApplicationContext(configLocation: String? = null) {
         pdlKlient = PdltjenesterKlient(config, httpClient()),
         vedtakKlient = vedtakKlient,
         grunnlagKlient = grunnlagKlient,
-        beregningKlient = beregningKlient
+        beregningKlient = beregningKlient,
+        vilkaarsvurderingKlient = vilkaarsvurderingKlient
     )
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
     val vedtakService = VedtakService(rapid)

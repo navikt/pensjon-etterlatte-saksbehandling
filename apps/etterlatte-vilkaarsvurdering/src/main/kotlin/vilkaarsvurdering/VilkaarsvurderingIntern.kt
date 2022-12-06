@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import java.util.*
 
@@ -28,10 +29,3 @@ data class VilkaarsvurderingIntern(
         resultat = this.resultat
     )
 }
-
-data class VilkaarsvurderingDto(
-    val behandlingId: UUID,
-    val vilkaar: List<Vilkaar>,
-    val virkningstidspunkt: Virkningstidspunkt,
-    val resultat: VilkaarsvurderingResultat? = null
-)

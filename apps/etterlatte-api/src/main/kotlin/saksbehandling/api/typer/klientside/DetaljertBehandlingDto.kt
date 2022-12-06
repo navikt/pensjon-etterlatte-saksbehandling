@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.typer.LagretHendelse
 import java.time.Instant
 import java.time.LocalDateTime
@@ -18,7 +18,7 @@ data class DetaljertBehandlingDto(
     val id: UUID,
     val sak: Long,
     val gyldighetsprøving: GyldighetsResultat?,
-    val vilkårsprøving: Vilkaarsvurdering?,
+    val vilkårsprøving: VilkaarsvurderingDto?,
     val beregning: BeregningDTO?,
     val saksbehandlerId: String?,
     val fastsatt: Boolean?,

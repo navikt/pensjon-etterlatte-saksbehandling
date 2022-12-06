@@ -28,7 +28,8 @@ class BehandlingService(
     private val pdlKlient: PdltjenesterKlient,
     private val vedtakKlient: EtterlatteVedtak,
     private val grunnlagKlient: EtterlatteGrunnlag,
-    private val beregningKlient: BeregningKlient
+    private val beregningKlient: BeregningKlient,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
@@ -95,12 +96,18 @@ class BehandlingService(
         val gjenlevende = async { grunnlagKlient.finnPersonOpplysning(sakId, GJENLEVENDE_FORELDER_PDL_V1, accessToken) }
         val soeker = async { grunnlagKlient.finnPersonOpplysning(sakId, SOEKER_PDL_V1, accessToken) }
         val beregning = async { beregningKlient.hentBeregning(UUID.fromString(behandlingId), accessToken) }
+        val vilkaarsvurdering = async {
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(
+                UUID.fromString(behandlingId),
+                accessToken
+            )
+        }
         DetaljertBehandlingDto(
             id = behandling.await().id,
             sak = sakId,
             gyldighetsprøving = behandling.await().gyldighetsproeving,
             kommerBarnetTilgode = behandling.await().kommerBarnetTilgode,
-            vilkårsprøving = vedtak.await()?.vilkaarsResultat,
+            vilkårsprøving = vilkaarsvurdering.await(),
             beregning = beregning.await(),
             saksbehandlerId = vedtak.await()?.saksbehandlerId,
             fastsatt = vedtak.await()?.vedtakFattet,

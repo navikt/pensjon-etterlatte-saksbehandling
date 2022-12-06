@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
-import java.time.LocalDate
 import java.time.YearMonth
 
 class Barnepensjon1967Test {
@@ -27,7 +26,7 @@ class Barnepensjon1967Test {
         virkningstidspunkt = FaktumNode(
             kilde = saksbehandler,
             beskrivelse = "Virkningstidspunkt",
-            verdi = YearMonth.of(2024, 1)
+            verdi = YearMonth.of(2022, 1)
         )
     )
 
@@ -39,6 +38,7 @@ class Barnepensjon1967Test {
     @Test
     fun `Skal finne alle knekkpunktene i regelverket`() {
         val knekkpunkter = beregnBarnepensjonRegel.finnAlleKnekkpunkter()
+
         knekkpunkter.size shouldBe 2
     }
 }

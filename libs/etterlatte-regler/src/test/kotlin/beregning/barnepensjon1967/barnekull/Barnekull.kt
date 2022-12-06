@@ -1,6 +1,7 @@
 package beregning.barnepensjon1967.barnekull
 
 import Regel
+import RegelGrunnlag
 import ToDoRegelReferanse
 import beregning.BarnepensjonGrunnlag
 import beregning.barnepensjon1967.BP_1967_DATO
@@ -42,7 +43,7 @@ private val belopForFoersteBarn = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Satser i kr av for første barn",
     regelReferanse = ToDoRegelReferanse()
-) multipliser prosentsatsFoersteBarnKonstant med grunnbeloep
+) multipliser (prosentsatsFoersteBarnKonstant og grunnbeloep)
 
 val prosentsatsEtterfoelgendeBarnKonstant = definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
     gjelderFra = BP_1967_DATO,
@@ -55,7 +56,7 @@ private val belopForEtterfoelgendeBarn = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Satser i kr av for etterfølgende barn",
     regelReferanse = ToDoRegelReferanse()
-) multipliser prosentsatsEtterfoelgendeBarnKonstant med grunnbeloep
+) multipliser (prosentsatsEtterfoelgendeBarnKonstant og grunnbeloep)
 
 private val satser = RegelMeta(
     gjelderFra = BP_1967_DATO,

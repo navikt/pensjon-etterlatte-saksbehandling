@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
@@ -99,6 +100,30 @@ open class VelgNyesteGyldigRegel<G : RegelGrunnlag, S : Any>(
             verdi = regel.verdi,
             regel = this,
             children = listOf(regel)
+        )
+    }
+}
+
+open class GangSammenRegel<G : RegelGrunnlag>(
+    override val gjelderFra: LocalDate,
+    override val beskrivelse: String,
+    override val regelReferanse: RegelReferanse,
+    @JsonIgnore
+    val regler: List<Regel<G, BigDecimal>>
+) : Regel<G, BigDecimal> {
+    override fun accept(visitor: RegelVisitor) {
+        visitor.visit(this)
+        regler.forEach { regel -> regel.accept(visitor) }
+    }
+
+    override fun anvend(grunnlag: G): SubsumsjonsNode<BigDecimal> {
+        val noder = regler.map { it.anvend(grunnlag) }
+        val verdi = noder.map { r -> r.verdi }.reduce { acc, i -> acc * i }
+
+        return SubsumsjonsNode(
+            verdi = verdi,
+            regel = this,
+            children = noder
         )
     }
 }

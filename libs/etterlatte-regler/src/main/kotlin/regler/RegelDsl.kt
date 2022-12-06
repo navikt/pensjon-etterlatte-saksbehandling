@@ -2,6 +2,7 @@ package regler
 
 import FaktumNode
 import FinnFaktumIGrunnlagRegel
+import GangSammenRegel
 import Konstant
 import Regel
 import RegelGrunnlag
@@ -45,19 +46,16 @@ fun <G : RegelGrunnlag, S : Any> velgNyesteRegel(
     regler = regler
 )
 
-fun <G : RegelGrunnlag, A : Regel<G, BigDecimal>, B : Regel<G, BigDecimal>> gangSammenToRegler(
+fun <G : RegelGrunnlag> gangSammenRegler(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
-    regel1: A,
-    regel2: B
-) = SlaaSammenToRegler(
+    regler: List<Regel<G, BigDecimal>>
+): Regel<G, BigDecimal> = GangSammenRegel(
     gjelderFra = gjelderFra,
     beskrivelse = beskrivelse,
     regelReferanse = regelReferanse,
-    venstre = regel1,
-    hoeyre = regel2,
-    slaasammenFunksjon = { a: BigDecimal, b: BigDecimal -> a * b }
+    regler = regler
 )
 
 fun <G : RegelGrunnlag, T : Any, A : FaktumNode<T>, S> finnFaktumIGrunnlag(
@@ -87,7 +85,13 @@ fun <G : RegelGrunnlag, S> definerKonstant(
 )
 
 infix fun <G : RegelGrunnlag, A> RegelMeta.kombinerer(regel1: Regel<G, A>) = this to regel1
-infix fun <G : RegelGrunnlag, A> RegelMeta.multipliser(regel1: Regel<G, A>) = this to regel1
+infix fun <G : RegelGrunnlag> RegelMeta.multipliser(regler: List<Regel<G, BigDecimal>>) = gangSammenRegler(
+    gjelderFra = gjelderFra,
+    beskrivelse = beskrivelse,
+    regelReferanse = regelReferanse,
+    regler = regler
+)
+
 infix fun <G : RegelGrunnlag, A : Any> RegelMeta.velgNyesteGyldige(regler: List<Regel<G, A>>) = velgNyesteRegel(
     gjelderFra = gjelderFra,
     beskrivelse = beskrivelse,
@@ -108,12 +112,3 @@ infix fun <G : RegelGrunnlag, A : Any, B : Any, S> Pair<Pair<RegelMeta, Regel<G,
     regel2 = second,
     slaaSammenFunksjon = f
 )
-
-infix fun <G : RegelGrunnlag> Pair<RegelMeta, Regel<G, BigDecimal>>.med(b: Regel<G, BigDecimal>) =
-    gangSammenToRegler(
-        gjelderFra = first.gjelderFra,
-        beskrivelse = first.beskrivelse,
-        regelReferanse = first.regelReferanse,
-        regel1 = second,
-        regel2 = b
-    )

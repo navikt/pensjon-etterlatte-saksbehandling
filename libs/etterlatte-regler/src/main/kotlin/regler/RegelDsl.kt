@@ -87,7 +87,7 @@ fun <G : RegelGrunnlag, S> definerKonstant(
     beskrivelse: String,
     regelReferanse: RegelReferanse,
     verdi: S
-): Regel<G, S> = Konstant(
+): Regel<G, S> = KonstantRegel(
     gjelderFra,
     beskrivelse,
     regelReferanse,

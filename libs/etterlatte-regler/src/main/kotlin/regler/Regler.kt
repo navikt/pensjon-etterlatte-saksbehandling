@@ -83,6 +83,9 @@ open class SlaaSammenTreRegler<D : Any, E : Any, F : Any, G : RegelGrunnlag, S, 
     }
 }
 
+data class IngenGyldigeReglerPaaVirkningstidspunktException(val virk: YearMonth) :
+    Exception("Ingen gyldige regler er konfigurert for virkningstidspunkt: $virk")
+
 open class VelgNyesteGyldigRegel<G : RegelGrunnlag, S : Any>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
@@ -98,8 +101,9 @@ open class VelgNyesteGyldigRegel<G : RegelGrunnlag, S : Any>(
     override fun anvend(grunnlag: G): SubsumsjonsNode<S> {
         val regel = regler
             .filter { it.gjelderFra <= grunnlag.virkningstidspunkt.verdi.atDay(1) }
-            .maxBy { it.gjelderFra }
-            .anvend(grunnlag)
+            .maxByOrNull { it.gjelderFra }
+            ?.anvend(grunnlag)
+            ?: throw IngenGyldigeReglerPaaVirkningstidspunktException(grunnlag.virkningstidspunkt.verdi)
 
         return SubsumsjonsNode(
             verdi = regel.verdi,
@@ -156,7 +160,7 @@ open class FinnFaktumIGrunnlagRegel<G : RegelGrunnlag, T : Any, A : FaktumNode<T
     }
 }
 
-open class Konstant<G : RegelGrunnlag, S>(
+open class KonstantRegel<G : RegelGrunnlag, S>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,

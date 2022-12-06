@@ -1,8 +1,5 @@
-package beregning.barnepensjon1967
+package beregning
 
-import beregning.AvdoedForelder
-import beregning.BarnepensjonGrunnlag
-import beregning.beregnBarnepensjonRegel
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.toJson

@@ -1,11 +1,11 @@
 package beregning.barnepensjon2024
 
-import regler.ToDoRegelReferanse
 import beregning.BarnepensjonGrunnlag
 import beregning.barnepensjon1967.BP_1967_DATO
 import beregning.barnepensjon1967.kroneavrundingKonstant
 import beregning.barnepensjon1967.trygdetidsfaktor.trygdetidsFaktor
 import regler.RegelMeta
+import regler.ToDoRegelReferanse
 import regler.definerKonstant
 import regler.kombinerer
 import regler.med

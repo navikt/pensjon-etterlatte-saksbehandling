@@ -1,12 +1,12 @@
 package beregning
 
-import regler.FaktumNode
-import regler.RegelGrunnlag
-import regler.ToDoRegelReferanse
 import beregning.barnepensjon1967.BP_1967_DATO
 import beregning.barnepensjon1967.beregnBarnepensjon1967Regel
 import beregning.barnepensjon2024.beregnBarnepensjon2024Regel
+import regler.FaktumNode
+import regler.RegelGrunnlag
 import regler.RegelMeta
+import regler.ToDoRegelReferanse
 import regler.og
 import regler.velgNyesteGyldige
 import java.math.BigDecimal

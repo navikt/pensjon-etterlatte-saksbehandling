@@ -1,6 +1,8 @@
 package no.nav.etterlatte.utbetaling.config
 
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
+import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.common.Oppgavetrigger
 import no.nav.etterlatte.utbetaling.common.next
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
@@ -71,12 +73,14 @@ class ApplicationContext(
 
     val avstemmingDao = AvstemmingDao(dataSource)
 
-    val grensesnittsavstemmingService = GrensesnittsavstemmingService(
-        avstemmingDao = avstemmingDao,
-        avstemmingsdataSender = avstemmingsdataSender,
-        utbetalingDao = utbetalingDao,
-        clock = clock
-    )
+    val grensesnittsavstemmingService by lazy {
+        GrensesnittsavstemmingService(
+            avstemmingDao = avstemmingDao,
+            avstemmingsdataSender = avstemmingsdataSender,
+            utbetalingDao = utbetalingDao,
+            clock = clock
+        )
+    }
 
     val leaderElection = LeaderElection(properties.leaderElectorPath)
 
@@ -87,6 +91,22 @@ class ApplicationContext(
             starttidspunkt = ZonedDateTime.now(norskTidssone).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS)
         )
+
+    val konsistensavstemmingService by lazy {
+        KonsistensavstemmingService(
+            utbetalingDao,
+            avstemmingDao,
+            avstemmingsdataSender
+        )
+    }
+
+    val konsistensavstemmingJob = KonsistensavstemmingJob(
+        konsistensavstemmingService,
+        leaderElection,
+        starttidspunkt = ZonedDateTime.now(norskTidssone).next(LocalTime.of(3, 30, 0)),
+        periode = Duration.of(1, ChronoUnit.DAYS)
+
+    )
 
     val oppgavetrigger by lazy {
         Oppgavetrigger(

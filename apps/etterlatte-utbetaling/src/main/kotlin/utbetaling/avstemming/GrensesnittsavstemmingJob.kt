@@ -29,7 +29,7 @@ class GrensesnittsavstemmingJob(
                     jobbNavn = jobbNavn!!
                 ).run()
             } catch (throwable: Throwable) {
-                logger.error("Avstemming feilet", throwable)
+                logger.error("Grensesnittavstemming feilet", throwable)
             }
         }
 

@@ -1,17 +1,59 @@
 package utbetaling.avstemming
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.gjeldendeLinjerForEnDato
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
+import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.utbetalingslinje
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class KonsistensavstemmingServiceKtTest {
+
+    private val avstemmingDao: AvstemmingDao = mockk()
+    private val utbetalingDao: UtbetalingDao = mockk()
+    private val avstemmingsdataSender: AvstemmingsdataSender = mockk()
+
+    @Test
+    fun `skal starte konsistensavstemming for Barnepensjon`() {
+        val utbetaling = utbetaling()
+        every {
+            utbetalingDao.hentUtbetalingerForKonsistensavstemming(
+                any(),
+                any(),
+                Saktype.BARNEPENSJON
+            )
+        } returns listOf(utbetaling)
+
+        every { avstemmingsdataSender.sendKonsistensavstemming(any()) } returns "<xml>data</xml>"
+
+        val service = KonsistensavstemmingService(
+            utbetalingDao = utbetalingDao,
+            avstemmingDao = avstemmingDao,
+            avstemmingsdataSender = avstemmingsdataSender
+        )
+
+        val dag = LocalDate.of(2022, 10, 10)
+        val saktype = Saktype.BARNEPENSJON
+        val resultat = service.startKonsistensavstemming(dag, saktype)
+
+        assertTrue(resultat.all { it == "<xml>data</xml>" })
+        verify { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), Saktype.BARNEPENSJON) }
+        verify { avstemmingsdataSender.sendKonsistensavstemming(any()) }
+    }
 
     /**
      * Utbetalingslinjene er sendt inn paa ulike tidspunkter.

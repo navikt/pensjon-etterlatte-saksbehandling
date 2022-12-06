@@ -100,9 +100,7 @@ internal class AvstemmingDaoIntegrationTest {
         avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming2)
 
         val nyesteAvstemming = avstemmingDao.hentSisteGrensesnittavstemming(Saktype.BARNEPENSJON)
-
-        assertEquals(now, nyesteAvstemming?.opprettet)
-        assertEquals(1, nyesteAvstemming?.antallOppdrag)
+        assertEquals(grensesnittavstemming1, nyesteAvstemming)
     }
 
     @Test

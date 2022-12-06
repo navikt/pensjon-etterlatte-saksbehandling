@@ -12,8 +12,6 @@ import javax.sql.DataSource
 
 class AvstemmingDao(private val dataSource: DataSource) {
 
-    // fun opprettKonsistensavstemming(konsistensavstemming: Konsistensavstemming): Int =
-
     fun opprettGrensesnittavstemming(grensesnittavstemming: Grensesnittavstemming): Int =
         using(sessionOf(dataSource)) { session ->
             queryOf(

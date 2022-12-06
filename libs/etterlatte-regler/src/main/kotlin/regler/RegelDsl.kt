@@ -1,15 +1,5 @@
 package regler
 
-import FaktumNode
-import FinnFaktumIGrunnlagRegel
-import GangSammenRegel
-import Konstant
-import Regel
-import RegelGrunnlag
-import RegelReferanse
-import SlaaSammenToRegler
-import SlaaSammenTreRegler
-import VelgNyesteGyldigRegel
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -136,7 +126,8 @@ infix fun <G : RegelGrunnlag, A : Any, B : Any, S> Pair<Pair<RegelMeta, Regel<G,
     slaaSammenFunksjon = f
 )
 
-infix fun <G : RegelGrunnlag, A : Any, B : Any, C : Any, S> Triple<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>, Regel<G, C>>.med(
+infix fun <G : RegelGrunnlag, A : Any, B : Any, C : Any, S>
+Triple<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>, Regel<G, C>>.med(
     f: (A, B, C) -> S
 ) = slaaSammenTreRegler(
     gjelderFra = first.first.gjelderFra,

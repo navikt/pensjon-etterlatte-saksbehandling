@@ -1,11 +1,11 @@
 package beregning.barnepensjon1967.trygdetidsfaktor
 
-import Regel
-import ToDoRegelReferanse
 import beregning.AvdoedForelder
 import beregning.BarnepensjonGrunnlag
 import beregning.barnepensjon1967.BP_1967_DATO
+import regler.Regel
 import regler.RegelMeta
+import regler.ToDoRegelReferanse
 import regler.definerKonstant
 import regler.finnFaktumIGrunnlag
 import regler.kombinerer

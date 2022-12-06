@@ -1,10 +1,10 @@
 package beregning.barnepensjon1967.barnekull
 
-import Regel
-import ToDoRegelReferanse
 import beregning.BarnepensjonGrunnlag
 import beregning.barnepensjon1967.BP_1967_DATO
+import regler.Regel
 import regler.RegelMeta
+import regler.ToDoRegelReferanse
 import regler.definerKonstant
 import regler.finnFaktumIGrunnlag
 import regler.kombinerer
@@ -12,7 +12,6 @@ import regler.med
 import regler.multipliser
 import regler.og
 import java.math.BigDecimal
-import java.math.RoundingMode
 
 private val grunnbeloep: Regel<BarnepensjonGrunnlag, BigDecimal> =
     finnFaktumIGrunnlag(

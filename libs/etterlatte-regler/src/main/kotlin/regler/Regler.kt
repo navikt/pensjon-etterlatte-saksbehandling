@@ -1,7 +1,7 @@
+package regler
+
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -9,36 +9,8 @@ interface RegelGrunnlag {
     val virkningstidspunkt: FaktumNode<YearMonth>
 }
 
-sealed class Node<T>(
-    open val verdi: T,
-    val opprettet: Instant = Instant.now()
-) {
-    abstract fun accept(visitor: Visitor)
-}
-
-data class SubsumsjonsNode<T>(
-    override val verdi: T,
-    val regel: Regel<*, *>,
-    val children: List<Node<out Any>>
-) : Node<T>(verdi) {
-    override fun accept(visitor: Visitor) {
-        visitor.visit(this)
-        if (visitor is RegelVisitor) regel.accept(visitor)
-        children.forEach { it.accept(visitor) }
-    }
-}
-
-data class FaktumNode<T>(
-    override val verdi: T,
-    val kilde: Grunnlagsopplysning.Kilde,
-    val beskrivelse: String
-) : Node<T>(verdi) {
-    override fun accept(visitor: Visitor) {
-        visitor.visit(this)
-    }
-}
-
 interface RegelReferanse
+
 data class ToDoRegelReferanse(val beskrivelse: String = "ToDo: Legg til referanse") : RegelReferanse
 
 interface Regel<G : RegelGrunnlag, S> {
@@ -199,44 +171,4 @@ open class Konstant<G : RegelGrunnlag, S>(
         regel = this,
         children = listOf()
     )
-}
-
-interface Visitor {
-    fun visit(node: Node<*>)
-    fun visit(node: SubsumsjonsNode<*>)
-}
-
-interface RegelVisitor {
-    fun visit(regel: Regel<*, *>)
-}
-
-class FinnAlleReglerVisitor : Visitor {
-    val regler = mutableListOf<String>()
-    override fun visit(node: Node<*>) {}
-    override fun visit(node: SubsumsjonsNode<*>) {
-        regler += node.regel.beskrivelse
-    }
-}
-
-fun Node<*>.finnAlleRegler(): List<String> {
-    val finnAlleReglerVisitor = FinnAlleReglerVisitor()
-
-    accept(finnAlleReglerVisitor)
-
-    return finnAlleReglerVisitor.regler
-}
-
-class FinnRegelverkKnekkpunkter : RegelVisitor {
-    val knekkpunkter = mutableSetOf<LocalDate>()
-    override fun visit(regel: Regel<*, *>) {
-        knekkpunkter.add(regel.gjelderFra)
-    }
-}
-
-fun Regel<*, *>.finnAlleKnekkpunkter(): Set<LocalDate> {
-    val finnKnekkpunkterVisitor = FinnRegelverkKnekkpunkter()
-
-    accept(finnKnekkpunkterVisitor)
-
-    return finnKnekkpunkterVisitor.knekkpunkter
 }

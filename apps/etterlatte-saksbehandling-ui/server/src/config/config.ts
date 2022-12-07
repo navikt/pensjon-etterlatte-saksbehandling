@@ -35,4 +35,8 @@ export const ApiConfig = {
     url: process.env.BEREGNING_API_URL || 'https://etterlatte-beregning.dev.intern.nav.no',
     scope: process.env.BEREGNING_API_SCOPE || 'api://b07cf335-11fb-4efa-bd46-11f51afd5052/.default',
   },
+  vedtak: {
+    url: process.env.VEDTAK_API_URL || 'https://etterlatte-vedtak.dev.intern.nav.no',
+    scope: process.env.VEDTAK_API_SCOPE || 'api://069b1b2c-0a06-4cc9-8418-f100b8ff71be/.default',
+  },
 }

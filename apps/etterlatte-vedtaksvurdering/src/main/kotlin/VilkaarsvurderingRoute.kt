@@ -1,7 +1,9 @@
 package no.nav.etterlatte
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -9,6 +11,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -47,6 +50,12 @@ fun Route.vilkaarsvurderingRoute(service: VedtaksvurderingService) {
         }
     }
 
+    post("api/vedtak/attester/{behandlingId}") {
+        val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+        val saksbehandler = call.navIdent
+        call.respond(service.attesterVedtak(behandlingId, saksbehandler))
+    }
+
     post("vedtak") {
         logger.debug("Request om vedtak bolk")
         val request = call.receive<VedtakBolkRequest>()
@@ -54,5 +63,10 @@ fun Route.vilkaarsvurderingRoute(service: VedtaksvurderingService) {
         call.respond(VedtakBolkResponse(vedtak))
     }
 }
+
+val ApplicationCall.navIdent: String get() = principal<TokenValidationContextPrincipal>()!!
+    .context.getJwtToken("azure")
+    .jwtTokenClaims.getStringClaim("NAVident")!!
+
 private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
 private data class VedtakBolkResponse(val vedtak: List<Vedtak>)

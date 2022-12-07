@@ -23,21 +23,6 @@ class VedtakService(private val rapid: KafkaProdusent<String, String>) {
         return AttesteringResult("Fattet")
     }
 
-    fun attesterVedtak(behandlingId: String, saksbehandler: String): AttesteringResult {
-        rapid.publiser(
-            behandlingId,
-            JsonMessage.newMessage(
-                mapOf(
-                    eventNameKey to "SAKSBEHANDLER:ATTESTER_VEDTAK",
-                    "behandlingId" to behandlingId,
-                    "saksbehandler" to saksbehandler
-
-                )
-            ).toJson()
-        )
-        return AttesteringResult("Attestert")
-    }
-
     fun underkjennVedtak(
         behandlingId: String,
         begrunnelse: String,

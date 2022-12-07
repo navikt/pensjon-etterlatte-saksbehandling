@@ -12,6 +12,8 @@ import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.DistribusjonService
+import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.MottakerService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.brevRoute
@@ -27,6 +29,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.etterlatte.brev.behandling.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
@@ -48,14 +51,11 @@ class ApplicationBuilder {
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
 
     private val adresseService = AdresseService(norg2Klient, regoppslagKlient)
+    private val distribusjonService = DistribusjonService(::sendToRapid)
 
-    private val brevService = BrevService(
-        db,
-        pdfGenerator,
-        sakOgBehandlingService,
-        adresseService,
-        ::sendToRapid
-    )
+    private val brevService = BrevService(db, pdfGenerator, adresseService, distribusjonService)
+    private val vedtaksbrevService =
+        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, distribusjonService)
 
     private val journalpostService = JournalpostClient(httpClient(), env["SAF_BASE_URL"]!!, env["SAF_SCOPE"]!!)
 
@@ -64,6 +64,7 @@ class ApplicationBuilder {
             .withKtorModule {
                 apiModule {
                     brevRoute(brevService, mottakerService)
+                    vedtaksbrevRoute(vedtaksbrevService)
                     dokumentRoute(journalpostService)
                 }
             }
@@ -75,7 +76,7 @@ class ApplicationBuilder {
                     }
                 })
                 OppdaterDistribusjonStatus(this, db)
-                FerdigstillVedtaksbrev(this, brevService)
+                FerdigstillVedtaksbrev(this, vedtaksbrevService)
             }
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)

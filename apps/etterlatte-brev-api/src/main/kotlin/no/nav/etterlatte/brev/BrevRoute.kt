@@ -68,14 +68,6 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService) {
             call.respond(brev)
         }
 
-        post("behandling/{sakId}/{behandlingId}/vedtak") {
-            val sakId = call.parameters["sakId"]!!.toLong()
-            val behandlingId = call.parameters["behandlingId"]!!
-            val brev = service.oppdaterVedtaksbrev(sakId, behandlingId, getAccessToken(call))
-
-            call.respond(brev)
-        }
-
         post("forhaandsvisning") {
             val request = call.receive<OpprettBrevRequest>()
 

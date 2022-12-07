@@ -1,7 +1,7 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -13,7 +13,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
-internal class FerdigstillVedtaksbrev(rapidsConnection: RapidsConnection, private val brevService: BrevService) :
+internal class FerdigstillVedtaksbrev(rapidsConnection: RapidsConnection, private val service: VedtaksbrevService) :
     River.PacketListener {
     private val logger = LoggerFactory.getLogger(FerdigstillVedtaksbrev::class.java)
 
@@ -30,9 +30,9 @@ internal class FerdigstillVedtaksbrev(rapidsConnection: RapidsConnection, privat
                 val vedtak: Vedtak = objectMapper.readValue(packet["vedtak"].toJson())
                 logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
 
-                val brev = brevService.ferdigstillAttestertVedtak(vedtak)
+                val brevId = service.sendTilDistribusjon(vedtak)
 
-                logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er ferdigstilt (brevId = ${brev.id})")
+                logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er ferdigstilt (brevId=$brevId)")
             }
         } catch (e: Exception) {
             logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)

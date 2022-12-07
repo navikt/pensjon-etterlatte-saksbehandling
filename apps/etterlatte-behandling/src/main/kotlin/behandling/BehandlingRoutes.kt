@@ -155,23 +155,41 @@ fun Route.behandlingRoutes(
                 }
             }
 
-            post("/vilkaarsvurder") {
+            get("/vilkaarsvurder") {
                 foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId)
                 call.respond(HttpStatusCode.OK)
             }
-
-            post("/fatteVedtak") {
-                foerstegangsbehandlingService.settFattetVedtak(behandlingsId)
+            post("/vilkaarsvurder") {
+                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false)
                 call.respond(HttpStatusCode.OK)
             }
 
-            post("/returner") {
+            get("/fatteVedtak") {
+                foerstegangsbehandlingService.settFattetVedtak(behandlingsId)
+                call.respond(HttpStatusCode.OK)
+            }
+            post("/fatteVedtak") {
+                foerstegangsbehandlingService.settFattetVedtak(behandlingsId, false)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            get("/returner") {
                 foerstegangsbehandlingService.settReturnert(behandlingsId)
                 call.respond(HttpStatusCode.OK)
             }
 
-            post("/iverksett") {
+            post("/returner") {
+                foerstegangsbehandlingService.settReturnert(behandlingsId, false)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            get("/iverksett") {
                 foerstegangsbehandlingService.settIverksatt(behandlingsId)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            post("/iverksett") {
+                foerstegangsbehandlingService.settIverksatt(behandlingsId, false)
                 call.respond(HttpStatusCode.OK)
             }
         }

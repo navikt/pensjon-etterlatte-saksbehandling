@@ -25,12 +25,12 @@ interface FoerstegangsbehandlingService {
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun lagreVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
-    fun settVilkaarsvurdert(behandlingId: UUID)
-    fun settBeregnet(behandlingId: UUID)
-    fun settFattetVedtak(behandlingId: UUID)
-    fun settAttestert(behandlingId: UUID)
-    fun settReturnert(behandlingId: UUID)
-    fun settIverksatt(behandlingId: UUID)
+    fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
+    fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
+    fun settFattetVedtak(behandlingId: UUID, dryRun: Boolean = true)
+    fun settAttestert(behandlingId: UUID, dryRun: Boolean = true)
+    fun settReturnert(behandlingId: UUID, dryRun: Boolean = true)
+    fun settIverksatt(behandlingId: UUID, dryRun: Boolean = true)
 }
 
 class RealFoerstegangsbehandlingService(
@@ -85,28 +85,34 @@ class RealFoerstegangsbehandlingService(
         }
     }
 
-    override fun settVilkaarsvurdert(behandlingId: UUID) {
-        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert())
+    override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert().lagreEndring(dryRun)
     }
 
-    override fun settBeregnet(behandlingId: UUID) {
-        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilBeregnet())
+    override fun settBeregnet(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilBeregnet().lagreEndring(dryRun)
     }
 
-    override fun settFattetVedtak(behandlingId: UUID) {
-        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilFattetVedtak())
+    override fun settFattetVedtak(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilFattetVedtak().lagreEndring(dryRun)
     }
 
-    override fun settAttestert(behandlingId: UUID) {
-        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilAttestert())
+    override fun settAttestert(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilAttestert().lagreEndring(dryRun)
     }
 
-    override fun settReturnert(behandlingId: UUID) {
-        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilReturnert())
+    override fun settReturnert(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilReturnert().lagreEndring(dryRun)
     }
 
-    override fun settIverksatt(behandlingId: UUID) {
-        lagreNyBehandlingStatus(hentFoerstegangsbehandling(behandlingId).tilIverksatt())
+    override fun settIverksatt(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilIverksatt().lagreEndring(dryRun)
+    }
+
+    private fun Foerstegangsbehandling.lagreEndring(dryRun: Boolean) {
+        if (dryRun) return
+
+        lagreNyBehandlingStatus(this)
     }
 
     private fun lagreNyBehandlingStatus(behandling: Foerstegangsbehandling) {

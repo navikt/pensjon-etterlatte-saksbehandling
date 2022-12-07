@@ -39,11 +39,11 @@ sealed class Behandling {
 
     val oppgaveStatus get() = OppgaveStatus.from(status)
 
-    fun <T : Behandling> hvisRedigerbar(block: () -> T): T {
+    protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {
         if (kanRedigeres) return block() else kastFeilTilstand()
     }
 
-    fun <T : Behandling> hvisTilstandEr(behandlingStatus: BehandlingStatus, block: () -> T): T {
+    protected fun <T : Behandling> hvisTilstandEr(behandlingStatus: BehandlingStatus, block: () -> T): T {
         if (status == behandlingStatus) return block() else kastFeilTilstand()
     }
 

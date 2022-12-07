@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -20,6 +21,7 @@ import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
+import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -59,7 +61,8 @@ class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository,
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
-    private val behandlingKlient: BehandlingKlient
+    private val behandlingKlient: BehandlingKlient,
+    private val sendToRapid: (String, UUID) -> Unit
 ) : VedlikeholdService {
 
     fun lagreVilkaarsresultat(
@@ -190,7 +193,18 @@ class VedtaksvurderingService(
             vedtak.vedtakId,
             utbetalingsperioderFraVedtak(vedtak)
         )
-        return requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
+        val attestertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
+
+        val message = JsonMessage.newMessage("VEDTAK:ATTESTERT")
+            .apply {
+                this["vedtak"] = attestertVedtak
+                this["vedtakId"] = attestertVedtak.vedtakId
+                this["sakId"] = attestertVedtak.sak.id
+                this["eventtimestamp"] = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!
+            }
+        sendToRapid(message.toJson(), behandlingId)
+
+        return attestertVedtak
     }
 
     private fun requireThat(b: Boolean, function: () -> Exception) {

@@ -62,14 +62,14 @@ internal class DBTest {
 
     fun lagreIverksattVedtak() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, beregning, vilkaarsvurdering, behandling)
+        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, beregning, vilkaarsvurdering, behandling, mockk())
         vedtaksvurderingService.lagreIverksattVedtak(uuid)
     }
 
     @Test
     fun testDB() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, beregning, vilkaarsvurdering, behandling)
+        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, beregning, vilkaarsvurdering, behandling, mockk())
 
         val beregningDTO = BeregningDTO(
             UUID.randomUUID(),

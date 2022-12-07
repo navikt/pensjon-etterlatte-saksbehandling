@@ -53,7 +53,8 @@ fun Route.vilkaarsvurderingRoute(service: VedtaksvurderingService) {
     post("api/vedtak/attester/{behandlingId}") {
         val behandlingId = UUID.fromString(call.parameters["behandlingId"])
         val saksbehandler = call.navIdent
-        call.respond(service.attesterVedtak(behandlingId, saksbehandler))
+        val attestert = service.attesterVedtak(behandlingId, saksbehandler)
+        call.respond(attestert)
     }
 
     post("vedtak") {

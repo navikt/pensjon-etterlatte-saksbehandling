@@ -33,7 +33,6 @@ import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
-import no.nav.etterlatte.vedtaksvurdering.rivers.AttesterVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.FattVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreBeregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
@@ -65,26 +64,28 @@ class ApplicationBuilder {
         vedtakRepo,
         beregningKlient,
         vilkaarsvurderingKlient,
-        behandlingKlient
+        behandlingKlient,
+        ::publiser
     )
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {
-                restModule(vedtaksvurderingService)
+                restModule(vedtaksvurderingService = vedtaksvurderingService)
             }
             .build()
             .apply {
                 LagreVilkaarsresultat(this, vedtaksvurderingService)
                 LagreBeregningsresultat(this, vedtaksvurderingService)
                 FattVedtak(this, vedtaksvurderingService)
-                AttesterVedtak(this, vedtaksvurderingService)
                 UnderkjennVedtak(this, vedtaksvurderingService)
                 LagreIverksattVedtak(this, vedtaksvurderingService)
                 registrerVedlikeholdsriver(vedtaksvurderingService)
             }
 
     fun start() = rapidsConnection.start()
+
+    fun publiser(melding: String, key: UUID) { rapidsConnection.publish(message = melding, key = key.toString()) }
 }
 
 fun Application.restModule(

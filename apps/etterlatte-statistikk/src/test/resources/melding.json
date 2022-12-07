@@ -178,13 +178,5 @@
       "attesterendeEnhet": "0000",
       "tidspunkt": "2022-09-20T11:43:19.002997Z"
     }
-  },
-  "vedtakId": 217,
-  "sakId": 45,
-  "eventtimestamp": "2022-09-20T11:43:19.002997Z",
-  "@forårsaket_av": {
-    "id": "e162d8d5-981c-430a-a8ac-e13210321a96",
-    "opprettet": "2022-09-20T13:43:18.971780666",
-    "event_name": "SAKSBEHANDLER:ATTESTER_VEDTAK"
   }
 }

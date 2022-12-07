@@ -21,6 +21,8 @@ dependencies {
     implementation(Jackson.ModuleKotlin)
 
     implementation(NavFelles.TokenValidationKtor2)
+    implementation(project(":libs:ktor2client-onbehalfof"))
+    implementation(project(":libs:etterlatte-ktor"))
 
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)

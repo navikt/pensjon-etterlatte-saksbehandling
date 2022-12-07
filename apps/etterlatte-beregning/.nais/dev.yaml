@@ -65,3 +65,4 @@ spec:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-api
+        - application: etterlatte-vedtaksvurdering

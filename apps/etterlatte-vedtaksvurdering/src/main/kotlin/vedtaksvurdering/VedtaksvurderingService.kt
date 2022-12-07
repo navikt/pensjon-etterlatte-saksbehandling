@@ -18,6 +18,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
+import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -57,7 +59,9 @@ class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: Vedtak) :
 }
 
 class VedtaksvurderingService(
-    private val repository: VedtaksvurderingRepository
+    private val repository: VedtaksvurderingRepository,
+    private val beregningKlient: BeregningKlient,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) : VedlikeholdService {
 
     fun lagreVilkaarsresultat(
@@ -122,6 +126,14 @@ class VedtaksvurderingService(
 
     fun hentVedtak(behandlingId: UUID): VedtakEntity? {
         return repository.hentVedtak(behandlingId)
+    }
+
+    suspend fun populerOgHentFellesVedtak(behandlingId: UUID, accessToken: String): Vedtak? {
+        val beregning = beregningKlient.hentBeregning(behandlingId, accessToken)
+        val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
+
+        // lagreBeregningsresultat()
+        return hentFellesVedtak(behandlingId)
     }
 
     fun hentFellesVedtak(behandlingId: UUID): Vedtak? {

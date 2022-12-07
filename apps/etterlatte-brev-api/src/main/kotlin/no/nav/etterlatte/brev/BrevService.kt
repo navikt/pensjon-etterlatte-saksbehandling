@@ -1,35 +1,18 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.Behandling
-import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
-import no.nav.etterlatte.brev.model.AnnetBrevRequest
-import no.nav.etterlatte.brev.model.AvslagBrevRequest
-import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
-import no.nav.etterlatte.libs.common.brev.model.Adresse
+import no.nav.etterlatte.brev.model.AnnetBrevRequest
+import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.brev.model.Brev
-import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.brev.model.BrevID
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
-import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
-import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
-import no.nav.etterlatte.libs.common.journalpost.Bruker
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
-import java.util.UUID
 import no.nav.etterlatte.brev.model.Mottaker as BrevMottaker
 
 class BrevService(

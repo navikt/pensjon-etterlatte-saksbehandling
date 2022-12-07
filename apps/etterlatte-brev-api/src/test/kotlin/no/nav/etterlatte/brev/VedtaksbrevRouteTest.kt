@@ -19,7 +19,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.apiModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.mock.oauth2.http.json
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals

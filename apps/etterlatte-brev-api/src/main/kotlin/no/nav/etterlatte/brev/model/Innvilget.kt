@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.brev.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 
 data class InnvilgetBrevRequest(

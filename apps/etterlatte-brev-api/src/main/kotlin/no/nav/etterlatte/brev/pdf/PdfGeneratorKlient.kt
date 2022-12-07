@@ -9,9 +9,8 @@ import io.ktor.client.request.setBody
 import no.nav.etterlatte.brev.model.BrevRequest
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import java.util.*
+import java.util.UUID
 
 class PdfGeneratorKlient(private val client: HttpClient, private val apiUrl: String) {
     suspend fun genererPdf(brevRequest: BrevRequest): ByteArray = try {

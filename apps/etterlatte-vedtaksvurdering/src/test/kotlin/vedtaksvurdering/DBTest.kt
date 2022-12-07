@@ -49,7 +49,7 @@ internal class DBTest {
     private val behandling = mockk<BehandlingKlient>(relaxed = true)
 
     private val uuid = UUID.randomUUID()
-    private val sakId = 12321423523545L
+    private val sakId = 123L
 
     @BeforeAll
     fun beforeAll() {
@@ -112,7 +112,7 @@ internal class DBTest {
         coEvery { beregning.hentBeregning(any(), any()) } returns beregningDTO
         coEvery { behandling.hentBehandling(any(), any()) } returns DetaljertBehandling(
             uuid,
-            4L,
+            sakId,
             LocalDateTime.now(),
             LocalDateTime.now(),
             LocalDateTime.now(),

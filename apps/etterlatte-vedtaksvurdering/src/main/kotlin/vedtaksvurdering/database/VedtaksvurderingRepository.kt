@@ -255,7 +255,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             }
             val s = it.prepareStatement("select behandlingId, sakId from vedtak").executeQuery()
             if (s.next()) {
-                val sakdId = s.getString("sakId")
+                val sakdId = s.getString("sakid")
                 val behandlingId = s.getString("behandlingId")
                 println("sakdi: $sakdId   beeahndling: $behandlingId")
             }
@@ -319,13 +319,13 @@ private object Queries {
     val underkjennVedtak =
         "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
     val setSakId =
-        "UPDATE vedtak SET sakId = ? WHERE behandlingId = ?"
+        "UPDATE vedtak SET sakid = ? WHERE behandlingId = ?"
     val hentVedtakBolk =
-        "SELECT sakId, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat," +
+        "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat," +
             "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
             "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(?)"
     val hentVedtak =
-        "SELECT sakId, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
+        "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
 
     val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE behandlingId = ?"
     val lagreDatoVirkFom =
@@ -336,8 +336,8 @@ private object Queries {
         "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"
     val hentUtbetalingsperiode = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?"
     val slettUtbetalingsperioderISak =
-        "DELETE FROM utbetalingsperiode WHERE vedtakid in (SELECT id from vedtak where sakId = ?)"
-    val slettVedtakISak = "DELETE FROM vedtak WHERE sakId = ?"
+        "DELETE FROM utbetalingsperiode WHERE vedtakid in (SELECT id from vedtak where sakid = ?)"
+    val slettVedtakISak = "DELETE FROM vedtak WHERE sakid = ?"
     val lagreIverksattVedtak = "UPDATE vedtak SET vedtakstatus = ? WHERE behandlingId = ?"
 }
 

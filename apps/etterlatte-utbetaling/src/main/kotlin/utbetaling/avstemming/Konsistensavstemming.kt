@@ -14,7 +14,7 @@ data class Konsistensavstemming(
     val id: UUIDBase64,
     val sakType: Saktype,
     val opprettet: Tidspunkt,
-    val avstemmingXmlRequest: String?,
+    val avstemmingsdata: String?,
     val loependeFraOgMed: Tidspunkt,
     val opprettetTilOgMed: Tidspunkt,
     val loependeUtbetalinger: List<OppdragForKonsistensavstemming>

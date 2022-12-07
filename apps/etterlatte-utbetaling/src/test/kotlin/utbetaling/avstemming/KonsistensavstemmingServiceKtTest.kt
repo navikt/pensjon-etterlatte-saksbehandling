@@ -37,6 +37,7 @@ internal class KonsistensavstemmingServiceKtTest {
                 Saktype.BARNEPENSJON
             )
         } returns listOf(utbetaling)
+        every { avstemmingDao.opprettKonsistensavstemming(any()) } returns 1
 
         every { avstemmingsdataSender.sendKonsistensavstemming(any()) } returns "<xml>data</xml>"
 
@@ -101,7 +102,7 @@ internal class KonsistensavstemmingServiceKtTest {
      * 3:         | (OPPHOER)
      */
     @Test
-    fun `gjeldendeLinjerForEnDato håndterer opphør korrekt`() {
+    fun `gjeldendeLinjerForEnDato haandterer opphoer korrekt`() {
         val linje1 = utbetalingslinje(
             utbetalingslinjeId = 1,
             periodeFra = LocalDate.of(1998, 1, 1),

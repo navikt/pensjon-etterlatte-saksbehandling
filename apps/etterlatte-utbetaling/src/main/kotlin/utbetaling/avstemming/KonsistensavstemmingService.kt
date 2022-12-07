@@ -45,7 +45,11 @@ class KonsistensavstemmingService(
             xmlMelding
         }
 
-        // TODO: EY-1225 lagre ned konsistensavstemming i DB
+        avstemmingDao.opprettKonsistensavstemming(
+            konsistensavstemming.copy(
+                avstemmingsdata = sendtAvstemmingsdata.joinToString("\n")
+            )
+        )
 
         logger.info("Konsistensavstemming for ${saktype.name} paa dato $dag utfoert")
         return sendtAvstemmingsdata
@@ -129,7 +133,7 @@ class KonsistensavstemmingService(
             id = UUIDBase64(),
             sakType = saktype,
             opprettet = Tidspunkt(instant = Instant.now()),
-            avstemmingXmlRequest = null,
+            avstemmingsdata = null,
             loependeFraOgMed = loependeYtelseFom,
             opprettetTilOgMed = registrertFoerTom,
             loependeUtbetalinger = loependeUtbetalinger

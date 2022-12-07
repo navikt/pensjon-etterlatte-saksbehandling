@@ -18,6 +18,8 @@ import {
   VilkaarsvurderingResultat,
   VurderingsResultat,
 } from '~shared/api/vilkaarsvurdering'
+import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
+
 interface VilkaarOption {
   value: string
   label: string
@@ -25,7 +27,9 @@ interface VilkaarOption {
 
 export const Vedtaksbrev = () => {
   const { behandlingId } = useParams()
-  const { sak, soeknadMottattDato, behandlingType } = useAppSelector((state) => state.behandlingReducer.behandling)
+  const { sak, soeknadMottattDato, behandlingType, status } = useAppSelector(
+    (state) => state.behandlingReducer.behandling
+  )
 
   const [fileURL, setFileURL] = useState<string>()
   const [vedtaksbrevId, setVedtaksbrevId] = useState<string>()
@@ -129,7 +133,7 @@ export const Vedtaksbrev = () => {
 
       <BrevContentFooter>
         <BehandlingHandlingKnapper>
-          <SendTilAttesteringModal />
+          {status === IBehandlingStatus.UNDER_BEHANDLING && <SendTilAttesteringModal />}
         </BehandlingHandlingKnapper>
       </BrevContentFooter>
     </Content>

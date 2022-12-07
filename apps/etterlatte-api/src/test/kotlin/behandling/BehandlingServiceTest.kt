@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.EtterlatteVedtak
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.Vedtak
+import no.nav.etterlatte.behandling.VilkaarsvurderingKlient
 import no.nav.etterlatte.behandling.VirkningstidspunktResponse
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
@@ -32,7 +33,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.typer.LagretHendelse
@@ -65,6 +66,9 @@ internal class BehandlingServiceTest {
 
     @MockK
     lateinit var beregningKlient: BeregningKlient
+
+    @MockK
+    lateinit var vilkaarsvurderingKlient: VilkaarsvurderingKlient
 
     @InjectMockKs
     lateinit var service: BehandlingService
@@ -137,17 +141,18 @@ internal class BehandlingServiceTest {
             behandlingid,
             null,
             null,
-            Vilkaarsvurdering(
-                UUID.randomUUID(),
-                emptyList(),
-                Virkningstidspunkt(YearMonth.of(2022, 1), Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now())),
-                VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), "ABV")
-            ),
+            null,
             null,
             null,
             null,
             null,
             null
+        )
+        val vilkaarsvurdering = VilkaarsvurderingDto(
+            UUID.randomUUID(),
+            emptyList(),
+            Virkningstidspunkt(YearMonth.of(2022, 1), Grunnlagsopplysning.Saksbehandler("Z1000", Instant.now())),
+            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), "ABV")
         )
         val hendelser = LagretHendelser(
             hendelser = listOf(
@@ -205,6 +210,7 @@ internal class BehandlingServiceTest {
         coEvery { vedtakKlient.hentVedtak(behandlingid.toString(), accessToken) } returns vedtak
         coEvery { behandlingKlient.hentHendelserForBehandling(behandlingid.toString(), accessToken) } returns hendelser
         coEvery { beregningKlient.hentBeregning(behandlingid, accessToken) } returns null
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingid, accessToken) } returns vilkaarsvurdering
         coEvery {
             grunnlagKlient.finnPersonOpplysning(
                 4L,

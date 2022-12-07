@@ -5,6 +5,13 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDateTime
 import java.util.*
 
+data class VilkaarsvurderingDto(
+    val behandlingId: UUID,
+    val vilkaar: List<Vilkaar>,
+    val virkningstidspunkt: Virkningstidspunkt,
+    val resultat: VilkaarsvurderingResultat? = null
+)
+
 data class Vilkaarsvurdering(
     val behandlingId: UUID,
     val vilkaar: List<Vilkaar>,

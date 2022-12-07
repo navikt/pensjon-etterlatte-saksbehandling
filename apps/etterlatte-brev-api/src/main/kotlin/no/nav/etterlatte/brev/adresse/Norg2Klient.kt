@@ -1,4 +1,4 @@
-package no.nav.etterlatte.norg2
+package no.nav.etterlatte.brev.adresse
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.github.benmanes.caffeine.cache.Caffeine

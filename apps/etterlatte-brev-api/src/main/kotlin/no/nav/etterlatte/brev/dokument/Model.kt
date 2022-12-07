@@ -1,4 +1,4 @@
-package no.nav.etterlatte.dokument
+package no.nav.etterlatte.brev.dokument
 
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.adresse
+package no.nav.etterlatte.brev.adresse
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -8,13 +8,13 @@ import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.brev.model.RegoppslagResponseDTO
 import org.slf4j.LoggerFactory
 
-class AdresseKlient(
+class RegoppslagKlient(
     private val client: HttpClient,
     private val url: String,
-) : AdresseService {
-    private val logger = LoggerFactory.getLogger(AdresseService::class.java)
+) {
+    private val logger = LoggerFactory.getLogger(RegoppslagKlient::class.java)
 
-    override suspend fun hentMottakerAdresse(ident: String): RegoppslagResponseDTO = try {
+    suspend fun hentMottakerAdresse(ident: String): RegoppslagResponseDTO = try {
         logger.info("Henter mottakere fra regoppslag")
         client.get("$url/regoppslag/${ident}") {
             header("x_correlation_id", getXCorrelationId())

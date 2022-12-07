@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grunnbeloep
+package no.nav.etterlatte.brev.grunnbeloep
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.pdf
+package no.nav.etterlatte.brev.pdf
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
@@ -9,12 +9,13 @@ import io.ktor.client.request.setBody
 import no.nav.etterlatte.brev.model.BrevRequest
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.util.*
 
 class PdfGeneratorKlient(private val client: HttpClient, private val apiUrl: String) {
     suspend fun genererPdf(brevRequest: BrevRequest): ByteArray = try {
-        client.post(apiUrl + brevRequest.brevMalUrl()) {
+        client.post("$apiUrl/genpdf/brev${brevRequest.brevMalUrl()}") {
             header("Content-Type", "application/json")
             header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
             setBody(brevRequest.toJsonNode())

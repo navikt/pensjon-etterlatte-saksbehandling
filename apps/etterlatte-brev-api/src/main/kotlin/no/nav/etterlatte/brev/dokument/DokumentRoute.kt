@@ -1,4 +1,4 @@
-package no.nav.etterlatte.dokument
+package no.nav.etterlatte.brev.dokument
 
 import io.ktor.server.application.call
 import io.ktor.server.response.respond

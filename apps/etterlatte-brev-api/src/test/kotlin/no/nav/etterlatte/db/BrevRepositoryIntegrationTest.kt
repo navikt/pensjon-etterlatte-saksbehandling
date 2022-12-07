@@ -1,6 +1,7 @@
 package no.nav.etterlatte.db
 
-import no.nav.etterlatte.DataSourceBuilder
+import no.nav.etterlatte.brev.db.DataSourceBuilder
+import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.Mottaker

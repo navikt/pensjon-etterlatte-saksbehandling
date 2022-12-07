@@ -1,15 +1,13 @@
 package no.nav.etterlatte.brev
 
-import no.nav.etterlatte.adresse.AdresseService
+import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.model.AnnetBrevRequest
-import no.nav.etterlatte.brev.model.Avsender
-import no.nav.etterlatte.brev.model.Mottaker as BrevMottaker
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
-import no.nav.etterlatte.db.BrevRepository
-import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
-import no.nav.etterlatte.grunnlag.Persongalleri
-import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
@@ -28,20 +26,16 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.norg2.Norg2Klient
-import no.nav.etterlatte.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.vedtak.VedtakService
+import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
+import no.nav.etterlatte.brev.model.Mottaker as BrevMottaker
 
 class BrevService(
     private val db: BrevRepository,
     private val pdfGenerator: PdfGeneratorKlient,
-    private val vedtakService: VedtakService,
-    private val grunnlagService: GrunnlagService,
-    private val norg2Klient: Norg2Klient,
-    private val grunnbeloepKlient: GrunnbeloepKlient,
+    private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
     private val sendToRapid: (String) -> Unit
 ) {
@@ -65,17 +59,13 @@ class BrevService(
 
     suspend fun opprett(mottaker: Mottaker, mal: Mal, enhet: String): BrevInnhold {
         val brevMottaker = when {
-            mottaker.foedselsnummer != null -> BrevMottaker.fraRegoppslag(
-                adresseService.hentMottakerAdresse(mottaker.foedselsnummer!!.value)
-            )
-            mottaker.orgnummer != null -> BrevMottaker.fraRegoppslag(
-                adresseService.hentMottakerAdresse(mottaker.orgnummer!!)
-            )
+            mottaker.foedselsnummer != null -> adresseService.hentMottakerAdresse(mottaker.foedselsnummer!!.value)
+            mottaker.orgnummer != null -> adresseService.hentMottakerAdresse(mottaker.orgnummer!!)
             mottaker.adresse != null -> BrevMottaker.fraAdresse(adresse = mottaker.adresse!!)
             else -> throw Exception("Ingen brevmottaker spesifisert")
         }
 
-        val avsender = hentAvsender(enhet)
+        val avsender = adresseService.hentAvsenderEnhet(enhet)
 
         val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker)
 
@@ -87,10 +77,8 @@ class BrevService(
     }
 
     suspend fun oppdaterVedtaksbrev(sakId: Long, behandlingId: String, accessToken: String = ""): BrevID {
-        val vedtak = vedtakService.hentVedtak(behandlingId, accessToken)
-        val grunnlag = grunnlagService.hentGrunnlag(sakId, accessToken)
-
-        val nyttBrev = opprettNyttBrevFraVedtak(vedtak, grunnlag, behandlingId)
+        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, accessToken)
+        val nyttBrev = opprettNyttBrevFraVedtak(behandling)
 
         val vedtaksbrev = db.hentBrevForBehandling(behandlingId)
             .find { it.erVedtaksbrev }
@@ -119,10 +107,7 @@ class BrevService(
             throw RuntimeException("Vedtaksbrev skal ikke ferdigstilles manuelt!")
         }
 
-        // todo: vedtak må byttes ut med grunnlag for å fungere på behandlinger også.
-        val vedtak = vedtakService.hentVedtak(brev.behandlingId, "") // TODO: token
-
-        return ferdigstill(brev, vedtak)
+        return ferdigstill(brev, TODO())
     }
 
     private fun ferdigstill(brev: Brev, vedtak: Vedtak): Brev {
@@ -132,20 +117,17 @@ class BrevService(
         return brev
     }
 
-    private suspend fun opprettNyttBrevFraVedtak(
-        vedtak: Vedtak,
-        grunnlag: Persongalleri,
-        behandlingId: String? = null
-    ): UlagretBrev {
+    private suspend fun opprettNyttBrevFraVedtak(behandling: Behandling): UlagretBrev {
+        val (_, behandlingId, persongalleri, vedtak) = behandling
+
         val enhet = vedtak.vedtakFattet?.ansvarligEnhet
             ?: "0805" // TODO: Midlertidig Porsgrunn inntil vedtak inneholder gyldig enhet
-        val avsender = hentAvsender(enhet)
-        val grunnbeloep = grunnbeloepKlient.hentGrunnbeloep()
-        val mottaker = hentMottaker(grunnlag.innsender.fnr)
+        val avsender = adresseService.hentAvsenderEnhet(enhet)
+        val mottaker = adresseService.hentMottakerAdresse(persongalleri.innsender.fnr)
 
         val brevRequest = when (vedtak.type) {
-            VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(vedtak, grunnlag, avsender, mottaker, grunnbeloep)
-            VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(vedtak, grunnlag, avsender)
+            VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker)
+            VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(behandling, avsender, mottaker)
             else -> throw Exception("Vedtakstype er ikke støttet: ${vedtak.type}")
         }
 
@@ -156,12 +138,12 @@ class BrevService(
         val tittel = "Vedtak om ${vedtak.type.name.lowercase()}"
 
         return UlagretBrev(
-            behandlingId = behandlingId ?: vedtak.behandling.id.toString(),
+            behandlingId,
             tittel,
             Mottaker(
-                foedselsnummer = Foedselsnummer.of(grunnlag.innsender.fnr),
+                foedselsnummer = Foedselsnummer.of(persongalleri.innsender.fnr),
                 adresse = Adresse(
-                    grunnlag.innsender.navn
+                    persongalleri.innsender.navn
                     // TODO: skrive om objekter
                 )
             ),
@@ -169,10 +151,6 @@ class BrevService(
             pdf
         )
     }
-
-    private suspend fun hentMottaker(ident: String): BrevMottaker =
-        adresseService.hentMottakerAdresse(ident)
-            .let { BrevMottaker.fraRegoppslag(it) }
 
     private fun opprettDistribusjonsmelding(brev: Brev, vedtak: Vedtak): String =
         DistribusjonMelding(
@@ -198,26 +176,4 @@ class BrevService(
             ).toJson()
         }
 
-    private suspend fun hentAvsender(navEnhetNr: String): Avsender {
-        val enhet = norg2Klient.hentEnhet(navEnhetNr)
-
-        // TODO: Hva gjør vi dersom postadresse mangler?
-        val postadresse = enhet.kontaktinfo?.postadresse
-
-        val kontor = enhet.navn ?: "NAV"
-        val adresse = when (postadresse?.type) {
-            "stedsadresse" -> postadresse.let { "${it.gatenavn} ${it.husnummer}${it.husbokstav ?: ""}" }
-            "postboksadresse" -> "Postboks ${postadresse.postboksnummer} ${postadresse.postboksanlegg ?: ""}".trim()
-            else -> throw Exception("Ukjent type postadresse ${postadresse?.type}")
-        }
-        val postnr = postadresse.let { "${it.postnummer} ${it.poststed}" }
-        val telefon = enhet.kontaktinfo?.telefonnummer ?: ""
-
-        return Avsender(
-            kontor = kontor,
-            adresse = adresse,
-            postnummer = postnr,
-            telefon = telefon
-        )
-    }
 }

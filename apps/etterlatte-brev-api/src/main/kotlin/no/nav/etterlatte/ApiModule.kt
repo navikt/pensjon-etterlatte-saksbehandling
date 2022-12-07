@@ -21,7 +21,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import no.nav.etterlatte.health.healthApi
+import no.nav.etterlatte.brev.health.healthApi
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.security.token.support.v2.tokenValidationSupport

@@ -1,6 +1,13 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.RETURNERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.VILKAARSVURDERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -33,11 +40,10 @@ sealed class Behandling {
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
 
     val logger: Logger = LoggerFactory.getLogger(Behandling::class.java)
+    val oppgaveStatus get() = OppgaveStatus.from(status)
 
     private val kanRedigeres: Boolean
         get() = this.status.kanRedigeres()
-
-    val oppgaveStatus get() = OppgaveStatus.from(status)
 
     protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {
         if (kanRedigeres) return block() else kastFeilTilstand()
@@ -87,17 +93,17 @@ data class Foerstegangsbehandling(
         this.copy(kommerBarnetTilgode = kommerBarnetTilgode, sistEndret = LocalDateTime.now())
     }
 
-    fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(BehandlingStatus.VILKAARSVURDERT) {
-        this.copy(status = BehandlingStatus.BEREGNET, sistEndret = LocalDateTime.now())
-    }
-
     fun tilVilkaarsvurdert(): Foerstegangsbehandling {
         if (!erFyltUt) {
             logger.info(("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert"))
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisRedigerbar { this.copy(status = BehandlingStatus.VILKAARSVURDERT, sistEndret = LocalDateTime.now()) }
+        return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }
+    }
+
+    fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(VILKAARSVURDERT) {
+        endreTilStatus(BEREGNET)
     }
 
     fun tilFattetVedtak(): Foerstegangsbehandling {
@@ -107,21 +113,25 @@ data class Foerstegangsbehandling(
         }
 
         return hvisRedigerbar {
-            this.copy(status = BehandlingStatus.FATTET_VEDTAK, sistEndret = LocalDateTime.now())
+            endreTilStatus(FATTET_VEDTAK)
         }
     }
 
-    fun tilAttestert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        this.copy(status = BehandlingStatus.ATTESTERT, sistEndret = LocalDateTime.now())
+    fun tilAttestert() = hvisTilstandEr(FATTET_VEDTAK) {
+        endreTilStatus(ATTESTERT)
     }
 
-    fun tilReturnert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        this.copy(status = BehandlingStatus.RETURNERT, sistEndret = LocalDateTime.now())
+    fun tilReturnert() = hvisTilstandEr(FATTET_VEDTAK) {
+        endreTilStatus(RETURNERT)
     }
 
-    fun tilIverksatt() = hvisTilstandEr(BehandlingStatus.ATTESTERT) {
-        this.copy(status = BehandlingStatus.IVERKSATT, sistEndret = LocalDateTime.now())
+    fun tilIverksatt() = hvisTilstandEr(ATTESTERT) {
+        endreTilStatus(IVERKSATT)
     }
+
+    /* TODO ai: Legg denne på Behandling-klassen når flere behandlingstyper skal støtte ny behandlingsflyt */
+    private fun endreTilStatus(status: BehandlingStatus) =
+        this.copy(status = status, sistEndret = LocalDateTime.now())
 }
 
 data class Revurdering(
@@ -159,7 +169,7 @@ data class ManueltOpphoer(
         sak = sak,
         behandlingOpprettet = LocalDateTime.now(),
         sistEndret = LocalDateTime.now(),
-        status = BehandlingStatus.OPPRETTET,
+        status = OPPRETTET,
         persongalleri = persongalleri,
         opphoerAarsaker = opphoerAarsaker,
         fritekstAarsak = fritekstAarsak

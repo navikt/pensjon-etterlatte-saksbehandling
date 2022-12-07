@@ -1,0 +1,3 @@
+UPDATE behandling
+SET status = 'OPPRETTET'
+where status in ('GYLDIG_SOEKNAD', 'IKKE_GYLDIG_SOEKNAD', 'UNDER_BEHANDLING')

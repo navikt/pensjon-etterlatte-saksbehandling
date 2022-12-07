@@ -683,10 +683,10 @@ internal class BehandlingDaoIntegrationTest {
             }
 
         with(behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling) {
-            assertEquals(this.status, BehandlingStatus.VILKAARSVURDERT)
-            assertEquals(this.kommerBarnetTilgode, kommerBarnetTilgode)
-            assertEquals(this.virkningstidspunkt, virkningstidspunkt)
-            assertEquals(this.gyldighetsproeving, gyldighetsResultat)
+            assertEquals(BehandlingStatus.VILKAARSVURDERT, this.status)
+            assertEquals(kommerBarnetTilgode, this.kommerBarnetTilgode)
+            assertEquals(virkningstidspunkt, this.virkningstidspunkt)
+            assertEquals(gyldighetsResultat, this.gyldighetsproeving)
             assert(this.sistEndret > foerstegangsbehandling.sistEndret)
         }
     }

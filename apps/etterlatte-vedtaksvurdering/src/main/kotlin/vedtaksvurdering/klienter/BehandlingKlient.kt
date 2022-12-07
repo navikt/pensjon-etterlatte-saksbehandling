@@ -4,34 +4,35 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
 import java.util.*
 
-interface VilkaarsvurderingKlient {
-    suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering
+interface BehandlingKlient {
+    suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
 }
 
-class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : VilkaarsvurderingKlient {
-    private val logger = LoggerFactory.getLogger(VilkaarsvurderingKlientImpl::class.java)
+class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingKlient {
+    private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
+
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("vilkaarsvurdering.client.id")
-    private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
+    private val clientId = config.getString("behandling.client.id")
+    private val resourceUrl = config.getString("behandling.resource.url")
 
-    override suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
-        logger.info("Henter vilkaarsvurdering med behandlingid $behandlingId")
+    override suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling {
+        logger.info("Henter behandling med id $behandlingId")
         try {
             val json = downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"
+                        url = "$resourceUrl/behandlinger/$behandlingId"
                     ),
                     accessToken = accessToken
                 )
@@ -39,9 +40,10 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
+
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting av vilkårsvurdering ($behandlingId) fra vedtak feilet.", e)
+            logger.error("Henting av behandling ($behandlingId) fra vedtak feilet.", e)
             throw e
         }
     }

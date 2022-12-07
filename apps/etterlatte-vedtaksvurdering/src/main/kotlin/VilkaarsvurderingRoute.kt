@@ -14,10 +14,9 @@ import java.util.*
 
 private val logger = LoggerFactory.getLogger("RouteApi")
 fun Route.vilkaarsvurderingRoute(service: VedtaksvurderingService) {
-    get("hentvedtak/{sakId}/{behandlingId}") {
-        val sakId = call.parameters["sakId"].toString()
+    get("hentvedtak/{sakId}/{behandlingId}") { // TODO: ubrukt sj?
         val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-        val vedtaksresultat = service.hentVedtak(sakId, behandlingId)
+        val vedtaksresultat = service.hentVedtak(behandlingId)
         if (vedtaksresultat == null) {
             call.response.status(HttpStatusCode.NotFound)
         } else {

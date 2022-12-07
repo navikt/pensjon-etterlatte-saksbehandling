@@ -42,7 +42,6 @@ internal class LagreBeregningsresultat(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             val behandling = objectMapper.readValue<Behandling>(packet["behandling"].toString())
-            val sakId = packet["sakId"].toString()
             val beregningDTO = objectMapper.readValue(
                 packet["beregning"].toString(),
                 BeregningDTO::class.java
@@ -60,17 +59,16 @@ internal class LagreBeregningsresultat(
 
             try {
                 vedtaksvurderingService.lagreBeregningsresultat(
-                    sakId,
                     behandling,
                     packet["fnrSoeker"].textValue(),
                     beregningsResultat
                 )
-                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandling.id)).also {
+                requireNotNull(vedtaksvurderingService.hentVedtak(behandling.id)).also {
                     context.publish(
                         JsonMessage.newMessage(
                             mapOf(
                                 eventNameKey to "VEDTAK:BEREGNET",
-                                "sakId" to it.sakId.toLong(),
+                                "sakId" to it.sakId.toString(),
                                 "behandlingId" to it.behandlingId.toString(),
                                 "vedtakId" to it.id,
                                 "eventtimestamp" to Tidspunkt.now()

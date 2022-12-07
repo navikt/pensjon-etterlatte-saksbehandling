@@ -44,7 +44,7 @@ internal class LagreIverksattVedtak(
                                     JsonMessage.newMessage(
                                         mapOf(
                                             eventNameKey to "VEDTAK:IVERKSATT",
-                                            "sakId" to vedtak.sakId.toLong(),
+                                            "sakId" to vedtak.sakId!!.toLong(),
                                             "behandlingId" to vedtak.behandlingId.toString(),
                                             "vedtakId" to vedtak.id,
                                             "eventtimestamp" to Tidspunkt.now()

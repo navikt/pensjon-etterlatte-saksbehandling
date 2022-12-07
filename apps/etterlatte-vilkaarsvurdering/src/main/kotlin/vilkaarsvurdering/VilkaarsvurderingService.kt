@@ -38,7 +38,7 @@ class VilkaarsvurderingService(
     ): VilkaarsvurderingIntern {
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
-        val sakType = SakType.BARNEPENSJON // TODO Hardkodet - bør kunne hentes fra behandling
+        val sakType = SakType.BARNEPENSJON // TODO: SOS, Hardkodet - https://jira.adeo.no/browse/EY-1300
 
         val virkningstidspunkt = behandling.virkningstidspunkt
             ?: throw VirkningstidspunktIkkeSattException("Virkningstidspunkt ikke satt for behandling $behandlingId")

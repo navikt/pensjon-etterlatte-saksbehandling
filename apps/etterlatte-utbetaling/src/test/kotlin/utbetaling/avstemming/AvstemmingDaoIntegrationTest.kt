@@ -5,8 +5,11 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
 import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
+import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
+import no.nav.etterlatte.utbetaling.oppdragslinjeForKonsistensavstemming
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,7 +17,9 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
+import utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import java.time.Instant
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
@@ -41,7 +46,29 @@ internal class AvstemmingDaoIntegrationTest {
     }
 
     @Test
-    fun `skal opprette avstemming for Barnepensjon`() {
+    fun `skal opprette konsistensavstemming for barnepensjon`() {
+        val konsistensavstemmingMedData = opprettKonsistensavstemmingMedData()
+
+        val antallRaderOppdatert = avstemmingDao.opprettKonsistensavstemming(konsistensavstemmingMedData)
+        assertEquals(1, antallRaderOppdatert)
+    }
+
+    @Test
+    fun `skal hente siste konsistensavstemming for barnepensjon`() {
+        val konsistensavstemming1 = opprettKonsistensavstemmingMedData(Tidspunkt.now())
+        val konsistensavstemming2 = opprettKonsistensavstemmingMedData(Tidspunkt.now().minus(3, ChronoUnit.DAYS))
+        val konsistensavstemming3 = opprettKonsistensavstemmingMedData(Tidspunkt.now().minus(6, ChronoUnit.DAYS))
+
+        avstemmingDao.opprettKonsistensavstemming(konsistensavstemming1)
+        avstemmingDao.opprettKonsistensavstemming(konsistensavstemming2)
+        avstemmingDao.opprettKonsistensavstemming(konsistensavstemming3)
+
+        val sisteKonsistensavstemming = avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
+        assertEquals(konsistensavstemming1, sisteKonsistensavstemming)
+    }
+
+    @Test
+    fun `skal opprette grensesnittavstemming for barnepensjon`() {
         val grensesnittavstemming = Grensesnittavstemming(
             periode = Avstemmingsperiode(
                 fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
@@ -59,7 +86,7 @@ internal class AvstemmingDaoIntegrationTest {
     }
 
     @Test
-    fun `skal hente nyeste avstemming`() {
+    fun `skal hente nyeste grensesnittavstemming`() {
         val now = Tidspunkt.now()
 
         val grensesnittavstemming1 = Grensesnittavstemming(
@@ -104,8 +131,15 @@ internal class AvstemmingDaoIntegrationTest {
     }
 
     @Test
-    fun `skal gi null dersom det ikke finnes noen avstemming`() {
+    fun `skal gi null dersom det ikke finnes noen grensesnittavstemming`() {
         val nyesteAvstemming = avstemmingDao.hentSisteGrensesnittavstemming(saktype = Saktype.BARNEPENSJON)
+
+        assertNull(nyesteAvstemming)
+    }
+
+    @Test
+    fun `skal gi null dersom det ikke finnes noen konsistensavstemming`() {
+        val nyesteAvstemming = avstemmingDao.hentSisteKonsistensavsvemming(saktype = Saktype.BARNEPENSJON)
 
         assertNull(nyesteAvstemming)
     }
@@ -120,5 +154,22 @@ internal class AvstemmingDaoIntegrationTest {
     @AfterAll
     fun afterAll() {
         postgreSQLContainer.stop()
+    }
+
+    fun opprettKonsistensavstemmingMedData(opprettetTilOgMed: Tidspunkt = Tidspunkt.now()): Konsistensavstemming {
+        val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
+        val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer)
+        val konsistensavstemmingUtenData = Konsistensavstemming(
+            id = UUIDBase64(),
+            sakType = Saktype.BARNEPENSJON,
+            opprettet = Tidspunkt.now(),
+            avstemmingsdata = null,
+            loependeFraOgMed = Tidspunkt.now(),
+            opprettetTilOgMed = opprettetTilOgMed,
+            loependeUtbetalinger = listOf(oppdrag)
+
+        )
+        val avstemmingsdata = KonsistensavstemmingDataMapper(konsistensavstemmingUtenData).opprettAvstemmingsmelding()
+        return konsistensavstemmingUtenData.copy(avstemmingsdata = avstemmingsdata.joinToString("\n"))
     }
 }

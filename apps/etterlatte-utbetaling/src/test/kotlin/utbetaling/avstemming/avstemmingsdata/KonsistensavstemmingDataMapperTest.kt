@@ -1,17 +1,8 @@
 package utbetaling.avstemming.avstemmingsdata
 
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
-import no.nav.etterlatte.utbetaling.avstemming.OppdragForKonsistensavstemming
-import no.nav.etterlatte.utbetaling.avstemming.OppdragslinjeForKonsistensavstemming
-import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
+import no.nav.etterlatte.utbetaling.mockKonsistensavstemming
+import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
+import no.nav.etterlatte.utbetaling.oppdragslinjeForKonsistensavstemming
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Konsistensavstemmingsdata
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Oppdragsdata
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +11,6 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
-import java.time.LocalTime
 
 internal class KonsistensavstemmingDataMapperTest {
 
@@ -131,47 +121,3 @@ fun `liste av konsistensavstemmingsdata har rett struktur`(konsistensavstemmings
         )
     }
 }
-
-fun mockKonsistensavstemming(
-    dag: LocalDate = LocalDate.now(),
-    loependeUtbetalinger: List<OppdragForKonsistensavstemming>
-) = Konsistensavstemming(
-    id = UUIDBase64(),
-    sakType = Saktype.BARNEPENSJON,
-    opprettet = Tidspunkt.now(),
-    avstemmingXmlRequest = null,
-    loependeFraOgMed = dag.atStartOfDay().toTidspunkt(norskTidssone),
-    opprettetTilOgMed = dag.minusDays(1).atTime(LocalTime.MAX).toTidspunkt(norskTidssone),
-    loependeUtbetalinger = loependeUtbetalinger
-)
-
-fun oppdragForKonsistensavstemming(
-    sakId: Long = 1,
-    sakType: Saktype = Saktype.BARNEPENSJON,
-    fnr: String = "123456",
-    oppdragslinjeForKonsistensavstemming: List<OppdragslinjeForKonsistensavstemming>
-) = OppdragForKonsistensavstemming(
-    sakId = SakId(sakId),
-    sakType = sakType,
-    fnr = Foedselsnummer(fnr),
-    utbetalingslinjer = oppdragslinjeForKonsistensavstemming
-)
-
-fun oppdragslinjeForKonsistensavstemming(
-    id: Long = 1,
-    opprettet: Tidspunkt = Tidspunkt.now(),
-    fraOgMed: LocalDate,
-    tilOgMed: LocalDate? = null,
-    forrigeUtbetalingslinjeId: Long? = null,
-    beloep: BigDecimal = BigDecimal(10000),
-    attestanter: List<NavIdent> = listOf(NavIdent("attestant"))
-
-) = OppdragslinjeForKonsistensavstemming(
-    id = UtbetalingslinjeId(id),
-    opprettet = opprettet,
-    fraOgMed = fraOgMed,
-    tilOgMed = tilOgMed,
-    forrigeUtbetalingslinjeId = forrigeUtbetalingslinjeId?.let { UtbetalingslinjeId(it) },
-    beloep = beloep,
-    attestanter = attestanter
-)

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 private val logger = LoggerFactory.getLogger("RouteApi")
-fun Route.Api(service: VedtaksvurderingService) {
+fun Route.vilkaarsvurderingRoute(service: VedtaksvurderingService) {
     get("hentvedtak/{sakId}/{behandlingId}") {
         val sakId = call.parameters["sakId"].toString()
         val behandlingId = UUID.fromString(call.parameters["behandlingId"])

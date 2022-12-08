@@ -51,12 +51,11 @@ export enum IBehandlingsType {
 
 export enum IBehandlingStatus {
   OPPRETTET = 'OPPRETTET',
-  GYLDIG_SOEKNAD = 'GYLDIG_SOEKNAD',
-  IKKE_GYLDIG_SOEKNAD = 'IKKE_GYLDIG_SOEKNAD',
-  UNDER_BEHANDLING = 'UNDER_BEHANDLING',
+  VILKAARSVURDERT = 'VILKAARSVURDERT',
+  BEREGNET = 'BEREGNET',
   FATTET_VEDTAK = 'FATTET_VEDTAK',
-  RETURNERT = 'RETURNERT',
   ATTESTERT = 'ATTESTERT',
+  RETURNERT = 'RETURNERT',
   IVERKSATT = 'IVERKSATT',
   AVBRUTT = 'AVBRUTT',
 }
@@ -308,7 +307,7 @@ export enum ISvar {
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
-  status: IBehandlingStatus.UNDER_BEHANDLING, //test
+  status: IBehandlingStatus.OPPRETTET, //test
   saksbehandlerId: '',
   attestant: '',
   vilkårsprøving: undefined,

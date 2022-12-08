@@ -9,12 +9,10 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
-      case IBehandlingStatus.UNDER_BEHANDLING:
-        return 'Under behandling'
-      case IBehandlingStatus.GYLDIG_SOEKNAD:
-        return 'Under behandling'
       case IBehandlingStatus.FATTET_VEDTAK:
         return 'To-trinnskontroll'
+      default:
+        return 'Under behandling'
     }
   }
 

@@ -18,7 +18,7 @@ import {
   VilkaarsvurderingResultat,
   VurderingsResultat,
 } from '~shared/api/vilkaarsvurdering'
-import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 interface VilkaarOption {
   value: string
@@ -145,7 +145,7 @@ export const Vedtaksbrev = () => {
 
       <BrevContentFooter>
         <BehandlingHandlingKnapper>
-          {status === IBehandlingStatus.UNDER_BEHANDLING && <SendTilAttesteringModal />}
+          {hentBehandlesFraStatus(status) && <SendTilAttesteringModal />}
         </BehandlingHandlingKnapper>
       </BrevContentFooter>
     </Content>

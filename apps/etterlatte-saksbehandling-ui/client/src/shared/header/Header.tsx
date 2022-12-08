@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { Bruker } from './Bruker'
 import { Search } from './Search'
 import { useNavigate } from 'react-router-dom'
+import { Link } from '@navikt/ds-react'
 
 export const Header = () => {
   const navigate = useNavigate()
@@ -13,7 +14,7 @@ export const Header = () => {
   return (
     <>
       <HeaderWrapper>
-        <Title onClick={goToOppgavebenken}>Etterlatte - saksbehandling</Title>
+        <Title href={'/'}>Doffen</Title>
         <RightWrap>
           <Search />
           <Bruker />
@@ -33,12 +34,16 @@ const HeaderWrapper = styled.div`
   align-items: center;
 `
 
-const Title = styled.div`
+const Title = styled(Link)`
   font-size: 1.2em;
+  text-decoration: none;
+  color: #fff;
+
   &:hover,
   &:focus {
     color: #0067c5;
     cursor: pointer;
+    background: none;
   }
 `
 const RightWrap = styled.div`

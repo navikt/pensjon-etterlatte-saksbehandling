@@ -1,6 +1,13 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.RETURNERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.VILKAARSVURDERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -11,50 +18,45 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-sealed interface Behandling {
-    fun toDetaljertBehandling(): DetaljertBehandling {
-        val (soeknadMottatDato, gyldighetsproeving) = when (this) {
-            is Foerstegangsbehandling -> this.soeknadMottattDato to this.gyldighetsproeving
-            // TODO øh 24.10.2022 er det riktig at søknadMottatDato er behandlingOpprettet der vi ikke har søknad?
-            else -> this.behandlingOpprettet to null
-        }
+internal sealed class TilstandException : IllegalStateException() {
+    internal object UgyldigtTilstand : TilstandException()
+    internal object IkkeFyltUt : TilstandException()
+}
 
-        return DetaljertBehandling(
-            id = id,
-            sak = sak,
-            behandlingOpprettet = behandlingOpprettet,
-            sistEndret = sistEndret,
-            soeknadMottattDato = soeknadMottatDato,
-            innsender = persongalleri.innsender,
-            soeker = persongalleri.soeker,
-            gjenlevende = persongalleri.gjenlevende,
-            avdoed = persongalleri.avdoed,
-            soesken = persongalleri.soesken,
-            gyldighetsproeving = gyldighetsproeving,
-            status = status,
-            behandlingType = type,
-            virkningstidspunkt = when (this) {
-                is Foerstegangsbehandling -> hentVirkningstidspunkt()
-                is ManueltOpphoer -> null
-                is Revurdering -> null
-            },
-            kommerBarnetTilgode = kommerBarnetTilgode
-        )
+sealed class Behandling {
+    abstract val id: UUID
+    abstract val sak: Long
+    abstract val behandlingOpprettet: LocalDateTime
+    abstract val sistEndret: LocalDateTime
+    abstract val status: BehandlingStatus
+    abstract val type: BehandlingType
+    abstract val persongalleri: Persongalleri
+    abstract val kommerBarnetTilgode: KommerBarnetTilgode?
+
+    val logger: Logger = LoggerFactory.getLogger(Behandling::class.java)
+    val oppgaveStatus get() = OppgaveStatus.from(status)
+
+    private val kanRedigeres: Boolean
+        get() = this.status.kanRedigeres()
+
+    protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {
+        if (kanRedigeres) return block() else kastFeilTilstand()
     }
 
-    val id: UUID
-    val sak: Long
-    val behandlingOpprettet: LocalDateTime
-    val sistEndret: LocalDateTime
-    val status: BehandlingStatus
-    val oppgaveStatus: OppgaveStatus?
-    val type: BehandlingType
-    val persongalleri: Persongalleri
-    val kommerBarnetTilgode: KommerBarnetTilgode?
+    protected fun <T : Behandling> hvisTilstandEr(behandlingStatus: BehandlingStatus, block: () -> T): T {
+        if (status == behandlingStatus) return block() else kastFeilTilstand()
+    }
+
+    private fun kastFeilTilstand(): Nothing {
+        logger.info("kan ikke oppdatere en behandling ($id) som ikke er under behandling")
+        throw TilstandException.UgyldigtTilstand
+    }
 }
 
 data class Foerstegangsbehandling(
@@ -63,32 +65,73 @@ data class Foerstegangsbehandling(
     override val behandlingOpprettet: LocalDateTime,
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
-    override val oppgaveStatus: OppgaveStatus?,
-    override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     val virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?
-) : Behandling {
-    private val kanRedigeres: Boolean
-        get() = this.status.kanRedigeres()
-    fun hentVirkningstidspunkt() = virkningstidspunkt
-    fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler): Foerstegangsbehandling {
-        if (kanRedigeres) {
-            throw RuntimeException("Kan ikke endre virkningstidspunkt for behandling som ikke er under behandling.")
+) : Behandling() {
+    override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+
+    private val erFyltUt: Boolean
+        get() {
+            return (virkningstidspunkt != null) &&
+                (gyldighetsproeving != null) &&
+                (kommerBarnetTilgode != null)
         }
 
-        return this.copy(virkningstidspunkt = Virkningstidspunkt(dato, kilde))
+    fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Foerstegangsbehandling = hvisRedigerbar {
+        this.copy(gyldighetsproeving = gyldighetsResultat, sistEndret = LocalDateTime.now())
     }
 
-    fun oppdaterKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode): Foerstegangsbehandling {
-        if (kanRedigeres) {
-            throw RuntimeException("Kan ikke endre kommer barnet til gode for behandling som ikke er under behandling")
+    fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler) =
+        this.hvisRedigerbar {
+            this.copy(virkningstidspunkt = Virkningstidspunkt(dato, kilde), sistEndret = LocalDateTime.now())
         }
 
-        return this.copy(kommerBarnetTilgode = kommerBarnetTilgode)
+    fun oppdaterKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode): Foerstegangsbehandling = hvisRedigerbar {
+        this.copy(kommerBarnetTilgode = kommerBarnetTilgode, sistEndret = LocalDateTime.now())
     }
+
+    fun tilVilkaarsvurdert(): Foerstegangsbehandling {
+        if (!erFyltUt) {
+            logger.info(("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert"))
+            throw TilstandException.IkkeFyltUt
+        }
+
+        return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }
+    }
+
+    fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(VILKAARSVURDERT) {
+        endreTilStatus(BEREGNET)
+    }
+
+    fun tilFattetVedtak(): Foerstegangsbehandling {
+        if (!erFyltUt) {
+            logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
+            throw TilstandException.IkkeFyltUt
+        }
+
+        return hvisRedigerbar {
+            endreTilStatus(FATTET_VEDTAK)
+        }
+    }
+
+    fun tilAttestert() = hvisTilstandEr(FATTET_VEDTAK) {
+        endreTilStatus(ATTESTERT)
+    }
+
+    fun tilReturnert() = hvisTilstandEr(FATTET_VEDTAK) {
+        endreTilStatus(RETURNERT)
+    }
+
+    fun tilIverksatt() = hvisTilstandEr(ATTESTERT) {
+        endreTilStatus(IVERKSATT)
+    }
+
+    /* TODO ai: Legg denne på Behandling-klassen når flere behandlingstyper skal støtte ny behandlingsflyt */
+    private fun endreTilStatus(status: BehandlingStatus) =
+        this.copy(status = status, sistEndret = LocalDateTime.now())
 }
 
 data class Revurdering(
@@ -97,12 +140,12 @@ data class Revurdering(
     override val behandlingOpprettet: LocalDateTime,
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
-    override val oppgaveStatus: OppgaveStatus?,
-    override val type: BehandlingType = BehandlingType.REVURDERING,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak
-) : Behandling
+) : Behandling() {
+    override val type: BehandlingType = BehandlingType.REVURDERING
+}
 
 data class ManueltOpphoer(
     override val id: UUID,
@@ -110,12 +153,12 @@ data class ManueltOpphoer(
     override val behandlingOpprettet: LocalDateTime,
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
-    override val oppgaveStatus: OppgaveStatus?,
-    override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER,
     override val persongalleri: Persongalleri,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
     val fritekstAarsak: String?
-) : Behandling {
+) : Behandling() {
+    override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER
+
     constructor(
         sak: Long,
         persongalleri: Persongalleri,
@@ -126,9 +169,7 @@ data class ManueltOpphoer(
         sak = sak,
         behandlingOpprettet = LocalDateTime.now(),
         sistEndret = LocalDateTime.now(),
-        status = BehandlingStatus.OPPRETTET,
-        oppgaveStatus = OppgaveStatus.NY,
-        type = BehandlingType.MANUELT_OPPHOER,
+        status = OPPRETTET,
         persongalleri = persongalleri,
         opphoerAarsaker = opphoerAarsaker,
         fritekstAarsak = fritekstAarsak
@@ -136,4 +177,38 @@ data class ManueltOpphoer(
 
     override val kommerBarnetTilgode: KommerBarnetTilgode?
         get() = null
+}
+
+internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
+    val (soeknadMottatDato, gyldighetsproeving) = when (this) {
+        is Foerstegangsbehandling -> this.soeknadMottattDato to this.gyldighetsproeving
+        // TODO øh 24.10.2022 er det riktig at søknadMottatDato er behandlingOpprettet der vi ikke har søknad?
+        else -> this.behandlingOpprettet to null
+    }
+
+    return DetaljertBehandling(
+        id = id,
+        sak = sak,
+        behandlingOpprettet = behandlingOpprettet,
+        sistEndret = sistEndret,
+        soeknadMottattDato = soeknadMottatDato,
+        innsender = persongalleri.innsender,
+        soeker = persongalleri.soeker,
+        gjenlevende = persongalleri.gjenlevende,
+        avdoed = persongalleri.avdoed,
+        soesken = persongalleri.soesken,
+        gyldighetsproeving = gyldighetsproeving,
+        status = status,
+        behandlingType = type,
+        virkningstidspunkt = when (this) {
+            is Foerstegangsbehandling -> this.virkningstidspunkt
+            is ManueltOpphoer -> null
+            is Revurdering -> null
+        },
+        kommerBarnetTilgode = kommerBarnetTilgode,
+        revurderingsaarsak = when (this) {
+            is Revurdering -> revurderingsaarsak
+            else -> null
+        }
+    )
 }

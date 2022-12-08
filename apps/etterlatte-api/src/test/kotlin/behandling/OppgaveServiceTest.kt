@@ -38,7 +38,7 @@ internal class OppgaveServiceTest {
             oppgaver = listOf(
                 BehandlingsOppgave(
                     behandlingId,
-                    BehandlingStatus.UNDER_BEHANDLING,
+                    BehandlingStatus.VILKAARSVURDERT,
                     OppgaveStatus.NY,
                     Sak("ident", "saktype", 1),
                     ZonedDateTime.now(),
@@ -51,7 +51,7 @@ internal class OppgaveServiceTest {
 
         val resultat = runBlocking { service.hentAlleOppgaver(accessToken) }
 
-        assertEquals(BehandlingStatus.UNDER_BEHANDLING, resultat.oppgaver.first().status)
+        assertEquals(BehandlingStatus.VILKAARSVURDERT, resultat.oppgaver.first().status)
         assertEquals(BehandlingType.REVURDERING, resultat.oppgaver.first().behandlingType)
         assertEquals(OppgaveStatus.NY, resultat.oppgaver.first().oppgaveStatus)
     }

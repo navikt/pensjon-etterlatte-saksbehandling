@@ -5,24 +5,17 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.ManueltOpphoer
-import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 
 interface FoerstegangsbehandlingService {
-    fun hentBehandling(behandling: UUID): Foerstegangsbehandling?
-    fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling
-    fun hentFoerstegangsbehandlinger(): List<Foerstegangsbehandling>
+    fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling?
     fun startFoerstegangsbehandling(
         sak: Long,
         persongalleri: Persongalleri,
@@ -30,8 +23,14 @@ interface FoerstegangsbehandlingService {
     ): Foerstegangsbehandling
 
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
-    fun fastsettVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt
-    fun settKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
+    fun lagreVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt
+    fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
+    fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
+    fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
+    fun settFattetVedtak(behandlingId: UUID, dryRun: Boolean = true)
+    fun settAttestert(behandlingId: UUID, dryRun: Boolean = true)
+    fun settReturnert(behandlingId: UUID, dryRun: Boolean = true)
+    fun settIverksatt(behandlingId: UUID, dryRun: Boolean = true)
 }
 
 class RealFoerstegangsbehandlingService(
@@ -41,22 +40,9 @@ class RealFoerstegangsbehandlingService(
 ) : FoerstegangsbehandlingService {
     private val logger = LoggerFactory.getLogger(RealFoerstegangsbehandlingService::class.java)
 
-    override fun hentBehandling(behandling: UUID): Foerstegangsbehandling {
-        return inTransaction {
-            foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling).serialiserbarUtgave()
-        }
-    }
-
     override fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling {
         return inTransaction {
             foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling).serialiserbarUtgave()
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun hentFoerstegangsbehandlinger(): List<Foerstegangsbehandling> {
-        return inTransaction {
-            behandlinger.alleBehandlingerAvType(BehandlingType.FØRSTEGANGSBEHANDLING) as List<Foerstegangsbehandling>
         }
     }
 
@@ -86,64 +72,54 @@ class RealFoerstegangsbehandlingService(
         }
     }
 
-    override fun fastsettVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt {
-        val behandling = inTransaction {
-            behandlinger.hentBehandling(behandlingId) ?: throw RuntimeException("Fant ikke behandling")
-        }
-
-        when (behandling) {
-            is Foerstegangsbehandling -> {
-                val oppdatertBehandling =
-                    behandling.oppdaterVirkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler(ident, Instant.now()))
-                val virkningstidspunkt = oppdatertBehandling.virkningstidspunkt!!
-
-                inTransaction {
-                    behandlinger.lagreNyttVirkningstidspunkt(
-                        behandling.id,
-                        virkningstidspunkt
-                    )
-                }
-
-                return virkningstidspunkt
-            }
-
-            is ManueltOpphoer -> throw RuntimeException(
-                "Kan ikke fastsette virkningstidspunkt for ${ManueltOpphoer::class.java.simpleName}"
-            ) // TODO ai: Hvordan håndtere error cases?
-            is Revurdering -> throw RuntimeException(
-                "Kan ikke fastsette virkningstidspunkt for ${Revurdering::class.java.simpleName}"
-            )
+    override fun lagreVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt {
+        return inTransaction {
+            foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId).lagreVirkningstidspunkt(dato, ident)
         }
     }
 
-    override fun settKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
-        val behandling = inTransaction {
-            behandlinger.hentBehandling(behandlingId)
-                ?: throw RuntimeException(
-                    "Kunne ikke sette kommer barnet til gode. Fant ikke behandling med id $behandlingId"
-                )
+    override fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
+        return inTransaction {
+            foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId)
+                .lagreKommerBarnetTilgode(kommerBarnetTilgode)
         }
+    }
 
-        when (behandling) {
-            is Foerstegangsbehandling -> {
-                val oppdatertBehandling =
-                    behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+    override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert().lagreEndring(dryRun)
+    }
 
-                inTransaction {
-                    behandlinger.lagreKommerBarnetTilgode(
-                        behandlingId,
-                        oppdatertBehandling.kommerBarnetTilgode!!
-                    )
-                }
+    override fun settBeregnet(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilBeregnet().lagreEndring(dryRun)
+    }
+
+    override fun settFattetVedtak(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilFattetVedtak().lagreEndring(dryRun)
+    }
+
+    override fun settAttestert(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilAttestert().lagreEndring(dryRun)
+    }
+
+    override fun settReturnert(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilReturnert().lagreEndring(dryRun)
+    }
+
+    override fun settIverksatt(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilIverksatt().lagreEndring(dryRun)
+    }
+
+    private fun Foerstegangsbehandling.lagreEndring(dryRun: Boolean) {
+        if (dryRun) return
+
+        lagreNyBehandlingStatus(this)
+    }
+
+    private fun lagreNyBehandlingStatus(behandling: Foerstegangsbehandling) {
+        inTransaction {
+            behandling.let {
+                behandlinger.lagreStatus(it.id, it.status, it.sistEndret)
             }
-
-            is ManueltOpphoer -> throw RuntimeException(
-                "Kan ikke endre kommer barnet til gode for ${ManueltOpphoer::class.java.simpleName}"
-            )
-
-            is Revurdering -> throw RuntimeException(
-                "Kan ikke endre kommer barnet til gode for ${Revurdering::class.java.simpleName}"
-            )
         }
     }
 }

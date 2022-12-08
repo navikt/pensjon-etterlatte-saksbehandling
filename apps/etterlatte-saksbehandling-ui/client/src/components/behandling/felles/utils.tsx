@@ -18,8 +18,9 @@ export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: stri
 
 export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
   return (
-    status === IBehandlingStatus.UNDER_BEHANDLING ||
-    status === IBehandlingStatus.GYLDIG_SOEKNAD ||
+    status === IBehandlingStatus.OPPRETTET ||
+    status === IBehandlingStatus.VILKAARSVURDERT ||
+    status === IBehandlingStatus.BEREGNET ||
     status === IBehandlingStatus.RETURNERT
   )
 }

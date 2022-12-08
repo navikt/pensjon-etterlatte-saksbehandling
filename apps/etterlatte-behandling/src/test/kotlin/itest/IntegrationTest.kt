@@ -21,14 +21,15 @@ import io.ktor.serialization.jackson.jackson
 import io.ktor.server.auth.Authentication
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
+import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktRequest
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
-import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.KommerBarnetTilgodeJson
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -190,6 +191,28 @@ class ApplicationTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(KommerBarnetTilgodeJson(JaNeiVetIkke.JA, "begrunnelse"))
             }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
+                addAuthSaksbehandler()
+            }.also {
+                beans.datasourceBuilder().dataSource.connection.use {
+                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.OPPRETTET, actual.status)
+                }
+
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            client.post("/behandlinger/$behandlingId/vilkaarsvurder") {
+                addAuthSaksbehandler()
+            }.also {
+                beans.datasourceBuilder().dataSource.connection.use {
+                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
+                }
+
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
@@ -407,26 +430,25 @@ class TestBeanFactory(
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
 
-    override fun pdlHttpClient(): HttpClient =
-        HttpClient(MockEngine) {
-            engine {
-                addHandler { request ->
-                    if (request.url.fullPath.startsWith("/")) {
-                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                        val json = javaClass.getResource("")!!.readText() // TODO: endre name
-                        respond(json, headers = headers)
-                    } else {
-                        error(request.url.fullPath)
-                    }
+    override fun pdlHttpClient(): HttpClient = HttpClient(MockEngine) {
+        engine {
+            addHandler { request ->
+                if (request.url.fullPath.startsWith("/")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    val json = javaClass.getResource("")!!.readText() // TODO: endre name
+                    respond(json, headers = headers)
+                } else {
+                    error(request.url.fullPath)
                 }
             }
-            install(ContentNegotiation) {
-                register(
-                    ContentType.Application.Json,
-                    JacksonConverter(no.nav.etterlatte.libs.common.objectMapper)
-                )
-            }
         }
+        install(ContentNegotiation) {
+            register(
+                ContentType.Application.Json,
+                JacksonConverter(no.nav.etterlatte.libs.common.objectMapper)
+            )
+        }
+    }
 
     override fun leaderElection() = LeaderElection(
         electorPath = "electorPath",

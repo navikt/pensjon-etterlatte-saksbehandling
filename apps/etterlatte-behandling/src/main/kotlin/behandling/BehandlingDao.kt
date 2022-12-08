@@ -10,7 +10,6 @@ import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -171,8 +170,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         persongalleri = hentPersongalleri(rs),
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
-        oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) }
     )
@@ -193,8 +190,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
-        oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
         revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) }
     )
@@ -207,8 +202,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
-        oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
         opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
         fritekstAarsak = rs.getString("fritekst_aarsak")
     )
@@ -236,8 +229,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status, virkningstidspunkt, kommer_barnet_tilgode)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt, kommer_barnet_tilgode)
+                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(foerstegangsbehandling) {
@@ -264,15 +257,11 @@ class BehandlingDao(private val connection: () -> Connection) {
                 stmt.setString(11, avdoed.toJson())
                 stmt.setString(12, soesken.toJson())
             }
-            stmt.setString(13, oppgaveStatus?.name)
             stmt.setString(
-                14,
-                foerstegangsbehandling.hentVirkningstidspunkt()?.toJson()
+                13,
+                foerstegangsbehandling.virkningstidspunkt?.toJson()
             )
-            stmt.setString(
-                15,
-                kommerBarnetTilgode?.toJson()
-            )
+            stmt.setString(14, kommerBarnetTilgode?.toJson())
         }
         stmt.executeUpdate()
     }
@@ -282,8 +271,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                 innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status, revurdering_aarsak, kommer_barnet_tilgode)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 innsender, soeker, gjenlevende, avdoed, soesken, revurdering_aarsak, kommer_barnet_tilgode)
+                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(revurdering) {
@@ -306,9 +295,8 @@ class BehandlingDao(private val connection: () -> Connection) {
                 stmt.setString(10, avdoed.toJson())
                 stmt.setString(11, soesken.toJson())
             }
-            stmt.setString(12, oppgaveStatus?.name)
-            stmt.setString(13, revurderingsaarsak.name)
-            stmt.setString(14, kommerBarnetTilgode?.let { objectMapper.writeValueAsString(it) })
+            stmt.setString(12, revurderingsaarsak.name)
+            stmt.setString(13, kommerBarnetTilgode?.let { objectMapper.writeValueAsString(it) })
         }
         require(stmt.executeUpdate() == 1)
     }
@@ -318,8 +306,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                     INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                    innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status, opphoer_aarsaker, fritekst_aarsak)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    innsender, soeker, gjenlevende, avdoed, soesken, opphoer_aarsaker, fritekst_aarsak)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     RETURNING *
                 """.trimIndent()
             )
@@ -343,9 +331,8 @@ class BehandlingDao(private val connection: () -> Connection) {
                 stmt.setString(10, avdoed.toJson())
                 stmt.setString(11, soesken.toJson())
             }
-            stmt.setString(12, oppgaveStatus?.name)
-            stmt.setString(13, opphoerAarsaker.toJson())
-            stmt.setString(14, fritekstAarsak)
+            stmt.setString(12, opphoerAarsaker.toJson())
+            stmt.setString(13, fritekstAarsak)
         }
         return stmt.executeQuery().singleOrNull {
             behandlingAvRettType() as ManueltOpphoer
@@ -357,17 +344,16 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 "UPDATE behandling " +
-                    "SET gyldighetssproving = ?, status = ?, oppgave_status = ?, sist_endret = ? " +
+                    "SET gyldighetssproving = ?, status = ?, sist_endret = ? " +
                     "WHERE id = ?"
             )
         stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
         stmt.setString(2, behandling.status.name)
-        stmt.setString(3, behandling.oppgaveStatus?.name)
         stmt.setTimestamp(
-            4,
+            3,
             Timestamp.from(behandling.sistEndret.atZone(ZoneId.systemDefault()).toInstant())
         )
-        stmt.setObject(5, behandling.id)
+        stmt.setObject(4, behandling.id)
         require(stmt.executeUpdate() == 1)
     }
 
@@ -377,11 +363,12 @@ class BehandlingDao(private val connection: () -> Connection) {
         statement.executeUpdate()
     }
 
+    // TODO ai: brukes kun i test
     fun lagreStatus(lagretBehandling: Behandling) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }
 
-    private fun lagreStatus(behandling: UUID, status: BehandlingStatus, sistEndret: LocalDateTime): Behandling {
+    fun lagreStatus(behandling: UUID, status: BehandlingStatus, sistEndret: LocalDateTime): Behandling {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ? RETURNING *")
         stmt.setString(1, status.name)
@@ -397,43 +384,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         )
     }
 
-    fun lagreOppgaveStatus(behandling: Behandling) {
-        val stmt =
-            connection().prepareStatement("UPDATE behandling SET oppgave_status = ?, sist_endret = ? WHERE id = ?")
-        stmt.setString(1, behandling.oppgaveStatus?.name)
-        stmt.setTimestamp(
-            2,
-            Timestamp.from(behandling.sistEndret.atZone(ZoneId.systemDefault()).toInstant())
-        )
-        stmt.setObject(3, behandling.id)
-        require(stmt.executeUpdate() == 1)
-    }
-
-    fun lagreStatusOgOppgaveStatus(
-        behandling: UUID,
-        behandlingStatus: BehandlingStatus,
-        oppgaveStatus: OppgaveStatus?,
-        sistEndret: LocalDateTime
-    ): Behandling {
-        val stmt =
-            connection().prepareStatement(
-                "UPDATE behandling SET status = ?, oppgave_status = ?, sist_endret = ? WHERE id = ? RETURNING *"
-            )
-        stmt.setString(1, behandlingStatus.name)
-        stmt.setString(2, oppgaveStatus?.name)
-        stmt.setTimestamp(
-            3,
-            Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
-        )
-        stmt.setObject(4, behandling)
-        return requireNotNull(
-            stmt.executeQuery().singleOrNull {
-                behandlingAvRettType()
-            }
-        )
-    }
-
-    fun ResultSet.behandlingsListe(): List<Behandling> =
+    private fun ResultSet.behandlingsListe(): List<Behandling> =
         toList {
             when (getString("behandlingstype")) {
                 BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
@@ -459,10 +410,9 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun avbrytBehandling(behandlingId: UUID): Behandling {
-        return this.lagreStatusOgOppgaveStatus(
+        return this.lagreStatus(
             behandling = behandlingId,
-            behandlingStatus = BehandlingStatus.AVBRUTT,
-            oppgaveStatus = OppgaveStatus.LUKKET,
+            status = BehandlingStatus.AVBRUTT,
             sistEndret = LocalDateTime.now()
         )
     }

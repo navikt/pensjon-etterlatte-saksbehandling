@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -22,6 +21,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.revurdering
@@ -189,8 +189,7 @@ internal class BehandlingDaoIntegrationTest {
                 ),
                 vurdertDato = LocalDateTime.now()
             ),
-            status = BehandlingStatus.GYLDIG_SOEKNAD,
-            oppgaveStatus = OppgaveStatus.NY
+            status = BehandlingStatus.OPPRETTET
         )
 
         behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)
@@ -419,34 +418,13 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
         val endretTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
         val behandlingMedNyStatus =
-            behandling.copy(status = BehandlingStatus.UNDER_BEHANDLING, sistEndret = endretTidspunkt)
+            behandling.copy(status = BehandlingStatus.VILKAARSVURDERT, sistEndret = endretTidspunkt)
         behandlingRepo.lagreStatus(behandlingMedNyStatus)
         val behandlingEtterStatusendring =
             behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
 
         assertEquals(BehandlingStatus.OPPRETTET, behandlingFoerStatusendring!!.status)
-        assertEquals(BehandlingStatus.UNDER_BEHANDLING, behandlingEtterStatusendring!!.status)
-        assertEquals(endretTidspunkt, behandlingEtterStatusendring.sistEndret)
-    }
-
-    @Test
-    fun `skal lagre oppgavestatus for behandling`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-
-        val behandling = foerstegangsbehandling(sak = sak1).also {
-            behandlingRepo.opprettFoerstegangsbehandling(it)
-        }
-
-        val behandlingFoerStatusendring =
-            behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
-        val endretTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
-        val behandlingMedNyStatus = behandling.copy(oppgaveStatus = OppgaveStatus.LUKKET, sistEndret = endretTidspunkt)
-        behandlingRepo.lagreOppgaveStatus(behandlingMedNyStatus)
-        val behandlingEtterStatusendring =
-            behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
-
-        assertEquals(OppgaveStatus.NY, behandlingFoerStatusendring!!.oppgaveStatus)
-        assertEquals(OppgaveStatus.LUKKET, behandlingEtterStatusendring!!.oppgaveStatus)
+        assertEquals(BehandlingStatus.VILKAARSVURDERT, behandlingEtterStatusendring!!.status)
         assertEquals(endretTidspunkt, behandlingEtterStatusendring.sistEndret)
     }
 
@@ -559,7 +537,7 @@ internal class BehandlingDaoIntegrationTest {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         listOf(
-            foerstegangsbehandling(sak = sak1, status = BehandlingStatus.GYLDIG_SOEKNAD),
+            foerstegangsbehandling(sak = sak1, status = BehandlingStatus.OPPRETTET),
             foerstegangsbehandling(sak = sak1, status = BehandlingStatus.RETURNERT),
             foerstegangsbehandling(sak = sak1, status = BehandlingStatus.IVERKSATT),
             foerstegangsbehandling(sak = sak1, status = BehandlingStatus.AVBRUTT)
@@ -583,12 +561,12 @@ internal class BehandlingDaoIntegrationTest {
         val saksbehandler = Grunnlagsopplysning.Saksbehandler("navIdent", Instant.now())
         val nyDato = YearMonth.of(2021, 2)
         behandling.oppdaterVirkningstidspunkt(nyDato, saksbehandler).let {
-            behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.hentVirkningstidspunkt()!!)
+            behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.virkningstidspunkt!!)
         }
 
         val expected = Virkningstidspunkt(nyDato, saksbehandler)
         with(behandlingRepo.hentBehandling(behandling.id)) {
-            val actual = (this as Foerstegangsbehandling).hentVirkningstidspunkt()
+            val actual = (this as Foerstegangsbehandling).virkningstidspunkt
             assertEquals(expected, actual)
         }
     }
@@ -669,5 +647,47 @@ internal class BehandlingDaoIntegrationTest {
         assertEquals(sak2, sakerOgRoller[4].second)
         assertEquals(Saksrolle.SOESKEN, sakerOgRoller[5].first)
         assertEquals(sak2, sakerOgRoller[5].second)
+    }
+
+    @Test
+    fun `kan oppdatere og lagre ny status for behandling`() {
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val foerstegangsbehandling = foerstegangsbehandling(
+            sak = sak,
+            persongalleri = Persongalleri(
+                soeker = "11111",
+                innsender = "22222",
+                soesken = listOf("33333", "44444"),
+                avdoed = listOf("55555"),
+                gjenlevende = listOf("66666")
+            )
+        )
+        behandlingRepo.opprettFoerstegangsbehandling(foerstegangsbehandling)
+
+        val saksbehandler = Grunnlagsopplysning.Saksbehandler("saksbehandler01", Tidspunkt.now().instant)
+
+        val kommerBarnetTilgode = KommerBarnetTilgode(JaNeiVetIkke.JA, "", saksbehandler)
+        val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler)
+        val gyldighetsResultat = GyldighetsResultat(VurderingsResultat.OPPFYLT, listOf(), LocalDateTime.now())
+
+        foerstegangsbehandling
+            .oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
+            .oppdaterGyldighetsproeving(gyldighetsResultat)
+            .tilVilkaarsvurdert()
+            .let {
+                behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
+                behandlingRepo.lagreGyldighetsproving(it)
+                behandlingRepo.lagreKommerBarnetTilgode(it.id, it.kommerBarnetTilgode!!)
+                behandlingRepo.lagreStatus(it.id, it.status, it.sistEndret)
+            }
+
+        with(behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling) {
+            assertEquals(BehandlingStatus.VILKAARSVURDERT, this.status)
+            assertEquals(kommerBarnetTilgode, this.kommerBarnetTilgode)
+            assertEquals(virkningstidspunkt, this.virkningstidspunkt)
+            assertEquals(gyldighetsResultat, this.gyldighetsproeving)
+            assert(this.sistEndret > foerstegangsbehandling.sistEndret)
+        }
     }
 }

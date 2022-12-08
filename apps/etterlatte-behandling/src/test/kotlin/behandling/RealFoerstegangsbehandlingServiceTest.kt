@@ -10,9 +10,9 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -67,7 +67,6 @@ internal class RealFoerstegangsbehandlingServiceTest {
             behandlingOpprettet = LocalDateTime.now(),
             sistEndret = LocalDateTime.now(),
             status = BehandlingStatus.OPPRETTET,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
             soeknadMottattDato = LocalDateTime.now(),
             persongalleri = Persongalleri(
                 soeker = "Ola Olsen",
@@ -77,7 +76,6 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 emptyList()
             ),
             gyldighetsproeving = null,
-            oppgaveStatus = OppgaveStatus.NY,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
                 Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
@@ -104,7 +102,6 @@ internal class RealFoerstegangsbehandlingServiceTest {
             behandlingOpprettet = datoNaa,
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
             soeknadMottattDato = LocalDateTime.now(),
             persongalleri = Persongalleri(
                 "Innsender",
@@ -114,7 +111,6 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 emptyList()
             ),
             gyldighetsproeving = null,
-            oppgaveStatus = OppgaveStatus.NY,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
                 Grunnlagsopplysning.Saksbehandler("ident", Instant.now())

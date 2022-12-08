@@ -7,8 +7,8 @@ enum class OppgaveStatus {
     LUKKET;
 
     companion object {
-        fun from(behandlingStatus: BehandlingStatus) {
-            when (behandlingStatus) {
+        fun from(behandlingStatus: BehandlingStatus): OppgaveStatus {
+            return when (behandlingStatus) {
                 BehandlingStatus.OPPRETTET,
                 BehandlingStatus.VILKAARSVURDERT,
                 BehandlingStatus.BEREGNET -> NY

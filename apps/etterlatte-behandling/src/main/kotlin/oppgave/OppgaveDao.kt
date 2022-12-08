@@ -26,7 +26,7 @@ data class Oppgave(
     val behandlingsType: BehandlingType,
     val antallSoesken: Int
 ) {
-    val oppgaveStatus = OppgaveStatus.from(behandlingStatus)
+    val oppgaveStatus: OppgaveStatus = OppgaveStatus.from(behandlingStatus)
 }
 
 class OppgaveDao(private val datasource: DataSource) {

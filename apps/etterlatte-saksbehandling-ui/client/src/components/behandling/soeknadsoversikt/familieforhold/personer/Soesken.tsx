@@ -1,12 +1,12 @@
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { ChildIcon } from '~shared/icons/childIcon'
-import { IFamilieforhold, IPdlPerson } from '~store/reducers/BehandlingReducer'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { Heading } from '@navikt/ds-react'
 import React from 'react'
 import differenceInYears from 'date-fns/differenceInYears'
 import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
+import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 
 type Props = {
   soekerFnr: string

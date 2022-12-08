@@ -2,11 +2,13 @@ import { Alert, Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { RadioGroupWrapper } from './KommerBarnetTilGodeVurdering'
 import { lagreBegrunnelseKommerBarnetTilgode } from '~shared/api/behandling'
 import { useState } from 'react'
-import { IKommerBarnetTilgode, JaNei, oppdaterKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { VurderingsTitle, Undertekst } from '../../styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import styled from 'styled-components'
+import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
+import { JaNei } from '~shared/types/ISvar'
+import { oppdaterKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
 
 export const EndreVurdering = ({
   setRedigeringsModusFalse,

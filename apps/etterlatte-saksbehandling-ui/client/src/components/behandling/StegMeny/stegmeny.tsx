@@ -1,10 +1,11 @@
 import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
-import { IBehandlingsType, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import classNames from 'classnames'
 import { Next } from '@navikt/ds-icons'
 import { useAppSelector } from '~store/Store'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 export const StegMeny = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)

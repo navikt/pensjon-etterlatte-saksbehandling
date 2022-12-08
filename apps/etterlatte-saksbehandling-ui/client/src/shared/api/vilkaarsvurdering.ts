@@ -1,4 +1,5 @@
-import { Kilde, KildeSaksbehandler } from '~shared/types/kilde'
+import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { Kilde } from '~shared/types/kilde'
 import { apiClient, ApiResponse } from './apiClient'
 
 export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
@@ -33,11 +34,6 @@ export interface IVilkaarsvurdering {
   vilkaar: Vilkaar[]
   resultat?: VilkaarsvurderingVurdertResultat
   virkningstidspunkt: Virkningstidspunkt
-}
-
-export interface Virkningstidspunkt {
-  dato: string
-  kilde: KildeSaksbehandler
 }
 
 export interface Vilkaar {

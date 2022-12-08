@@ -1,4 +1,5 @@
-import { IGyldighetproving, VurderingsResultat } from '~store/reducers/BehandlingReducer'
+import { IGyldighetproving } from '~shared/types/IDetaljertBehandling'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktElement } from '../OversiktElement'
 
 interface Props {

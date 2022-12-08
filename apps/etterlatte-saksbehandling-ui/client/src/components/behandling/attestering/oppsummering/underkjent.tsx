@@ -1,7 +1,7 @@
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useAppSelector } from '~store/Store'
 import { formaterEnumTilLesbarString, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
-import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {

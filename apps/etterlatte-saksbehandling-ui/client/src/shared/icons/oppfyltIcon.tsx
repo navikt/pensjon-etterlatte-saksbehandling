@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { VurderingsResultat } from '~store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 export const OppfyltIcon = (props: { status: VurderingsResultat }) => {
   return (

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
-import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { formaterEnumTilLesbarString, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 

@@ -1,4 +1,5 @@
-import { IBehandlingStatus, IBehandlingsType, IHendelse } from '~store/reducers/BehandlingReducer'
+import { IBehandlingsType, IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IHendelse } from '~shared/types/IHendelse'
 
 export interface IBehandlingInfo {
   type: IBehandlingsType

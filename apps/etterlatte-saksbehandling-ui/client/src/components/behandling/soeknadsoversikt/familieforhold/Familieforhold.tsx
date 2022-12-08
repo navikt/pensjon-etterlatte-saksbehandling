@@ -5,13 +5,9 @@ import { GjenlevendeForelder } from './personer/GjenlevendeForelder'
 import { Barn } from './personer/Barn'
 import { ContentHeader } from '~shared/styled'
 import { Border, DashedBorder } from '../styled'
-import {
-  GyldigFramsattType,
-  IDetaljertBehandling,
-  IGyldighetproving,
-  VurderingsResultat,
-} from '~store/reducers/BehandlingReducer'
 import { SoeskenListe } from './personer/Soesken'
+import { GyldigFramsattType, IDetaljertBehandling, IGyldighetproving } from '~shared/types/IDetaljertBehandling'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling

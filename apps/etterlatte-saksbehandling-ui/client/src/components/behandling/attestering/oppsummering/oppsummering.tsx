@@ -1,4 +1,4 @@
-import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { Underkjent } from './underkjent'
 import { Oversikt } from './oversikt'
 import { IBeslutning } from '../types'

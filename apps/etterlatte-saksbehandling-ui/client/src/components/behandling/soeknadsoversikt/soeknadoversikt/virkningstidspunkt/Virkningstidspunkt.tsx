@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker'
 import { Alert, Button, Label } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
 import { GyldighetIcon } from '~shared/icons/gyldigIcon'
-import { oppdaterVirkningstidspunkt, VurderingsResultat } from '~store/reducers/BehandlingReducer'
+import { oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { Calender, Edit } from '@navikt/ds-icons'
 
 import { RedigerWrapper } from '../kommerBarnetTilgode/KommerBarnetTilGodeVurdering'
@@ -20,6 +20,7 @@ import {
   Undertekst,
 } from '../../styled'
 import { useAppDispatch, useAppSelector } from '~store/Store'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
   return (

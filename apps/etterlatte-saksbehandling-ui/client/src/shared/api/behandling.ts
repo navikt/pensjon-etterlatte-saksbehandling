@@ -1,4 +1,4 @@
-import { IDetaljertBehandling, IKommerBarnetTilgode, Virkningstidspunkt } from '~store/reducers/BehandlingReducer'
+import { IDetaljertBehandling, Virkningstidspunkt, IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {

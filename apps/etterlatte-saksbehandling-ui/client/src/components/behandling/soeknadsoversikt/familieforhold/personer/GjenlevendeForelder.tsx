@@ -3,9 +3,9 @@ import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PeopleIcon } from '~shared/icons/peopleIcon'
 import { ForelderWrap } from '../../styled'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
-import { IPdlPerson } from '~store/reducers/BehandlingReducer'
 import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
 import { PersonStatus, RelatertPersonsRolle } from '~components/behandling/types'
+import { IPdlPerson } from '~shared/types/Person'
 
 type Props = {
   person: IPdlPerson

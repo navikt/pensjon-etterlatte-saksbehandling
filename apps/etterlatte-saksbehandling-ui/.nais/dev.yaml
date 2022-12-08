@@ -54,6 +54,8 @@ spec:
       value: http://etterlatte-vilkaarsvurdering
     - name: BEHANDLING_API_URL
       value: http://etterlatte-behandling
+    - name: VEDTAK_API_URL
+      value: http://etterlatte-vedtaksvurdering
   accessPolicy:
     outbound:
       external:

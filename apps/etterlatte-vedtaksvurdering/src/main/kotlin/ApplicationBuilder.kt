@@ -96,7 +96,7 @@ fun Application.restModule(
 
     routing {
         authenticate {
-            Api(vedtaksvurderingService)
+            vilkaarsvurderingRoute(vedtaksvurderingService)
         }
     }
 }

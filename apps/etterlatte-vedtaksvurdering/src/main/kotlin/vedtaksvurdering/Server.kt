@@ -59,7 +59,7 @@ fun Application.module(vedtaksvurderingService: VedtaksvurderingService, localDe
 fun Application.routingWithouthTokenValidation(vedtaksvurderingService: VedtaksvurderingService) {
     routing {
         route("api") {
-            Api(vedtaksvurderingService)
+            vilkaarsvurderingRoute(vedtaksvurderingService)
         }
     }
 }
@@ -70,7 +70,7 @@ fun Application.routingWithTokenValidation(vedtaksvurderingService: Vedtaksvurde
     routing {
         route("api") {
             authenticate {
-                Api(vedtaksvurderingService)
+                vilkaarsvurderingRoute(vedtaksvurderingService)
             }
         }
     }

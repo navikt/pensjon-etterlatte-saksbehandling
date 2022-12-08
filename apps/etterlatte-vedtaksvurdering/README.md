@@ -29,5 +29,5 @@ curl --location --request POST 'http://localhost:8082/azure/token' \
 ```
 
 #### Kjøre request
-- Url: `http://localhost:8085/api/vedtaksvurdering`
+- Url: `http://localhost:8085` 
 - Header: `Authorization: Bearer $token`

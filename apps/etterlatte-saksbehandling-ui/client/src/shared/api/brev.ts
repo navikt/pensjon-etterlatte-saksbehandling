@@ -14,7 +14,7 @@ export const nyttBrevForBehandling = async (
   enhet: string
 ): Promise<ApiResponse<any>> => apiClient.post(`/brev/behandling/${behandlingId}`, { mottaker, mal, enhet })
 
-export const opprettBrevFraPDF = async (behandlingId: string, mottaker: Mottaker, pdf: FormData): Promise<any> => {
+export const opprettBrevFraPDF = async (behandlingId: string, pdf: FormData): Promise<any> => {
   return await fetch(`/brev/pdf/${behandlingId}`, {
     method: 'POST',
     body: pdf,
@@ -27,8 +27,10 @@ export const opprettBrevFraPDF = async (behandlingId: string, mottaker: Mottaker
   })
 }
 
-export const opprettEllerOppdaterBrevForVedtak = async (sakId: number, behandlingId: string): Promise<ApiResponse<any>> =>
-  apiClient.post(`/brev/vedtak`, { sakId, behandlingId })
+export const opprettEllerOppdaterBrevForVedtak = async (
+  sakId: number,
+  behandlingId: string
+): Promise<ApiResponse<any>> => apiClient.post(`/brev/vedtak`, { sakId, behandlingId })
 
 export const ferdigstillBrev = async (brevId: string): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/${brevId}/ferdigstill`, {})

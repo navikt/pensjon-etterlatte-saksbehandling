@@ -1,16 +1,9 @@
 import styled from 'styled-components'
 import { Bruker } from './Bruker'
 import { Search } from './Search'
-import { useNavigate } from 'react-router-dom'
 import { Link } from '@navikt/ds-react'
 
 export const Header = () => {
-  const navigate = useNavigate()
-
-  const goToOppgavebenken = () => {
-    navigate('/')
-  }
-
   return (
     <>
       <HeaderWrapper>

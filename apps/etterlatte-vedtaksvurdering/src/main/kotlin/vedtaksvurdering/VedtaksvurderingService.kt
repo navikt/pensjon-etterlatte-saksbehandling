@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -176,7 +177,23 @@ class VedtaksvurderingService(
             if (it.vilkaarsvurdering == null) throw VedtakKanIkkeFattes(v)
             repository.fattVedtak(saksbehandler, behandlingId)
         }
-        return requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
+
+        val fattetVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
+        val fattetVedtakMessage = JsonMessage.newMessage(
+            mapOf(
+                eventNameKey to "VEDTAK:FATTET",
+                "vedtak" to fattetVedtak,
+                "behandlingId" to behandlingId,
+                "sakId" to fattetVedtak.sak.id,
+                "vedtakId" to fattetVedtak.vedtakId,
+                "eventtimestamp" to fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
+                "saksbehandler" to fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
+            )
+        )
+
+        sendToRapid(fattetVedtakMessage.toJson(), behandlingId)
+
+        return fattetVedtak
     }
 
     fun attesterVedtak(

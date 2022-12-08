@@ -65,6 +65,11 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             val vedtak = service.hentVedtakBolk(request.behandlingsidenter.map { UUID.fromString(it) })
             call.respond(VedtakBolkResponse(vedtak))
         }
+
+        post("vedtak/fattvedtak/{behandlingId}") {
+            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+            call.respond(service.fattVedtak(behandlingId, call.navIdent))
+        }
     }
 }
 

@@ -23,7 +23,6 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.ktor.server.routing.IgnoreTrailingSlash
-import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
@@ -33,7 +32,6 @@ import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
-import no.nav.etterlatte.vedtaksvurdering.rivers.FattVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreBeregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreVilkaarsresultat
@@ -77,7 +75,6 @@ class ApplicationBuilder {
             .apply {
                 LagreVilkaarsresultat(this, vedtaksvurderingService)
                 LagreBeregningsresultat(this, vedtaksvurderingService)
-                FattVedtak(this, vedtaksvurderingService)
                 UnderkjennVedtak(this, vedtaksvurderingService)
                 LagreIverksattVedtak(this, vedtaksvurderingService)
                 registrerVedlikeholdsriver(vedtaksvurderingService)

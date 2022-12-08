@@ -8,7 +8,6 @@ import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.config.LeaderElection
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class KonsistensavstemmingJobTest {
@@ -32,9 +31,7 @@ internal class KonsistensavstemmingJobTest {
         Assertions.assertFalse(leaderElection.isLeader())
     }
 
-    // TODO: fjern @Disabled naar konsistensavstemming er klar til aa kjoere
     @Test
-    @Disabled
     fun `skal konsistensavstemme for Barnepensjon siden pod er leader`() {
         every { leaderElection.isLeader() } returns true
         every { konsistensavstemmingService.startKonsistensavstemming(any(), any()) } returns emptyList()

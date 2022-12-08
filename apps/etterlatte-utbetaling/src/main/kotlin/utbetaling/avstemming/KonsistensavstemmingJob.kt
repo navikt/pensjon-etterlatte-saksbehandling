@@ -51,9 +51,7 @@ class KonsistensavstemmingJob(
                     Saktype.values().forEach {
                         when (it) {
                             Saktype.BARNEPENSJON -> {
-                                log.info("Konsistensavstemming for barnepensjon ennaa ikke implementert")
-                                /* TODO: fjern kommentar under naar klar til aa kjoere avstemming*/
-                                // konsistensavstemmingService.startKonsistensavstemming(idag, it)
+                                konsistensavstemmingService.startKonsistensavstemming(dag = idag, saktype = it)
                             }
                             Saktype.OMSTILLINGSSTOENAD -> {
                                 log.info("Konsistensavstemming for omstillingsstoenad ennaa ikke implementert")

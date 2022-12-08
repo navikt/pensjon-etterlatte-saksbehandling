@@ -205,14 +205,16 @@ fun utbetalingshendelse(
 
 fun mockKonsistensavstemming(
     dag: LocalDate = LocalDate.now(),
-    loependeUtbetalinger: List<OppdragForKonsistensavstemming>
+    loependeUtbetalinger: List<OppdragForKonsistensavstemming>,
+    id: UUIDBase64 = UUIDBase64(),
+    opprettTilOgMed: Tidspunkt = dag.minusDays(1).atTime(LocalTime.MAX).toTidspunkt(norskTidssone)
 ) = Konsistensavstemming(
-    id = UUIDBase64(),
+    id = id,
     sakType = Saktype.BARNEPENSJON,
     opprettet = Tidspunkt.now(),
     avstemmingsdata = null,
     loependeFraOgMed = dag.atStartOfDay().toTidspunkt(norskTidssone),
-    opprettetTilOgMed = dag.minusDays(1).atTime(LocalTime.MAX).toTidspunkt(norskTidssone),
+    opprettetTilOgMed = opprettTilOgMed,
     loependeUtbetalinger = loependeUtbetalinger
 )
 

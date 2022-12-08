@@ -6,18 +6,11 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
-import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.database.DataSourceBuilder
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
@@ -32,7 +25,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import vilkaarsvurdering.VilkaarsvurderingTestData
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -66,27 +58,6 @@ internal class DBTest {
     @AfterAll
     fun afterAll() {
         postgreSQLContainer.stop()
-    }
-
-    fun leggtilberegningsresultat() {
-        val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, beregning, vilkaarsvurdering, behandling)
-
-        val now = LocalDateTime.now()
-        val beregningsperiode = listOf<Beregningsperiode>()
-        vedtaksvurderingService.lagreBeregningsresultat(
-            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
-            "",
-            BeregningsResultat(
-                UUID.randomUUID(),
-                Beregningstyper.BPGP,
-                Endringskode.NY,
-                BeregningsResultatType.BEREGNET,
-                beregningsperiode,
-                now,
-                0L
-            )
-        )
     }
 
     fun lagreIverksattVedtak() {
@@ -164,15 +135,5 @@ internal class DBTest {
 
         vedtaksvurderingService.slettSak(sakId)
         Assertions.assertNull(vedtaksvurderingService.hentVedtak(uuid))
-    }
-
-    private fun lagreNyttVilkaarsresultat(service: VedtaksvurderingService, behandlingId: UUID) {
-        service.lagreVilkaarsresultat(
-            SakType.BARNEPENSJON,
-            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
-            "fnr",
-            VilkaarsvurderingTestData.oppfylt,
-            LocalDate.now()
-        )
     }
 }

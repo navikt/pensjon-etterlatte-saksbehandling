@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.sak.Sak
 import java.time.LocalDate
 import java.time.ZoneId
@@ -24,7 +25,9 @@ data class Oppgave(
     val fristDato: LocalDate,
     val behandlingsType: BehandlingType,
     val antallSoesken: Int
-)
+) {
+    val oppgaveStatus = OppgaveStatus.from(behandlingStatus)
+}
 
 class OppgaveDao(private val datasource: DataSource) {
 

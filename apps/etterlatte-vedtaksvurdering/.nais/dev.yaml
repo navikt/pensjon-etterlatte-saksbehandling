@@ -58,6 +58,8 @@ spec:
         - application: etterlatte-api
         - application: etterlatte-brev-api
         - application: etterlatte-brev-api-lokal
+        - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-saksbehandling-ui-lokal
     outbound:
       rules:
         - application: etterlatte-vilkaarsvurdering

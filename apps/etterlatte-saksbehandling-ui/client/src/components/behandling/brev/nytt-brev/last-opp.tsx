@@ -99,7 +99,7 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev
     formData.append('fil', valgtFil as Blob, valgtFil!!.name)
     formData.append('filData', JSON.stringify(filData))
 
-    opprettBrevFraPDF(behandlingId!!, brevMottaker, formData)
+    opprettBrevFraPDF(behandlingId!!, formData)
       .then((data) => leggTilNytt(data))
       .catch((error) => setError(error))
       .finally(() => {

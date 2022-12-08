@@ -43,7 +43,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
     })
 
     if (response.ok) {
-      let data = await retrieveData(props, response)
+      const data = await retrieveData(props, response)
 
       return {
         status: 'ok',

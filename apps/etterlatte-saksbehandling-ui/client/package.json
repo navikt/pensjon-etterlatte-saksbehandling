@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && eslint src --ext .ts,.tsx && vite build",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
@@ -54,12 +54,6 @@
     "vite": "^3.2.3",
     "vite-tsconfig-paths": "^3.5.2",
     "vitest": "^0.25.1"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [

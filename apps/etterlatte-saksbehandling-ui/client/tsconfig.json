@@ -16,6 +16,8 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx"

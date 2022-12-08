@@ -7,7 +7,7 @@ const SaksbehandlerTildelKnapp: React.FC<{ value: string }> = ({ value }) => {
   const verdi = value ? (
     value
   ) : (
-    <Button size={'small'} onClick={() => {}} variant={'secondary'}>
+    <Button size={'small'} onClick={() => {}} variant={'tertiary'}>
       Tildel meg
     </Button>
   )

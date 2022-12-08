@@ -55,11 +55,6 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     },
   },
   {
-    Header: 'Beskrivelse',
-    accessor: 'beskrivelse',
-    disableSortBy: true,
-  },
-  {
     Header: 'Søsken',
     accessor: 'antallSoesken',
     disableSortBy: true,

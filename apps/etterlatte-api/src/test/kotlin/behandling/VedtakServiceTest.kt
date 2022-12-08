@@ -23,19 +23,6 @@ internal class VedtakServiceTest {
     }
 
     @Test
-    fun attesterVedtak() {
-        val rapid = TestProdusent<String, String>()
-        val service = VedtakService(rapid)
-        service.attesterVedtak("behanldingId", "saksbehandlerIdent")
-
-        assertEquals(1, rapid.publiserteMeldinger.size)
-        val publisertMelding = rapid.publiserteMeldinger.first().verdi.let { objectMapper.readTree(it) }
-        assertEquals("SAKSBEHANDLER:ATTESTER_VEDTAK", publisertMelding[eventNameKey].textValue())
-        assertEquals("behanldingId", publisertMelding["behandlingId"].textValue())
-        assertEquals("saksbehandlerIdent", publisertMelding["saksbehandler"].textValue())
-    }
-
-    @Test
     fun underkjennVedtak() {
         val rapid = TestProdusent<String, String>()
         val service = VedtakService(rapid)

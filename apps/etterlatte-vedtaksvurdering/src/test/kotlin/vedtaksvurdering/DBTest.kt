@@ -39,6 +39,7 @@ internal class DBTest {
     private val beregning = mockk<BeregningKlient>(relaxed = true)
     private val vilkaarsvurdering = mockk<VilkaarsvurderingKlient>(relaxed = true)
     private val behandling = mockk<BehandlingKlient>(relaxed = true)
+    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     private val uuid = UUID.randomUUID()
     private val sakId = 123L
@@ -62,14 +63,26 @@ internal class DBTest {
 
     fun lagreIverksattVedtak() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, beregning, vilkaarsvurdering, behandling)
+        val vedtaksvurderingService = VedtaksvurderingService(
+            vedtakRepo,
+            beregning,
+            vilkaarsvurdering,
+            behandling,
+            sendToRapid
+        )
         vedtaksvurderingService.lagreIverksattVedtak(uuid)
     }
 
     @Test
     fun testDB() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, beregning, vilkaarsvurdering, behandling)
+        val vedtaksvurderingService = VedtaksvurderingService(
+            vedtakRepo,
+            beregning,
+            vilkaarsvurdering,
+            behandling,
+            sendToRapid
+        )
 
         val beregningDTO = BeregningDTO(
             UUID.randomUUID(),
@@ -102,6 +115,7 @@ internal class DBTest {
             .oppfylt.copy(
                 behandlingId = uuid
             )
+
         val vedtaket: Vedtak? = runBlocking {
             vedtaksvurderingService.populerOgHentFellesVedtak(uuid, "access")
         }

@@ -21,7 +21,7 @@ export const fattVedtak = async (behandlingsId: string): Promise<ApiResponse<unk
 }
 
 export const attesterVedtak = async (behandlingId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/attestervedtak/${behandlingId}`, {})
+  return apiClient.post(`/vedtak/attester/${behandlingId}`, {})
 }
 
 export const underkjennVedtak = async (

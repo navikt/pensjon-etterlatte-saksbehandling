@@ -30,7 +30,7 @@ internal class VedtaksvurderingServiceTest {
     private val beregning = mockk<BeregningKlient>(relaxed = true)
     private val vilkaarsvurdering = mockk<VilkaarsvurderingKlient>(relaxed = true)
     private val behandling = mockk<BehandlingKlient>(relaxed = true)
-    private val service = VedtaksvurderingService(repositoryMock, beregning, vilkaarsvurdering, behandling)
+    private val service = VedtaksvurderingService(repositoryMock, beregning, vilkaarsvurdering, behandling, mockk())
 
     private val sakId = 2L
     private val behandlingId = UUID.randomUUID()

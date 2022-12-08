@@ -122,7 +122,7 @@ class VedtaksvurderingService(
 
     suspend fun populerOgHentFellesVedtak(behandlingId: UUID, accessToken: String): Vedtak? {
         val vedtak = hentFellesVedtakMedUtbetalingsperioder(behandlingId)
-        if (vedtak != null) {
+        if (vedtak?.vedtakFattet != null) {
             return vedtak
         } else {
             return coroutineScope {

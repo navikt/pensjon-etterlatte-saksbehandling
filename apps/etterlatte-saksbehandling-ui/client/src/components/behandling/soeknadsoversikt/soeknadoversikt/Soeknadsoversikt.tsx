@@ -1,8 +1,9 @@
 import { OversiktGyldigFramsatt } from './gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { OversiktKommerBarnetTilgode } from './kommerBarnetTilgode/OversiktKommerBarnetTilgode'
-import { IDetaljertBehandling, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { Innhold } from '../styled'
 import Virkningstidspunkt from './virkningstidspunkt/Virkningstidspunkt'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 export interface PropsOmSoeknad {
   behandling: IDetaljertBehandling

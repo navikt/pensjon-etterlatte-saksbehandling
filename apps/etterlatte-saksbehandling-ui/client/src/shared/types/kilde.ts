@@ -1,3 +1,5 @@
+export type Kilde = KildeSaksbehandler | KildePdl
+
 export enum KildeType {
   saksbehandler = 'saksbehandler',
   privatperson = 'privatperson',
@@ -6,8 +8,6 @@ export enum KildeType {
   vilkaarskomponenten = 'vilkaarskomponenten',
   pdl = 'pdl',
 }
-
-export type Kilde = KildeSaksbehandler | KildePdl
 
 export interface KildeSaksbehandler {
   type: KildeType.saksbehandler

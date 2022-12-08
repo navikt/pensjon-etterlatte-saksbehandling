@@ -2,8 +2,8 @@ import { GyldigFramsattVurdering } from './GyldigFramsattVurdering'
 import { Foreldreansvar } from './Foreldreansvar'
 import { Innsender } from './Innsender'
 import { Verge } from './Verge'
-import { GyldigFramsattType, IGyldighetproving, IGyldighetResultat } from '~store/reducers/BehandlingReducer'
 import { InfobokserWrapper, Header, VurderingsWrapper, SoeknadOversiktWrapper } from '../../styled'
+import { IGyldighetResultat, IGyldighetproving, GyldigFramsattType } from '~shared/types/IDetaljertBehandling'
 
 export const OversiktGyldigFramsatt = ({ gyldigFramsatt }: { gyldigFramsatt: IGyldighetResultat | undefined }) => {
   if (gyldigFramsatt == null) {

@@ -1,13 +1,7 @@
-import {
-  IAdresse,
-  IBehandlingStatus,
-  IKriterie,
-  IKriterieOpplysning,
-  IVilkaarsproving,
-  KriterieOpplysningsType,
-  Kriterietype,
-} from '~store/reducers/BehandlingReducer'
 import { isAfter } from 'date-fns'
+import { IAdresse } from '~shared/types/IAdresse'
+import { IBehandlingStatus, IVilkaarsproving } from '~shared/types/IDetaljertBehandling'
+import { Kriterietype, IKriterie, KriterieOpplysningsType, IKriterieOpplysning } from '~shared/types/Kriterie'
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
   if (doedsdato == null) {

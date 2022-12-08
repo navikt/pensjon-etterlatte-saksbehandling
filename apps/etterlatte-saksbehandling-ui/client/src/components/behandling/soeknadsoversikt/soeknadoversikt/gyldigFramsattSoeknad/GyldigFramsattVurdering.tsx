@@ -1,6 +1,7 @@
-import { IGyldighetproving, IGyldighetResultat, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { format } from 'date-fns'
 import { GyldighetIcon } from '~shared/icons/gyldigIcon'
+import { IGyldighetResultat, IGyldighetproving } from '~shared/types/IDetaljertBehandling'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
 import { hentGyldighetsTekst } from '../../utils'
 

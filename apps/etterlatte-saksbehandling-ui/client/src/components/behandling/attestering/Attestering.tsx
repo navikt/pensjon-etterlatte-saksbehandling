@@ -1,10 +1,10 @@
 import { IBeslutning } from './types'
 import { useState } from 'react'
 import { IRolle } from '~store/reducers/SaksbehandlerReducer'
-import { IBehandlingStatus } from '~store/reducers/BehandlingReducer'
 import { Attestering } from './attestering/attestering'
 import { IBehandlingInfo } from '../SideMeny/types'
 import { Behandlingsoppsummering } from './oppsummering/oppsummering'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 export const BehandlingInfo = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const [beslutning, setBeslutning] = useState<IBeslutning>()

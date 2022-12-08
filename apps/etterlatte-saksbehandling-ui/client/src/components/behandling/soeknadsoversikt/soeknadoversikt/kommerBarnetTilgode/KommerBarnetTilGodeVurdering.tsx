@@ -1,4 +1,3 @@
-import { IKommerBarnetTilgode, JaNei, JaNeiRec, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { GyldighetIcon } from '~shared/icons/gyldigIcon'
 import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
 import styled from 'styled-components'
@@ -7,6 +6,9 @@ import { EndreVurdering } from './EndreVurdering'
 import { formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
 import { svarTilVurderingsstatus } from '../../utils'
 import { Edit } from '@navikt/ds-icons'
+import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
+import { JaNei, JaNeiRec } from '~shared/types/ISvar'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerBarnetTilgode,

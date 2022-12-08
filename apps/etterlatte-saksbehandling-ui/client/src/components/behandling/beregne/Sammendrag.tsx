@@ -4,8 +4,8 @@ import { useRef, useState } from 'react'
 import { InformationColored } from '@navikt/ds-icons'
 import { differenceInYears, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
-import { Beregning } from '~shared/api/beregning'
-import { IPdlPerson } from '~store/reducers/BehandlingReducer'
+import { IPdlPerson } from '~shared/types/Person'
+import { Beregning } from '~shared/types/Beregning'
 
 interface ToolTipPerson {
   fornavn: string

@@ -10,11 +10,12 @@ import {
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarBorder } from './styled'
 import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
-import { ISvar, VurderingsResultat } from '~store/reducers/BehandlingReducer'
 import { svarTilTotalResultat } from './utils'
 import { Delete } from '@navikt/ds-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterStringDato } from '~utils/formattering'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
+import { ISvar } from '~shared/types/ISvar'
 
 type Props = {
   virkningstidspunktDato: string

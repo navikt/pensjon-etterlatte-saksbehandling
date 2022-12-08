@@ -1,4 +1,4 @@
-import { IPdlPerson } from '~store/reducers/BehandlingReducer'
+import { IPdlPerson } from '~shared/types/Person'
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PeopleIcon } from '~shared/icons/peopleIcon'

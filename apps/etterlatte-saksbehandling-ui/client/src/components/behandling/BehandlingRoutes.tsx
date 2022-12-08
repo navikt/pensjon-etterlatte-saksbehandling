@@ -4,7 +4,7 @@ import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt/Soeknadoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag/Beregningsgrunnlag'
-import { IBehandlingsType } from '~store/reducers/BehandlingReducer'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { useAppSelector } from '~store/Store'
 import { Vedtaksbrev } from './vedtaksbrev/Vedtaksbrev'
 

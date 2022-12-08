@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { TextButton } from './TextButton'
-import { IAdresse } from '~store/reducers/BehandlingReducer'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { PersonDetailWrapper, Historikk } from '~components/behandling/soeknadsoversikt/styled'
+import { IAdresse } from '~shared/types/IAdresse'
 
 type Props = {
   adresser: Readonly<IAdresse[]> | undefined

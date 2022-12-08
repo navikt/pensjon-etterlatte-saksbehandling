@@ -13,7 +13,7 @@ import {
 import React from 'react'
 import { Vilkaar, IVilkaarsvurdering, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
-import { VurderingsResultat as VurderingsresultatOld } from '~store/reducers/BehandlingReducer'
+import { VurderingsResultat as VurderingsresultatOld } from '~shared/types/VurderingsResultat'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 import { Link } from '@navikt/ds-react'

@@ -1,4 +1,5 @@
-import { JaNei, VurderingsResultat } from '~store/reducers/BehandlingReducer'
+import { JaNei } from '~shared/types/ISvar'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 export function hentGyldighetsTekst(
   innsenderErForelder: VurderingsResultat | undefined,

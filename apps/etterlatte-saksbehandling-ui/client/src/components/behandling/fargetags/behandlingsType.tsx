@@ -1,5 +1,5 @@
 import { ColorTagBehandling } from './styled'
-import { IBehandlingsType } from '~store/reducers/BehandlingReducer'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { formaterEnumTilLesbarString } from '~utils/formattering'
 
 const colors = {

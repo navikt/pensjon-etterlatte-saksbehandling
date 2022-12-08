@@ -1,6 +1,6 @@
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
-import { IKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
 import { Header, InfobokserWrapper, InfoWrapper, SoeknadOversiktWrapper, VurderingsWrapper } from '../../styled'
+import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 
 interface Props {
   kommerBarnetTilgode: IKommerBarnetTilgode | null

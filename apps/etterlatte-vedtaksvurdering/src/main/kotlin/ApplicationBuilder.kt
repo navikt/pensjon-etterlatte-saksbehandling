@@ -1,6 +1,11 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
@@ -22,8 +27,12 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
+import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.rivers.AttesterVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.FattVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreBeregningsresultat
@@ -47,7 +56,17 @@ class ApplicationBuilder {
 
     private val dataSource = dataSourceBuilder.dataSource()
     private val vedtakRepo = VedtaksvurderingRepository.using(dataSource)
-    private val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
+    val config: Config = ConfigFactory.load()
+
+    val beregningKlient = BeregningKlientImpl(config, httpClient())
+    val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
+    val behandlingKlient = BehandlingKlientImpl(config, httpClient())
+    val vedtaksvurderingService = VedtaksvurderingService(
+        vedtakRepo,
+        beregningKlient,
+        vilkaarsvurderingKlient,
+        behandlingKlient
+    )
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
@@ -108,3 +127,12 @@ private fun Map<String, String>.withConsumerGroupId() =
     this.toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }
+
+private fun httpClient() = HttpClient(OkHttp) {
+    install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+    }
+    defaultRequest {
+        header(X_CORRELATION_ID, getCorrelationId())
+    }
+}.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }

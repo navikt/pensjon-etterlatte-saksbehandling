@@ -36,7 +36,6 @@ internal class LesVilkaarsmeldingTest {
                 any(),
                 any(),
                 any(),
-                any(),
                 capture(vilkarsres),
                 any()
             )

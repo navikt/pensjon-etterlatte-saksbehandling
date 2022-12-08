@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.rivers
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -40,26 +41,24 @@ internal class LagreVilkaarsresultat(
         withLogContext(packet.correlationId) {
             val behandling = objectMapper.readValue<Behandling>(packet["behandling"].toString())
 
-            val sakId = packet["sak.id"].toString()
-            val sakType = packet["sak.sakType"].textValue()
+            val sakType = SakType.valueOf(packet["sak.sakType"].textValue())
             val vilkaarsvurdering: Vilkaarsvurdering = objectMapper.readValue(
                 packet["vilkaarsvurdering"].toString()
             )
             try {
                 vedtaksvurderingService.lagreVilkaarsresultat(
-                    sakId,
                     sakType,
                     behandling,
                     packet["fnrSoeker"].textValue(),
                     vilkaarsvurdering,
                     vilkaarsvurdering.virkningstidspunkt.dato.atDay(1)
                 )
-                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandling.id)).also {
+                requireNotNull(vedtaksvurderingService.hentVedtak(behandling.id)).also {
                     context.publish(
                         JsonMessage.newMessage(
                             mapOf(
                                 eventNameKey to "VEDTAK:VILKAARSVURDERT",
-                                "sakId" to it.sakId.toLong(),
+                                "sakId" to it.sakId!!.toLong(),
                                 "behandlingId" to it.behandlingId.toString(),
                                 "vedtakId" to it.id,
                                 "eventtimestamp" to Tidspunkt.now()

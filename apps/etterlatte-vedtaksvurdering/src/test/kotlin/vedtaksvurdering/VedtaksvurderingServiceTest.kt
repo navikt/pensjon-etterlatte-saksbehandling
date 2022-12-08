@@ -6,12 +6,16 @@ import io.mockk.verify
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.vedtaksvurdering.database.Vedtak
+import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
+import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -23,17 +27,20 @@ import java.util.*
 internal class VedtaksvurderingServiceTest {
 
     private val repositoryMock: VedtaksvurderingRepository = mockk()
-    private val service = VedtaksvurderingService(repositoryMock)
+    private val beregning = mockk<BeregningKlient>(relaxed = true)
+    private val vilkaarsvurdering = mockk<VilkaarsvurderingKlient>(relaxed = true)
+    private val behandling = mockk<BehandlingKlient>(relaxed = true)
+    private val service = VedtaksvurderingService(repositoryMock, beregning, vilkaarsvurdering, behandling)
 
-    private val sakId = "5"
+    private val sakId = 2L
     private val behandlingId = UUID.randomUUID()
     private val fnr = "fnr"
-    private val sakType = "BARNEPENSJON"
+    private val sakType = SakType.BARNEPENSJON
 
     private val vedtakSomIkkeErFattet = Vedtak(
         0,
         sakId,
-        sakType,
+        sakType.toString(),
         behandlingId,
         null,
         null,
@@ -61,15 +68,14 @@ internal class VedtaksvurderingServiceTest {
             0L
         )
 
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns vedtakSomIkkeErFattet
-        every { repositoryMock.oppdaterBeregningsgrunnlag(sakId, behandlingId, any()) } returns Unit
+        every { repositoryMock.hentVedtak(behandlingId) } returns vedtakSomIkkeErFattet
+        every { repositoryMock.oppdaterBeregningsgrunnlag(behandlingId, any()) } returns Unit
         service.lagreBeregningsresultat(
-            sakId,
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
             fnr,
             beregning
         )
-        verify { repositoryMock.oppdaterBeregningsgrunnlag(sakId, behandlingId, beregning) }
+        verify { repositoryMock.oppdaterBeregningsgrunnlag(behandlingId, beregning) }
     }
 
     @Test
@@ -84,24 +90,21 @@ internal class VedtaksvurderingServiceTest {
             0L
         )
 
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
+        every { repositoryMock.hentVedtak(behandlingId) } returns null
         every {
             repositoryMock.lagreBeregningsresultat(
-                sakId,
                 Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
                 fnr,
                 any()
             )
         } returns Unit
         service.lagreBeregningsresultat(
-            sakId,
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
             fnr,
             beregning
         )
         verify {
             repositoryMock.lagreBeregningsresultat(
-                sakId,
                 Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
                 fnr,
                 any()
@@ -121,10 +124,9 @@ internal class VedtaksvurderingServiceTest {
             0L
         )
 
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns fattetVedtak
+        every { repositoryMock.hentVedtak(behandlingId) } returns fattetVedtak
         assertThrows<KanIkkeEndreFattetVedtak> {
             service.lagreBeregningsresultat(
-                sakId,
                 Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
                 fnr,
                 beregning
@@ -136,13 +138,12 @@ internal class VedtaksvurderingServiceTest {
     fun `når vilkårsresultat lagres og vedtak finnes fra før, så skal vedtaket oppdateres`() {
         val virkingsDato = LocalDate.now()
 
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns vedtakSomIkkeErFattet
-        every { repositoryMock.oppdaterVilkaarsresultat(sakId, sakType, behandlingId, any()) } returns Unit
-        every { repositoryMock.lagreFnr(sakId, behandlingId, fnr) } returns Unit
-        every { repositoryMock.lagreDatoVirk(sakId, behandlingId, virkingsDato) } returns Unit
+        every { repositoryMock.hentVedtak(behandlingId) } returns vedtakSomIkkeErFattet
+        every { repositoryMock.oppdaterVilkaarsresultat(sakType, behandlingId, any()) } returns Unit
+        every { repositoryMock.lagreFnr(behandlingId, fnr) } returns Unit
+        every { repositoryMock.lagreDatoVirk(behandlingId, virkingsDato) } returns Unit
 
         service.lagreVilkaarsresultat(
-            sakId,
             sakType,
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
             fnr,
@@ -151,7 +152,6 @@ internal class VedtaksvurderingServiceTest {
         )
         verify {
             repositoryMock.oppdaterVilkaarsresultat(
-                sakId,
                 sakType,
                 behandlingId,
                 VilkaarsvurderingTestData.oppfylt
@@ -163,10 +163,9 @@ internal class VedtaksvurderingServiceTest {
     fun `når vilkårsresultat lagres og vedtak ikke finnes fra før, så skal det opprettes nytt vedtak`() {
         val virkingsDato = LocalDate.now()
 
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
+        every { repositoryMock.hentVedtak(behandlingId) } returns null
         every {
             repositoryMock.lagreVilkaarsresultat(
-                sakId,
                 sakType,
                 Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
                 fnr,
@@ -175,7 +174,6 @@ internal class VedtaksvurderingServiceTest {
             )
         } returns Unit
         service.lagreVilkaarsresultat(
-            sakId,
             sakType,
             Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
             fnr,
@@ -184,7 +182,6 @@ internal class VedtaksvurderingServiceTest {
         )
         verify {
             repositoryMock.lagreVilkaarsresultat(
-                sakId,
                 sakType,
                 Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
                 fnr,
@@ -197,10 +194,9 @@ internal class VedtaksvurderingServiceTest {
     @Test
     fun `skal ikke lagre vilkårsresultat på fattet vedtak`() {
         val virkingsDato = LocalDate.now()
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns fattetVedtak
+        every { repositoryMock.hentVedtak(behandlingId) } returns fattetVedtak
         assertThrows<KanIkkeEndreFattetVedtak> {
             service.lagreVilkaarsresultat(
-                sakId,
                 sakType,
                 Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
                 fnr,
@@ -212,14 +208,14 @@ internal class VedtaksvurderingServiceTest {
 
     @Test
     fun `hent vedatak skal returnere vedtaket fra repository`() {
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns vedtakSomIkkeErFattet
-        Assertions.assertEquals(vedtakSomIkkeErFattet, service.hentVedtak(sakId, behandlingId))
+        every { repositoryMock.hentVedtak(behandlingId) } returns vedtakSomIkkeErFattet
+        Assertions.assertEquals(vedtakSomIkkeErFattet, service.hentVedtak(behandlingId))
     }
 
     @Test
     fun `hent vedatak skal returnere NULL om vedtak ikke finnes`() {
-        every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
-        Assertions.assertNull(service.hentVedtak(sakId, behandlingId))
+        every { repositoryMock.hentVedtak(behandlingId) } returns null
+        Assertions.assertNull(service.hentVedtak(behandlingId))
     }
 
     @Test

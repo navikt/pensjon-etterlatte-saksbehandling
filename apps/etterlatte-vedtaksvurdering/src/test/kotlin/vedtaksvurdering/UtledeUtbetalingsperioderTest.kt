@@ -8,6 +8,9 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
+import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -15,7 +18,10 @@ import java.time.YearMonth
 
 internal class UtledeUtbetalingsperioderTest {
     private val repositoryMock: VedtaksvurderingRepository = mockk()
-    private val service = VedtaksvurderingService(repositoryMock)
+    private val beregning = mockk<BeregningKlient>(relaxed = true)
+    private val vilkaarsvurdering = mockk<VilkaarsvurderingKlient>(relaxed = true)
+    private val behandling = mockk<BehandlingKlient>(relaxed = true)
+    private val service = VedtaksvurderingService(repositoryMock, beregning, vilkaarsvurdering, behandling)
 
     @Test
     fun `vedtak med sluttdato uten beregninger skal ha en opphørsperiode`() {

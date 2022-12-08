@@ -42,7 +42,7 @@ internal class UnderkjennVedtak(
                             eventNameKey to "VEDTAK:UNDERKJENT",
                             "eventtimestamp" to Tidspunkt.now(),
                             "vedtakId" to vedtak.id,
-                            "sakId" to vedtak.sakId.toLong()
+                            "sakId" to vedtak.sakId!!.toLong()
                         ) + packet.keep(
                             "behandlingId",
                             "saksbehandler",

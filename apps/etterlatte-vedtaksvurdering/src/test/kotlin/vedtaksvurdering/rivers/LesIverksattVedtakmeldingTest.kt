@@ -30,7 +30,7 @@ internal class LesIverksattVedtakmeldingTest {
     @Test
     fun `skal lese utbetalingsmelding og legge vedtaksmelding paa rapid`() {
         val behandlingIdVal = UUID.fromString("45dc0f0e-dbd0-465c-880b-f20ddb8e3789")
-        val sakIdVal = "1234"
+        val sakIdVal = 1234L
         val vedtakIdVal = 1L
         val behandlingIdSlot = slot<UUID>()
         every { vedtaksvurderingServiceMock.lagreIverksattVedtak(capture(behandlingIdSlot)) } returns Unit

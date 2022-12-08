@@ -7,16 +7,16 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import no.nav.etterlatte.vedtaksvurdering.database.Vedtak
+import no.nav.etterlatte.libs.ktor.accesstoken
+import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import org.slf4j.LoggerFactory
 import java.util.*
 
 private val logger = LoggerFactory.getLogger("RouteApi")
 fun Route.vilkaarsvurderingRoute(service: VedtaksvurderingService) {
-    get("hentvedtak/{sakId}/{behandlingId}") {
-        val sakId = call.parameters["sakId"].toString()
+    get("hentvedtak/{sakId}/{behandlingId}") { // TODO: ubrukt sj?
         val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-        val vedtaksresultat = service.hentVedtak(sakId, behandlingId)
+        val vedtaksresultat = service.hentVedtak(behandlingId)
         if (vedtaksresultat == null) {
             call.response.status(HttpStatusCode.NotFound)
         } else {
@@ -36,7 +36,10 @@ fun Route.vilkaarsvurderingRoute(service: VedtaksvurderingService) {
 
     get("behandlinger/{behandlingId}/fellesvedtak") {
         val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-        val vedtaksresultat = service.hentFellesVedtak(behandlingId)
+        val vedtaksresultat = service.populerOgHentFellesVedtak(
+            behandlingId = behandlingId,
+            accessToken = accesstoken
+        )
         if (vedtaksresultat == null) {
             call.response.status(HttpStatusCode.NotFound)
         } else {

@@ -117,9 +117,7 @@ fun Application.restModule(
 
     routing {
         authenticate {
-            route("api") {
-                vilkaarsvurderingRoute(vedtaksvurderingService)
-            }
+            vedtaksvurderingRoute(vedtaksvurderingService)
         }
     }
 }

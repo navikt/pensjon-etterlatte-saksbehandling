@@ -8,7 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.libs.ktor.accesstoken
-import no.nav.etterlatte.vedtaksvurdering.database.Vedtak
+import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import org.slf4j.LoggerFactory
 import java.util.*
 

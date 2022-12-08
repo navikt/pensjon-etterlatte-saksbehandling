@@ -11,10 +11,10 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
-import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -253,12 +253,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                 setLong(1, sakId)
                 executeUpdate()
             }
-            val s = it.prepareStatement("select behandlingId, sakId from vedtak").executeQuery()
-            if (s.next()) {
-                val sakdId = s.getString("sakid")
-                val behandlingId = s.getString("behandlingId")
-                println("sakdi: $sakdId   beeahndling: $behandlingId")
-            }
         }
     }
 
@@ -277,28 +271,9 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         virkningsDato = getDate(12)?.toLocalDate(),
         vedtakStatus = getString(13)?.let { VedtakStatus.valueOf(it) },
         sakType = getString(14),
-        behandlingType = getString(15)?.let { BehandlingType.valueOf(it) }
-            ?: BehandlingType.FØRSTEGANGSBEHANDLING // TODO: Hacky å defaulte her, må ses på
+        behandlingType = BehandlingType.valueOf(getString(15))
     )
 }
-
-data class Vedtak(
-    val id: Long,
-    val sakId: Long?,
-    val sakType: String?,
-    val behandlingId: UUID,
-    val saksbehandlerId: String?,
-    val beregningsResultat: BeregningsResultat?,
-    val vilkaarsResultat: Vilkaarsvurdering?,
-    val vedtakFattet: Boolean?,
-    val fnr: String?,
-    val datoFattet: Instant?,
-    val datoattestert: Instant?,
-    val attestant: String?,
-    val virkningsDato: LocalDate?,
-    val vedtakStatus: VedtakStatus?,
-    val behandlingType: BehandlingType
-)
 
 private object Queries {
     val lagreBeregningsresultat =

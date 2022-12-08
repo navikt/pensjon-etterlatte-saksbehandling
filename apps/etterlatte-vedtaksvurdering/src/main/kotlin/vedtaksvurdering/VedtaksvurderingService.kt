@@ -1,39 +1,30 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
-import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
-import no.nav.etterlatte.libs.common.vedtak.BilagMedSammendrag
 import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Sak
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import rapidsandrivers.vedlikehold.VedlikeholdService
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
-import java.time.ZoneOffset
 import java.util.*
-import no.nav.etterlatte.vedtaksvurdering.database.Vedtak as VedtakEntity
+import no.nav.etterlatte.vedtaksvurdering.Vedtak as VedtakEntity
 
 class KanIkkeEndreFattetVedtak(vedtak: VedtakEntity) :
     Exception("Vedtak ${vedtak.id} kan ikke oppdateres fordi det allerede er fattet") {
@@ -130,118 +121,66 @@ class VedtaksvurderingService(
     }
 
     suspend fun populerOgHentFellesVedtak(behandlingId: UUID, accessToken: String): Vedtak? {
-        val vedtak = repository.hentVedtak(behandlingId)
+        val vedtak = hentFellesVedtakMedUtbetalingsperioder(behandlingId)
         if (vedtak != null) {
-            return mapVedtakToDTO(vedtak, behandlingId)
+            return vedtak
         } else {
-            // TODO: async these requests
-            val beregningDTO = beregningKlient.hentBeregning(behandlingId, accessToken)
-            val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
-            val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-            val behandlingMini = Behandling(behandling.behandlingType!!, behandlingId)
+            return coroutineScope {
+                val beregningDTO = async { beregningKlient.hentBeregning(behandlingId, accessToken) }
+                val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) } // ktlint-disable max-line-length
+                val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
+                val behandlingMini = async { Behandling(behandling.await().behandlingType!!, behandlingId) }
 
-            val beregningsResultat = BeregningsResultat(
-                id = beregningDTO.beregningId,
-                type = Beregningstyper.GP,
-                endringskode = Endringskode.NY,
-                resultat = BeregningsResultatType.BEREGNET,
-                beregningsperioder = beregningDTO.beregningsperioder,
-                beregnetDato = LocalDateTime.from(beregningDTO.beregnetDato.toNorskTid()),
-                grunnlagVersjon = beregningDTO.grunnlagMetadata.versjon
-            )
-            // TODO: lag jira som setter inn alt i db samtidig
-            lagreBeregningsresultat(behandlingMini, behandling.soeker!!, beregningsResultat)
-            lagreVilkaarsresultat(
-                SakType.BARNEPENSJON, // TODO: SOS, hardkodet i behandling? https://jira.adeo.no/browse/EY-1300
-                behandlingMini,
-                behandling.soeker!!,
-                vilkaarsvurdering,
-                vilkaarsvurdering.virkningstidspunkt.dato.atDay(1)
-            )
-            repository.setSakid(sakId = behandling.sak, behandlingId = behandlingId)
-            return hentFellesVedtak(behandlingId)
+                val beregningsResultat = BeregningsResultat(
+                    id = beregningDTO.await().beregningId,
+                    type = Beregningstyper.GP,
+                    endringskode = Endringskode.NY,
+                    resultat = BeregningsResultatType.BEREGNET,
+                    beregningsperioder = beregningDTO.await().beregningsperioder,
+                    beregnetDato = LocalDateTime.from(beregningDTO.await().beregnetDato.toNorskTid()),
+                    grunnlagVersjon = beregningDTO.await().grunnlagMetadata.versjon
+                )
+                // TODO: sett inn alt i en sql -> EY-1308
+                lagreBeregningsresultat(behandlingMini.await(), behandling.await().soeker!!, beregningsResultat)
+                lagreVilkaarsresultat(
+                    SakType.BARNEPENSJON, // TODO: SOS, hardkodet i behandling? https://jira.adeo.no/browse/EY-1300
+                    behandlingMini.await(),
+                    behandling.await().soeker!!,
+                    vilkaarsvurdering.await(),
+                    vilkaarsvurdering.await().virkningstidspunkt.dato.atDay(1)
+                )
+                repository.setSakid(sakId = behandling.await().sak, behandlingId = behandlingId)
+                hentFellesVedtakMedUtbetalingsperioder(behandlingId)
+            }
         }
     }
 
-    fun hentFellesVedtak(behandlingId: UUID): Vedtak? {
-        // Placeholder for tingene som må inn for å fylle vedtaksmodellen
-        return repository.hentVedtak(behandlingId)?.let { mapVedtakToDTO(it, behandlingId) }
+    fun hentFellesVedtakMedUtbetalingsperioder(behandlingId: UUID): Vedtak? {
+        return repository.hentVedtak(behandlingId)?.let {
+            it.toDTO(repository.hentUtbetalingsPerioder(it.id))
+        }
     }
-
-    fun mapVedtakToDTO(vedtak: no.nav.etterlatte.vedtaksvurdering.database.Vedtak, behandlingId: UUID): Vedtak =
-        Vedtak(
-            vedtakId = vedtak.id,
-            virk = Periode(
-                vedtak.virkningsDato?.let(YearMonth::from)
-                    ?: vedtak.vilkaarsResultat?.virkningstidspunkt?.dato
-                    ?: YearMonth.now(),
-                null
-            ), // må få inn dette på toppnivå?
-            sak = Sak(vedtak.fnr!!, vedtak.sakType!!, vedtak.sakId!!),
-            behandling = Behandling(vedtak.behandlingType, behandlingId),
-            type = if (vedtak.vilkaarsResultat?.resultat?.utfall == VilkaarsvurderingUtfall.OPPFYLT) {
-                VedtakType.INNVILGELSE
-            } else if (vedtak.behandlingType == BehandlingType.REVURDERING) {
-                VedtakType.OPPHOER
-            } else {
-                VedtakType.AVSLAG
-            }, // Hvor skal vi bestemme vedtakstype?
-            grunnlag = emptyList(), // Ikke lenger aktuell
-            vilkaarsvurdering = vedtak.vilkaarsResultat, // Bør periodiseres
-            beregning = vedtak.beregningsResultat?.let { bres ->
-                BilagMedSammendrag(
-                    objectMapper.valueToTree(bres) as ObjectNode,
-                    bres.beregningsperioder.map {
-                        Beregningsperiode(
-                            Periode(
-                                YearMonth.from(it.datoFOM),
-                                it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }
-                                    ?.let(YearMonth::from)
-                            ),
-                            BigDecimal.valueOf(it.utbetaltBeloep.toLong())
-                        )
-                    }
-                )
-            }, // sammendraget bør lages av beregning
-            pensjonTilUtbetaling = repository.hentUtbetalingsPerioder(vedtak.id),
-            vedtakFattet = vedtak.saksbehandlerId?.let { ansvarligSaksbehandler ->
-                VedtakFattet(
-                    ansvarligSaksbehandler,
-                    "0000",
-                    vedtak.datoFattet?.atZone(
-                        ZoneOffset.UTC
-                    )!!
-                )
-            }, // logikk inn der fatting skjer. DB utvides med enhet og timestamp?
-            attestasjon = vedtak.attestant?.let { attestant ->
-                Attestasjon(
-                    attestant,
-                    "0000",
-                    vedtak.datoattestert!!.atZone(ZoneOffset.UTC)
-                )
-            }
-        )
 
     fun fattVedtak(behandlingId: UUID, saksbehandler: String): Vedtak {
         val v = requireNotNull(hentVedtak(behandlingId)).also {
             if (it.vedtakFattet == true) throw KanIkkeEndreFattetVedtak(it)
         }
 
-        requireNotNull(hentFellesVedtak(behandlingId)).also {
+        requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId)).also {
             if (it.type == VedtakType.INNVILGELSE) {
                 if (it.beregning == null) throw VedtakKanIkkeFattes(v)
             }
             if (it.vilkaarsvurdering == null) throw VedtakKanIkkeFattes(v)
             repository.fattVedtak(saksbehandler, behandlingId)
         }
-        return requireNotNull(hentFellesVedtak(behandlingId))
+        return requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
     }
 
     fun attesterVedtak(
         behandlingId: UUID,
         saksbehandler: String
     ): Vedtak {
-        val vedtak = requireNotNull(hentFellesVedtak(behandlingId)).also {
+        val vedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId)).also {
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
         }
@@ -251,7 +190,7 @@ class VedtaksvurderingService(
             vedtak.vedtakId,
             utbetalingsperioderFraVedtak(vedtak)
         )
-        return requireNotNull(hentFellesVedtak(behandlingId))
+        return requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
     }
 
     private fun requireThat(b: Boolean, function: () -> Exception) {
@@ -261,7 +200,7 @@ class VedtaksvurderingService(
     fun underkjennVedtak(
         behandlingId: UUID
     ): VedtakEntity {
-        val vedtak = requireNotNull(hentFellesVedtak(behandlingId)).also {
+        val vedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId)).also {
             require(it.vedtakFattet != null) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
             require(it.attestasjon == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
         }

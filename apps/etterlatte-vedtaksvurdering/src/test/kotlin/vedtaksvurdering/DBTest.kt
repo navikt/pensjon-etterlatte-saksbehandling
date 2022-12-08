@@ -166,38 +166,6 @@ internal class DBTest {
         Assertions.assertNull(vedtaksvurderingService.hentVedtak(uuid))
     }
 
-    @Test
-    fun `kan lagre og hente alle vedtak`() {
-        val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, beregning, vilkaarsvurdering, behandling)
-
-        val uuid1 = UUID.randomUUID()
-        val uuid2 = UUID.randomUUID()
-        val uuid3 = UUID.randomUUID()
-
-        // populerOgHentFellesVedtak(vedtaksvurderingService, uuid1)
-        // populerOgHentFellesVedtak(vedtaksvurderingService, uuid2)
-        lagreNyttVilkaarsresultat(vedtaksvurderingService, uuid3)
-
-        Assertions.assertEquals(3, vedtaksvurderingService.hentVedtakBolk(listOf(uuid1, uuid2, uuid3)).size)
-    }
-
-    @Test
-    fun `Skal lagre eller oppdatere virkningstidspunkt`() {
-        val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, beregning, vilkaarsvurdering, behandling)
-        val behandlingId = UUID.randomUUID()
-        val virk = LocalDate.now()
-
-        vedtaksvurderingService.lagreVirkningstidspunkt(behandlingId, virk)
-        val vedtak = vedtaksvurderingService.hentVedtak(behandlingId)
-        Assertions.assertEquals(virk, vedtak?.virkningsDato)
-
-        vedtaksvurderingService.lagreVirkningstidspunkt(behandlingId, virk.plusDays(1))
-        val vedtakOppdatertVirk = vedtaksvurderingService.hentVedtak(behandlingId)
-        Assertions.assertEquals(virk.plusDays(1), vedtakOppdatertVirk?.virkningsDato)
-    }
-
     private fun lagreNyttVilkaarsresultat(service: VedtaksvurderingService, behandlingId: UUID) {
         service.lagreVilkaarsresultat(
             SakType.BARNEPENSJON,

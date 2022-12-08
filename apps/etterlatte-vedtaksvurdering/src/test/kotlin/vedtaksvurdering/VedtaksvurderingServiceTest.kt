@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.vedtaksvurdering.database.Vedtak
+import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient

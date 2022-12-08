@@ -5,6 +5,9 @@ import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.mockKonsistensavstemming
+import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
+import no.nav.etterlatte.utbetaling.oppdragslinjeForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import org.junit.jupiter.api.AfterAll
@@ -13,7 +16,9 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
+import utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import java.time.Instant
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -44,7 +49,21 @@ internal class AvstemmingsdataSenderIntegrationTest {
     }
 
     @Test
-    fun `skal sende avstemmingsmeldinger på koeen`() {
+    fun `skal sende konsistensavstemmingsmeldinger paa koeen`() {
+        val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
+        val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer)
+        val konsistensavstemming = mockKonsistensavstemming(
+            loependeUtbetalinger = listOf(oppdrag)
+        )
+        val avstemmingsdata = KonsistensavstemmingDataMapper(konsistensavstemming).opprettAvstemmingsmelding()
+        avstemmingsdata.forEach {
+            val xml = avstemmingsdataSender.sendKonsistensavstemming(it)
+            assertNotNull(xml)
+        }
+    }
+
+    @Test
+    fun `skal sende grensesnittavstemmingsmeldinger paa koeen`() {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
@@ -57,9 +76,10 @@ internal class AvstemmingsdataSenderIntegrationTest {
             GrensesnittavstemmingDataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
         val avstemmingsdata = grensesnittavstemmingDataMapper.opprettAvstemmingsmelding()
 
-        val xml = avstemmingsdataSender.sendGrensesnittavstemming(avstemmingsdata.first())
-
-        assertNotNull(xml)
+        avstemmingsdata.forEach {
+            val xml = avstemmingsdataSender.sendGrensesnittavstemming(it)
+            assertNotNull(xml)
+        }
     }
 
     @AfterAll

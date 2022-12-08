@@ -27,11 +27,11 @@ internal class KonsistensavstemmingDataMapper(
     fun opprettAvstemmingsmelding(): List<Konsistensavstemmingsdata> =
         listOf(startmelding()) + datameldinger() + listOf(sluttmelding())
 
-    fun startmelding() = Konsistensavstemmingsdata().apply {
+    private fun startmelding() = Konsistensavstemmingsdata().apply {
         aksjonsdata = avstemmingsdata(KodeAksjon.START)
     }
 
-    fun sluttmelding() = Konsistensavstemmingsdata().apply {
+    private fun sluttmelding() = Konsistensavstemmingsdata().apply {
         aksjonsdata = avstemmingsdata(KodeAksjon.AVSL)
     }
 

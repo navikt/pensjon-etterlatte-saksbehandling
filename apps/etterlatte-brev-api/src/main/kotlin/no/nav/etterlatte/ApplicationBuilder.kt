@@ -8,22 +8,28 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.serialization.jackson.jackson
-import no.nav.etterlatte.adresse.AdresseKlient
+import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.adresse.RegoppslagKlient
+import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.BrevService
-import no.nav.etterlatte.brev.MottakerServiceImpl
+import no.nav.etterlatte.brev.DistribusjonService
+import no.nav.etterlatte.brev.VedtaksbrevService
+import no.nav.etterlatte.brev.adresse.MottakerService
+import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.brevRoute
-import no.nav.etterlatte.db.BrevRepository
-import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
-import no.nav.etterlatte.grunnlag.GrunnlagKlient
-import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.journalpost.JournalpostClient
+import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.db.DataSourceBuilder
+import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
+import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.dokument.JournalpostClient
+import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.norg2.Norg2Klient
-import no.nav.etterlatte.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.security.ktor.clientCredential
-import no.nav.etterlatte.vedtak.VedtakServiceImpl
+import no.nav.etterlatte.brev.behandling.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
@@ -33,37 +39,33 @@ class ApplicationBuilder {
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }
-    private val localDevelopment: Boolean = env["BREV_LOCAL_DEV"].toBoolean()
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env["ETTERLATTE_PDFGEN_URL"]!!)
-    private val vedtakService = VedtakServiceImpl(config, httpClient())
+    private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
+    private val regoppslagKlient = RegoppslagKlient(proxyClient(), env["ETTERLATTE_PROXY_URL"]!!)
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
-    private val grunnlagService = GrunnlagService(grunnlagKlient)
+    private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val grunnbeloepKlient = GrunnbeloepKlient(httpClient())
+    private val sakOgBehandlingService = SakOgBehandlingService(vedtakKlient, grunnlagKlient, grunnbeloepKlient)
     private val norg2Klient = Norg2Klient(env["NORG2_URL"]!!, httpClient())
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
 
-    private val mottakerService = MottakerServiceImpl(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
-    private val adresseService = AdresseKlient(proxyClient(), env["ETTERLATTE_PROXY_URL"]!!)
+    private val adresseService = AdresseService(norg2Klient, regoppslagKlient)
+    private val distribusjonService = DistribusjonService(::sendToRapid)
 
-    private val brevService = BrevService(
-        db,
-        pdfGenerator,
-        vedtakService,
-        grunnlagService,
-        norg2Klient,
-        grunnbeloepKlient,
-        adresseService,
-        ::sendToRapid
-    )
+    private val brevService = BrevService(db, pdfGenerator, adresseService, distribusjonService)
+    private val vedtaksbrevService =
+        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, distribusjonService)
 
     private val journalpostService = JournalpostClient(httpClient(), env["SAF_BASE_URL"]!!, env["SAF_SCOPE"]!!)
 
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
-                apiModule(localDevelopment) {
-                    brevRoute(brevService, mottakerService, journalpostService)
+                apiModule {
+                    brevRoute(brevService, mottakerService)
+                    vedtaksbrevRoute(vedtaksbrevService)
+                    dokumentRoute(journalpostService)
                 }
             }
             .build()
@@ -74,7 +76,7 @@ class ApplicationBuilder {
                     }
                 })
                 OppdaterDistribusjonStatus(this, db)
-                FerdigstillVedtaksbrev(this, brevService)
+                FerdigstillVedtaksbrev(this, vedtaksbrevService)
             }
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)

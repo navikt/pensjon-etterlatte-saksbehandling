@@ -6,16 +6,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.adresse.AdresseKlient
 import no.nav.etterlatte.brev.BrevService
-import no.nav.etterlatte.db.BrevRepository
-import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
-import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.brev.DistribusjonService
+import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.Status
-import no.nav.etterlatte.norg2.Norg2Klient
-import no.nav.etterlatte.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.vedtak.VedtakServiceImpl
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -24,22 +21,14 @@ internal class BrevServiceTest {
 
     private val mockkDb = mockk<BrevRepository>()
     private val mockPdfGen = mockk<PdfGeneratorKlient>()
-    private val vedtakServiceMock = mockk<VedtakServiceImpl>()
-    private val grunnlagService = mockk<GrunnlagService>()
-    private val adresseService = mockk<AdresseKlient>()
-    private val norg2Klient = mockk<Norg2Klient>()
-    private val grunnbeloepKlientMock = mockk<GrunnbeloepKlient>()
-    private val sendToRapid = mockk<(String) -> Unit>()
+    private val adresseService = mockk<AdresseService>()
+    private val distribusjonsService = mockk<DistribusjonService>()
 
     private val service = BrevService(
         mockkDb,
         mockPdfGen,
-        vedtakServiceMock,
-        grunnlagService,
-        norg2Klient,
-        grunnbeloepKlientMock,
         adresseService,
-        sendToRapid
+        distribusjonsService
     )
 
     @Test

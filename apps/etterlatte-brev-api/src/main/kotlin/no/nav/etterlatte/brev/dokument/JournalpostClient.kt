@@ -1,4 +1,4 @@
-package no.nav.etterlatte.journalpost
+package no.nav.etterlatte.brev.dokument
 
 import com.github.michaelbull.result.get
 import com.typesafe.config.Config

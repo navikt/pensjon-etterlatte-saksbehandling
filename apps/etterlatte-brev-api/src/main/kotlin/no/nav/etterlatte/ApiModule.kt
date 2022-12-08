@@ -19,15 +19,16 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import no.nav.etterlatte.health.healthApi
+import no.nav.etterlatte.brev.health.healthApi
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
-import java.util.*
+import java.util.UUID
 
-fun Application.apiModule(localDevelopment: Boolean, routes: Route.() -> Unit) {
+fun Application.apiModule(routes: Route.() -> Unit) {
     install(ContentNegotiation) {
         jackson {
             registerModule(JavaTimeModule())
@@ -49,16 +50,14 @@ fun Application.apiModule(localDevelopment: Boolean, routes: Route.() -> Unit) {
         }
     }
 
-    if (localDevelopment) {
-        routing { routes() }
-    } else {
-        install(Authentication) {
-            tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
-        }
+    install(Authentication) {
+        tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+    }
 
-        routing {
-            healthApi()
-            authenticate {
+    routing {
+        healthApi()
+        authenticate {
+            route("api") {
                 routes()
             }
         }

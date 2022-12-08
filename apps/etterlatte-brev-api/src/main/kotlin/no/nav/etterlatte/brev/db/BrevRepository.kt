@@ -1,13 +1,13 @@
-package no.nav.etterlatte.db
+package no.nav.etterlatte.brev.db
 
-import no.nav.etterlatte.db.BrevRepository.Queries.HENT_ALLE_BREV_QUERY
-import no.nav.etterlatte.db.BrevRepository.Queries.HENT_BREV_QUERY
-import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_BREV_QUERY
-import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_INNHOLD_QUERY
-import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
-import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_STATUS_QUERY
-import no.nav.etterlatte.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
-import no.nav.etterlatte.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_ALLE_BREV_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_BREV_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_STATUS_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevID

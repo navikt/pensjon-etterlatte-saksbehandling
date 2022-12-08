@@ -1,4 +1,4 @@
-package no.nav.etterlatte.health
+package no.nav.etterlatte.brev.health
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call

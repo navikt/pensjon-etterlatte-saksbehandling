@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtak
+package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
@@ -11,13 +11,9 @@ import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
 
-interface VedtakService {
-    suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak
-}
+class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
 
-class VedtakServiceImpl(config: Config, httpClient: HttpClient) : VedtakService {
-
-    private val logger = LoggerFactory.getLogger(VedtakServiceImpl::class.java)
+    private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
@@ -25,7 +21,7 @@ class VedtakServiceImpl(config: Config, httpClient: HttpClient) : VedtakService 
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
 
-    override suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak {
+    suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak {
         try {
             logger.info("Henter vedtaksvurdering (behandlingId: $behandlingId)")
 

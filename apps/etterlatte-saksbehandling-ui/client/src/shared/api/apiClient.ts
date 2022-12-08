@@ -12,6 +12,23 @@ interface Options {
   noData?: boolean
 }
 
+async function retrieveData(props: Options, response: Response): Promise<any> {
+  if (props.noData) {
+    return null
+  } else {
+    const type = response.headers.get('content-type')
+
+    switch (type) {
+      case 'application/json':
+        return await response.json()
+      case 'application/pdf':
+        return await response.arrayBuffer()
+      default:
+        return await response.text()
+    }
+  }
+}
+
 async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
   const { url, method, body } = props
 
@@ -26,10 +43,12 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
     })
 
     if (response.ok) {
+      let data = await retrieveData(props, response)
+
       return {
         status: 'ok',
         statusCode: response.status,
-        data: !props.noData ? await response.json() : null,
+        data,
       }
     }
     console.error(response)

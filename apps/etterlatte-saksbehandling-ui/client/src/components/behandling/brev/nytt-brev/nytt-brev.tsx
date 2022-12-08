@@ -50,8 +50,14 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
   const saksbehandlerEnheter = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.enheter)
 
   useEffect(() => {
-    hentMaler().then((res) => setMaler(res))
-    hentMottakere().then((res) => setMottakere(res))
+    hentMaler().then((res) => {
+      if (res.status === 'ok') setMaler(res.data)
+      else setError(res.error)
+    })
+    hentMottakere().then((res) => {
+      if (res.status === 'ok') setMottakere(res.data)
+      else setError(res.error)
+    })
   }, [])
 
   const forhaandsvis = () => {
@@ -73,15 +79,20 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
       },
       enhet
     )
-      .then((file) => URL.createObjectURL(file))
+      .then((res) => {
+        if (res.status === 'ok') {
+          return new Blob([res.data], { type: 'application/pdf' })
+        } else {
+          throw Error(res.error)
+        }
+      })
+      .then((file) => URL.createObjectURL(file!!))
       .then((url) => {
         setFileURL(url)
         setError(undefined)
         setKlarforLagring(true)
       })
-      .catch((e) => {
-        setError(e.message)
-      })
+      .catch((e) => setError(e.message))
       .finally(() => {
         if (fileURL) URL.revokeObjectURL(fileURL)
         setLaster(false)
@@ -108,7 +119,10 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
       },
       enhet
     )
-      .then((brev) => leggTilNytt(brev))
+      .then((res) => {
+        if (res.status === 'ok') leggTilNytt(res.data)
+        else throw Error(res.error)
+      })
       .finally(() => {
         setAdresse(undefined)
         setFnrMottaker(undefined)
@@ -192,7 +206,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
                 }}
               >
                 <option value={''}>Velg en enhet</option>
-                {saksbehandlerEnheter.map((m, i) => (
+                {saksbehandlerEnheter?.map((m, i) => (
                   <option key={i} value={m.enhetId}>
                     {m.navn} ({m.enhetId})
                   </option>

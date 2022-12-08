@@ -1,7 +1,7 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.db.BrevRepository
+import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes.DISTRIBUERT
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes.JOURNALFOERT
 import no.nav.etterlatte.libs.common.brev.model.Status

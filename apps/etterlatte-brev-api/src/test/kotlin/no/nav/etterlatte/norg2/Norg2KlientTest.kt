@@ -11,6 +11,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.adresse.Norg2Klient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.fail

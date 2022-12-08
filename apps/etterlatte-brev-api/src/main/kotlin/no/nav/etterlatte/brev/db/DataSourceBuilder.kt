@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.brev.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

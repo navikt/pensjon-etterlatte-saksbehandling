@@ -3,6 +3,7 @@ package no.nav.etterlatte.vilkaarsvurdering.config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.output.MigrateResult
 
 class DataSourceBuilder(
     private val jdbcUrl: String,

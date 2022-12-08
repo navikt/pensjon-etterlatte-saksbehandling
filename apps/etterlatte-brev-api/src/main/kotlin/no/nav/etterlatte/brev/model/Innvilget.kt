@@ -1,12 +1,8 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.brev.model.mapper.finnUtbetalingsinfo
-import no.nav.etterlatte.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.grunnlag.Persongalleri
+import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import java.math.BigDecimal
-import java.time.LocalDate
 
 data class InnvilgetBrevRequest(
     val saksnummer: String,
@@ -23,18 +19,16 @@ data class InnvilgetBrevRequest(
 
     companion object {
         fun fraVedtak(
-            vedtak: Vedtak,
-            grunnlag: Persongalleri,
+            behandling: Behandling,
             avsender: Avsender,
-            mottaker: Mottaker,
-            grunnbeloep: Grunnbeloep
+            mottaker: Mottaker
         ): InnvilgetBrevRequest =
             InnvilgetBrevRequest(
-                saksnummer = vedtak.sak.id.toString(),
-                utbetalingsinfo = vedtak.finnUtbetalingsinfo(),
-                grunnbeloep = grunnbeloep.grunnbeloep,
-                barn = grunnlag.soeker,
-                avdoed = grunnlag.avdoed,
+                saksnummer = behandling.vedtak.sak.id.toString(),
+                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                grunnbeloep = behandling.utbetalingsinfo.grunnbeloep.grunnbeloep,
+                barn = behandling.persongalleri.soeker,
+                avdoed = behandling.persongalleri.avdoed,
                 aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår? Nødvendig?
                 spraak = Spraak.NB, // todo, må hentes.
                 mottaker = mottaker,
@@ -42,5 +36,3 @@ data class InnvilgetBrevRequest(
             )
     }
 }
-
-data class Utbetalingsinfo(val beloep: BigDecimal, val kontonummer: String, val virkningsdato: LocalDate)

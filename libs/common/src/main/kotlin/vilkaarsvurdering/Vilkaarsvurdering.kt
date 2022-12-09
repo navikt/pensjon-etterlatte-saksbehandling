@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import java.time.LocalDateTime
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 import java.util.*
 
@@ -47,14 +47,14 @@ data class Lovreferanse(
 
 data class VilkaarVurderingData(
     val kommentar: String?,
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: Tidspunkt,
     val saksbehandler: String
 )
 
 data class VilkaarsvurderingResultat(
     val utfall: VilkaarsvurderingUtfall,
     val kommentar: String?,
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: Tidspunkt,
     val saksbehandler: String
 )
 

@@ -5,6 +5,7 @@ import behandling.VirkningstidspunktTestData
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -120,7 +120,7 @@ internal class VilkaarsvurderingRepository2Test {
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
                 kommentar = "En test",
-                tidspunkt = LocalDateTime.now(),
+                tidspunkt = Tidspunkt.now(),
                 saksbehandler = "saksbehandler1"
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
@@ -157,7 +157,7 @@ internal class VilkaarsvurderingRepository2Test {
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
                 kommentar = "En test",
-                tidspunkt = LocalDateTime.now(),
+                tidspunkt = Tidspunkt.now(),
                 saksbehandler = "saksbehandler1"
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
@@ -215,7 +215,7 @@ internal class VilkaarsvurderingRepository2Test {
         val vilkaarsvurderingResultat = VilkaarsvurderingResultat(
             utfall = VilkaarsvurderingUtfall.OPPFYLT,
             kommentar = "Alt ser bra ut",
-            tidspunkt = LocalDateTime.of(2022, 1, 1, 0, 0),
+            tidspunkt = Tidspunkt.now(),
             saksbehandler = "saksbehandler1"
         )
     }

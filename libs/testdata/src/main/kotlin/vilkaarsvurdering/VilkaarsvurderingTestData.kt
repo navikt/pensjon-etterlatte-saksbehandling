@@ -1,9 +1,9 @@
 package vilkaarsvurdering
 
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -13,14 +13,14 @@ class VilkaarsvurderingTestData {
             UUID.randomUUID(),
             emptyList(),
             YearMonth.of(2022, 1),
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, LocalDateTime.now(), "ABCDEF")
+            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, Tidspunkt.now(), "ABCDEF")
         )
 
         val ikkeOppfylt = Vilkaarsvurdering(
             UUID.randomUUID(),
             emptyList(),
             YearMonth.of(2022, 1),
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.IKKE_OPPFYLT, null, LocalDateTime.now(), "ABCDEF")
+            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.IKKE_OPPFYLT, null, Tidspunkt.now(), "ABCDEF")
         )
     }
 }

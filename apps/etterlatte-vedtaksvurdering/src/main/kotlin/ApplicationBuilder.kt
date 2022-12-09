@@ -32,7 +32,6 @@ import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
-import no.nav.etterlatte.vedtaksvurdering.rivers.LagreBeregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreVilkaarsresultat
 import no.nav.etterlatte.vedtaksvurdering.rivers.UnderkjennVedtak
@@ -74,7 +73,6 @@ class ApplicationBuilder {
             .build()
             .apply {
                 LagreVilkaarsresultat(this, vedtaksvurderingService)
-                LagreBeregningsresultat(this, vedtaksvurderingService)
                 UnderkjennVedtak(this, vedtaksvurderingService)
                 LagreIverksattVedtak(this, vedtaksvurderingService)
                 registrerVedlikeholdsriver(vedtaksvurderingService)

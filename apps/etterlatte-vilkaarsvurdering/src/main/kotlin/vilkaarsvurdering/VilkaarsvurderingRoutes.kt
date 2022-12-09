@@ -13,7 +13,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -62,15 +61,15 @@ fun Route.vilkaarsvurdering(
             }
         }
 
-        delete("/{behandlingId}/{vilkaarType}") {
+        delete("/{behandlingId}/{vilkaarId}") {
             withBehandlingId { behandlingId ->
-                val vilkaarType = VilkaarType.valueOf(requireNotNull(call.parameters["vilkaarType"]))
+                val vilkaarId = UUID.fromString(requireNotNull(call.parameters["vilkaarId"]))
 
-                logger.info("Sletter vurdering på vilkår $vilkaarType for $behandlingId")
+                logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
                 val oppdatertVilkaarsvurdering =
                     vilkaarsvurderingService.slettVurderingPaaVilkaar(
                         behandlingId = behandlingId,
-                        hovedVilkaarType = vilkaarType
+                        vilkaarId = vilkaarId
                     )
 
                 call.respond(oppdatertVilkaarsvurdering)
@@ -119,6 +118,7 @@ private suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
 
 private fun toVurdertVilkaar(vurdertVilkaarDto: VurdertVilkaarDto, saksbehandler: String) =
     VurdertVilkaar(
+        vilkaarId = vurdertVilkaarDto.vilkaarId,
         hovedvilkaar = vurdertVilkaarDto.hovedvilkaar,
         unntaksvilkaar = vurdertVilkaarDto.unntaksvilkaar,
         vurdering = VilkaarVurderingData(
@@ -139,6 +139,7 @@ private fun toVilkaarsvurderingResultat(
 )
 
 data class VurdertVilkaarDto(
+    val vilkaarId: UUID,
     val hovedvilkaar: VilkaarTypeOgUtfall,
     val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
     val kommentar: String?

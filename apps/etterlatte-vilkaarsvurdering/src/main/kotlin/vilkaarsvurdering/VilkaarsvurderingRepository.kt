@@ -5,6 +5,7 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import java.util.*
@@ -25,6 +26,15 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                 paramMap = mapOf("behandlingId" to behandlingId)
             )
                 .let { query -> session.run(query.map(::toVilkaarsvurderingIntern).asSingle) }
+        }
+
+    fun hentAlle() =
+        using(sessionOf(ds)) { session ->
+            queryOf(
+                statement = Queries.hentAlleVilkaarsvurderinger,
+                paramMap = emptyMap()
+            )
+                .let { query -> session.run(query.map(::toVilkaarsvurderingIntern).asList) }
         }
 
     override fun lagre(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern {
@@ -65,13 +75,21 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
             resultat = stringOrNull("resultat").let { resultat ->
                 resultat?.let { objectMapper.readValue(it) }
             },
-            virkningstidspunkt = string("virkningstidspunkt").let { virk -> objectMapper.readValue(virk) },
+            virkningstidspunkt = string("virkningstidspunkt").let { virk ->
+                val virkningstidspunkt: Virkningstidspunkt = objectMapper.readValue(virk)
+                virkningstidspunkt.dato
+            },
             grunnlagsmetadata = string("metadata").let { metadata -> objectMapper.readValue(metadata) }
         )
     }
 }
 
 private object Queries {
+    val hentAlleVilkaarsvurderinger = """
+        |SELECT behandlingId, vilkaar, resultat, virkningstidspunkt, metadata 
+        |FROM vilkaarsvurdering
+    """.trimMargin()
+
     val hentVilkaarsvurdering = """
         |SELECT behandlingId, vilkaar, resultat, virkningstidspunkt, metadata 
         |FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID

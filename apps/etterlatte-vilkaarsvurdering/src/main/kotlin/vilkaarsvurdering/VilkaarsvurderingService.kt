@@ -17,7 +17,7 @@ import java.util.*
 class VirkningstidspunktIkkeSattException(message: String) : RuntimeException(message)
 
 class VilkaarsvurderingService(
-    private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
+    private val vilkaarsvurderingRepository: VilkaarsvurderingRepository2,
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient
 ) : VedlikeholdService {
@@ -44,20 +44,20 @@ class VilkaarsvurderingService(
             SakType.BARNEPENSJON ->
                 when (behandling.behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
-                        vilkaarsvurderingRepository.lagre(
+                        vilkaarsvurderingRepository.opprettVilkaarsvurdering(
                             VilkaarsvurderingIntern(
                                 behandlingId = behandlingId,
                                 vilkaar = BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt),
-                                virkningstidspunkt = virkningstidspunkt,
+                                virkningstidspunkt = virkningstidspunkt.dato,
                                 grunnlagsmetadata = grunnlag.metadata
                             )
                         )
                     BehandlingType.REVURDERING ->
-                        vilkaarsvurderingRepository.lagre(
+                        vilkaarsvurderingRepository.opprettVilkaarsvurdering(
                             VilkaarsvurderingIntern(
                                 behandlingId = behandlingId,
                                 vilkaar = mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak)),
-                                virkningstidspunkt = virkningstidspunkt,
+                                virkningstidspunkt = virkningstidspunkt.dato,
                                 grunnlagsmetadata = grunnlag.metadata
                             )
                         )
@@ -75,45 +75,23 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         resultat: VilkaarsvurderingResultat
     ): VilkaarsvurderingIntern {
-        val oppdatertVilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
-            vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = resultat))
-        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
-
+        val oppdatertVilkaarsvurdering =
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
         return oppdatertVilkaarsvurdering
     }
 
-    fun slettTotalVurdering(behandlingId: UUID): VilkaarsvurderingIntern {
-        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
-            vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = null))
-        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
-    }
+    fun slettTotalVurdering(behandlingId: UUID): VilkaarsvurderingIntern =
+        vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
 
     fun oppdaterVurderingPaaVilkaar(
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
     ): VilkaarsvurderingIntern {
-        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
-            val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
-                vilkaar = vilkaarsvurdering.vilkaar.map {
-                    oppdaterVurdering(it, vurdertVilkaar)
-                }
-            )
-            vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
-        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
+        return vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
     }
 
-    fun slettVurderingPaaVilkaar(
-        behandlingId: UUID,
-        hovedVilkaarType: VilkaarType
-    ): VilkaarsvurderingIntern {
-        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
-            val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
-                vilkaar = vilkaarsvurdering.vilkaar.map {
-                    slettVurdering(it, hovedVilkaarType)
-                }
-            )
-            vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
-        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
+    fun slettVurderingPaaVilkaar(behandlingId: UUID, vilkaarId: UUID): VilkaarsvurderingIntern {
+        return vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
     }
 
     private fun mapVilkaarRevurdering(

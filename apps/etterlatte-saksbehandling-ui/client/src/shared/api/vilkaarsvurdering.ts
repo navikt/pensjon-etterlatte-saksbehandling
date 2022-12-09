@@ -1,4 +1,3 @@
-import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { Kilde } from '~shared/types/kilde'
 import { apiClient, ApiResponse } from './apiClient'
 
@@ -33,10 +32,11 @@ export const lagreTotalVurdering = async (
 export interface IVilkaarsvurdering {
   vilkaar: Vilkaar[]
   resultat?: VilkaarsvurderingVurdertResultat
-  virkningstidspunkt: Virkningstidspunkt
+  virkningstidspunkt: string
 }
 
 export interface Vilkaar {
+  id: string
   hovedvilkaar: Hovedvilkaar
   unntaksvilkaar?: Unntaksvilkaar[]
   vurdering?: VurdertResultat
@@ -89,6 +89,7 @@ export enum VilkaarsvurderingResultat {
 }
 
 export interface VurderVilkaarRequest {
+  vilkaarId: string
   hovedvilkaar: {
     type: string
     resultat: VurderingsResultat

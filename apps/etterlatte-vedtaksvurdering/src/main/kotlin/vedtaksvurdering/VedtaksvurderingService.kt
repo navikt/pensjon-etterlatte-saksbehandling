@@ -164,25 +164,11 @@ class VedtaksvurderingService(
                 hentFellesVedtakMedUtbetalingsperioder(behandlingId)!!
             }
 
-            sendVedtakBeregnetEvent(hentetVedtak, behandlingId)
+            sendToRapid(lagVedtakHendelseMelding("VEDTAK:BEREGNET", hentetVedtak), behandlingId)
+            sendToRapid(lagVedtakHendelseMelding("VEDTAK:VILKAARSVURDERT", hentetVedtak), behandlingId)
 
             return hentetVedtak
         }
-    }
-
-    fun sendVedtakBeregnetEvent(vedtak: Vedtak, behandlingId: UUID) {
-        sendToRapid(
-            JsonMessage.newMessage(
-                mapOf(
-                    eventNameKey to "VEDTAK:BEREGNET",
-                    "sakId" to vedtak.sak.id,
-                    "behandlingId" to vedtak.behandling.id,
-                    "vedtakId" to vedtak.vedtakId,
-                    "eventtimestamp" to Tidspunkt.now()
-                )
-            ).toJson(),
-            behandlingId
-        )
     }
 
     fun hentFellesVedtakMedUtbetalingsperioder(behandlingId: UUID): Vedtak? {
@@ -327,3 +313,14 @@ class VedtaksvurderingService(
         repository.slettSak(sakId)
     }
 }
+
+private fun lagVedtakHendelseMelding(vedtakhendelse: String, vedtak: Vedtak) =
+    JsonMessage.newMessage(
+        mapOf(
+            eventNameKey to vedtakhendelse,
+            "sakId" to vedtak.sak.id,
+            "behandlingId" to vedtak.behandling.id,
+            "vedtakId" to vedtak.vedtakId,
+            "eventtimestamp" to Tidspunkt.now()
+        )
+    ).toJson()

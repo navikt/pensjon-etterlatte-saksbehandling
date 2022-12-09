@@ -60,7 +60,7 @@ class KonsistensavstemmingService(
         val registrertFoerTom = dag.minusDays(1).atTime(LocalTime.MAX).toTidspunkt(norskTidssone)
 
         val relevanteUtbetalinger = utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-            loependeFraOgMed = loependeYtelseFom,
+            aktivFraOgMed = loependeYtelseFom,
             opprettetFramTilOgMed = registrertFoerTom,
             saktype = saktype
         )

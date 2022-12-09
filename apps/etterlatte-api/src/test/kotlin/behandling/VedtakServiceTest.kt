@@ -10,19 +10,6 @@ import org.junit.jupiter.api.Test
 internal class VedtakServiceTest {
 
     @Test
-    fun fattVedtak() {
-        val rapid = TestProdusent<String, String>()
-        val service = VedtakService(rapid)
-        service.fattVedtak("behanldingId", "saksbehandlerIdent")
-
-        assertEquals(1, rapid.publiserteMeldinger.size)
-        val publisertMelding = rapid.publiserteMeldinger.first().verdi.let { objectMapper.readTree(it) }
-        assertEquals("SAKSBEHANDLER:FATT_VEDTAK", publisertMelding[eventNameKey].textValue())
-        assertEquals("behanldingId", publisertMelding["behandlingId"].textValue())
-        assertEquals("saksbehandlerIdent", publisertMelding["saksbehandler"].textValue())
-    }
-
-    @Test
     fun underkjennVedtak() {
         val rapid = TestProdusent<String, String>()
         val service = VedtakService(rapid)

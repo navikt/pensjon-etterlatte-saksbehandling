@@ -7,19 +7,15 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.beregning.erInklusiv
-import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
-import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.behandling.BehandlingKlient
 import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
-import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -30,8 +26,7 @@ class BeregningService(
     private val beregningRepository: BeregningRepository,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val behandlingKlient: BehandlingKlient,
-    private val sendToRapid: (String, UUID) -> Unit
+    private val behandlingKlient: BehandlingKlient
 ) : VedlikeholdService {
 
     fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
@@ -50,20 +45,7 @@ class BeregningService(
             behandlingId
         )
 
-        val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
-        val message = JsonMessage.newMessage(BehandlingGrunnlagEndret.eventName)
-            .apply {
-                this["vilkaarsvurdering"] = vilkaarsvurdering
-                this["beregning"] = lagretBeregning.toDTO()
-                this[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey] = grunnlag
-            }
-            .apply { // trengs av lagreberegning i vedtak + beregning, fjerne?
-                this["sakId"] = behandling.sak
-                this["fnrSoeker"] = behandling.soeker!!
-                this["behandling"] = Behandling(behandling.behandlingType!!, behandling.id)
-            }
-        sendToRapid(message.toJson(), behandling.id)
-        return lagretBeregning
+        return beregningRepository.lagreEllerOppdaterBeregning(beregning)
     }
 
     fun lagBeregning(

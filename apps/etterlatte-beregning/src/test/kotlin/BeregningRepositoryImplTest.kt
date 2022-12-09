@@ -27,7 +27,6 @@ internal class BeregningRepositoryImplTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private lateinit var beregningRepository: BeregningRepository
-    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
     fun beforeAll() {
@@ -53,8 +52,7 @@ internal class BeregningRepositoryImplTest {
             beregningRepository,
             mockk(),
             mockk(),
-            mockk(),
-            sendToRapid
+            mockk()
         ).lagBeregning(
             grunnlag = opplysningsgrunnlag,
             virkFOM = YearMonth.of(2021, 2),
@@ -94,7 +92,7 @@ internal class BeregningRepositoryImplTest {
 
         val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        val nyBeregning = BeregningService(beregningRepository, mockk(), mockk(), mockk(), sendToRapid).lagBeregning(
+        val nyBeregning = BeregningService(beregningRepository, mockk(), mockk(), mockk()).lagBeregning(
             grunnlag = opplysningsgrunnlag,
             virkFOM = YearMonth.of(2021, 2),
             virkTOM = YearMonth.of(2024, 12),

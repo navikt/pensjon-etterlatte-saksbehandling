@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
 import java.util.UUID.randomUUID
 
 internal class BeregningServiceTest {
@@ -32,7 +31,6 @@ internal class BeregningServiceTest {
     private val vilkaarsvurderingKlientImpl = mockk<VilkaarsvurderingKlient>()
     private val grunnlagKlientImpl = mockk<GrunnlagKlientImpl>()
     private val behandlingKlientImpl = mockk<BehandlingKlientImpl>()
-    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
     private val testData = GrunnlagTestData(
         opplysningsmapSoeskenOverrides = mapOf(
             Opplysningstype.FOEDSELSDATO to Opplysning.Konstant(
@@ -48,8 +46,7 @@ internal class BeregningServiceTest {
         beregningRepository,
         vilkaarsvurderingKlientImpl,
         grunnlagKlientImpl,
-        behandlingKlientImpl,
-        sendToRapid
+        behandlingKlientImpl
     ).lagBeregning(
         opplysningsgrunnlag,
         YearMonth.of(2021, 2),
@@ -87,8 +84,7 @@ internal class BeregningServiceTest {
             beregningRepository,
             vilkaarsvurderingKlientImpl,
             grunnlagKlientImpl,
-            behandlingKlientImpl,
-            sendToRapid
+            behandlingKlientImpl
         ).lagBeregning(
             grunnlag = Grunnlag.empty(),
             virkFOM = virkFOM,
@@ -109,8 +105,7 @@ internal class BeregningServiceTest {
             beregningRepository,
             vilkaarsvurderingKlientImpl,
             grunnlagKlientImpl,
-            behandlingKlientImpl,
-            sendToRapid
+            behandlingKlientImpl
         ).lagBeregning(
             grunnlag = grunnlag,
             virkFOM = mockk(),

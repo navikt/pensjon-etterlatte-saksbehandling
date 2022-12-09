@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -129,9 +130,14 @@ class VedtaksvurderingService(
         if (vedtak?.vedtakFattet != null) {
             return vedtak
         } else {
-            return coroutineScope {
+            val hentetVedtak = coroutineScope {
                 val beregningDTO = async { beregningKlient.hentBeregning(behandlingId, accessToken) }
-                val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) } // ktlint-disable max-line-length
+                val vilkaarsvurdering = async {
+                    vilkaarsvurderingKlient.hentVilkaarsvurdering(
+                        behandlingId,
+                        accessToken
+                    )
+                } // ktlint-disable max-line-length
                 val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
                 val behandlingMini = async { Behandling(behandling.await().behandlingType!!, behandlingId) }
 
@@ -146,6 +152,7 @@ class VedtaksvurderingService(
                 )
                 // TODO: sett inn alt i en sql -> EY-1308
                 lagreBeregningsresultat(behandlingMini.await(), behandling.await().soeker!!, beregningsResultat)
+
                 lagreVilkaarsresultat(
                     SakType.BARNEPENSJON, // TODO: SOS, hardkodet i behandling? https://jira.adeo.no/browse/EY-1300
                     behandlingMini.await(),
@@ -154,9 +161,28 @@ class VedtaksvurderingService(
                     vilkaarsvurdering.await().virkningstidspunkt.dato.atDay(1)
                 )
                 repository.setSakid(sakId = behandling.await().sak, behandlingId = behandlingId)
-                hentFellesVedtakMedUtbetalingsperioder(behandlingId)
+                hentFellesVedtakMedUtbetalingsperioder(behandlingId)!!
             }
+
+            sendVedtakBeregnetEvent(hentetVedtak, behandlingId)
+
+            return hentetVedtak
         }
+    }
+
+    fun sendVedtakBeregnetEvent(vedtak: Vedtak, behandlingId: UUID) {
+        sendToRapid(
+            JsonMessage.newMessage(
+                mapOf(
+                    eventNameKey to "VEDTAK:BEREGNET",
+                    "sakId" to vedtak.sak.id,
+                    "behandlingId" to vedtak.behandling.id,
+                    "vedtakId" to vedtak.vedtakId,
+                    "eventtimestamp" to Tidspunkt.now()
+                )
+            ).toJson(),
+            behandlingId
+        )
     }
 
     fun hentFellesVedtakMedUtbetalingsperioder(behandlingId: UUID): Vedtak? {

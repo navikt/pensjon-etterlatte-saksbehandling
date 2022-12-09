@@ -123,7 +123,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     }
 
     fun hentVedtak(behandlingsId: UUID): Vedtak? {
-        val resultat = connection.use { it ->
+        val resultat = connection.use {
             val statement = it.prepareStatement(Queries.hentVedtak)
             statement.setObject(1, behandlingsId)
             statement.executeQuery().singleOrNull {

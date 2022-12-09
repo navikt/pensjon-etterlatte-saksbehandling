@@ -39,7 +39,7 @@ sealed class Behandling {
     abstract val persongalleri: Persongalleri
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
 
-    val logger: Logger = LoggerFactory.getLogger(Behandling::class.java)
+    protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
     val oppgaveStatus get() = OppgaveStatus.from(status)
 
     private val kanRedigeres: Boolean

@@ -215,7 +215,7 @@ internal class VilkaarsvurderingRepository2Test {
         val vilkaarsvurderingResultat = VilkaarsvurderingResultat(
             utfall = VilkaarsvurderingUtfall.OPPFYLT,
             kommentar = "Alt ser bra ut",
-            tidspunkt = LocalDateTime.now(),
+            tidspunkt = LocalDateTime.of(2022, 1, 1, 0, 0),
             saksbehandler = "saksbehandler1"
         )
     }

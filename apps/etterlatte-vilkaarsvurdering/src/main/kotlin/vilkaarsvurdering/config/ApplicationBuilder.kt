@@ -38,7 +38,7 @@ class ApplicationBuilder {
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     private val vilkaarsvurderingService =
-        VilkaarsvurderingService(vilkaarsvurderingRepository, behandlingKlient, grunnlagKlient, ::publiser)
+        VilkaarsvurderingService(vilkaarsvurderingRepository, behandlingKlient, grunnlagKlient)
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
@@ -51,9 +51,6 @@ class ApplicationBuilder {
             .apply { registrerVedlikeholdsriver(vilkaarsvurderingService) }
 
     fun start() = rapidsConnection.start()
-    private fun publiser(melding: String, key: UUID) {
-        rapidsConnection.publish(message = melding, key = key.toString())
-    }
 }
 
 private fun httpClient() = HttpClient(OkHttp) {

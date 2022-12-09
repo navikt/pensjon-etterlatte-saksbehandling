@@ -6,12 +6,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.string.shouldInclude
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -39,7 +36,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -55,7 +51,6 @@ internal class VilkaarsvurderingServiceTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val uuid: UUID = UUID.randomUUID()
-    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
     private val accesstoken = "token"
 
     @BeforeAll
@@ -81,8 +76,7 @@ internal class VilkaarsvurderingServiceTest {
         service = VilkaarsvurderingService(
             repository,
             behandlingKlient,
-            grunnlagKlient,
-            sendToRapid
+            grunnlagKlient
         )
     }
 
@@ -240,32 +234,6 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
-    fun `Skal publisere vilkaarsvurdering paa kafka paa et format vedtaksvurering og beregning forstaar`() {
-        val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
-        val emptyGrunnlag = Grunnlag.empty()
-        val vilkaarsvurderingIntern = VilkaarsvurderingIntern(
-            vilkaarsvurdering.behandlingId,
-            emptyList(),
-            VirkningstidspunktTestData.virkningstidsunkt(),
-            vilkaarsvurdering.resultat,
-            emptyGrunnlag.metadata
-        )
-        val payloadContent = slot<String>()
-
-        service.publiserVilkaarsvurdering(vilkaarsvurderingIntern, emptyGrunnlag, detaljertBehandling())
-
-        verify(exactly = 1) {
-            sendToRapid.invoke(capture(payloadContent), vilkaarsvurdering.behandlingId)
-        }
-        payloadContent.captured shouldInclude "vilkaarsvurdering"
-        payloadContent.captured shouldInclude "grunnlag"
-        payloadContent.captured shouldInclude "sak"
-        payloadContent.captured shouldInclude "virkningstidspunkt"
-        payloadContent.captured shouldInclude "behandling"
-        payloadContent.captured shouldInclude "fnrSoeker"
-    }
-
-    @Test
     fun `Skal slette alle vilkaarsvurderinger i en sak ved vedlikehold`() {
         val vilkaarsvurdering = runBlocking { service.hentEllerOpprettVilkaarsvurdering(uuid, accesstoken) }
         assertNotNull(vilkaarsvurdering)
@@ -281,13 +249,6 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             accesstoken
         )
-    }
-
-    private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
-        every { id } returns UUID.randomUUID()
-        every { sak } returns 1L
-        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-        every { soeker } returns "10095512345"
     }
 
     private fun vilkaarsVurderingData() =

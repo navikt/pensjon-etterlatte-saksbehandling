@@ -56,6 +56,11 @@ internal class KonsistensavstemmingServiceKtTest {
         verify { avstemmingsdataSender.sendKonsistensavstemming(any()) }
     }
 
+    @Test
+    fun `gjeldendelinjerForEnDato haandterer den tomme listen`() {
+        assertEquals(emptyList<Utbetalingslinje>(), gjeldendeLinjerForEnDato(emptyList(), LocalDate.now()))
+    }
+
     /**
      * Utbetalingslinjene er sendt inn paa ulike tidspunkter.
      * 1:   |-------->

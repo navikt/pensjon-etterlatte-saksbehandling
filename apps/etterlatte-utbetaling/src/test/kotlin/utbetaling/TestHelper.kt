@@ -122,12 +122,15 @@ fun utbetaling(
     opprettet: Tidspunkt = Tidspunkt.now(),
     utbetalingslinjeId: Long = 1L,
     periodeFra: LocalDate = LocalDate.parse("2022-01-01"),
+    periodeTil: LocalDate? = null,
     utbetalingslinjer: List<Utbetalingslinje> = listOf(
         utbetalingslinje(
             id,
             sakId,
             utbetalingslinjeId,
-            periodeFra = periodeFra
+            periodeFra = periodeFra,
+            periodeTil = periodeTil,
+            opprettet = opprettet
         )
     ),
     kvittering: Kvittering? = null,

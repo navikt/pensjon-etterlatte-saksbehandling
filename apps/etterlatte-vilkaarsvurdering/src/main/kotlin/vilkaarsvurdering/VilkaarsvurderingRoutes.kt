@@ -85,8 +85,7 @@ fun Route.vilkaarsvurdering(
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
                     val oppdatertVilkaarsvurdering = vilkaarsvurderingService.oppdaterTotalVurdering(
                         behandlingId = behandlingId,
-                        resultat = toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler),
-                        accessToken = accesstoken
+                        resultat = toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler)
                     )
 
                     call.respond(oppdatertVilkaarsvurdering)

@@ -15,7 +15,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -52,7 +51,6 @@ internal class VilkaarsvurderingRoutesTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
-    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
     fun before() {
@@ -70,8 +68,7 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(
                 VilkaarsvurderingRepositoryImpl(ds.dataSource()),
                 behandlingKlient,
-                grunnlagKlient,
-                sendToRapid
+                grunnlagKlient
             )
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
@@ -350,7 +347,6 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(resultat.kommentar, oppdatertVilkaarsvurdering?.resultat?.kommentar)
             assertEquals("Saksbehandler01", oppdatertVilkaarsvurdering?.resultat?.saksbehandler)
             assertNotNull(oppdatertVilkaarsvurdering?.resultat?.tidspunkt)
-            verify(exactly = 1) { sendToRapid.invoke(any(), any()) }
 
             val sletteResponse = client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

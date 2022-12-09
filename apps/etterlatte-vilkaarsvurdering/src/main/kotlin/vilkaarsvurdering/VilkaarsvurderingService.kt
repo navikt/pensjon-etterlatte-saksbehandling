@@ -1,13 +1,8 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -16,7 +11,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
-import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
@@ -25,8 +19,7 @@ class VirkningstidspunktIkkeSattException(message: String) : RuntimeException(me
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingKlient: BehandlingKlient,
-    private val grunnlagKlient: GrunnlagKlient,
-    private val sendToRapid: (String, UUID) -> Unit
+    private val grunnlagKlient: GrunnlagKlient
 ) : VedlikeholdService {
 
     suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingIntern =
@@ -78,27 +71,13 @@ class VilkaarsvurderingService(
         }
     }
 
-    suspend fun oppdaterTotalVurdering(
+    fun oppdaterTotalVurdering(
         behandlingId: UUID,
-        resultat: VilkaarsvurderingResultat,
-        accessToken: String
+        resultat: VilkaarsvurderingResultat
     ): VilkaarsvurderingIntern {
         val oppdatertVilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = resultat))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
-
-        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-
-        publiserVilkaarsvurdering(
-            vilkaarsvurdering = oppdatertVilkaarsvurdering,
-            grunnlag = grunnlagKlient
-                .hentGrunnlagMedVersjon(
-                    oppdatertVilkaarsvurdering.grunnlagsmetadata.sakId,
-                    oppdatertVilkaarsvurdering.grunnlagsmetadata.versjon,
-                    accessToken
-                ),
-            behandling = behandling
-        )
 
         return oppdatertVilkaarsvurdering
     }
@@ -135,33 +114,6 @@ class VilkaarsvurderingService(
             )
             vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
-    }
-
-    fun publiserVilkaarsvurdering(
-        vilkaarsvurdering: VilkaarsvurderingIntern,
-        grunnlag: Grunnlag,
-        behandling: DetaljertBehandling
-    ) {
-        // Bygger midlertidig opp en melding for å tilfredsstille beregning og vedtaksvurdering.
-        val message = JsonMessage.newMessage(BehandlingGrunnlagEndret.eventName)
-            .apply {
-                this["sak"] = Sak(
-                    behandling.soeker!!,
-                    SakType.BARNEPENSJON.toString(),
-                    behandling.sak
-                )
-            }
-            .apply { this["sakId"] = behandling.sak }
-            .apply { this["fnrSoeker"] = behandling.soeker!! }
-            .apply {
-                this["behandling"] =
-                    Behandling(behandling.behandlingType!!, behandling.id)
-            }
-            .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDomain() }
-            .apply { this["virkningstidspunkt"] = vilkaarsvurdering.virkningstidspunkt.dato }
-            .apply { this["grunnlag"] = grunnlag }
-
-        sendToRapid(message.toJson(), vilkaarsvurdering.behandlingId)
     }
 
     private fun mapVilkaarRevurdering(

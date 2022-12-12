@@ -19,17 +19,18 @@ abstract class Regel<G, S>(
     open val beskrivelse: String,
     open val regelReferanse: RegelReferanse
 ) {
-    fun anvend(grunnlag: G, periode: RegelPeriode): SubsumsjonsNode<S> {
+    fun anvend(grunnlag: G, periode: RegelPeriode): SubsumsjonsNode<S> =
         if (gjelderFra <= periode.fraDato) {
-            return anvendRegel(grunnlag, periode)
-        } else throw IngenGyldigeReglerForTidspunktException(periode)
-    }
+            anvendRegel(grunnlag, periode)
+        } else {
+            throw IngenGyldigeReglerForTidspunktException(periode)
+        }
 
     protected abstract fun anvendRegel(grunnlag: G, periode: RegelPeriode): SubsumsjonsNode<S>
     abstract fun accept(visitor: RegelVisitor)
 }
 
-open class SlaaSammenToRegler<C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel<G, D>>(
+open class SlaaSammenToRegler<C, D, G, S, A : Regel<G, C>, B : Regel<G, D>>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
@@ -61,8 +62,7 @@ open class SlaaSammenToRegler<C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel
     }
 }
 
-open class SlaaSammenTreRegler<D : Any, E : Any, F : Any, G, S, A : Regel<G, D>, B : Regel<G, E>, C :
-        Regel<G, F>>(
+open class SlaaSammenTreRegler<D, E, F, G, S, A : Regel<G, D>, B : Regel<G, E>, C : Regel<G, F>>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
@@ -98,10 +98,7 @@ open class SlaaSammenTreRegler<D : Any, E : Any, F : Any, G, S, A : Regel<G, D>,
     }
 }
 
-data class IngenGyldigeReglerForTidspunktException(val periode: RegelPeriode) :
-    Exception("Ingen gyldige regler er konfigurert for tidsrommet: ${periode.fraDato} - ${periode.tilDato}")
-
-open class VelgNyesteGyldigRegel<G, S : Any>(
+open class VelgNyesteGyldigRegel<G, S>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
@@ -135,7 +132,7 @@ open class VelgNyesteGyldigRegel<G, S : Any>(
         )
     }
 
-    private fun <G, S : Any> List<Regel<G, S>>.nyesteGyldigeRegel(periode: RegelPeriode) = this
+    private fun <G, S> List<Regel<G, S>>.nyesteGyldigeRegel(periode: RegelPeriode) = this
         .filter { regel -> regel.gjelderFra <= periode.fraDato }
         .maxByOrNull { it.gjelderFra }
 }
@@ -168,7 +165,7 @@ open class GangSammenRegel<G>(
     }
 }
 
-open class FinnFaktumIGrunnlagRegel<G, T : Any, A : FaktumNode<T>, S>(
+open class FinnFaktumIGrunnlagRegel<G, T, A : FaktumNode<T>, S>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
@@ -215,3 +212,6 @@ open class KonstantRegel<G, S>(
         children = listOf()
     )
 }
+
+data class IngenGyldigeReglerForTidspunktException(val periode: RegelPeriode) :
+    Exception("Ingen gyldige regler er konfigurert for tidsrommet: ${periode.fraDato} - ${periode.tilDato}")

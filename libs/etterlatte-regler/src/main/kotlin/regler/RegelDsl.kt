@@ -9,7 +9,7 @@ data class RegelMeta(
     val regelReferanse: RegelReferanse
 )
 
-fun <C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel<G, D>> slaaSammenToRegler(
+private fun <C, D, G, S, A : Regel<G, C>, B : Regel<G, D>> slaaSammenToRegler(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -25,8 +25,7 @@ fun <C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel<G, D>> slaaSammenToRegle
     slaasammenFunksjon = slaaSammenFunksjon
 )
 
-fun <D : Any, E : Any, F : Any, G, S, A : Regel<G, D>, B : Regel<G, E>, C : Regel<G, F>>
-slaaSammenTreRegler(
+private fun <D, E, F, G, S, A : Regel<G, D>, B : Regel<G, E>, C : Regel<G, F>> slaaSammenTreRegler(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -44,7 +43,7 @@ slaaSammenTreRegler(
     slaasammenFunksjon = slaaSammenFunksjon
 )
 
-fun <G, S : Any> velgNyesteRegel(
+private fun <G, S> velgNyesteRegel(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -56,7 +55,7 @@ fun <G, S : Any> velgNyesteRegel(
     regler = regler
 )
 
-fun <G> gangSammenRegler(
+private fun <G> gangSammenRegler(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -68,7 +67,7 @@ fun <G> gangSammenRegler(
     regler = regler
 )
 
-fun <G, T : Any, A : FaktumNode<T>, S> finnFaktumIGrunnlag(
+fun <G, T, A : FaktumNode<T>, S> finnFaktumIGrunnlag(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -95,6 +94,7 @@ fun <G, S> definerKonstant(
 )
 
 infix fun <G, A> RegelMeta.kombinerer(regel1: Regel<G, A>) = this to regel1
+
 infix fun <G> RegelMeta.multipliser(regler: List<Regel<G, BigDecimal>>) = gangSammenRegler(
     gjelderFra = gjelderFra,
     beskrivelse = beskrivelse,
@@ -102,7 +102,7 @@ infix fun <G> RegelMeta.multipliser(regler: List<Regel<G, BigDecimal>>) = gangSa
     regler = regler
 )
 
-infix fun <G, A : Any> RegelMeta.velgNyesteGyldige(regler: List<Regel<G, A>>) = velgNyesteRegel(
+infix fun <G, A> RegelMeta.velgNyesteGyldige(regler: List<Regel<G, A>>) = velgNyesteRegel(
     gjelderFra = gjelderFra,
     beskrivelse = beskrivelse,
     regelReferanse = regelReferanse,
@@ -113,28 +113,25 @@ infix fun <G, A, B> Pair<RegelMeta, Regel<G, A>>.og(regel2: Regel<G, B>) = this 
 infix fun <G, A, B, C> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>>.og(third: Regel<G, C>) =
     Triple(first, second, third)
 
-infix fun <G, A : Any> Regel<G, A>.og(that: Regel<G, A>) = listOf(this, that)
-infix fun <G, A : Any> List<Regel<G, A>>.og(that: Regel<G, A>) = this.plus(that)
-infix fun <G, A : Any, B : Any, S> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>>.med(
-    f: (A, B) -> S
-) = slaaSammenToRegler(
-    gjelderFra = first.first.gjelderFra,
-    beskrivelse = first.first.beskrivelse,
-    regelReferanse = first.first.regelReferanse,
-    regel1 = first.second,
-    regel2 = second,
-    slaaSammenFunksjon = f
-)
+infix fun <G, A> Regel<G, A>.og(that: Regel<G, A>) = listOf(this, that)
+infix fun <G, A> List<Regel<G, A>>.og(that: Regel<G, A>) = this.plus(that)
+infix fun <G, A, B, S> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>>.med(f: (A, B) -> S) =
+    slaaSammenToRegler(
+        gjelderFra = first.first.gjelderFra,
+        beskrivelse = first.first.beskrivelse,
+        regelReferanse = first.first.regelReferanse,
+        regel1 = first.second,
+        regel2 = second,
+        slaaSammenFunksjon = f
+    )
 
-infix fun <G, A : Any, B : Any, C : Any, S>
-Triple<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>, Regel<G, C>>.med(
-    f: (A, B, C) -> S
-) = slaaSammenTreRegler(
-    gjelderFra = first.first.gjelderFra,
-    beskrivelse = first.first.beskrivelse,
-    regelReferanse = first.first.regelReferanse,
-    regel1 = first.second,
-    regel2 = second,
-    regel3 = third,
-    slaaSammenFunksjon = f
-)
+infix fun <G, A, B, C, S> Triple<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>, Regel<G, C>>.med(f: (A, B, C) -> S) =
+    slaaSammenTreRegler(
+        gjelderFra = first.first.gjelderFra,
+        beskrivelse = first.first.beskrivelse,
+        regelReferanse = first.first.regelReferanse,
+        regel1 = first.second,
+        regel2 = second,
+        regel3 = third,
+        slaaSammenFunksjon = f
+    )

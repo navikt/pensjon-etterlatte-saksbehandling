@@ -13,7 +13,7 @@ sealed class Node<T>(
 data class SubsumsjonsNode<T>(
     override val verdi: T,
     val regel: Regel<*, *>,
-    val children: List<Node<out Any>>
+    val children: List<Node<*>>
 ) : Node<T>(verdi) {
     override fun accept(visitor: Visitor) {
         visitor.visit(this)

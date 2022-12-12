@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
+import no.nav.etterlatte.utbetaling.avstemming.OppdragForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.gjeldendeLinjerForEnDato
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalTime
 
 internal class KonsistensavstemmingServiceKtTest {
 
@@ -54,6 +56,63 @@ internal class KonsistensavstemmingServiceKtTest {
         assertTrue(resultat.all { it == "<xml>data</xml>" })
         verify { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), Saktype.BARNEPENSJON) }
         verify { avstemmingsdataSender.sendKonsistensavstemming(any()) }
+    }
+
+    @Test
+    fun `lagKonsistensavstemming haandterer tilfellet uten utbetalingslinjer`() {
+        val idag = LocalDate.now()
+        every {
+            utbetalingDao.hentUtbetalingerForKonsistensavstemming(
+                idag.atStartOfDay().toTidspunkt(norskTidssone),
+                idag.minusDays(1).atTime(
+                    LocalTime.MAX
+                ).toTidspunkt(norskTidssone),
+                Saktype.BARNEPENSJON
+            )
+        } returns emptyList()
+
+        val service = KonsistensavstemmingService(
+            utbetalingDao = utbetalingDao,
+            avstemmingDao = avstemmingDao,
+            avstemmingsdataSender = avstemmingsdataSender
+        )
+
+        val konsistensavstemming = service.lagKonsistensavstemming(LocalDate.now(), Saktype.BARNEPENSJON)
+        assertEquals(emptyList<OppdragForKonsistensavstemming>(), konsistensavstemming.loependeUtbetalinger)
+    }
+
+    @Test
+    fun `lagKonsistensavstemming haandterer tilfellet uten loepende utbetalinger`() {
+        val idag = LocalDate.now()
+        every {
+            utbetalingDao.hentUtbetalingerForKonsistensavstemming(
+                idag.atStartOfDay().toTidspunkt(norskTidssone),
+                idag.minusDays(1).atTime(
+                    LocalTime.MAX
+                ).toTidspunkt(norskTidssone),
+                Saktype.BARNEPENSJON
+            )
+        } returns listOf(
+            utbetaling(
+                periodeFra = idag.minusDays(200),
+                periodeTil = idag.minusDays(50)
+            ),
+            utbetaling(
+                utbetalingslinjer = listOf(
+                    utbetalingslinje(periodeFra = idag.minusDays(300)),
+                    utbetalingslinje(type = Utbetalingslinjetype.OPPHOER, periodeFra = idag.minusDays(2))
+                )
+            )
+        )
+
+        val service = KonsistensavstemmingService(
+            utbetalingDao = utbetalingDao,
+            avstemmingDao = avstemmingDao,
+            avstemmingsdataSender = avstemmingsdataSender
+        )
+
+        val konsistensavstemming = service.lagKonsistensavstemming(LocalDate.now(), Saktype.BARNEPENSJON)
+        assertEquals(emptyList<OppdragForKonsistensavstemming>(), konsistensavstemming.loependeUtbetalinger)
     }
 
     @Test

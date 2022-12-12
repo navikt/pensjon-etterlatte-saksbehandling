@@ -139,6 +139,20 @@ class KonsistensavstemmingService(
             loependeUtbetalinger = loependeUtbetalinger
         )
     }
+
+    fun konsistensavstemmingErKjoertIDag(saktype: Saktype, idag: LocalDate): Boolean {
+        val tidspunktForSisteKonsistensavstemming: Tidspunkt? =
+            hentSisteKonsistensavstemming(saktype)?.opprettet
+
+        val datoForSisteKonsistensavstemming = tidspunktForSisteKonsistensavstemming?.let {
+            LocalDate.ofInstant(it.instant, norskTidssone)
+        }
+
+        return datoForSisteKonsistensavstemming == idag
+    }
+
+    fun hentSisteKonsistensavstemming(saktype: Saktype): Konsistensavstemming? =
+        avstemmingDao.hentSisteKonsistensavsvemming(saktype)
 }
 
 /**

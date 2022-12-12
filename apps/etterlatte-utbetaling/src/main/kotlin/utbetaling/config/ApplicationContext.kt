@@ -103,8 +103,8 @@ class ApplicationContext(
     val konsistensavstemmingJob = KonsistensavstemmingJob(
         konsistensavstemmingService,
         leaderElection,
-        starttidspunkt = ZonedDateTime.now(norskTidssone).next(LocalTime.of(3, 30, 0)),
-        periode = Duration.of(1, ChronoUnit.DAYS)
+        initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+        periode = Duration.of(1, ChronoUnit.HOURS)
 
     )
 

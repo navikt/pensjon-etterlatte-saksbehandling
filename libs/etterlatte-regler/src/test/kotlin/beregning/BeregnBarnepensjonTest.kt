@@ -5,9 +5,11 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 import regler.FaktumNode
+import regler.RegelPeriode
 import regler.finnAlleKnekkpunkter
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 import java.time.YearMonth
 
 class BeregnBarnepensjonTest {
@@ -20,10 +22,10 @@ class BeregnBarnepensjonTest {
             beskrivelse = "Avdød forelders trygdetid",
             verdi = AvdoedForelder(trygdetid = BigDecimal(30))
         ),
-        virkningstidspunkt = FaktumNode(
+        periode = FaktumNode(
             kilde = saksbehandler,
             beskrivelse = "Virkningstidspunkt",
-            verdi = YearMonth.of(2022, 1)
+            verdi = RegelPeriode(LocalDate.of(2022, 1, 1))
         )
     )
 

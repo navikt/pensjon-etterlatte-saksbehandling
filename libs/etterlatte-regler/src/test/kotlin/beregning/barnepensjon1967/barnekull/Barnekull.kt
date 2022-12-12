@@ -61,7 +61,6 @@ val barnekullRegel = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
     regelReferanse = ToDoRegelReferanse()
-) kombinerer belopForFoersteBarn og belopForEtterfoelgendeBarn og antallSoeskenIKullet med {
-        foerstebarnSats, etterfoelgendeBarnSats, antallSoesken ->
+) kombinerer belopForFoersteBarn og belopForEtterfoelgendeBarn og antallSoeskenIKullet med { foerstebarnSats, etterfoelgendeBarnSats, antallSoesken ->
     (foerstebarnSats + (etterfoelgendeBarnSats * antallSoesken.toBigDecimal())) / (antallSoesken + 1).toBigDecimal()
 }

@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
-import java.time.YearMonth
 
 class GangSammenRegelTest {
 
-    private data class TestGrunnlag(override val virkningstidspunkt: FaktumNode<YearMonth>) : RegelGrunnlag
+    private data class TestGrunnlag(override val periode: FaktumNode<RegelPeriode>) : RegelGrunnlag
 
     private val regel1 = definerKonstant<TestGrunnlag, BigDecimal>(
         gjelderFra = GJELDER_FRA,
@@ -56,7 +55,7 @@ class GangSammenRegelTest {
         private val GJELDER_FRA = LocalDate.of(2030, 1, 1)
         private val SAKSBEHANDLER = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
         private val GRUNNLAG = TestGrunnlag(
-            FaktumNode(YearMonth.of(2030, 1), SAKSBEHANDLER, "virkningstidspunkt")
+            FaktumNode(RegelPeriode(LocalDate.of(2030, 1, 1)), SAKSBEHANDLER, "virkningstidspunkt")
         )
     }
 }

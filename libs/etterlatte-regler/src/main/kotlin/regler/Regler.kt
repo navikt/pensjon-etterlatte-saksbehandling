@@ -3,10 +3,15 @@ package regler
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.YearMonth
 
 interface RegelGrunnlag {
-    val virkningstidspunkt: FaktumNode<YearMonth>
+    val periode: FaktumNode<RegelPeriode>
+}
+
+data class RegelPeriode(val fraDato: LocalDate, val tilDato: LocalDate? = null) {
+    init {
+        assert(tilDato == null || tilDato >= fraDato) { "Tildato må være større eller lik fradato" }
+    }
 }
 
 interface RegelReferanse
@@ -83,8 +88,8 @@ open class SlaaSammenTreRegler<D : Any, E : Any, F : Any, G : RegelGrunnlag, S, 
     }
 }
 
-data class IngenGyldigeReglerPaaVirkningstidspunktException(val virk: YearMonth) :
-    Exception("Ingen gyldige regler er konfigurert for virkningstidspunkt: $virk")
+data class IngenGyldigeReglerForTidspunktException(val periode: RegelPeriode) :
+    Exception("Ingen gyldige regler er konfigurert for tidsrommet: ${periode.fraDato} - ${periode.tilDato}")
 
 open class VelgNyesteGyldigRegel<G : RegelGrunnlag, S : Any>(
     override val gjelderFra: LocalDate,
@@ -100,10 +105,10 @@ open class VelgNyesteGyldigRegel<G : RegelGrunnlag, S : Any>(
 
     override fun anvend(grunnlag: G): SubsumsjonsNode<S> {
         val regel = regler
-            .filter { it.gjelderFra <= grunnlag.virkningstidspunkt.verdi.atDay(1) }
+            .filter { regel -> regel.gjelderFra <= grunnlag.periode.verdi.fraDato }
             .maxByOrNull { it.gjelderFra }
             ?.anvend(grunnlag)
-            ?: throw IngenGyldigeReglerPaaVirkningstidspunktException(grunnlag.virkningstidspunkt.verdi)
+            ?: throw IngenGyldigeReglerForTidspunktException(grunnlag.periode.verdi)
 
         return SubsumsjonsNode(
             verdi = regel.verdi,

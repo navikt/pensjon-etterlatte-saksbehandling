@@ -6,19 +6,18 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
-import java.time.YearMonth
 
 class FinnFaktumIGrunnlagRegelTest {
     data class Grunnlag(
         val testVerdi2021: FaktumNode<Int>,
-        override val virkningstidspunkt: FaktumNode<YearMonth>
+        override val periode: FaktumNode<RegelPeriode>
     ) : RegelGrunnlag
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
 
     private val grunnlag = Grunnlag(
         testVerdi2021 = FaktumNode(100_000, saksbehandler, "Verdi for test"),
-        virkningstidspunkt = FaktumNode(verdi = YearMonth.of(2021, 1), saksbehandler, "Virk")
+        periode = FaktumNode(RegelPeriode(LocalDate.of(2021, 1, 1)), saksbehandler, "Virk")
     )
 
     private val finnFaktumIGrunnlagRegel: Regel<Grunnlag, Int> = finnFaktumIGrunnlag(

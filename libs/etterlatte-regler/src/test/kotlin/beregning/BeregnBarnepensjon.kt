@@ -6,15 +6,15 @@ import beregning.barnepensjon2024.beregnBarnepensjon2024Regel
 import regler.FaktumNode
 import regler.RegelGrunnlag
 import regler.RegelMeta
+import regler.RegelPeriode
 import regler.ToDoRegelReferanse
 import regler.og
 import regler.velgNyesteGyldige
 import java.math.BigDecimal
-import java.time.YearMonth
 
 data class AvdoedForelder(val trygdetid: BigDecimal)
 data class BarnepensjonGrunnlag(
-    override val virkningstidspunkt: FaktumNode<YearMonth>,
+    override val periode: FaktumNode<RegelPeriode>,
     val grunnbeloep: FaktumNode<BigDecimal>,
     val antallSoeskenIKullet: FaktumNode<Int>,
     val avdoedForelder: FaktumNode<AvdoedForelder>

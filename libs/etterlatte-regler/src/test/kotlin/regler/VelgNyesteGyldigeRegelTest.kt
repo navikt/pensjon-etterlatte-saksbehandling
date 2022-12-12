@@ -6,23 +6,22 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
-import java.time.YearMonth
 
 class VelgNyesteGyldigeRegelTest {
     data class Grunnlag(
         val testVerdi2021: FaktumNode<Int>,
         val testVerdi2022: FaktumNode<Int>,
         val testVerdi2023: FaktumNode<Int>,
-        override val virkningstidspunkt: FaktumNode<YearMonth>
+        override val periode: FaktumNode<RegelPeriode>
     ) : RegelGrunnlag
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
 
-    private fun grunnlag(virkningstidspunkt: YearMonth) = Grunnlag(
+    private fun grunnlag(periode: RegelPeriode) = Grunnlag(
         testVerdi2021 = FaktumNode(2021, saksbehandler, "Verdi for test"),
         testVerdi2022 = FaktumNode(2022, saksbehandler, "Verdi for test"),
         testVerdi2023 = FaktumNode(2023, saksbehandler, "Verdi for test"),
-        virkningstidspunkt = FaktumNode(verdi = virkningstidspunkt, saksbehandler, "Virk")
+        periode = FaktumNode(verdi = periode, saksbehandler, "Regelperiode")
     )
 
     private val gjelderFra1900: LocalDate = LocalDate.of(1900, 1, 1)
@@ -62,7 +61,7 @@ class VelgNyesteGyldigeRegelTest {
 
     @Test
     fun `Skal velge regel med senest gjelderFra hvis virk er senere enn seneste regel`() {
-        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(YearMonth.of(2025, 1)))
+        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(RegelPeriode(LocalDate.of(2025, 1, 1))))
 
         resultat.verdi shouldBe 2023
         resultat.children.size shouldBe 1
@@ -77,7 +76,7 @@ class VelgNyesteGyldigeRegelTest {
 
     @Test
     fun `Skal velge nyeste regel som er gyldig`() {
-        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(YearMonth.of(2022, 5)))
+        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(RegelPeriode(LocalDate.of(2022, 5, 1))))
 
         resultat.verdi shouldBe 2022
         resultat.children.size shouldBe 1
@@ -92,7 +91,7 @@ class VelgNyesteGyldigeRegelTest {
 
     @Test
     fun `Skal velge den eneste potensielt gyldige regelen`() {
-        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(YearMonth.of(2021, 5)))
+        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(RegelPeriode(LocalDate.of(2021, 1, 1))))
 
         resultat.verdi shouldBe 2021
         resultat.children.size shouldBe 1
@@ -107,8 +106,8 @@ class VelgNyesteGyldigeRegelTest {
 
     @Test
     fun `Skal kaste exception hvis det ikke finnes gyldige reger paa et gitt tidspunkt`() {
-        shouldThrow<IngenGyldigeReglerPaaVirkningstidspunktException> {
-            velgNyesteGyldigeRegel.anvend(grunnlag(YearMonth.of(2020, 1)))
+        shouldThrow<IngenGyldigeReglerForTidspunktException> {
+            velgNyesteGyldigeRegel.anvend(grunnlag(RegelPeriode(LocalDate.of(2020, 1, 1))))
         }
     }
 }

@@ -8,28 +8,28 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.serialization.jackson.jackson
-import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.adresse.RegoppslagKlient
-import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.DistribusjonService
 import no.nav.etterlatte.brev.VedtaksbrevService
+import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.MottakerService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
+import no.nav.etterlatte.brev.adresse.RegoppslagKlient
+import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
+import no.nav.etterlatte.brev.behandling.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.db.DataSourceBuilder
-import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
-import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.dokument.JournalpostClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
+import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
+import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.security.ktor.clientCredential
-import no.nav.etterlatte.brev.behandling.VedtaksvurderingKlient
-import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
@@ -76,7 +76,7 @@ class ApplicationBuilder {
                     }
                 })
                 OppdaterDistribusjonStatus(this, db)
-                FerdigstillVedtaksbrev(this, vedtaksbrevService)
+//                FerdigstillVedtaksbrev(this, vedtaksbrevService)
             }
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)

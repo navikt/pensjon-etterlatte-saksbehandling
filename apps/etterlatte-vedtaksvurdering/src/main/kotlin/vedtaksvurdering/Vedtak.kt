@@ -78,15 +78,24 @@ data class Vedtak(
             )
         }, // sammendraget bør lages av beregning
         pensjonTilUtbetaling = utbetalingsperioder,
-        vedtakFattet = this.saksbehandlerId?.let { ansvarligSaksbehandler ->
-            VedtakFattet(
-                ansvarligSaksbehandler,
-                "0000",
-                this.datoFattet?.atZone(
-                    ZoneOffset.UTC
-                )!!
+        vedtakFattet = if (this.vedtakStatus in listOf(
+                VedtakStatus.FATTET_VEDTAK,
+                VedtakStatus.ATTESTERT,
+                VedtakStatus.IVERKSATT
             )
-        }, // logikk inn der fatting skjer. DB utvides med enhet og timestamp?
+        ) {
+            this.saksbehandlerId?.let { ansvarligSaksbehandler ->
+                VedtakFattet(
+                    ansvarligSaksbehandler,
+                    "0000",
+                    this.datoFattet?.atZone(
+                        ZoneOffset.UTC
+                    )!!
+                )
+            }
+        } else {
+            null
+        },
         attestasjon = this.attestant?.let { attestant ->
             Attestasjon(
                 attestant,

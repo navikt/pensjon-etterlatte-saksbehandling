@@ -11,16 +11,18 @@ import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { Sammendrag } from './Sammendrag'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { Alert, Button } from '@navikt/ds-react'
+import { Alert, Button, ErrorMessage } from '@navikt/ds-react'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import styled from 'styled-components'
-import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { upsertVedtak } from '~shared/api/behandling'
 
 export const Beregne = () => {
   const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
+  const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
 
   useEffect(() => {
     hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
@@ -31,6 +33,10 @@ export const Beregne = () => {
     : undefined
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const vedtaksresultat = useVedtaksResultat()
+
+  const opprettEllerOppdaterVedtak = () => {
+    oppdaterVedtakRequest(behandling.id, () => next())
+  }
 
   return (
     <Content>
@@ -58,7 +64,8 @@ export const Beregne = () => {
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>
-          <Button variant="primary" size="medium" onClick={next}>
+          {isFailure(vedtak) && <ErrorMessage>Vedtaksoppdatering feilet</ErrorMessage>}
+          <Button loading={isPending(vedtak)} variant="primary" size="medium" onClick={opprettEllerOppdaterVedtak}>
             Gå videre til brev
           </Button>
         </BehandlingHandlingKnapper>

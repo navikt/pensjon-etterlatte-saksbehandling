@@ -56,6 +56,23 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
+    fun oppdaterVedtak(
+        behandlingsId: UUID,
+        beregningsresultat: BeregningsResultat,
+        vilkaarsresultat: Vilkaarsvurdering,
+        virkningsDato: LocalDate
+    ) {
+        logger.info("Oppdaterer vedtak behandlingid: $behandlingsId ")
+        connection.use {
+            val statement = it.prepareStatement(Queries.oppdaterVedtak)
+            statement.setDate(1, Date.valueOf(virkningsDato))
+            statement.setString(2, objectMapper.writeValueAsString(beregningsresultat))
+            statement.setString(3, objectMapper.writeValueAsString(vilkaarsresultat))
+            statement.setObject(4, behandlingsId)
+            require(statement.executeUpdate() == 1)
+        }
+    }
+
     // Kan det finnes flere vedtak for en behandling? Hør med Henrik
     fun lagreIverksattVedtak(
         behandlingsId: UUID
@@ -210,6 +227,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 private object Queries {
 
     val opprettVedtak = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" // ktlint-disable max-line-length
+    val oppdaterVedtak = "UPDATE vedtak SET datovirkfom = ?, beregningsresultat = ?, vilkaarsresultat = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
 
     val fattVedtak =
         "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now(), vedtakstatus = ?  WHERE behandlingId = ?" // ktlint-disable max-line-length

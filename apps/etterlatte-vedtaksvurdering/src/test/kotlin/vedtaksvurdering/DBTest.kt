@@ -116,9 +116,11 @@ internal class DBTest {
                 behandlingId = uuid
             )
 
-        val vedtaket: Vedtak? = runBlocking {
-            vedtaksvurderingService.populerOgHentFellesVedtak(uuid, "access")
+        runBlocking {
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, "access")
         }
+
+        val vedtaket: Vedtak? = vedtaksvurderingService.hentFellesvedtak(uuid)
 
         assert(vedtaket?.beregning != null)
         assert(vedtaket?.vilkaarsvurdering != null)

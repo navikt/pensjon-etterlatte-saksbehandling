@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE vilkaarsvurdering_v2
 (
     id                     UUID PRIMARY KEY,

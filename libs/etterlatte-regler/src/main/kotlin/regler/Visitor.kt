@@ -41,3 +41,29 @@ fun Regel<*, *>.finnAlleKnekkpunkter(): Set<LocalDate> {
 
     return finnKnekkpunkterVisitor.knekkpunkter
 }
+
+class KanAnvendesPaaPeriode(val periode: RegelPeriode) : RegelVisitor {
+    val ugyldigeReglerForPeriode = mutableListOf<Regel<*, *>>()
+    override fun visit(regel: Regel<*, *>) {
+        when (regel) {
+            is VelgNyesteGyldigRegel<*, *> -> {
+                if (regel.regler.none { periode.fraDato < it.gjelderFra }) {
+                    ugyldigeReglerForPeriode.add(regel)
+                }
+            }
+            else -> {
+                if (periode.fraDato < regel.gjelderFra) {
+                    ugyldigeReglerForPeriode.add(regel)
+                }
+            }
+        }
+    }
+}
+
+fun Regel<*, *>.finnUgyldigePerioder(periode: RegelPeriode): List<Regel<*, *>> {
+    val resultat = KanAnvendesPaaPeriode(periode)
+
+    accept(resultat)
+
+    return resultat.ugyldigeReglerForPeriode
+}

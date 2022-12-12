@@ -1,14 +1,12 @@
 package regler
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.LocalDate
 
 class SlaaSammenTreReglerTest {
 
-    private data class TestGrunnlag(override val periode: FaktumNode<RegelPeriode>) : RegelGrunnlag
+    private object TestGrunnlag
 
     private val regel1 = definerKonstant<TestGrunnlag, Int>(
         gjelderFra = GJELDER_FRA,
@@ -41,7 +39,8 @@ class SlaaSammenTreReglerTest {
 
     @Test
     fun `skal bruke resultatet av tre regler som grunnlag til en ny regel`() {
-        val resultat = regelSomBrukerVerdienFraTreAndreRegler.anvend(GRUNNLAG)
+        val resultat =
+            regelSomBrukerVerdienFraTreAndreRegler.anvend(TestGrunnlag, RegelPeriode(LocalDate.of(2030, 1, 1)))
 
         with(resultat) {
             verdi shouldBe 6
@@ -54,9 +53,5 @@ class SlaaSammenTreReglerTest {
 
     private companion object {
         private val GJELDER_FRA = LocalDate.of(2030, 1, 1)
-        private val SAKSBEHANDLER = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
-        private val GRUNNLAG = TestGrunnlag(
-            FaktumNode(RegelPeriode(LocalDate.of(2030, 1, 1)), SAKSBEHANDLER, "virkningstidspunkt")
-        )
     }
 }

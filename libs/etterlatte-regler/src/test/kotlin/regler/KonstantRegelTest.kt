@@ -1,14 +1,12 @@
 package regler
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.LocalDate
 
 class KonstantRegelTest {
 
-    private data class TestGrunnlag(override val periode: FaktumNode<RegelPeriode>) : RegelGrunnlag
+    private object TestGrunnlag
 
     private val regelSomReturnererKonstantVerdi = definerKonstant<TestGrunnlag, Int>(
         gjelderFra = GJELDER_FRA,
@@ -19,7 +17,7 @@ class KonstantRegelTest {
 
     @Test
     fun `skal returnere konstant verdi`() {
-        val resultat = regelSomReturnererKonstantVerdi.anvend(GRUNNLAG)
+        val resultat = regelSomReturnererKonstantVerdi.anvend(TestGrunnlag, RegelPeriode(LocalDate.of(2030, 1, 1)))
 
         with(resultat) {
             verdi shouldBe 2
@@ -31,9 +29,5 @@ class KonstantRegelTest {
 
     private companion object {
         private val GJELDER_FRA = LocalDate.of(2030, 1, 1)
-        private val SAKSBEHANDLER = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
-        private val GRUNNLAG = TestGrunnlag(
-            FaktumNode(RegelPeriode(LocalDate.of(2030, 1, 1)), SAKSBEHANDLER, "virkningstidspunkt")
-        )
     }
 }

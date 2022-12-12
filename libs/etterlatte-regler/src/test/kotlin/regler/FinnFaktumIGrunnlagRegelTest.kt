@@ -8,16 +8,12 @@ import java.time.Instant
 import java.time.LocalDate
 
 class FinnFaktumIGrunnlagRegelTest {
-    data class Grunnlag(
-        val testVerdi2021: FaktumNode<Int>,
-        override val periode: FaktumNode<RegelPeriode>
-    ) : RegelGrunnlag
+    data class Grunnlag(val testVerdi2021: FaktumNode<Int>)
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
 
     private val grunnlag = Grunnlag(
-        testVerdi2021 = FaktumNode(100_000, saksbehandler, "Verdi for test"),
-        periode = FaktumNode(RegelPeriode(LocalDate.of(2021, 1, 1)), saksbehandler, "Virk")
+        testVerdi2021 = FaktumNode(100_000, saksbehandler, "Verdi for test")
     )
 
     private val finnFaktumIGrunnlagRegel: Regel<Grunnlag, Int> = finnFaktumIGrunnlag(
@@ -30,7 +26,7 @@ class FinnFaktumIGrunnlagRegelTest {
 
     @Test
     fun `Skal hente ut faktum fra grunnlag`() {
-        val resultat = finnFaktumIGrunnlagRegel.anvend(grunnlag)
+        val resultat = finnFaktumIGrunnlagRegel.anvend(grunnlag, RegelPeriode(LocalDate.of(2021, 1, 1)))
 
         resultat.regel shouldBe finnFaktumIGrunnlagRegel
         resultat.verdi shouldBe 100_000

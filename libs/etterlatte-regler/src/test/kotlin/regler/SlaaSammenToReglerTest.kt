@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 class SlaaSammenToReglerTest {
 
-    private data class TestGrunnlag(override val periode: FaktumNode<RegelPeriode>) : RegelGrunnlag
+    private object TestGrunnlag
 
     private val regel1 = definerKonstant<TestGrunnlag, Int>(
         gjelderFra = GJELDER_FRA,
@@ -34,7 +34,8 @@ class SlaaSammenToReglerTest {
 
     @Test
     fun `skal bruke resultatet av to regler som grunnlag til en ny regel`() {
-        val resultat = regelSomBrukerVerdienFraToAndreRegler.anvend(GRUNNLAG)
+        val resultat =
+            regelSomBrukerVerdienFraToAndreRegler.anvend(TestGrunnlag, RegelPeriode(LocalDate.of(2030, 1, 1)))
 
         with(resultat) {
             verdi shouldBe 3
@@ -48,8 +49,5 @@ class SlaaSammenToReglerTest {
     private companion object {
         private val GJELDER_FRA = LocalDate.of(2030, 1, 1)
         private val SAKSBEHANDLER = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
-        private val GRUNNLAG = TestGrunnlag(
-            FaktumNode(RegelPeriode(LocalDate.of(2030, 1, 1)), SAKSBEHANDLER, "virkningstidspunkt")
-        )
     }
 }

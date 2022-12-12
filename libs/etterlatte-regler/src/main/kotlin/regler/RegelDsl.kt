@@ -9,7 +9,7 @@ data class RegelMeta(
     val regelReferanse: RegelReferanse
 )
 
-fun <C : Any, D : Any, G : RegelGrunnlag, S, A : Regel<G, C>, B : Regel<G, D>> slaaSammenToRegler(
+fun <C : Any, D : Any, G, S, A : Regel<G, C>, B : Regel<G, D>> slaaSammenToRegler(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -25,7 +25,7 @@ fun <C : Any, D : Any, G : RegelGrunnlag, S, A : Regel<G, C>, B : Regel<G, D>> s
     slaasammenFunksjon = slaaSammenFunksjon
 )
 
-fun <D : Any, E : Any, F : Any, G : RegelGrunnlag, S, A : Regel<G, D>, B : Regel<G, E>, C : Regel<G, F>>
+fun <D : Any, E : Any, F : Any, G, S, A : Regel<G, D>, B : Regel<G, E>, C : Regel<G, F>>
 slaaSammenTreRegler(
     gjelderFra: LocalDate,
     beskrivelse: String,
@@ -44,7 +44,7 @@ slaaSammenTreRegler(
     slaasammenFunksjon = slaaSammenFunksjon
 )
 
-fun <G : RegelGrunnlag, S : Any> velgNyesteRegel(
+fun <G, S : Any> velgNyesteRegel(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -56,7 +56,7 @@ fun <G : RegelGrunnlag, S : Any> velgNyesteRegel(
     regler = regler
 )
 
-fun <G : RegelGrunnlag> gangSammenRegler(
+fun <G> gangSammenRegler(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -68,7 +68,7 @@ fun <G : RegelGrunnlag> gangSammenRegler(
     regler = regler
 )
 
-fun <G : RegelGrunnlag, T : Any, A : FaktumNode<T>, S> finnFaktumIGrunnlag(
+fun <G, T : Any, A : FaktumNode<T>, S> finnFaktumIGrunnlag(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -82,7 +82,7 @@ fun <G : RegelGrunnlag, T : Any, A : FaktumNode<T>, S> finnFaktumIGrunnlag(
     finnFelt
 )
 
-fun <G : RegelGrunnlag, S> definerKonstant(
+fun <G, S> definerKonstant(
     gjelderFra: LocalDate,
     beskrivelse: String,
     regelReferanse: RegelReferanse,
@@ -94,28 +94,28 @@ fun <G : RegelGrunnlag, S> definerKonstant(
     verdi
 )
 
-infix fun <G : RegelGrunnlag, A> RegelMeta.kombinerer(regel1: Regel<G, A>) = this to regel1
-infix fun <G : RegelGrunnlag> RegelMeta.multipliser(regler: List<Regel<G, BigDecimal>>) = gangSammenRegler(
+infix fun <G, A> RegelMeta.kombinerer(regel1: Regel<G, A>) = this to regel1
+infix fun <G> RegelMeta.multipliser(regler: List<Regel<G, BigDecimal>>) = gangSammenRegler(
     gjelderFra = gjelderFra,
     beskrivelse = beskrivelse,
     regelReferanse = regelReferanse,
     regler = regler
 )
 
-infix fun <G : RegelGrunnlag, A : Any> RegelMeta.velgNyesteGyldige(regler: List<Regel<G, A>>) = velgNyesteRegel(
+infix fun <G, A : Any> RegelMeta.velgNyesteGyldige(regler: List<Regel<G, A>>) = velgNyesteRegel(
     gjelderFra = gjelderFra,
     beskrivelse = beskrivelse,
     regelReferanse = regelReferanse,
     regler = regler
 )
 
-infix fun <G : RegelGrunnlag, A, B> Pair<RegelMeta, Regel<G, A>>.og(regel2: Regel<G, B>) = this to regel2
-infix fun <G : RegelGrunnlag, A, B, C> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>>.og(third: Regel<G, C>) =
+infix fun <G, A, B> Pair<RegelMeta, Regel<G, A>>.og(regel2: Regel<G, B>) = this to regel2
+infix fun <G, A, B, C> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>>.og(third: Regel<G, C>) =
     Triple(first, second, third)
 
-infix fun <G : RegelGrunnlag, A : Any> Regel<G, A>.og(that: Regel<G, A>) = listOf(this, that)
-infix fun <G : RegelGrunnlag, A : Any> List<Regel<G, A>>.og(that: Regel<G, A>) = this.plus(that)
-infix fun <G : RegelGrunnlag, A : Any, B : Any, S> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>>.med(
+infix fun <G, A : Any> Regel<G, A>.og(that: Regel<G, A>) = listOf(this, that)
+infix fun <G, A : Any> List<Regel<G, A>>.og(that: Regel<G, A>) = this.plus(that)
+infix fun <G, A : Any, B : Any, S> Pair<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>>.med(
     f: (A, B) -> S
 ) = slaaSammenToRegler(
     gjelderFra = first.first.gjelderFra,
@@ -126,7 +126,7 @@ infix fun <G : RegelGrunnlag, A : Any, B : Any, S> Pair<Pair<RegelMeta, Regel<G,
     slaaSammenFunksjon = f
 )
 
-infix fun <G : RegelGrunnlag, A : Any, B : Any, C : Any, S>
+infix fun <G, A : Any, B : Any, C : Any, S>
 Triple<Pair<RegelMeta, Regel<G, A>>, Regel<G, B>, Regel<G, C>>.med(
     f: (A, B, C) -> S
 ) = slaaSammenTreRegler(

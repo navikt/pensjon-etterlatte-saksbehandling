@@ -11,17 +11,15 @@ class VelgNyesteGyldigeRegelTest {
     data class Grunnlag(
         val testVerdi2021: FaktumNode<Int>,
         val testVerdi2022: FaktumNode<Int>,
-        val testVerdi2023: FaktumNode<Int>,
-        override val periode: FaktumNode<RegelPeriode>
-    ) : RegelGrunnlag
+        val testVerdi2023: FaktumNode<Int>
+    )
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
 
-    private fun grunnlag(periode: RegelPeriode) = Grunnlag(
+    private fun grunnlag() = Grunnlag(
         testVerdi2021 = FaktumNode(2021, saksbehandler, "Verdi for test"),
         testVerdi2022 = FaktumNode(2022, saksbehandler, "Verdi for test"),
-        testVerdi2023 = FaktumNode(2023, saksbehandler, "Verdi for test"),
-        periode = FaktumNode(verdi = periode, saksbehandler, "Regelperiode")
+        testVerdi2023 = FaktumNode(2023, saksbehandler, "Verdi for test")
     )
 
     private val gjelderFra1900: LocalDate = LocalDate.of(1900, 1, 1)
@@ -61,7 +59,7 @@ class VelgNyesteGyldigeRegelTest {
 
     @Test
     fun `Skal velge regel med senest gjelderFra hvis virk er senere enn seneste regel`() {
-        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(RegelPeriode(LocalDate.of(2025, 1, 1))))
+        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(), RegelPeriode(LocalDate.of(2025, 1, 1)))
 
         resultat.verdi shouldBe 2023
         resultat.children.size shouldBe 1
@@ -76,7 +74,7 @@ class VelgNyesteGyldigeRegelTest {
 
     @Test
     fun `Skal velge nyeste regel som er gyldig`() {
-        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(RegelPeriode(LocalDate.of(2022, 5, 1))))
+        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(), RegelPeriode(LocalDate.of(2022, 5, 1)))
 
         resultat.verdi shouldBe 2022
         resultat.children.size shouldBe 1
@@ -91,7 +89,7 @@ class VelgNyesteGyldigeRegelTest {
 
     @Test
     fun `Skal velge den eneste potensielt gyldige regelen`() {
-        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(RegelPeriode(LocalDate.of(2021, 1, 1))))
+        val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(), RegelPeriode(LocalDate.of(2021, 1, 1)))
 
         resultat.verdi shouldBe 2021
         resultat.children.size shouldBe 1
@@ -107,7 +105,7 @@ class VelgNyesteGyldigeRegelTest {
     @Test
     fun `Skal kaste exception hvis det ikke finnes gyldige reger paa et gitt tidspunkt`() {
         shouldThrow<IngenGyldigeReglerForTidspunktException> {
-            velgNyesteGyldigeRegel.anvend(grunnlag(RegelPeriode(LocalDate.of(2020, 1, 1))))
+            velgNyesteGyldigeRegel.anvend(grunnlag(), RegelPeriode(LocalDate.of(2020, 1, 1)))
         }
     }
 }

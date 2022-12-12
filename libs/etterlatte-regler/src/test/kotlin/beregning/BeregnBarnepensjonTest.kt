@@ -6,11 +6,11 @@ import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 import regler.FaktumNode
 import regler.RegelPeriode
+import regler.eksekver
 import regler.finnAlleKnekkpunkter
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
-import java.time.YearMonth
 
 class BeregnBarnepensjonTest {
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
@@ -21,17 +21,16 @@ class BeregnBarnepensjonTest {
             kilde = saksbehandler,
             beskrivelse = "Avdød forelders trygdetid",
             verdi = AvdoedForelder(trygdetid = BigDecimal(30))
-        ),
-        periode = FaktumNode(
-            kilde = saksbehandler,
-            beskrivelse = "Virkningstidspunkt",
-            verdi = RegelPeriode(LocalDate.of(2022, 1, 1))
         )
     )
 
     @Test
     fun `Regler skal representeres som et tre`() {
-        println(beregnBarnepensjonRegel.anvend(grunnlag).toJson())
+        val periode = RegelPeriode(LocalDate.of(2022, 1, 1))
+        println(beregnBarnepensjonRegel.anvend(grunnlag, periode).toJson())
+
+        val resultat = beregnBarnepensjonRegel.eksekver(grunnlag, periode)
+        println(resultat.toJson())
     }
 
     @Test

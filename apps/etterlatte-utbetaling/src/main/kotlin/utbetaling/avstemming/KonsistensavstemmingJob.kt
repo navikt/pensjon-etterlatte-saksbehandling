@@ -6,13 +6,12 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
-import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 class KonsistensavstemmingJob(
     private val konsistensavstemmingService: KonsistensavstemmingService,
     private val leaderElection: LeaderElection,
-    private val starttidspunkt: Date,
+    private val initialDelay: Long,
     private val periode: Duration
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -22,7 +21,7 @@ class KonsistensavstemmingJob(
         fixedRateTimer(
             name = jobbNavn,
             daemon = true,
-            startAt = starttidspunkt,
+            initialDelay = initialDelay,
             period = periode.toMillis()
         ) {
             try {
@@ -51,7 +50,15 @@ class KonsistensavstemmingJob(
                     Saktype.values().forEach {
                         when (it) {
                             Saktype.BARNEPENSJON -> {
-                                konsistensavstemmingService.startKonsistensavstemming(dag = idag, saktype = it)
+                                if (!konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
+                                        saktype = it,
+                                        idag = idag
+                                    )
+                                ) {
+                                    konsistensavstemmingService.startKonsistensavstemming(dag = idag, saktype = it)
+                                } else {
+                                    log.info("Konsistensavstemming er allerede kjoert i dag")
+                                }
                             }
                             Saktype.OMSTILLINGSSTOENAD -> {
                                 log.info("Konsistensavstemming for omstillingsstoenad ennaa ikke implementert")

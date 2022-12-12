@@ -18,10 +18,12 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.utbetalingslinje
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 
 internal class KonsistensavstemmingServiceKtTest {
 
@@ -79,6 +81,63 @@ internal class KonsistensavstemmingServiceKtTest {
 
         val konsistensavstemming = service.lagKonsistensavstemming(LocalDate.now(), Saktype.BARNEPENSJON)
         assertEquals(emptyList<OppdragForKonsistensavstemming>(), konsistensavstemming.loependeUtbetalinger)
+    }
+
+    @Test
+    fun `konsistensavstemmingErKjoertIDag skal returnere false dersom det ikke finnes noen konsistensavstemminger`() {
+        every {
+            avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
+        } returns null
+
+        val idag = LocalDate.now()
+        val service = KonsistensavstemmingService(
+            utbetalingDao = utbetalingDao,
+            avstemmingDao = avstemmingDao,
+            avstemmingsdataSender = avstemmingsdataSender
+        )
+
+        val resultat = service.konsistensavstemmingErKjoertIDag(Saktype.BARNEPENSJON, idag)
+        assertFalse(resultat)
+    }
+
+    @Test
+    fun `konsistensavstemmingErKjoertIDag skal returnere false dersom konsistensavstemming ikke er kjoert i dag`() {
+        val idag = LocalDate.now()
+        val igaar = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
+        every {
+            avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
+        } returns mockk() {
+            every { opprettet } returns igaar
+        }
+
+        val service = KonsistensavstemmingService(
+            utbetalingDao = utbetalingDao,
+            avstemmingDao = avstemmingDao,
+            avstemmingsdataSender = avstemmingsdataSender
+        )
+
+        val resultat = service.konsistensavstemmingErKjoertIDag(Saktype.BARNEPENSJON, idag)
+        assertFalse(resultat)
+    }
+
+    @Test
+    fun `konsistensavstemmingErKjoertIDag skal returnere true dersom konsistensavstemming er kjoert i dag`() {
+        val idagDato = LocalDate.now()
+        val idagTidspunkt = Tidspunkt.now()
+        every {
+            avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
+        } returns mockk() {
+            every { opprettet } returns idagTidspunkt
+        }
+
+        val service = KonsistensavstemmingService(
+            utbetalingDao = utbetalingDao,
+            avstemmingDao = avstemmingDao,
+            avstemmingsdataSender = avstemmingsdataSender
+        )
+
+        val resultat = service.konsistensavstemmingErKjoertIDag(Saktype.BARNEPENSJON, idagDato)
+        assertTrue(resultat)
     }
 
     @Test

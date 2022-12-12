@@ -67,6 +67,7 @@ spec:
         - application: etterlatte-pdl-proxy
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
+        - application: etterlatte-beregning
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal

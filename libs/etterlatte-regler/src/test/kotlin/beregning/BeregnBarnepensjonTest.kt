@@ -26,7 +26,7 @@ class BeregnBarnepensjonTest {
 
     @Test
     fun `Regler skal representeres som et tre`() {
-        val periode = RegelPeriode(LocalDate.of(2022, 1, 1))
+        val periode = RegelPeriode(LocalDate.of(2022, 1, 1), LocalDate.of(2025, 1, 1))
         println(beregnBarnepensjonRegel.anvend(grunnlag, periode).toJson())
 
         val resultat = beregnBarnepensjonRegel.eksekver(grunnlag, periode)

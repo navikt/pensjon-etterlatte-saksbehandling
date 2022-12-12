@@ -42,7 +42,7 @@ internal class DistribuerBrev(
             val bestillingsId = distribusjonService.distribuerJournalpost(
                 journalpostId = packet.journalpostId(),
                 type = distMelding.distribusjonType,
-                tidspunkt = DistribusjonsTidspunktType.KJERNETID, // todo: dobbeltsjekk.
+                tidspunkt = DistribusjonsTidspunktType.KJERNETID,
                 adresse = distMelding.mottakerAdresse
             )
 

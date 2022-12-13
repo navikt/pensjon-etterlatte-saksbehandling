@@ -16,11 +16,13 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-pdl/**
+      - libs/testdata/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-pdl/**
+      - libs/testdata/**
 
 jobs:
   test:

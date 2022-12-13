@@ -17,12 +17,14 @@ on:
     paths:
       - apps/etterlatte-grunnlag/**
       - libs/common/**
+      - libs/testdata/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-gyldig-soeknad/**
       - libs/common/**
+      - libs/testdata/**
 
 jobs:
   test:

@@ -16,11 +16,13 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-inntektskomponenten/**
+      - libs/testdata/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-inntektskomponenten/**
+      - libs/testdata/**
 
 jobs:
   test:

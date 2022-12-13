@@ -1,8 +1,10 @@
 package grunnlag
 
-import kafkameldinger.behandlingOpprettetMelding
+import GrunnlagTestData
 import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -26,4 +28,12 @@ class BehandlingHendelserTest {
         )
         Assertions.assertEquals(3, inspector.size)
     }
+
+    private fun behandlingOpprettetMelding() = JsonMessage.newMessage(
+        mapOf(
+            eventNameKey to "BEHANDLING:OPPRETTET",
+            "sakId" to 1,
+            "persongalleri" to GrunnlagTestData().hentPersonGalleri()
+        )
+    )
 }

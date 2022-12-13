@@ -16,7 +16,6 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.OppgaveService
 import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.VedtakKlient
-import no.nav.etterlatte.behandling.VedtakService
 import no.nav.etterlatte.behandling.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -45,7 +44,6 @@ class ApplicationContext(configLocation: String? = null) {
         vilkaarsvurderingKlient = vilkaarsvurderingKlient
     )
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
-    val vedtakService = VedtakService(rapid)
     val grunnlagService = GrunnlagService(behandlingKlient, rapid)
 
     private fun httpClient() = HttpClient {

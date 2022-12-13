@@ -29,9 +29,6 @@ import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -248,17 +245,6 @@ internal class VilkaarsvurderingServiceTest {
             vilkaar.grunnlag shouldBe emptyList()
             vilkaar.hovedvilkaar.type shouldBe VilkaarType.FORMAAL
         }
-    }
-
-    @Test
-    fun `Skal slette alle vilkaarsvurderinger i en sak ved vedlikehold`() {
-        val vilkaarsvurdering = runBlocking { service.hentEllerOpprettVilkaarsvurdering(uuid, accesstoken) }
-        assertNotNull(vilkaarsvurdering)
-        assertEquals(vilkaarsvurdering.grunnlagsmetadata.sakId, 1)
-
-        service.slettSak(1)
-
-        assertNull(repository.hent(uuid))
     }
 
     private suspend fun opprettVilkaarsvurdering(): VilkaarsvurderingIntern {

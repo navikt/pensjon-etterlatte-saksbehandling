@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
-import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
 class VirkningstidspunktIkkeSattException(message: String) : RuntimeException(message)
@@ -18,7 +17,7 @@ class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient
-) : VedlikeholdService {
+) {
 
     suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingIntern =
         vilkaarsvurderingRepository.hent(behandlingId) ?: opprettVilkaarsvurdering(behandlingId, accessToken)
@@ -101,9 +100,5 @@ class VilkaarsvurderingService(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )
         }
-    }
-
-    override fun slettSak(sakId: Long) {
-        vilkaarsvurderingRepository.slettVilkaarsvurderingerISak(sakId)
     }
 }

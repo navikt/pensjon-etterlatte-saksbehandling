@@ -40,7 +40,6 @@ interface VilkaarsvurderingRepository {
     ): VilkaarsvurderingIntern
 
     fun slettVilkaarResultat(behandlingId: UUID, vilkaarId: UUID): VilkaarsvurderingIntern
-    fun slettVilkaarsvurderingerISak(sakId: Long)
 }
 
 class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : VilkaarsvurderingRepository {
@@ -173,13 +172,6 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                     .let { tx.run(it.asUpdate) }
             }
         }.let { hentNonNull(behandlingId) }
-
-    override fun slettVilkaarsvurderingerISak(sakId: Long) {
-        using(sessionOf(ds)) { session ->
-            queryOf(Queries.slettVilkaarsvurdering, mapOf("sak_id" to sakId))
-                .let { session.run(it.asUpdate) }
-        }
-    }
 
     private fun hentNonNull(behandlingId: UUID): VilkaarsvurderingIntern =
         hent(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
@@ -423,7 +415,5 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
             SET resultat = null
             WHERE vilkaar_id = :vilkaar_id
         """
-
-        const val slettVilkaarsvurdering = "DELETE FROM vilkaarsvurdering WHERE sak_id = :sak_id"
     }
 }

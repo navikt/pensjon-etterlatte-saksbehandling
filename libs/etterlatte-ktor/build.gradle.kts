@@ -21,6 +21,8 @@ dependencies {
     implementation(Ktor2.CallLogging)
     implementation(Ktor2.StatusPages)
     implementation(Ktor2.ServerContentNegotiation)
+    implementation(Ktor2.OkHttp)
+    implementation(Ktor2.ClientContentNegotiation)
 
     implementation(NavFelles.TokenValidationKtor2)
 

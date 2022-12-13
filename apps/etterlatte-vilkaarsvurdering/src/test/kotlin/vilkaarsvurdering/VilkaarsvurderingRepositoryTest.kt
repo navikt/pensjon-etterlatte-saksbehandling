@@ -187,18 +187,6 @@ internal class VilkaarsvurderingRepository2Test {
         }
     }
 
-<<<<<<< HEAD
-    @Test
-    fun `skal slette vilkaarsvurdering`() {
-        val opprettetVilkaarsvurdering1 = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
-
-        vilkaarsvurderingRepository.slettVilkaarsvurderingerISak(opprettetVilkaarsvurdering1.grunnlagsmetadata.sakId)
-
-        vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering1.behandlingId) shouldBe null
-    }
-
-=======
->>>>>>> f04418da (Fjerner rapids-and-rivers fra vilkårsvurdering)
     companion object {
         val vilkaarsvurdering = VilkaarsvurderingIntern(
             behandlingId = UUID.randomUUID(),

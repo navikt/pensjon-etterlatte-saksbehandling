@@ -114,11 +114,19 @@ class GrunnlagsendringshendelseService(
     fun sjekkKlareGrunnlagsendringshendelser(minutterGamle: Long) {
         ikkeVurderteHendelser(minutterGamle)
             .forEach { hendelse ->
-                when (val data = hendelse.data) {
-                    is Doedsfall -> verifiserOgHaandterDoedsfall(data, hendelse.sakId, hendelse.id)
-                    is Utflytting -> verifiserOgHaandterSoekerErUtflyttet(data, hendelse.id)
-                    is ForelderBarnRelasjon -> verifiserOgHaandterForelderBarnRelasjon(data, hendelse.id)
-                    null -> Unit
+                try {
+                    when (val data = hendelse.data) {
+                        is Doedsfall -> verifiserOgHaandterDoedsfall(data, hendelse.sakId, hendelse.id)
+                        is Utflytting -> verifiserOgHaandterSoekerErUtflyttet(data, hendelse.id)
+                        is ForelderBarnRelasjon -> verifiserOgHaandterForelderBarnRelasjon(data, hendelse.id)
+                        null -> Unit
+                    }
+                } catch (e: Exception) {
+                    logger.error(
+                        "Kunne ikke sjekke opp for hendelsen med id=${hendelse.id} på sak ${hendelse.sakId} " +
+                            "på grunn av feil",
+                        e
+                    )
                 }
             }
     }

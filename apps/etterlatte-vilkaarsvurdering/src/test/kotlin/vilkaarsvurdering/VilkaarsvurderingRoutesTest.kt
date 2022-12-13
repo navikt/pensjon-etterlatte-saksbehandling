@@ -66,7 +66,7 @@ internal class VilkaarsvurderingRoutesTest {
         ).apply { migrate() }
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryImpl(ds.dataSource()),
+                VilkaarsvurderingRepository2Impl(ds.dataSource()),
                 behandlingKlient,
                 grunnlagKlient
             )
@@ -143,7 +143,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             assertEquals(nyBehandlingId, vilkaarsvurdering.behandlingId)
             assertEquals(
-                vilkaarsvurdering.virkningstidspunkt.dato,
+                vilkaarsvurdering.virkningstidspunkt,
                 VirkningstidspunktTestData.virkningstidsunkt().dato
             )
             assertNull(vilkaarsvurdering.resultat)
@@ -174,9 +174,10 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
-            opprettVilkaarsvurdering()
+            val vilkaarsvurdering = opprettVilkaarsvurdering()
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
+                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.DOEDSFALL_FORELDER)?.id!!,
                 hovedvilkaar = VilkaarTypeOgUtfall(
                     VilkaarType.DOEDSFALL_FORELDER,
                     Utfall.OPPFYLT
@@ -212,9 +213,10 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
-            opprettVilkaarsvurdering()
+            val vilkaarsvurdering = opprettVilkaarsvurdering()
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
+                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORUTGAAENDE_MEDLEMSKAP)?.id!!,
                 hovedvilkaar = VilkaarTypeOgUtfall(
                     type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
                     resultat = Utfall.OPPFYLT
@@ -237,6 +239,7 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(Utfall.OPPFYLT, vurdertVilkaar.hovedvilkaar.resultat)
 
             val vurdertVilkaarMedUnntakDto = VurdertVilkaarDto(
+                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORUTGAAENDE_MEDLEMSKAP)?.id!!,
                 hovedvilkaar = VilkaarTypeOgUtfall(
                     type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
                     resultat = Utfall.IKKE_OPPFYLT
@@ -279,9 +282,10 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
-            opprettVilkaarsvurdering()
+            val vilkaarsvurdering = opprettVilkaarsvurdering()
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
+                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.DOEDSFALL_FORELDER)?.id!!,
                 hovedvilkaar = VilkaarTypeOgUtfall(
                     type = VilkaarType.DOEDSFALL_FORELDER,
                     resultat = Utfall.OPPFYLT
@@ -303,7 +307,7 @@ internal class VilkaarsvurderingRoutesTest {
             assertNotNull(vurdertVilkaar.hovedvilkaar.resultat)
 
             val response = client
-                .delete("/api/vilkaarsvurdering/$behandlingId/${vurdertVilkaarDto.hovedvilkaar.type}") {
+                .delete("/api/vilkaarsvurdering/$behandlingId/${vurdertVilkaarDto.vilkaarId}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -361,14 +365,13 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
-    private fun opprettVilkaarsvurdering() {
+    private fun opprettVilkaarsvurdering(): VilkaarsvurderingIntern =
         runBlocking {
             vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
                 behandlingId,
                 oboToken
             )
         }
-    }
 
     private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
         every { id } returns UUID.randomUUID()

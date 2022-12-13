@@ -45,6 +45,7 @@ export const Vurdering = ({
         resultat == VurderingsResultat.IKKE_OPPFYLT && vilkaarsUnntakType && vilkaarsUnntakType != ''
 
       vurderVilkaar(behandlingId, {
+        vilkaarId: vilkaar.id,
         hovedvilkaar: {
           type: vilkaar.hovedvilkaar.type,
           resultat,
@@ -66,7 +67,7 @@ export const Vurdering = ({
   }
 
   const slettVurderingAvVilkaar = () => {
-    slettVurdering(behandlingId, vilkaar.hovedvilkaar.type).then((response) => {
+    slettVurdering(behandlingId, vilkaar.id).then((response) => {
       if (response.status == 'ok') {
         oppdaterVilkaar(response.data)
       }

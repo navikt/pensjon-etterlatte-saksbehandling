@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
@@ -15,7 +16,6 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.math.BigDecimal
 import java.time.Instant
@@ -32,7 +32,7 @@ data class Vedtak(
     val behandlingId: UUID,
     val saksbehandlerId: String?,
     val beregningsResultat: BeregningsResultat?,
-    val vilkaarsResultat: Vilkaarsvurdering?,
+    val vilkaarsResultat: JsonNode?,
     val vedtakFattet: Boolean?,
     val fnr: String?,
     val datoFattet: Instant?,
@@ -46,13 +46,14 @@ data class Vedtak(
         vedtakId = this.id,
         virk = Periode(
             this.virkningsDato?.let(YearMonth::from)
-                ?: this.vilkaarsResultat?.virkningstidspunkt?.dato
                 ?: YearMonth.now(),
             null
         ), // må få inn dette på toppnivå?
         sak = Sak(this.fnr!!, this.sakType!!, this.sakId!!),
         behandling = Behandling(this.behandlingType, behandlingId),
-        type = if (this.vilkaarsResultat?.resultat?.utfall == VilkaarsvurderingUtfall.OPPFYLT) {
+        type = if (this.vilkaarsResultat?.get("resultat")?.get("utfall")
+            ?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
+        ) {
             VedtakType.INNVILGELSE
         } else if (this.behandlingType == BehandlingType.REVURDERING) {
             VedtakType.OPPHOER

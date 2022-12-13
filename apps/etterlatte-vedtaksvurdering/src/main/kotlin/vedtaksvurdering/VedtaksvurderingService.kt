@@ -158,7 +158,7 @@ class VedtaksvurderingService(
                     behandlingMini.await(),
                     behandling.await().soeker!!,
                     vilkaarsvurdering.await(),
-                    vilkaarsvurdering.await().virkningstidspunkt.dato.atDay(1)
+                    vilkaarsvurdering.await().virkningstidspunkt.atDay(1)
                 )
                 repository.setSakid(sakId = behandling.await().sak, behandlingId = behandlingId)
                 hentFellesVedtakMedUtbetalingsperioder(behandlingId)!!

@@ -1,21 +1,21 @@
 package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import java.time.LocalDateTime
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import java.time.YearMonth
 import java.util.*
 
 data class VilkaarsvurderingDto(
     val behandlingId: UUID,
     val vilkaar: List<Vilkaar>,
-    val virkningstidspunkt: Virkningstidspunkt,
+    val virkningstidspunkt: YearMonth,
     val resultat: VilkaarsvurderingResultat? = null
 )
 
 data class Vilkaarsvurdering(
     val behandlingId: UUID,
     val vilkaar: List<Vilkaar>,
-    val virkningstidspunkt: Virkningstidspunkt,
+    val virkningstidspunkt: YearMonth,
     val resultat: VilkaarsvurderingResultat
 )
 
@@ -23,10 +23,11 @@ data class Vilkaar(
     val hovedvilkaar: Hovedvilkaar,
     val unntaksvilkaar: List<Unntaksvilkaar>? = null,
     val vurdering: VilkaarVurderingData? = null,
-    val grunnlag: List<Vilkaarsgrunnlag<out Any?>>? = null
+    val grunnlag: List<Vilkaarsgrunnlag<out Any?>>? = null,
+    val id: UUID? = null
 )
 
-data class Hovedvilkaar(
+data class Delvilkaar(
     val type: VilkaarType,
     val tittel: String,
     val beskrivelse: String? = null,
@@ -34,13 +35,8 @@ data class Hovedvilkaar(
     val resultat: Utfall? = null
 )
 
-data class Unntaksvilkaar(
-    val type: VilkaarType,
-    val tittel: String,
-    val beskrivelse: String? = null,
-    val lovreferanse: Lovreferanse,
-    val resultat: Utfall? = null
-)
+typealias Hovedvilkaar = Delvilkaar
+typealias Unntaksvilkaar = Delvilkaar
 
 data class Lovreferanse(
     val paragraf: String,
@@ -51,14 +47,14 @@ data class Lovreferanse(
 
 data class VilkaarVurderingData(
     val kommentar: String?,
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: Tidspunkt,
     val saksbehandler: String
 )
 
 data class VilkaarsvurderingResultat(
     val utfall: VilkaarsvurderingUtfall,
     val kommentar: String?,
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: Tidspunkt,
     val saksbehandler: String
 )
 
@@ -79,10 +75,14 @@ data class VilkaarTypeOgUtfall(
 )
 
 data class VurdertVilkaar(
+    val vilkaarId: UUID,
     val hovedvilkaar: VilkaarTypeOgUtfall,
     val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
     val vurdering: VilkaarVurderingData
-)
+) {
+    fun hovedvilkaarOgUnntaksvilkaarIkkeOppfylt() =
+        hovedvilkaar.resultat == Utfall.IKKE_OPPFYLT && unntaksvilkaar == null
+}
 
 data class Vilkaarsgrunnlag<T>(
     val id: UUID,

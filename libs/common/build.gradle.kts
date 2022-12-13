@@ -18,10 +18,6 @@ dependencies {
 
     compileOnly(Slf4jApi)
 
-    implementation(Ktor2.ServerCore)
-    implementation(Ktor2.Auth)
-    implementation(NavFelles.TokenValidationKtor2)
-
     testImplementation(Jupiter.Api)
     testImplementation(Jupiter.Params)
     testRuntimeOnly(Jupiter.Engine)

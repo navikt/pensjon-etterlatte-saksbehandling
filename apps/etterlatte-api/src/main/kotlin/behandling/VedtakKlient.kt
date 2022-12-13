@@ -1,12 +1,12 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -77,7 +77,7 @@ data class Vedtak(
     val behandlingId: UUID,
     val saksbehandlerId: String?,
     val beregningsResultat: BeregningsResultat?,
-    val vilkaarsResultat: Vilkaarsvurdering?,
+    val vilkaarsResultat: JsonNode?,
     val virkningsDato: LocalDate?,
     val vedtakFattet: Boolean?,
     val datoFattet: Instant?,

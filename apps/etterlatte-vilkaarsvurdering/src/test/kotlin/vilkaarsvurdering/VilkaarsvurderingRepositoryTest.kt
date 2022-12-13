@@ -32,7 +32,7 @@ internal class VilkaarsvurderingRepository2Test {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
-    private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository2
+    private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository
     private lateinit var ds: DataSource
 
     @BeforeAll
@@ -45,12 +45,12 @@ internal class VilkaarsvurderingRepository2Test {
             postgreSQLContainer.password
         ).apply { migrate() }.dataSource()
 
-        vilkaarsvurderingRepository = VilkaarsvurderingRepository2Impl(ds)
+        vilkaarsvurderingRepository = VilkaarsvurderingRepositoryImpl(ds)
     }
 
     private fun cleanDatabase() {
         ds.connection.use {
-            it.prepareStatement("TRUNCATE vilkaarsvurdering_v2 CASCADE").apply { execute() }
+            it.prepareStatement("TRUNCATE vilkaarsvurdering CASCADE").apply { execute() }
         }
     }
 
@@ -190,14 +190,10 @@ internal class VilkaarsvurderingRepository2Test {
     @Test
     fun `skal slette vilkaarsvurdering`() {
         val opprettetVilkaarsvurdering1 = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
-        val opprettetVilkaarsvurdering2 = vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-            vilkaarsvurdering.copy(behandlingId = UUID.randomUUID())
-        )
 
         vilkaarsvurderingRepository.slettVilkaarsvurderingerISak(opprettetVilkaarsvurdering1.grunnlagsmetadata.sakId)
 
         vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering1.behandlingId) shouldBe null
-        vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering2.behandlingId) shouldBe null
     }
 
     companion object {

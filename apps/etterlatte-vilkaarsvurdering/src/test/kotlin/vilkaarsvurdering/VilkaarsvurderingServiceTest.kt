@@ -49,7 +49,7 @@ internal class VilkaarsvurderingServiceTest {
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
     private lateinit var service: VilkaarsvurderingService
-    private lateinit var repository: VilkaarsvurderingRepository2
+    private lateinit var repository: VilkaarsvurderingRepository
     private lateinit var ds: DataSource
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
@@ -75,7 +75,7 @@ internal class VilkaarsvurderingServiceTest {
             every { revurderingsaarsak } returns null
         }
 
-        repository = VilkaarsvurderingRepository2Impl(ds)
+        repository = VilkaarsvurderingRepositoryImpl(ds)
         service = VilkaarsvurderingService(
             repository,
             behandlingKlient,
@@ -85,7 +85,7 @@ internal class VilkaarsvurderingServiceTest {
 
     private fun cleanDatabase() {
         ds.connection.use {
-            it.prepareStatement("TRUNCATE vilkaarsvurdering_v2 CASCADE").apply { execute() }
+            it.prepareStatement("TRUNCATE vilkaarsvurdering CASCADE").apply { execute() }
         }
     }
 

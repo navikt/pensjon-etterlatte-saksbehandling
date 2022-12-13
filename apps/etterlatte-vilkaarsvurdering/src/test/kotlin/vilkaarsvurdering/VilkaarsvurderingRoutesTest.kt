@@ -66,7 +66,7 @@ internal class VilkaarsvurderingRoutesTest {
         ).apply { migrate() }
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepository2Impl(ds.dataSource()),
+                VilkaarsvurderingRepositoryImpl(ds.dataSource()),
                 behandlingKlient,
                 grunnlagKlient
             )

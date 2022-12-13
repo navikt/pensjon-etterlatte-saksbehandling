@@ -13,8 +13,6 @@ import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingMigration
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository2Impl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlientImpl
@@ -35,16 +33,11 @@ class ApplicationBuilder {
     ).apply { migrate() }
 
     private val dataSource = dataSourceBuilder.dataSource()
-    private val vilkaarsvurderingRepositoryOld = VilkaarsvurderingRepositoryImpl(dataSource)
-    private val vilkaarsvurderingRepository = VilkaarsvurderingRepository2Impl(dataSource)
+    private val vilkaarsvurderingRepository = VilkaarsvurderingRepositoryImpl(dataSource)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     private val vilkaarsvurderingService =
         VilkaarsvurderingService(vilkaarsvurderingRepository, behandlingKlient, grunnlagKlient)
-    private val vilkaarsvurderingMigration = VilkaarsvurderingMigration(
-        vilkaarsvurderingRepositoryOld,
-        vilkaarsvurderingRepository
-    )
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
@@ -57,8 +50,6 @@ class ApplicationBuilder {
             .apply { registrerVedlikeholdsriver(vilkaarsvurderingService) }
 
     fun start() = rapidsConnection.start()
-
-    fun migrerVilkaarsvurdering() = vilkaarsvurderingMigration.migrerVilkaarsvurdering()
 }
 
 private fun httpClient() = HttpClient(OkHttp) {

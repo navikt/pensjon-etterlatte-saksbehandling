@@ -3,9 +3,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
@@ -17,7 +15,7 @@ import java.util.*
 class VirkningstidspunktIkkeSattException(message: String) : RuntimeException(message)
 
 class VilkaarsvurderingService(
-    private val vilkaarsvurderingRepository: VilkaarsvurderingRepository2,
+    private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient
 ) : VedlikeholdService {
@@ -104,42 +102,6 @@ class VilkaarsvurderingService(
             )
         }
     }
-
-    private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar): Vilkaar =
-        if (vilkaar.hovedvilkaar.type == vurdertVilkaar.hovedvilkaar.type) {
-            val hovedvilkaarOgUnntaksvilkaarIkkeOppfylt =
-                vurdertVilkaar.hovedvilkaar.resultat == Utfall.IKKE_OPPFYLT && vurdertVilkaar.unntaksvilkaar == null
-            vilkaar.copy(
-                vurdering = vurdertVilkaar.vurdering,
-                hovedvilkaar = vilkaar.hovedvilkaar.copy(resultat = vurdertVilkaar.hovedvilkaar.resultat),
-                unntaksvilkaar = vilkaar.unntaksvilkaar?.map {
-                    if (hovedvilkaarOgUnntaksvilkaarIkkeOppfylt) {
-                        it.copy(resultat = Utfall.IKKE_OPPFYLT)
-                    } else {
-                        if (vurdertVilkaar.unntaksvilkaar?.type === it.type) {
-                            it.copy(resultat = vurdertVilkaar.unntaksvilkaar!!.resultat)
-                        } else {
-                            it.copy(resultat = null)
-                        }
-                    }
-                }
-            )
-        } else {
-            vilkaar
-        }
-
-    private fun slettVurdering(vilkaar: Vilkaar, hovedVilkaarType: VilkaarType) =
-        if (vilkaar.hovedvilkaar.type === hovedVilkaarType) {
-            vilkaar.copy(
-                vurdering = null,
-                hovedvilkaar = vilkaar.hovedvilkaar.copy(resultat = null),
-                unntaksvilkaar = vilkaar.unntaksvilkaar?.map {
-                    it.copy(resultat = null)
-                }
-            )
-        } else {
-            vilkaar
-        }
 
     override fun slettSak(sakId: Long) {
         vilkaarsvurderingRepository.slettVilkaarsvurderingerISak(sakId)

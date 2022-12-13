@@ -24,7 +24,7 @@ data class Vilkaar(
     val unntaksvilkaar: List<Unntaksvilkaar>? = null,
     val vurdering: VilkaarVurderingData? = null,
     val grunnlag: List<Vilkaarsgrunnlag<out Any?>>? = null,
-    val id: UUID? = null
+    val id: UUID = UUID.randomUUID()
 )
 
 data class Delvilkaar(

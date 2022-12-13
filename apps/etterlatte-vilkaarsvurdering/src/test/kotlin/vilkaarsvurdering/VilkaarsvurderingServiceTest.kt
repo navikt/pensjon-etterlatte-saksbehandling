@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
@@ -39,6 +38,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -269,5 +269,5 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     private fun vilkaarsVurderingData() =
-        VilkaarVurderingData("en kommentar", Tidspunkt.now(), "saksbehandler")
+        VilkaarVurderingData("en kommentar", LocalDateTime.now(), "saksbehandler")
 }

@@ -151,7 +151,7 @@ internal class BehandlingServiceTest {
             UUID.randomUUID(),
             emptyList(),
             YearMonth.of(2022, 1),
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", Tidspunkt.now(), "ABV")
+            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), "ABV")
         )
         val hendelser = LagretHendelser(
             hendelser = listOf(

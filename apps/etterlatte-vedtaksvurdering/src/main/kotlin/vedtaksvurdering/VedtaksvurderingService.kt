@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -17,6 +18,7 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -46,14 +48,14 @@ class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: Vedtak) :
     val vedtakId: Long = vedtak.vedtakId
 }
 
-class VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak: Vedtak) :
-    Exception("Vedtak ${vedtak.vedtakId} kan ikke underkjennes da det ikke er fattet") {
-    val vedtakId: Long = vedtak.vedtakId
+class VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak: VedtakEntity) :
+    Exception("Vedtak ${vedtak.id} kan ikke underkjennes da det ikke er fattet") {
+    val vedtakId: Long = vedtak.id
 }
 
-class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: Vedtak) :
-    Exception("Vedtak ${vedtak.vedtakId} kan ikke underkjennes da det allerede er attestert") {
-    val vedtakId: Long = vedtak.vedtakId
+class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: VedtakEntity) :
+    Exception("Vedtak ${vedtak.id} kan ikke underkjennes da det allerede er attestert") {
+    val vedtakId: Long = vedtak.id
 }
 
 class VedtaksvurderingService(
@@ -78,50 +80,74 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)
     }
 
-    suspend fun populerOgHentFellesVedtak(behandlingId: UUID, accessToken: String): Vedtak {
-        val vedtak = hentFellesVedtakMedUtbetalingsperioder(behandlingId)
+    suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, accessToken: String): Vedtak {
+        val vedtak = hentVedtak(behandlingId)
         if (vedtak?.vedtakFattet != null) {
-            return vedtak
-        } else {
-            val hentetVedtak = coroutineScope {
-                val beregningDTO = async { beregningKlient.hentBeregning(behandlingId, accessToken) }
-                val vilkaarsvurdering = async {
-                    vilkaarsvurderingKlient.hentVilkaarsvurdering(
-                        behandlingId,
-                        accessToken
-                    )
-                } // ktlint-disable max-line-length
-                val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
-
-                val beregningsResultat = BeregningsResultat(
-                    id = beregningDTO.await().beregningId,
-                    type = Beregningstyper.GP,
-                    endringskode = Endringskode.NY,
-                    resultat = BeregningsResultatType.BEREGNET,
-                    beregningsperioder = beregningDTO.await().beregningsperioder,
-                    beregnetDato = LocalDateTime.from(beregningDTO.await().beregnetDato.toNorskTid()),
-                    grunnlagVersjon = beregningDTO.await().grunnlagMetadata.versjon
-                )
-
-                val virk = vilkaarsvurdering.await().virkningstidspunkt.atDay(1)
-                repository.opprettVedtak(
-                    behandlingId,
-                    behandling.await().sak,
-                    behandling.await().soeker!!,
-                    SakType.BARNEPENSJON,
-                    behandling.await().behandlingType!!,
-                    virk,
-                    beregningsResultat,
-                    vilkaarsvurdering.await()
-                )
-                hentFellesVedtakMedUtbetalingsperioder(behandlingId)!!
-            }
-
-            sendToRapid(lagVedtakHendelseMelding("VEDTAK:BEREGNET", hentetVedtak), behandlingId)
-            sendToRapid(lagVedtakHendelseMelding("VEDTAK:VILKAARSVURDERT", hentetVedtak), behandlingId)
-
-            return hentetVedtak
+            throw KanIkkeEndreFattetVedtak(vedtak)
         }
+
+        val (beregning, vilkaarsvurdering, behandling) =
+            hentDataForVedtak(behandlingId, accessToken)
+        val virk = vilkaarsvurdering.virkningstidspunkt.atDay(1)
+
+        if (vedtak == null) {
+            repository.opprettVedtak(
+                behandlingId,
+                behandling.sak,
+                behandling.soeker!!,
+                SakType.BARNEPENSJON,
+                behandling.behandlingType!!,
+                virk,
+                beregning,
+                vilkaarsvurdering
+            )
+        } else {
+            repository.oppdaterVedtak(
+                behandlingId,
+                beregning,
+                vilkaarsvurdering,
+                virk
+            )
+        }
+        val oppdatertVedtak = hentFellesVedtakMedUtbetalingsperioder(behandlingId)!!
+
+        sendToRapid(lagVedtakHendelseMelding("VEDTAK:BEREGNET", oppdatertVedtak), behandlingId)
+        sendToRapid(lagVedtakHendelseMelding("VEDTAK:VILKAARSVURDERT", oppdatertVedtak), behandlingId)
+        return oppdatertVedtak
+    }
+
+    suspend fun hentDataForVedtak(
+        behandlingId: UUID,
+        accessToken: String
+    ): Triple<BeregningsResultat, Vilkaarsvurdering, DetaljertBehandling> {
+        return coroutineScope {
+            val beregningDTO = async { beregningKlient.hentBeregning(behandlingId, accessToken) }
+
+            val beregningsResultat = BeregningsResultat(
+                id = beregningDTO.await().beregningId,
+                type = Beregningstyper.GP,
+                endringskode = Endringskode.NY,
+                resultat = BeregningsResultatType.BEREGNET,
+                beregningsperioder = beregningDTO.await().beregningsperioder,
+                beregnetDato = LocalDateTime.from(beregningDTO.await().beregnetDato.toNorskTid()),
+                grunnlagVersjon = beregningDTO.await().grunnlagMetadata.versjon
+            )
+
+            val vilkaarsvurdering = async {
+                vilkaarsvurderingKlient.hentVilkaarsvurdering(
+                    behandlingId,
+                    accessToken
+                )
+            }
+            val behandling = async {
+                behandlingKlient.hentBehandling(behandlingId, accessToken)
+            }
+            Triple(beregningsResultat, vilkaarsvurdering.await(), behandling.await())
+        }
+    }
+
+    fun hentFellesvedtak(behandlingId: UUID): Vedtak? {
+        return hentFellesVedtakMedUtbetalingsperioder(behandlingId)
     }
 
     fun hentFellesVedtakMedUtbetalingsperioder(behandlingId: UUID): Vedtak? {
@@ -196,9 +222,9 @@ class VedtaksvurderingService(
     fun underkjennVedtak(
         behandlingId: UUID
     ): VedtakEntity {
-        val vedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId)).also {
+        requireNotNull(hentVedtak(behandlingId)).also {
             require(it.vedtakFattet != null) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
-            require(it.attestasjon == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
+            require(it.attestant == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
         }
         repository.underkjennVedtak(behandlingId)
         return repository.hentVedtak(behandlingId)!!

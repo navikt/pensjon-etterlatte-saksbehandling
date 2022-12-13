@@ -20,6 +20,10 @@ export const fattVedtak = async (behandlingsId: string): Promise<ApiResponse<unk
   return apiClient.post(`/vedtak/fattvedtak/${behandlingsId}`, {})
 }
 
+export const upsertVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/vedtak/upsert/${behandlingsId}`, {})
+}
+
 export const attesterVedtak = async (behandlingId: string): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/vedtak/attester/${behandlingId}`, {})
 }

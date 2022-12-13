@@ -41,15 +41,23 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         get("behandlinger/{behandlingId}/fellesvedtak") {
             val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-            val vedtaksresultat = service.populerOgHentFellesVedtak(
-                behandlingId = behandlingId,
-                accessToken = accesstoken
+            val vedtaksresultat = service.hentFellesvedtak(
+                behandlingId = behandlingId
             )
             if (vedtaksresultat == null) {
                 call.response.status(HttpStatusCode.NotFound)
             } else {
                 call.respond(vedtaksresultat)
             }
+        }
+
+        post("vedtak/upsert/{behandlingId}") {
+            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+            val nyttVedtak = service.opprettEllerOppdaterVedtak(
+                behandlingId = behandlingId,
+                accessToken = accesstoken
+            )
+            call.respond(nyttVedtak)
         }
 
         post("vedtak/attester/{behandlingId}") {

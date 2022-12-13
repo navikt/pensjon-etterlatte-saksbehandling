@@ -7,7 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 interface VilkaarsvurderingKlient {
-    suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering
+    suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingDto
 }
 
 class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : VilkaarsvurderingKlient {
@@ -26,9 +26,9 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
     private val clientId = config.getString("vilkaarsvurdering.client.id")
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
 
-    override suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
+    override suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingDto {
         logger.info("Henter vilkaarsvurdering med behandlingid $behandlingId")
-        return retry<Vilkaarsvurdering> {
+        return retry<VilkaarsvurderingDto> {
             val json = downstreamResourceClient
                 .get(
                     resource = Resource(

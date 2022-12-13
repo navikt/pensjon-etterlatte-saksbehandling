@@ -12,13 +12,6 @@ data class VilkaarsvurderingDto(
     val resultat: VilkaarsvurderingResultat? = null
 )
 
-data class Vilkaarsvurdering(
-    val behandlingId: UUID,
-    val vilkaar: List<Vilkaar>,
-    val virkningstidspunkt: YearMonth,
-    val resultat: VilkaarsvurderingResultat
-)
-
 data class Vilkaar(
     val hovedvilkaar: Hovedvilkaar,
     val unntaksvilkaar: List<Unntaksvilkaar>? = null,
@@ -67,21 +60,6 @@ enum class Utfall {
 enum class VilkaarsvurderingUtfall {
     OPPFYLT,
     IKKE_OPPFYLT
-}
-
-data class VilkaarTypeOgUtfall(
-    val type: VilkaarType,
-    val resultat: Utfall
-)
-
-data class VurdertVilkaar(
-    val vilkaarId: UUID,
-    val hovedvilkaar: VilkaarTypeOgUtfall,
-    val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
-    val vurdering: VilkaarVurderingData
-) {
-    fun hovedvilkaarOgUnntaksvilkaarIkkeOppfylt() =
-        hovedvilkaar.resultat == Utfall.IKKE_OPPFYLT && unntaksvilkaar == null
 }
 
 data class Vilkaarsgrunnlag<T>(

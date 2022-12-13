@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
@@ -18,22 +17,22 @@ class VilkaarsvurderingService(
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient
 ) {
-    suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingIntern =
+    suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering =
         vilkaarsvurderingRepository.hent(behandlingId) ?: opprettVilkaarsvurdering(behandlingId, accessToken)
 
-    fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): VilkaarsvurderingIntern =
+    fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): Vilkaarsvurdering =
         vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
 
-    fun slettTotalVurdering(behandlingId: UUID): VilkaarsvurderingIntern =
+    fun slettTotalVurdering(behandlingId: UUID): Vilkaarsvurdering =
         vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
 
-    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): VilkaarsvurderingIntern =
+    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering =
         vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
 
-    fun slettVurderingPaaVilkaar(behandlingId: UUID, vilkaarId: UUID): VilkaarsvurderingIntern =
+    fun slettVurderingPaaVilkaar(behandlingId: UUID, vilkaarId: UUID): Vilkaarsvurdering =
         vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
 
-    private suspend fun opprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingIntern {
+    private suspend fun opprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
         val sakType = SakType.BARNEPENSJON // TODO: SOS, Hardkodet - https://jira.adeo.no/browse/EY-1300
@@ -41,16 +40,12 @@ class VilkaarsvurderingService(
         val virkningstidspunkt = behandling.virkningstidspunkt
             ?: throw VirkningstidspunktIkkeSattException("Virkningstidspunkt ikke satt for behandling $behandlingId")
 
-        requireNotNull(behandling.behandlingType) { // TODO gir det mening at denne er optional?!
-            "BehandlingType ikke satt for behandling $behandlingId"
-        }
-
         return when (sakType) {
             SakType.BARNEPENSJON ->
                 when (requireNotNull(behandling.behandlingType)) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-                            VilkaarsvurderingIntern(
+                            Vilkaarsvurdering(
                                 sakId = behandling.sak,
                                 behandlingId = behandlingId,
                                 vilkaar = BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt),
@@ -60,7 +55,7 @@ class VilkaarsvurderingService(
                         )
                     BehandlingType.REVURDERING ->
                         vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-                            VilkaarsvurderingIntern(
+                            Vilkaarsvurdering(
                                 sakId = behandling.sak,
                                 behandlingId = behandlingId,
                                 vilkaar = mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak)),

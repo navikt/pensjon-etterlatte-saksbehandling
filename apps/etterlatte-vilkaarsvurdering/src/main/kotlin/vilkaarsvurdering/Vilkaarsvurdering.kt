@@ -1,12 +1,15 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import java.time.YearMonth
 import java.util.*
 
-data class VilkaarsvurderingIntern(
+data class Vilkaarsvurdering(
     val id: UUID = UUID.randomUUID(),
     val sakId: Long,
     val behandlingId: UUID,
@@ -21,4 +24,19 @@ data class VilkaarsvurderingIntern(
         vilkaar = this.vilkaar,
         resultat = this.resultat
     )
+}
+
+data class VilkaarTypeOgUtfall(
+    val type: VilkaarType,
+    val resultat: Utfall
+)
+
+data class VurdertVilkaar(
+    val vilkaarId: UUID,
+    val hovedvilkaar: VilkaarTypeOgUtfall,
+    val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
+    val vurdering: VilkaarVurderingData
+) {
+    fun hovedvilkaarOgUnntaksvilkaarIkkeOppfylt() =
+        hovedvilkaar.resultat == Utfall.IKKE_OPPFYLT && unntaksvilkaar == null
 }

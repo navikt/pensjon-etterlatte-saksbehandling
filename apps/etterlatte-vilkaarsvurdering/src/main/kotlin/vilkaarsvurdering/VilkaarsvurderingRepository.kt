@@ -17,12 +17,10 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import java.sql.Timestamp
 import java.time.YearMonth
 import java.util.*
@@ -30,7 +28,7 @@ import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(private val ds: DataSource) {
 
-    fun hent(behandlingId: UUID): VilkaarsvurderingIntern? =
+    fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->
             queryOf(Queries.hentVilkaarsvurdering, mapOf("behandling_id" to behandlingId))
                 .let { query ->
@@ -43,7 +41,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 }
         }
 
-    fun opprettVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern =
+    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
                 val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
@@ -63,7 +61,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
     fun lagreVilkaarsvurderingResultat(
         behandlingId: UUID,
         resultat: VilkaarsvurderingResultat
-    ): VilkaarsvurderingIntern {
+    ): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
             val vilkaarsvurdering = hentNonNull(behandlingId)
 
@@ -82,7 +80,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         return hentNonNull(behandlingId)
     }
 
-    fun slettVilkaarsvurderingResultat(behandlingId: UUID): VilkaarsvurderingIntern {
+    fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
             val vilkaarsvurdering = hentNonNull(behandlingId)
 
@@ -96,7 +94,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
     fun lagreVilkaarResultat(
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
-    ): VilkaarsvurderingIntern {
+    ): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
                 queryOf(
@@ -148,7 +146,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
     fun slettVilkaarResultat(
         behandlingId: UUID,
         vilkaarId: UUID
-    ): VilkaarsvurderingIntern =
+    ): Vilkaarsvurdering =
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
                 queryOf(Queries.slettVilkaarResultat, mapOf("id" to vilkaarId))
@@ -159,7 +157,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             }
         }.let { hentNonNull(behandlingId) }
 
-    private fun hentNonNull(behandlingId: UUID): VilkaarsvurderingIntern =
+    private fun hentNonNull(behandlingId: UUID): Vilkaarsvurdering =
         hent(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
 
     private fun hentVilkaar(vilkaarsvurderingId: UUID, session: Session): List<Vilkaar> =
@@ -187,7 +185,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             .let { session.run(it.map { row -> row.toGrunnlag() }.asList) }
 
     private fun lagreVilkaarsvurdering(
-        vilkaarsvurdering: VilkaarsvurderingIntern,
+        vilkaarsvurdering: Vilkaarsvurdering,
         tx: TransactionalSession
     ): UUID {
         queryOf(
@@ -256,7 +254,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
     ).let { tx.run(it.asExecute) }
 
     private fun Row.toVilkaarsvurderingIntern(vilkaar: List<Vilkaar>) =
-        VilkaarsvurderingIntern(
+        Vilkaarsvurdering(
             id = uuid("id"),
             sakId = long("sak_id"),
             behandlingId = uuid("behandling_id"),

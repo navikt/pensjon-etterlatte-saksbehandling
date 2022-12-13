@@ -7,11 +7,9 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import org.junit.jupiter.api.AfterAll
@@ -187,7 +185,7 @@ internal class VilkaarsvurderingRepository2Test {
     }
 
     companion object {
-        val vilkaarsvurdering = VilkaarsvurderingIntern(
+        val vilkaarsvurdering = Vilkaarsvurdering(
             sakId = 1234L,
             behandlingId = UUID.randomUUID(),
             grunnlagVersjon = 1L,
@@ -207,5 +205,5 @@ internal class VilkaarsvurderingRepository2Test {
     }
 }
 
-fun VilkaarsvurderingIntern.hentVilkaarMedHovedvilkaarType(vilkaarType: VilkaarType): Vilkaar? =
+fun Vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(vilkaarType: VilkaarType): Vilkaar? =
     vilkaar.find { it.hovedvilkaar.type == vilkaarType }

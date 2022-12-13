@@ -21,9 +21,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
@@ -247,7 +245,7 @@ internal class VilkaarsvurderingServiceTest {
         }
     }
 
-    private suspend fun opprettVilkaarsvurdering(): VilkaarsvurderingIntern {
+    private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering {
         return service.hentEllerOpprettVilkaarsvurdering(
             uuid,
             accesstoken

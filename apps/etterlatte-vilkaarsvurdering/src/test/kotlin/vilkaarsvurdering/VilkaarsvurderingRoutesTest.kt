@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.restModule
@@ -365,7 +364,7 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
-    private fun opprettVilkaarsvurdering(): VilkaarsvurderingIntern =
+    private fun opprettVilkaarsvurdering(): Vilkaarsvurdering =
         runBlocking {
             vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
                 behandlingId,

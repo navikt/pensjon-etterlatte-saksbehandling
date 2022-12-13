@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import org.slf4j.LoggerFactory
 import java.sql.Date
@@ -38,7 +38,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         behandlingtype: BehandlingType,
         virkningsDato: LocalDate,
         beregningsresultat: BeregningsResultat,
-        vilkaarsresultat: Vilkaarsvurdering
+        vilkaarsresultat: VilkaarsvurderingDto
     ) {
         logger.info("Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid")
         connection.use {
@@ -59,7 +59,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     fun oppdaterVedtak(
         behandlingsId: UUID,
         beregningsresultat: BeregningsResultat,
-        vilkaarsresultat: Vilkaarsvurdering,
+        vilkaarsresultat: VilkaarsvurderingDto,
         virkningsDato: LocalDate
     ) {
         logger.info("Oppdaterer vedtak behandlingid: $behandlingsId ")

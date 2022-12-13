@@ -40,7 +40,7 @@ class BeregningService(
             grunnlag,
             behandling.virkningstidspunkt!!.dato,
             YearMonth.now().plusMonths(3),
-            vilkaarsvurdering.resultat.utfall,
+            vilkaarsvurdering.resultat!!.utfall,
             behandling.behandlingType!!,
             behandlingId
         )

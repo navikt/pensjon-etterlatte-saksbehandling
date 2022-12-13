@@ -33,7 +33,7 @@ export const underkjennVedtak = async (
   kommentar: string,
   valgtBegrunnelse: string
 ): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/underkjennVedtak/${behandlingId}`, { kommentar, valgtBegrunnelse })
+  return apiClient.post(`/vedtak/underkjenn/${behandlingId}`, { kommentar, valgtBegrunnelse })
 }
 
 export const lagreBegrunnelseKommerBarnetTilgode = async (args: {

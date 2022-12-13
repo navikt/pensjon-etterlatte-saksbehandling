@@ -220,13 +220,30 @@ class VedtaksvurderingService(
     }
 
     fun underkjennVedtak(
-        behandlingId: UUID
+        behandlingId: UUID,
+        begrunnelse: UnderkjennVedtakClientRequest
     ): VedtakEntity {
         requireNotNull(hentVedtak(behandlingId)).also {
             require(it.vedtakFattet != null) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
             require(it.attestant == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
         }
         repository.underkjennVedtak(behandlingId)
+
+        val underkjentVedtak = repository.hentVedtak(behandlingId)!!
+
+        val message = JsonMessage.newMessage(
+            mapOf(
+                eventNameKey to "VEDTAK:UNDERKJENT",
+                "sakId" to underkjentVedtak.sakId.toString(),
+                "behandlingId" to underkjentVedtak.behandlingId,
+                "vedtakId" to underkjentVedtak.id,
+                "eventtimestamp" to Tidspunkt.now(),
+                "valgtBegrunnelse" to begrunnelse.valgtBegrunnelse,
+                "kommentar" to begrunnelse.kommentar
+            )
+        )
+        sendToRapid(message.toJson(), behandlingId)
+
         return repository.hentVedtak(behandlingId)!!
     }
 

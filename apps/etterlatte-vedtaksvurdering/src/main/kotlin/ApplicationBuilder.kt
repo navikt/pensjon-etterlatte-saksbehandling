@@ -33,7 +33,6 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
-import no.nav.etterlatte.vedtaksvurdering.rivers.UnderkjennVedtak
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
@@ -71,7 +70,6 @@ class ApplicationBuilder {
             }
             .build()
             .apply {
-                UnderkjennVedtak(this, vedtaksvurderingService)
                 LagreIverksattVedtak(this, vedtaksvurderingService)
                 registrerVedlikeholdsriver(vedtaksvurderingService)
             }

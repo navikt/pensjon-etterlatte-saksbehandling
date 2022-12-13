@@ -1,7 +1,9 @@
 package no.nav.etterlatte.behandling
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -9,6 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.getAccessToken
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import org.slf4j.LoggerFactory
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
@@ -44,3 +47,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 private data class SoeskenMedIBeregningDTO(
     val soeskenMedIBeregning: List<SoeskenMedIBeregning>
 )
+
+val ApplicationCall.navIdent: String get() = principal<TokenValidationContextPrincipal>()!!
+    .context.getJwtToken("azure")
+    .jwtTokenClaims.getStringClaim("NAVident")!!

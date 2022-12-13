@@ -78,8 +78,17 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             val behandlingId = UUID.fromString(call.parameters["behandlingId"])
             call.respond(service.fattVedtak(behandlingId, call.navIdent))
         }
+
+        post("vedtak/underkjenn/{behandlingId}") {
+            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+            val begrunnelse = call.receive<UnderkjennVedtakClientRequest>()
+            val underkjentVedtak = service.underkjennVedtak(behandlingId, begrunnelse)
+            call.respond(underkjentVedtak)
+        }
     }
 }
+
+data class UnderkjennVedtakClientRequest(val kommentar: String, val valgtBegrunnelse: String)
 
 val ApplicationCall.navIdent: String get() = principal<TokenValidationContextPrincipal>()!!
     .context.getJwtToken("azure")

@@ -9,7 +9,7 @@ import java.time.YearMonth
 import java.util.*
 
 data class VilkaarsvurderingIntern(
-    val id: UUID? = null,
+    val id: UUID = UUID.randomUUID(),
     val behandlingId: UUID,
     val vilkaar: List<Vilkaar>,
     val virkningstidspunkt: YearMonth,

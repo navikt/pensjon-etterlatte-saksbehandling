@@ -190,14 +190,10 @@ internal class VilkaarsvurderingRepository2Test {
     @Test
     fun `skal slette vilkaarsvurdering`() {
         val opprettetVilkaarsvurdering1 = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
-        val opprettetVilkaarsvurdering2 = vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-            vilkaarsvurdering.copy(behandlingId = UUID.randomUUID())
-        )
 
         vilkaarsvurderingRepository.slettVilkaarsvurderingerISak(opprettetVilkaarsvurdering1.grunnlagsmetadata.sakId)
 
         vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering1.behandlingId) shouldBe null
-        vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering2.behandlingId) shouldBe null
     }
 
     companion object {

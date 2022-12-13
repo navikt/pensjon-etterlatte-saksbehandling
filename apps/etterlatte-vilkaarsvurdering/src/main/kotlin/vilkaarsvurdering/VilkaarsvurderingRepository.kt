@@ -212,11 +212,10 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
         vilkaarsvurdering: VilkaarsvurderingIntern,
         tx: TransactionalSession
     ): UUID {
-        val id = UUID.randomUUID()
         queryOf(
             statement = Queries.lagreVilkaarsvurdering,
             paramMap = mapOf(
-                "id" to id,
+                "id" to vilkaarsvurdering.id,
                 "behandling_id" to vilkaarsvurdering.behandlingId,
                 "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt.atDay(1),
                 "sak_id" to vilkaarsvurdering.grunnlagsmetadata.sakId,
@@ -224,15 +223,14 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
             )
         ).let { tx.run(it.asUpdate) }
 
-        return id
+        return vilkaarsvurdering.id
     }
 
     private fun lagreVilkaar(vilkaarsvurderingId: UUID, vilkaar: Vilkaar, tx: TransactionalSession): UUID {
-        val id = UUID.randomUUID()
         queryOf(
             statement = Queries.lagreVilkaar,
             paramMap = mapOf(
-                "id" to id,
+                "id" to vilkaar.id,
                 "vilkaarsvurdering_id" to vilkaarsvurderingId,
                 "resultat_kommentar" to vilkaar.vurdering?.kommentar,
                 "resultat_tidspunkt" to vilkaar.vurdering?.tidspunkt?.let { Timestamp.valueOf(it) },
@@ -240,7 +238,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
             )
         ).let { tx.run(it.asUpdate) }
 
-        return id
+        return vilkaar.id
     }
 
     private fun lagreDelvilkaar(
@@ -281,7 +279,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
 
     private fun Row.toVilkaarsvurderingIntern(vilkaar: List<Vilkaar>) =
         VilkaarsvurderingIntern(
-            id = uuidOrNull("id"),
+            id = uuid("id"),
             behandlingId = uuid("behandling_id"),
             vilkaar = vilkaar,
             resultat = stringOrNull("resultat_utfall")?.let { utfall ->

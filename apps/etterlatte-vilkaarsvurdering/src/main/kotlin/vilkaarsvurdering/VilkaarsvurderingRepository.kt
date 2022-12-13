@@ -35,7 +35,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     session.run(
                         query.map { row ->
                             val vilkaarsvurderingId = row.uuid("id")
-                            row.toVilkaarsvurderingIntern(hentVilkaar(vilkaarsvurderingId, session))
+                            row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, session))
                         }.asSingle
                     )
                 }
@@ -253,7 +253,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         )
     ).let { tx.run(it.asExecute) }
 
-    private fun Row.toVilkaarsvurderingIntern(vilkaar: List<Vilkaar>) =
+    private fun Row.toVilkaarsvurdering(vilkaar: List<Vilkaar>) =
         Vilkaarsvurdering(
             id = uuid("id"),
             sakId = long("sak_id"),

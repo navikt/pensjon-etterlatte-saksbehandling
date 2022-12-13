@@ -21,7 +21,7 @@ class Server(context: ApplicationContext) {
                     vilkaarsvurdering(context.vilkaarsvurderingService)
                 }
             }
-            connector { port = 8080 }
+            connector { port = System.getenv("HTTP_PORT")?.toInt() ?: 8080 }
         }
     )
 

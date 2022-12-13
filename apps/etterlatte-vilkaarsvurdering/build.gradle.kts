@@ -1,3 +1,6 @@
+import Logging.LogbackClassic
+import Logging.LogstashLogbackEncoder
+
 plugins {
     kotlin("jvm")
 }
@@ -33,6 +36,12 @@ dependencies {
     implementation(Database.FlywayDB)
     implementation(Database.Postgresql)
     implementation(Database.KotliQuery)
+
+    implementation(LogbackClassic)
+    implementation(LogstashLogbackEncoder) {
+        exclude("com.fasterxml.jackson.core")
+        exclude("com.fasterxml.jackson.dataformat")
+    }
 
     testImplementation(MockK.MockK)
     testImplementation(Ktor2.ServerTests)

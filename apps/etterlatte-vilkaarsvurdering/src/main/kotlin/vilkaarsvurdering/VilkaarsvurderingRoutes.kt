@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -12,10 +11,10 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
 import java.time.LocalDateTime
@@ -98,19 +97,6 @@ fun Route.vilkaarsvurdering(
                 }
             }
         }
-    }
-}
-
-private suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSuccess: (id: UUID) -> Unit) {
-    val id = call.parameters["behandlingId"]
-    if (id == null) {
-        call.respond(HttpStatusCode.BadRequest, "Fant ikke behandlingId")
-    }
-
-    try {
-        onSuccess(UUID.fromString(id))
-    } catch (e: IllegalArgumentException) {
-        call.respond(HttpStatusCode.BadRequest, "behandlingId må være en UUID")
     }
 }
 

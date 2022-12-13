@@ -1,9 +1,6 @@
 package no.nav.etterlatte.behandling
 
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
-import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -11,7 +8,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.getAccessToken
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import no.nav.etterlatte.libs.common.navIdent
+import no.nav.etterlatte.libs.common.withBehandlingId
 import org.slf4j.LoggerFactory
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
@@ -19,26 +17,21 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 
     route("/grunnlag") {
         post("/beregningsgrunnlag/{behandlingId}") {
-            try {
-                val behandlingId = call.parameters["behandlingId"]
-                val body = call.receive<SoeskenMedIBeregningDTO>()
-
-                if (behandlingId == null) { // todo ai: trekk ut
-                    call.response.status(HttpStatusCode(400, "Bad request"))
-                    call.respond("Behandlings-id mangler")
-                } else {
+            withBehandlingId { behandlingId ->
+                try {
+                    val body = call.receive<SoeskenMedIBeregningDTO>()
                     call.respond(
                         service.lagreSoeskenMedIBeregning(
-                            behandlingId,
+                            behandlingId.toString(),
                             body.soeskenMedIBeregning,
                             call.navIdent,
                             getAccessToken(call)
                         )
                     )
+                } catch (ex: Exception) {
+                    logger.error("beregningsgrunnlag feilet", ex)
+                    throw ex
                 }
-            } catch (ex: Exception) {
-                logger.error("beregningsgrunnlag feilet", ex)
-                throw ex
             }
         }
     }
@@ -47,7 +40,3 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 private data class SoeskenMedIBeregningDTO(
     val soeskenMedIBeregning: List<SoeskenMedIBeregning>
 )
-
-val ApplicationCall.navIdent: String get() = principal<TokenValidationContextPrincipal>()!!
-    .context.getJwtToken("azure")
-    .jwtTokenClaims.getStringClaim("NAVident")!!

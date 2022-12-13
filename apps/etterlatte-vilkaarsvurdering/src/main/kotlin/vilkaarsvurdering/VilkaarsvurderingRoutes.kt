@@ -57,7 +57,7 @@ fun Route.vilkaarsvurdering(
                         vurdertVilkaar = toVurdertVilkaar(vurdertVilkaarDto, saksbehandler)
                     )
 
-                call.respond(oppdatertVilkaarsvurdering)
+                call.respond(oppdatertVilkaarsvurdering.toDto())
             }
         }
 
@@ -72,7 +72,7 @@ fun Route.vilkaarsvurdering(
                         vilkaarId = vilkaarId
                     )
 
-                call.respond(oppdatertVilkaarsvurdering)
+                call.respond(oppdatertVilkaarsvurdering.toDto())
             }
         }
 
@@ -87,7 +87,7 @@ fun Route.vilkaarsvurdering(
                         resultat = toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler)
                     )
 
-                    call.respond(oppdatertVilkaarsvurdering)
+                    call.respond(oppdatertVilkaarsvurdering.toDto())
                 }
             }
 
@@ -96,7 +96,7 @@ fun Route.vilkaarsvurdering(
                     logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
                     val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
 
-                    call.respond(oppdatertVilkaarsvurdering)
+                    call.respond(oppdatertVilkaarsvurdering.toDto())
                 }
             }
         }

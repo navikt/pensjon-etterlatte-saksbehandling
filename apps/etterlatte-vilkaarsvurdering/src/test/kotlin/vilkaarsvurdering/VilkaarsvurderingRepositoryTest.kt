@@ -4,7 +4,6 @@ import GrunnlagTestData
 import behandling.VirkningstidspunktTestData
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -45,7 +44,7 @@ internal class VilkaarsvurderingRepository2Test {
             postgreSQLContainer.password
         ).apply { migrate() }.dataSource()
 
-        vilkaarsvurderingRepository = VilkaarsvurderingRepositoryImpl(ds)
+        vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds)
     }
 
     private fun cleanDatabase() {
@@ -189,14 +188,14 @@ internal class VilkaarsvurderingRepository2Test {
 
     companion object {
         val vilkaarsvurdering = VilkaarsvurderingIntern(
+            sakId = 1234L,
             behandlingId = UUID.randomUUID(),
+            grunnlagVersjon = 1L,
+            virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
             vilkaar = BarnepensjonVilkaar.inngangsvilkaar(
                 grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag(),
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt()
-            ),
-            virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
-            resultat = null,
-            grunnlagsmetadata = Metadata(1234L, 1L)
+            )
         )
 
         val vilkaarsvurderingResultat = VilkaarsvurderingResultat(

@@ -66,7 +66,7 @@ internal class VilkaarsvurderingRoutesTest {
         ).apply { migrate() }
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryImpl(ds.dataSource()),
+                VilkaarsvurderingRepository(ds.dataSource()),
                 behandlingKlient,
                 grunnlagKlient
             )
@@ -344,7 +344,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
             assertEquals(resultat.resultat, oppdatertVilkaarsvurdering?.resultat?.utfall)
@@ -358,7 +358,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val slettetVilkaarsvurdering = objectMapper
-                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
+                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
             assertEquals(HttpStatusCode.OK, sletteResponse.status)
             assertEquals(behandlingId, slettetVilkaarsvurdering.behandlingId)
             assertEquals(null, slettetVilkaarsvurdering?.resultat)

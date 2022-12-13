@@ -8,7 +8,6 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
@@ -29,22 +28,9 @@ import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-interface VilkaarsvurderingRepository {
-    fun hent(behandlingId: UUID): VilkaarsvurderingIntern?
-    fun opprettVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern
-    fun lagreVilkaarsvurderingResultat(behandlingId: UUID, resultat: VilkaarsvurderingResultat): VilkaarsvurderingIntern
-    fun slettVilkaarsvurderingResultat(behandlingId: UUID): VilkaarsvurderingIntern
-    fun lagreVilkaarResultat(
-        behandlingId: UUID,
-        vurdertVilkaar: VurdertVilkaar
-    ): VilkaarsvurderingIntern
+class VilkaarsvurderingRepository(private val ds: DataSource) {
 
-    fun slettVilkaarResultat(behandlingId: UUID, vilkaarId: UUID): VilkaarsvurderingIntern
-}
-
-class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : VilkaarsvurderingRepository {
-
-    override fun hent(behandlingId: UUID): VilkaarsvurderingIntern? =
+    fun hent(behandlingId: UUID): VilkaarsvurderingIntern? =
         using(sessionOf(ds)) { session ->
             queryOf(Queries.hentVilkaarsvurdering, mapOf("behandling_id" to behandlingId))
                 .let { query ->
@@ -57,7 +43,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                 }
         }
 
-    override fun opprettVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern =
+    fun opprettVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingIntern): VilkaarsvurderingIntern =
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
                 val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
@@ -74,7 +60,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
             }
         }.let { hentNonNull(vilkaarsvurdering.behandlingId) }
 
-    override fun lagreVilkaarsvurderingResultat(
+    fun lagreVilkaarsvurderingResultat(
         behandlingId: UUID,
         resultat: VilkaarsvurderingResultat
     ): VilkaarsvurderingIntern {
@@ -96,7 +82,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
         return hentNonNull(behandlingId)
     }
 
-    override fun slettVilkaarsvurderingResultat(behandlingId: UUID): VilkaarsvurderingIntern {
+    fun slettVilkaarsvurderingResultat(behandlingId: UUID): VilkaarsvurderingIntern {
         using(sessionOf(ds)) { session ->
             val vilkaarsvurdering = hentNonNull(behandlingId)
 
@@ -107,7 +93,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
         return hentNonNull(behandlingId)
     }
 
-    override fun lagreVilkaarResultat(
+    fun lagreVilkaarResultat(
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
     ): VilkaarsvurderingIntern {
@@ -159,7 +145,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
         ).let { tx.run(it.asUpdate) }
     }
 
-    override fun slettVilkaarResultat(
+    fun slettVilkaarResultat(
         behandlingId: UUID,
         vilkaarId: UUID
     ): VilkaarsvurderingIntern =
@@ -210,8 +196,8 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                 "id" to vilkaarsvurdering.id,
                 "behandling_id" to vilkaarsvurdering.behandlingId,
                 "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt.atDay(1),
-                "sak_id" to vilkaarsvurdering.grunnlagsmetadata.sakId,
-                "grunnlag_versjon" to vilkaarsvurdering.grunnlagsmetadata.versjon
+                "sak_id" to vilkaarsvurdering.sakId,
+                "grunnlag_versjon" to vilkaarsvurdering.grunnlagVersjon
             )
         ).let { tx.run(it.asUpdate) }
 
@@ -272,7 +258,10 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
     private fun Row.toVilkaarsvurderingIntern(vilkaar: List<Vilkaar>) =
         VilkaarsvurderingIntern(
             id = uuid("id"),
+            sakId = long("sak_id"),
             behandlingId = uuid("behandling_id"),
+            grunnlagVersjon = long("grunnlag_versjon"),
+            virkningstidspunkt = YearMonth.from(localDate("virkningstidspunkt")),
             vilkaar = vilkaar,
             resultat = stringOrNull("resultat_utfall")?.let { utfall ->
                 VilkaarsvurderingResultat(
@@ -281,12 +270,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                     tidspunkt = sqlTimestamp("resultat_tidspunkt").toLocalDateTime(),
                     saksbehandler = string("resultat_saksbehandler")
                 )
-            },
-            virkningstidspunkt = YearMonth.from(localDate("virkningstidspunkt")),
-            grunnlagsmetadata = Metadata(
-                sakId = long("sak_id"),
-                versjon = long("grunnlag_versjon")
-            )
+            }
         )
 
     private fun Row.toVilkaar(

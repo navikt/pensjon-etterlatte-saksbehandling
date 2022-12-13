@@ -1,9 +1,16 @@
 plugins {
-    id("etterlatte.rapids-and-rivers-ktor2")
+    kotlin("jvm")
+}
+
+repositories {
+    mavenCentral()
+    maven("https://packages.confluent.io/maven/")
 }
 
 dependencies {
     implementation(project(":libs:common"))
+    implementation(project(":libs:ktor2client-onbehalfof"))
+    implementation(project(":libs:etterlatte-ktor"))
 
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ServerCore)
@@ -16,9 +23,6 @@ dependencies {
     implementation(Ktor2.ClientCore)
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.ClientAuth)
-
-    implementation(project(":libs:ktor2client-onbehalfof"))
-    implementation(project(":libs:etterlatte-ktor"))
 
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.ModuleKotlin)

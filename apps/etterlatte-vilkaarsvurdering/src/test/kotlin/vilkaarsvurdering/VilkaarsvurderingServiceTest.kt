@@ -72,7 +72,7 @@ internal class VilkaarsvurderingServiceTest {
             every { revurderingsaarsak } returns null
         }
 
-        repository = VilkaarsvurderingRepositoryImpl(ds)
+        repository = VilkaarsvurderingRepository(ds)
         service = VilkaarsvurderingService(
             repository,
             behandlingKlient,

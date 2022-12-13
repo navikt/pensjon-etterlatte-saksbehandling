@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-vilkaarsvurdering/**
       - libs/common/**
+      - libs/ktor/**
       - libs/testdata/**
   pull_request:
     branches:
@@ -24,6 +25,7 @@ on:
     paths:
       - apps/etterlatte-vilkaarsvurdering/**
       - libs/common/**
+      - libs/ktor/**
       - libs/testdata/**
 
 jobs:

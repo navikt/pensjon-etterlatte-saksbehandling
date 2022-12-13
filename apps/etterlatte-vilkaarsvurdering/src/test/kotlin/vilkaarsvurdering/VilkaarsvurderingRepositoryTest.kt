@@ -32,7 +32,7 @@ internal class VilkaarsvurderingRepository2Test {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
-    private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository2
+    private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository
     private lateinit var ds: DataSource
 
     @BeforeAll
@@ -45,12 +45,12 @@ internal class VilkaarsvurderingRepository2Test {
             postgreSQLContainer.password
         ).apply { migrate() }.dataSource()
 
-        vilkaarsvurderingRepository = VilkaarsvurderingRepository2Impl(ds)
+        vilkaarsvurderingRepository = VilkaarsvurderingRepositoryImpl(ds)
     }
 
     private fun cleanDatabase() {
         ds.connection.use {
-            it.prepareStatement("TRUNCATE vilkaarsvurdering_v2 CASCADE").apply { execute() }
+            it.prepareStatement("TRUNCATE vilkaarsvurdering CASCADE").apply { execute() }
         }
     }
 

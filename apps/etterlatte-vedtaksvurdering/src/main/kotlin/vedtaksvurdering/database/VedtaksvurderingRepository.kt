@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -31,39 +30,28 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun lagreVilkaarsresultat(
-        saktype: SakType,
-        behandling: Behandling,
-        fnr: String,
-        vilkaarsresultat: Vilkaarsvurdering,
-        virkningsDato: LocalDate?
-    ) {
-        logger.info("Lagrer vilkaarsresultat")
-        connection.use {
-            val statement = it.prepareStatement(Queries.lagreVilkaarResultat)
-            statement.setObject(1, behandling.id)
-            statement.setString(2, objectMapper.writeValueAsString(vilkaarsresultat))
-            statement.setString(3, fnr)
-            statement.setDate(4, virkningsDato?.let { Date.valueOf(virkningsDato) })
-            statement.setString(5, VedtakStatus.VILKAARSVURDERT.name)
-            statement.setString(6, saktype.toString())
-            statement.setString(7, behandling.type.name)
-            statement.execute()
-        }
-    }
-
-    fun oppdaterVilkaarsresultat(
-        saktype: SakType,
+    fun opprettVedtak(
         behandlingsId: UUID,
+        sakid: Long,
+        fnr: String,
+        saktype: SakType,
+        behandlingtype: BehandlingType,
+        virkningsDato: LocalDate,
+        beregningsresultat: BeregningsResultat,
         vilkaarsresultat: Vilkaarsvurdering
     ) {
-        logger.info("Lagrer vilkaarsresultat")
+        logger.info("Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid")
         connection.use {
-            val statement = it.prepareStatement(Queries.oppdaterVilkaarResultat)
-            statement.setString(1, objectMapper.writeValueAsString(vilkaarsresultat))
-            statement.setObject(3, saktype.toString())
-            statement.setString(2, VedtakStatus.VILKAARSVURDERT.name)
-            statement.setObject(4, behandlingsId)
+            val statement = it.prepareStatement(Queries.opprettVedtak)
+            statement.setObject(1, behandlingsId)
+            statement.setLong(2, sakid)
+            statement.setString(3, fnr)
+            statement.setString(4, behandlingtype.name)
+            statement.setString(5, saktype.toString())
+            statement.setString(6, VedtakStatus.BEREGNET.toString())
+            statement.setDate(7, Date.valueOf(virkningsDato))
+            statement.setString(8, objectMapper.writeValueAsString(beregningsresultat))
+            statement.setString(9, objectMapper.writeValueAsString(vilkaarsresultat))
             statement.execute()
         }
     }
@@ -79,35 +67,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                 setObject(2, behandlingsId)
                 require(executeUpdate() == 1)
             }
-        }
-    }
-
-    fun lagreBeregningsresultat(
-        behandling: Behandling,
-        fnr: String,
-        beregningsresultat: BeregningsResultat
-    ) {
-        logger.info("Lagrer beregningsresultat")
-
-        connection.use {
-            val statement = it.prepareStatement(Queries.lagreBeregningsresultat)
-            statement.setObject(1, behandling.id)
-            statement.setString(2, objectMapper.writeValueAsString(beregningsresultat))
-            statement.setString(3, fnr)
-            statement.setString(4, VedtakStatus.BEREGNET.name)
-            statement.setString(5, behandling.type.name)
-            statement.execute()
-        }
-    }
-
-    fun oppdaterBeregningsgrunnlag(behandlingsId: UUID, beregningsresultat: BeregningsResultat) {
-        logger.info("Lagrer beregningsresultat")
-        connection.use {
-            val statement = it.prepareStatement(Queries.oppdaterBeregningsresultat)
-            statement.setString(1, objectMapper.writeValueAsString(beregningsresultat))
-            statement.setString(2, VedtakStatus.BEREGNET.name)
-            statement.setObject(3, behandlingsId)
-            statement.execute()
         }
     }
 
@@ -216,33 +175,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun setSakid(sakId: Long, behandlingId: UUID) {
-        connection.use {
-            val statement = it.prepareStatement(Queries.setSakId)
-            statement.setLong(1, sakId)
-            statement.setObject(2, behandlingId)
-            statement.execute()
-        }
-    }
-
-    fun lagreFnr(behandlingId: UUID, fnr: String) {
-        connection.use {
-            val statement = it.prepareStatement(Queries.lagreFnr)
-            statement.setString(1, fnr)
-            statement.setObject(2, behandlingId)
-            statement.execute()
-        }
-    }
-
-    fun lagreDatoVirk(behandlingId: UUID, datoVirk: LocalDate?) {
-        connection.use {
-            val statement = it.prepareStatement(Queries.lagreDatoVirkFom)
-            statement.setDate(1, datoVirk?.let { Date.valueOf(datoVirk) })
-            statement.setObject(2, behandlingId)
-            statement.execute()
-        }
-    }
-
     fun slettSak(sakId: Long) {
         connection.use {
             it.prepareStatement(Queries.slettUtbetalingsperioderISak).apply {
@@ -276,16 +208,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 }
 
 private object Queries {
-    val lagreBeregningsresultat =
-        "INSERT INTO vedtak(behandlingId, beregningsresultat, fnr, vedtakstatus, behandlingtype) VALUES (?, ?, ?, ?, ?)" // ktlint-disable max-line-length
-    val oppdaterBeregningsresultat =
-        "UPDATE vedtak SET beregningsresultat = ?, vedtakstatus = ? WHERE behandlingId = ?"
 
-    val lagreVilkaarResultat =
-        "INSERT INTO vedtak(behandlingId, vilkaarsresultat, fnr, datoVirkFom, vedtakstatus, saktype, behandlingtype) VALUES (?, ?, ?, ?, ?, ?, ?)" // ktlint-disable max-line-length
-
-    val oppdaterVilkaarResultat =
-        "UPDATE vedtak SET vilkaarsresultat = ?, vedtakstatus = ?, saktype = ? WHERE behandlingId = ?"
+    val opprettVedtak = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" // ktlint-disable max-line-length
 
     val fattVedtak =
         "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now(), vedtakstatus = ?  WHERE behandlingId = ?" // ktlint-disable max-line-length
@@ -293,19 +217,12 @@ private object Queries {
         "UPDATE vedtak SET attestant = ?, datoAttestert = now(), vedtakstatus = ? WHERE behandlingId = ?"
     val underkjennVedtak =
         "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
-    val setSakId =
-        "UPDATE vedtak SET sakid = ? WHERE behandlingId = ?"
     val hentVedtakBolk =
         "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat," +
             "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
             "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(?)"
     val hentVedtak =
         "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
-
-    val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE behandlingId = ?"
-    val lagreDatoVirkFom =
-        "INSERT INTO VEDTAK as v (datoVirkFom, behandlingId) VALUES (?,?) ON CONFLICT (behandlingId) DO " +
-            "UPDATE SET datoVirkFom = EXCLUDED.datoVirkFom WHERE v.behandlingId = EXCLUDED.behandlingId"
 
     val lagreUtbetalingsperiode =
         "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"

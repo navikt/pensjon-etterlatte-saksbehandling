@@ -82,7 +82,7 @@ class VedtaksvurderingService(
 
     suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, accessToken: String): Vedtak {
         val vedtak = hentVedtak(behandlingId)
-        if (vedtak?.vedtakFattet != null) {
+        if (vedtak?.vedtakFattet == true) {
             throw KanIkkeEndreFattetVedtak(vedtak)
         }
 

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class BehandlingEndretHendleseTest {
+internal class BehandlingEndretHendelseTest {
     companion object {
         val opplysningerMock = mockk<OpplysningDao>()
     }

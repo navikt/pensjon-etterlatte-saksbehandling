@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm")
-    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 repositories {
@@ -10,4 +9,6 @@ repositories {
 
 dependencies {
     implementation(project(":libs:common"))
+
+    testImplementation(Jupiter.Engine)
 }

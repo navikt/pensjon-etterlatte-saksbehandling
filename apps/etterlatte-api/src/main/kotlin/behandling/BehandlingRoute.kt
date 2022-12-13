@@ -12,7 +12,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.logger
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
@@ -23,8 +22,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
-val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRoute")
 fun Route.behandlingRoute(service: BehandlingService) {
+    val logger = LoggerFactory.getLogger(this::class.java)
+
     route("saker") {
         // hent alle sakerª
         get {

@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
@@ -76,7 +76,7 @@ internal class VedtaksvurderingServiceTest {
 
     @Test
     fun `hentDataForVedtak skal hente en beregning om vilkårsvurdering er oppfylt`() {
-        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) } returns Vilkaarsvurdering(
+        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) } returns VilkaarsvurderingDto(
             behandlingId,
             emptyList(),
             YearMonth.now(),
@@ -98,7 +98,7 @@ internal class VedtaksvurderingServiceTest {
 
     @Test
     fun `hentDataForVedtak skal ikke hente en beregning om vilkårsvurdering ikke er oppfylt`() {
-        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) } returns Vilkaarsvurdering(
+        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) } returns VilkaarsvurderingDto(
             behandlingId,
             emptyList(),
             YearMonth.now(),

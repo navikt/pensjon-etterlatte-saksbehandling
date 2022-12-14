@@ -156,33 +156,55 @@ class KonsistensavstemmingService(
 }
 
 /**
- * Tar kun med de gjeldende linjene for en dato:
+ * Tar kun med de gjeldende linjene for en Dato:
  * En linje er gjeldende hvis den
- *      1. Er opprettet før / på datoen
- *      2. Ikke har en utløpsdato før datoen
- *      3. Ikke har blitt erstattet med en linje fra med før datoen (gjelder erstatteres erstattere også)
+ *      1. Er opprettet før / på Datoen
+ *      2. Ikke har en til og med-dato før Datoen
+ *      3. Ikke har blitt erstattet med en linje som har fra og med før Datoen vi sjekker opp mot.
+ *          Dette gjelder alle potensielle erstattere for en linje, så hvis en linje A er erstattet av linje B som
+ *          igjen er erstattet av linje C, er det den tidligste datoen av B og C som bestemmer om A er aktiv på Datoen
+ *
+ *          For hver utbetalingslinje kan dette finnes ved å sjekke iterativt om den er erstattet av en annen linje,
+ *          og huske fra-datoen for erstatteren. Man kan så sjekke videre på denne linjen, og hele tiden huske på
+ *          den tidligste datoen en erstatter gjelder fra. (dette kunne blitt gjort på en mer effektiv måte med
+ *          memoisering f.eks., men det er ikke kritisk siden vi snakker n << 100 i all sannsynlighet)
+ *
+ *          Dette er spesielt relevant for opphør, siden man kan ha revurderinger fram i tid, og så skal man opphøre:
+ *
+ *          Linjene erstattes nedover, så A erstattes av B, B av C, og C av D
+ *
+ *          Linje A: |----------------->
+ *          Linje B:           |--------->
+ *          Linje C:                |-------->
+ *          Linje D:     |------------------------> (opphør)
+ *
+ *          Nå er det viktig at alle linjene A, B og C er filtrert bort hvis Datoen vi spør om er etter opphøret.
+ *
  *      4. Ikke er en opphørslinje (disse telles ikke som aktive)
  */
 fun gjeldendeLinjerForEnDato(utbetalingslinjer: List<Utbetalingslinje>, dato: LocalDate): List<Utbetalingslinje> {
-    val trivieltGjeldende = utbetalingslinjer
+    val linjerSomErOpprettetOgIkkeAvsluttetPaaDato = utbetalingslinjer
         .filter {
             it.opprettet.instant <= ZonedDateTime.of(dato, LocalTime.MIN, norskTidssone).toInstant()
         } // 1
         .filter { (it.periode.til ?: dato) >= dato } // 2
 
-    val erstattetAvMap = trivieltGjeldende.associateBy { it.erstatterId }
+    val utbetalingIdTilErstattendeUtbetalingMap = linjerSomErOpprettetOgIkkeAvsluttetPaaDato
+        .associateBy { it.erstatterId }
 
-    return trivieltGjeldende.filter { utbetalingslinje -> // 3
+    return linjerSomErOpprettetOgIkkeAvsluttetPaaDato.filter { utbetalingslinje -> // 3
         var tidligsteStartForEnErstatter: LocalDate? = null
-        var naavaerendeLinje = erstattetAvMap[utbetalingslinje.id]
+        var naavaerendeLinje = utbetalingIdTilErstattendeUtbetalingMap[utbetalingslinje.id]
 
         while (naavaerendeLinje != null) {
             tidligsteStartForEnErstatter =
                 listOfNotNull(tidligsteStartForEnErstatter, naavaerendeLinje.periode.fra).min()
-            naavaerendeLinje = erstattetAvMap[naavaerendeLinje.id]
+            naavaerendeLinje = utbetalingIdTilErstattendeUtbetalingMap[naavaerendeLinje.id]
         }
-
-        (tidligsteStartForEnErstatter ?: dato) >= dato
+        if (tidligsteStartForEnErstatter == null) {
+            return@filter true
+        }
+        return@filter tidligsteStartForEnErstatter > dato
     }.filter { it.type != Utbetalingslinjetype.OPPHOER } // 4
 }
 

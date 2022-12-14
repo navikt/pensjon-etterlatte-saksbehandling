@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -119,7 +119,7 @@ class VedtaksvurderingService(
     suspend fun hentDataForVedtak(
         behandlingId: UUID,
         accessToken: String
-    ): Triple<BeregningsResultat, Vilkaarsvurdering, DetaljertBehandling> {
+    ): Triple<BeregningsResultat, VilkaarsvurderingDto, DetaljertBehandling> {
         return coroutineScope {
             val beregningDTO = async { beregningKlient.hentBeregning(behandlingId, accessToken) }
 

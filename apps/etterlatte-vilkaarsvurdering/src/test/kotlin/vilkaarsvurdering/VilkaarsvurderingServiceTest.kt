@@ -21,17 +21,12 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -75,7 +70,7 @@ internal class VilkaarsvurderingServiceTest {
             every { revurderingsaarsak } returns null
         }
 
-        repository = VilkaarsvurderingRepositoryImpl(ds)
+        repository = VilkaarsvurderingRepository(ds)
         service = VilkaarsvurderingService(
             repository,
             behandlingKlient,
@@ -250,18 +245,7 @@ internal class VilkaarsvurderingServiceTest {
         }
     }
 
-    @Test
-    fun `Skal slette alle vilkaarsvurderinger i en sak ved vedlikehold`() {
-        val vilkaarsvurdering = runBlocking { service.hentEllerOpprettVilkaarsvurdering(uuid, accesstoken) }
-        assertNotNull(vilkaarsvurdering)
-        assertEquals(vilkaarsvurdering.grunnlagsmetadata.sakId, 1)
-
-        service.slettSak(1)
-
-        assertNull(repository.hent(uuid))
-    }
-
-    private suspend fun opprettVilkaarsvurdering(): VilkaarsvurderingIntern {
+    private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering {
         return service.hentEllerOpprettVilkaarsvurdering(
             uuid,
             accesstoken

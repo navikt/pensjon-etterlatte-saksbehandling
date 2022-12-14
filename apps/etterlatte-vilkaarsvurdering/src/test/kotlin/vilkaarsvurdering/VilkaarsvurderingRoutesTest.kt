@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.restModule
@@ -66,7 +65,7 @@ internal class VilkaarsvurderingRoutesTest {
         ).apply { migrate() }
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryImpl(ds.dataSource()),
+                VilkaarsvurderingRepository(ds.dataSource()),
                 behandlingKlient,
                 grunnlagKlient
             )
@@ -344,7 +343,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
             assertEquals(resultat.resultat, oppdatertVilkaarsvurdering?.resultat?.utfall)
@@ -358,14 +357,14 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val slettetVilkaarsvurdering = objectMapper
-                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
+                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingDto::class.java)
             assertEquals(HttpStatusCode.OK, sletteResponse.status)
             assertEquals(behandlingId, slettetVilkaarsvurdering.behandlingId)
             assertEquals(null, slettetVilkaarsvurdering?.resultat)
         }
     }
 
-    private fun opprettVilkaarsvurdering(): VilkaarsvurderingIntern =
+    private fun opprettVilkaarsvurdering(): Vilkaarsvurdering =
         runBlocking {
             vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
                 behandlingId,

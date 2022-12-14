@@ -1,8 +1,19 @@
+import Logging.LogbackClassic
+import Logging.LogstashLogbackEncoder
+
 plugins {
-    id("etterlatte.rapids-and-rivers-ktor2")
+    kotlin("jvm")
 }
+
+repositories {
+    mavenCentral()
+    maven("https://packages.confluent.io/maven/")
+}
+
 dependencies {
     implementation(project(":libs:common"))
+    implementation(project(":libs:ktor2client-onbehalfof"))
+    implementation(project(":libs:etterlatte-ktor"))
 
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ServerCore)
@@ -16,9 +27,6 @@ dependencies {
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.ClientAuth)
 
-    implementation(project(":libs:ktor2client-onbehalfof"))
-    implementation(project(":libs:etterlatte-ktor"))
-
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.ModuleKotlin)
 
@@ -28,6 +36,12 @@ dependencies {
     implementation(Database.FlywayDB)
     implementation(Database.Postgresql)
     implementation(Database.KotliQuery)
+
+    implementation(LogbackClassic)
+    implementation(LogstashLogbackEncoder) {
+        exclude("com.fasterxml.jackson.core")
+        exclude("com.fasterxml.jackson.dataformat")
+    }
 
     testImplementation(MockK.MockK)
     testImplementation(Ktor2.ServerTests)

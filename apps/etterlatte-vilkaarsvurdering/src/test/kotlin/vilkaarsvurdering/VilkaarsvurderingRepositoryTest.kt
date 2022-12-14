@@ -4,15 +4,12 @@ import GrunnlagTestData
 import behandling.VirkningstidspunktTestData
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import org.junit.jupiter.api.AfterAll
@@ -45,7 +42,7 @@ internal class VilkaarsvurderingRepository2Test {
             postgreSQLContainer.password
         ).apply { migrate() }.dataSource()
 
-        vilkaarsvurderingRepository = VilkaarsvurderingRepositoryImpl(ds)
+        vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds)
     }
 
     private fun cleanDatabase() {
@@ -187,25 +184,16 @@ internal class VilkaarsvurderingRepository2Test {
         }
     }
 
-    @Test
-    fun `skal slette vilkaarsvurdering`() {
-        val opprettetVilkaarsvurdering1 = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
-
-        vilkaarsvurderingRepository.slettVilkaarsvurderingerISak(opprettetVilkaarsvurdering1.grunnlagsmetadata.sakId)
-
-        vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering1.behandlingId) shouldBe null
-    }
-
     companion object {
-        val vilkaarsvurdering = VilkaarsvurderingIntern(
+        val vilkaarsvurdering = Vilkaarsvurdering(
+            sakId = 1234L,
             behandlingId = UUID.randomUUID(),
+            grunnlagVersjon = 1L,
+            virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
             vilkaar = BarnepensjonVilkaar.inngangsvilkaar(
                 grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag(),
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt()
-            ),
-            virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
-            resultat = null,
-            grunnlagsmetadata = Metadata(1234L, 1L)
+            )
         )
 
         val vilkaarsvurderingResultat = VilkaarsvurderingResultat(
@@ -217,5 +205,5 @@ internal class VilkaarsvurderingRepository2Test {
     }
 }
 
-fun VilkaarsvurderingIntern.hentVilkaarMedHovedvilkaarType(vilkaarType: VilkaarType): Vilkaar? =
+fun Vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(vilkaarType: VilkaarType): Vilkaar? =
     vilkaar.find { it.hovedvilkaar.type == vilkaarType }

@@ -45,11 +45,11 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
         }
     }
 
-    suspend fun hentGrunnlag(sakid: Long, type: Opplysningstype, accessToken: String): Grunnlagsopplysning<InnsenderSoeknad> {
+    suspend fun hentInnsender(sakid: Long, accessToken: String): Grunnlagsopplysning<InnsenderSoeknad> {
         try {
             val json =
                 downstreamResourceClient.get(
-                    Resource(clientId, "$resourceUrl/api/grunnlag/$sakid/$type"),
+                    Resource(clientId, "$resourceUrl/api/grunnlag/$sakid/${Opplysningstype.INNSENDER_SOEKNAD_V1}"),
                     accessToken
                 ).mapBoth(
                     success = { json -> json },

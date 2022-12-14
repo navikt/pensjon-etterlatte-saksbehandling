@@ -24,7 +24,7 @@ data class InnvilgetBrevRequest(
             mottaker: Mottaker
         ): InnvilgetBrevRequest =
             InnvilgetBrevRequest(
-                saksnummer = behandling.vedtak.sak.id.toString(),
+                saksnummer = behandling.sakId.toString(),
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
                 grunnbeloep = behandling.utbetalingsinfo.grunnbeloep.grunnbeloep,
                 barn = behandling.persongalleri.soeker,

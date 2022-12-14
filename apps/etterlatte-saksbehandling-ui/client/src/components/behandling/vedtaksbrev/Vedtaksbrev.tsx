@@ -103,6 +103,7 @@ export const Vedtaksbrev = () => {
         setVedtaksbrevId(brevResponse.data)
       } else {
         setError(brevResponse.error)
+        setLoading(false)
       }
     }
     fetchVedtaksbrev()

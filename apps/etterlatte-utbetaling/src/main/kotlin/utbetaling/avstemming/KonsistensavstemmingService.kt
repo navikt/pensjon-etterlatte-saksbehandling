@@ -201,8 +201,10 @@ fun gjeldendeLinjerForEnDato(utbetalingslinjer: List<Utbetalingslinje>, dato: Lo
                 listOfNotNull(tidligsteStartForEnErstatter, naavaerendeLinje.periode.fra).min()
             naavaerendeLinje = utbetalingIdTilErstattendeUtbetalingMap[naavaerendeLinje.id]
         }
-
-        (tidligsteStartForEnErstatter ?: dato) >= dato
+        if (tidligsteStartForEnErstatter == null) {
+            return@filter true
+        }
+        return@filter tidligsteStartForEnErstatter > dato
     }.filter { it.type != Utbetalingslinjetype.OPPHOER } // 4
 }
 

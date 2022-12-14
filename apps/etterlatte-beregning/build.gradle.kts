@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":libs:etterlatte-ktor"))
 
     implementation(Ktor2.CallLogging)
     implementation(Ktor2.StatusPages)

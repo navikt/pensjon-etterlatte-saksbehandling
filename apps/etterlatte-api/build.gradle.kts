@@ -7,6 +7,7 @@ plugins {
 dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-onbehalfof"))
+    implementation(project(":libs:etterlatte-ktor"))
 
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)
@@ -42,5 +43,4 @@ dependencies {
     testImplementation(NavFelles.MockOauth2Server)
     testImplementation(Kotlinx.CoroutinesTest)
     testImplementation("org.skyscreamer:jsonassert:1.5.1")
-//    testImplementation(project(":libs:testdata"))
 }

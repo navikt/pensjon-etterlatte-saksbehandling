@@ -18,7 +18,6 @@ dependencies {
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)
-    implementation(Ktor2.Auth)
     implementation(Ktor2.Jackson)
     implementation(Ktor2.CallLogging)
     implementation(Ktor2.StatusPages)
@@ -29,8 +28,6 @@ dependencies {
 
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.ModuleKotlin)
-
-    implementation(NavFelles.TokenValidationKtor2)
 
     implementation(Database.HikariCP)
     implementation(Database.FlywayDB)

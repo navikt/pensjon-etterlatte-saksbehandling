@@ -8,8 +8,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.getAccessToken
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.navIdent
 import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.ktor.saksbehandler
 import org.slf4j.LoggerFactory
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
@@ -24,7 +24,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
                         service.lagreSoeskenMedIBeregning(
                             behandlingId.toString(),
                             body.soeskenMedIBeregning,
-                            call.navIdent,
+                            saksbehandler,
                             getAccessToken(call)
                         )
                     )

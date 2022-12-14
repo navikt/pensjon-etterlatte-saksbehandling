@@ -8,9 +8,9 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.navIdent
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.accesstoken
+import no.nav.etterlatte.libs.ktor.saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -54,7 +54,6 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         post("vedtak/attester/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                val saksbehandler = call.navIdent
                 val attestert = service.attesterVedtak(behandlingId, saksbehandler)
                 call.respond(attestert)
             }
@@ -69,7 +68,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         post("vedtak/fattvedtak/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                call.respond(service.fattVedtak(behandlingId, call.navIdent))
+                call.respond(service.fattVedtak(behandlingId, saksbehandler))
             }
         }
 

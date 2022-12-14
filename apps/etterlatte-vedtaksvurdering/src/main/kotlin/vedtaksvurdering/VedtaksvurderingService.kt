@@ -4,7 +4,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.vedtaksvurdering.Beregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -111,23 +111,21 @@ class VedtaksvurderingService(
         return oppdatertVedtak
     }
 
-    private suspend fun hentDataForVedtak(
+    suspend fun hentDataForVedtak(
         behandlingId: UUID,
         accessToken: String
-    ): Triple<BeregningsResultat?, VilkaarsvurderingDto, DetaljertBehandling> {
+    ): Triple<Beregningsresultat?, VilkaarsvurderingDto, DetaljertBehandling> {
         return coroutineScope {
             val behandling = async {
                 behandlingKlient.hentBehandling(behandlingId, accessToken)
             }
-            val vilkaarsvurdering = async {
-                vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
-            }.await()
+            val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
 
             when (vilkaarsvurdering.resultat?.utfall) {
                 VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(null, vilkaarsvurdering, behandling.await())
                 VilkaarsvurderingUtfall.OPPFYLT -> {
-                    val beregningDTO = async { beregningKlient.hentBeregning(behandlingId, accessToken) }
-                    val beregningsResultat = BeregningsResultat.fraDto(beregningDTO.await())
+                    val beregningDTO = beregningKlient.hentBeregning(behandlingId, accessToken)
+                    val beregningsResultat = Beregningsresultat.fraDto(beregningDTO)
                     Triple(beregningsResultat, vilkaarsvurdering, behandling.await())
                 }
                 null -> throw IllegalArgumentException(

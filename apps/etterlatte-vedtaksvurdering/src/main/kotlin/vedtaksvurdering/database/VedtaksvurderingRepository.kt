@@ -4,12 +4,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.vedtaksvurdering.Beregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import org.slf4j.LoggerFactory
 import java.sql.Date
@@ -37,7 +37,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         saktype: SakType,
         behandlingtype: BehandlingType,
         virkningsDato: LocalDate,
-        beregningsresultat: BeregningsResultat?,
+        beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto
     ) {
         logger.info("Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid")
@@ -58,7 +58,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 
     fun oppdaterVedtak(
         behandlingsId: UUID,
-        beregningsresultat: BeregningsResultat?,
+        beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto,
         virkningsDato: LocalDate
     ) {

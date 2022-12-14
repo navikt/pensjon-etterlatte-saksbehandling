@@ -46,13 +46,13 @@ internal class VedtaksvurderingServiceTest {
     private val fattetVedtak = vedtakSomIkkeErFattet.copy(vedtakFattet = true)
 
     @Test
-    fun `hent vedatak skal returnere vedtaket fra repository`() {
+    fun `hent vedtak skal returnere vedtaket fra repository`() {
         every { repositoryMock.hentVedtak(behandlingId) } returns vedtakSomIkkeErFattet
         Assertions.assertEquals(vedtakSomIkkeErFattet, service.hentVedtak(behandlingId))
     }
 
     @Test
-    fun `hent vedatak skal returnere NULL om vedtak ikke finnes`() {
+    fun `hent vedtak skal returnere NULL om vedtak ikke finnes`() {
         every { repositoryMock.hentVedtak(behandlingId) } returns null
         Assertions.assertNull(service.hentVedtak(behandlingId))
     }

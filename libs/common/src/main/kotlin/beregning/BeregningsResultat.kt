@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.beregning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -39,7 +40,19 @@ data class BeregningsResultat(
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: LocalDateTime,
     val grunnlagVersjon: Long = 0L
-)
+) {
+    companion object {
+        fun fraDto(beregning: BeregningDTO) = BeregningsResultat(
+            id = beregning.beregningId,
+            type = Beregningstyper.GP,
+            endringskode = Endringskode.NY,
+            resultat = BeregningsResultatType.BEREGNET,
+            beregningsperioder = beregning.beregningsperioder,
+            beregnetDato = LocalDateTime.from(beregning.beregnetDato.toNorskTid()),
+            grunnlagVersjon = beregning.grunnlagMetadata.versjon
+        )
+    }
+}
 
 data class Beregningsperiode(
     val delytelsesId: String,

@@ -37,7 +37,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         saktype: SakType,
         behandlingtype: BehandlingType,
         virkningsDato: LocalDate,
-        beregningsresultat: BeregningsResultat,
+        beregningsresultat: BeregningsResultat?,
         vilkaarsresultat: VilkaarsvurderingDto
     ) {
         logger.info("Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid")
@@ -58,7 +58,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 
     fun oppdaterVedtak(
         behandlingsId: UUID,
-        beregningsresultat: BeregningsResultat,
+        beregningsresultat: BeregningsResultat?,
         vilkaarsresultat: VilkaarsvurderingDto,
         virkningsDato: LocalDate
     ) {

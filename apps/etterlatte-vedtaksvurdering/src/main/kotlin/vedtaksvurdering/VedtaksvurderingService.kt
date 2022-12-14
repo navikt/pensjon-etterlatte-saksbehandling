@@ -5,12 +5,8 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -19,13 +15,13 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
 import rapidsandrivers.vedlikehold.VedlikeholdService
-import java.time.LocalDateTime
 import java.util.*
 import no.nav.etterlatte.vedtaksvurdering.Vedtak as VedtakEntity
 
@@ -86,8 +82,7 @@ class VedtaksvurderingService(
             throw KanIkkeEndreFattetVedtak(vedtak)
         }
 
-        val (beregning, vilkaarsvurdering, behandling) =
-            hentDataForVedtak(behandlingId, accessToken)
+        val (beregning, vilkaarsvurdering, behandling) = hentDataForVedtak(behandlingId, accessToken)
         val virk = vilkaarsvurdering.virkningstidspunkt.atDay(1)
 
         if (vedtak == null) {
@@ -116,33 +111,29 @@ class VedtaksvurderingService(
         return oppdatertVedtak
     }
 
-    suspend fun hentDataForVedtak(
+    private suspend fun hentDataForVedtak(
         behandlingId: UUID,
         accessToken: String
-    ): Triple<BeregningsResultat, VilkaarsvurderingDto, DetaljertBehandling> {
+    ): Triple<BeregningsResultat?, VilkaarsvurderingDto, DetaljertBehandling> {
         return coroutineScope {
-            val beregningDTO = async { beregningKlient.hentBeregning(behandlingId, accessToken) }
-
-            val beregningsResultat = BeregningsResultat(
-                id = beregningDTO.await().beregningId,
-                type = Beregningstyper.GP,
-                endringskode = Endringskode.NY,
-                resultat = BeregningsResultatType.BEREGNET,
-                beregningsperioder = beregningDTO.await().beregningsperioder,
-                beregnetDato = LocalDateTime.from(beregningDTO.await().beregnetDato.toNorskTid()),
-                grunnlagVersjon = beregningDTO.await().grunnlagMetadata.versjon
-            )
-
-            val vilkaarsvurdering = async {
-                vilkaarsvurderingKlient.hentVilkaarsvurdering(
-                    behandlingId,
-                    accessToken
-                )
-            }
             val behandling = async {
                 behandlingKlient.hentBehandling(behandlingId, accessToken)
             }
-            Triple(beregningsResultat, vilkaarsvurdering.await(), behandling.await())
+            val vilkaarsvurdering = async {
+                vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
+            }.await()
+
+            when (vilkaarsvurdering.resultat?.utfall) {
+                VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(null, vilkaarsvurdering, behandling.await())
+                VilkaarsvurderingUtfall.OPPFYLT -> {
+                    val beregningDTO = async { beregningKlient.hentBeregning(behandlingId, accessToken) }
+                    val beregningsResultat = BeregningsResultat.fraDto(beregningDTO.await())
+                    Triple(beregningsResultat, vilkaarsvurdering, behandling.await())
+                }
+                null -> throw IllegalArgumentException(
+                    "Resultat av vilkårsvurdering er null for behandling $behandlingId"
+                )
+            }
         }
     }
 

@@ -12,10 +12,10 @@ spec:
     - "https://etterlatte-vilkaarsvurdering.dev.intern.nav.no"
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
   secureLogs:
     enabled: true
   prometheus:
@@ -45,11 +45,6 @@ spec:
     max: 1
     min: 1
   env:
-    - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
-    - name: KAFKA_RESET_POLICY
-    #sette tilbake til none senere
-      value: latest
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID

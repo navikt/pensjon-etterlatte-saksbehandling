@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 
 export const VilkaarsVurderingKnapper = () => {
-  const { next } = useBehandlingRoutes()
+  const { next, goto } = useBehandlingRoutes()
   const [ventNavn, setVentNavn] = useState<string>(handlinger.VILKAARSVURDERING.VENT.navn)
   const vedtaksresultat = useVedtaksResultat()
 
@@ -24,7 +24,7 @@ export const VilkaarsVurderingKnapper = () => {
           case 'avslag':
             return (
               //TODO - Avslag
-              <Button variant="primary" size="medium" className="button" onClick={() => console.log('Avslag')}>
+              <Button variant="primary" size="medium" className="button" onClick={() => goto('brev')}>
                 {handlinger.VILKAARSVURDERING.AVSLAG.navn}
               </Button>
             )

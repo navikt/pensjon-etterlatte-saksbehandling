@@ -114,4 +114,19 @@ internal class BehandlingTest {
                 assertEquals(nyttVirkningstidspunkt, it.virkningstidspunkt)
             }
     }
+
+    @Test
+    fun `man maa gjennom hele loeypen paa nytt dersom man gjoer operasjoner i tidligere steg`() {
+        val vilkaarsvurdertBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
+            .oppdaterGyldighetsproeving(gyldighetsResultat)
+            .tilVilkaarsvurdert()
+        val nyttVirkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 2), saksbehandler)
+
+        vilkaarsvurdertBehandling
+            .oppdaterVirkningstidspunkt(nyttVirkningstidspunkt.dato, nyttVirkningstidspunkt.kilde)
+            .let {
+                assertEquals(it.status, BehandlingStatus.OPPRETTET)
+            }
+    }
 }

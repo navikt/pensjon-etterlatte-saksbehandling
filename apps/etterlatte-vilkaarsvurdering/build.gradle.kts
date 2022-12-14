@@ -2,7 +2,7 @@ import Logging.LogbackClassic
 import Logging.LogstashLogbackEncoder
 
 plugins {
-    kotlin("jvm")
+    id("etterlatte.common")
 }
 
 repositories {

@@ -13,9 +13,9 @@ class ApplicationContext {
     private val config: Config = ConfigFactory.load()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
     val dataSource = DataSourceBuilder.createDataSource(
-        properties.jdbcUrl,
-        properties.dbUsername,
-        properties.dbPassword
+        jdbcUrl = properties.jdbcUrl,
+        username = properties.dbUsername,
+        password = properties.dbPassword
     )
     val vilkaarsvurderingService = VilkaarsvurderingService(
         vilkaarsvurderingRepository = VilkaarsvurderingRepository(dataSource),

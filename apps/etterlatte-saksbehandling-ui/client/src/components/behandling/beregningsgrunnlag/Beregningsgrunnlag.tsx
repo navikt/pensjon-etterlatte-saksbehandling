@@ -69,7 +69,7 @@ const Beregningsgrunnlag = () => {
       <FamilieforholdWrapper
         id="form"
         onSubmit={handleSubmit(async (formValues) => {
-          if (formValues.beregningsgrunnlag.length !== 0) {
+          if (formValues.beregningsgrunnlag.length >= 0) {
             setIsLoading(true)
 
             await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)

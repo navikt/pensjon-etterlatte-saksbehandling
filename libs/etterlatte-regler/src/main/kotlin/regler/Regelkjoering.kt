@@ -16,31 +16,27 @@ object Regelkjoering {
         val ugyldigePerioder = regel.finnUgyldigePerioder(periode)
 
         return if (ugyldigePerioder.isEmpty()) {
-            val knekkpunkterFraRegler = regel.finnAlleKnekkpunkter()
-                .filter { knekkpunktGyldigForPeriode(it, periode) }.toSet()
-            val knekkpunkterFraPeriode = setOf(periode.fraDato, periode.tilDato).filterNotNull()
-            val knekkpunkter = knekkpunkterFraRegler.plus(knekkpunkterFraPeriode).sorted().toSet()
-            // TODO dette bør løses mer elegant
-            val perioder =
-                if (periode.tilDato == null) {
-                    listOf(periode)
-                } else {
-                    knekkpunkter.zipWithNext { a, b -> RegelPeriode(a, b) }
+            regel.finnAlleKnekkpunkter()
+                .filter { knekkpunktGyldigForPeriode(it, periode) }
+                .plus(periode.fraDato)
+                .plus(periode.tilDato?.plusDays(1) ?: LocalDate.MAX)
+                .sorted()
+                .toSet()
+                .zipWithNext { periodeFra, nestePeriodeFra ->
+                    RegelPeriode(
+                        periodeFra,
+                        nestePeriodeFra.takeIf { it.isBefore(LocalDate.MAX) }?.minusDays(1) ?: periode.tilDato
+                    )
                 }
-
-            val periodisertResultat = perioder.associateWith { p -> regel.anvend(grunnlag, p) }
-            RegelkjoeringResultat.Suksess(periodisertResultat)
+                .associateWith { p -> regel.anvend(grunnlag, p) }
+                .let { RegelkjoeringResultat.Suksess(it) }
         } else {
             RegelkjoeringResultat.UgyldigPeriode(ugyldigePerioder)
         }
     }
 
     private fun knekkpunktGyldigForPeriode(it: LocalDate, periode: RegelPeriode) =
-        if (periode.tilDato == null) {
-            it == periode.fraDato
-        } else {
-            it >= periode.fraDato && it <= periode.tilDato
-        }
+        it.isAfter(periode.fraDato) && it.isBefore(periode.tilDato ?: LocalDate.MAX)
 }
 
 fun <G, S> Regel<G, S>.eksekver(grunnlag: G, periode: RegelPeriode) = Regelkjoering.eksekver(

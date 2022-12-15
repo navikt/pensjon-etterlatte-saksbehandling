@@ -11,6 +11,8 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
     switch (behandlingsInfo.status) {
       case IBehandlingStatus.FATTET_VEDTAK:
         return 'To-trinnskontroll'
+      case IBehandlingStatus.IVERKSATT:
+        return 'Iverksatt'
       default:
         return 'Under behandling'
     }

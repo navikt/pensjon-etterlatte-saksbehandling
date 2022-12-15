@@ -24,9 +24,10 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
-import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -58,14 +59,15 @@ internal class VilkaarsvurderingRoutesTest {
         System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
         postgreSQLContainer.start()
 
-        val ds = DataSourceBuilder(
+        val ds = DataSourceBuilder.createDataSource(
             postgreSQLContainer.jdbcUrl,
             postgreSQLContainer.username,
             postgreSQLContainer.password
-        ).apply { migrate() }
+        ).also { it.migrate() }
+
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepository(ds.dataSource()),
+                VilkaarsvurderingRepository(ds),
                 behandlingKlient,
                 grunnlagKlient
             )

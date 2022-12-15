@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-vilkaarsvurdering/**
       - libs/common/**
       - libs/ktor/**
+      - libs/database/**
       - libs/ktor2client-onbehalfof/**
       - libs/testdata/**
   pull_request:
@@ -27,6 +28,7 @@ on:
       - apps/etterlatte-vilkaarsvurdering/**
       - libs/common/**
       - libs/ktor/**
+      - libs/database/**
       - libs/libs/ktor2client-onbehalfof/**
       - libs/testdata/**
 

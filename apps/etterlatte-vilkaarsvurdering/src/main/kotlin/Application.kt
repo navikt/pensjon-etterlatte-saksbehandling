@@ -4,6 +4,7 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
@@ -12,20 +13,23 @@ fun main() {
     ApplicationContext().let { Server(it).run() }
 }
 
-class Server(context: ApplicationContext) {
-    private val engine = embeddedServer(
-        factory = CIO,
-        environment = applicationEngineEnvironment {
-            modules.add {
-                restModule {
-                    vilkaarsvurdering(context.vilkaarsvurderingService)
+class Server(private val context: ApplicationContext) {
+    private val engine = with(context) {
+        embeddedServer(
+            factory = CIO,
+            environment = applicationEngineEnvironment {
+                module {
+                    restModule {
+                        vilkaarsvurdering(vilkaarsvurderingService)
+                    }
                 }
+                connector { port = properties.httpPort }
             }
-            connector { port = System.getenv("HTTP_PORT")?.toInt() ?: 8080 }
-        }
-    )
+        )
+    }
 
-    fun run() {
+    fun run() = with(context) {
+        dataSource.migrate()
         engine.start(true)
     }
 }

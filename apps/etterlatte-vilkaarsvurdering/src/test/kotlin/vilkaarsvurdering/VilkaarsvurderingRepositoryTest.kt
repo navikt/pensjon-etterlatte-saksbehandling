@@ -10,8 +10,9 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
-import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -36,11 +37,11 @@ internal class VilkaarsvurderingRepository2Test {
     fun beforeAll() {
         postgreSQLContainer.start()
 
-        ds = DataSourceBuilder(
+        ds = DataSourceBuilder.createDataSource(
             postgreSQLContainer.jdbcUrl,
             postgreSQLContainer.username,
             postgreSQLContainer.password
-        ).apply { migrate() }.dataSource()
+        ).also { it.migrate() }
 
         vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds)
     }

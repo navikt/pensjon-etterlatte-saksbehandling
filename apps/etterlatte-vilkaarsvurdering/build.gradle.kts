@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:etterlatte-database"))
 
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ServerCore)

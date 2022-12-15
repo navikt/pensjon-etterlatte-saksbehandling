@@ -31,6 +31,7 @@ include(
     "libs:common",
     "libs:ktor2client-onbehalfof",
     "libs:rapidsandrivers-extras",
+    "libs:etterlatte-database",
     "libs:etterlatte-ktor",
     "libs:etterlatte-kafka",
     "libs:testdata",

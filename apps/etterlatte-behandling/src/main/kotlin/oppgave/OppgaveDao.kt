@@ -40,8 +40,8 @@ class OppgaveDao(private val connection: () -> Connection) {
     fun finnOppgaverMedStatuser(statuser: List<BehandlingStatus>): List<Oppgave> {
         if (statuser.isEmpty()) return emptyList()
 
-        connection().let { connection ->
-            val stmt = connection.prepareStatement(
+        with(connection()) {
+            val stmt = prepareStatement(
                 """
                 |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status, behandling_opprettet,
                 |behandlingstype, soesken 
@@ -49,7 +49,7 @@ class OppgaveDao(private val connection: () -> Connection) {
                 |WHERE status = ANY(?)
                 """.trimMargin()
             )
-            stmt.setArray(1, connection.createArrayOf("text", statuser.toTypedArray()))
+            stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))
             return stmt.executeQuery().toList {
                 val mottattDato = getTimestamp("soekand_mottatt_dato")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
                     ?: getTimestamp("behandling_opprettet")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
@@ -72,8 +72,8 @@ class OppgaveDao(private val connection: () -> Connection) {
     }
 
     fun finnOppgaverFraGrunnlagsendringshendelser(): List<GrunnlagsendringsOppgave> {
-        connection().use { connection ->
-            val stmt = connection.prepareStatement(
+        with(connection()) {
+            val stmt = prepareStatement(
                 """
                 SELECT g.sak_id, g.type, g.behandling_id, g.opprettet, s.fnr, s.saktype 
                 FROM grunnlagsendringshendelse g 

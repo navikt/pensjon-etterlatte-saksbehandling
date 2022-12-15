@@ -49,6 +49,9 @@ internal class OppgaveServiceTest {
             )
         )
 
+        // TODO skriv noen bedre tester av sammenflettingen av forskjellige oppgaver her
+        coEvery { behandlingKlient.hentUhaandterteGrunnlagshendelser(accessToken) } returns listOf()
+
         val resultat = runBlocking { service.hentAlleOppgaver(accessToken) }
 
         assertEquals(BehandlingStatus.VILKAARSVURDERT, resultat.oppgaver.first().status)

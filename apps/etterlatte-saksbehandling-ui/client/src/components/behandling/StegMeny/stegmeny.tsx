@@ -21,6 +21,8 @@ export const StegMeny = () => {
     (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT && klarForVidereBehandling)
 
   const harBeregning = !!behandling.beregning
+
+  const oppfylt = behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT
   const vurdert = !!behandling.vilkårsprøving?.resultat && klarForVidereBehandling
 
   return (
@@ -51,9 +53,7 @@ export const StegMeny = () => {
       <Separator />
       <li
         className={classNames({
-          disabled:
-            !vurdert ||
-            (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT && !harBeregning),
+          disabled: !vurdert || (oppfylt && !harBeregning),
         })}
       >
         <NavLink to="brev">Vedtaksbrev</NavLink>

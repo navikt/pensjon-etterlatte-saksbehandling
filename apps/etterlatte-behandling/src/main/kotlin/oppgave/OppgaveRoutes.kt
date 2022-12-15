@@ -8,26 +8,32 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsOppgave
 
 data class OppgaveListeDto(
     val oppgaver: List<Oppgave>
 )
+data class GrunnlagsendringsoppgaverDto(val oppgaver: List<GrunnlagsendringsOppgave>)
 
-fun Route.oppgaveRoutes(repo: OppgaveDao) {
+fun Route.oppgaveRoutes(service: OppgaveService) {
     route("/oppgaver") {
         get {
-            val bruker = Kontekst.get().AppUser
+            when (val bruker = Kontekst.get().AppUser) {
+                is Saksbehandler -> call.respond(OppgaveListeDto(service.finnOppgaverForBruker(bruker)))
+                else -> call.respond(HttpStatusCode.Forbidden)
+            }
+        }
 
-            if (bruker is Saksbehandler) {
-                repo.finnOppgaverForRoller(
-                    listOfNotNull(
-                        Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
-                        Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() }
+        route("/endringshendelser") {
+            get {
+                when (val bruker = Kontekst.get().AppUser) {
+                    is Saksbehandler -> call.respond(
+                        GrunnlagsendringsoppgaverDto(
+                            service.finnOppgaverUhaandterteGrunnlagsendringshendelser(bruker)
+                        )
                     )
-                ).let { OppgaveListeDto(it) }
-                    .also { call.respond(it) }
-            } else {
-                call.respond(HttpStatusCode.Forbidden)
+                    else -> call.respond(HttpStatusCode.Forbidden)
+                }
             }
         }
     }

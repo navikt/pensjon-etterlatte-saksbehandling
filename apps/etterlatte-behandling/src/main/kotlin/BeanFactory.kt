@@ -29,6 +29,9 @@ import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.oppgave.OppgaveDao
+import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.pdl.PdlService
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
@@ -47,7 +50,9 @@ interface BeanFactory {
     fun generellBehandlingService(): GenerellBehandlingService
     fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService
     fun manueltOpphoerService(): ManueltOpphoerService
+    fun oppgaveService(): OppgaveService
     fun sakDao(): SakDao
+    fun oppgaveDao(): OppgaveDao
     fun behandlingDao(): BehandlingDao
     fun hendelseDao(): HendelseDao
     fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao
@@ -79,6 +84,14 @@ abstract class CommonFactory : BeanFactory {
 
     private val revurderingFactory: RevurderingFactory by lazy {
         RevurderingFactory(behandlingDao(), hendelseDao())
+    }
+
+    private val oppgaveService: OppgaveService by lazy {
+        OppgaveServiceImpl(oppgaveDao())
+    }
+
+    private val oppgaveDao: OppgaveDao by lazy {
+        OppgaveDao { databaseContext().activeTx() }
     }
 
     override fun behandlingHendelser(): BehandlingsHendelser {
@@ -126,6 +139,8 @@ abstract class CommonFactory : BeanFactory {
             manueltOpphoerService()
         )
 
+    override fun oppgaveDao(): OppgaveDao = oppgaveDao
+    override fun oppgaveService(): OppgaveService = oppgaveService
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
     override fun hendelseDao(): HendelseDao = HendelseDao { databaseContext().activeTx() }

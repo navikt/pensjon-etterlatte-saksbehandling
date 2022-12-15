@@ -31,11 +31,9 @@ class DatabaseContext(private val ds: DataSource) : DatabaseKontekst {
             transactionalConnection = c
             val retur = block()
             c.commit()
-            // println("committed")
             retur
         } catch (ex: Throwable) {
             c.rollback()
-            println("rolled back")
             logger.warn("Reason for rollback", ex)
             throw ex
         } finally {

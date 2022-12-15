@@ -427,7 +427,8 @@ class TestBeanFactory(
     private val jdbcUrl: String
 ) : CommonFactory() {
     val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
-    override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
+    val dsb: DataSourceBuilder by lazy { DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl)) }
+    override fun datasourceBuilder(): DataSourceBuilder = dsb
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
 
     override fun pdlHttpClient(): HttpClient = HttpClient(MockEngine) {

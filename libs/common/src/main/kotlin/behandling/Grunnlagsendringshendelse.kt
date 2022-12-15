@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -19,6 +20,15 @@ data class Grunnlagsendringshendelse(
     val behandlingId: UUID? = null,
     val hendelseGjelderRolle: Saksrolle,
     val korrektIPDL: KorrektIPDL = KorrektIPDL.IKKE_SJEKKET
+)
+
+data class GrunnlagsendringsOppgave(
+    val sakId: Long,
+    val sakType: SakType,
+    val type: GrunnlagsendringsType,
+    val opprettet: LocalDateTime,
+    val bruker: Foedselsnummer,
+    val behandlingId: UUID?
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")

@@ -1,6 +1,6 @@
 export interface IOppgave {
   sakId: number
-  behandlingsId: string
+  behandlingsId?: string
   regdato: Date
   fristdato: Date
   fnr: string
@@ -15,22 +15,28 @@ export interface IOppgave {
 
 export enum Handlinger {
   BEHANDLE = 'BEHANDLE',
+  SE_PAA_SAK = 'GAA_TIL_SAK',
 }
 
 export const handlinger: Record<Handlinger, IPar> = {
   BEHANDLE: { id: 'BEHANDLE', navn: 'Start behandling' },
+  GAA_TIL_SAK: { id: 'GAA_TIL_SAK', navn: 'Gå til sak' },
 }
 
 export enum BehandlingTypeFilter {
   VELG = 'VELG',
   FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
   REVURDERING = 'REVURDERING',
+  HENDELSE = 'HENDELSE',
+  MANUELT_OPPHOER = 'MANUELT_OPPHOER',
 }
 
 export const behandlingTypeFilter: Record<BehandlingTypeFilter, IPar> = {
+  HENDELSE: { id: 'HENDELSE', navn: 'Hendelse' },
   VELG: { id: 'VELG', navn: 'Velg' },
   FØRSTEGANGSBEHANDLING: { id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
   REVURDERING: { id: 'REVURDERING', navn: 'Revurdering' },
+  MANUELT_OPPHOER: { id: 'MANUELT_OPPHOER', navn: 'Manuelt opphør' },
 }
 
 export enum SoeknadTypeFilter {

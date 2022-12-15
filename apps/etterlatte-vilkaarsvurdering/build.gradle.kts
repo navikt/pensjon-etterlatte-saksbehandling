@@ -1,8 +1,6 @@
-import Logging.LogbackClassic
-import Logging.LogstashLogbackEncoder
-
 plugins {
     id("etterlatte.common")
+    id("etterlatte.postgres")
 }
 
 repositories {
@@ -28,22 +26,10 @@ dependencies {
 
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.ModuleKotlin)
-
-    implementation(Database.HikariCP)
-    implementation(Database.FlywayDB)
-    implementation(Database.Postgresql)
     implementation(Database.KotliQuery)
-
-    implementation(LogbackClassic)
-    implementation(LogstashLogbackEncoder) {
-        exclude("com.fasterxml.jackson.core")
-        exclude("com.fasterxml.jackson.dataformat")
-    }
 
     testImplementation(MockK.MockK)
     testImplementation(Ktor2.ServerTests)
-    testImplementation(TestContainer.Jupiter)
-    testImplementation(TestContainer.Postgresql)
     testImplementation(Kotest.AssertionsCore)
     testImplementation(NavFelles.MockOauth2Server)
     testImplementation(project(":libs:testdata"))

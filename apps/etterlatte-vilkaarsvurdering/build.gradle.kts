@@ -31,6 +31,8 @@ dependencies {
     testImplementation(MockK.MockK)
     testImplementation(Ktor2.ServerTests)
     testImplementation(Kotest.AssertionsCore)
-    testImplementation(NavFelles.MockOauth2Server)
+    testImplementation(NavFelles.MockOauth2Server) {
+        exclude("org.slf4j", "slf4j-api")
+    }
     testImplementation(project(":libs:testdata"))
 }

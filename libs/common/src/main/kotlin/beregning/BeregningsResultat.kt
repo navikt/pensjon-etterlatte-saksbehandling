@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.common.beregning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -29,16 +28,6 @@ data class BeregningDTO(
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: Tidspunkt,
     val grunnlagMetadata: Metadata
-)
-
-data class BeregningsResultat(
-    val id: UUID,
-    val type: Beregningstyper,
-    val endringskode: Endringskode,
-    val resultat: BeregningsResultatType,
-    val beregningsperioder: List<Beregningsperiode>,
-    val beregnetDato: LocalDateTime,
-    val grunnlagVersjon: Long = 0L
 )
 
 data class Beregningsperiode(

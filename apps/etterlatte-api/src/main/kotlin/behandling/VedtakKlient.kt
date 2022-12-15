@@ -5,7 +5,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.beregning.Beregningstyper
+import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -13,6 +16,7 @@ import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 interface EtterlatteVedtak {
@@ -87,3 +91,13 @@ data class Vedtak(
 
 private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
 private data class VedtakBolkResponse(val vedtak: List<Vedtak>)
+
+data class BeregningsResultat(
+    val id: UUID,
+    val type: Beregningstyper,
+    val endringskode: Endringskode,
+    val resultat: BeregningsResultatType,
+    val beregningsperioder: List<Beregningsperiode>,
+    val beregnetDato: LocalDateTime,
+    val grunnlagVersjon: Long = 0L
+)

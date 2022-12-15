@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -31,7 +30,7 @@ data class Vedtak(
     val sakType: String?,
     val behandlingId: UUID,
     val saksbehandlerId: String?,
-    val beregningsResultat: BeregningsResultat?,
+    val beregningsResultat: Beregningsresultat?,
     val vilkaarsResultat: JsonNode?,
     val vedtakFattet: Boolean?,
     val fnr: String?,

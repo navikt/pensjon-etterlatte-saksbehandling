@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.GjenlevendeForelder
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import java.time.YearMonth
 import java.time.ZoneOffset
 import java.util.UUID
@@ -97,6 +98,7 @@ class Opplysningsuthenter {
             innsender(barnepensjonssoknad, Opplysningstype.INNSENDER_SOEKNAD_V1),
             utbetalingsinformasjon(barnepensjonssoknad, Opplysningstype.UTBETALINGSINFORMASJON_V1),
             samtykke(barnepensjonssoknad, Opplysningstype.SAMTYKKE),
+            spraak(barnepensjonssoknad, Opplysningstype.SPRAAK),
             soeknadMottattDato(barnepensjonssoknad, Opplysningstype.SOEKNAD_MOTTATT_DATO),
             soeknadsType(barnepensjonssoknad, Opplysningstype.SOEKNADSTYPE_V1),
             personGalleri(barnepensjonssoknad)
@@ -243,6 +245,9 @@ class Opplysningsuthenter {
     fun samtykke(barnepensjon: Barnepensjon, opplysningsType: Opplysningstype): Grunnlagsopplysning<out Samtykke> {
         return setBehandlingsopplysninger(barnepensjon, opplysningsType, Samtykke(barnepensjon.harSamtykket.svar))
     }
+
+    fun spraak(barnepensjon: Barnepensjon, opplysningsType: Opplysningstype): Grunnlagsopplysning<out Spraak> =
+        setBehandlingsopplysninger(barnepensjon, opplysningsType, barnepensjon.spraak)
 
     fun utbetalingsinformasjon(
         barnepensjon: Barnepensjon,

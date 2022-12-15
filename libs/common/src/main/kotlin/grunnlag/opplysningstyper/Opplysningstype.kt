@@ -14,6 +14,7 @@ enum class Opplysningstype {
     UTBETALINGSINFORMASJON_V1,
     SOEKNAD_MOTTATT_DATO,
     SAMTYKKE,
+    SPRAAK,
     SOEKNADSTYPE_V1,
 
     PENSJON_UFORE_V1, // Todo: brukes ikke lenger?

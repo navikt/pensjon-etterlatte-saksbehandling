@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.opplysningerfrasoknad.Opplysningsuthenter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -130,6 +131,14 @@ internal class OpplysningsuthenterTest {
         consumeSingle<Samtykke>(Opplysningstype.SAMTYKKE)
             .apply {
                 assertEquals(true, harSamtykket)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om språk`() {
+        consumeSingle<Spraak>(Opplysningstype.SPRAAK)
+            .apply {
+                assertEquals(Spraak.NB, this)
             }
     }
 

@@ -15,29 +15,25 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
 import java.time.LocalDateTime
 import java.util.*
 
-fun Route.vilkaarsvurdering(
-    vilkaarsvurderingService: VilkaarsvurderingService
-) {
+fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
     route("/api/vilkaarsvurdering") {
         val logger = application.log
 
         get("/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                logger.info("Henter vilkårsvurdering for $behandlingId")
-
                 try {
-                    val vilkaarsvurdering = vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
-                        behandlingId = behandlingId,
-                        accessToken = accesstoken
-                    )
+                    logger.info("Henter vilkårsvurdering for $behandlingId")
+                    val vilkaarsvurdering =
+                        vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(behandlingId, accesstoken)
                     call.respond(vilkaarsvurdering.toDto())
                 } catch (e: VirkningstidspunktIkkeSattException) {
-                    logger.info("Virkningstidspunkt ikke satt for behandling $behandlingId")
+                    logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                     call.respond(HttpStatusCode.PreconditionFailed)
                 }
             }
@@ -46,30 +42,20 @@ fun Route.vilkaarsvurdering(
         post("/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 val vurdertVilkaarDto = call.receive<VurdertVilkaarDto>()
+                val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(saksbehandler)
 
                 logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
-                val oppdatertVilkaarsvurdering =
-                    vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
-                        behandlingId = behandlingId,
-                        vurdertVilkaar = toVurdertVilkaar(vurdertVilkaarDto, saksbehandler)
-                    )
-
-                call.respond(oppdatertVilkaarsvurdering.toDto())
+                val vilkaarsvurdering =
+                    vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
+                call.respond(vilkaarsvurdering.toDto())
             }
         }
 
         delete("/{behandlingId}/{vilkaarId}") {
-            withBehandlingId { behandlingId ->
-                val vilkaarId = UUID.fromString(requireNotNull(call.parameters["vilkaarId"]))
-
+            withParam("behandlingId", "vilkaarId") { behandlingId, vilkaarId ->
                 logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
-                val oppdatertVilkaarsvurdering =
-                    vilkaarsvurderingService.slettVurderingPaaVilkaar(
-                        behandlingId = behandlingId,
-                        vilkaarId = vilkaarId
-                    )
-
-                call.respond(oppdatertVilkaarsvurdering.toDto())
+                val vilkaarsvurdering = vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarId)
+                call.respond(vilkaarsvurdering.toDto())
             }
         }
 
@@ -77,50 +63,45 @@ fun Route.vilkaarsvurdering(
             post("/{behandlingId}") {
                 withBehandlingId { behandlingId ->
                     val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
+                    val vurdertResultat = vurdertResultatDto.toVilkaarsvurderingResultat(saksbehandler)
 
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
-                    val oppdatertVilkaarsvurdering = vilkaarsvurderingService.oppdaterTotalVurdering(
-                        behandlingId = behandlingId,
-                        resultat = toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler)
-                    )
-
-                    call.respond(oppdatertVilkaarsvurdering.toDto())
+                    val vilkaarsvurdering =
+                        vilkaarsvurderingService.oppdaterTotalVurdering(behandlingId, vurdertResultat)
+                    call.respond(vilkaarsvurdering.toDto())
                 }
             }
 
             delete("/{behandlingId}") {
                 withBehandlingId { behandlingId ->
                     logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
-                    val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
-
-                    call.respond(oppdatertVilkaarsvurdering.toDto())
+                    val vilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
+                    call.respond(vilkaarsvurdering.toDto())
                 }
             }
         }
     }
 }
 
-private fun toVurdertVilkaar(vurdertVilkaarDto: VurdertVilkaarDto, saksbehandler: String) =
+private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
     VurdertVilkaar(
-        vilkaarId = vurdertVilkaarDto.vilkaarId,
-        hovedvilkaar = vurdertVilkaarDto.hovedvilkaar,
-        unntaksvilkaar = vurdertVilkaarDto.unntaksvilkaar,
+        vilkaarId = vilkaarId,
+        hovedvilkaar = hovedvilkaar,
+        unntaksvilkaar = unntaksvilkaar,
         vurdering = VilkaarVurderingData(
-            kommentar = vurdertVilkaarDto.kommentar,
+            kommentar = kommentar,
             tidspunkt = LocalDateTime.now(),
             saksbehandler = saksbehandler
         )
     )
 
-private fun toVilkaarsvurderingResultat(
-    vurdertResultatDto: VurdertVilkaarsvurderingResultatDto,
-    saksbehandler: String
-) = VilkaarsvurderingResultat(
-    vurdertResultatDto.resultat,
-    vurdertResultatDto.kommentar,
-    LocalDateTime.now(),
-    saksbehandler
-)
+private fun VurdertVilkaarsvurderingResultatDto.toVilkaarsvurderingResultat(saksbehandler: String) =
+    VilkaarsvurderingResultat(
+        utfall = resultat,
+        kommentar = kommentar,
+        tidspunkt = LocalDateTime.now(),
+        saksbehandler = saksbehandler
+    )
 
 data class VurdertVilkaarDto(
     val vilkaarId: UUID,

@@ -44,7 +44,7 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                 ).mapBoth(
                     success = { json -> json },
                     failure = { throwableErrorMessage ->
-                        logger.error("Henting  vedtak for en behandling feilet", throwableErrorMessage)
+                        logger.warn("Henting  vedtak for en behandling feilet", throwableErrorMessage)
                         null
                     }
                 )?.response

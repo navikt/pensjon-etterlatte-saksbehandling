@@ -74,8 +74,7 @@ class VedtaksbrevService(
     private suspend fun opprettEllerOppdater(behandling: Behandling): UlagretBrev {
         val (_, behandlingId, persongalleri, vedtak) = behandling
 
-        val enhet = vedtak.vedtakFattet?.ansvarligEnhet
-            ?: "0805" // TODO: Midlertidig Porsgrunn inntil vedtak inneholder gyldig enhet
+        val enhet = vedtak.enhet
         val avsender = adresseService.hentAvsenderEnhet(enhet)
         val mottaker = adresseService.hentMottakerAdresse(persongalleri.innsender.fnr)
 
@@ -87,7 +86,7 @@ class VedtaksbrevService(
 
         val pdf = pdfGenerator.genererPdf(brevRequest)
 
-        logger.info("Generert brev for vedtak (vedtakId=${vedtak.vedtakId}) med størrelse: ${pdf.size}")
+        logger.info("Generert brev for vedtak (vedtakId=${vedtak.id}) med størrelse: ${pdf.size}")
 
         val tittel = "Vedtak om ${vedtak.type.name.lowercase()}"
 

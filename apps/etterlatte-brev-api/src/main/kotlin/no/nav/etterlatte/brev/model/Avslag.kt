@@ -17,7 +17,7 @@ data class AvslagBrevRequest(
     companion object {
         fun fraVedtak(behandling: Behandling, avsender: Avsender, mottaker: Mottaker): AvslagBrevRequest =
             AvslagBrevRequest(
-                saksnummer = behandling.vedtak.sak.id.toString(),
+                saksnummer = behandling.sakId.toString(),
                 barn = behandling.persongalleri.soeker,
                 avdoed = behandling.persongalleri.avdoed,
                 aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår?

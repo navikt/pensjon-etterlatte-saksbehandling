@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.behandling.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.db.DataSourceBuilder
@@ -28,7 +29,6 @@ import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -44,8 +44,14 @@ class ApplicationBuilder {
     private val regoppslagKlient = RegoppslagKlient(proxyClient(), env["ETTERLATTE_PROXY_URL"]!!)
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
+    private val beregningKlient = BeregningKlient(config, httpClient())
     private val grunnbeloepKlient = GrunnbeloepKlient(httpClient())
-    private val sakOgBehandlingService = SakOgBehandlingService(vedtakKlient, grunnlagKlient, grunnbeloepKlient)
+    private val sakOgBehandlingService = SakOgBehandlingService(
+        vedtakKlient,
+        grunnlagKlient,
+        beregningKlient,
+        grunnbeloepKlient
+    )
     private val norg2Klient = Norg2Klient(env["NORG2_URL"]!!, httpClient())
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
@@ -102,7 +108,7 @@ class ApplicationBuilder {
             "AZURE_APP_OUTBOUND_SCOPE" to inntektsConfig.getString("outbound"),
             "AZURE_APP_JWK" to inntektsConfig.getString("clientJwk")
         )
-        install(ContentNegotiation) { jackson { objectMapper } }
+        install(ContentNegotiation) { jackson() }
         install(Auth) {
             clientCredential {
                 config = env

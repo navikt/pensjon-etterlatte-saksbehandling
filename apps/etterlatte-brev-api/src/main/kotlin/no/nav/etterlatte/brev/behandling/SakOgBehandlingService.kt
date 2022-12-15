@@ -1,46 +1,54 @@
 package no.nav.etterlatte.brev.behandling
 
-import no.nav.etterlatte.brev.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.brev.model.Innsender
 import java.time.LocalDate
 
 class SakOgBehandlingService(
-    private val vedtakService: VedtaksvurderingKlient,
+    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
+    private val beregningKlient: BeregningKlient,
     private val grunnbeloepKlient: GrunnbeloepKlient
 ) {
 
     suspend fun hentBehandling(sakId: Long, behandlingId: String, accessToken: String): Behandling {
-        val vedtak = vedtakService.hentVedtak(behandlingId, accessToken)
+        val vedtak = vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(sakId, accessToken)
-        val innsenderGrunnlag = grunnlagKlient.hentGrunnlag(sakId, Opplysningstype.INNSENDER_SOEKNAD_V1, accessToken)
-        val grunnbeloep = grunnbeloepKlient.hentGrunnbeloep()
+        val innsender = grunnlagKlient.hentInnsender(sakId, accessToken)
 
         return Behandling(
-            sakId,
-            behandlingId,
+            sakId = sakId,
+            behandlingId = behandlingId,
             persongalleri = Persongalleri(
-                innsender = innsenderGrunnlag.mapInnsender(),
+                innsender = Innsender(
+                    navn = innsender.opplysning.let { "${it.fornavn} ${it.etternavn}"},
+                    fnr = innsender.opplysning.foedselsnummer.value
+                ),
                 soeker = grunnlag.mapSoeker(),
                 avdoed = grunnlag.mapAvdoed()
             ),
-            // TODO: Soesken må inn
-            vedtak,
-            grunnlag,
-            utbetalingsinfo = finnUtbetalingsinfo(vedtak, grunnbeloep)
+            vedtak = ForenkletVedtak(vedtak.vedtakId, vedtak.type),
+            grunnlag = grunnlag,
+            utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )
     }
 
-    private fun finnUtbetalingsinfo(
-        vedtak: Vedtak,
-        grunnbeloep: Grunnbeloep
-    ) = Utbetalingsinfo(
-        beloep = vedtak.beregning!!.sammendrag[0].beloep,
-        virkningsdato = LocalDate.of(vedtak.virk.fom.year, vedtak.virk.fom.month, 1),
-        kontonummer = "<todo: Ikke tilgjengelig>",
-        grunnbeloep = grunnbeloep
-    )
+    private suspend fun finnUtbetalingsinfo(behandlingId: String, accessToken: String): Utbetalingsinfo {
+        val beregning = beregningKlient.hentBeregning(behandlingId, accessToken)
+        val grunnbeloep = grunnbeloepKlient.hentGrunnbeloep()
+
+        // TODO: Tilføye beregningsperioder i brevet. Se https://jira.adeo.no/browse/EY-1403
+        val periode = beregning.beregningsperioder.first()
+
+        return Utbetalingsinfo(
+            beloep = periode.utbetaltBeloep,
+            virkningsdato = LocalDate.of(periode.datoFOM.year, periode.datoFOM.month, 1),
+            kontonummer = "<todo: Ikke tilgjengelig>",
+            grunnbeloep = grunnbeloep,
+            antallBarn = (periode.soeskenFlokk?.size ?: 0) + 1, // TODO: Må fikse dette ifm TODO på linje 42
+            soeskenjustering = !periode.soeskenFlokk.isNullOrEmpty()
+        )
+    }
 }

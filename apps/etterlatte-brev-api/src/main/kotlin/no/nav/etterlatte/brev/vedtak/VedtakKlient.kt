@@ -1,10 +1,9 @@
 package no.nav.etterlatte.brev.behandling
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -37,7 +36,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
                     }
                 )?.response
 
-            return json?.let { objectMapper.readValue(json.toString()) }!!
+            return deserialize(json.toString())
         } catch (e: Exception) {
             logger.error("Henting  vedtak for en behandling feilet", e)
             throw e

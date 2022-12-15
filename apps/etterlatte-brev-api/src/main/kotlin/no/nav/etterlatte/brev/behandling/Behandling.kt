@@ -10,30 +10,36 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import java.math.BigDecimal
 import java.time.LocalDate
 
 data class Behandling(
     val sakId: Long,
     val behandlingId: String,
     val persongalleri: Persongalleri,
-    val vedtak: Vedtak,
+    val vedtak: ForenkletVedtak,
     val grunnlag: Grunnlag,
     val utbetalingsinfo: Utbetalingsinfo? = null
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE)
-            requireNotNull(utbetalingsinfo) { "Utbetalingsinformasjon mangler på behandling (id=${vedtak.behandling.id}" }
+            requireNotNull(utbetalingsinfo) { "Utbetalingsinformasjon mangler på behandling (id=${behandlingId}" }
     }
 }
 
+data class ForenkletVedtak(
+    val id: Long,
+    val type: VedtakType,
+    val enhet: String = "0805" // TODO: Midlertidig Porsgrunn inntil vedtak inneholder gyldig enhet
+)
+
 data class Utbetalingsinfo(
-    val beloep: BigDecimal,
+    val beloep: Int,
     val kontonummer: String,
     val virkningsdato: LocalDate,
-    val grunnbeloep: Grunnbeloep
+    val grunnbeloep: Grunnbeloep,
+    val antallBarn: Int,
+    val soeskenjustering: Boolean
 )
 
 data class Persongalleri(

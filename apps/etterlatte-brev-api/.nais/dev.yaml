@@ -59,6 +59,10 @@ spec:
       value: ce96a301-13db-4409-b277-5b27f464d08b
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag
+    - name: ETTERLATTE_BEREGNING_CLIENT_ID
+      value: b07cf335-11fb-4efa-bd46-11f51afd5052
+    - name: ETTERLATTE_BEREGNING_URL
+      value: http://etterlatte-beregning
   accessPolicy:
     outbound:
       rules:

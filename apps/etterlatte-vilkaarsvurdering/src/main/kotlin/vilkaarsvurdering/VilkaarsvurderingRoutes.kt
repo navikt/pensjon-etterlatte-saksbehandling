@@ -29,8 +29,9 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             withBehandlingId { behandlingId ->
                 try {
                     logger.info("Henter vilkårsvurdering for $behandlingId")
-                    vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(behandlingId, accesstoken)
-                        .let { call.respond(it.toDto()) }
+                    val vilkaarsvurdering =
+                        vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(behandlingId, accesstoken)
+                    call.respond(vilkaarsvurdering.toDto())
                 } catch (e: VirkningstidspunktIkkeSattException) {
                     logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                     call.respond(HttpStatusCode.PreconditionFailed)
@@ -44,16 +45,17 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(saksbehandler)
 
                 logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
-                vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
-                    .let { call.respond(it.toDto()) }
+                val vilkaarsvurdering =
+                    vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
+                call.respond(vilkaarsvurdering.toDto())
             }
         }
 
         delete("/{behandlingId}/{vilkaarId}") {
             withParam("behandlingId", "vilkaarId") { behandlingId, vilkaarId ->
                 logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
-                vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarId)
-                    .let { call.respond(it.toDto()) }
+                val vilkaarsvurdering = vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarId)
+                call.respond(vilkaarsvurdering.toDto())
             }
         }
 
@@ -64,16 +66,17 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                     val vurdertResultat = vurdertResultatDto.toVilkaarsvurderingResultat(saksbehandler)
 
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
-                    vilkaarsvurderingService.oppdaterTotalVurdering(behandlingId, vurdertResultat)
-                        .let { call.respond(it.toDto()) }
+                    val vilkaarsvurdering =
+                        vilkaarsvurderingService.oppdaterTotalVurdering(behandlingId, vurdertResultat)
+                    call.respond(vilkaarsvurdering.toDto())
                 }
             }
 
             delete("/{behandlingId}") {
                 withBehandlingId { behandlingId ->
                     logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
-                    vilkaarsvurderingService.slettTotalVurdering(behandlingId)
-                        .let { call.respond(it.toDto()) }
+                    val vilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
+                    call.respond(vilkaarsvurdering.toDto())
                 }
             }
         }

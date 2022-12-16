@@ -55,9 +55,6 @@ if (isDev) {
   app.use('/api', tokenMiddleware(ApiConfig.api.scope), proxy(ApiConfig.api.url!!))
 }
 
-// Body parser må komme etter proxy middleware
-app.use(express.json())
-
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)
 })

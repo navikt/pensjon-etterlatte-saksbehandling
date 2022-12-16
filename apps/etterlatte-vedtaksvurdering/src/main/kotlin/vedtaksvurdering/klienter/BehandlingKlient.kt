@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.VedtakHendelse
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -14,6 +15,12 @@ import java.util.*
 
 interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
+    suspend fun postVedtakHendelse(
+        vedtakHendelse: VedtakHendelse,
+        hendelse: String,
+        behandlingId: UUID,
+        accessToken: String
+    ): VedtakHendelse
 }
 
 class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingKlient {
@@ -45,6 +52,37 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         } catch (e: Exception) {
             logger.error("Henting av behandling ($behandlingId) fra vedtak feilet.", e)
             throw e
+        }
+    }
+
+    override suspend fun postVedtakHendelse(
+        vedtakHendelse: VedtakHendelse,
+        hendelse: String,
+        behandlingId: UUID,
+        accessToken: String
+    ): VedtakHendelse {
+        logger.info("Poster hendelse $hendelse om vedtak ${vedtakHendelse.vedtakId}")
+        try {
+            val json = downstreamResourceClient
+                .post(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/behandlinger/$behandlingId/hendelser/vedtak/$hendelse"
+                    ),
+                    accessToken = accessToken,
+                    postBody = vedtakHendelse
+                ).mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+
+            return objectMapper.readValue(json.toString())
+        } catch (exceotion: Exception) {
+            logger.error(
+                "Posting av vedtakhendelse ${vedtakHendelse.vedtakId} med behandlingId $behandlingId feilet.",
+                exceotion
+            )
+            throw exceotion
         }
     }
 }

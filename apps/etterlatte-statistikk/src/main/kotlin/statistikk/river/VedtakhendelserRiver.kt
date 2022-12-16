@@ -21,8 +21,6 @@ class VedtakhendelserRiver(
         "VEDTAK:FATTET",
         "VEDTAK:ATTESTERT",
         "VEDTAK:UNDERKJENT",
-        "VEDTAK:BEREGNET",
-        "VEDTAK:VILKAARSVURDERT",
         "VEDTAK:IVERKSATT"
     )
 

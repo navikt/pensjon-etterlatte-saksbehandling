@@ -28,6 +28,10 @@ loggerRouter.post('/', express.json(), (req, res) => {
         .catch((err) => {
           frontendLogger.error('Request got error on: \n', err)
         })
+    } else {
+      frontendLogger.error(
+        `General error from frontend: ${JSON.stringify(body.data)} \n details: ${JSON.stringify(body.jsonContent)}`
+      )
     }
   }
   res.sendStatus(200)

@@ -36,13 +36,21 @@ export const logger = {
         console.error('Couldnt log error message: ', data, ' err: ', err)
       })
   },
+  generalError: (info: string) => {
+    const data = { type: 'error', data: info, jsonContent: { ...defaultContext } }
+    loggFunc(data)
+      .then(() => store.dispatch(loggError(data)))
+      .catch((err) => {
+        console.error('Couldnt log error message: ', data, ' err: ', err)
+      })
+  },
 }
 
 export const setupWindowOnError = () => {
   addEventListener('error', (event) => {
     const { error, lineno, colno } = event
     logger.error({ lineno: lineno, columnno: colno, error: JSON.stringify(error) })
-    if (error.stack?.indexOf('invokeGuardedCallbackDev') >= 0 && !error.alreadySeen) {
+    if (error.stack && error.stack?.indexOf('invokeGuardedCallbackDev') >= 0 && !error.alreadySeen) {
       error.alreadySeen = true
       event.preventDefault()
       return true

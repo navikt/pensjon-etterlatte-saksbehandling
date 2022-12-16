@@ -114,8 +114,7 @@ open class VelgNyesteGyldigRegel<G, S>(
 
         when (visitor) {
             is KanAnvendesPaaPeriode -> {
-                val regel = regler.nyesteGyldigeRegel(visitor.periode) ?: regler.minByOrNull { it.gjelderFra }!!
-                regel.accept(visitor)
+                regler.nyesteGyldigeRegel(visitor.periode)?.accept(visitor)
             }
             else -> regler.forEach { regel -> regel.accept(visitor) }
         }

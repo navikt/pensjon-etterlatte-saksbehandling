@@ -17,6 +17,7 @@ object Regelkjoering {
 
         return if (ugyldigePerioder.isEmpty()) {
             regel.finnAlleKnekkpunkter()
+                .asSequence()
                 .filter { knekkpunktGyldigForPeriode(it, periode) }
                 .plus(periode.fraDato)
                 .plus(periode.tilDato?.plusDays(1) ?: LocalDate.MAX)
@@ -24,10 +25,11 @@ object Regelkjoering {
                 .toSet()
                 .zipWithNext { periodeFra, nestePeriodeFra ->
                     RegelPeriode(
-                        periodeFra,
-                        nestePeriodeFra.takeIf { it.isBefore(LocalDate.MAX) }?.minusDays(1) ?: periode.tilDato
+                        fraDato = periodeFra,
+                        tilDato = nestePeriodeFra.takeIf { it.isBefore(LocalDate.MAX) }?.minusDays(1) ?: periode.tilDato
                     )
                 }
+                .toList()
                 .associateWith { p -> regel.anvend(grunnlag, p) }
                 .let { RegelkjoeringResultat.Suksess(it) }
         } else {

@@ -47,7 +47,7 @@ class KanAnvendesPaaPeriode(val periode: RegelPeriode) : RegelVisitor {
     override fun visit(regel: Regel<*, *>) {
         when (regel) {
             is VelgNyesteGyldigRegel<*, *> -> {
-                if (regel.regler.none { periode.fraDato < it.gjelderFra }) {
+                if (regel.regler.none { periode.fraDato >= it.gjelderFra }) {
                     ugyldigeReglerForPeriode.add(regel)
                 }
             }

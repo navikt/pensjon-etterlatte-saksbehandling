@@ -24,7 +24,7 @@ class BehandlingClient(
         persongalleri: Persongalleri
     ): UUID {
         return runBlocking {
-            sakOgBehandlingApp.post("$url/behandlinger") {
+            sakOgBehandlingApp.post("$url/behandlinger/foerstegangsbehandling") {
                 contentType(ContentType.Application.Json)
                 setBody(NyBehandlingRequest(sak, persongalleri, mottattDato.toString()))
             }.body<String>()

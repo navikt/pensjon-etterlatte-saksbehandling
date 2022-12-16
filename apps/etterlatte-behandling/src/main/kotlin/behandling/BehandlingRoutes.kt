@@ -225,17 +225,6 @@ fun Route.behandlingRoutes(
             }
         }
 
-        // TODO: fases ut -> nytt endepunkt: /behandlinger/foerstegangsbehandling
-        post {
-            val behandlingsBehov = call.receive<BehandlingsBehov>()
-
-            foerstegangsbehandlingService.startFoerstegangsbehandling(
-                behandlingsBehov.sak,
-                behandlingsBehov.persongalleri,
-                behandlingsBehov.mottattDato
-            ).also { call.respondText(it.id.toString()) }
-        }
-
         route("/foerstegangsbehandling") {
             get {
                 call.respond(
@@ -323,17 +312,6 @@ fun Route.behandlingRoutes(
                 }
             }
         }
-    }
-
-// TODO: fases ut -> nytt endepunkt: /behandlinger/foerstegangsbehandling
-    post {
-        val behandlingsBehov = call.receive<BehandlingsBehov>()
-
-        foerstegangsbehandlingService.startFoerstegangsbehandling(
-            behandlingsBehov.sak,
-            behandlingsBehov.persongalleri,
-            behandlingsBehov.mottattDato
-        ).also { call.respondText(it.id.toString()) }
     }
 
 // TODO: fases ut -> nytt endepunkt: /behandlinger/sak/{sakid}

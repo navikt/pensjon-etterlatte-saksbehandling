@@ -1,13 +1,22 @@
 import { isAfter } from 'date-fns'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IAdresse } from '~shared/types/IAdresse'
-import { IBehandlingStatus, IVilkaarsproving } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling, IVilkaarsproving } from '~shared/types/IDetaljertBehandling'
 import { Kriterietype, IKriterie, KriterieOpplysningsType, IKriterieOpplysning } from '~shared/types/Kriterie'
+
+export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
+  return Boolean(behandling.gyldighetsprøving && behandling.kommerBarnetTilgode && behandling.virkningstidspunkt)
+}
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
   if (doedsdato == null) {
     return adresser
   }
   return adresser?.filter((adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), new Date(doedsdato)))
+}
+
+export function behandlingErAvslag(behandling: IDetaljertBehandling) {
+  return behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT
 }
 
 export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {

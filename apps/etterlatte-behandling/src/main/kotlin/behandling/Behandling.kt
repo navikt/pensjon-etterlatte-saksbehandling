@@ -46,16 +46,30 @@ sealed class Behandling {
         get() = this.status.kanRedigeres()
 
     protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {
-        if (kanRedigeres) return block() else kastFeilTilstand()
+        if (kanRedigeres) {
+            return block()
+        } else {
+            logger.info("behandling ($id) med status $status kan ikke redigeres")
+            throw TilstandException.UgyldigtTilstand
+        }
     }
 
     protected fun <T : Behandling> hvisTilstandEr(behandlingStatus: BehandlingStatus, block: () -> T): T {
-        if (status == behandlingStatus) return block() else kastFeilTilstand()
+        if (status == behandlingStatus) {
+            return block()
+        } else {
+            logger.info("Ugyldig operasjon på behandling ($id) med status $status")
+            throw TilstandException.UgyldigtTilstand
+        }
     }
 
-    private fun kastFeilTilstand(): Nothing {
-        logger.info("kan ikke oppdatere en behandling ($id) som ikke er under behandling")
-        throw TilstandException.UgyldigtTilstand
+    protected fun <T : Behandling> hvisTilstandEr(behandlingStatuser: List<BehandlingStatus>, block: () -> T): T {
+        if (status in behandlingStatuser) {
+            return block()
+        } else {
+            logger.info("Ugyldig operasjon på behandling ($id) med status $status")
+            throw TilstandException.UgyldigtTilstand
+        }
     }
 }
 
@@ -81,16 +95,16 @@ data class Foerstegangsbehandling(
         }
 
     fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Foerstegangsbehandling = hvisRedigerbar {
-        this.copy(gyldighetsproeving = gyldighetsResultat, sistEndret = LocalDateTime.now())
+        endreTilStatus(OPPRETTET).copy(gyldighetsproeving = gyldighetsResultat)
     }
 
     fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler) =
-        this.hvisRedigerbar {
-            this.copy(virkningstidspunkt = Virkningstidspunkt(dato, kilde), sistEndret = LocalDateTime.now())
+        hvisRedigerbar {
+            endreTilStatus(OPPRETTET).copy(virkningstidspunkt = Virkningstidspunkt(dato, kilde))
         }
 
     fun oppdaterKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode): Foerstegangsbehandling = hvisRedigerbar {
-        this.copy(kommerBarnetTilgode = kommerBarnetTilgode, sistEndret = LocalDateTime.now())
+        endreTilStatus(OPPRETTET).copy(kommerBarnetTilgode = kommerBarnetTilgode)
     }
 
     fun tilVilkaarsvurdert(): Foerstegangsbehandling {
@@ -112,7 +126,7 @@ data class Foerstegangsbehandling(
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisRedigerbar {
+        return hvisTilstandEr(listOf(VILKAARSVURDERT, BEREGNET)) {
             endreTilStatus(FATTET_VEDTAK)
         }
     }

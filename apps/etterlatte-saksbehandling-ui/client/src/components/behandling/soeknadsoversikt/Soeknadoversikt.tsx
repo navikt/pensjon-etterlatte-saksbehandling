@@ -9,9 +9,10 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { Start } from '../handlinger/start'
 import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
 import { useAppSelector } from '~store/Store'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
+import { JaNei } from '~shared/types/ISvar'
 
 export const Soeknadsoversikt = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -36,7 +37,9 @@ export const Soeknadsoversikt = () => {
       <Familieforhold behandling={behandling} />
       {behandles ? (
         <BehandlingHandlingKnapper>
-          <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT} />
+          {behandlingErUtfylt(behandling) && behandling.kommerBarnetTilgode?.svar === JaNei.JA && (
+            <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT} />
+          )}
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

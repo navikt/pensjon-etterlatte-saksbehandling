@@ -6,20 +6,24 @@ import { useAppSelector } from '~store/Store'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
+import { behandlingErUtfylt } from '~components/behandling/felles/utils'
+import { JaNei } from '~shared/types/ISvar'
 
 export const StegMeny = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
+  const klarForVidereBehandling = behandlingErUtfylt(behandling) && behandling.kommerBarnetTilgode?.svar === JaNei.JA
   const gyldighet =
     behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
     behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const vilkaar =
     behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
-    behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT
-  const vurdert = !!behandling.vilkårsprøving?.resultat
+    (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT && klarForVidereBehandling)
 
-  const avdoedesBarn = behandling.familieforhold?.avdoede.opplysning.avdoedesBarn
-  const soekerHarSoesken = avdoedesBarn ? avdoedesBarn.length > 1 : false
+  const harBeregning = !!behandling.beregning
+
+  const oppfylt = behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT
+  const vurdert = !!behandling.vilkårsprøving?.resultat && klarForVidereBehandling
 
   return (
     <StegMenyWrapper>
@@ -31,11 +35,11 @@ export const StegMeny = () => {
           <Separator />
         </>
       )}
-      <li className={classNames({ disabled: !gyldighet })}>
+      <li className={classNames({ disabled: !klarForVidereBehandling || !gyldighet })}>
         <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
       </li>
       <Separator />
-      {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && soekerHarSoesken && (
+      {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
         <>
           <li className={classNames({ disabled: !gyldighet || !vilkaar })}>
             <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
@@ -43,11 +47,15 @@ export const StegMeny = () => {
           <Separator />
         </>
       )}
-      <li className={classNames({ disabled: !gyldighet || !vilkaar })}>
+      <li className={classNames({ disabled: !gyldighet || !vilkaar || !harBeregning })}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
       <Separator />
-      <li className={classNames({ disabled: !vurdert })}>
+      <li
+        className={classNames({
+          disabled: !vurdert || (oppfylt && !harBeregning),
+        })}
+      >
         <NavLink to="brev">Vedtaksbrev</NavLink>
       </li>
     </StegMenyWrapper>

@@ -14,9 +14,11 @@ export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({ behandling }) => {
     <Innhold>
       <OversiktGyldigFramsatt gyldigFramsatt={behandling.gyldighetsprøving} />
       {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
-        <OversiktKommerBarnetTilgode kommerBarnetTilgode={behandling.kommerBarnetTilgode} />
+        <>
+          <OversiktKommerBarnetTilgode kommerBarnetTilgode={behandling.kommerBarnetTilgode} />
+          <Virkningstidspunkt />
+        </>
       )}
-      <Virkningstidspunkt />
     </Innhold>
   )
 }

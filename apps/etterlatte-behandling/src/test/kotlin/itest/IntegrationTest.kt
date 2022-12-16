@@ -112,7 +112,7 @@ class ApplicationTest {
                 assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
             }
 
-            val behandlingId = client.post("/behandlinger") {
+            val behandlingId = client.post("/behandlinger/foerstegangsbehandling") {
                 addAuthServiceBruker()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -341,7 +341,7 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger") {
+            val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger/foerstegangsbehandling") {
                 addAuthServiceBruker()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(

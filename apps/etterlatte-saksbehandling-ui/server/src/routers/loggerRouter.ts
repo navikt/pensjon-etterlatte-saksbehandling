@@ -18,9 +18,11 @@ loggerRouter.post('/', express.json(), (req, res) => {
   } else {
     if (body.stackInfo) {
       sourceMapMapper(body.stackInfo)
-        .then((data) => {
+        .then((mappedPositionData) => {
           frontendLogger.error(
-            `Request got error on: \n ${data} \n error: ${body.stackInfo.error} \n details: ${body.jsonContent}`
+            `Request got error on: \n ${JSON.stringify(mappedPositionData)} \n error: ${JSON.stringify(
+              body.stackInfo.error
+            )} \n details: ${JSON.stringify(body.jsonContent)}`
           )
         })
         .catch((err) => {

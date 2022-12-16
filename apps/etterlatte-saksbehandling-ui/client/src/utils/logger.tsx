@@ -40,9 +40,8 @@ export const logger = {
 
 export const setupWindowOnError = () => {
   addEventListener('error', (event) => {
-    const { error, lineno, colno, filename } = event
-    console.log('event: lineno:', lineno, ' colno: ', colno, ' filename: ', filename)
-    logger.error({ lineno: lineno, columnno: colno, error: error })
+    const { error, lineno, colno } = event
+    logger.error({ lineno: lineno, columnno: colno, error: JSON.stringify(error) })
     if (error.stack?.indexOf('invokeGuardedCallbackDev') >= 0 && !error.alreadySeen) {
       error.alreadySeen = true
       event.preventDefault()

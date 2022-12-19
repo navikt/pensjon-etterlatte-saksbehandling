@@ -1,14 +1,10 @@
 package no.nav.etterlatte.brev.grunnlag
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -22,13 +18,13 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
     private val clientId = config.getString("grunnlag.client.id")
-    private val resourceUrl = config.getString("grunnlag.resource.url")
+    private val baseUrl = config.getString("grunnlag.resource.url")
 
     suspend fun hentGrunnlag(sakid: Long, accessToken: String): Grunnlag {
         try {
             val json =
                 downstreamResourceClient.get(
-                    Resource(clientId, "$resourceUrl/api/grunnlag/$sakid"),
+                    Resource(clientId, "$baseUrl/api/grunnlag/$sakid"),
                     accessToken
                 ).mapBoth(
                     success = { json -> json },
@@ -38,28 +34,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                     }
                 )?.response
 
-            return json?.let { objectMapper.readValue(json.toString()) }!!
-        } catch (e: Exception) {
-            logger.error("Henting av grunnlag for sakId:$sakid feilet", e)
-            throw e
-        }
-    }
-
-    suspend fun hentInnsender(sakid: Long, accessToken: String): Grunnlagsopplysning<InnsenderSoeknad> {
-        try {
-            val json =
-                downstreamResourceClient.get(
-                    Resource(clientId, "$resourceUrl/api/grunnlag/$sakid/${Opplysningstype.INNSENDER_SOEKNAD_V1}"),
-                    accessToken
-                ).mapBoth(
-                    success = { json -> json },
-                    failure = { errorMessage ->
-                        logger.error("Henting av grunnlag for sakId:$sakid feilet", errorMessage.throwable)
-                        null
-                    }
-                )?.response
-
-            return json?.let { objectMapper.readValue(json.toString()) }!!
+            return deserialize(json.toString())
         } catch (e: Exception) {
             logger.error("Henting av grunnlag for sakId:$sakid feilet", e)
             throw e

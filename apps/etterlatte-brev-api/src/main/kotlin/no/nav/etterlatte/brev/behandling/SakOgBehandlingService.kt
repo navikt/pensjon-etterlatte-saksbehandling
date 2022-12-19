@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.behandling
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
-import no.nav.etterlatte.brev.model.Innsender
 import java.time.LocalDate
 
 class SakOgBehandlingService(
@@ -16,21 +15,17 @@ class SakOgBehandlingService(
     suspend fun hentBehandling(sakId: Long, behandlingId: String, accessToken: String): Behandling {
         val vedtak = vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(sakId, accessToken)
-        val innsender = grunnlagKlient.hentInnsender(sakId, accessToken)
 
         return Behandling(
             sakId = sakId,
             behandlingId = behandlingId,
+            spraak = grunnlag.mapSpraak(),
             persongalleri = Persongalleri(
-                innsender = Innsender(
-                    navn = innsender.opplysning.let { "${it.fornavn} ${it.etternavn}"},
-                    fnr = innsender.opplysning.foedselsnummer.value
-                ),
+                innsender = grunnlag.mapInnsender(),
                 soeker = grunnlag.mapSoeker(),
                 avdoed = grunnlag.mapAvdoed()
             ),
             vedtak = ForenkletVedtak(vedtak.vedtakId, vedtak.type),
-            grunnlag = grunnlag,
             utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )
     }

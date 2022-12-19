@@ -72,31 +72,31 @@ class VedtaksbrevService(
     }
 
     private suspend fun opprettEllerOppdater(behandling: Behandling): UlagretBrev {
-        val (_, behandlingId, persongalleri, vedtak) = behandling
-
-        val enhet = vedtak.enhet
+        val enhet = behandling.vedtak.enhet
         val avsender = adresseService.hentAvsenderEnhet(enhet)
-        val mottaker = adresseService.hentMottakerAdresse(persongalleri.innsender.fnr)
+        val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
 
-        val brevRequest = when (vedtak.type) {
+        val vedtakType = behandling.vedtak.type
+
+        val brevRequest = when (vedtakType) {
             VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker)
             VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(behandling, avsender, mottaker)
-            else -> throw Exception("Vedtakstype er ikke støttet: ${vedtak.type}")
+            else -> throw Exception("Vedtakstype er ikke støttet: ${vedtakType}")
         }
 
         val pdf = pdfGenerator.genererPdf(brevRequest)
 
-        logger.info("Generert brev for vedtak (vedtakId=${vedtak.id}) med størrelse: ${pdf.size}")
+        logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${pdf.size}")
 
-        val tittel = "Vedtak om ${vedtak.type.name.lowercase()}"
+        val tittel = "Vedtak om ${vedtakType.name.lowercase()}"
 
         return UlagretBrev(
-            behandlingId,
+            behandling.behandlingId,
             tittel,
             Mottaker(
-                foedselsnummer = Foedselsnummer.of(persongalleri.innsender.fnr),
+                foedselsnummer = Foedselsnummer.of(behandling.persongalleri.innsender.fnr),
                 adresse = Adresse(
-                    persongalleri.innsender.navn
+                    behandling.persongalleri.innsender.navn
                     // TODO: skrive om objekter
                 )
             ),

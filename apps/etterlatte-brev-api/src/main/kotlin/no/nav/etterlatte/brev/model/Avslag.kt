@@ -21,7 +21,7 @@ data class AvslagBrevRequest(
                 barn = behandling.persongalleri.soeker,
                 avdoed = behandling.persongalleri.avdoed,
                 aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår?
-                spraak = Spraak.NB, // todo, må hentes.
+                spraak = behandling.spraak,
                 avsender = avsender,
                 mottaker = mottaker,
             )

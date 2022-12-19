@@ -17,10 +17,12 @@ class SakOgBehandlingService(
         val vedtak = vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(sakId, accessToken)
         val innsender = grunnlagKlient.hentInnsender(sakId, accessToken)
+        val spraak = grunnlagKlient.hentSpraak(sakId, accessToken)
 
         return Behandling(
             sakId = sakId,
             behandlingId = behandlingId,
+            spraak = spraak.opplysning,
             persongalleri = Persongalleri(
                 innsender = Innsender(
                     navn = innsender.opplysning.let { "${it.fornavn} ${it.etternavn}"},

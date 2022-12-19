@@ -10,12 +10,14 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 
 data class Behandling(
     val sakId: Long,
     val behandlingId: String,
+    val spraak: Spraak,
     val persongalleri: Persongalleri,
     val vedtak: ForenkletVedtak,
     val grunnlag: Grunnlag,

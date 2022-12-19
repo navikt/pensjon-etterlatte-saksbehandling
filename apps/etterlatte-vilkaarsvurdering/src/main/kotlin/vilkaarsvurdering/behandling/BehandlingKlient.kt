@@ -17,6 +17,7 @@ import java.util.UUID
 
 interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
+    suspend fun vilkaarsvurder(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean
 }
 
 class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingKlient {
@@ -55,5 +56,25 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 }
             }
         }
+    }
+
+    override suspend fun vilkaarsvurder(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean {
+        logger.info("Sjekker hvis behandling med id $behandlingId kan vilkaarsvurdere")
+        val url = "$resourceUrl/behandlinger/$behandlingId/vilkaarsvurder"
+
+        val response = if (!commit) {
+            downstreamResourceClient.get(resource = Resource(clientId = clientId, url = url), accessToken = accessToken)
+        } else {
+            downstreamResourceClient.post(
+                resource = Resource(clientId = clientId, url = url),
+                accessToken = accessToken,
+                postBody = ""
+            )
+        }
+
+        return response.mapBoth(success = { true }, failure = {
+            logger.info("Behandling med id $behandlingId kan ikke vilkaarsvurderes")
+            false
+        })
     }
 }

@@ -22,26 +22,45 @@ class VilkaarsvurderingService(
 
     suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
         val vilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)
+
         return if (vilkaarsvurdering != null) {
             logger.info("Vilkårsvurdering finnes for behandling $behandlingId")
             vilkaarsvurdering
         } else {
-            logger.info("Ny vilkårsvurdering opprettes for behandling $behandlingId")
-            opprettVilkaarsvurdering(behandlingId, accessToken)
+            sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
+                logger.info("Ny vilkårsvurdering opprettes for behandling $behandlingId")
+                opprettVilkaarsvurdering(behandlingId, accessToken)
+            }
         }
     }
 
-    fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): Vilkaarsvurdering =
-        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
+    suspend fun oppdaterTotalVurdering(
+        behandlingId: UUID,
+        accessToken: String,
+        resultat: VilkaarsvurderingResultat
+    ): Vilkaarsvurdering =
+        sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
+        }
 
-    fun slettTotalVurdering(behandlingId: UUID): Vilkaarsvurdering =
-        vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
+    suspend fun slettTotalVurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering =
+        sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
+            vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
+        }
 
-    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering =
-        vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
+    suspend fun oppdaterVurderingPaaVilkaar(
+        behandlingId: UUID,
+        accessToken: String,
+        vurdertVilkaar: VurdertVilkaar
+    ): Vilkaarsvurdering =
+        sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
+            vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
+        }
 
-    fun slettVurderingPaaVilkaar(behandlingId: UUID, vilkaarId: UUID): Vilkaarsvurdering =
-        vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
+    suspend fun slettVurderingPaaVilkaar(behandlingId: UUID, accessToken: String, vilkaarId: UUID): Vilkaarsvurdering =
+        sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
+            vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
+        }
 
     private suspend fun opprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
@@ -66,6 +85,7 @@ class VilkaarsvurderingService(
                                 grunnlagVersjon = grunnlag.metadata.versjon
                             )
                         )
+
                     BehandlingType.REVURDERING ->
                         vilkaarsvurderingRepository.opprettVilkaarsvurdering(
                             Vilkaarsvurdering(
@@ -76,14 +96,33 @@ class VilkaarsvurderingService(
                                 grunnlagVersjon = grunnlag.metadata.versjon
                             )
                         )
+
                     else ->
                         throw IllegalArgumentException(
                             "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                         )
                 }
+
             SakType.OMSTILLINGSSTOENAD ->
                 throw IllegalArgumentException("Støtter ikke vilkårsvurdering for sakType=$sakType")
         }
+    }
+
+    private suspend fun sjekkOgCommitVilkaarsvurdering(
+        behandlingId: UUID,
+        accessToken: String,
+        block: suspend () -> Vilkaarsvurdering
+    ): Vilkaarsvurdering {
+        val kanVilkaarsvurdere = behandlingKlient.vilkaarsvurder(behandlingId, accessToken, false)
+
+        if (!kanVilkaarsvurdere) {
+            throw IllegalStateException()
+        }
+
+        val vilkaarsvurdering = block()
+        behandlingKlient.vilkaarsvurder(behandlingId, accessToken, true)
+
+        return vilkaarsvurdering
     }
 
     private fun mapVilkaarRevurdering(revurderingAarsak: RevurderingAarsak): List<Vilkaar> {

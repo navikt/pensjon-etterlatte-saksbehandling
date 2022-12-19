@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import { Bruker } from './Bruker'
 import { Search } from './Search'
+import { Enhet } from './Enhet'
 import { Link } from '@navikt/ds-react'
 
 export const Header = () => {
@@ -10,6 +11,7 @@ export const Header = () => {
         <Title href={'/'}>Doffen</Title>
         <RightWrap>
           <Search />
+          <Enhet />
           <Bruker />
         </RightWrap>
       </HeaderWrapper>

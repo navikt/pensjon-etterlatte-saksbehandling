@@ -3,12 +3,14 @@ import { parseJwt } from '../utils/parsejwt'
 import { getOboToken } from '../middleware/getOboToken'
 import fetch from 'node-fetch'
 import { logger } from '../utils/logger'
-import { lagEnhetFraString } from '../utils/enhet'
+import { ApiConfig } from './../config/config'
+import { randomUUID } from 'crypto'
 
 export const modiaRouter = express.Router() // for å støtte dekoratør for innloggede flater
 
 export interface IEnhet {
   enhetId: string
+  temaer: string[]
   navn: string
 }
 
@@ -29,30 +31,35 @@ const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> =>
 
   const bearerToken = auth.split(' ')[1]
   const parsedToken = parseJwt(bearerToken)
+  const ident = parsedToken.NAVident
 
   return {
-    ident: parsedToken.NAVident,
+    ident,
     navn: parsedToken.name,
     fornavn: parsedToken.name.split(', ')[1],
     etternavn: parsedToken.name.split(', ')[0],
     rolle: 'attestant',
-    enheter: await hentEnheter(req, bearerToken),
+    enheter: await hentEnheter(req, ident, bearerToken),
   }
 }
 
-const hentEnheter = async (req: Request, bearerToken: string): Promise<IEnhet[]> => {
+const hentEnheter = async (req: Request, ident: string, bearerToken: string): Promise<IEnhet[]> => {
   if (bearerToken) {
     try {
-      const oboToken = await getOboToken(bearerToken, 'https://graph.microsoft.com/.default')
-      const query = 'officeLocation'
+      const oboToken = await getOboToken(bearerToken, ApiConfig.axsys.scope)
 
-      const data = await fetch(`https://graph.microsoft.com/v1.0/me?$select=${query}`, {
-        headers: { Authorization: `Bearer ${oboToken}` },
-      }).then((response) => response.json())
+      const data: { enheter: IEnhet[] } = await fetch(
+        `${ApiConfig.axsys.url!!}/api/v2/tilgang/${ident}?inkluderAlleEnheter=false`,
+        {
+          headers: {
+            Authorization: `Bearer ${oboToken}`,
+            'Nav-Consumer-Id': 'etterlatte-saksbehandling-ui',
+            'Nav-Call-Id': randomUUID(),
+          },
+        }
+      ).then((response) => response.json())
 
-      const enhet = lagEnhetFraString(data.officeLocation)
-
-      return [enhet]
+      return data.enheter.filter((enhet) => enhet.temaer.includes('EYB'))
     } catch (error) {
       logger.info('Feilmelding ved uthenting av enheter', error)
     }

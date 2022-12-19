@@ -13,6 +13,7 @@ export const Bruker = () => {
 
 const BrukerWrap = styled.div`
   padding: 1em;
+  min-width: 11em;
 `
 
 const Ident = styled.span`

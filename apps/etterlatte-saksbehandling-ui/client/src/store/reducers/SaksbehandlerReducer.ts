@@ -11,8 +11,9 @@ export const initialState: SaksbehandlerReducer = {
   },
 }
 
-interface IEnhet {
+export interface IEnhet {
   enhetId: string
+  temaer: string[]
   navn: string
 }
 
@@ -31,9 +32,11 @@ export interface ISaksbehandler {
 }
 
 export const setSaksbehandler = createAction<ISaksbehandler>('saksbehandler/set')
+
 export interface SaksbehandlerReducer {
   saksbehandler: ISaksbehandler
 }
+
 export const saksbehandlerReducer = createReducer(initialState, (builder) => {
   builder.addCase(setSaksbehandler, (state, action) => {
     state.saksbehandler = action.payload

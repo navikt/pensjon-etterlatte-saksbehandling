@@ -116,7 +116,7 @@ class VilkaarsvurderingService(
         val kanVilkaarsvurdere = behandlingKlient.vilkaarsvurder(behandlingId, accessToken, false)
 
         if (!kanVilkaarsvurdere) {
-            throw IllegalStateException()
+            throw BehandlingstilstandException
         }
 
         val vilkaarsvurdering = block()
@@ -135,3 +135,4 @@ class VilkaarsvurderingService(
         }
     }
 }
+object BehandlingstilstandException : IllegalStateException()

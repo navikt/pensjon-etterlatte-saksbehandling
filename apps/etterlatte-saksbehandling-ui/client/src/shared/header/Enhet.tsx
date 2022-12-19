@@ -11,11 +11,16 @@ export const Enhet = () => {
   const { enheter } = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
   useEffect(() => {
+    if (!enheter.length) {
+      localStorage.removeItem('enhet')
+      return
+    }
+
     const enhet = localStorage.getItem('enhet')
     if (isNotValid(enhet)) {
-        if (enheter.length) setValgtEnhet(enheter[0])
+      if (enheter.length) setValgtEnhet(enheter[0])
     } else {
-        setValgtEnhet(JSON.parse(String(enhet)))
+      setValgtEnhet(JSON.parse(String(enhet)))
     }
   }, [])
 
@@ -35,13 +40,17 @@ export const Enhet = () => {
         }}
         hideLabel={true}
       >
-        {enheter.map((enhet: IEnhet) => {
-          return (
-            <option key={enhet.enhetId} value={enhet.enhetId}>
-              {`${enhet.enhetId} ${enhet.navn}`}
-            </option>
-          )
-        })}
+        {enheter.length ? (
+          enheter.map((enhet: IEnhet) => {
+            return (
+              <option key={enhet.enhetId} value={enhet.enhetId}>
+                {`${enhet.enhetId} ${enhet.navn}`}
+              </option>
+            )
+          })
+        ) : (
+          <option value="">Fant ingen enheter</option>
+        )}
       </Select>
     </EnhetWrap>
   )
@@ -49,6 +58,7 @@ export const Enhet = () => {
 
 const EnhetWrap = styled.div`
   padding: 0.3em;
+  min-width: 14rem;
 `
 
 const hentEnhet = (enheter: IEnhet[], enhetsId: string): IEnhet | undefined =>

@@ -40,7 +40,7 @@ export const ApiConfig = {
     scope: process.env.VEDTAK_API_SCOPE || 'api://069b1b2c-0a06-4cc9-8418-f100b8ff71be/.default',
   },
   axsys: {
-    url: process.env.AXSYS_API_URL || 'https://axsys.dev.adeo.no',
-    scope: process.env.AXSYS_API_SCOPE || 'api://37088ee9-1f0b-4c12-957e-f2f609016689/.default',
+    url: process.env.AXSYS_API_URL || 'https://axsys.dev-fss-pub.nais.io',
+    scope: process.env.AXSYS_API_SCOPE || 'api://dev-fss.org.axsys/.default',
   },
 }

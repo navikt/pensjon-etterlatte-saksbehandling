@@ -8,6 +8,7 @@ import { logger } from './utils/logger'
 import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
+import { loggerRouter } from './routers/loggerRouter'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -28,6 +29,8 @@ if (isDev) {
   logger.info('Mocking all endpoints')
   app.use('/api', mockRouter)
 } else {
+  app.use('/api/logg', loggerRouter)
+
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
   app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
 

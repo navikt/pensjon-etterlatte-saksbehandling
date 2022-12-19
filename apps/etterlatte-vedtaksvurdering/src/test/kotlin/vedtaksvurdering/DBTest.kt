@@ -3,7 +3,6 @@ package vedtaksvurdering
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.UnderkjennVedtakClientRequest
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -133,7 +132,7 @@ internal class DBTest {
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
 
-        vedtaksvurderingService.underkjennVedtak(uuid, UnderkjennVedtakClientRequest("kommentar", "begrunnelse"))
+        vedtaksvurderingService.underkjennVedtak(uuid)
         val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 

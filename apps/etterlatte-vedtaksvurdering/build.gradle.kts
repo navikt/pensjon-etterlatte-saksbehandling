@@ -23,6 +23,7 @@ dependencies {
     implementation(NavFelles.TokenValidationKtor2)
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
 
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)

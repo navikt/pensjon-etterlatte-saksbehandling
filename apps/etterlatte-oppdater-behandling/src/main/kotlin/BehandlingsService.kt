@@ -16,15 +16,6 @@ import java.util.*
 
 interface Behandling : VedlikeholdService {
     fun grunnlagEndretISak(sak: Long)
-    fun vedtakHendelse(
-        behandlingid: UUID,
-        hendelse: String,
-        vedtakId: Long,
-        inntruffet: Tidspunkt,
-        saksbehandler: String?,
-        kommentar: String?,
-        valgtBegrunnelse: String?
-    )
 
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
@@ -38,23 +29,6 @@ class BehandlingsService(
     override fun grunnlagEndretISak(sak: Long) {
         runBlocking {
             behandling_app.post("$url/saker/$sak/hendelse/grunnlagendret") {}
-        }
-    }
-
-    override fun vedtakHendelse(
-        behandlingid: UUID,
-        hendelse: String,
-        vedtakId: Long,
-        inntruffet: Tidspunkt,
-        saksbehandler: String?,
-        kommentar: String?,
-        valgtBegrunnelse: String?
-    ) {
-        runBlocking {
-            behandling_app.post("$url/behandlinger/$behandlingid/hendelser/vedtak/$hendelse") {
-                contentType(ContentType.Application.Json)
-                setBody(VedtakHendelse(vedtakId, inntruffet, saksbehandler, kommentar, valgtBegrunnelse))
-            }
         }
     }
 

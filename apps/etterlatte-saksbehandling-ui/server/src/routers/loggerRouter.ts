@@ -12,7 +12,7 @@ export interface IStackLineNoColumnNo {
 }
 
 loggerRouter.post('/', express.json(), (req, res) => {
-  let body = req.body
+  const body = req.body
   if (body.type && body.type === 'info') {
     frontendLogger.info('Frontendlogging: ', body)
   } else {
@@ -39,12 +39,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
 
 const sourcemapLocation = '/app/client/assets'
 async function sourceMapMapper(numbers: IStackLineNoColumnNo): Promise<NullableMappedPosition> {
-  let sourcemapFile = ''
-  fs.readdirSync(sourcemapLocation).forEach((file) => {
-    if (file.includes('.map')) {
-      sourcemapFile = file
-    }
-  })
+  const sourcemapFile = fs.readdirSync(sourcemapLocation).find((file) => file.includes('.map')) ?? ''
   const rawSourceMap = fs.readFileSync(`${sourcemapLocation}/${sourcemapFile}`).toString()
   const smc = await new sourceMap.SourceMapConsumer(rawSourceMap)
   return Promise.resolve(smc.originalPositionFor({ line: numbers.lineno, column: numbers.columnno }))

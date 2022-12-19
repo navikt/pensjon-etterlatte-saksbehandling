@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.KorrektIPDL
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.erLik
 import no.nav.etterlatte.pdl.PdlService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -48,65 +49,130 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
-        generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(doedshendelse.avdoedFnr).map { rolleOgSak ->
-            inTransaction {
-                logger.info("Oppretter grunnlagsendringshendelse for doedshendelse: $doedshendelse")
-                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                    Grunnlagsendringshendelse(
-                        id = UUID.randomUUID(),
-                        sakId = rolleOgSak.second,
-                        type = GrunnlagsendringsType.DOEDSFALL,
-                        opprettet = LocalDateTime.now(),
-                        data = Doedsfall(hendelse = doedshendelse),
-                        hendelseGjelderRolle = rolleOgSak.first,
-                        korrektIPDL = KorrektIPDL.IKKE_SJEKKET
-                    )
-                )
+        generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(doedshendelse.avdoedFnr)
+            .let {
+                inTransaction {
+                    it.filter { rolleOgSak ->
+                        val statuser =
+                            listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB)
+                        val eksisterendeHendelserISak =
+                            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                                rolleOgSak.second,
+                                statuser
+                            )
+                        val hendelseEksistererFraFoer = eksisterendeHendelserISak.any {
+                            when (val doedsfall = it.data) {
+                                is Doedsfall -> doedsfall.hendelse.erLik(doedshendelse)
+                                else -> false
+                            }
+                        }
+                        return@filter !hendelseEksistererFraFoer
+                    }
+                        .map { rolleOgSak ->
+                            logger.info("Oppretter grunnlagsendringshendelse for doedshendelse: $doedshendelse")
+                            grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                                Grunnlagsendringshendelse(
+                                    id = UUID.randomUUID(),
+                                    sakId = rolleOgSak.second,
+                                    type = GrunnlagsendringsType.DOEDSFALL,
+                                    opprettet = LocalDateTime.now(),
+                                    data = Doedsfall(hendelse = doedshendelse),
+                                    hendelseGjelderRolle = rolleOgSak.first,
+                                    korrektIPDL = KorrektIPDL.IKKE_SJEKKET
+                                )
+                            )
+                        }
+                }
             }
-        }
 
-    fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse) {
+    fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = LocalDateTime.now()
 
-        generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(utflyttingsHendelse.fnr).map { rolleOgSak ->
+        return generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(utflyttingsHendelse.fnr).let {
             inTransaction {
-                logger.info("Oppretter grunnlagsendringshendelse for utflyttingshendelse: $utflyttingsHendelse")
-                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                    Grunnlagsendringshendelse(
-                        id = UUID.randomUUID(),
-                        sakId = rolleOgSak.second,
-                        type = GrunnlagsendringsType.UTFLYTTING,
-                        opprettet = tidspunktForMottakAvHendelse,
-                        data = Utflytting(hendelse = utflyttingsHendelse),
-                        hendelseGjelderRolle = rolleOgSak.first,
-                        korrektIPDL = KorrektIPDL.IKKE_SJEKKET
-                    )
-                )
+                it.filter { rolleOgSak ->
+                    val statuser =
+                        listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB)
+                    val eksisterendeHendelserISak =
+                        grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                            rolleOgSak.second,
+                            statuser
+                        )
+                    val hendelseEksistererFraFoer = eksisterendeHendelserISak.any {
+                        when (val utflytting = it.data) {
+                            is Utflytting -> utflytting.hendelse.erLik(utflyttingsHendelse)
+                            else -> false
+                        }
+                    }
+                    return@filter !hendelseEksistererFraFoer
+                }
+                    .map { rolleOgSak ->
+                        inTransaction {
+                            logger.info(
+                                "Oppretter grunnlagsendringshendelse for utflyttingshendelse: $utflyttingsHendelse"
+                            )
+                            grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                                Grunnlagsendringshendelse(
+                                    id = UUID.randomUUID(),
+                                    sakId = rolleOgSak.second,
+                                    type = GrunnlagsendringsType.UTFLYTTING,
+                                    opprettet = tidspunktForMottakAvHendelse,
+                                    data = Utflytting(hendelse = utflyttingsHendelse),
+                                    hendelseGjelderRolle = rolleOgSak.first,
+                                    korrektIPDL = KorrektIPDL.IKKE_SJEKKET
+                                )
+                            )
+                        }
+                    }
             }
         }
     }
 
-    fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse) {
+    fun opprettForelderBarnRelasjonHendelse(
+        forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse
+    ): List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = LocalDateTime.now()
 
-        generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(forelderBarnRelasjonHendelse.fnr)
-            .map { rolleOgSak ->
+        return generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(forelderBarnRelasjonHendelse.fnr)
+            .let {
                 inTransaction {
-                    logger.info(
-                        "Oppretter grunnlagsendringshendelse for forelder-barn-relasjon-hendelse: " +
-                            "$forelderBarnRelasjonHendelse"
-                    )
-                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                        Grunnlagsendringshendelse(
-                            id = UUID.randomUUID(),
-                            sakId = rolleOgSak.second,
-                            type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
-                            opprettet = tidspunktForMottakAvHendelse,
-                            data = ForelderBarnRelasjon(hendelse = forelderBarnRelasjonHendelse),
-                            hendelseGjelderRolle = rolleOgSak.first,
-                            korrektIPDL = KorrektIPDL.IKKE_SJEKKET
-                        )
-                    )
+                    it.filter { rolleOgSak ->
+                        val statuser =
+                            listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB)
+                        val eksisterendeHendelserISak =
+                            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                                rolleOgSak.second,
+                                statuser
+                            )
+                        val hendelseEksistererFraFoer = eksisterendeHendelserISak.any {
+                            when (val forelderbarnrelasjon = it.data) {
+                                is ForelderBarnRelasjon -> forelderbarnrelasjon.hendelse.erLik(
+                                    forelderBarnRelasjonHendelse
+                                )
+                                else -> false
+                            }
+                        }
+                        return@filter !hendelseEksistererFraFoer
+                    }
+                        .map { rolleOgSak ->
+                            inTransaction {
+                                logger.info(
+                                    "Oppretter grunnlagsendringshendelse for forelder-barn-relasjon-hendelse: " +
+                                        "$forelderBarnRelasjonHendelse"
+                                )
+                                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                                    Grunnlagsendringshendelse(
+                                        id = UUID.randomUUID(),
+                                        sakId = rolleOgSak.second,
+                                        type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+                                        opprettet = tidspunktForMottakAvHendelse,
+                                        data = ForelderBarnRelasjon(hendelse = forelderBarnRelasjonHendelse),
+                                        hendelseGjelderRolle = rolleOgSak.first,
+                                        korrektIPDL = KorrektIPDL.IKKE_SJEKKET
+                                    )
+                                )
+                            }
+                        }
                 }
             }
     }
@@ -118,7 +184,10 @@ class GrunnlagsendringshendelseService(
                     when (val data = hendelse.data) {
                         is Doedsfall -> verifiserOgHaandterDoedsfall(data, hendelse.sakId, hendelse.id)
                         is Utflytting -> verifiserOgHaandterSoekerErUtflyttet(data, hendelse.id)
-                        is ForelderBarnRelasjon -> verifiserOgHaandterForelderBarnRelasjon(data, hendelse.id)
+                        is ForelderBarnRelasjon -> verifiserOgHaandterForelderBarnRelasjon(
+                            data,
+                            hendelse.id
+                        )
                         null -> Unit
                     }
                 } catch (e: Exception) {

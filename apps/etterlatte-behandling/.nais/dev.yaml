@@ -49,6 +49,8 @@ spec:
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: GRUNNLAG_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: PDL_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: HENDELSE_JOB_FREKVENS
@@ -60,6 +62,7 @@ spec:
       rules:
         - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
+        - application: etterlatte-grunnlag
     inbound:
       rules:
         - application: etterlatte-beregning

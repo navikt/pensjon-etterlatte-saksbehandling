@@ -59,6 +59,7 @@ interface BeanFactory {
     fun pdlService(): PdlService
     fun leaderElection(): LeaderElection
     fun grunnlagsendringshendelseJob(): Timer
+    fun grunnlagHttpClient(): HttpClient
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -179,6 +180,20 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
     override fun leaderElection() = LeaderElection(env.getValue("ELECTOR_PATH"))
+    override fun grunnlagHttpClient(): HttpClient = HttpClient(OkHttp) {
+        install(ContentNegotiation) {
+            jackson {
+                registerModule(JavaTimeModule())
+                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            }
+        }
+        install(Auth) {
+            clientCredential {
+                env.toMutableMap()
+                    .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("GRUNNLAG_AZURE_SCOPE"))) }
+            }
+        }
+    }
 
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(

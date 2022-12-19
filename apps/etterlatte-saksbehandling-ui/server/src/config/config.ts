@@ -41,6 +41,6 @@ export const ApiConfig = {
   },
   axsys: {
     url: process.env.AXSYS_API_URL || 'https://axsys.dev.adeo.no',
-    scope: process.env.AXYS_API_SCOPE || 'api://37088ee9-1f0b-4c12-957e-f2f609016689/.default',
+    scope: process.env.AXSYS_API_SCOPE || 'api://37088ee9-1f0b-4c12-957e-f2f609016689/.default',
   },
 }

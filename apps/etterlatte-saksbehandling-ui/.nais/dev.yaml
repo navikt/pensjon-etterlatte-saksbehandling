@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{ image }}
+  image: { { image } }
   port: 8080
   replicas:
     min: 1
@@ -56,6 +56,10 @@ spec:
       value: http://etterlatte-behandling
     - name: VEDTAK_API_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: AXSYS_API_URL
+      value: https://axsys.dev-fss-pub.nais.io
+    - name: AXSYS_API_SCOPE
+      value: api://dev-fss.org.axsys/.default
   accessPolicy:
     outbound:
       external:
@@ -69,6 +73,3 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering
-        - application: axsys
-          namespace: org
-          cluster: dev-gcp

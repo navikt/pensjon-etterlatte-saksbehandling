@@ -69,3 +69,6 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering
+        - application: axsys
+          namespace: org
+          cluster: dev-gcp

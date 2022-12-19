@@ -25,7 +25,7 @@ export const logger = {
     loggFunc(data)
       .then(() => store.dispatch(loggInfo(data)))
       .catch((err) => {
-        console.error('Couldnt log info message: ', data, ' err: ', err)
+        console.error('Unable to log info message: ', data, ' err: ', err)
       })
   },
   error: (stackLineNoColumnNo: IStackLineNoColumnNo) => {
@@ -33,7 +33,7 @@ export const logger = {
     loggFunc(data)
       .then(() => store.dispatch(loggError(data)))
       .catch((err) => {
-        console.error('Couldnt log error message: ', data, ' err: ', err)
+        console.error('Unable to log error message: ', data, ' err: ', err)
       })
   },
   generalError: (info: string) => {
@@ -41,7 +41,7 @@ export const logger = {
     loggFunc(data)
       .then(() => store.dispatch(loggError(data)))
       .catch((err) => {
-        console.error('Couldnt log error message: ', data, ' err: ', err)
+        console.error('Unable to log error message: ', data, ' err: ', err)
       })
   },
 }

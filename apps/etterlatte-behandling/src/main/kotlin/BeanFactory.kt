@@ -6,6 +6,10 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsHendelser
@@ -29,6 +33,9 @@ import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.pdl.PdlService
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
@@ -182,16 +189,17 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun leaderElection() = LeaderElection(env.getValue("ELECTOR_PATH"))
     override fun grunnlagHttpClient(): HttpClient = HttpClient(OkHttp) {
         install(ContentNegotiation) {
-            jackson {
-                registerModule(JavaTimeModule())
-                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            }
+            register(ContentType.Application.Json, JacksonConverter(objectMapper))
         }
         install(Auth) {
             clientCredential {
                 env.toMutableMap()
                     .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("GRUNNLAG_AZURE_SCOPE"))) }
             }
+        }
+        defaultRequest {
+            header(X_CORRELATION_ID, getCorrelationId())
+            url("http://etterlatte-grunnlag/")
         }
     }
 

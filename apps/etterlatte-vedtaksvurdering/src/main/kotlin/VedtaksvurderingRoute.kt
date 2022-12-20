@@ -52,7 +52,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                 )
                 val vedtakHendelse = VedtakHendelse(
                     vedtakId = nyttVedtak.vedtakId,
-                    inntruffet = nyttVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
+                    inntruffet = Tidspunkt.now(),
                     saksbehandler = saksbehandler
                 )
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.HendelseType
 import no.nav.etterlatte.VedtakHendelse
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
@@ -17,7 +18,7 @@ interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
     suspend fun postVedtakHendelse(
         vedtakHendelse: VedtakHendelse,
-        hendelse: String,
+        hendelse: HendelseType,
         behandlingId: UUID,
         accessToken: String
     )
@@ -57,7 +58,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun postVedtakHendelse(
         vedtakHendelse: VedtakHendelse,
-        hendelse: String,
+        hendelse: HendelseType,
         behandlingId: UUID,
         accessToken: String
     ) {

@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
@@ -155,7 +154,7 @@ class VedtaksvurderingService(
         }
 
         val fattetVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-        val statistikkmelding = lagStatistikkMelding("VEDTAK:FATTET", fattetVedtak)
+        val statistikkmelding = lagStatistikkMelding(HendelseType.FATTET, fattetVedtak)
         sendToRapid(statistikkmelding, behandlingId)
 
         return fattetVedtak
@@ -177,7 +176,7 @@ class VedtaksvurderingService(
         )
         val attestertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
 
-        val message = lagStatistikkMelding("VEDTAK:ATTESTERT", attestertVedtak)
+        val message = lagStatistikkMelding(HendelseType.ATTESTERT, attestertVedtak)
         sendToRapid(message, behandlingId)
 
         return attestertVedtak
@@ -251,20 +250,18 @@ class VedtaksvurderingService(
             .sortedBy { it.periode.fom }
     }
 
-    fun postTilVedtakhendelse(
+    suspend fun postTilVedtakhendelse(
         behandlingId: UUID,
         accessToken: String,
-        hendelse: String,
+        hendelse: HendelseType,
         vedtakhendelse: VedtakHendelse
     ) {
-        runBlocking {
-            behandlingKlient.postVedtakHendelse(
-                vedtakHendelse = vedtakhendelse,
-                hendelse = hendelse,
-                behandlingId = behandlingId,
-                accessToken = accessToken
-            )
-        }
+        behandlingKlient.postVedtakHendelse(
+            vedtakHendelse = vedtakhendelse,
+            hendelse = hendelse,
+            behandlingId = behandlingId,
+            accessToken = accessToken
+        )
     }
 
     override fun slettSak(sakId: Long) {
@@ -272,8 +269,8 @@ class VedtaksvurderingService(
     }
 }
 
-private fun lagStatistikkMelding(vedtakhendelse: String, vedtak: Vedtak) =
-    JsonMessage.newMessage(mapOf(eventNameKey to vedtakhendelse, "vedtak" to vedtak)).toJson()
+private fun lagStatistikkMelding(vedtakhendelse: HendelseType, vedtak: Vedtak) =
+    JsonMessage.newMessage(mapOf(eventNameKey to "VEDTAK:$vedtakhendelse", "vedtak" to vedtak)).toJson() // ktlint-disable max-line-length TODO sj: Lag egen enum for VEDTAK:vedtakshendelse. Egner seg i egen PR
 
 data class VedtakHendelse(
     val vedtakId: Long,

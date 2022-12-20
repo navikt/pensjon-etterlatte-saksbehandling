@@ -10,9 +10,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import rapidsandrivers.vedlikehold.VedlikeholdService
-import java.util.*
 
 interface Behandling : VedlikeholdService {
     fun grunnlagEndretISak(sak: Long)
@@ -66,11 +64,3 @@ class BehandlingsService(
         }
     }
 }
-
-data class VedtakHendelse(
-    val vedtakId: Long,
-    val inntruffet: Tidspunkt,
-    val saksbehandler: String?,
-    val kommentar: String?,
-    val valgtBegrunnelse: String?
-)

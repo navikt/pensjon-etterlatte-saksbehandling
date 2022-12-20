@@ -7,6 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.HendelseType
 import no.nav.etterlatte.VedtakHendelse
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -38,7 +39,7 @@ internal class LagreIverksattVedtak(
 
     fun postTilBehandling(behandlingId: UUID, vedtakId: Long) = runBlocking {
         behandlingHttpClient.post(
-            "http://etterlatte-behandling/behandlinger/$behandlingId/hendelser/vedtak/IVERKSATT"
+            "http://etterlatte-behandling/behandlinger/$behandlingId/hendelser/vedtak/${HendelseType.IVERKSATT}"
         ) {
             contentType(ContentType.Application.Json)
             setBody(

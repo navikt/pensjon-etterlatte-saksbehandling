@@ -1,7 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
@@ -12,7 +10,6 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.application.log
@@ -135,10 +132,7 @@ private fun httpClient() = HttpClient(OkHttp) {
 private fun behandlingHttpClient(props: Map<String, String>) = HttpClient(OkHttp) {
     expectSuccess = true
     install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
-        jackson {
-            registerModule(JavaTimeModule())
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        }
+        register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
     install(Auth) {
         clientCredential {

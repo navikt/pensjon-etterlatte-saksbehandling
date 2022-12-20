@@ -8,6 +8,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
@@ -56,8 +58,24 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                     saksbehandler = saksbehandler
                 )
 
-                service.postTilVedtakhendelse(behandlingId, accesstoken, "BEREGNET", vedtakHendelse)
-                service.postTilVedtakhendelse(behandlingId, accesstoken, "VILKAARSVURDERT", vedtakHendelse)
+                coroutineScope {
+                    async {
+                        service.postTilVedtakhendelse(
+                            behandlingId,
+                            accesstoken,
+                            HendelseType.BEREGNET,
+                            vedtakHendelse
+                        )
+                    }
+                    async {
+                        service.postTilVedtakhendelse(
+                            behandlingId,
+                            accesstoken,
+                            HendelseType.VILKAARSVURDERT,
+                            vedtakHendelse
+                        )
+                    }
+                }
                 call.respond(nyttVedtak)
             }
         }
@@ -71,7 +89,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                     saksbehandler = saksbehandler
                 )
 
-                service.postTilVedtakhendelse(behandlingId, accesstoken, "ATTESTER", vedtakHendelse)
+                service.postTilVedtakhendelse(behandlingId, accesstoken, HendelseType.ATTESTERT, vedtakHendelse)
                 call.respond(attestert)
             }
         }
@@ -92,7 +110,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                     inntruffet = fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
                     saksbehandler = fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
                 )
-                service.postTilVedtakhendelse(behandlingId, accesstoken, "FATTET", vedtakHendelse)
+                service.postTilVedtakhendelse(behandlingId, accesstoken, HendelseType.FATTET, vedtakHendelse)
                 call.respond(fattetVedtak)
             }
         }
@@ -110,7 +128,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                 valgtBegrunnelse = begrunnelse.valgtBegrunnelse
             )
 
-            service.postTilVedtakhendelse(behandlingId, accesstoken, "UNDERKJENT", vedtakHendelse)
+            service.postTilVedtakhendelse(behandlingId, accesstoken, HendelseType.UNDERKJENT, vedtakHendelse)
             call.respond(underkjentVedtak)
         }
     }
@@ -119,3 +137,12 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 data class UnderkjennVedtakClientRequest(val kommentar: String, val valgtBegrunnelse: String)
 private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
 private data class VedtakBolkResponse(val vedtak: List<Vedtak>)
+
+enum class HendelseType {
+    VILKAARSVURDERT,
+    BEREGNET,
+    FATTET,
+    ATTESTERT,
+    UNDERKJENT,
+    IVERKSATT
+}

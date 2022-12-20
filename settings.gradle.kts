@@ -35,5 +35,6 @@ include(
     "libs:etterlatte-ktor",
     "libs:etterlatte-kafka",
     "libs:testdata",
+    "libs:etterlatte-regler",
     "jobs:test-fordeler"
 )

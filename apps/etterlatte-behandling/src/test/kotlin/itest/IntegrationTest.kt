@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -53,6 +54,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.module
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
@@ -437,6 +439,25 @@ class TestBeanFactory(
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     val json = javaClass.getResource("")!!.readText() // TODO: endre name
                     respond(json, headers = headers)
+                } else {
+                    error(request.url.fullPath)
+                }
+            }
+        }
+        install(ContentNegotiation) {
+            register(
+                ContentType.Application.Json,
+                JacksonConverter(no.nav.etterlatte.libs.common.objectMapper)
+            )
+        }
+    }
+
+    override fun grunnlagHttpClient(): HttpClient = HttpClient(MockEngine) {
+        engine {
+            addHandler { request ->
+                if (request.url.fullPath.startsWith("/")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(Grunnlag.empty().toJson(), headers = headers)
                 } else {
                     error(request.url.fullPath)
                 }

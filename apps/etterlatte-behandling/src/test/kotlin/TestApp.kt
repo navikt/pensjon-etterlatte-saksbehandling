@@ -11,7 +11,9 @@ import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import org.testcontainers.containers.PostgreSQLContainer
 
 fun main() {
@@ -48,6 +50,21 @@ class LocalAppBeanFactory(val jdbcUrl: String) : CommonFactory() {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         val json = javaClass.getResource("")!!.readText() // TODO: endre name
                         respond(json, headers = headers)
+                    } else {
+                        error(request.url.fullPath)
+                    }
+                }
+            }
+            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+        }
+
+    override fun grunnlagHttpClient(): HttpClient =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    if (request.url.fullPath.startsWith("/")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(Grunnlag.empty().toJson(), headers = headers)
                     } else {
                         error(request.url.fullPath)
                     }

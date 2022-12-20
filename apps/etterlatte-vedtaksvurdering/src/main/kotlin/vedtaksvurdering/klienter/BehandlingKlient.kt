@@ -20,7 +20,7 @@ interface BehandlingKlient {
         hendelse: String,
         behandlingId: UUID,
         accessToken: String
-    ): VedtakHendelse
+    )
 }
 
 class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingKlient {
@@ -60,10 +60,10 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         hendelse: String,
         behandlingId: UUID,
         accessToken: String
-    ): VedtakHendelse {
+    ) {
         logger.info("Poster hendelse $hendelse om vedtak ${vedtakHendelse.vedtakId}")
         try {
-            val json = downstreamResourceClient
+            downstreamResourceClient
                 .post(
                     resource = Resource(
                         clientId = clientId,
@@ -75,8 +75,6 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
-
-            return objectMapper.readValue(json.toString())
         } catch (exceotion: Exception) {
             logger.error(
                 "Posting av vedtakhendelse ${vedtakHendelse.vedtakId} med behandlingId $behandlingId feilet.",

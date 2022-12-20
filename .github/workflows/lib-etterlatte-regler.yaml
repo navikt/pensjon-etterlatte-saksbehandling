@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - ci/regler
     paths:
       - libs/etterlatte-regler/**
   pull_request:

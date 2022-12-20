@@ -59,16 +59,16 @@ internal class GrunnlagsendringshendelseServiceTest {
     @Test
     fun `skal opprette grunnlagsendringshendelser i databasen for doedshendelser`() {
         val sakId = 1L
+        val fnr = "Soeker"
         val foerstegangsbehandlinger = listOf(
             foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT),
             foerstegangsbehandling(sak = sakId, status = BehandlingStatus.FATTET_VEDTAK)
         )
-        val grunnlagsendringshendelse =
-            grunnlagsendringshendelse(
-                id = UUID.randomUUID(),
-                sakId = sakId,
-                data = grunnlagsinformasjonDoedshendelse("Soeker")
-            )
+        val grunnlagsendringshendelse = grunnlagsendringshendelse(
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            data = grunnlagsinformasjonDoedshendelse(fnr)
+        )
 
         val opprettGrunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
 
@@ -77,11 +77,12 @@ internal class GrunnlagsendringshendelseServiceTest {
             every {
                 opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
             } returns grunnlagsendringshendelse
+            every { hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns emptyList()
         }
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
-            every { alleBehandlingerForSoekerMedFnr("Soeker") } returns foerstegangsbehandlinger
-            every { alleSakIderForSoekerMedFnr("Soeker") } returns listOf(1L)
+            every { alleBehandlingerForSoekerMedFnr(fnr) } returns foerstegangsbehandlinger
+            every { alleSakIderForSoekerMedFnr(fnr) } returns listOf(1L)
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
         val pdlService = mockk<PdlService>()
@@ -93,7 +94,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val lagredeGrunnlagsendringshendelser = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
-                avdoedFnr = "Soeker",
+                avdoedFnr = fnr,
                 doedsdato = LocalDate.of(2022, 1, 1),
                 endringstype = Endringstype.OPPRETTET
             )
@@ -106,30 +107,24 @@ internal class GrunnlagsendringshendelseServiceTest {
             { assertTrue(opprettGrunnlagsendringshendelse.captured.data is Grunnlagsinformasjon.Doedsfall) },
             { assertTrue(opprettGrunnlagsendringshendelse.captured.opprettet >= LocalDateTime.now().minusSeconds(10)) },
             { assertEquals(1, lagredeGrunnlagsendringshendelser.size) },
-            { assertEquals(grunnlagsendringshendelse.id, lagredeGrunnlagsendringshendelser.first().id) },
-            { assertEquals(grunnlagsendringshendelse.data, lagredeGrunnlagsendringshendelser.first().data) },
-            { assertEquals(grunnlagsendringshendelse.sakId, lagredeGrunnlagsendringshendelser.first().sakId) },
-            { assertEquals(grunnlagsendringshendelse.type, lagredeGrunnlagsendringshendelser.first().type) },
-            { assertEquals(grunnlagsendringshendelse.opprettet, lagredeGrunnlagsendringshendelser.first().opprettet) },
-            { assertEquals(grunnlagsendringshendelse.status, lagredeGrunnlagsendringshendelser.first().status) }
+            { assertEquals(grunnlagsendringshendelse, lagredeGrunnlagsendringshendelser.first()) }
         )
     }
 
     @Test
     fun `skal opprette grunnlagsendringshendelser i databasen for utflytting og forelder-barn`() {
         val sakId = 1L
-        val grlagEndringUtflytting =
-            grunnlagsendringshendelse(
-                id = UUID.randomUUID(),
-                sakId = sakId,
-                data = grunnlagsinformasjonUtflyttingshendelse("Soeker")
-            )
-        val grlagEndringForelderBarn =
-            grunnlagsendringshendelse(
-                id = UUID.randomUUID(),
-                sakId = sakId,
-                data = grunnlagsinformasjonForelderBarnRelasjonHendelse("Soeker")
-            )
+        val fnr = "Soeker"
+        val grlagEndringUtflytting = grunnlagsendringshendelse(
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            data = grunnlagsinformasjonUtflyttingshendelse(fnr)
+        )
+        val grlagEndringForelderBarn = grunnlagsendringshendelse(
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            data = grunnlagsinformasjonForelderBarnRelasjonHendelse(fnr)
+        )
 
         val opprettGrlaghendelseUtflytting = slot<Grunnlagsendringshendelse>()
 
@@ -137,9 +132,10 @@ internal class GrunnlagsendringshendelseServiceTest {
             every {
                 opprettGrunnlagsendringshendelse(capture(opprettGrlaghendelseUtflytting))
             } returns grlagEndringUtflytting
+            every { hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns emptyList()
         }
         val generellBehandlingService = mockk<GenerellBehandlingService> {
-            every { alleSakIderForSoekerMedFnr("Soeker") } returns listOf(1L)
+            every { alleSakIderForSoekerMedFnr(fnr) } returns listOf(1L)
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
         val pdlService = mockk<PdlService>()
@@ -151,7 +147,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             utflyttingsHendelse = UtflyttingsHendelse(
-                fnr = "Soeker",
+                fnr = fnr,
                 endringstype = Endringstype.OPPRETTET,
                 tilflyttingsLand = null,
                 tilflyttingsstedIUtlandet = null,
@@ -166,7 +162,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
             forelderBarnRelasjonHendelse = ForelderBarnRelasjonHendelse(
-                fnr = "Soeker",
+                fnr = fnr,
                 relatertPersonsIdent = null,
                 relatertPersonsRolle = "",
                 minRolleForPerson = "",
@@ -180,6 +176,229 @@ internal class GrunnlagsendringshendelseServiceTest {
             GrunnlagsendringsType.FORELDER_BARN_RELASJON
         )
         assertEquals(opprettGrlaghendelseUtflytting.captured.type, GrunnlagsendringsType.UTFLYTTING)
+    }
+
+    @Test
+    fun `skal ikke opprette ny doedshendelse dersom en lignende allerede eksisterer`() {
+        val sakId = 1L
+        val fnr = "Soeker"
+        val doedsdato = LocalDate.of(2022, 7, 8)
+        val grunnlagsendringshendelse1 = grunnlagsendringshendelse(
+            type = GrunnlagsendringsType.DOEDSFALL,
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            data = grunnlagsinformasjonDoedshendelse(fnr, doedsdato)
+        )
+
+        val grunnlagsendringshendelse2 = grunnlagsendringshendelse(
+            type = GrunnlagsendringsType.UTFLYTTING,
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            data = grunnlagsinformasjonUtflyttingshendelse(fnr)
+        )
+
+        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
+            every {
+                opprettGrunnlagsendringshendelse(any())
+            } returns grunnlagsendringshendelse1
+            every {
+                hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+            } returns emptyList() andThen listOf(
+                grunnlagsendringshendelse1,
+                grunnlagsendringshendelse2
+            )
+        }
+        val generellBehandlingService = mockk<GenerellBehandlingService> {
+            every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
+        }
+        val pdlService = mockk<PdlService>()
+        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
+            grunnlagshendelsesDao,
+            generellBehandlingService,
+            pdlService
+        )
+        val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettDoedshendelse(
+            Doedshendelse(
+                avdoedFnr = fnr,
+                doedsdato = doedsdato,
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+        // siden dette er en hendelse av en annen type skal det ikke påvirke filtreringen
+        grunnlagsendringshendelseService.opprettUtflyttingshendelse(
+            UtflyttingsHendelse(
+                fnr = fnr,
+                tilflyttingsLand = null,
+                tilflyttingsstedIUtlandet = null,
+                utflyttingsdato = null,
+                endringstype = Endringstype.OPPRETTET
+
+            )
+        )
+
+        // denne skal ikke opprette en doedshendelse, siden den allerede eksisterer
+        val lagredeGrunnlagsendringshendelser3 = grunnlagsendringshendelseService.opprettDoedshendelse(
+            Doedshendelse(
+                avdoedFnr = fnr,
+                doedsdato = doedsdato,
+                endringstype = Endringstype.ANNULLERT
+            )
+        )
+
+        assertEquals(listOf(grunnlagsendringshendelse1), lagredeGrunnlagsendringshendelser1)
+        assertEquals(emptyList<Grunnlagsendringshendelse>(), lagredeGrunnlagsendringshendelser3)
+    }
+
+    @Test
+    fun `skal ikke opprette ny utflyttingshendelse dersom en lignende allerede eksisterer`() {
+        val sakId = 1L
+        val fnr = "Soeker"
+        val tilflyttingsland = "Sverige"
+        val utflyttingsdato = LocalDate.of(2022, 2, 8)
+        val grunnlagsendringshendelse1 = grunnlagsendringshendelse(
+            type = GrunnlagsendringsType.UTFLYTTING,
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            data = grunnlagsinformasjonUtflyttingshendelse(
+                fnr = fnr,
+                tilflyttingsLand = tilflyttingsland,
+                utflyttingsdato = utflyttingsdato
+            )
+        )
+        val grunnlagsendringshendelse2 = grunnlagsendringshendelse(
+            type = GrunnlagsendringsType.DOEDSFALL,
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            data = grunnlagsinformasjonDoedshendelse(fnr)
+        )
+
+        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
+            every {
+                opprettGrunnlagsendringshendelse(any())
+            } returns grunnlagsendringshendelse1
+            every {
+                hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+            } returns emptyList() andThen listOf(
+                grunnlagsendringshendelse1,
+                grunnlagsendringshendelse2
+            )
+        }
+        val generellBehandlingService = mockk<GenerellBehandlingService> {
+            every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
+        }
+        val pdlService = mockk<PdlService>()
+        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
+            grunnlagshendelsesDao,
+            generellBehandlingService,
+            pdlService
+        )
+        val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettUtflyttingshendelse(
+            UtflyttingsHendelse(
+                fnr = fnr,
+                tilflyttingsLand = tilflyttingsland,
+                tilflyttingsstedIUtlandet = null,
+                utflyttingsdato = utflyttingsdato,
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        // siden dette er en hendelse av en annen type skal det ikke påvirke filtreringen
+        grunnlagsendringshendelseService.opprettDoedshendelse(
+            Doedshendelse(
+                avdoedFnr = fnr,
+                doedsdato = utflyttingsdato,
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        // denne skal ikke opprette en utflyttingshendelse, siden den allerede eksisterer
+        val lagredeGrunnlagsendringshendelser3 = grunnlagsendringshendelseService.opprettUtflyttingshendelse(
+            UtflyttingsHendelse(
+                fnr = fnr,
+                tilflyttingsLand = tilflyttingsland,
+                tilflyttingsstedIUtlandet = null,
+                utflyttingsdato = utflyttingsdato,
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        assertEquals(listOf(grunnlagsendringshendelse1), lagredeGrunnlagsendringshendelser1)
+        assertEquals(emptyList<Grunnlagsendringshendelse>(), lagredeGrunnlagsendringshendelser3)
+    }
+
+    @Test
+    fun `skal ikke opprette ny forelder-barn-relasjon-hendelse dersom en lignende allerede eksisterer`() {
+        val sakId = 1L
+        val grunnlagsendringshendelse1 = grunnlagsendringshendelse(
+            type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            data = grunnlagsinformasjonForelderBarnRelasjonHendelse(
+                fnr = "Soeker",
+                relatertPersonsIdent = "Ny forelder"
+            )
+        )
+        val grunnlagsendringshendelse2 = grunnlagsendringshendelse(
+            type = GrunnlagsendringsType.DOEDSFALL,
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            data = grunnlagsinformasjonDoedshendelse("Soeker")
+        )
+
+        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
+            every {
+                opprettGrunnlagsendringshendelse(any())
+            } returns grunnlagsendringshendelse1
+            every {
+                hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+            } returns emptyList() andThen listOf(
+                grunnlagsendringshendelse1,
+                grunnlagsendringshendelse2
+            )
+        }
+        val generellBehandlingService = mockk<GenerellBehandlingService> {
+            every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
+        }
+        val pdlService = mockk<PdlService>()
+        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
+            grunnlagshendelsesDao,
+            generellBehandlingService,
+            pdlService
+        )
+        val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
+            ForelderBarnRelasjonHendelse(
+                fnr = "Soeker",
+                relatertPersonsIdent = "Ny forelder",
+                relatertPersonsRolle = null,
+                minRolleForPerson = null,
+                relatertPersonUtenFolkeregisteridentifikator = null,
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        // siden dette er en hendelse av en annen type skal det ikke påvirke filtreringen
+        grunnlagsendringshendelseService.opprettDoedshendelse(
+            Doedshendelse(
+                avdoedFnr = "Soeker",
+                doedsdato = LocalDate.of(2022, 1, 1),
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        // denne skal ikke opprette en utflyttingshendelse, siden den allerede eksisterer
+        val lagredeGrunnlagsendringshendelser3 = grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
+            ForelderBarnRelasjonHendelse(
+                fnr = "Soeker",
+                relatertPersonsIdent = "Ny forelder",
+                relatertPersonsRolle = null,
+                minRolleForPerson = null,
+                relatertPersonUtenFolkeregisteridentifikator = null,
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        assertEquals(listOf(grunnlagsendringshendelse1), lagredeGrunnlagsendringshendelser1)
+        assertEquals(emptyList<Grunnlagsendringshendelse>(), lagredeGrunnlagsendringshendelser3)
     }
 
     @Test

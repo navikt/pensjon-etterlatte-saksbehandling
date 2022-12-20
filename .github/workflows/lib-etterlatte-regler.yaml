@@ -1,0 +1,18 @@
+name: etterlatte-regler
+
+on:
+  push:
+    branches:
+      - main
+      - ci/regler
+    paths:
+      - libs/etterlatte-regler/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-regler/**
+
+jobs:
+  test:
+    uses: ./.github/workflows/.test.yaml

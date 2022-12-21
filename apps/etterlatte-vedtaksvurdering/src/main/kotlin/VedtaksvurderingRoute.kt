@@ -59,13 +59,13 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                 service.postTilVedtakhendelse(
                     behandlingId,
                     accesstoken,
-                    HendelseType.BEREGNET,
+                    HendelseType.VILKAARSVURDERT,
                     vedtakHendelse
                 )
                 service.postTilVedtakhendelse(
                     behandlingId,
                     accesstoken,
-                    HendelseType.VILKAARSVURDERT,
+                    HendelseType.BEREGNET,
                     vedtakHendelse
                 )
 

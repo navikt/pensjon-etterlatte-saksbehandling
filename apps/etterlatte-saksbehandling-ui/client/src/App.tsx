@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import '@navikt/ds-css'
+import "@navikt/ds-css-internal";
 import Oppgavebenken from './components/oppgavebenken/Oppgavebenken'
 import { Behandling } from './components/behandling/Behandling'
-import { Header } from './shared/header/Header'
+import { HeaderWrapper } from './shared/header/Header'
 import { Person } from './components/person/Person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import { Testside } from './components/testside/Testside'
@@ -18,7 +19,7 @@ function App() {
       {innloggetbrukerHentet && (
         <div className="app">
           <BrowserRouter basename="/">
-            <Header />
+            <HeaderWrapper />
             <Routes>
               <Route path="/" element={<Oppgavebenken />} />
               <Route path="/oppgavebenken" element={<Oppgavebenken />} />

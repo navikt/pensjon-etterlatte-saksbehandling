@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 sealed class RegelkjoeringResultat<S> {
     data class Suksess<S>(val resultat: Map<RegelPeriode, SubsumsjonsNode<S>>) : RegelkjoeringResultat<S>()
-    data class UgyldigPeriode<S>(val ugyldigePerioder: List<Regel<*, *>>) : RegelkjoeringResultat<S>()
+    data class UgyldigPeriode<S>(val ugyldigeReglerForPeriode: List<Regel<*, *>>) : RegelkjoeringResultat<S>()
 }
 
 object Regelkjoering {

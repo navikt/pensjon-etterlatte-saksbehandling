@@ -3,7 +3,6 @@ package regler
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -43,8 +42,6 @@ internal class VisitorTest {
 
         val ugyldigeReglerForPeriode = regelSomKombinererToRegler.finnUgyldigePerioder(ugyldigPeriode)
 
-        println(ugyldigeReglerForPeriode.toJson())
-
         ugyldigeReglerForPeriode.size shouldBe 3
         ugyldigeReglerForPeriode shouldContainExactlyInAnyOrder listOf(
             regel4,
@@ -58,8 +55,6 @@ internal class VisitorTest {
         val ugyldigPeriode = RegelPeriode(GJELDER_FRA_3)
 
         val ugyldigeReglerForPeriode = regelSomKombinererToRegler.finnUgyldigePerioder(ugyldigPeriode)
-
-        println(ugyldigeReglerForPeriode.toJson())
 
         ugyldigeReglerForPeriode shouldHaveSize 0
     }

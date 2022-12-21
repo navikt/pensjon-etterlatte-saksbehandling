@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -19,7 +20,7 @@ internal class FerdigstillVedtaksbrev(rapidsConnection: RapidsConnection, privat
 
     init {
         River(rapidsConnection).apply {
-            eventName("VEDTAK:ATTESTERT")
+            eventName(KafkaHendelseType.ATTESTERT.toString())
             validate { it.requireKey("vedtak") }
         }.register(this)
     }

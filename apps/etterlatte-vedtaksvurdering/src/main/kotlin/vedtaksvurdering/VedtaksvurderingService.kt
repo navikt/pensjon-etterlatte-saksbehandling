@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
+import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -154,7 +155,7 @@ class VedtaksvurderingService(
         }
 
         val fattetVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-        val statistikkmelding = lagStatistikkMelding(HendelseType.FATTET, fattetVedtak)
+        val statistikkmelding = lagStatistikkMelding(KafkaHendelseType.FATTET, fattetVedtak)
         sendToRapid(statistikkmelding, behandlingId)
 
         return fattetVedtak
@@ -176,7 +177,7 @@ class VedtaksvurderingService(
         )
         val attestertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
 
-        val message = lagStatistikkMelding(HendelseType.ATTESTERT, attestertVedtak)
+        val message = lagStatistikkMelding(KafkaHendelseType.ATTESTERT, attestertVedtak)
         sendToRapid(message, behandlingId)
 
         return attestertVedtak
@@ -269,8 +270,8 @@ class VedtaksvurderingService(
     }
 }
 
-private fun lagStatistikkMelding(vedtakhendelse: HendelseType, vedtak: Vedtak) =
-    JsonMessage.newMessage(mapOf(eventNameKey to "VEDTAK:$vedtakhendelse", "vedtak" to vedtak)).toJson() // ktlint-disable max-line-length TODO sj: Lag egen enum for VEDTAK:vedtakshendelse. Egner seg i egen PR
+private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak) =
+    JsonMessage.newMessage(mapOf(eventNameKey to vedtakhendelse.toString(), "vedtak" to vedtak)).toJson()
 
 data class VedtakHendelse(
     val vedtakId: Long,

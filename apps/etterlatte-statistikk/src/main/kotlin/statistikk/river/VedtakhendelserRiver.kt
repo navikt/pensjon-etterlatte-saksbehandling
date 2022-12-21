@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -17,11 +18,11 @@ class VedtakhendelserRiver(
     private val service: StatistikkService
 ) : River.PacketListener {
 
-    val vedtakshendelser = listOf(
-        "VEDTAK:FATTET",
-        "VEDTAK:ATTESTERT",
-        "VEDTAK:UNDERKJENT",
-        "VEDTAK:IVERKSATT"
+    private val vedtakshendelser = listOf(
+        KafkaHendelseType.FATTET.toString(),
+        KafkaHendelseType.ATTESTERT.toString(),
+        KafkaHendelseType.UNDERKJENT.toString(),
+        KafkaHendelseType.IVERKSATT.toString()
     )
 
     val logger = LoggerFactory.getLogger(this::class.java)

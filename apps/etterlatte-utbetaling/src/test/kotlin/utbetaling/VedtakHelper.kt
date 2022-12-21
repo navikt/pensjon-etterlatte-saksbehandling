@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Sak
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -197,7 +198,7 @@ fun genererEtterfolgendeUtbetalingsperioder(
 
 fun vedtakEvent(vedtak: Vedtak) = """
     {
-      "@event_name": "VEDTAK:ATTESTERT",
+      "@event_name": "${KafkaHendelseType.ATTESTERT}",
       "vedtak": ${vedtak.toJson()}
     }
 """

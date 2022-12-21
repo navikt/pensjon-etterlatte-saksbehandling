@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
+import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
@@ -33,7 +34,7 @@ class VedtakMottaker(
 
     init {
         River(rapidsConnection).apply {
-            eventName("VEDTAK:ATTESTERT")
+            eventName(KafkaHendelseType.ATTESTERT.toString())
             validate { it.requireKey("vedtak") }
             validate {
                 it.requireAny(

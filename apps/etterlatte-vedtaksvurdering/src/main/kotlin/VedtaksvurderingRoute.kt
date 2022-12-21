@@ -8,8 +8,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
@@ -58,24 +56,19 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                     saksbehandler = saksbehandler
                 )
 
-                coroutineScope {
-                    async {
-                        service.postTilVedtakhendelse(
-                            behandlingId,
-                            accesstoken,
-                            HendelseType.BEREGNET,
-                            vedtakHendelse
-                        )
-                    }
-                    async {
-                        service.postTilVedtakhendelse(
-                            behandlingId,
-                            accesstoken,
-                            HendelseType.VILKAARSVURDERT,
-                            vedtakHendelse
-                        )
-                    }
-                }
+                service.postTilVedtakhendelse(
+                    behandlingId,
+                    accesstoken,
+                    HendelseType.BEREGNET,
+                    vedtakHendelse
+                )
+                service.postTilVedtakhendelse(
+                    behandlingId,
+                    accesstoken,
+                    HendelseType.VILKAARSVURDERT,
+                    vedtakHendelse
+                )
+
                 call.respond(nyttVedtak)
             }
         }

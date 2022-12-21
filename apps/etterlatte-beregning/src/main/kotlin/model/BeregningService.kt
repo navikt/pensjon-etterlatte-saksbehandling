@@ -20,7 +20,7 @@ import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 class BeregningService(
     private val beregningRepository: BeregningRepository,
@@ -83,7 +83,8 @@ class BeregningService(
                                     utbetaltBeloep = 0,
                                     soeskenFlokk = listOf(),
                                     grunnbelopMnd = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløpPerMåned,
-                                    grunnbelop = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløp
+                                    grunnbelop = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløp,
+                                    trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
                                 )
                             ),
                             beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
@@ -117,7 +118,8 @@ class BeregningService(
                             utbetaltBeloep = 0,
                             soeskenFlokk = listOf(),
                             grunnbelopMnd = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløpPerMåned,
-                            grunnbelop = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløp
+                            grunnbelop = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløp,
+                            trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
                         )
                     ),
                     beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
@@ -159,7 +161,8 @@ class BeregningService(
                 grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
                 grunnbelop = gjeldendeG.grunnbeløp,
                 soeskenFlokk = flokkForPeriode,
-                utbetaltBeloep = utbetaltBeloep
+                utbetaltBeloep = utbetaltBeloep,
+                trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
             )
         }
 

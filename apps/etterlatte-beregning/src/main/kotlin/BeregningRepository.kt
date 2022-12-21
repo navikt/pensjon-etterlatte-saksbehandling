@@ -16,7 +16,7 @@ import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningsperiodeDAO
 import java.io.Serializable
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 interface BeregningRepository {
@@ -134,7 +134,8 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                 utbetaltBeloep = it.utbetaltBeloep,
                 soeskenFlokk = it.soeskenFlokk,
                 grunnbelopMnd = it.grunnbelopMnd,
-                grunnbelop = it.grunnbelop
+                grunnbelop = it.grunnbelop,
+                trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
             )
         }
 

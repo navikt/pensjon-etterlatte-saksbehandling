@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 enum class Beregningstyper {
     GP,
@@ -38,7 +38,8 @@ data class Beregningsperiode(
     val utbetaltBeloep: Int,
     val soeskenFlokk: List<Person>?,
     val grunnbelopMnd: Int,
-    val grunnbelop: Int
+    val grunnbelop: Int,
+    val trygdetid: Int
 )
 
 data class SoeskenPeriode(

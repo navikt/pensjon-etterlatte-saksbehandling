@@ -12,7 +12,6 @@ fun main() {
                 .also {
                     val behandlingservice = ab.createBehandlingService()
                     OppdaterBehandling(it, behandlingservice)
-                    HendelserOmVedtak(it, behandlingservice)
                     PdlHendelser(it, behandlingservice)
                     it.registrerVedlikeholdsriver(behandlingservice)
                 }

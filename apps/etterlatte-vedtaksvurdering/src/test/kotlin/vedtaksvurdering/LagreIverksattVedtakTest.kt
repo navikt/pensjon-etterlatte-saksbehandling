@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
-import io.mockk.verify
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -25,10 +24,10 @@ internal class LesIverksattVedtakmeldingTest {
     }
 
     private val vedtaksvurderingServiceMock = mockk<VedtaksvurderingService>()
-    private val inspector = spyk(TestRapid().apply { LagreIverksattVedtak(this, vedtaksvurderingServiceMock) })
+    private val inspector = spyk(TestRapid().apply { LagreIverksattVedtak(this, vedtaksvurderingServiceMock, mockk()) })
 
     @Test
-    fun `skal lese utbetalingsmelding og legge vedtaksmelding paa rapid`() {
+    fun `skal lese utbetalingsmelding`() {
         val behandlingIdVal = UUID.fromString("45dc0f0e-dbd0-465c-880b-f20ddb8e3789")
         val sakIdVal = 1234L
         val vedtakIdVal = 1L
@@ -42,16 +41,5 @@ internal class LesIverksattVedtakmeldingTest {
 
         inspector.apply { sendTestMessage(melding) }.inspektør
         Assertions.assertEquals(behandlingIdVal, behandlingIdSlot.captured)
-
-        verify(timeout = 5000) {
-            inspector.publish(
-                match {
-                    it.contains("VEDTAK:IVERKSATT") &&
-                        it.contains("\"sakId\":$sakIdVal") &&
-                        it.contains("\"behandlingId\":\"$behandlingIdVal") &&
-                        it.contains("\"vedtakId\":$vedtakIdVal")
-                }
-            )
-        }
     }
 }

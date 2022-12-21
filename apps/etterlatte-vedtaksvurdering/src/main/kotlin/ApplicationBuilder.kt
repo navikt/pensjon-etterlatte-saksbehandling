@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
@@ -28,6 +29,7 @@ import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
@@ -50,12 +52,12 @@ class ApplicationBuilder {
 
     private val dataSource = dataSourceBuilder.dataSource()
     private val vedtakRepo = VedtaksvurderingRepository.using(dataSource)
-    val config: Config = ConfigFactory.load()
+    private val config: Config = ConfigFactory.load()
 
-    val beregningKlient = BeregningKlientImpl(config, httpClient())
-    val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
-    val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    val vedtaksvurderingService = VedtaksvurderingService(
+    private val beregningKlient = BeregningKlientImpl(config, httpClient())
+    private val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
+    private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
+    private val vedtaksvurderingService = VedtaksvurderingService(
         vedtakRepo,
         beregningKlient,
         vilkaarsvurderingKlient,
@@ -70,7 +72,7 @@ class ApplicationBuilder {
             }
             .build()
             .apply {
-                LagreIverksattVedtak(this, vedtaksvurderingService)
+                LagreIverksattVedtak(this, vedtaksvurderingService, behandlingHttpClient(env))
                 registrerVedlikeholdsriver(vedtaksvurderingService)
             }
 
@@ -124,5 +126,18 @@ private fun httpClient() = HttpClient(OkHttp) {
     }
     defaultRequest {
         header(X_CORRELATION_ID, getCorrelationId())
+    }
+}.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+
+private fun behandlingHttpClient(props: Map<String, String>) = HttpClient(OkHttp) {
+    expectSuccess = true
+    install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+    }
+    install(Auth) {
+        clientCredential {
+            config = props.toMutableMap()
+                .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("BEHANDLING_AZURE_SCOPE"))) }
+        }
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }

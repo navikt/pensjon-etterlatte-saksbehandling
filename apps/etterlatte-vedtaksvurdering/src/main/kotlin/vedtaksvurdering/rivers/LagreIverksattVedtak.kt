@@ -1,12 +1,19 @@
 package no.nav.etterlatte.vedtaksvurdering.rivers
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.HendelseType
+import no.nav.etterlatte.VedtakHendelse
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -15,10 +22,12 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class LagreIverksattVedtak(
     rapidsConnection: RapidsConnection,
-    val vedtaksvurderingService: VedtaksvurderingService
+    private val vedtaksvurderingService: VedtaksvurderingService,
+    private val behandlingHttpClient: HttpClient
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
@@ -28,7 +37,21 @@ internal class LagreIverksattVedtak(
         }.register(this)
     }
 
-    val logger = LoggerFactory.getLogger(this::class.java)
+    fun postTilBehandling(behandlingId: UUID, vedtakId: Long) = runBlocking {
+        behandlingHttpClient.post(
+            "http://etterlatte-behandling/behandlinger/$behandlingId/hendelser/vedtak/${HendelseType.IVERKSATT}"
+        ) {
+            contentType(ContentType.Application.Json)
+            setBody(
+                VedtakHendelse(
+                    vedtakId = vedtakId,
+                    inntruffet = Tidspunkt.now()
+                )
+            )
+        }
+    }
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
@@ -40,18 +63,7 @@ internal class LagreIverksattVedtak(
                         respons.behandlingId?.also { behandlingId ->
                             vedtaksvurderingService.lagreIverksattVedtak(behandlingId)
                             requireNotNull(vedtaksvurderingService.hentVedtak(behandlingId)).also { vedtak ->
-                                context.publish(
-                                    JsonMessage.newMessage(
-                                        mapOf(
-                                            eventNameKey to "VEDTAK:IVERKSATT",
-                                            "sakId" to vedtak.sakId!!.toLong(),
-                                            "behandlingId" to vedtak.behandlingId.toString(),
-                                            "vedtakId" to vedtak.id,
-                                            "eventtimestamp" to Tidspunkt.now()
-                                        )
-                                    ).toJson()
-
-                                )
+                                postTilBehandling(behandlingId, vedtak.id)
                             }
                         }
                             ?: logger.error(

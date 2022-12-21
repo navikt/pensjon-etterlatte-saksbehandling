@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -104,11 +103,7 @@ class VedtaksvurderingService(
                 virk
             )
         }
-        val oppdatertVedtak = hentFellesVedtakMedUtbetalingsperioder(behandlingId)!!
-
-        sendToRapid(lagVedtakHendelseMelding("VEDTAK:BEREGNET", oppdatertVedtak), behandlingId)
-        sendToRapid(lagVedtakHendelseMelding("VEDTAK:VILKAARSVURDERT", oppdatertVedtak), behandlingId)
-        return oppdatertVedtak
+        return hentFellesVedtakMedUtbetalingsperioder(behandlingId)!!
     }
 
     suspend fun hentDataForVedtak(
@@ -159,19 +154,8 @@ class VedtaksvurderingService(
         }
 
         val fattetVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-        val fattetVedtakMessage = JsonMessage.newMessage(
-            mapOf(
-                eventNameKey to "VEDTAK:FATTET",
-                "vedtak" to fattetVedtak,
-                "behandlingId" to behandlingId,
-                "sakId" to fattetVedtak.sak.id,
-                "vedtakId" to fattetVedtak.vedtakId,
-                "eventtimestamp" to fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
-                "saksbehandler" to fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
-            )
-        )
-
-        sendToRapid(fattetVedtakMessage.toJson(), behandlingId)
+        val statistikkmelding = lagStatistikkMelding(HendelseType.FATTET, fattetVedtak)
+        sendToRapid(statistikkmelding, behandlingId)
 
         return fattetVedtak
     }
@@ -192,14 +176,8 @@ class VedtaksvurderingService(
         )
         val attestertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
 
-        val message = JsonMessage.newMessage("VEDTAK:ATTESTERT")
-            .apply {
-                this["vedtak"] = attestertVedtak
-                this["vedtakId"] = attestertVedtak.vedtakId
-                this["sakId"] = attestertVedtak.sak.id
-                this["eventtimestamp"] = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!
-            }
-        sendToRapid(message.toJson(), behandlingId)
+        val message = lagStatistikkMelding(HendelseType.ATTESTERT, attestertVedtak)
+        sendToRapid(message, behandlingId)
 
         return attestertVedtak
     }
@@ -208,31 +186,12 @@ class VedtaksvurderingService(
         if (!b) throw function()
     }
 
-    fun underkjennVedtak(
-        behandlingId: UUID,
-        begrunnelse: UnderkjennVedtakClientRequest
-    ): VedtakEntity {
+    fun underkjennVedtak(behandlingId: UUID): VedtakEntity {
         requireNotNull(hentVedtak(behandlingId)).also {
             require(it.vedtakFattet != null) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
             require(it.attestant == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
         }
         repository.underkjennVedtak(behandlingId)
-
-        val underkjentVedtak = repository.hentVedtak(behandlingId)!!
-
-        val message = JsonMessage.newMessage(
-            mapOf(
-                eventNameKey to "VEDTAK:UNDERKJENT",
-                "sakId" to underkjentVedtak.sakId.toString(),
-                "behandlingId" to underkjentVedtak.behandlingId,
-                "vedtakId" to underkjentVedtak.id,
-                "eventtimestamp" to Tidspunkt.now(),
-                "valgtBegrunnelse" to begrunnelse.valgtBegrunnelse,
-                "kommentar" to begrunnelse.kommentar
-            )
-        )
-        sendToRapid(message.toJson(), behandlingId)
-
         return repository.hentVedtak(behandlingId)!!
     }
 
@@ -291,18 +250,32 @@ class VedtaksvurderingService(
             .sortedBy { it.periode.fom }
     }
 
+    suspend fun postTilVedtakhendelse(
+        behandlingId: UUID,
+        accessToken: String,
+        hendelse: HendelseType,
+        vedtakhendelse: VedtakHendelse
+    ) {
+        behandlingKlient.postVedtakHendelse(
+            vedtakHendelse = vedtakhendelse,
+            hendelse = hendelse,
+            behandlingId = behandlingId,
+            accessToken = accessToken
+        )
+    }
+
     override fun slettSak(sakId: Long) {
         repository.slettSak(sakId)
     }
 }
 
-private fun lagVedtakHendelseMelding(vedtakhendelse: String, vedtak: Vedtak) =
-    JsonMessage.newMessage(
-        mapOf(
-            eventNameKey to vedtakhendelse,
-            "sakId" to vedtak.sak.id,
-            "behandlingId" to vedtak.behandling.id,
-            "vedtakId" to vedtak.vedtakId,
-            "eventtimestamp" to Tidspunkt.now()
-        )
-    ).toJson()
+private fun lagStatistikkMelding(vedtakhendelse: HendelseType, vedtak: Vedtak) =
+    JsonMessage.newMessage(mapOf(eventNameKey to "VEDTAK:$vedtakhendelse", "vedtak" to vedtak)).toJson() // ktlint-disable max-line-length TODO sj: Lag egen enum for VEDTAK:vedtakshendelse. Egner seg i egen PR
+
+data class VedtakHendelse(
+    val vedtakId: Long,
+    val inntruffet: Tidspunkt,
+    val saksbehandler: String? = null,
+    val kommentar: String? = null,
+    val valgtBegrunnelse: String? = null
+)

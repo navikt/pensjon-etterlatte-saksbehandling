@@ -10,8 +10,10 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@navikt/ds-css": "^1.5.4",
-    "@navikt/ds-react": "^1.5.4",
+    "@navikt/ds-css": "^2.0.10",
+    "@navikt/ds-css-internal": "^2.0.10",
+    "@navikt/ds-react": "^2.0.10",
+    "@navikt/ds-react-internal": "^2.0.10",
     "@navikt/navspa": "^6.0.1",
     "@reduxjs/toolkit": "^1.9.0",
     "bowser": "^2.11.0",

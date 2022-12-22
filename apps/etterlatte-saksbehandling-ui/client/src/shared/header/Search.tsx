@@ -67,7 +67,7 @@ export const Search = () => {
   }
 
   return (
-    <>
+    <SearchWrapper>
       <SearchField
         placeholder="Fødselsnummer"
         label="Tast inn fødselsnummer"
@@ -121,7 +121,7 @@ export const Search = () => {
           </SearchResult>
         </Dropdown>
       )}
-    </>
+    </SearchWrapper>
   )
 }
 
@@ -140,6 +140,11 @@ const Dropdown = styled.div<{ error?: boolean; info?: boolean }>`
     margin-right: 0px;
     align-self: center;
   }
+`
+
+const SearchWrapper = styled.span`
+  max-width: 100%;
+  padding: 0.3em;
 `
 
 const SearchResult = styled.div<{ link?: boolean }>`

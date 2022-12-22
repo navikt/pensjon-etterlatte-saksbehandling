@@ -23,7 +23,7 @@ data class AvslagBrevRequest(
                 aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår?
                 spraak = behandling.spraak,
                 avsender = avsender,
-                mottaker = mottaker,
+                mottaker = mottaker
             )
     }
 }

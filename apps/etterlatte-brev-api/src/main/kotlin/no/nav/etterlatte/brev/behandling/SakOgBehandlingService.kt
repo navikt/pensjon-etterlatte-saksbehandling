@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.behandling
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
-import java.time.LocalDate
 
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -34,16 +33,24 @@ class SakOgBehandlingService(
         val beregning = beregningKlient.hentBeregning(behandlingId, accessToken)
         val grunnbeloep = grunnbeloepKlient.hentGrunnbeloep()
 
-        // TODO: Tilføye beregningsperioder i brevet. Se https://jira.adeo.no/browse/EY-1403
-        val periode = beregning.beregningsperioder.first()
+        val beregningsperioder = beregning.beregningsperioder.map {
+            Beregningsperiode(
+                datoFOM = it.datoFOM.atDay(1),
+                datoTOM = it.datoTOM?.atEndOfMonth(),
+                grunnbeloep = it.grunnbelop,
+                antallBarn = (it.soeskenFlokk?.size ?: 0) + 1,
+                utbetaltBeloep = it.utbetaltBeloep,
+                trygdetid = it.trygdetid
+            )
+        }
+
+        val soeskenjustering = beregning.beregningsperioder
+            .any { !it.soeskenFlokk.isNullOrEmpty() }
 
         return Utbetalingsinfo(
-            beloep = periode.utbetaltBeloep,
-            virkningsdato = LocalDate.of(periode.datoFOM.year, periode.datoFOM.month, 1),
-            kontonummer = "<todo: Ikke tilgjengelig>",
-            grunnbeloep = grunnbeloep,
-            antallBarn = (periode.soeskenFlokk?.size ?: 0) + 1, // TODO: Må fikse dette ifm TODO på linje 42
-            soeskenjustering = !periode.soeskenFlokk.isNullOrEmpty()
+            grunnbeloep.grunnbeloep,
+            soeskenjustering,
+            beregningsperioder
         )
     }
 }

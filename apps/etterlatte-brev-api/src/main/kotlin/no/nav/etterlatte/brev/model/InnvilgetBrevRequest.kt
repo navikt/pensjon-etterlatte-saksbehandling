@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 data class InnvilgetBrevRequest(
     val saksnummer: String,
     val utbetalingsinfo: Utbetalingsinfo,
-    val grunnbeloep: Int,
     val barn: Soeker,
     val avdoed: Avdoed,
     val aktuelleParagrafer: List<String>,
@@ -18,15 +17,10 @@ data class InnvilgetBrevRequest(
     override fun templateName(): String = "innvilget"
 
     companion object {
-        fun fraVedtak(
-            behandling: Behandling,
-            avsender: Avsender,
-            mottaker: Mottaker
-        ): InnvilgetBrevRequest =
+        fun fraVedtak(behandling: Behandling, avsender: Avsender, mottaker: Mottaker): InnvilgetBrevRequest =
             InnvilgetBrevRequest(
                 saksnummer = behandling.sakId.toString(),
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
-                grunnbeloep = behandling.utbetalingsinfo.grunnbeloep.grunnbeloep,
                 barn = behandling.persongalleri.soeker,
                 avdoed = behandling.persongalleri.avdoed,
                 aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår? Nødvendig?

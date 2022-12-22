@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.behandling
 
-import no.nav.etterlatte.brev.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.brev.model.Avdoed
 import no.nav.etterlatte.brev.model.Innsender
 import no.nav.etterlatte.brev.model.Soeker
@@ -25,8 +24,9 @@ data class Behandling(
     val utbetalingsinfo: Utbetalingsinfo? = null
 ) {
     init {
-        if (vedtak.type == VedtakType.INNVILGELSE)
-            requireNotNull(utbetalingsinfo) { "Utbetalingsinformasjon mangler på behandling (id=${behandlingId}" }
+        if (vedtak.type == VedtakType.INNVILGELSE) {
+            requireNotNull(utbetalingsinfo) { "Utbetalingsinformasjon mangler på behandling (id=$behandlingId" }
+        }
     }
 }
 
@@ -37,12 +37,18 @@ data class ForenkletVedtak(
 )
 
 data class Utbetalingsinfo(
-    val beloep: Int,
-    val kontonummer: String,
-    val virkningsdato: LocalDate,
-    val grunnbeloep: Grunnbeloep,
+    val grunnbeloep: Int,
+    val soeskenjustering: Boolean,
+    val beregningsperioder: List<Beregningsperiode>
+)
+
+data class Beregningsperiode(
+    val datoFOM: LocalDate,
+    val datoTOM: LocalDate?,
+    val grunnbeloep: Int,
     val antallBarn: Int,
-    val soeskenjustering: Boolean
+    val utbetaltBeloep: Int,
+    val trygdetid: Int
 )
 
 data class Persongalleri(

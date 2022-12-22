@@ -9,16 +9,31 @@ import io.ktor.client.request.setBody
 import no.nav.etterlatte.brev.model.BrevRequest
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.util.UUID
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
 class PdfGeneratorKlient(private val client: HttpClient, private val apiUrl: String) {
+    private val logger = LoggerFactory.getLogger(PdfGeneratorKlient::class.java)
+
+    @OptIn(ExperimentalTime::class)
     suspend fun genererPdf(brevRequest: BrevRequest): ByteArray = try {
-        client.post("$apiUrl/${brevRequest.brevMalUrl()}") {
-            header("Content-Type", "application/json")
-            header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
-            setBody(brevRequest.toJsonNode())
-        }.body()
+        logger.info("Starter pdfgen")
+
+        measureTimedValue {
+            client.post("$apiUrl/${brevRequest.brevMalUrl()}") {
+                header("Content-Type", "application/json")
+                header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
+                setBody(brevRequest.toJsonNode())
+            }.body<ByteArray>()
+        }.let { (result, duration) ->
+            logger.info("Fullført pdfgen OK (${duration.toString(DurationUnit.SECONDS, 2)})")
+
+            result
+        }
     } catch (ex: Exception) {
         throw PdfGeneratorException("Feil ved kall til pdfgen", ex)
     }

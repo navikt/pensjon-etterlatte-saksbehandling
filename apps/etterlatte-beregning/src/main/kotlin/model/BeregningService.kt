@@ -1,5 +1,7 @@
 package no.nav.etterlatte.model
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import model.finnSoeskenperiode.FinnSoeskenPeriode
 import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -32,20 +34,21 @@ class BeregningService(
     fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
-        val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
-        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
+        return coroutineScope {
+            val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
+            val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
+            val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.await().sak, accessToken) }
 
-        val beregning = lagBeregning(
-            grunnlag,
-            behandling.virkningstidspunkt!!.dato,
-            YearMonth.now().plusMonths(3),
-            vilkaarsvurdering.resultat!!.utfall,
-            behandling.behandlingType!!,
-            behandlingId
-        )
-
-        return beregningRepository.lagreEllerOppdaterBeregning(beregning)
+            val beregning = lagBeregning(
+                grunnlag.await(),
+                behandling.await().virkningstidspunkt!!.dato,
+                YearMonth.now().plusMonths(3),
+                vilkaarsvurdering.await().resultat!!.utfall,
+                behandling.await().behandlingType!!,
+                behandlingId
+            )
+            beregningRepository.lagreEllerOppdaterBeregning(beregning)
+        }
     }
 
     fun lagBeregning(
@@ -84,7 +87,7 @@ class BeregningService(
                                     soeskenFlokk = listOf(),
                                     grunnbelopMnd = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløpPerMåned,
                                     grunnbelop = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløp,
-                                    trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
+                                    trygdetid = 40 // TODO: Må fikses med andresaker som IKKE har 40 års trygdetid
                                 )
                             ),
                             beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),

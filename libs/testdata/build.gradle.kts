@@ -3,7 +3,7 @@ plugins {
 }
 
 repositories {
-    maven("https://jitpack.io")
+    maven("https://github.com")
     mavenCentral()
 }
 

@@ -434,18 +434,19 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     /*sjekker om et fnr opptrer i persongalleriet til behandlinger. Returnerer rollen og saksnr som Pair*/
+    /* TODO: EY-1430: Skriv om denne*/
     fun sakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>> {
         val statement = connection().prepareStatement(
             """
               SELECT (
                 SELECT string_agg(col, ', ' ORDER BY col) AS rolle
-                FROM jsonb_each_text(to_jsonb(json_build_object('innsender', behandling.innsender, 'soeker', behandling.soeker, 'gjenlevende', behandling.gjenlevende, 'avdoed', behandling.avdoed, 'soesken', behandling.soesken))) t(col, val)
+                FROM jsonb_each_text(to_jsonb(json_build_object('soeker', behandling.soeker, 'gjenlevende', behandling.gjenlevende, 'avdoed', behandling.avdoed, 'soesken', behandling.soesken))) t(col, val)
                 WHERE t.val LIKE '%' || ? || '%'
               ), sak_id
               FROM behandling
               WHERE (
                 SELECT string_agg(col, ', ' ORDER BY col)
-                FROM jsonb_each_text(to_jsonb(json_build_object('innsender', behandling.innsender, 'soeker', behandling.soeker, 'gjenlevende', behandling.gjenlevende, 'avdoed', behandling.avdoed, 'soesken', behandling.soesken))) t(col, val)
+                FROM jsonb_each_text(to_jsonb(json_build_object('soeker', behandling.soeker, 'gjenlevende', behandling.gjenlevende, 'avdoed', behandling.avdoed, 'soesken', behandling.soesken))) t(col, val)
                 WHERE t.val LIKE '%' || ? || '%'
               ) IS NOT NULL;
             """.trimIndent()

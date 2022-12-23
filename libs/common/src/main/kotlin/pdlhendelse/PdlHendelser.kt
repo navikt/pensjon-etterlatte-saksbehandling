@@ -33,7 +33,7 @@ data class ForelderBarnRelasjonHendelse(
     val minRolleForPerson: String?,
     val relatertPersonUtenFolkeregisteridentifikator: String?,
     val endringstype: Endringstype
-)
+) : PdlHendelse
 
 fun ForelderBarnRelasjonHendelse.erLik(other: ForelderBarnRelasjonHendelse) =
     this.fnr == other.fnr &&

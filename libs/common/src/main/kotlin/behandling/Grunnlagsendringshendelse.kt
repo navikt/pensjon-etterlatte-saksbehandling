@@ -5,7 +5,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Utland
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -18,7 +22,7 @@ data class Grunnlagsendringshendelse(
     val status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     val behandlingId: UUID? = null,
     val hendelseGjelderRolle: Saksrolle,
-    val korrektIPDL: KorrektIPDL = KorrektIPDL.IKKE_SJEKKET
+    val samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag? = null
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -54,7 +58,6 @@ enum class GrunnlagsendringStatus {
 
 enum class Saksrolle {
     SOEKER,
-    INNSENDER,
     SOESKEN,
     AVDOED,
     GJENLEVENDE,
@@ -73,7 +76,51 @@ enum class Saksrolle {
                 )
                 UKJENT
             }
+
+        fun SaksrolleToPersonrolle(saksrolle: Saksrolle): PersonRolle =
+            when (saksrolle) {
+                SOEKER -> PersonRolle.BARN
+                SOESKEN -> PersonRolle.BARN
+                AVDOED -> PersonRolle.AVDOED
+                GJENLEVENDE -> PersonRolle.AVDOED
+                UKJENT -> throw Exception("Ukjent Saksrolle kan ikke castes til PersonRolle")
+            }
     }
 }
 
-enum class KorrektIPDL { JA, NEI, IKKE_SJEKKET }
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+sealed class SamsvarMellomPdlOgGrunnlag {
+    abstract val samsvar: Boolean
+
+    @JsonTypeName("DOEDSDATO")
+    data class Doedsdatoforhold(
+        val fraGrunnlag: LocalDate?,
+        val fraPdl: LocalDate?,
+        override val samsvar: Boolean
+    ) : SamsvarMellomPdlOgGrunnlag()
+
+    @JsonTypeName("UTLAND")
+    data class Utlandsforhold(
+        val fraPdl: Utland?,
+        val fraGrunnlag: Utland?,
+        override val samsvar: Boolean
+    ) : SamsvarMellomPdlOgGrunnlag()
+
+    @JsonTypeName("ANSVARLIGE_FORELDRE")
+    data class AnsvarligeForeldre(
+        val fraPdl: List<Foedselsnummer>?,
+        val fraGrunnlag: List<Foedselsnummer>?,
+        override val samsvar: Boolean
+    ) : SamsvarMellomPdlOgGrunnlag()
+
+    @JsonTypeName("BARN")
+    data class Barn(
+        val fraPdl: List<Foedselsnummer>?,
+        val fraGrunnlag: List<Foedselsnummer>?,
+        override val samsvar: Boolean
+    ) : SamsvarMellomPdlOgGrunnlag()
+
+    // Verge
+
+    // institusjonsopphold?
+}

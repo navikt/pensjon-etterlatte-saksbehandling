@@ -1,0 +1,73 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-saksbehandling-ui
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{ image }}
+  port: 8080
+  replicas:
+    min: 2
+    max: 4
+    cpuThresholdPercentage: 90
+  ingresses:
+    - https://etterlatte-saksbehandling.intern.nav.no
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      allowAllUsers: false
+      claims:
+        groups:
+          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # Required for authorization
+        extra:
+          - NAVident
+    sidecar:
+      enabled: true
+      autoLogin: true
+  envFrom:
+    - secret: saksbehandler-secret
+  liveness:
+    path: /health/isAlive
+    initialDelay: 10
+    timeout: 5
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: /health/isReady
+    initialDelay: 30
+    periodSeconds: 5
+    timeout: 5
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    - name: API_URL
+      value: http://etterlatte-api
+    - name: BREV_API_URL
+      value: http://etterlatte-brev-api
+    - name: VILKAARSVURDERING_API_URL
+      value: http://etterlatte-vilkaarsvurdering
+    - name: BEHANDLING_API_URL
+      value: http://etterlatte-behandling
+    - name: VEDTAK_API_URL
+      value: http://etterlatte-vedtaksvurdering
+  accessPolicy:
+    outbound:
+      external:
+        - host: navikt.github.io
+        - host: https://login.microsoftonline.com
+        - host: graph.microsoft.com
+      rules:
+        - application: etterlatte-api
+        - application: etterlatte-brev-api
+        - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-behandling
+        - application: etterlatte-beregning
+        - application: etterlatte-vedtaksvurdering

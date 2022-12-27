@@ -52,7 +52,6 @@ const UserInfo = styled.div`
 `
 
 const Skilletegn = styled.div`
-  margin-right: 1em;
   margin-left: 1em;
 `
 

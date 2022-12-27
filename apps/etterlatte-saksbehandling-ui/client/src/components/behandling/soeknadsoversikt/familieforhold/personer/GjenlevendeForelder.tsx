@@ -1,6 +1,6 @@
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
-import { PeopleIcon } from '~shared/icons/peopleIcon'
+import { People } from '@navikt/ds-icons'
 import { ForelderWrap } from '../../styled'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
@@ -20,7 +20,7 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
     <PersonBorder>
       <PersonHeader>
         <span className="icon">
-          <PeopleIcon />
+          <People />
         </span>
         {`${person.fornavn} ${person.etternavn}`}
         <span className="personRolle">

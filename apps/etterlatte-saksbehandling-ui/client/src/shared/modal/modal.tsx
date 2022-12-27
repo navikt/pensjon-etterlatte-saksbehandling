@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import styled from 'styled-components'
-import { CloseIcon } from '../icons/closeIcon'
+import { Close } from '@navikt/ds-icons'
 import { Portal } from '../portal'
 
 export const Modal = (props: { onClose: any; children: ReactNode }) => {
@@ -8,9 +8,9 @@ export const Modal = (props: { onClose: any; children: ReactNode }) => {
     <Portal>
       <ModalWrapper>
         <ModalBox>
-          <Close onClick={props.onClose}>
-            <CloseIcon />
-          </Close>
+          <CloseIconWrapper onClick={props.onClose}>
+            <Close color={'#0067C5'}/>
+          </CloseIconWrapper>
           <div>{props.children}</div>
         </ModalBox>
       </ModalWrapper>
@@ -52,7 +52,7 @@ const ModalBox = styled.div`
   }
 `
 
-const Close = styled.div`
+const CloseIconWrapper = styled.div`
   align-self: flex-end;
   cursor: pointer;
 `

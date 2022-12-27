@@ -4,7 +4,7 @@ import { handlinger } from './typer'
 import { fattVedtak } from '~shared/api/behandling'
 import { useMatch } from 'react-router'
 import { useNavigate } from 'react-router-dom'
-import { ButtonWrapper } from "~components/behandling/attestering/modal";
+import { ButtonWrapper } from "~shared/modal/modal";
 
 export const SendTilAttesteringModal: React.FC = () => {
   const navigate = useNavigate()

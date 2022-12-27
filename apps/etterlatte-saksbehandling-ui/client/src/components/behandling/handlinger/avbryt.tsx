@@ -5,7 +5,7 @@ import { avbrytBehandling } from '~shared/api/behandling'
 import { useMatch, useNavigate } from 'react-router'
 import { handlinger } from './typer'
 import { ApiResponse } from '~shared/api/apiClient'
-import { ButtonWrapper } from '~components/behandling/attestering/modal'
+import { ButtonWrapper } from '~shared/modal/modal'
 
 export const AvbrytBehandling = () => {
   const navigate = useNavigate()

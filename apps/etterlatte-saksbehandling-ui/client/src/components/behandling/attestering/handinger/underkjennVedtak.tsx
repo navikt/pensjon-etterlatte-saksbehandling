@@ -1,7 +1,7 @@
 import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
 import { ButtonWrapper } from '../styled'
-import { GeneriskModal } from '../modal'
+import { GeneriskModal } from '~shared/modal/modal'
 import { hentBehandling, underkjennVedtak } from '~shared/api/behandling'
 
 type Props = {

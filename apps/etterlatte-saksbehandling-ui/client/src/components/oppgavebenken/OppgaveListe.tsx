@@ -87,7 +87,7 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filte
 
   return (
     <Styles>
-      <Heading size={'medium'} spacing>
+      <Heading size={'medium'} spacing level={"2"}>
         Oppgaveliste
       </Heading>
       <table {...getTableProps()}>

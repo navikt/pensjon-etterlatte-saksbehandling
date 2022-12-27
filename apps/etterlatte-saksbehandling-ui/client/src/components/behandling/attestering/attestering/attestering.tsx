@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
-import { SynchronizeIcon } from '~shared/icons/synchronizeIcon'
 import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
 
@@ -17,16 +16,6 @@ export const Attestering: React.FC<Props> = ({ setBeslutning, beslutning }) => {
       <div className="info">
         <Overskrift>Kontroller opplysninger og faglige vurderinger gjort under behandling.</Overskrift>
       </div>
-      <VurderingTekstWrapper>
-        <div className="icon">
-          <SynchronizeIcon />
-        </div>
-        <div className="tekst">
-          Hardkodet: Steget er vurdert automatisk
-          {/** TODO: dato for når hvert steg i behabdlingen er vurdert skal vises her: 21.09.21 */}. Ingen faresignaler
-          oppdaget.
-        </div>
-      </VurderingTekstWrapper>
       <TextWrapper>
         Beslutning
         {currentRoute === 'brev' ? (
@@ -70,21 +59,4 @@ const Tekst = styled.div`
   font-weight: 400;
   color: #3e3832;
   margin-top: 6px;
-`
-
-const VurderingTekstWrapper = styled.div`
-  margin-top: 15px;
-  color: #262626;
-  display: flex;
-  .icon {
-    color: #262626;
-    margin-right: 10px;
-  }
-
-  .tekst {
-    font-style: normal;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 18px;
-  }
 `

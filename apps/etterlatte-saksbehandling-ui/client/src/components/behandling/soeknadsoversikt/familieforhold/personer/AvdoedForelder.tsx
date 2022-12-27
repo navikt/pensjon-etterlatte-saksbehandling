@@ -1,7 +1,7 @@
 import { IPdlPerson } from '~shared/types/Person'
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
-import { PeopleIcon } from '~shared/icons/peopleIcon'
+import { People } from '@navikt/ds-icons'
 import { format } from 'date-fns'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { PersonStatus, RelatertPersonsRolle } from '~components/behandling/types'
@@ -16,7 +16,7 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
     <PersonBorder>
       <PersonHeader>
         <span className="icon">
-          <PeopleIcon />
+          <People />
         </span>
         {`${person.fornavn} ${person.etternavn}`}
         <span className="personRolle">

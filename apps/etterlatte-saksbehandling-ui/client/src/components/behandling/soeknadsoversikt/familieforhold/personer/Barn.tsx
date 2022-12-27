@@ -1,6 +1,6 @@
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
-import { ChildIcon } from '~shared/icons/childIcon'
+import { Child } from '@navikt/ds-icons'
 import { PersonDetailWrapper, TypeStatusWrap } from '../../styled'
 import { IPdlPerson } from '~shared/types/Person'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
@@ -21,7 +21,7 @@ export const Barn: React.FC<Props> = ({ person, doedsdato }) => {
     <PersonBorder>
       <PersonHeader>
         <span className="icon">
-          <ChildIcon />
+          <Child />
         </span>
         {`${person.fornavn} ${person.etternavn}`}{' '}
         <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>

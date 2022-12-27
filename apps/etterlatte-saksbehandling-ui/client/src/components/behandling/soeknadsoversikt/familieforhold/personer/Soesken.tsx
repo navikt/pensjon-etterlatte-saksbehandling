@@ -1,6 +1,6 @@
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
-import { ChildIcon } from '~shared/icons/childIcon'
+import { Child } from '@navikt/ds-icons'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { Heading } from '@navikt/ds-react'
 import React from 'react'
@@ -39,7 +39,7 @@ export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; famili
     <PersonBorder key={person.foedselsnummer}>
       <PersonHeader>
         <span className="icon">
-          <ChildIcon />
+          <Child />
         </span>
         {`${person.fornavn} ${person.etternavn}`}{' '}
         <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>

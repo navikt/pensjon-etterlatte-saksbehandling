@@ -3,9 +3,9 @@ import { Loader, Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPerson } from '../api/person'
-import { ErrorIcon } from '../icons/errorIcon'
-import { InformationIcon } from '../icons/informationIcon'
-import { PeopleIcon } from '../icons/peopleIcon'
+import { ErrorColored } from '@navikt/ds-icons'
+import { InformationColored } from '@navikt/ds-icons'
+import { People } from '@navikt/ds-icons'
 import { IPersonResult } from '~components/person/typer'
 import { ApiResponse } from '../api/apiClient'
 
@@ -90,7 +90,7 @@ export const Search = () => {
       {feilInput && (
         <Dropdown info={true}>
           <span className="icon">
-            <InformationIcon />
+            <InformationColored />
           </span>
           <SearchResult>
             <div className="text">Tast inn gyldig fødselsnummer</div>
@@ -101,7 +101,7 @@ export const Search = () => {
       {searchResult && !feilInput && (
         <Dropdown>
           <span className="icon">
-            <PeopleIcon />
+            <People />
           </span>
           <SearchResult link={true} onClick={goToPerson}>
             <div className="text">
@@ -114,7 +114,7 @@ export const Search = () => {
       {error && (
         <Dropdown error={true}>
           <span className="icon">
-            <ErrorIcon />
+            <ErrorColored />
           </span>
           <SearchResult>
             <div className="text">{JSON.stringify(error)}</div>

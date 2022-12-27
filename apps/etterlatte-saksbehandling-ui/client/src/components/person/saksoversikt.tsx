@@ -33,7 +33,7 @@ export const Saksoversikt = ({
     <>
       <SaksoversiktWrapper>
         <HeadingWrapper>
-          <Heading spacing size="xlarge" level="5">
+          <Heading spacing size="xlarge" level="1">
             Barnepensjon
           </Heading>
           <div className="details">

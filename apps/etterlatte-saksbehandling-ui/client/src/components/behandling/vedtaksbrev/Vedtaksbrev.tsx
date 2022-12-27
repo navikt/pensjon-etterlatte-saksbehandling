@@ -1,9 +1,8 @@
 import { Content, ContentHeader } from '~shared/styled'
 import { useEffect, useState } from 'react'
-import { Heading, Select } from '@navikt/ds-react'
+import { Heading, Select, Tag } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
-import { BehandlingsType } from '../fargetags/behandlingsType'
-import { ISaksType, SaksType } from '../fargetags/saksType'
+import { ISaksType } from '../fargetags/saksType'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { genererPdf, opprettEllerOppdaterBrevForVedtak } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -19,6 +18,8 @@ import {
   VurderingsResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { tagColors, TagList } from "~shared/Tags";
+import { formaterEnumTilLesbarString } from "~utils/formattering";
 
 interface VilkaarOption {
   value: string
@@ -119,8 +120,18 @@ export const Vedtaksbrev = () => {
                 Vedtaksbrev
               </Heading>
               <div className="details">
-                <BehandlingsType type={behandlingType} />
-                <SaksType type={ISaksType.BARNEPENSJON} />
+                <TagList>
+                  <li>
+                    <Tag variant={tagColors[behandlingType]} size={'small'}>
+                      {formaterEnumTilLesbarString(behandlingType)}
+                    </Tag>
+                  </li>
+                  <li>
+                    <Tag variant={tagColors[ISaksType.BARNEPENSJON]} size={'small'}>
+                      {formaterEnumTilLesbarString(ISaksType.BARNEPENSJON)}
+                    </Tag>
+                  </li>
+                </TagList>
               </div>
             </HeadingWrapper>
             <Soeknadsdato mottattDato={soeknadMottattDato} />

@@ -5,14 +5,13 @@ import BrevModal from './brev-modal'
 import { Information, Success } from '@navikt/ds-icons'
 import NyttBrev from './nytt-brev/nytt-brev'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
-import { BehandlingsType } from '../fargetags/behandlingsType'
-import { SaksType, ISaksType } from '../fargetags/saksType'
+import { ISaksType } from '../fargetags/saksType'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { ferdigstillBrev, hentBrevForBehandling, Mottaker, slettBrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import { Journalpost } from '../types'
-import { formaterDato } from '~utils/formattering'
+import { formaterDato, formaterEnumTilLesbarString } from '~utils/formattering'
 import InnkommendeBrevModal from './innkommende-brev-modal'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
@@ -20,6 +19,7 @@ import LastOppBrev from './nytt-brev/last-opp'
 import { useAppSelector } from '~store/Store'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import { hentDokumenter } from '~shared/api/dokument'
+import { tagColors, TagList } from "~shared/Tags";
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -137,8 +137,18 @@ export const Brev = () => {
             Brev-oversikt
           </Heading>
           <div className="details">
-            <BehandlingsType type={behandlingType} />
-            <SaksType type={ISaksType.BARNEPENSJON} />
+            <TagList>
+              <li>
+                <Tag variant={tagColors[behandlingType]} size={'small'}>
+                  {formaterEnumTilLesbarString(behandlingType)}
+                </Tag>
+              </li>
+              <li>
+                <Tag variant={tagColors[ISaksType.BARNEPENSJON]} size={'small'}>
+                  {formaterEnumTilLesbarString(ISaksType.BARNEPENSJON)}
+                </Tag>
+              </li>
+            </TagList>
           </div>
         </HeadingWrapper>
         {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}

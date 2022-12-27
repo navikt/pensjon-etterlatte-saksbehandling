@@ -2,9 +2,8 @@ import { Content, ContentHeader } from '~shared/styled'
 import { SoeknadOversikt } from './soeknadoversikt/Soeknadsoversikt'
 import { Familieforhold } from './familieforhold/Familieforhold'
 import { Border, HeadingWrapper } from './styled'
-import { BehandlingsType } from '../fargetags/behandlingsType'
-import { ISaksType, SaksType } from '../fargetags/saksType'
-import { Heading } from '@navikt/ds-react'
+import { ISaksType } from '../fargetags/saksType'
+import { Heading, Tag } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Start } from '../handlinger/start'
 import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
@@ -13,6 +12,8 @@ import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
 import { useAppSelector } from '~store/Store'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { JaNei } from '~shared/types/ISvar'
+import { tagColors, TagList } from '~shared/Tags'
+import { formaterEnumTilLesbarString } from '~utils/formattering'
 
 export const Soeknadsoversikt = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -26,8 +27,18 @@ export const Soeknadsoversikt = () => {
             Søknadsoversikt
           </Heading>
           <div className="details">
-            <BehandlingsType type={behandling.behandlingType} />
-            <SaksType type={ISaksType.BARNEPENSJON} />
+            <TagList>
+              <li>
+                <Tag variant={tagColors[behandling.behandlingType]} size={'small'}>
+                  {formaterEnumTilLesbarString(behandling.behandlingType)}
+                </Tag>
+              </li>
+              <li>
+                <Tag variant={tagColors[ISaksType.BARNEPENSJON]} size={'small'}>
+                  {formaterEnumTilLesbarString(ISaksType.BARNEPENSJON)}
+                </Tag>
+              </li>
+            </TagList>
           </div>
         </HeadingWrapper>
         <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
@@ -47,3 +58,5 @@ export const Soeknadsoversikt = () => {
     </Content>
   )
 }
+
+

@@ -9,10 +9,11 @@ import {
   StatusFilter,
 } from './typer/oppgavebenken'
 import { format } from 'date-fns'
-import { ColorTag } from './styled'
+import { Tag } from '@navikt/ds-react'
 import SaksbehandlerTildelKnapp from './handlinger/SaksbehandlerTildelKnapp'
 import HandlingerKnapp from './handlinger/HandlingerKnapp'
 import BrukeroversiktLenke from './handlinger/BrukeroversiktKnapp'
+import { tagColors } from '~shared/Tags'
 
 export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   {
@@ -43,7 +44,11 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     accessor: 'behandlingType',
     filter: 'exact',
     Cell: ({ value: oppgavetype }) => {
-      return <ColorTag type={oppgavetype} label={behandlingTypeFilter[oppgavetype as BehandlingTypeFilter]?.navn} />
+      return (
+        <Tag variant={tagColors[oppgavetype]} size={'small'}>
+            {behandlingTypeFilter[oppgavetype as BehandlingTypeFilter]?.navn}
+        </Tag>
+      )
     },
   },
   {
@@ -51,7 +56,11 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     accessor: 'soeknadType',
     filter: 'exact',
     Cell: ({ value: soeknadstype }) => {
-      return <ColorTag type={soeknadstype} label={soeknadTypeFilter[soeknadstype as SoeknadTypeFilter]?.navn} />
+      return (
+        <Tag variant={tagColors[soeknadstype]} size={'small'}>
+          {soeknadTypeFilter[soeknadstype as SoeknadTypeFilter]?.navn}
+        </Tag>
+      )
     },
   },
   {

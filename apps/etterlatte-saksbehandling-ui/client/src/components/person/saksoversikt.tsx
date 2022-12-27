@@ -2,11 +2,13 @@ import { Saksliste } from './saksliste'
 import styled from 'styled-components'
 import { Grunnlagsendringshendelse, IBehandlingsammendrag } from './typer'
 import { useNavigate } from 'react-router-dom'
-import { INasjonalitetsType, NasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
-import { Heading } from '@navikt/ds-react'
+import { INasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
+import { Heading, Tag } from '@navikt/ds-react'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { ToKolonner } from '../toKolonner/ToKolonner'
 import { Grunnlagshendelser } from './grunnlagshendelser/Grunnlagsendringshendelser'
+import { tagColors } from "~shared/Tags";
+import { formaterEnumTilLesbarString } from "~utils/formattering";
 
 export const Saksoversikt = ({
   behandlingliste,
@@ -35,7 +37,9 @@ export const Saksoversikt = ({
             Barnepensjon
           </Heading>
           <div className="details">
-            <NasjonalitetsType type={INasjonalitetsType.NASJONAL} />
+            <Tag variant={tagColors[INasjonalitetsType.NASJONAL]}>
+              {formaterEnumTilLesbarString(INasjonalitetsType.NASJONAL)}
+            </Tag>
           </div>
         </HeadingWrapper>
         <ToKolonner>

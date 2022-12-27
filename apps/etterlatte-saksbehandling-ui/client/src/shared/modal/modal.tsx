@@ -9,6 +9,7 @@ export type Props = {
   setModalisOpen: React.Dispatch<React.SetStateAction<boolean>>
   open: boolean
 }
+
 export const GeneriskModal: React.FC<Props> = ({
   tekst,
   tekstKnappJa,

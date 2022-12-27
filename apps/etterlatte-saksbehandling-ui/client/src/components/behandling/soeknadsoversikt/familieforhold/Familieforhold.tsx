@@ -43,7 +43,6 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
               doedsdato={doedsdato}
             />
             <AvdoedForelder person={behandling.familieforhold.avdoede.opplysning} />
-            <br />
             <DashedBorder />
             <SoeskenListe soekerFnr={behandling.søker.foedselsnummer} familieforhold={behandling.familieforhold!!} />
           </FamilieforholdWrapper>

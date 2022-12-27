@@ -18,7 +18,6 @@ export const SoeskenListe: React.FC<Props> = ({ soekerFnr, familieforhold }) => 
 
   return (
     <>
-      <br />
       <Heading spacing size="small" level="5">
         Søsken <span style={{ fontWeight: 'normal' }}>(avdødes barn)</span>
       </Heading>
@@ -38,12 +37,13 @@ export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; famili
   return (
     <PersonBorder key={person.foedselsnummer}>
       <PersonHeader>
-        <span className="icon">
-          <Child />
-        </span>
-        {`${person.fornavn} ${person.etternavn}`}{' '}
-        <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
-        <br />
+        <div>
+          <span className="icon">
+            <Child />
+          </span>
+          {`${person.fornavn} ${person.etternavn} `}
+          <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
+        </div>
         <span className={'personInfo'}>{erHelsoesken(person.foedselsnummer) ? 'Helsøsken' : 'Halvsøsken'}</span>
       </PersonHeader>
       <PersonInfoWrapper>

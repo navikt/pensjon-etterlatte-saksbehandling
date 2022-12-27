@@ -19,7 +19,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -74,6 +76,7 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
         coEvery { behandlingKlient.opprett(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery {
             grunnlagKlient.hentGrunnlagMedVersjon(
@@ -474,6 +477,12 @@ internal class VilkaarsvurderingRoutesTest {
         every { soeker } returns "10095512345"
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
         every { revurderingsaarsak } returns null
+    }
+
+    private fun lagSak() = mockk<Sak>().apply {
+        every { id } returns 1L
+        every { ident } returns "ident"
+        every { sakType } returns SakType.BARNEPENSJON.toString()
     }
 
     private companion object {

@@ -1,14 +1,17 @@
 package vedtaksvurdering
 
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
@@ -111,6 +114,11 @@ internal class DBTest {
             null,
             null
         )
+        coEvery { behandling.hentSak(any(), any()) } returns mockk<Sak>().apply {
+            every { id } returns 1L
+            every { ident } returns "ident"
+            every { sakType } returns SakType.BARNEPENSJON.toString()
+        }
         coEvery { vilkaarsvurdering.hentVilkaarsvurdering(any(), any()) } returns VilkaarsvurderingTestData
             .oppfylt.copy(
                 behandlingId = uuid

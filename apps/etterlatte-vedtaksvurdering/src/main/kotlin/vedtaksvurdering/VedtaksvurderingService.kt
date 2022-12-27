@@ -86,11 +86,12 @@ class VedtaksvurderingService(
         val virk = vilkaarsvurdering.virkningstidspunkt.atDay(1)
 
         if (vedtak == null) {
+            val sak = behandlingKlient.hentSak(behandling.sak, accessToken)
             repository.opprettVedtak(
                 behandlingId,
                 behandling.sak,
                 behandling.soeker!!,
-                SakType.BARNEPENSJON,
+                SakType.valueOf(sak.sakType),
                 behandling.behandlingType!!,
                 virk,
                 beregning,

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.time.ZonedDateTime
@@ -28,8 +29,6 @@ data class Behandling(
     val type: BehandlingType,
     val id: UUID
 )
-
-data class Sak(val ident: String, val sakType: String, val id: Long)
 
 data class Periode(
     val fom: YearMonth,

@@ -8,6 +8,7 @@ import no.nav.etterlatte.HendelseType
 import no.nav.etterlatte.VedtakHendelse
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -16,6 +17,7 @@ import java.util.*
 
 interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
+    suspend fun hentSak(sakId: Long, accessToken: String): Sak
     suspend fun postVedtakHendelse(
         vedtakHendelse: VedtakHendelse,
         hendelse: HendelseType,
@@ -82,6 +84,29 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 exceotion
             )
             throw exceotion
+        }
+    }
+
+    override suspend fun hentSak(sakId: Long, accessToken: String): Sak {
+        logger.info("Henter sak med id $sakId")
+        try {
+            val json = downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/saker/$sakId"
+                    ),
+                    accessToken = accessToken
+                )
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+
+            return objectMapper.readValue(json.toString())
+        } catch (e: Exception) {
+            logger.error("Henting av sakid ($sakId) fra vedtak feilet.", e)
+            throw e
         }
     }
 }

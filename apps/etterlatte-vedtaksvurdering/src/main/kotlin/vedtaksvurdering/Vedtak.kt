@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.BilagMedSammendrag
 import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Sak
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
@@ -51,7 +51,7 @@ data class Vedtak(
         sak = Sak(this.fnr!!, this.sakType!!, this.sakId!!),
         behandling = Behandling(this.behandlingType, behandlingId),
         type = if (this.vilkaarsResultat?.get("resultat")?.get("utfall")
-            ?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
+                ?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
         ) {
             VedtakType.INNVILGELSE
         } else if (this.behandlingType == BehandlingType.REVURDERING) {

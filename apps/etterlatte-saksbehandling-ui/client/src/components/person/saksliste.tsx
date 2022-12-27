@@ -18,7 +18,7 @@ export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendra
         </Table.Header>
         <Table.Body>
           {behandlinger.map((behandling, i) => (
-            <Table.Row key={i}>
+            <Table.Row key={i} shadeOnHover={false}>
               <Table.DataCell key={`data${behandling.behandlingOpprettet}`}>
                 {formaterStringDato(behandling.behandlingOpprettet)}
               </Table.DataCell>

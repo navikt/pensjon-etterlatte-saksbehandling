@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Button } from '@navikt/ds-react'
-import { Modal } from '~shared/modal/modal'
+import { Button, Heading, Modal } from '@navikt/ds-react'
 import { WarningText } from '~shared/styled'
 import { avbrytBehandling } from '~shared/api/behandling'
 import { useMatch, useNavigate } from 'react-router'
 import { handlinger } from './typer'
 import { ApiResponse } from '~shared/api/apiClient'
+import { ButtonWrapper } from '~components/behandling/attestering/modal'
 
 export const AvbrytBehandling = () => {
   const navigate = useNavigate()
@@ -32,31 +32,38 @@ export const AvbrytBehandling = () => {
         {handlinger.AVBRYT.navn}
       </Button>
 
-      {isOpen && (
-        <Modal
-          onClose={() => {
-            setIsOpen(false)
-            setError(false)
-          }}
-        >
-          <h2>Er du sikker på at du vil avbryte behandlingen?</h2>
-          <Button
-            variant="secondary"
-            size="medium"
-            className="button"
-            onClick={() => {
-              setIsOpen(false)
-              setError(false)
-            }}
-          >
-            {handlinger.AVBRYT_MODAL.NEI.navn}
-          </Button>
-          <Button variant="primary" size="medium" className="button" onClick={avbryt}>
-            {handlinger.AVBRYT_MODAL.JA.navn}
-          </Button>
+      <Modal
+        open={isOpen}
+        onClose={() => {
+          setIsOpen(false)
+          setError(false)
+        }}
+        aria-labelledby="modal-heading"
+        className={"padding-modal"}
+      >
+        <Modal.Content>
+          <Heading level={'1'} spacing size={'medium'} id="modal-heading">
+            Er du sikker på at du vil avbryte behandlingen?
+          </Heading>
+          <ButtonWrapper>
+            <Button
+              variant="secondary"
+              size="medium"
+              className="button"
+              onClick={() => {
+                setIsOpen(false)
+                setError(false)
+              }}
+            >
+              {handlinger.AVBRYT_MODAL.NEI.navn}
+            </Button>
+            <Button variant="primary" size="medium" className="button" onClick={avbryt}>
+              {handlinger.AVBRYT_MODAL.JA.navn}
+            </Button>
+          </ButtonWrapper>
           {error && <WarningText>Det oppsto enn feil ved avbryting av behandlingen.</WarningText>}
-        </Modal>
-      )}
+        </Modal.Content>
+      </Modal>
     </>
   )
 }

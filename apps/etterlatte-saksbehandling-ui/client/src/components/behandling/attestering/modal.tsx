@@ -1,29 +1,39 @@
-import { Button } from '@navikt/ds-react'
-import { Modal } from '~shared/modal/modal'
+import { Button, Heading, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 
 export type Props = {
   tekst: string
   tekstKnappJa: string
   tekstKnappNei: string
-  funksjon: () => void
+  onYesClick: () => void
   setModalisOpen: React.Dispatch<React.SetStateAction<boolean>>
+  open: boolean
 }
-export const GeneriskModal: React.FC<Props> = ({ tekst, tekstKnappJa, tekstKnappNei, funksjon, setModalisOpen }) => {
+export const GeneriskModal: React.FC<Props> = ({
+  tekst,
+  tekstKnappJa,
+  tekstKnappNei,
+  onYesClick,
+  setModalisOpen,
+  open,
+}) => {
   return (
     <Modal
+      open={open}
       onClose={() => {
         setModalisOpen(false)
       }}
+      aria-labelledby="modal-heading"
+      className={'padding-modal'}
     >
-      <ModalContent>
-        <h2>{tekst}</h2>
-        <div>
-          <Button variant="primary" size="medium" className="button" onClick={funksjon}>
+      <Modal.Content>
+        <Heading spacing level="1" id="modal-heading" size="medium">
+          {tekst}
+        </Heading>
+        <ButtonWrapper>
+          <Button variant="primary" size="medium" className="button" onClick={onYesClick}>
             {tekstKnappJa}
           </Button>
-        </div>
-        <div>
           <Button
             variant="secondary"
             size="medium"
@@ -34,20 +44,15 @@ export const GeneriskModal: React.FC<Props> = ({ tekst, tekstKnappJa, tekstKnapp
           >
             {tekstKnappNei}
           </Button>
-        </div>
-      </ModalContent>
+        </ButtonWrapper>
+      </Modal.Content>
     </Modal>
   )
 }
 
-export const ModalContent = styled.div`
-  .button {
-    width: fit-content;
-    padding: 0.5em 2.5em 0.5em 2.5em;
-    margin-top: 1em;
-  }
 
-  h2 {
-    width: 500px;
-  }
+export const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 1em;
 `

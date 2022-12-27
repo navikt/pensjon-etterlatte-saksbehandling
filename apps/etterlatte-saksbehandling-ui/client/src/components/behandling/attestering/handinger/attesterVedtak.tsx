@@ -27,15 +27,14 @@ export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
           Iverksett vedtak
         </Button>
       </ButtonWrapper>
-      {modalisOpen && (
-        <GeneriskModal
-          tekst="Er du sikker på at vil iverksette vedtaket?"
-          tekstKnappJa="Ja, iverksett vedtak"
-          tekstKnappNei=" Nei, gå tilbake"
-          funksjon={attester}
-          setModalisOpen={setModalisOpen}
-        />
-      )}
+      <GeneriskModal
+        tekst="Er du sikker på at vil iverksette vedtaket?"
+        tekstKnappJa="Ja, iverksett vedtak"
+        tekstKnappNei=" Nei, gå tilbake"
+        onYesClick={attester}
+        setModalisOpen={setModalisOpen}
+        open={modalisOpen}
+      />
     </>
   )
 }

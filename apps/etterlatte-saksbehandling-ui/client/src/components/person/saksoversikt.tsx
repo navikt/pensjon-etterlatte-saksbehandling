@@ -1,7 +1,6 @@
 import { Saksliste } from './saksliste'
 import styled from 'styled-components'
 import { Grunnlagsendringshendelse, IBehandlingsammendrag } from './typer'
-import { useNavigate } from 'react-router-dom'
 import { INasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
 import { Heading, Tag } from '@navikt/ds-react'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
@@ -17,17 +16,12 @@ export const Saksoversikt = ({
   behandlingliste: IBehandlingsammendrag[] | undefined
   grunnlagshendelser: Grunnlagsendringshendelse[] | undefined
 }) => {
-  const navigate = useNavigate()
   const behandlinger = behandlingliste ? behandlingliste : []
   const sakId = behandlinger[0]?.sak
 
   const sortertListe = behandlinger.sort((a, b) =>
     new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ? 1 : -1
   )
-
-  const goToBehandling = (behandlingsId: string) => {
-    navigate(`/behandling/${behandlingsId}/soeknadsoversikt`)
-  }
 
   return (
     <>
@@ -53,7 +47,7 @@ export const Saksoversikt = ({
                 ) : null}
                 <div className="behandlinger">
                   <h2>Behandlinger</h2>
-                  <Saksliste behandlinger={sortertListe} goToBehandling={goToBehandling} />
+                  <Saksliste behandlinger={sortertListe} />
                 </div>
               </>
             ),

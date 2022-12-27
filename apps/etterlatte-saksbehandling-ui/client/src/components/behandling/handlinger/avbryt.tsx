@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Link } from '@navikt/ds-react'
+import { Button } from '@navikt/ds-react'
 import { Modal } from '~shared/modal/modal'
 import { WarningText } from '~shared/styled'
 import { avbrytBehandling } from '~shared/api/behandling'
@@ -28,9 +28,9 @@ export const AvbrytBehandling = () => {
 
   return (
     <>
-      <Link className="textButton" onClick={() => setIsOpen(true)}>
+      <Button variant={"tertiary"} className="textButton" onClick={() => setIsOpen(true)}>
         {handlinger.AVBRYT.navn}
-      </Link>
+      </Button>
 
       {isOpen && (
         <Modal

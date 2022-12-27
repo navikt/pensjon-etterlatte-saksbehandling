@@ -39,16 +39,21 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
     logger.error('Feil ved validering av token', e)
     return res.status(401).send('ugyldig token')
   }
-  const NAVident = parsedToken.NAVident
-  logger.info(`Navident logger på ${NAVident} cluster-name ${process.env.NAIS_CLUSTER_NAME}`)
-  const cluster = process.env.NAIS_CLUSTER_NAME
-  if (['prod-gcp', 'dev-gcp'].includes(cluster!!)) {
-    const saksbehandlere = process.env.saksbehandlere?.split(':')
-    if (!saksbehandlere?.includes(NAVident)) {
-      logger.error(`Saksbehandler utenfor scope forsøke å logge på, ident: ${NAVident}`)
-      return res.status(401).send('Saksbehandler mangler tilgang')
+
+  if (process.env.TILGANGSSTYRING_ENABLED && process.env.TILGANGSSTYRING_ENABLED === 'true') {
+    const NAVident = parsedToken.NAVident
+    const cluster = process.env.NAIS_CLUSTER_NAME
+    if (['prod-gcp', 'dev-gcp'].includes(cluster!!)) {
+      const saksbehandlere = process.env.saksbehandlere?.split(':')
+      if (!saksbehandlere?.includes(NAVident)) {
+        logger.error(`Saksbehandler utenfor scope forsøke å logge på, ident: ${NAVident}`)
+        return res.status(401).send('Saksbehandler mangler tilgang')
+      }
+      if (cluster === 'dev-gcp') {
+        logger.info(`Navident logger på ${NAVident} cluster-name ${process.env.NAIS_CLUSTER_NAME}`)
+        logger.info(`saksbehandlere fra secret: ${process.env.saksbehandlere}`)
+      }
     }
-    if (cluster === 'dev-gcp') logger.info(`saksbehandlere fra secret: ${process.env.saksbehandlere}`)
   }
 
   return next()

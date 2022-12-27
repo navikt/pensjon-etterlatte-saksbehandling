@@ -58,6 +58,8 @@ spec:
       value: http://etterlatte-behandling
     - name: VEDTAK_API_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: TILGANGSSTYRING_ENABLED
+      value: true
   accessPolicy:
     outbound:
       external:

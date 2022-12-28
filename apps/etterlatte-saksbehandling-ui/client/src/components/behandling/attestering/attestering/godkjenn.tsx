@@ -22,6 +22,7 @@ export const Godkjenn: React.FC<PropsIverksett> = ({ behandlingId }) => {
           onChange={(e) => setKommentarFraAttestant(e.target.value)}
           minRows={2}
           size="small"
+          autoComplete="off"
         />
 
       </div>

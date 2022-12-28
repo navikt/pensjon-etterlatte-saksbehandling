@@ -74,6 +74,7 @@ export const EndreVurdering = ({
         minRows={3}
         size="small"
         error={begrunnelseError ? begrunnelseError : false}
+        autoComplete="off"
       />
       <Button
         loading={isPending(kommerBarnetTilGode)}

@@ -36,6 +36,7 @@ export const Underkjenn = ({ behandlingId }: { behandlingId: string }) => {
           onChange={(e) => setTilbakemeldingFraAttestant(e.target.value)}
           minRows={3}
           size="small"
+          autoComplete="off"
         />
       </div>
       <UnderkjennVedtak

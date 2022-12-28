@@ -37,6 +37,7 @@ export const GlobalFilter = ({
             onChange(e.target.value)
           }}
           placeholder={'Søk i hele tabellen'}
+          autoComplete="off"
         />
       </FilterElement>
     </FilterWrapper>

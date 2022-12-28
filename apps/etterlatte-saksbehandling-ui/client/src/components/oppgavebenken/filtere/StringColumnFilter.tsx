@@ -21,6 +21,7 @@ const StringColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOp
             settFilterVerdi(oppgaveFelt, e.target.value, oppgaveFelter, setOppgaveFelter)
           }}
           placeholder={'Søk'}
+          autoComplete="off"
         />
       </FilterElement>
     </FilterWrapper>

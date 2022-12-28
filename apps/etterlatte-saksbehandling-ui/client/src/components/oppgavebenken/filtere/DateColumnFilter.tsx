@@ -25,7 +25,6 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
     <FilterElement>
       <DatoSection>
         <Label htmlFor={oppgaveFelt.noekkel}>{oppgaveFelt.label}</Label>
-
         <Datovelger>
           <DatePicker
             ref={datepickerRef}
@@ -39,7 +38,6 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
             className={'skjemaelement__input'}
             name={oppgaveFelt.noekkel}
           />
-
           <KalenderIkon
             tabIndex={0}
             onKeyPress={toggleDatepicker}

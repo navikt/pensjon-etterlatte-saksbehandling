@@ -157,10 +157,9 @@ export const Vurdering = ({
       )}
       {aktivVurdering && (
         <>
-          <VurderingsTitle>Er hovedvilkår oppfylt?</VurderingsTitle>
           <RadioGroupWrapper>
             <RadioGroup
-              legend=""
+              legend="Er hovedvilkår oppfylt?"
               size="small"
               className="radioGroup"
               onChange={(event) => {
@@ -180,10 +179,9 @@ export const Vurdering = ({
 
           {VurderingsResultat.IKKE_OPPFYLT === resultat && vilkaar.unntaksvilkaar && vilkaar.unntaksvilkaar.length > 0 && (
             <>
-              <VurderingsTitle>Er unntak fra hovedregelen oppfylt?</VurderingsTitle>
               <Unntaksvilkaar>
                 <RadioGroup
-                  legend=""
+                  legend="Er unntak fra hovedregelen oppfylt?"
                   size="small"
                   className="radioGroup"
                   onChange={(event) => setVilkaarsUnntakType(event)}
@@ -205,8 +203,9 @@ export const Vurdering = ({
               </Unntaksvilkaar>
             </>
           )}
+          <VurderingsLabel htmlFor={vilkaar.hovedvilkaar.tittel}>Begrunnelse (obligatorisk)</VurderingsLabel>
           <Textarea
-            label="Begrunnelse (obligatorisk)"
+            label=""
             hideLabel={false}
             placeholder="Gi en begrunnelse for vurderingen"
             value={kommentar}
@@ -219,6 +218,7 @@ export const Vurdering = ({
             size="small"
             error={kommentarError ? kommentarError : false}
             autoComplete="off"
+            name={vilkaar.hovedvilkaar.tittel}
           />
           <VurderingKnapper>
             <Button variant={'primary'} size={'small'} onClick={vilkaarVurdert}>
@@ -276,24 +276,22 @@ export const KildeVilkaar = styled.div`
   }
 `
 
-export const KildeOverskrift = styled.div`
-  color: black;
-  font-size: 1.2em;
-`
-
-export const VurderingsTitle = styled.div`
-  display: flex;
-  font-size: 0.8em;
-  font-weight: bold;
+export const VurderingsLabel = styled.label`
+  font-size: 1rem;
 `
 
 export const RadioGroupWrapper = styled.div`
-  margin-top: 0.5em;
   margin-bottom: 1em;
 
   .flex {
     display: flex;
     gap: 20px;
+  }
+
+  legend {
+    display: flex;
+    font-size: 0.8em;
+    font-weight: bold;
   }
 `
 

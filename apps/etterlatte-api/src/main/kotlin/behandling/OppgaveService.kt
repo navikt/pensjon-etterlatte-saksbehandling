@@ -28,6 +28,7 @@ enum class Handling {
     BEHANDLE
 }
 
+// TODO: slett alt dette hvis det andre fungerer
 class OppgaveService(private val behandlingKlient: BehandlingKlient) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 

@@ -105,7 +105,9 @@ fun Application.module(beanFactory: BeanFactory) {
                 beanFactory.revurderingService(),
                 beanFactory.manueltOpphoerService()
             )
-            oppgaveRoutes(OppgaveDao(ds.dataSource))
+            route("api") {
+                oppgaveRoutes(OppgaveDao(ds.dataSource))
+            }
             grunnlagsendringshendelseRoute(beanFactory.grunnlagsendringshendelseService())
         }
     }

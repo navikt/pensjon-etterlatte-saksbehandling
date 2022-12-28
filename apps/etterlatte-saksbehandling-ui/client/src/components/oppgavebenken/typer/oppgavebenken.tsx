@@ -1,6 +1,6 @@
 export interface IOppgave {
   sakId: number
-  behandlingsId: string
+  behandlingId: string
   regdato: Date
   fristdato: Date
   fnr: string

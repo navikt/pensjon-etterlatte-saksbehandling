@@ -1,13 +1,8 @@
 import { apiClient, ApiResponse } from './apiClient'
 
-//ikke sikkert vi trenger denne etter mapping til oppgaver, lar stå enn så lenge
-export const hentSaker = async (): Promise<ApiResponse<unknown>> => {
-  return apiClient.get('/api/saker')
-}
-
 export interface OppgaveDTO {
   sakId: number
-  behandlingsId: string
+  behandlingId: string
   regdato: Date
   fristdato: Date
   fnr: string

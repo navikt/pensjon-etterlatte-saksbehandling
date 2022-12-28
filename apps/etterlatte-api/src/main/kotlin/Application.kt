@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BeregningKlientImpl
 import no.nav.etterlatte.behandling.GrunnlagKlient
 import no.nav.etterlatte.behandling.GrunnlagService
-import no.nav.etterlatte.behandling.OppgaveService
 import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.VedtakKlient
 import no.nav.etterlatte.behandling.VilkaarsvurderingKlientImpl
@@ -43,7 +42,6 @@ class ApplicationContext(configLocation: String? = null) {
         beregningKlient = beregningKlient,
         vilkaarsvurderingKlient = vilkaarsvurderingKlient
     )
-    val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
     val grunnlagService = GrunnlagService(behandlingKlient, rapid)
 
     private fun httpClient() = HttpClient {

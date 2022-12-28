@@ -70,7 +70,6 @@ class Server(applicationContext: ApplicationContext) {
                     authenticate {
                         route("api") {
                             behandlingRoute(applicationContext.behandlingService)
-                            oppgaveRoute(applicationContext.oppgaveService)
                             grunnlagRoute(applicationContext.grunnlagService)
                         }
                     }

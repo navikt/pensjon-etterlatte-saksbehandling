@@ -23,8 +23,8 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
 
   return (
     <FilterElement>
-      <section>
-        <Label style={{ marginBottom: '8px' }}>{oppgaveFelt.label}</Label>
+      <DatoSection>
+        <Label htmlFor={oppgaveFelt.noekkel}>{oppgaveFelt.label}</Label>
 
         <Datovelger>
           <DatePicker
@@ -37,6 +37,7 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
             autoComplete="off"
             preventOpenOnFocus={true}
             className={'skjemaelement__input'}
+            name={oppgaveFelt.noekkel}
           />
 
           <KalenderIkon
@@ -50,7 +51,7 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
             <Calender color="white" />
           </KalenderIkon>
         </Datovelger>
-      </section>
+      </DatoSection>
     </FilterElement>
   )
 }
@@ -85,6 +86,11 @@ const KalenderIkon = styled.div`
   border-radius: 0 4px 4px 0;
   height: 48px;
   line-height: 42px;
+`
+
+const DatoSection = styled.section`
+display: grid;
+gap: 0.5em;
 `
 
 export default DateColumnFilter

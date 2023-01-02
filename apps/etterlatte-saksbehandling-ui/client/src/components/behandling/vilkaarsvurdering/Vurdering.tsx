@@ -218,6 +218,7 @@ export const Vurdering = ({
             minRows={3}
             size="small"
             error={kommentarError ? kommentarError : false}
+            autoComplete="off"
           />
           <VurderingKnapper>
             <Button variant={'primary'} size={'small'} onClick={vilkaarVurdert}>

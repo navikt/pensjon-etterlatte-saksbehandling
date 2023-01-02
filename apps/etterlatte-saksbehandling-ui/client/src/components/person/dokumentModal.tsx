@@ -1,4 +1,4 @@
-import { Button, Modal } from '@navikt/ds-react'
+import { Button, Modal, Heading } from '@navikt/ds-react'
 import { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import styled from 'styled-components'
@@ -49,13 +49,20 @@ export default function DokumentModal({
 
   return (
     <>
-      <Button variant={'secondary'} size={'small'} onClick={() => open(journalpostId, dokumentInfoId)}>
-        <Findout />
+      <Button
+        variant={'secondary'}
+        size={'small'}
+        onClick={() => open(journalpostId, dokumentInfoId)}
+        icon={<Findout />}
+      >
+        Åpne dokument
       </Button>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
         <Modal.Content>
-          <h2>{tittel}</h2>
+          <Heading spacing level={'2'} size={'medium'}>
+            {tittel}
+          </Heading>
 
           <PdfVisning fileUrl={fileURL} error={error} />
           <Spinner visible={!hasLoaded} label="Laster inn PDF" />

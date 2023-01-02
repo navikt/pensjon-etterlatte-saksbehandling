@@ -68,7 +68,7 @@ export const Sammendrag = ({ beregning, soeker }: Props) => {
       <Heading spacing size="small" level="5">
         Beregningssammendrag
       </Heading>
-      <Table className="table">
+      <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell>Periode</Table.HeaderCell>
@@ -81,7 +81,7 @@ export const Sammendrag = ({ beregning, soeker }: Props) => {
         </Table.Header>
         <Table.Body>
           {beregningsperioder?.map((beregning, key) => (
-            <Table.Row key={key}>
+            <Table.Row key={key} shadeOnHover={false}>
               <Table.DataCell>
                 {`${formaterStringDato(beregning.datoFOM)} - ${
                   beregning.datoTOM ? formaterDato(lastDayOfMonth(new Date(beregning.datoTOM))) : ''

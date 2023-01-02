@@ -18,7 +18,7 @@ export const Dokumentliste = ({
 }) => {
   return (
     <TableWrapper>
-      <Table>
+      <Table zebraStripes>
         <Table.Header className="test">
           <Table.Row>
             {colonner.map((col) => (
@@ -26,9 +26,9 @@ export const Dokumentliste = ({
             ))}
           </Table.Row>
         </Table.Header>
-        {dokumenter.map((brev, i) => (
-          <Table.Body key={i}>
-            <Table.Row>
+        <Table.Body>
+          {dokumenter.map((brev, i) => (
+            <Table.Row key={i} shadeOnHover={false}>
               <Table.DataCell key={`data${brev.journalpostId}`}>{brev.journalpostId}</Table.DataCell>
               <Table.DataCell key={`data${brev.tittel}`}>{brev.tittel}</Table.DataCell>
               <Table.DataCell key={`data${brev.avsenderMottaker.navn}`}>{brev.avsenderMottaker.navn}</Table.DataCell>
@@ -47,11 +47,9 @@ export const Dokumentliste = ({
                 />
               </Table.DataCell>
             </Table.Row>
-          </Table.Body>
-        ))}
-        {dokumenter.length === 0 && !error && (
-          <Table.Body>
-            <Table.Row>
+          ))}
+          {dokumenter.length === 0 && !error && (
+            <Table.Row shadeOnHover={false}>
               <IngenDokumenterRad colSpan={6}>
                 {dokumenterHentet ? (
                   'Ingen dokumenter ble funnet'
@@ -60,8 +58,8 @@ export const Dokumentliste = ({
                 )}
               </IngenDokumenterRad>
             </Table.Row>
-          </Table.Body>
-        )}
+          )}
+        </Table.Body>
       </Table>
       {error && (
         <Alert variant={'error'} style={{ marginTop: '10px' }}>

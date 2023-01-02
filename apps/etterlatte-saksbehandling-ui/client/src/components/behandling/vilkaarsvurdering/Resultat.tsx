@@ -145,6 +145,7 @@ export const Resultat: React.FC<Props> = ({
               minRows={3}
               size="medium"
               error={kommentarError ? kommentarError : false}
+              autoComplete="off"
             />
             <Button variant={'primary'} size={'small'} onClick={lagreVilkaarsvurderingResultat}>
               Lagre

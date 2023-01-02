@@ -1,21 +1,14 @@
-import { Table } from '@navikt/ds-react'
-import styled from 'styled-components'
+import { Table, Link } from '@navikt/ds-react'
 import { AarsaksTyper, IBehandlingsammendrag } from './typer'
 import { formaterStringDato, formaterEnumTilLesbarString } from '~utils/formattering'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
 
-export const Saksliste = ({
-  behandlinger,
-  goToBehandling,
-}: {
-  behandlinger: IBehandlingsammendrag[]
-  goToBehandling: (behandlingsId: string) => void
-}) => {
+export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
   return (
     <div>
-      <Table>
+      <Table zebraStripes>
         <Table.Header>
           <Table.Row>
             {colonner.map((col) => (
@@ -23,10 +16,9 @@ export const Saksliste = ({
             ))}
           </Table.Row>
         </Table.Header>
-
-        {behandlinger.map((behandling, i) => (
-          <Table.Body key={i}>
-            <Table.Row>
+        <Table.Body>
+          {behandlinger.map((behandling, i) => (
+            <Table.Row key={i} shadeOnHover={false}>
               <Table.DataCell key={`data${behandling.behandlingOpprettet}`}>
                 {formaterStringDato(behandling.behandlingOpprettet)}
               </Table.DataCell>
@@ -42,11 +34,11 @@ export const Saksliste = ({
               }
               <Table.DataCell key={'vedtaksdato'}></Table.DataCell>
               <Table.DataCell key={i}>
-                <Link onClick={() => goToBehandling(behandling.id.toString())}>Gå til behandling</Link>
+                <Link href={`/behandling/${behandling.id}/soeknadsoversikt`}>Gå til behandling</Link>
               </Table.DataCell>
             </Table.Row>
-          </Table.Body>
-        ))}
+          ))}
+        </Table.Body>
       </Table>
     </div>
   )
@@ -73,9 +65,3 @@ function endringStatusNavn(status: IBehandlingStatus) {
       return status
   }
 }
-
-export const Link = styled.div`
-  cursor: pointer;
-  text-decoration: underline;
-  color: #0067c5;
-`

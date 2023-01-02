@@ -136,6 +136,7 @@ export const DashedBorder = styled.div`
   background-repeat: repeat-x;
   width: 100%;
   padding: 1px;
+  margin-bottom: 1em;
 `
 
 export const TypeStatusWrap = styled.div<{ type: string }>`

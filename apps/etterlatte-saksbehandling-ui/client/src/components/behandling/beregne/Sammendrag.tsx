@@ -17,11 +17,13 @@ interface ToolTipPerson {
 interface Props {
   beregning: Beregning
   soeker?: IPdlPerson
+  soesken: IPdlPerson[]
 }
 
-export const Sammendrag = ({ beregning, soeker }: Props) => {
+export const Sammendrag = ({ beregning, soeker, soesken }: Props) => {
   const beregningsperioder = beregning.beregningsperioder
 
+  //TODO: egen komponent
   const GjelderTooltip = ({ soesken, soeker }: { soesken: ToolTipPerson[]; soeker: ToolTipPerson }) => {
     const [isOpen, setIsOpen] = useState(false)
     const ref = useRef(null)
@@ -80,24 +82,32 @@ export const Sammendrag = ({ beregning, soeker }: Props) => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {beregningsperioder?.map((beregning, key) => (
+          {beregningsperioder?.map((beregningsperiode, key) => (
             <Table.Row key={key} shadeOnHover={false}>
               <Table.DataCell>
-                {`${formaterStringDato(beregning.datoFOM)} - ${
-                  beregning.datoTOM ? formaterDato(lastDayOfMonth(new Date(beregning.datoTOM))) : ''
+                {`${formaterStringDato(beregningsperiode.datoFOM)} - ${
+                  beregningsperiode.datoTOM ? formaterDato(lastDayOfMonth(new Date(beregningsperiode.datoTOM))) : ''
                 }`}
               </Table.DataCell>
-              <Table.DataCell>{beregning.type == 'GP' ? 'Grunnpensjon' : beregning.type}</Table.DataCell>
-              <Table.DataCell>40 år</Table.DataCell>
-              <Table.DataCell>{beregning.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
-                {beregning.soeskenFlokk && soeker ? (
-                  <GjelderTooltip soesken={beregning.soeskenFlokk} soeker={soeker} />
+                {beregningsperiode.type == 'GP' ? 'Grunnpensjon' : beregningsperiode.type}
+              </Table.DataCell>
+              <Table.DataCell>40 år</Table.DataCell>
+              <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
+              <Table.DataCell>
+                {beregningsperiode.soeskenFlokk && soeker ? (
+                  <GjelderTooltip
+                    soesken={beregningsperiode.soeskenFlokk.map((fnr) => {
+                      const pdlPerson = soesken.find((p) => p.foedselsnummer === fnr)
+                      return pdlPerson!!
+                    })}
+                    soeker={soeker}
+                  />
                 ) : (
                   '-'
                 )}
               </Table.DataCell>
-              <Table.DataCell>{beregning.utbetaltBeloep} kr</Table.DataCell>
+              <Table.DataCell>{beregningsperiode.utbetaltBeloep} kr</Table.DataCell>
             </Table.Row>
           ))}
         </Table.Body>

@@ -3,7 +3,6 @@ package no.nav.etterlatte.model
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 import java.util.*
@@ -15,7 +14,7 @@ data class BeregningsperiodeDAO(
     val datoFOM: YearMonth,
     val datoTOM: YearMonth?,
     val utbetaltBeloep: Int,
-    val soeskenFlokk: List<Person>?,
+    val soeskenFlokk: List<String>?,
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val grunnlagMetadata: Metadata

@@ -17,7 +17,7 @@ export interface Beregningsperiode {
   datoFOM: string
   datoTOM: string
   utbetaltBeloep: number
-  soeskenFlokk: any[]
+  soeskenFlokk: string[]
   grunnbelopMnd: number
   grunnbelop: number
 }

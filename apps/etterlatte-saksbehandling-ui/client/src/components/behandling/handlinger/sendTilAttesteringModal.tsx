@@ -1,16 +1,15 @@
-import { Button } from '@navikt/ds-react'
+import { Button, Modal, Heading, BodyShort } from '@navikt/ds-react'
 import { useState } from 'react'
-import { Modal } from '~shared/modal/modal'
-import styled from 'styled-components'
 import { handlinger } from './typer'
 import { fattVedtak } from '~shared/api/behandling'
 import { useMatch } from 'react-router'
 import { useNavigate } from 'react-router-dom'
+import { ButtonWrapper } from "~shared/modal/modal";
 
 export const SendTilAttesteringModal: React.FC = () => {
   const navigate = useNavigate()
 
-  const [beregneModalisOpen, setBeregneModalisOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const match = useMatch('/behandling/:behandlingId/*')
 
   const goToOppgavebenken = () => {
@@ -22,7 +21,7 @@ export const SendTilAttesteringModal: React.FC = () => {
 
     fattVedtak(match.params.behandlingId).then((response) => {
       if (response.status === 'ok') {
-        setBeregneModalisOpen(false)
+        setIsOpen(false)
         goToOppgavebenken()
       }
     })
@@ -30,24 +29,29 @@ export const SendTilAttesteringModal: React.FC = () => {
 
   return (
     <>
-      <Button variant="primary" size="medium" className="button" onClick={() => setBeregneModalisOpen(true)}>
+      <Button variant="primary" size="medium" className="button" onClick={() => setIsOpen(true)}>
         {handlinger.ATTESTERING.navn}
       </Button>
-      {beregneModalisOpen && (
-        <Modal
-          onClose={() => {
-            setBeregneModalisOpen(false)
-          }}
-        >
-          <ModalContent>
-            <h2>Er du sikker på at du vil sende vedtaket til attestering?</h2>
-            <p>Når du sender til attestering vil vedtaket låses og du får ikke gjort endringer</p>
+      <Modal
+        open={isOpen}
+        onClose={() => {
+          setIsOpen(false)
+        }}
+        aria-labelledby="modal-heading"
+        className={"padding-modal"}
+      >
+        <Modal.Content>
+          <Heading spacing level="1" id="modal-heading" size="medium">
+            Er du sikker på at du vil sende vedtaket til attestering?
+          </Heading>
+          <BodyShort spacing>Når du sender til attestering vil vedtaket låses og du får ikke gjort endringer</BodyShort>
+          <ButtonWrapper>
             <Button
               variant="secondary"
               size="medium"
               className="button"
               onClick={() => {
-                setBeregneModalisOpen(false)
+                setIsOpen(false)
               }}
             >
               {handlinger.ATTESTERING_MODAL.NEI.navn}
@@ -55,17 +59,11 @@ export const SendTilAttesteringModal: React.FC = () => {
             <Button variant="primary" size="medium" className="button" onClick={send}>
               {handlinger.ATTESTERING_MODAL.JA.navn}
             </Button>
-          </ModalContent>
-        </Modal>
-      )}
+          </ButtonWrapper>
+        </Modal.Content>
+      </Modal>
     </>
   )
 }
 
-export const ModalContent = styled.div`
-  .button {
-    width: fit-content;
-    padding: 0.7em 2em 0.7em 2em;
-    margin-top: 1em;
-  }
-`
+

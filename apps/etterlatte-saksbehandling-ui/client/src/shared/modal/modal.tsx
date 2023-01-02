@@ -1,58 +1,59 @@
-import { ReactNode } from 'react'
+import { Button, Heading, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { Close } from '@navikt/ds-icons'
-import { Portal } from '../portal'
 
-export const Modal = (props: { onClose: any; children: ReactNode }) => {
+export type Props = {
+  tekst: string
+  tekstKnappJa: string
+  tekstKnappNei: string
+  onYesClick: () => void
+  setModalisOpen: React.Dispatch<React.SetStateAction<boolean>>
+  open: boolean
+}
+
+export const GeneriskModal: React.FC<Props> = ({
+  tekst,
+  tekstKnappJa,
+  tekstKnappNei,
+  onYesClick,
+  setModalisOpen,
+  open,
+}) => {
   return (
-    <Portal>
-      <ModalWrapper>
-        <ModalBox>
-          <CloseIconWrapper onClick={props.onClose}>
-            <Close color={'#0067C5'}/>
-          </CloseIconWrapper>
-          <div>{props.children}</div>
-        </ModalBox>
-      </ModalWrapper>
-    </Portal>
+    <Modal
+      open={open}
+      onClose={() => {
+        setModalisOpen(false)
+      }}
+      aria-labelledby="modal-heading"
+      className={'padding-modal'}
+    >
+      <Modal.Content>
+        <Heading spacing level="1" id="modal-heading" size="medium">
+          {tekst}
+        </Heading>
+        <ButtonWrapper>
+          <Button variant="primary" size="medium" className="button" onClick={onYesClick}>
+            {tekstKnappJa}
+          </Button>
+          <Button
+            variant="secondary"
+            size="medium"
+            className="button"
+            onClick={() => {
+              setModalisOpen(false)
+            }}
+          >
+            {tekstKnappNei}
+          </Button>
+        </ButtonWrapper>
+      </Modal.Content>
+    </Modal>
   )
 }
 
-const ModalWrapper = styled.div`
-  position: fixed;
-  background-color: rgba(0, 0, 0, 0.7);
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  z-index: 10;
-`
 
-const ModalBox = styled.div`
-  text-align: center;
-  border-radius: 4px;
-  background-color: #fff;
-  border: 2px solid #0067c5;
-  position: absolute;
-  min-width: fit-content;
-  max-width: 600px;
-  min-height: fit-content;
-  max-height: 500px;
-  margin: auto;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  padding: 2em;
+export const ButtonWrapper = styled.div`
   display: flex;
-  flex-direction: column;
-
-  .button {
-    margin: 0 1em 0.5em 1em;
-  }
-`
-
-const CloseIconWrapper = styled.div`
-  align-self: flex-end;
-  cursor: pointer;
+  justify-content: center;
+  gap: 1em;
 `

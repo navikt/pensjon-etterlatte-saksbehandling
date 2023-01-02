@@ -1,7 +1,7 @@
 import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
 import { ButtonWrapper } from '../styled'
-import { GeneriskModal } from '../modal'
+import { GeneriskModal } from '~shared/modal/modal'
 import { hentBehandling, underkjennVedtak } from '~shared/api/behandling'
 
 type Props = {
@@ -34,15 +34,14 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandlingId, kommentar, val
           Bekreft og send i retur
         </Button>
       </ButtonWrapper>
-      {modalisOpen && (
-        <GeneriskModal
-          tekst="Er du sikker på at vil underkjenne vedtak og sende i retur til saksbehandler?"
-          tekstKnappJa="Ja, send i retur"
-          tekstKnappNei=" Nei, gå tilbake"
-          funksjon={underkjenn}
-          setModalisOpen={setModalisOpen}
-        />
-      )}
+      <GeneriskModal
+        tekst="Er du sikker på at vil underkjenne vedtak og sende i retur til saksbehandler?"
+        tekstKnappJa="Ja, send i retur"
+        tekstKnappNei=" Nei, gå tilbake"
+        onYesClick={underkjenn}
+        setModalisOpen={setModalisOpen}
+        open={modalisOpen}
+      />
     </>
   )
 }

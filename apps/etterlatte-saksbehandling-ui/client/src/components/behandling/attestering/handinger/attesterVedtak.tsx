@@ -2,7 +2,7 @@ import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
 import { attesterVedtak, hentBehandling } from '~shared/api/behandling'
 import { ButtonWrapper } from '../styled'
-import { GeneriskModal } from '../modal'
+import { GeneriskModal } from '~shared/modal/modal'
 
 export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
   const [modalisOpen, setModalisOpen] = useState(false)
@@ -27,15 +27,14 @@ export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
           Iverksett vedtak
         </Button>
       </ButtonWrapper>
-      {modalisOpen && (
-        <GeneriskModal
-          tekst="Er du sikker på at vil iverksette vedtaket?"
-          tekstKnappJa="Ja, iverksett vedtak"
-          tekstKnappNei=" Nei, gå tilbake"
-          funksjon={attester}
-          setModalisOpen={setModalisOpen}
-        />
-      )}
+      <GeneriskModal
+        tekst="Er du sikker på at vil iverksette vedtaket?"
+        tekstKnappJa="Ja, iverksett vedtak"
+        tekstKnappNei=" Nei, gå tilbake"
+        onYesClick={attester}
+        setModalisOpen={setModalisOpen}
+        open={modalisOpen}
+      />
     </>
   )
 }

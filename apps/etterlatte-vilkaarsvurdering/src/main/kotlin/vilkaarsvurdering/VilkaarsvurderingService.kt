@@ -77,7 +77,7 @@ class VilkaarsvurderingService(
     private suspend fun opprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
         val (behandling, grunnlag, sak) = hentDataForVilkaarsvurdering(behandlingId, accessToken)
 
-        val sakType = SakType.valueOf(sak.sakType)
+        val sakType = sak.sakType
         val behandlingType = requireNotNull(behandling.behandlingType)
         val virkningstidspunkt = behandling.virkningstidspunkt
             ?: throw VirkningstidspunktIkkeSattException("Virkningstidspunkt ikke satt for behandling $behandlingId")

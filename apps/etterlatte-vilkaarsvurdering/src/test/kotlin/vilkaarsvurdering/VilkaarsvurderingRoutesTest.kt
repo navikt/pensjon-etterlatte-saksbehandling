@@ -392,6 +392,7 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -411,6 +412,7 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -431,6 +433,7 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returnsMany listOf(true, false)
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -482,7 +485,7 @@ internal class VilkaarsvurderingRoutesTest {
     private fun lagSak() = mockk<Sak>().apply {
         every { id } returns 1L
         every { ident } returns "ident"
-        every { sakType } returns SakType.BARNEPENSJON.toString()
+        every { sakType } returns SakType.BARNEPENSJON
     }
 
     private companion object {

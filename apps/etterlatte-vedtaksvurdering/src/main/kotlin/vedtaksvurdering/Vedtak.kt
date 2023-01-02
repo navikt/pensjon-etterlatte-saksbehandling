@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -27,7 +28,7 @@ import java.util.*
 data class Vedtak(
     val id: Long,
     val sakId: Long?,
-    val sakType: String?,
+    val sakType: SakType?,
     val behandlingId: UUID,
     val saksbehandlerId: String?,
     val beregningsResultat: Beregningsresultat?,

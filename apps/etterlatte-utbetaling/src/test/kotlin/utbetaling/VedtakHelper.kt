@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -12,7 +13,6 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
@@ -35,7 +35,7 @@ fun vedtak(
         id = UUID.randomUUID(),
         type = BehandlingType.FØRSTEGANGSBEHANDLING
     ),
-    saktype: Saktype = Saktype.BARNEPENSJON
+    saktype: SakType = SakType.BARNEPENSJON
 
 ): Vedtak = Vedtak(
     vedtakId = vedtakId,
@@ -43,7 +43,7 @@ fun vedtak(
     sak = Sak(
         id = sakId,
         ident = ident,
-        sakType = saktype.name
+        sakType = saktype
     ),
     type = VedtakType.INNVILGELSE,
     virk = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 2)),
@@ -69,14 +69,14 @@ fun ugyldigVedtakTilUtbetaling(
         id = UUID.randomUUID(),
         type = BehandlingType.FØRSTEGANGSBEHANDLING
     ),
-    saktype: Saktype = Saktype.BARNEPENSJON
+    saktype: SakType = SakType.BARNEPENSJON
 ): Vedtak = Vedtak(
     vedtakId = vedtakId,
     behandling = behandling,
     sak = Sak(
         id = 1,
         ident = "12345678913",
-        sakType = saktype.name
+        sakType = saktype
     ),
     type = VedtakType.INNVILGELSE,
     virk = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 2)),

@@ -117,7 +117,7 @@ internal class DBTest {
         coEvery { behandling.hentSak(any(), any()) } returns mockk<Sak>().apply {
             every { id } returns 1L
             every { ident } returns "ident"
-            every { sakType } returns SakType.BARNEPENSJON.toString()
+            every { sakType } returns SakType.BARNEPENSJON
         }
         coEvery { vilkaarsvurdering.hentVilkaarsvurdering(any(), any()) } returns VilkaarsvurderingTestData
             .oppfylt.copy(

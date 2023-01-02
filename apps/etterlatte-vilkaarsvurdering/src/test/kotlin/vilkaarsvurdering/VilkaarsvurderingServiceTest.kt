@@ -78,7 +78,7 @@ internal class VilkaarsvurderingServiceTest {
         coEvery { behandlingKlient.hentSak(any(), any()) } returns mockk<Sak>().apply {
             every { id } returns 1L
             every { ident } returns "ident"
-            every { sakType } returns SakType.BARNEPENSJON.toString()
+            every { sakType } returns SakType.BARNEPENSJON
         }
 
         repository = VilkaarsvurderingRepository(ds)

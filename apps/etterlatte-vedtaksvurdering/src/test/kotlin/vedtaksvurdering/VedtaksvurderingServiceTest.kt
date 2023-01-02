@@ -41,13 +41,12 @@ internal class VedtaksvurderingServiceTest {
 
     private val sakId = 2L
     private val behandlingId = UUID.randomUUID()
-    private val sakType = SakType.BARNEPENSJON
     private val accessToken = "sesam sesam"
 
     private val vedtakSomIkkeErFattet = Vedtak(
         0,
         sakId,
-        sakType.toString(),
+        SakType.BARNEPENSJON,
         behandlingId,
         null,
         null,

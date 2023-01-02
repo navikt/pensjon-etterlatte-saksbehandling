@@ -27,7 +27,7 @@ class VilkaarsvurderingService(
             logger.info("Vilkårsvurdering finnes for behandling $behandlingId")
             vilkaarsvurdering
         } else {
-            sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
+            tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
                 logger.info("Ny vilkårsvurdering opprettes for behandling $behandlingId")
                 opprettVilkaarsvurdering(behandlingId, accessToken)
             }
@@ -38,27 +38,34 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         accessToken: String,
         resultat: VilkaarsvurderingResultat
-    ): Vilkaarsvurdering =
-        sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
-            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
+    ): Vilkaarsvurdering = tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
+        val vilkaarsvurdering = vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
+        behandlingKlient.vilkaarsvurder(behandlingId, accessToken, true)
+        vilkaarsvurdering
+    }
+
+    suspend fun slettTotalVurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
+        if (behandlingKlient.opprett(behandlingId, accessToken, false)) {
+            val vilkaarsvurdering = vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
+            behandlingKlient.opprett(behandlingId, accessToken, true)
+
+            return vilkaarsvurdering
         }
 
-    suspend fun slettTotalVurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering =
-        sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
-            vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
-        }
+        throw BehandlingstilstandException
+    }
 
     suspend fun oppdaterVurderingPaaVilkaar(
         behandlingId: UUID,
         accessToken: String,
         vurdertVilkaar: VurdertVilkaar
     ): Vilkaarsvurdering =
-        sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
+        tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
             vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
         }
 
     suspend fun slettVurderingPaaVilkaar(behandlingId: UUID, accessToken: String, vilkaarId: UUID): Vilkaarsvurdering =
-        sjekkOgCommitVilkaarsvurdering(behandlingId, accessToken) {
+        tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
             vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
         }
 
@@ -72,43 +79,36 @@ class VilkaarsvurderingService(
 
         logger.info("Oppretter vilkårsvurdering med sakType $sakType og behandlingType $behandlingType")
 
-        return when (sakType) {
+        val vilkaar = when (sakType) {
             SakType.BARNEPENSJON ->
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
-                        vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-                            Vilkaarsvurdering(
-                                sakId = behandling.sak,
-                                behandlingId = behandlingId,
-                                vilkaar = BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt),
-                                virkningstidspunkt = virkningstidspunkt.dato,
-                                grunnlagVersjon = grunnlag.metadata.versjon
-                            )
-                        )
+                        BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
 
                     BehandlingType.REVURDERING ->
-                        vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-                            Vilkaarsvurdering(
-                                sakId = behandling.sak,
-                                behandlingId = behandlingId,
-                                vilkaar = mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak)),
-                                virkningstidspunkt = virkningstidspunkt.dato,
-                                grunnlagVersjon = grunnlag.metadata.versjon
-                            )
-                        )
+                        mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak))
 
-                    else ->
-                        throw IllegalArgumentException(
-                            "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
-                        )
+                    else -> throw IllegalArgumentException(
+                        "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
+                    )
                 }
 
             SakType.OMSTILLINGSSTOENAD ->
                 throw IllegalArgumentException("Støtter ikke vilkårsvurdering for sakType=$sakType")
         }
+
+        return vilkaarsvurderingRepository.opprettVilkaarsvurdering(
+            Vilkaarsvurdering(
+                sakId = behandling.sak,
+                behandlingId = behandlingId,
+                vilkaar = vilkaar,
+                virkningstidspunkt = virkningstidspunkt.dato,
+                grunnlagVersjon = grunnlag.metadata.versjon
+            )
+        )
     }
 
-    private suspend fun sjekkOgCommitVilkaarsvurdering(
+    private suspend fun tilstandssjekkFoerKjoerning(
         behandlingId: UUID,
         accessToken: String,
         block: suspend () -> Vilkaarsvurdering
@@ -119,10 +119,7 @@ class VilkaarsvurderingService(
             throw BehandlingstilstandException
         }
 
-        val vilkaarsvurdering = block()
-        behandlingKlient.vilkaarsvurder(behandlingId, accessToken, true)
-
-        return vilkaarsvurdering
+        return block()
     }
 
     private fun mapVilkaarRevurdering(revurderingAarsak: RevurderingAarsak): List<Vilkaar> {
@@ -135,4 +132,5 @@ class VilkaarsvurderingService(
         }
     }
 }
+
 object BehandlingstilstandException : IllegalStateException()

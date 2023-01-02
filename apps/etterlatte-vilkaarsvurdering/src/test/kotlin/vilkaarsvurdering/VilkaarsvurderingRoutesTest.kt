@@ -73,6 +73,7 @@ internal class VilkaarsvurderingRoutesTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.opprett(any(), any(), any()) } returns true
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery {
             grunnlagKlient.hentGrunnlagMedVersjon(
@@ -384,10 +385,10 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
-    fun `statussjekk kalles paa to ganger, foerst for sjekking og siden for aa commite endringen`() {
+    fun `statussjekk kalles paa en gang for å sjekke tilstandet paa behandling`() {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
-        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returnsMany listOf(true, false)
+        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -398,7 +399,6 @@ internal class VilkaarsvurderingRoutesTest {
 
             coVerifyOrder {
                 behandlingKlient.vilkaarsvurder(any(), any(), false)
-                behandlingKlient.vilkaarsvurder(any(), any(), true)
             }
         }
     }

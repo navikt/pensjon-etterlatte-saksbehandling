@@ -16,6 +16,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import org.slf4j.LoggerFactory
 
@@ -105,7 +106,9 @@ class DownstreamResourceClient(
             }
         }.fold(
             onSuccess = { result ->
-                if (result.harContentType(ContentType.Application.Json)) {
+                if (result.status == HttpStatusCode.NoContent) {
+                    Ok(result.status)
+                } else if (result.harContentType(ContentType.Application.Json)) {
                     Ok(result.body<ObjectNode>())
                 } else {
                     logger.info("Mottok content-type: ${result.contentType()} som ikke var JSON")

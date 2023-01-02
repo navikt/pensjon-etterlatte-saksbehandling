@@ -25,6 +25,7 @@ interface FoerstegangsbehandlingService {
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun lagreVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
+    fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
     fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
     fun settFattetVedtak(behandlingId: UUID, dryRun: Boolean = true)
@@ -85,6 +86,9 @@ class RealFoerstegangsbehandlingService(
         }
     }
 
+    override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
+        hentFoerstegangsbehandling(behandlingId).tilOpprettet().lagreEndring(dryRun)
+    }
     override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean) {
         hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert().lagreEndring(dryRun)
     }

@@ -72,10 +72,10 @@ spec:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
         - application: etterlatte-beregning
+      external:
+        - host: saf.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-brev-distribusjon
-      external:
-        - host: saf.dev-fss-pub.nais.io

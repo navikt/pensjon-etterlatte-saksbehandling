@@ -155,42 +155,50 @@ fun Route.behandlingRoutes(
                 }
             }
 
+            get("/opprett") {
+                foerstegangsbehandlingService.settOpprettet(behandlingsId)
+                call.respond(HttpStatusCode.OK, "true")
+            }
+            post("/opprett") {
+                foerstegangsbehandlingService.settOpprettet(behandlingsId, false)
+                call.respond(HttpStatusCode.OK, "true")
+            }
             get("/vilkaarsvurder") {
                 foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId)
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
             post("/vilkaarsvurder") {
                 foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false)
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             get("/fatteVedtak") {
                 foerstegangsbehandlingService.settFattetVedtak(behandlingsId)
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
             post("/fatteVedtak") {
                 foerstegangsbehandlingService.settFattetVedtak(behandlingsId, false)
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             get("/returner") {
                 foerstegangsbehandlingService.settReturnert(behandlingsId)
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             post("/returner") {
                 foerstegangsbehandlingService.settReturnert(behandlingsId, false)
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             get("/iverksett") {
                 foerstegangsbehandlingService.settIverksatt(behandlingsId)
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             post("/iverksett") {
                 foerstegangsbehandlingService.settIverksatt(behandlingsId, false)
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
         }
 

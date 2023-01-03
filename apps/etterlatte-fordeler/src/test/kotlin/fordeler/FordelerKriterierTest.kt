@@ -40,9 +40,9 @@ internal class FordelerKriterierTest {
         )
         val avdoed = mockPerson(
             fnr = FNR_2,
-            doedsdato = LocalDate.parse("2022-01-01"),
+            doedsdato = LocalDate.now().plusMonths(11),
             bostedsadresse = mockNorskAdresse(
-                gyldigTilOgMed = LocalDateTime.parse("2022-01-01T00:00:00")
+                gyldigTilOgMed = LocalDateTime.now().plusMonths(11)
             ),
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(barn.foedselsnummer),

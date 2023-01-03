@@ -9,6 +9,7 @@ import { RequestStatus } from './utils'
 import Spinner from '~shared/Spinner'
 import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
+import { Heading } from "@navikt/ds-react";
 
 export const Vilkaarsvurdering = () => {
   const location = useLocation()
@@ -55,7 +56,7 @@ export const Vilkaarsvurdering = () => {
   return (
     <Content>
       <Header>
-        <h1>Vilkårsvurdering</h1>
+          <Heading size={"large"} level={"1"}>Vilkårsvurdering</Heading>
       </Header>
 
       {behandlingId && status === RequestStatus.ok && vilkaarsvurdering?.virkningstidspunkt && (

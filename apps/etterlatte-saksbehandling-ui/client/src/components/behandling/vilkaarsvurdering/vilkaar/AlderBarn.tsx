@@ -4,6 +4,7 @@ import { VilkaarColumn } from '../styled'
 import { hentKildenavn } from '../utils'
 import { formaterStringDato } from '~utils/formattering'
 import { KildeType } from '~shared/types/kilde'
+import { Detail } from "@navikt/ds-react";
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
   const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'SOEKER_FOEDSELSDATO')
@@ -21,35 +22,29 @@ export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) =
     <>
       {doedsdato && doedsdatoKilde && doedsdatoKilde?.type === KildeType.pdl && (
         <VilkaarColumn>
-          <Center>
             <div>
-              <strong>Dødsfall</strong>
+              <VilkaarStrong>Dødsfall</VilkaarStrong>
             </div>
             <span>{formaterStringDato(doedsdato)}</span>
             <KildeDatoOpplysning type={doedsdatoKilde.type} dato={doedsdatoKilde.tidspunktForInnhenting} />
-          </Center>
         </VilkaarColumn>
       )}
       {foedselsdato && foedselsdatoKilde && foedselsdatoKilde?.type === KildeType.pdl && (
         <VilkaarColumn>
-          <Center>
             <div>
-              <strong>Barnets fødselsdato</strong>
+              <VilkaarStrong>Barnets fødselsdato</VilkaarStrong>
             </div>
             <span>{formaterStringDato(foedselsdato)}</span>
             <KildeDatoOpplysning type={foedselsdatoKilde.type} dato={foedselsdatoKilde.tidspunktForInnhenting} />
-          </Center>
         </VilkaarColumn>
       )}
       {virkningstidspunkt && virkningstidspunktKilde && virkningstidspunktKilde?.type == KildeType.saksbehandler && (
         <VilkaarColumn>
-          <Center>
             <div>
-              <strong>Virkningstidspunkt</strong>
+              <VilkaarStrong>Virkningstidspunkt</VilkaarStrong>
             </div>
             <span>{formaterStringDato(virkningstidspunkt)}</span>
             <KildeDatoOpplysning type={virkningstidspunktKilde.type} dato={virkningstidspunktKilde.tidspunkt} />
-          </Center>
         </VilkaarColumn>
       )}
     </>
@@ -64,18 +59,12 @@ const KildeDatoOpplysning = ({ type, dato }: { type?: KildeType; dato?: string }
   const kilde = hentKildenavn(type)
 
   return (
-    <KildeOppysning>
+    <Detail>
       {kilde} {dataDato}
-    </KildeOppysning>
+    </Detail>
   )
 }
 
-export const KildeOppysning = styled.div`
-  color: grey;
-  font-size: 0.9em;
-  margin-top: 5px;
-`
-
-export const Center = styled.div`
-  text-align: center;
+const VilkaarStrong = styled.strong`
+    white-space: nowrap;
 `

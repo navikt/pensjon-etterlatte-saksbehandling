@@ -57,7 +57,6 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                   {vilkaar.hovedvilkaar.lovreferanse.paragraf} {vilkaar.hovedvilkaar.tittel}
                 </Link>
               </Title>
-
               <Lovtekst>
                 <p>{vilkaar.hovedvilkaar.beskrivelse}</p>
               </Lovtekst>

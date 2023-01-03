@@ -32,25 +32,25 @@ export const StegMeny = () => {
           <li>
             <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
           </li>
-          <Separator />
+          <Separator aria-hidden={"true"} />
         </>
       )}
       <li className={classNames({ disabled: !klarForVidereBehandling || !gyldighet })}>
         <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
       </li>
-      <Separator />
+      <Separator aria-hidden={"true"} />
       {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
         <>
           <li className={classNames({ disabled: !gyldighet || !vilkaar })}>
             <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
           </li>
-          <Separator />
+          <Separator aria-hidden={"true"} />
         </>
       )}
       <li className={classNames({ disabled: !gyldighet || !vilkaar || !harBeregning })}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
-      <Separator />
+      <Separator aria-hidden={"true"} />
       <li
         className={classNames({
           disabled: !vurdert || (oppfylt && !harBeregning),

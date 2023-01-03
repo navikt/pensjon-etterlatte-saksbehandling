@@ -90,7 +90,7 @@ export const Resultat: React.FC<Props> = ({
     <>
       <VilkaarsvurderingContent>
         <HeadingWrapper>
-          <Heading size="small">Er vilkårene for barnepensjon oppfylt?</Heading>
+          <Heading size="small" level={"2"}>Er vilkårene for barnepensjon oppfylt?</Heading>
         </HeadingWrapper>
         {vilkaarsvurdering.resultat && (
           <ContentWrapper>
@@ -101,11 +101,11 @@ export const Resultat: React.FC<Props> = ({
               <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(virkningstidspunktDato)}</BodyShort>
             )}
             <Kommentar>
-              <Heading size="xsmall">Begrunnelse</Heading>
+              <Heading size="xsmall" level={"3"}>Begrunnelse</Heading>
               <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
             </Kommentar>
             <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
-              <Delete />
+              <Delete aria-hidden={"true"} />
               <span className={'text'}>Slett vurdering</span>
             </SlettWrapper>
           </ContentWrapper>

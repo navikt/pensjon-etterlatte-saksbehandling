@@ -332,29 +332,3 @@ fun mockPerson(
     avdoedesBarn = null,
     vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) }
 )
-/*
-fun mockPerson(
-    doedsdato: LocalDate? = null,
-    utland: Utland? = null
-) = PersonDTO(
-    fornavn = "Test",
-    etternavn = "Testulfsen",
-    foedselsnummer = Foedselsnummer.of("70078749472"),
-    foedselsdato = LocalDate.parse("2020-06-10"),
-    foedselsaar = 1985,
-    foedeland = null,
-    doedsdato = doedsdato,
-    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
-    bostedsadresse = null,
-    deltBostedsadresse = null,
-    kontaktadresse = null,
-    oppholdsadresse = null,
-    sivilstatus = null,
-    statsborgerskap = null,
-    utland = utland,
-    familieRelasjon = FamilieRelasjon(null, null, null),
-    avdoedesBarn = null,
-    vergemaalEllerFremtidsfullmakt = null
-)
-
- */

@@ -35,7 +35,6 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 stmt.setString(3, type.name)
                 stmt.setTimestamp(4, Timestamp.from(opprettet.atZone(ZoneId.systemDefault()).toInstant()))
                 stmt.setJsonb(5, hendelse.data)
-                // hendelse.data?.let { stmt.setString(5, objectMapper.writeValueAsString(hendelse.data)) }
                 stmt.setString(6, status.name)
                 stmt.setString(7, hendelseGjelderRolle.name)
                 stmt.setJsonb(8, samsvarMellomPdlOgGrunnlag)

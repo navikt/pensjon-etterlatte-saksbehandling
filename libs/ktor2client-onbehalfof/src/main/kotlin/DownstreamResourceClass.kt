@@ -16,7 +16,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import org.slf4j.LoggerFactory
+import java.lang.RuntimeException
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
 
@@ -79,17 +81,24 @@ class DownstreamResourceClient(
         runCatching {
             httpClient.get(resource.url) {
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
-            }.body<JsonNode>()
-        }.fold(
-            onSuccess = { result ->
-                logger.info("received get-result")
-                Ok(result)
-            },
-            onFailure = { error ->
-                logger.error("received error from downstream api", error)
-                Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
             }
-        )
+        }
+            .mapCatching { result ->
+                if (!result.status.isSuccess()) {
+                    throw RuntimeException("received response with status ${result.status.value} from downstream api")
+                }
+
+                result
+            }
+            .fold(
+                onSuccess = { result ->
+                    Ok(result.body())
+                },
+                onFailure = { error ->
+                    logger.error("received error from downstream api", error)
+                    Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
+                }
+            )
 
     private suspend fun postToDownstreamApi(
         resource: Resource,
@@ -103,21 +112,28 @@ class DownstreamResourceClient(
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
             }
-        }.fold(
-            onSuccess = { result ->
-                logger.info("received post-result with status ${result.status.value}")
-                if (result.harContentType(ContentType.Application.Json)) {
-                    Ok(result.body<JsonNode>())
-                } else {
-                    logger.info("Mottok content-type: ${result.contentType()} som ikke var JSON")
-                    Ok(result.status)
+        }
+            .mapCatching { result ->
+                if (!result.status.isSuccess()) {
+                    throw RuntimeException("received response with status ${result.status.value} from downstream api")
                 }
-            },
-            onFailure = { error ->
-                logger.error("received error from downstream api", error)
-                Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
+
+                result
             }
-        )
+            .fold(
+                onSuccess = { result ->
+                    if (result.harContentType(ContentType.Application.Json)) {
+                        Ok(result.body<JsonNode>())
+                    } else {
+                        logger.info("Mottok content-type: ${result.contentType()} som ikke var JSON")
+                        Ok(result.status)
+                    }
+                },
+                onFailure = { error ->
+                    logger.error("received error from downstream api", error)
+                    Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
+                }
+            )
 
     private suspend fun deleteToDownstreamApi(
         resource: Resource,
@@ -130,16 +146,24 @@ class DownstreamResourceClient(
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
-            }.body<JsonNode>()
-        }.fold(
-            onSuccess = { result ->
-                Ok(result)
-            },
-            onFailure = { error ->
-                logger.error("received error from downstream api", error)
-                Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
             }
-        )
+        }
+            .mapCatching { result ->
+                if (!result.status.isSuccess()) {
+                    throw RuntimeException("received response with status ${result.status.value} from downstream api")
+                }
+
+                result
+            }
+            .fold(
+                onSuccess = { result ->
+                    Ok(result.body())
+                },
+                onFailure = { error ->
+                    logger.error("received error from downstream api", error)
+                    Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
+                }
+            )
 }
 
 /**

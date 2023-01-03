@@ -41,7 +41,7 @@ const Beregningsgrunnlag = () => {
       beregningsgrunnlag:
         soesken?.map((person) => ({
           foedselsnummer: person.foedselsnummer,
-          skalBrukes: !!beregningsperiode[0]?.soeskenFlokk?.find((p) => p.foedselsnummer === person.foedselsnummer),
+          skalBrukes: !!beregningsperiode[0]?.soeskenFlokk?.find((fnr) => fnr === person.foedselsnummer),
         })) ?? [],
     },
   })

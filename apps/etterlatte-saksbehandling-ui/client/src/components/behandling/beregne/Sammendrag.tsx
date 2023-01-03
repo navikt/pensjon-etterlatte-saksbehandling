@@ -17,9 +17,10 @@ interface ToolTipPerson {
 interface Props {
   beregning: Beregning
   soeker?: IPdlPerson
+  soesken: IPdlPerson[]
 }
 
-export const Sammendrag = ({ beregning, soeker }: Props) => {
+export const Sammendrag = ({ beregning, soeker, soesken }: Props) => {
   const beregningsperioder = beregning.beregningsperioder
 
   //TODO: egen komponent
@@ -95,7 +96,13 @@ export const Sammendrag = ({ beregning, soeker }: Props) => {
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
                 {beregningsperiode.soeskenFlokk && soeker ? (
-                  <GjelderTooltip soesken={beregningsperiode.soeskenFlokk} soeker={soeker} />
+                  <GjelderTooltip
+                    soesken={beregningsperiode.soeskenFlokk.map((fnr) => {
+                      const pdlPerson = soesken.find((p) => p.foedselsnummer === fnr)
+                      return pdlPerson!!
+                    })}
+                    soeker={soeker}
+                  />
                 ) : (
                   '-'
                 )}

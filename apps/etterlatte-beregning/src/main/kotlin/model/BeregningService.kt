@@ -163,7 +163,7 @@ class BeregningService(
                 datoTOM = datoTom,
                 grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
                 grunnbelop = gjeldendeG.grunnbeløp,
-                soeskenFlokk = flokkForPeriode,
+                soeskenFlokk = flokkForPeriode.map { it.foedselsnummer.value },
                 utbetaltBeloep = utbetaltBeloep,
                 trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
             )

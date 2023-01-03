@@ -38,6 +38,11 @@ export const Beregne = () => {
     oppdaterVedtakRequest(behandling.id, () => next())
   }
 
+  const soeker = behandling.søker
+  const soesken = behandling.familieforhold?.avdoede.opplysning.avdoedesBarn?.filter(
+    (barn) => barn.foedselsnummer !== soeker?.foedselsnummer
+  )
+
   return (
     <Content>
       <ContentHeader>
@@ -55,7 +60,7 @@ export const Beregne = () => {
         {isPendingOrInitial(beregning) ? (
           <Spinner visible label="Laster" />
         ) : isSuccess(beregning) ? (
-          <Sammendrag beregning={behandling.beregning!!} soeker={behandling.søker} />
+          <Sammendrag beregning={behandling.beregning!!} soeker={soeker} soesken={soesken} />
         ) : isFailure(beregning) ? (
           <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
         ) : (

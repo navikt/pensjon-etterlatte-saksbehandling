@@ -82,6 +82,7 @@ class DownstreamResourceClient(
             }.body<JsonNode>()
         }.fold(
             onSuccess = { result ->
+                logger.info("received get-result")
                 Ok(result)
             },
             onFailure = { error ->
@@ -104,6 +105,7 @@ class DownstreamResourceClient(
             }
         }.fold(
             onSuccess = { result ->
+                logger.info("received post-result with status ${result.status.value}")
                 if (result.harContentType(ContentType.Application.Json)) {
                     Ok(result.body<JsonNode>())
                 } else {

@@ -26,7 +26,7 @@ export const StegMeny = () => {
   const vurdert = !!behandling.vilkårsprøving?.resultat && klarForVidereBehandling
 
   return (
-    <StegMenyWrapper>
+    <StegMenyWrapper role="navigation">
       {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
         <>
           <li>

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
-import { Alert, Button, Label } from '@navikt/ds-react'
+import { Alert, Button, Heading, Label } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
 import { GyldighetIcon } from '~shared/icons/gyldigIcon'
 import { oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
@@ -11,7 +11,6 @@ import { formaterStringDato, formaterStringTidspunkt } from '~utils/formattering
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall, isPending, isFailure } from '~shared/hooks/useApiCall'
 import {
-  Header,
   SoeknadOversiktWrapper,
   InfobokserWrapper,
   Infoboks,
@@ -25,7 +24,7 @@ import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
   return (
     <InfoElement>
-      <Label size="small">{label}</Label>
+      <Label size="small" as={"p"}>{label}</Label>
       <div>{tekst}</div>
     </InfoElement>
   )
@@ -51,7 +50,7 @@ const Virkningstidspunkt = () => {
 
   return (
     <>
-      <Header>Virkningstidspunkt</Header>
+      <Heading size={"medium"} level={"2"}>Virkningstidspunkt</Heading>
       <SoeknadOversiktWrapper>
         <InfobokserWrapper>
           <Infoboks>
@@ -78,7 +77,7 @@ const Virkningstidspunkt = () => {
             />
           </div>
           <div>
-            <VurderingsTitle>Virkningstidspunkt</VurderingsTitle>
+            <VurderingsTitle title={"Virkningstidspunkt"} />
             <div>
               {rediger ? (
                 <>

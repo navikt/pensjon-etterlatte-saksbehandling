@@ -1,4 +1,4 @@
-import { BodyShort } from '@navikt/ds-react'
+import { BodyShort, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 
 export const Innhold = styled.div`
@@ -11,13 +11,6 @@ export const SoeknadOversiktWrapper = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: top;
-`
-
-export const Header = styled.div`
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 1em;
-  margin-top: 0em;
 `
 
 export const InfobokserWrapper = styled.div`
@@ -90,11 +83,13 @@ export const VurderingsContainer = styled.div`
   min-width: 300px;
 `
 
-export const VurderingsTitle = styled.div`
-  display: flex;
-  font-size: 1.1em;
-  font-weight: bold;
-`
+export const VurderingsTitle = ({ title }: { title: string }) => {
+  return (
+    <Heading level={'3'} size={'small'}>
+      {title}
+    </Heading>
+  )
+}
 
 export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`
   padding-top: 0.5em;

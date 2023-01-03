@@ -18,7 +18,7 @@ export const SoeskenListe: React.FC<Props> = ({ soekerFnr, familieforhold }) => 
 
   return (
     <>
-      <Heading spacing size="small" level="5">
+      <Heading spacing size="small" level="3">
         Søsken <span style={{ fontWeight: 'normal' }}>(avdødes barn)</span>
       </Heading>
 

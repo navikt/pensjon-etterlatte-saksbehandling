@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -26,6 +27,30 @@ interface BeregningRepository {
 }
 
 class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRepository {
+
+    fun migrateSoeskenFlokk() {
+        using(sessionOf(dataSource)) { session ->
+            session.transaction { tx ->
+                val alleBeregningsperioder = tx.run(
+                    queryOf("SELECT * from beregningsperiode").map { row ->
+                        val beregningsid = row.uuid("id")
+                        val soeskenflokk = row.stringOrNull(BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn)?.let {
+                            objectMapper.readValue<List<Person>>(it)
+                        }
+                        Pair(beregningsid, soeskenflokk)
+                    }.asList
+                )
+
+                alleBeregningsperioder.forEach { beregningsperiode ->
+                    val (id, soeskenflokk) = beregningsperiode
+                    queryOf(
+                        statement = "update beregningsperiode set soeskenflokk = :soeskenflokk where id = :id",
+                        paramMap = mapOf("soeskenflokk" to id, "id" to soeskenflokk)
+                    ).let { tx.run(it.asUpdate) }
+                }
+            }
+        }
+    }
 
     override fun hent(behandlingId: UUID): Beregning? = using(sessionOf(dataSource)) { session ->
         session.transaction { tx ->
@@ -115,10 +140,12 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
 
 private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregning {
     val basePeriode = beregningsperioder.first()
-    if (beregningsperioder.any { it.beregningId != basePeriode.beregningId }) throw IllegalStateException("Beregningen inneholder forskjellige beredningsIder ${basePeriode.beregningId} for behandling ${basePeriode.behandlingId}") // ktlint-disable argument-list-wrapping
-    if (beregningsperioder.any { it.behandlingId != basePeriode.behandlingId }) throw IllegalStateException("Beregningen inneholder forskjellige behandlingIder ${basePeriode.behandlingId} for beregning ${basePeriode.beregningId}") // ktlint-disable argument-list-wrapping
-    if (beregningsperioder.any { it.beregnetDato != basePeriode.beregnetDato }) throw IllegalStateException("Beregningen inneholder forskjellige beregnetDatoer ${basePeriode.beregnetDato} med behandlingId ${basePeriode.behandlingId} for beregning ${basePeriode.beregningId}") // ktlint-disable argument-list-wrapping
-    if (beregningsperioder.any { it.grunnlagMetadata.versjon != basePeriode.grunnlagMetadata.versjon }) throw IllegalStateException("Beregningen inneholder forskjellige grunnlagsversjoner ${basePeriode.grunnlagMetadata.versjon} med behandlingId ${basePeriode.behandlingId} for beregning ${basePeriode.beregningId}") // ktlint-disable argument-list-wrapping
+    /* ktlint-disable */
+    if (beregningsperioder.any { it.beregningId != basePeriode.beregningId }) throw IllegalStateException("Beregningen inneholder forskjellige beredningsIder ${basePeriode.beregningId} for behandling ${basePeriode.behandlingId}")
+    if (beregningsperioder.any { it.behandlingId != basePeriode.behandlingId }) throw IllegalStateException("Beregningen inneholder forskjellige behandlingIder ${basePeriode.behandlingId} for beregning ${basePeriode.beregningId}")
+    if (beregningsperioder.any { it.beregnetDato != basePeriode.beregnetDato }) throw IllegalStateException("Beregningen inneholder forskjellige beregnetDatoer ${basePeriode.beregnetDato} med behandlingId ${basePeriode.behandlingId} for beregning ${basePeriode.beregningId}")
+    if (beregningsperioder.any { it.grunnlagMetadata.versjon != basePeriode.grunnlagMetadata.versjon }) throw IllegalStateException("Beregningen inneholder forskjellige grunnlagsversjoner ${basePeriode.grunnlagMetadata.versjon} med behandlingId ${basePeriode.behandlingId} for beregning ${basePeriode.beregningId}")
+    /* ktlint-enable */
 
     return Beregning(
         beregningId = basePeriode.beregningId,

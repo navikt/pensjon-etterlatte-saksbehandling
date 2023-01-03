@@ -51,6 +51,7 @@ class ApplicationBuilder {
 
     private val dataSource = dataSourceBuilder.dataSource()
     private val beregningRepository = BeregningRepositoryImpl(dataSource)
+        .also { it.migrateSoeskenFlokk() }
     private val vilkaarsvurderingKlientImpl = VilkaarsvurderingKlientImpl(config, httpClient())
     private val grunnlagKlientImpl = GrunnlagKlientImpl(config, httpClient())
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
@@ -60,6 +61,7 @@ class ApplicationBuilder {
         grunnlagKlientImpl,
         behandlingKlient
     )
+
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {

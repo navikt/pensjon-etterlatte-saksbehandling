@@ -19,7 +19,7 @@ export const Innhold = styled.div`
 `
 
 export const VilkaarWrapper = styled.div`
-  padding: 1em 1em 1em 0;
+  padding: 1em 1em 1em 2em;
   display: flex;
   flex-direction: row;
   justify-content: space-between;

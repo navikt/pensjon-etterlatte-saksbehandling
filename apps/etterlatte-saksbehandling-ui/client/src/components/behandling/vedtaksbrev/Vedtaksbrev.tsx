@@ -18,8 +18,8 @@ import {
   VurderingsResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
-import { tagColors, TagList } from "~shared/Tags";
-import { formaterEnumTilLesbarString } from "~utils/formattering";
+import { tagColors, TagList } from '~shared/Tags'
+import { formaterEnumTilLesbarString } from '~utils/formattering'
 
 interface VilkaarOption {
   value: string
@@ -116,7 +116,7 @@ export const Vedtaksbrev = () => {
         <Editor>
           <ContentHeader>
             <HeadingWrapper>
-              <Heading spacing size={'xlarge'} level={'5'}>
+              <Heading spacing size={'large'} level={'1'}>
                 Vedtaksbrev
               </Heading>
               <div className="details">

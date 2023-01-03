@@ -112,11 +112,10 @@ export const HistorikkElement = styled.div`
 `
 
 export const HeadingWrapper = styled.div`
-  display: inline-flex;
   margin-top: 3em;
 
   .details {
-    padding: 0.6em;
+    margin-bottom: 0.6em;
   }
 `
 

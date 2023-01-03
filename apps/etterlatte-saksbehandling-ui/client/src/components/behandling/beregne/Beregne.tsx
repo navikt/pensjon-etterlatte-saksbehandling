@@ -1,5 +1,5 @@
 import { Content, ContentHeader } from '~shared/styled'
-import { TypeStatusWrap } from '../soeknadsoversikt/styled'
+import { HeadingWrapper, TypeStatusWrap } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
@@ -46,7 +46,11 @@ export const Beregne = () => {
   return (
     <Content>
       <ContentHeader>
-        <Heading size={"large"} level={"1"}>Beregning og vedtak</Heading>
+        <HeadingWrapper>
+          <Heading size={'large'} level={'1'}>
+            Beregning og vedtak
+          </Heading>
+        </HeadingWrapper>
         <InfoWrapper>
           <DetailWrapper>
             <TypeStatusWrap type="barn">Barnepensjon</TypeStatusWrap>

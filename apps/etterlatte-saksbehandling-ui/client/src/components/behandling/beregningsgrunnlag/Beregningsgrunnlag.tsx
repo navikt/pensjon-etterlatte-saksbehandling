@@ -1,7 +1,7 @@
 import { BodyShort, Button, Heading, Loader, Radio, RadioGroup } from '@navikt/ds-react'
 import { Content, ContentHeader } from '~shared/styled'
 import { useState } from 'react'
-import { Border, HeadingWrapper, Innhold } from '../soeknadsoversikt/styled'
+import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { Barn } from '../soeknadsoversikt/familieforhold/personer/Barn'
 import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
 import styled from 'styled-components'

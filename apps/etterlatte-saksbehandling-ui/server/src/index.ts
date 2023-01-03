@@ -25,7 +25,6 @@ app.use(['/health/isAlive', '/health/isReady'], (req: Request, res: Response) =>
 })
 
 if (isDev) {
-  // TODO: Legge til resterende mocks
   logger.info('Mocking all endpoints')
   app.use('/api', mockRouter)
 } else {
@@ -45,6 +44,8 @@ if (isDev) {
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url!!)
   )
+
+  app.use('/api/oppgaver', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url!!))
 
   app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url!!))
 

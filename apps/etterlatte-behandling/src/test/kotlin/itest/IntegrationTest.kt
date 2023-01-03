@@ -245,7 +245,7 @@ class ApplicationTest {
                 assertEquals("FATTET_VEDTAK", behandling.status?.name)
             }
 
-            client.get("/oppgaver") {
+            client.get("/api/oppgaver") {
                 addAuthAttesterer()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {

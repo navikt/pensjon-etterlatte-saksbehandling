@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.typer.LagretHendelser
-import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -21,7 +20,6 @@ import java.time.YearMonth
 interface EtterlatteBehandling {
     suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker
     suspend fun hentSaker(accessToken: String): Saker
-    suspend fun hentOppgaver(accessToken: String): OppgaveListe
     suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
     suspend fun avbrytBehandling(behandlingId: String, accessToken: String): Boolean
@@ -91,29 +89,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             return objectMapper.readValue(json.toString(), Saker::class.java)
         } catch (e: Exception) {
             logger.error("Henting av saker fra behandling feilet", e)
-            throw e
-        }
-    }
-
-    override suspend fun hentOppgaver(accessToken: String): OppgaveListe {
-        try {
-            logger.info("Henter alle oppgaver")
-
-            val json = downstreamResourceClient
-                .get(
-                    Resource(
-                        clientId,
-                        "$resourceUrl/oppgaver"
-                    ),
-                    accessToken
-                ).mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            return objectMapper.readValue(json.toString(), OppgaveListe::class.java)
-        } catch (e: Exception) {
-            logger.error("Henting av oppgaver fra behandling feilet", e)
             throw e
         }
     }

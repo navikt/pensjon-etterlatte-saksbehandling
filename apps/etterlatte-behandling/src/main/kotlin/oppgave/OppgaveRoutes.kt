@@ -15,7 +15,7 @@ import java.util.*
 
 fun Route.oppgaveRoutes(repo: OppgaveDao) {
     route("/oppgaver") {
-        get { it ->
+        get {
             val bruker = Kontekst.get().AppUser
 
             if (bruker is Saksbehandler) {

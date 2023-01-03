@@ -30,8 +30,9 @@ class SakstatistikkRepository(private val datasource: DataSource) {
                     behandling_id, sak_id, mottatt_tid, registrert_tid, ferdigbehandlet_tid, vedtak_tid, 
                     behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode, 
                     opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse, 
-                    vedtak_loepende_fom, vedtak_loepende_tom
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, 
+                    sak_utland
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
                 Statement.RETURN_GENERATED_KEYS
             ).apply {
@@ -71,7 +72,11 @@ class SakstatistikkRepository(private val datasource: DataSource) {
         tekniskTid = getTimestamp("teknisk_tid").toTidspunkt(),
         sakYtelse = getString("sak_ytelse"),
         vedtakLoependeFom = getDate("vedtak_loepende_fom")?.toLocalDate(),
-        vedtakLoependeTom = getDate("vedtak_loepende_tom")?.toLocalDate()
+        vedtakLoependeTom = getDate("vedtak_loepende_tom")?.toLocalDate(),
+        saksbehandler = getString("saksbehandler"),
+        ansvarligEnhet = getString("ansvarlig_enhet"),
+        soeknadFormat = getString("soeknad_format"), // TODO
+        sakUtland = getString("sak_utland")
     )
 
     fun hentRader(): List<SakRad> {
@@ -80,7 +85,7 @@ class SakstatistikkRepository(private val datasource: DataSource) {
             SELECT id, behandling_id, sak_id, mottatt_tid, registrert_tid, ferdigbehandlet_tid, vedtak_tid,
                 behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode,
                 opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
-                vedtak_loepende_fom, vedtak_loepende_tom
+                vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland
             FROM sak
             """.trimIndent()
         )
@@ -106,6 +111,10 @@ data class SakRad(
     val behandlingStatus: String?,
     val behandlingResultat: String?,
     val resultatBegrunnelse: String?,
+    val saksbehandler: String?,
+    val ansvarligEnhet: String?,
+    val soeknadFormat: String?,
+    val sakUtland: String?,
     val behandlingMetode: String?,
     val opprettetAv: String?,
     val ansvarligBeslutter: String?,
@@ -137,4 +146,8 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = thi
     setString(17, sakRad.sakYtelse)
     setDate(18, sakRad.vedtakLoependeFom?.let { Date.valueOf(it) })
     setDate(19, sakRad.vedtakLoependeTom?.let { Date.valueOf(it) })
+    setString(20, sakRad.saksbehandler)
+    setString(21, sakRad.ansvarligEnhet)
+    setString(22, sakRad.soeknadFormat)
+    setString(23, sakRad.sakUtland)
 }

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -44,6 +46,16 @@ class StatistikkService(
         }
     }
 
+    private fun behandlingResultatFraVedtak(vedtak: Vedtak, detaljertBehandling: DetaljertBehandling): String? {
+        if (vedtak.vedtakFattet != null) {
+            return "VEDTAK"
+        }
+        if (detaljertBehandling.status == BehandlingStatus.AVBRUTT) {
+            return "AVBRUTT"
+        }
+        return null
+    }
+
     private fun vedtakshendelseTilSakRad(vedtak: Vedtak, hendelse: VedtakHendelse): SakRad {
         val detaljertBehandling = hentDetaljertBehandling(vedtak.behandling.id)
         val mottattTid = detaljertBehandling.soeknadMottattDato ?: detaljertBehandling.behandlingOpprettet
@@ -52,27 +64,31 @@ class StatistikkService(
             id = -1,
             behandlingId = vedtak.behandling.id,
             sakId = vedtak.sak.id,
-            mottattTidspunkt = Tidspunkt(mottattTid.toInstant(ZoneOffset.UTC)),
-            registrertTidspunkt = Tidspunkt(detaljertBehandling.behandlingOpprettet.toInstant(ZoneOffset.UTC)),
+            mottattTidspunkt = mottattTid.toTidspunkt(ZoneOffset.UTC),
+            registrertTidspunkt = detaljertBehandling.behandlingOpprettet.toTidspunkt(ZoneOffset.UTC),
             ferdigbehandletTidspunkt = vedtak.vedtakFattet?.tidspunkt?.toTidspunkt(),
             vedtakTidspunkt = vedtak.vedtakFattet?.tidspunkt?.toTidspunkt(),
             behandlingType = vedtak.behandling.type,
             behandlingStatus = hendelse.name,
-            behandlingResultat = null,
+            behandlingResultat = behandlingResultatFraVedtak(vedtak, detaljertBehandling),
             resultatBegrunnelse = null,
-            behandlingMetode = "",
+            behandlingMetode = "MANUELL",
+            soeknadFormat = "DIGITAL",
             opprettetAv = null,
-            ansvarligBeslutter = vedtak.vedtakFattet?.ansvarligSaksbehandler,
+            ansvarligBeslutter = vedtak.attestasjon?.attestant,
             aktorId = vedtak.sak.ident,
             datoFoersteUtbetaling = vedtak.vedtakFattet?.let {
                 vedtak.pensjonTilUtbetaling?.minByOrNull { it.periode.fom }?.periode?.fom?.atDay(
                     20
                 )
             },
-            tekniskTid = Tidspunkt.now(), // denne er litt irr
-            sakYtelse = "",
+            tekniskTid = detaljertBehandling.sistEndret.toTidspunkt(ZoneOffset.UTC),
+            sakYtelse = vedtak.sak.sakType,
             vedtakLoependeFom = vedtak.virk.fom.atDay(1),
-            vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth()
+            vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
+            saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
+            ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet,
+            sakUtland = false.toString()
         )
         if (hendelse == VedtakHendelse.IVERKSATT || hendelse == VedtakHendelse.ATTESTERT) {
             return fellesRad.copy(
@@ -141,7 +157,11 @@ class StatistikkService(
             tekniskTid = Tidspunkt(instant = behandling.sistEndret.toInstant(ZoneOffset.UTC)),
             sakYtelse = "",
             vedtakLoependeFom = null,
-            vedtakLoependeTom = null
+            vedtakLoependeTom = null,
+            saksbehandler = null,
+            ansvarligEnhet = null,
+            soeknadFormat = "DIGITAL",
+            sakUtland = false.toString()
         )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(

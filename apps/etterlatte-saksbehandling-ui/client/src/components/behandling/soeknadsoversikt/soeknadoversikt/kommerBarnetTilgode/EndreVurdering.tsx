@@ -39,7 +39,7 @@ export const EndreVurdering = ({
 
   return (
     <div>
-      <VurderingsTitle>Trenger avklaring</VurderingsTitle>
+      <VurderingsTitle title={"Trenger avklaring"} />
       <Undertekst gray={false}>
         Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
       </Undertekst>

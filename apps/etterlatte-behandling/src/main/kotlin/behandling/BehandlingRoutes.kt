@@ -157,48 +157,48 @@ fun Route.behandlingRoutes(
 
             get("/opprett") {
                 foerstegangsbehandlingService.settOpprettet(behandlingsId)
-                call.respondText("true", ContentType.Application.Json, HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
             post("/opprett") {
                 foerstegangsbehandlingService.settOpprettet(behandlingsId, false)
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.OK, "true")
             }
             get("/vilkaarsvurder") {
                 foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId)
-                call.respondText("true", ContentType.Application.Json, HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
             post("/vilkaarsvurder") {
                 foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false)
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             get("/fatteVedtak") {
                 foerstegangsbehandlingService.settFattetVedtak(behandlingsId)
-                call.respondText("true", ContentType.Application.Json, HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
             post("/fatteVedtak") {
                 foerstegangsbehandlingService.settFattetVedtak(behandlingsId, false)
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             get("/returner") {
                 foerstegangsbehandlingService.settReturnert(behandlingsId)
-                call.respondText("true", ContentType.Application.Json, HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             post("/returner") {
                 foerstegangsbehandlingService.settReturnert(behandlingsId, false)
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             get("/iverksett") {
                 foerstegangsbehandlingService.settIverksatt(behandlingsId)
-                call.respondText("true", ContentType.Application.Json, HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "true")
             }
 
             post("/iverksett") {
                 foerstegangsbehandlingService.settIverksatt(behandlingsId, false)
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.OK, "true")
             }
         }
 

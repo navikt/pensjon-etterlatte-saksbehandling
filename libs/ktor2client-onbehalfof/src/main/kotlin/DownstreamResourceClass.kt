@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.ktorobo
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -16,7 +15,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import org.slf4j.LoggerFactory
 
@@ -106,10 +104,8 @@ class DownstreamResourceClient(
             }
         }.fold(
             onSuccess = { result ->
-                if (result.status == HttpStatusCode.NoContent) {
-                    Ok(result.status)
-                } else if (result.harContentType(ContentType.Application.Json)) {
-                    Ok(result.body<ObjectNode>())
+                if (result.harContentType(ContentType.Application.Json)) {
+                    Ok(result.body<JsonNode>())
                 } else {
                     logger.info("Mottok content-type: ${result.contentType()} som ikke var JSON")
                     Ok(result.status)

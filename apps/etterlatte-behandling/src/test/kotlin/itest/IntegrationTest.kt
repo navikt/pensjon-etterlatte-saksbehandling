@@ -215,7 +215,7 @@ class ApplicationTest {
                     assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
                 }
 
-                assertEquals(HttpStatusCode.NoContent, it.status)
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {

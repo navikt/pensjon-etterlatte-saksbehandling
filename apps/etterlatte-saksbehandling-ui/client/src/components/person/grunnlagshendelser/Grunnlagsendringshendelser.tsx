@@ -21,7 +21,7 @@ const VisDoedsdatoSamsvar = (props: { data: DoedsdatoSamsvar }) => {
       <dt>Dødsdato i grunnlag</dt>
       <dd>{formaterKanskjeStringDato('Ingen', props.data.fraGrunnlag)}</dd>
       <dt>Dødsdato i PDL</dt>
-      <dd>{formaterKanskjeStringDato('Ingen', props.data.fraGrunnlag)}</dd>
+      <dd>{formaterKanskjeStringDato('Ingen', props.data.fraPdl)}</dd>
     </HendelseSammenligning>
   )
 }

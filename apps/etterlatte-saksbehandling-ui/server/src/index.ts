@@ -12,7 +12,7 @@ import { loggerRouter } from './routers/loggerRouter'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
-const clientPath = path.resolve(__dirname, '..', '..', 'client')
+const clientPath = path.resolve(__dirname, '..', 'client')
 const isDev = process.env.NODE_ENV !== 'production'
 
 const app = express()

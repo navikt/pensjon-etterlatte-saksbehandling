@@ -142,12 +142,13 @@ const ListeAvHendelser = ({ hendelser }: { hendelser: Grunnlagsendringshendelse[
         <HendelseMetaWrapper>
           <HendelseMetaItem>{teksterForGrunnlagshendelser[hendelse.type]}</HendelseMetaItem>
           <HendelseMetaItem>
-            Gjelder {teksterForSaksrolle[hendelse.hendelseGjelderRolle].toLowerCase()} ({hendelse.gjelderPerson})
+            Gjelder {teksterForSaksrolle[hendelse.hendelseGjelderRolle].toLowerCase()}
+            {hendelse.gjelderPerson ? ` (${hendelse.gjelderPerson})` : ''}
           </HendelseMetaItem>
           <HendelseMetaItem>Opprettet {formaterStringDato(hendelse.opprettet)}</HendelseMetaItem>
         </HendelseMetaWrapper>
         <div>
-          <HendelseVisning data={hendelse.samsvarMedPdl} />
+          <HendelseVisning data={hendelse.samsvarMellomPdlOgGrunnlag} />
         </div>
       </HendelseWrapper>
     ))}

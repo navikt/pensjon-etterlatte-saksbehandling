@@ -16,6 +16,7 @@ import java.util.*
 
 interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
+    suspend fun beregn(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean
 }
 
 class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingKlient {
@@ -54,5 +55,23 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 }
             }
         }
+    }
+
+    override suspend fun beregn(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean {
+        logger.info("Sjekker hvis behandling med id $behandlingId kan beregnes")
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/beregn")
+
+        val response = when (commit) {
+            false -> downstreamResourceClient.get(resource, accessToken)
+            true -> downstreamResourceClient.post(resource, accessToken, "{}")
+        }
+
+        return response.mapBoth(
+            success = { true },
+            failure = {
+                logger.info("Behandling med id $behandlingId kan ikke beregnes", it.throwable)
+                false
+            }
+        )
     }
 }

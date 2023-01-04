@@ -121,7 +121,6 @@ const VisAnsvarligeForeldreSamsvar = (props: { data: AnsvarligeForeldreSamsvar }
 }
 
 const HendelseVisning = (props: { data?: SamsvarMellomGrunnlagOgPdl }) => {
-  const type = props.data?.type
   switch (props.data?.type) {
     case 'DOEDSDATO':
       return <VisDoedsdatoSamsvar data={props.data} />
@@ -132,7 +131,7 @@ const HendelseVisning = (props: { data?: SamsvarMellomGrunnlagOgPdl }) => {
     case 'ANSVARLIGE_FORELDRE':
       return <VisAnsvarligeForeldreSamsvar data={props.data} />
     default:
-      return <p>Ukjent hendelse av type {type}</p>
+      return <p>Ukjent hendelse</p>
   }
 }
 

@@ -4,21 +4,13 @@ import {
   DoedsdatoSamsvar,
   Grunnlagsendringshendelse,
   GrunnlagsendringStatus,
-  GrunnlagsendringsType,
-  Saksrolle,
   SamsvarMellomGrunnlagOgPdl,
   UtlandSamsvar,
 } from '../typer'
 import { formaterStringDato } from '~utils/formattering'
-import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
-
-const teksterForGrunnlagshendelser: Record<GrunnlagsendringsType, string> = {
-  ANSVARLIGE_FORELDRE: 'Ansvarlige foreldre',
-  BARN: 'Barn',
-  UTLAND: 'Ut-/innflytting',
-  DOEDSDATO: 'Dødsfall',
-}
+import { teksterForGrunnlagshendelser, teksterForSaksrolle } from '~components/person/grunnlagshendelser/tekster'
+import { HendelseMetaItem, HendelseMetaWrapper, HendelseSammenligning, HendelseWrapper } from './styled'
 
 const formaterKanskjeStringDato = (fallback = 'Ukjent dato', dato?: string): string =>
   dato ? formaterStringDato(dato) : fallback
@@ -142,57 +134,6 @@ const HendelseVisning = (props: { data?: SamsvarMellomGrunnlagOgPdl }) => {
     default:
       return <p>Ukjent hendelse av type {type}</p>
   }
-}
-
-const HendelseSammenligning = styled.dl`
-  display: grid;
-  width: 100%;
-  grid-template-columns: repeat(2, auto);
-  grid-gap: 5px;
-
-  p {
-    margin: 0;
-  }
-`
-// TODO: Hele dette designet må tas en avsjekk med fag / design om det
-//      1. dekker behovet for å se relevante opplysninger
-//      2. må fikses så det ikke ser helt løk ut
-const HendelseWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 5px;
-  background-color: #f5f5f5;
-  margin-bottom: 30px;
-`
-
-const HendelseMetaWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  border-bottom: 1px solid black;
-`
-
-const HendelseMetaItem = styled.div`
-  display: inline-block;
-  width: 33%;
-  padding-right: 10px;
-  padding: 5px;
-  font-weight: bold;
-
-  small {
-    font-weight: normal;
-    font-size: 14px;
-  }
-`
-
-const teksterForSaksrolle: Record<Saksrolle, string> = {
-  AVDOED: 'Avdød',
-  GJENLEVENDE: 'Gjenlevende',
-  INNSENDER: 'Innsender',
-  SOEKER: 'Søker',
-  SOESKEN: 'Søsken',
-  UKJENT: 'Ukjent',
 }
 
 const ListeAvHendelser = ({ hendelser }: { hendelser: Grunnlagsendringshendelse[] }) => (

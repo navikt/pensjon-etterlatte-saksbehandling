@@ -219,7 +219,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         attestant = getString(11),
         virkningsDato = getDate(12)?.toLocalDate(),
         vedtakStatus = getString(13)?.let { VedtakStatus.valueOf(it) },
-        sakType = getString(14),
+        sakType = SakType.valueOf(getString(14)),
         behandlingType = BehandlingType.valueOf(getString(15))
     )
 }

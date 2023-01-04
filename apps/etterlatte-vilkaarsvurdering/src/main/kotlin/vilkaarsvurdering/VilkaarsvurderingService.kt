@@ -1,8 +1,13 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
@@ -70,9 +75,9 @@ class VilkaarsvurderingService(
         }
 
     private suspend fun opprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
-        val sakType = SakType.BARNEPENSJON // TODO: SOS, Hardkodet - https://jira.adeo.no/browse/EY-1300
+        val (behandling, grunnlag, sak) = hentDataForVilkaarsvurdering(behandlingId, accessToken)
+
+        val sakType = sak.sakType
         val behandlingType = requireNotNull(behandling.behandlingType)
         val virkningstidspunkt = behandling.virkningstidspunkt
             ?: throw VirkningstidspunktIkkeSattException("Virkningstidspunkt ikke satt for behandling $behandlingId")
@@ -120,6 +125,19 @@ class VilkaarsvurderingService(
         }
 
         return block()
+    }
+
+    private suspend fun hentDataForVilkaarsvurdering(
+        behandlingId: UUID,
+        accessToken: String
+    ): Triple<DetaljertBehandling, Grunnlag, Sak> {
+        return coroutineScope {
+            val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+            val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, accessToken) }
+            val sak = async { behandlingKlient.hentSak(behandling.sak, accessToken) }
+
+            Triple(behandling, grunnlag.await(), sak.await())
+        }
     }
 
     private fun mapVilkaarRevurdering(revurderingAarsak: RevurderingAarsak): List<Vilkaar> {

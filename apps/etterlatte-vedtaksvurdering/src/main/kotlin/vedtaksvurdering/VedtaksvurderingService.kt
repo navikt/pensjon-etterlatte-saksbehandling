@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
@@ -86,11 +85,12 @@ class VedtaksvurderingService(
         val virk = vilkaarsvurdering.virkningstidspunkt.atDay(1)
 
         if (vedtak == null) {
+            val sak = behandlingKlient.hentSak(behandling.sak, accessToken)
             repository.opprettVedtak(
                 behandlingId,
                 behandling.sak,
                 behandling.soeker!!,
-                SakType.BARNEPENSJON,
+                sak.sakType,
                 behandling.behandlingType!!,
                 virk,
                 beregning,

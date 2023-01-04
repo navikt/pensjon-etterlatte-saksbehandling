@@ -13,10 +13,12 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
@@ -72,6 +74,11 @@ internal class VilkaarsvurderingServiceTest {
             every { soeker } returns "10095512345"
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
             every { revurderingsaarsak } returns null
+        }
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns mockk<Sak>().apply {
+            every { id } returns 1L
+            every { ident } returns "ident"
+            every { sakType } returns SakType.BARNEPENSJON
         }
 
         repository = VilkaarsvurderingRepository(ds)

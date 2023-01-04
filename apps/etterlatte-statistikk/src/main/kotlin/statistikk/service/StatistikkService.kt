@@ -106,7 +106,7 @@ class StatistikkService(
             vedtak.sak.id,
             vedtak.sak.id,
             Instant.now(),
-            vedtak.sak.sakType,
+            vedtak.sak.sakType.toString(),
             "",
             vedtak.vedtakFattet!!.ansvarligSaksbehandler,
             vedtak.attestasjon?.attestant,

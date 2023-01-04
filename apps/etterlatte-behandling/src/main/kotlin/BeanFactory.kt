@@ -205,7 +205,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
         }
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())
-            url("http://etterlatte-grunnlag/")
+            url("http://etterlatte-grunnlag/api/")
         }
     }
 

@@ -199,7 +199,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
         }
         install(Auth) {
             clientCredential {
-                env.toMutableMap()
+                config = env.toMutableMap()
                     .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("GRUNNLAG_AZURE_SCOPE"))) }
             }
         }

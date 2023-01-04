@@ -3,7 +3,9 @@ package regler
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldHaveSize
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.containADigit
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -63,13 +65,14 @@ internal class RegelkjoeringTest {
     @Test
     fun `Skal periodisere resultatet basert paa alle knekkpunkter i grafen`() {
         when (val perioder = velgNyesteGyldigeRegel.eksekver(grunnlag, RegelPeriode(gjelderFra2021))) {
-            is RegelkjoeringResultat.Suksess -> with(perioder) {
-                resultat shouldHaveSize 3
-                resultat.keys shouldContainExactly setOf(
+            is RegelkjoeringResultat.Suksess -> {
+                perioder.resultat shouldHaveSize 3
+                perioder.resultat.keys shouldContainExactly setOf(
                     RegelPeriode(gjelderFra2021, gjelderFra2022.minusDays(1)),
                     RegelPeriode(gjelderFra2022, gjelderFra2023.minusDays(1)),
                     RegelPeriode(gjelderFra2023)
                 )
+                perioder.reglerVersjon should containADigit()
             }
             is RegelkjoeringResultat.UgyldigPeriode -> throw Exception("Skal ikke ha ugyldige perioder")
         }
@@ -79,9 +82,10 @@ internal class RegelkjoeringTest {
     fun `Skal returnere med ugyldige regler for perioden hvis man eksekverer en regel utenfor gyldig periode`() {
         when (val resultat = velgNyesteGyldigeRegel.eksekver(grunnlag, RegelPeriode(gjelderFra1900))) {
             is RegelkjoeringResultat.Suksess -> throw Exception("Skal ha ugyldige perioder")
-            is RegelkjoeringResultat.UgyldigPeriode -> with(resultat) {
-                ugyldigeReglerForPeriode shouldHaveSize 1
-                ugyldigeReglerForPeriode[0] shouldBe velgNyesteGyldigeRegel
+            is RegelkjoeringResultat.UgyldigPeriode -> {
+                resultat.ugyldigeReglerForPeriode shouldHaveSize 1
+                resultat.ugyldigeReglerForPeriode[0] shouldBe velgNyesteGyldigeRegel
+                resultat.reglerVersjon should containADigit()
             }
         }
     }

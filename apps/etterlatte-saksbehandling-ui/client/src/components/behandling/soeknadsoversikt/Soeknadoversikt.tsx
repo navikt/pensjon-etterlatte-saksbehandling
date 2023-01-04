@@ -23,7 +23,7 @@ export const Soeknadsoversikt = () => {
     <Content>
       <ContentHeader>
         <HeadingWrapper>
-          <Heading spacing size="xlarge" level="5">
+          <Heading spacing size="large" level="1">
             Søknadsoversikt
           </Heading>
           <div className="details">

@@ -36,7 +36,7 @@ export const GyldigFramsattVurdering = ({
     <VurderingsContainer>
       <div>{gyldigFramsatt.resultat && <GyldighetIcon status={gyldigFramsatt.resultat} large={true} />}</div>
       <div>
-        <VurderingsTitle>{tittel}</VurderingsTitle>
+        <VurderingsTitle title={tittel} />
         <Undertekst $gray>Automatisk {format(new Date(gyldigFramsatt.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
         {gyldigFramsatt.resultat !== VurderingsResultat.OPPFYLT && <Undertekst>{vurderingstekst}</Undertekst>}
       </div>

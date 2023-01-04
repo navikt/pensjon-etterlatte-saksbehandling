@@ -24,6 +24,7 @@ const DropdownColumnFilter: React.FC<Props> = ({ oppgaveFelt, liste, oppgaveFelt
         onChange={(e) => {
           settFilterVerdi(oppgaveFelt, e.target.value, oppgaveFelter, setOppgaveFelter)
         }}
+        autoComplete="off"
       >
         {options.map((par: IPar) => {
           return (

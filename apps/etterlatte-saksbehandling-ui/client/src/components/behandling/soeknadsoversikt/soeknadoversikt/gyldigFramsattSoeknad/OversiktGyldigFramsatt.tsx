@@ -2,8 +2,9 @@ import { GyldigFramsattVurdering } from './GyldigFramsattVurdering'
 import { Foreldreansvar } from './Foreldreansvar'
 import { Innsender } from './Innsender'
 import { Verge } from './Verge'
-import { InfobokserWrapper, Header, VurderingsWrapper, SoeknadOversiktWrapper } from '../../styled'
+import { InfobokserWrapper, VurderingsWrapper, SoeknadOversiktWrapper } from '../../styled'
 import { IGyldighetResultat, IGyldighetproving, GyldigFramsattType } from '~shared/types/IDetaljertBehandling'
+import { Heading } from "@navikt/ds-react";
 
 export const OversiktGyldigFramsatt = ({ gyldigFramsatt }: { gyldigFramsatt: IGyldighetResultat | undefined }) => {
   if (gyldigFramsatt == null) {
@@ -24,7 +25,7 @@ export const OversiktGyldigFramsatt = ({ gyldigFramsatt }: { gyldigFramsatt: IGy
 
   return (
     <>
-      <Header>Gyldig fremsatt</Header>
+      <Heading size={"medium"} level={"2"}>Gyldig fremsatt</Heading>
       <SoeknadOversiktWrapper>
         <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />

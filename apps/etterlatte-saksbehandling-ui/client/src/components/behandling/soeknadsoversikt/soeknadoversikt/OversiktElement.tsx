@@ -15,7 +15,7 @@ export const OversiktElement = ({ navn, label, tekst, erOppfylt }: Props) => {
   return (
     <Infoboks>
       <DetailWrapper>
-        <Label size="small" className={labelClassName}>
+        <Label size="small" as={"p"} className={labelClassName}>
           {label}
         </Label>
         <span>{navn}</span>

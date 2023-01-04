@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
-import { AvdoedForelder } from './personer/AvdoedForelder'
 import { GjenlevendeForelder } from './personer/GjenlevendeForelder'
 import { Barn } from './personer/Barn'
 import { ContentHeader } from '~shared/styled'
@@ -8,6 +7,7 @@ import { Border, DashedBorder } from '../styled'
 import { SoeskenListe } from './personer/Soesken'
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetproving } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
+import { Foreldre } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Foreldre'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -30,23 +30,22 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
       {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
         <>
           <ContentHeader>
-            <Heading spacing size="medium" level="5">
+            <Heading spacing size="medium" level="2">
               Familieforhold
             </Heading>
           </ContentHeader>
           <FamilieforholdWrapper>
             <Barn person={behandling.søker} doedsdato={doedsdato} />
             <DashedBorder />
-            <GjenlevendeForelder
-              person={behandling.familieforhold.gjenlevende.opplysning}
-              innsenderErGjenlevendeForelder={innsenderErGjenlevende}
+            <Foreldre
+              gjenlevende={behandling.familieforhold.gjenlevende.opplysning}
+              innsenderErGjenlevende={innsenderErGjenlevende}
               doedsdato={doedsdato}
+              avdoed={behandling.familieforhold.avdoede.opplysning}
             />
-            <AvdoedForelder person={behandling.familieforhold.avdoede.opplysning} />
             <DashedBorder />
             <SoeskenListe soekerFnr={behandling.søker.foedselsnummer} familieforhold={behandling.familieforhold!!} />
           </FamilieforholdWrapper>
-          <Border />
         </>
       ) : (
         <>
@@ -57,9 +56,9 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
               doedsdato={doedsdato}
             />
           </FamilieforholdWrapper>
-          <Border />
         </>
       )}
+      <Border />
     </>
   )
 }

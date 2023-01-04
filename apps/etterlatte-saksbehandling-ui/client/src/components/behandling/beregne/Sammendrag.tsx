@@ -14,10 +14,10 @@ interface Props {
 
 export const Sammendrag = ({ beregning, soeker, soesken }: Props) => {
   const beregningsperioder = beregning.beregningsperioder
-
+    
   return (
     <TableWrapper>
-      <Heading spacing size="small" level="5">
+      <Heading spacing size="small" level="2">
         Beregningssammendrag
       </Heading>
       <Table className="table" zebraStripes>

@@ -1,5 +1,6 @@
 import { Vilkaar } from '~shared/api/vilkaarsvurdering'
 import { AlderBarn } from './AlderBarn'
+import styled from 'styled-components'
 
 export const VilkaarGrunnlagsStoette = ({ vilkaar }: { vilkaar: Vilkaar }) => {
   const finnGrunnlag = (vilkaar: Vilkaar) => {
@@ -11,5 +12,11 @@ export const VilkaarGrunnlagsStoette = ({ vilkaar }: { vilkaar: Vilkaar }) => {
     }
   }
 
-  return finnGrunnlag(vilkaar)
+  return <VilkaarGrunnlagsStoetteWrapper>{finnGrunnlag(vilkaar)}</VilkaarGrunnlagsStoetteWrapper>
 }
+
+const VilkaarGrunnlagsStoetteWrapper = styled.div`
+  display: flex;
+  gap: 1em;
+  flex-wrap: wrap;
+`

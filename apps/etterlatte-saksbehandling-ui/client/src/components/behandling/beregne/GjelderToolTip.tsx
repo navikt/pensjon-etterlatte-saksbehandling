@@ -25,6 +25,7 @@ export const GjelderTooltip = ({ soesken, soeker }: { soesken: ToolTipPerson[]; 
         ref={ref}
         onClick={() => setIsOpen(true)}
         icon={<InformationColored title="Få mer informasjon om beregningsgrunnlaget" />}
+        onBlur={() => setIsOpen(false)}
       />
       <Popover anchorEl={ref.current} open={isOpen} onClose={() => setIsOpen(false)} placement="top">
         <PopoverContent>

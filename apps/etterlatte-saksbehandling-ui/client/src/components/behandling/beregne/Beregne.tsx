@@ -1,5 +1,5 @@
 import { Content, ContentHeader } from '~shared/styled'
-import { TypeStatusWrap } from '../soeknadsoversikt/styled'
+import { HeadingWrapper, TypeStatusWrap } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
@@ -11,7 +11,7 @@ import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { Sammendrag } from './Sammendrag'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { Alert, Button, ErrorMessage } from '@navikt/ds-react'
+import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import styled from 'styled-components'
 import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -46,7 +46,11 @@ export const Beregne = () => {
   return (
     <Content>
       <ContentHeader>
-        <h1>Beregning og vedtak</h1>
+        <HeadingWrapper>
+          <Heading size={'large'} level={'1'}>
+            Beregning og vedtak
+          </Heading>
+        </HeadingWrapper>
         <InfoWrapper>
           <DetailWrapper>
             <TypeStatusWrap type="barn">Barnepensjon</TypeStatusWrap>

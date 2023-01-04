@@ -1,7 +1,7 @@
 import { BodyShort, Button, Heading, Loader, Radio, RadioGroup } from '@navikt/ds-react'
-import { Content, Header } from '~shared/styled'
+import { Content, ContentHeader } from '~shared/styled'
 import { useState } from 'react'
-import { Border } from '../soeknadsoversikt/styled'
+import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { Barn } from '../soeknadsoversikt/familieforhold/personer/Barn'
 import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
 import styled from 'styled-components'
@@ -52,20 +52,23 @@ const Beregningsgrunnlag = () => {
 
   return (
     <Content>
-      <Header>
-        <h1>Beregningsgrunnlag</h1>
-        <BodyShort spacing>
-          Vilkårsresultat:{' '}
-          <strong>
-            Innvilget fra{' '}
-            {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt.dato) : 'ukjent dato'}
-          </strong>
-        </BodyShort>
-        <Heading level="2" size="small">
-          Søskenjustering
-        </Heading>
-      </Header>
-
+      <ContentHeader>
+        <HeadingWrapper>
+          <Heading spacing size={'large'} level={'1'}>
+            Beregningsgrunnlag
+          </Heading>
+          <BodyShort spacing>
+            Vilkårsresultat:{' '}
+            <strong>
+              Innvilget fra{' '}
+              {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt.dato) : 'ukjent dato'}
+            </strong>
+          </BodyShort>
+          <Heading level="2" size="medium">
+            Søskenjustering
+          </Heading>
+        </HeadingWrapper>
+      </ContentHeader>
       <FamilieforholdWrapper
         id="form"
         onSubmit={handleSubmit(async (formValues) => {
@@ -131,7 +134,7 @@ const RadioGroupRow = styled(RadioGroup)`
   }
 `
 const FamilieforholdWrapper = styled.form`
-  margin-left: 3em;
+  padding: 0em 5em;
 `
 
 export default Beregningsgrunnlag

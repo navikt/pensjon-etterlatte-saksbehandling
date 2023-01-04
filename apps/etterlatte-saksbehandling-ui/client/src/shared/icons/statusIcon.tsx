@@ -10,11 +10,11 @@ export const StatusIcon = (props: { status: VurderingsResultat; noLeftPadding?: 
   function hentSymbol() {
     switch (props.status) {
       case VurderingsResultat.OPPFYLT:
-        return <SuccessColored />
+        return <SuccessColored aria-hidden={"true"} /> // Vurder å bruk tittel for å forklare istendenfor å skjule
       case VurderingsResultat.IKKE_OPPFYLT:
-        return <ErrorColored />
+        return <ErrorColored aria-hidden={"true"} />
       case VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
-        return <WarningColored />
+        return <WarningColored aria-hidden={"true"} />
     }
   }
 

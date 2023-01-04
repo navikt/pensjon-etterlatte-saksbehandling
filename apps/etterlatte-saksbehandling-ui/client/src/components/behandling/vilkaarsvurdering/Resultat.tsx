@@ -8,7 +8,7 @@ import {
   IVilkaarsvurdering,
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
-import { VilkaarBorder } from './styled'
+import { VilkaarBorder, VilkaarWrapper } from './styled'
 import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
 import { Delete } from '@navikt/ds-icons'
@@ -88,71 +88,77 @@ export const Resultat: React.FC<Props> = ({
 
   return (
     <>
-      <VilkaarsvurderingContent>
-        <HeadingWrapper>
-          <Heading size="small">Er vilkårene for barnepensjon oppfylt?</Heading>
-        </HeadingWrapper>
-        {vilkaarsvurdering.resultat && (
-          <ContentWrapper>
-            <TekstWrapper>
-              <StatusIcon status={status} noLeftPadding /> {`${resultatTekst()}`}
-            </TekstWrapper>
-            {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
-              <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(virkningstidspunktDato)}</BodyShort>
-            )}
-            <Kommentar>
-              <Heading size="xsmall">Begrunnelse</Heading>
-              <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
-            </Kommentar>
-            <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
-              <Delete />
-              <span className={'text'}>Slett vurdering</span>
-            </SlettWrapper>
-          </ContentWrapper>
-        )}
+      <VilkaarWrapper>
+        <VilkaarsvurderingContent>
+          <HeadingWrapper>
+            <Heading size="small" level={'2'}>
+              Er vilkårene for barnepensjon oppfylt?
+            </Heading>
+          </HeadingWrapper>
+          {vilkaarsvurdering.resultat && (
+            <ContentWrapper>
+              <TekstWrapper>
+                <StatusIcon status={status} noLeftPadding /> {`${resultatTekst()}`}
+              </TekstWrapper>
+              {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
+                <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(virkningstidspunktDato)}</BodyShort>
+              )}
+              <Kommentar>
+                <Heading size="xsmall" level={'3'}>
+                  Begrunnelse
+                </Heading>
+                <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
+              </Kommentar>
+              <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
+                <Delete aria-hidden={'true'} />
+                <span className={'text'}>Slett vurdering</span>
+              </SlettWrapper>
+            </ContentWrapper>
+          )}
 
-        {!vilkaarsvurdering.resultat && !alleVilkaarErVurdert && (
-          <TekstWrapper>Alle vilkår må vurderes før man kan gå videre</TekstWrapper>
-        )}
+          {!vilkaarsvurdering.resultat && !alleVilkaarErVurdert && (
+            <TekstWrapper>Alle vilkår må vurderes før man kan gå videre</TekstWrapper>
+          )}
 
-        {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
-          <>
-            <RadioGroupWrapper>
-              <RadioGroup
-                legend=""
-                size="small"
-                className="radioGroup"
-                onChange={(event) => {
-                  setSvar(ISvar[event as ISvar])
-                  setRadioError(undefined)
+          {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
+            <>
+              <RadioGroupWrapper>
+                <RadioGroup
+                  legend=""
+                  size="small"
+                  className="radioGroup"
+                  onChange={(event) => {
+                    setSvar(ISvar[event as ISvar])
+                    setRadioError(undefined)
+                  }}
+                  error={radioError ? radioError : false}
+                >
+                  <Radio value={ISvar.JA}>Ja, vilkår er oppfylt</Radio>
+                  <Radio value={ISvar.NEI}>Nei, vilkår er ikke oppfylt</Radio>
+                </RadioGroup>
+              </RadioGroupWrapper>
+              <Textarea
+                label="Begrunnelse (obligatorisk)"
+                hideLabel={false}
+                placeholder="Gi en begrunnelse for vurderingen"
+                value={kommentar}
+                onChange={(e) => {
+                  const kommentarLocal = e.target.value
+                  setKommentar(kommentarLocal)
+                  kommentarLocal.length >= MIN_KOMMENTAR_LENGDE && setKommentarError(undefined)
                 }}
-                error={radioError ? radioError : false}
-              >
-                <Radio value={ISvar.JA}>Ja, vilkår er oppfylt</Radio>
-                <Radio value={ISvar.NEI}>Nei, vilkår er ikke oppfylt</Radio>
-              </RadioGroup>
-            </RadioGroupWrapper>
-            <Textarea
-              label="Begrunnelse (obligatorisk)"
-              hideLabel={false}
-              placeholder="Gi en begrunnelse for vurderingen"
-              value={kommentar}
-              onChange={(e) => {
-                const kommentarLocal = e.target.value
-                setKommentar(kommentarLocal)
-                kommentarLocal.length >= MIN_KOMMENTAR_LENGDE && setKommentarError(undefined)
-              }}
-              minRows={3}
-              size="medium"
-              error={kommentarError ? kommentarError : false}
-              autoComplete="off"
-            />
-            <Button variant={'primary'} size={'small'} onClick={lagreVilkaarsvurderingResultat}>
-              Lagre
-            </Button>
-          </>
-        )}
-      </VilkaarsvurderingContent>
+                minRows={3}
+                size="medium"
+                error={kommentarError ? kommentarError : false}
+                autoComplete="off"
+              />
+              <Button variant={'primary'} size={'small'} onClick={lagreVilkaarsvurderingResultat}>
+                Lagre
+              </Button>
+            </>
+          )}
+        </VilkaarsvurderingContent>
+      </VilkaarWrapper>
 
       <VilkaarBorder />
       <BehandlingHandlingKnapper>

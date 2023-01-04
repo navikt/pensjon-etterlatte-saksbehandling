@@ -427,7 +427,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grlg_id = UUID.randomUUID()
         val doedsdato = LocalDate.of(2022, 3, 13)
         val rolle = Saksrolle.SOEKER
-        val personRolle = Saksrolle.SaksrolleToPersonrolle(rolle)
+        val personRolle = rolle.toPersonrolle()
         val grunnlagsendringshendelser = listOf(
             grunnlagsendringshendelseUtenSamsvar(
                 id = grlg_id,

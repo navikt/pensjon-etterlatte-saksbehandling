@@ -174,7 +174,7 @@ class GrunnlagsendringshendelseService(
         hendelseGjelderRolle: Saksrolle
     ) {
         val fnr = data.hendelse.avdoedFnr
-        val personRolle = Saksrolle.SaksrolleToPersonrolle(hendelseGjelderRolle)
+        val personRolle = hendelseGjelderRolle.toPersonrolle()
 
         val doedsdatoPdl = pdlService.hentDoedsdato(fnr, personRolle)
         val doedsdatoGrunnlag = runBlocking {
@@ -197,7 +197,7 @@ class GrunnlagsendringshendelseService(
         hendelseGjelderRolle: Saksrolle
     ) {
         val fnr = data.hendelse.fnr
-        val personRolle = Saksrolle.SaksrolleToPersonrolle(hendelseGjelderRolle)
+        val personRolle = hendelseGjelderRolle.toPersonrolle()
         val utlandPdl = pdlService.hentUtland(fnr, personRolle)
         val utlandGrunnlag =
             runBlocking { grunnlagClient.hentGrunnlag(sakId)?.utland(hendelseGjelderRolle, fnr) }
@@ -218,7 +218,7 @@ class GrunnlagsendringshendelseService(
         hendelseGjelderRolle: Saksrolle
     ) {
         val fnr = data.hendelse.fnr
-        val personRolle = Saksrolle.SaksrolleToPersonrolle(hendelseGjelderRolle)
+        val personRolle = hendelseGjelderRolle.toPersonrolle()
         val samsvarMellomPdlOgGrunnlag = when (personRolle) {
             PersonRolle.BARN -> {
                 val ansvarligeForeldrePDL = pdlService.hentAnsvarligeForeldre(fnr, personRolle)

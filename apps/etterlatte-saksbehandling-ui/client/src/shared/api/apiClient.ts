@@ -16,16 +16,18 @@ async function retrieveData(props: Options, response: Response): Promise<any> {
   if (props.noData) {
     return null
   } else {
-    const type = response.headers.get('content-type')
+    const type = response.headers.get('content-type')?.toLowerCase()
 
-    switch (type) {
-      case 'application/json':
-        return await response.json()
-      case 'application/pdf':
-        return await response.arrayBuffer()
-      default:
-        return await response.text()
+    // content-type-headeren tillater ekstra meta-informasjon, eks: "text/html; charset=utf-8"
+    // eller "multipart/form-data; boundary=something". Derfor sjekker vi på om den inneholder
+    // den relevante content-typen vi er ute etter
+    if (type?.includes('application/json')) {
+      return await response.json()
     }
+    if (type?.includes('application/pdf')) {
+      return await response.arrayBuffer()
+    }
+    return await response.text()
   }
 }
 

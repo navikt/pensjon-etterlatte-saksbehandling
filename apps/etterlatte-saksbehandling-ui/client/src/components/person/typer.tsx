@@ -47,46 +47,71 @@ export enum AarsaksTyper {
   SOEKNAD = 'SOEKNAD',
 }
 
-export interface Utflyttingshendelse {
-  fnr: string
-  tilflyttingsLand?: string
-  tilflyttingsstedIUtlandet?: string
-  utflyttingsdato: string
-  endringstype: Endringstype
-}
-
-export interface Doedshendelse {
-  avdoedFnr: string
-  doedsdato?: string
-  endringstype: Endringstype
-}
-
-export type Grunnlagsinformasjon =
-  | { type: 'SOEKER_DOED'; hendelse: Doedshendelse }
-  | { type: 'SOESKEN_DOED'; hendelse: Doedshendelse }
-  | { type: 'GJENLEVENDE_FORELDER_DOED'; hendelse: Doedshendelse }
-  | { type: 'UTFLYTTING'; hendelse: Utflyttingshendelse }
-
-export type GrunnlagsendringsType = Grunnlagsinformasjon['type']
-
-export const ENDRINGSTYPER = ['OPPRETTET', 'KORRIGERT', 'ANNULERT', 'OPPHOERT'] as const
-export type Endringstype = typeof ENDRINGSTYPER[number]
+export type GrunnlagsendringsType = SamsvarMellomGrunnlagOgPdl['type']
 
 const GRUNNLAGSENDRING_STATUS = [
-  'IKKE_VURDERT',
+  'VENTER_PAA_JOBB',
+  'SJEKKET_AV_JOBB',
   'TATT_MED_I_BEHANDLING',
-  'GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING',
+  'VURDERT_SOM_IKKE_RELEVANT',
   'FORKASTET',
 ] as const
 
+interface Utland {
+  utflyttingFraNorge?: {
+    tilflyttingsland?: string
+    dato?: string
+  }[]
+  innflyttingTilNorge?: {
+    fraflyttingsland?: string
+    dato?: string
+  }[]
+}
+
+export interface DoedsdatoSamsvar {
+  type: 'DOEDSDATO'
+  samsvar: boolean
+  fraPdl?: string
+  fraGrunnlag?: string
+}
+
+export interface UtlandSamsvar {
+  type: 'UTLAND'
+  samsvar: boolean
+  fraPdl?: Utland
+  fraGrunnlag?: Utland
+}
+
+export interface BarnSamsvar {
+  type: 'BARN'
+  samsvar: boolean
+  fraPdl?: string[]
+  fraGrunnlag?: string[]
+}
+
+export interface AnsvarligeForeldreSamsvar {
+  type: 'ANSVARLIGE_FORELDRE'
+  samsvar: boolean
+  fraPdl?: string[]
+  fraGrunnlag?: string[]
+}
+
+export type SamsvarMellomGrunnlagOgPdl = DoedsdatoSamsvar | UtlandSamsvar | BarnSamsvar | AnsvarligeForeldreSamsvar
+
 export type GrunnlagsendringStatus = typeof GRUNNLAGSENDRING_STATUS[number]
+
+const SAKSROLLER = ['SOEKER', 'INNSENDER', 'SOESKEN', 'AVDOED', 'GJENLEVENDE', 'UKJENT'] as const
+
+export type Saksrolle = typeof SAKSROLLER[number]
 
 export interface Grunnlagsendringshendelse {
   id: string
   sakId: number
   type: GrunnlagsendringsType
-  data?: Grunnlagsinformasjon
   status: GrunnlagsendringStatus
   behandlingId?: string
   opprettet: string
+  hendelseGjelderRolle: Saksrolle
+  gjelderPerson: string
+  samsvarMedPdl: SamsvarMellomGrunnlagOgPdl
 }

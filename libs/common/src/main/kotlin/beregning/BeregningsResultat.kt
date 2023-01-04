@@ -19,7 +19,7 @@ enum class Endringskode {
 }
 
 enum class BeregningsResultatType {
-    BEREGNET, FAARIKKEPAENG;
+    BEREGNET, FAARIKKEPAENG
 }
 
 data class BeregningDTO(
@@ -36,7 +36,7 @@ data class Beregningsperiode(
     val datoFOM: YearMonth,
     val datoTOM: YearMonth?,
     val utbetaltBeloep: Int,
-    val soeskenFlokk: List<Person>?,
+    val soeskenFlokk: List<String>?,
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val trygdetid: Int

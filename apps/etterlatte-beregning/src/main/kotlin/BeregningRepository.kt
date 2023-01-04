@@ -34,8 +34,10 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                 val alleBeregningsperioder = tx.run(
                     queryOf("SELECT * from beregningsperiode").map { row ->
                         val beregningsid = row.uuid("id")
-                        val soeskenflokk = row.stringOrNull(BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn)?.let {
-                            objectMapper.readValue<List<Person>>(it)
+                        val soeskenflokk: List<Person>? = row.stringOrNull(
+                            BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn
+                        )?.let {
+                            objectMapper.readValue(it)
                         }
                         Pair(beregningsid, soeskenflokk)
                     }.asList

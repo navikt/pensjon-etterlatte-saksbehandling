@@ -45,7 +45,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                     val (id, soeskenflokk) = beregningsperiode
                     queryOf(
                         statement = "update beregningsperiode set soeskenflokk = :soeskenflokk where id = :id",
-                        paramMap = mapOf("soeskenflokk" to id, "id" to soeskenflokk)
+                        paramMap = mapOf("soeskenflokk" to soeskenflokk, "id" to id)
                     ).let { tx.run(it.asUpdate) }
                 }
             }

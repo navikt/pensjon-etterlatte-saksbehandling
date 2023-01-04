@@ -7,15 +7,16 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.behandling.KorrektIPDL
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Utland
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 interface Pdl {
-    fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): Person
+    fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): PersonDTO
 }
 
 class PdlService(
@@ -27,44 +28,43 @@ class PdlService(
         val logger = LoggerFactory.getLogger(PdlService::class.java)
     }
 
-    override fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): Person {
+    override fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): PersonDTO {
         logger.info("Henter Pdl-modell for ${rolle.name}")
         val personRequest = HentPersonRequest(Foedselsnummer.of(foedselsnummer), rolle)
         val response = runBlocking {
-            pdl_app.post("$url/person") {
+            pdl_app.post("$url/person/v2") {
                 contentType(ContentType.Application.Json)
                 setBody(personRequest)
-            }.body<Person>()
+            }.body<PersonDTO>()
         }
         return response
     }
 
-    fun personErDoed(fnr: String): KorrektIPDL {
+    fun hentDoedsdato(fnr: String, rolle: PersonRolle): LocalDate? {
         return hentPdlModell(
             foedselsnummer = fnr,
-            rolle = PersonRolle.BARN
-        ).doedsdato?.let { doedsdato ->
-            KorrektIPDL.JA
-        } ?: KorrektIPDL.NEI
+            rolle = rolle
+        ).doedsdato?.verdi
     }
 
-    fun personHarUtflytting(fnr: String): KorrektIPDL {
-        val brukerHarIkkeUtflytting = hentPdlModell(
+    fun hentAnsvarligeForeldre(fnr: String, rolle: PersonRolle): List<Foedselsnummer>? {
+        return hentPdlModell(
             foedselsnummer = fnr,
-            rolle = PersonRolle.BARN
-        ).utland?.utflyttingFraNorge.isNullOrEmpty()
-
-        return if (brukerHarIkkeUtflytting) {
-            KorrektIPDL.NEI
-        } else {
-            KorrektIPDL.JA
-        }
+            rolle = rolle
+        ).familieRelasjon?.verdi?.ansvarligeForeldre
     }
 
-    /*
-    TODO: sjekk om forelder-barn-relasjon er gyldig
-     */
-    fun forelderBarnRelasjonErGyldig(fnr: String): KorrektIPDL {
-        return KorrektIPDL.IKKE_SJEKKET
+    fun hentBarn(fnr: String, rolle: PersonRolle): List<Foedselsnummer>? {
+        return hentPdlModell(
+            foedselsnummer = fnr,
+            rolle = rolle
+        ).familieRelasjon?.verdi?.barn
+    }
+
+    fun hentUtland(fnr: String, rolle: PersonRolle): Utland? {
+        return hentPdlModell(
+            foedselsnummer = fnr,
+            rolle = rolle
+        ).utland?.verdi
     }
 }

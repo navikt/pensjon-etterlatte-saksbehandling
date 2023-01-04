@@ -47,8 +47,10 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
                     val (id, soeskenflokk) = beregningsperiode
                     if (soeskenflokk != null) {
                         queryOf(
-                            statement = "update beregningsperiode set soeskenflokk = :soeskenflokk where id = :id",
-                            paramMap = mapOf("soeskenflokk" to soeskenflokk.toJson(), "id" to id)
+                            statement =
+                            "update beregningsperiode set soeskenflokk = :soeskenflokk::JSONB where id = :id",
+                            paramMap =
+                            mapOf("soeskenflokk" to soeskenflokk.map { it.foedselsnummer.value }.toJson(), "id" to id)
                         ).let { tx.run(it.asUpdate) }
                     }
                 }

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -38,6 +39,7 @@ sealed class Behandling {
     abstract val type: BehandlingType
     abstract val persongalleri: Persongalleri
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
+    abstract val vilkaarStatus: VilkaarsvurderingUtfall?
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
     val oppgaveStatus get() = OppgaveStatus.from(status)
@@ -81,6 +83,7 @@ data class Foerstegangsbehandling(
     override val status: BehandlingStatus,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
+    override val vilkaarStatus: VilkaarsvurderingUtfall?,
     val virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?
@@ -106,16 +109,16 @@ data class Foerstegangsbehandling(
     }
 
     fun tilOpprettet(): Foerstegangsbehandling {
-        return hvisRedigerbar { endreTilStatus(OPPRETTET) }
+        return hvisRedigerbar { endreTilStatus(OPPRETTET) }.copy(vilkaarStatus = null)
     }
 
-    fun tilVilkaarsvurdert(): Foerstegangsbehandling {
+    fun tilVilkaarsvurdert(utfall: VilkaarsvurderingUtfall?): Foerstegangsbehandling {
         if (!erFyltUt) {
             logger.info(("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert"))
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }
+        return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }.copy(vilkaarStatus = utfall)
     }
 
     fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(VILKAARSVURDERT) {
@@ -158,6 +161,7 @@ data class Revurdering(
     override val status: BehandlingStatus,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
+    override val vilkaarStatus: VilkaarsvurderingUtfall?,
     val revurderingsaarsak: RevurderingAarsak
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
@@ -192,6 +196,9 @@ data class ManueltOpphoer(
     )
 
     override val kommerBarnetTilgode: KommerBarnetTilgode?
+        get() = null
+
+    override val vilkaarStatus: VilkaarsvurderingUtfall?
         get() = null
 }
 

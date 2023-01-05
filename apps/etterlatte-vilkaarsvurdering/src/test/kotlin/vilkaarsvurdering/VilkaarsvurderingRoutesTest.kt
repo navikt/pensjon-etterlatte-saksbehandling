@@ -13,7 +13,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
-import io.mockk.coVerifyOrder
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -74,7 +74,8 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
-        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns true
+        coEvery { behandlingKlient.commitVilkaarsvurdering(any(), any(), VilkaarsvurderingUtfall.OPPFYLT) } returns true
         coEvery { behandlingKlient.opprett(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -391,7 +392,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `statussjekk kalles paa en gang for å sjekke tilstandet paa behandling`() {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
-        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns true
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
@@ -401,8 +402,8 @@ internal class VilkaarsvurderingRoutesTest {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
-            coVerifyOrder {
-                behandlingKlient.vilkaarsvurder(any(), any(), false)
+            coVerify(exactly = 1) {
+                behandlingKlient.testVilkaarsvurderingState(any(), any())
             }
         }
     }
@@ -411,7 +412,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `kan ikke opprette vilkaarsvurdering hvis statussjekk feiler`() {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
-        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns false
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
@@ -429,10 +430,51 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
+    fun `skal ikke commite vilkaarsvurdering hvis statussjekk feiler`() {
+        val behandlingKlient = mockk<BehandlingKlient>()
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns false
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
+
+        val vilkaarsvurderingServiceImpl =
+            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+
+        testApplication {
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+
+            client.get("/api/vilkaarsvurdering/$behandlingId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+        }
+        coVerify(exactly = 0) { behandlingKlient.commitVilkaarsvurdering(any(), any(), any()) }
+    }
+
+    @Test
+    fun `skal ikke commite vilkaarsvurdering hvis statussjekk feiler ved sletting av totalvurdering`() {
+        val behandlingKlient = mockk<BehandlingKlient>()
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingKlient.opprett(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
+
+        val vilkaarsvurderingServiceImpl =
+            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+
+        testApplication {
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+
+            client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+        }
+        coVerify(exactly = 1) { behandlingKlient.opprett(any(), any(), false) }
+        coVerify(exactly = 0) { behandlingKlient.opprett(any(), any(), true) }
+    }
+
+    @Test
     fun `kan ikke endre vilkaarsvurdering hvis statussjekk feiler`() {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
-        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returnsMany listOf(true, false)
+        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returnsMany listOf(true, false)
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =

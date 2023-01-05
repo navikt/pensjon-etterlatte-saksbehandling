@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
 import java.time.YearMonth
@@ -163,12 +164,14 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.settOpprettet(behandlingsId, false)
                 call.respond(HttpStatusCode.OK, "true")
             }
+
             get("/vilkaarsvurder") {
-                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId)
+                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, true, null)
                 call.respond(HttpStatusCode.OK, "true")
             }
             post("/vilkaarsvurder") {
-                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false)
+                val utfall = call.parameters["utfall"]?.let { VilkaarsvurderingUtfall.valueOf(it) }
+                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false, utfall)
                 call.respond(HttpStatusCode.OK, "true")
             }
 
@@ -185,7 +188,6 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.settReturnert(behandlingsId)
                 call.respond(HttpStatusCode.OK, "true")
             }
-
             post("/returner") {
                 foerstegangsbehandlingService.settReturnert(behandlingsId, false)
                 call.respond(HttpStatusCode.OK, "true")
@@ -195,7 +197,6 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.settIverksatt(behandlingsId)
                 call.respond(HttpStatusCode.OK, "true")
             }
-
             post("/iverksett") {
                 foerstegangsbehandlingService.settIverksatt(behandlingsId, false)
                 call.respond(HttpStatusCode.OK, "true")

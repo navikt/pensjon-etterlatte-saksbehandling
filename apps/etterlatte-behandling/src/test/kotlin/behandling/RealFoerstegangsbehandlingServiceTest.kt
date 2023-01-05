@@ -80,7 +80,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 YearMonth.of(2022, 1),
                 Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
             ),
-            kommerBarnetTilgode = null
+            kommerBarnetTilgode = null,
+            vilkaarStatus = null
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
@@ -115,7 +116,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 YearMonth.of(2022, 1),
                 Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
             ),
-            kommerBarnetTilgode = null
+            kommerBarnetTilgode = null,
+            vilkaarStatus = null
         )
 
         val persongalleri = Persongalleri(

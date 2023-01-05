@@ -1,18 +1,25 @@
 package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingClient
-import no.nav.etterlatte.statistikk.database.SakRad
 import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
 import no.nav.etterlatte.statistikk.database.StatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRad
 import no.nav.etterlatte.statistikk.river.Behandling
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
+import no.nav.etterlatte.statistikk.sak.BehandlingMetode
+import no.nav.etterlatte.statistikk.sak.BehandlingResultat
+import no.nav.etterlatte.statistikk.sak.SakRad
+import no.nav.etterlatte.statistikk.sak.SakUtland
+import no.nav.etterlatte.statistikk.sak.SoeknadFormat
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.Instant
 import java.time.ZoneOffset
@@ -44,6 +51,19 @@ class StatistikkService(
         }
     }
 
+    private fun behandlingResultatFraVedtak(
+        vedtak: Vedtak,
+        detaljertBehandling: DetaljertBehandling
+    ): BehandlingResultat? {
+        if (vedtak.vedtakFattet != null) {
+            return BehandlingResultat.VEDTAK
+        }
+        if (detaljertBehandling.status == BehandlingStatus.AVBRUTT) {
+            return BehandlingResultat.AVBRUTT
+        }
+        return null
+    }
+
     private fun vedtakshendelseTilSakRad(vedtak: Vedtak, hendelse: VedtakHendelse): SakRad {
         val detaljertBehandling = hentDetaljertBehandling(vedtak.behandling.id)
         val mottattTid = detaljertBehandling.soeknadMottattDato ?: detaljertBehandling.behandlingOpprettet
@@ -52,35 +72,47 @@ class StatistikkService(
             id = -1,
             behandlingId = vedtak.behandling.id,
             sakId = vedtak.sak.id,
-            mottattTidspunkt = Tidspunkt(mottattTid.toInstant(ZoneOffset.UTC)),
-            registrertTidspunkt = Tidspunkt(detaljertBehandling.behandlingOpprettet.toInstant(ZoneOffset.UTC)),
+            mottattTidspunkt = mottattTid.toTidspunkt(ZoneOffset.UTC),
+            registrertTidspunkt = detaljertBehandling.behandlingOpprettet.toTidspunkt(ZoneOffset.UTC),
             ferdigbehandletTidspunkt = vedtak.vedtakFattet?.tidspunkt?.toTidspunkt(),
             vedtakTidspunkt = vedtak.vedtakFattet?.tidspunkt?.toTidspunkt(),
             behandlingType = vedtak.behandling.type,
             behandlingStatus = hendelse.name,
-            behandlingResultat = null,
+            behandlingResultat = behandlingResultatFraVedtak(vedtak, detaljertBehandling),
             resultatBegrunnelse = null,
-            behandlingMetode = "",
+            behandlingMetode = BehandlingMetode.MANUELL,
+            soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = null,
-            ansvarligBeslutter = vedtak.vedtakFattet?.ansvarligSaksbehandler,
+            ansvarligBeslutter = vedtak.attestasjon?.attestant,
             aktorId = vedtak.sak.ident,
             datoFoersteUtbetaling = vedtak.vedtakFattet?.let {
                 vedtak.pensjonTilUtbetaling?.minByOrNull { it.periode.fom }?.periode?.fom?.atDay(
                     20
                 )
             },
-            tekniskTid = Tidspunkt.now(), // denne er litt irr
-            sakYtelse = "",
+            tekniskTid = detaljertBehandling.sistEndret.toTidspunkt(ZoneOffset.UTC),
+            sakYtelse = vedtak.sak.sakType,
             vedtakLoependeFom = vedtak.virk.fom.atDay(1),
-            vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth()
+            vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
+            saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
+            ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet,
+            sakUtland = SakUtland.NASJONAL
         )
         if (hendelse == VedtakHendelse.IVERKSATT || hendelse == VedtakHendelse.ATTESTERT) {
             return fellesRad.copy(
-                behandlingResultat = vedtak.type.name
+                behandlingResultat = behandlingResultatFraVedtak(vedtak)
             )
         }
 
         return fellesRad
+    }
+
+    private fun behandlingResultatFraVedtak(vedtak: Vedtak): BehandlingResultat? {
+        return when (vedtak.pensjonTilUtbetaling?.any { it.type == UtbetalingsperiodeType.OPPHOER }) {
+            true -> BehandlingResultat.OPPHOER
+            false -> BehandlingResultat.VEDTAK
+            null -> null
+        }
     }
 
     private fun hentDetaljertBehandling(behandlingId: UUID) = runBlocking {
@@ -89,6 +121,10 @@ class StatistikkService(
 
     private fun hentPersongalleri(behandlingId: UUID): Persongalleri = runBlocking {
         behandlingClient.hentPersongalleri(behandlingId)
+    }
+
+    private fun hentSak(sakId: Long) = runBlocking {
+        behandlingClient.hentSak(sakId)
     }
 
     private fun vedtakTilStoenadsrad(vedtak: Vedtak): StoenadRad {
@@ -121,6 +157,7 @@ class StatistikkService(
     }
 
     private fun behandlingTilSakRad(behandling: Behandling, behandlingHendelse: BehandlingHendelse): SakRad {
+        val sak = hentSak(behandling.sak)
         val fellesRad = SakRad(
             id = -1,
             behandlingId = behandling.id,
@@ -139,14 +176,18 @@ class StatistikkService(
             aktorId = behandling.persongalleri.soeker,
             datoFoersteUtbetaling = null,
             tekniskTid = Tidspunkt(instant = behandling.sistEndret.toInstant(ZoneOffset.UTC)),
-            sakYtelse = "",
+            sakYtelse = sak.sakType,
             vedtakLoependeFom = null,
-            vedtakLoependeTom = null
+            vedtakLoependeTom = null,
+            saksbehandler = null,
+            ansvarligEnhet = null,
+            soeknadFormat = SoeknadFormat.DIGITAL,
+            sakUtland = SakUtland.NASJONAL
         )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(
                 ferdigbehandletTidspunkt = Tidspunkt(instant = behandling.sistEndret.toInstant(ZoneOffset.UTC)),
-                behandlingResultat = "AVBRUTT"
+                behandlingResultat = BehandlingResultat.AVBRUTT
             )
         }
         return fellesRad

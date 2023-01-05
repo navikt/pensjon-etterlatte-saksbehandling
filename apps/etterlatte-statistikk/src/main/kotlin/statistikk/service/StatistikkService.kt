@@ -6,15 +6,20 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingClient
-import no.nav.etterlatte.statistikk.database.SakRad
 import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
 import no.nav.etterlatte.statistikk.database.StatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRad
 import no.nav.etterlatte.statistikk.river.Behandling
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
+import no.nav.etterlatte.statistikk.sak.BehandlingMetode
+import no.nav.etterlatte.statistikk.sak.BehandlingResultat
+import no.nav.etterlatte.statistikk.sak.SakRad
+import no.nav.etterlatte.statistikk.sak.SakUtland
+import no.nav.etterlatte.statistikk.sak.SoeknadFormat
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.Instant
 import java.time.ZoneOffset
@@ -46,12 +51,15 @@ class StatistikkService(
         }
     }
 
-    private fun behandlingResultatFraVedtak(vedtak: Vedtak, detaljertBehandling: DetaljertBehandling): String? {
+    private fun behandlingResultatFraVedtak(
+        vedtak: Vedtak,
+        detaljertBehandling: DetaljertBehandling
+    ): BehandlingResultat? {
         if (vedtak.vedtakFattet != null) {
-            return "VEDTAK"
+            return BehandlingResultat.VEDTAK
         }
         if (detaljertBehandling.status == BehandlingStatus.AVBRUTT) {
-            return "AVBRUTT"
+            return BehandlingResultat.AVBRUTT
         }
         return null
     }
@@ -72,8 +80,8 @@ class StatistikkService(
             behandlingStatus = hendelse.name,
             behandlingResultat = behandlingResultatFraVedtak(vedtak, detaljertBehandling),
             resultatBegrunnelse = null,
-            behandlingMetode = "MANUELL",
-            soeknadFormat = "DIGITAL",
+            behandlingMetode = BehandlingMetode.MANUELL,
+            soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = null,
             ansvarligBeslutter = vedtak.attestasjon?.attestant,
             aktorId = vedtak.sak.ident,
@@ -88,15 +96,23 @@ class StatistikkService(
             vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
             ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet,
-            sakUtland = false.toString()
+            sakUtland = SakUtland.NASJONAL
         )
         if (hendelse == VedtakHendelse.IVERKSATT || hendelse == VedtakHendelse.ATTESTERT) {
             return fellesRad.copy(
-                behandlingResultat = vedtak.type.name
+                behandlingResultat = behandlingResultatFraVedtak(vedtak)
             )
         }
 
         return fellesRad
+    }
+
+    private fun behandlingResultatFraVedtak(vedtak: Vedtak): BehandlingResultat? {
+        return when (vedtak.pensjonTilUtbetaling?.any { it.type == UtbetalingsperiodeType.OPPHOER }) {
+            true -> BehandlingResultat.OPPHOER
+            false -> BehandlingResultat.VEDTAK
+            null -> null
+        }
     }
 
     private fun hentDetaljertBehandling(behandlingId: UUID) = runBlocking {
@@ -105,6 +121,10 @@ class StatistikkService(
 
     private fun hentPersongalleri(behandlingId: UUID): Persongalleri = runBlocking {
         behandlingClient.hentPersongalleri(behandlingId)
+    }
+
+    private fun hentSak(sakId: Long) = runBlocking {
+        behandlingClient.hentSak(sakId)
     }
 
     private fun vedtakTilStoenadsrad(vedtak: Vedtak): StoenadRad {
@@ -137,6 +157,7 @@ class StatistikkService(
     }
 
     private fun behandlingTilSakRad(behandling: Behandling, behandlingHendelse: BehandlingHendelse): SakRad {
+        val sak = hentSak(behandling.sak)
         val fellesRad = SakRad(
             id = -1,
             behandlingId = behandling.id,
@@ -155,18 +176,18 @@ class StatistikkService(
             aktorId = behandling.persongalleri.soeker,
             datoFoersteUtbetaling = null,
             tekniskTid = Tidspunkt(instant = behandling.sistEndret.toInstant(ZoneOffset.UTC)),
-            sakYtelse = "",
+            sakYtelse = sak.sakType,
             vedtakLoependeFom = null,
             vedtakLoependeTom = null,
             saksbehandler = null,
             ansvarligEnhet = null,
-            soeknadFormat = "DIGITAL",
-            sakUtland = false.toString()
+            soeknadFormat = SoeknadFormat.DIGITAL,
+            sakUtland = SakUtland.NASJONAL
         )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(
                 ferdigbehandletTidspunkt = Tidspunkt(instant = behandling.sistEndret.toInstant(ZoneOffset.UTC)),
-                behandlingResultat = "AVBRUTT"
+                behandlingResultat = BehandlingResultat.AVBRUTT
             )
         }
         return fellesRad

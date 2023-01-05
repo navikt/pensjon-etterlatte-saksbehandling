@@ -1,14 +1,16 @@
 package no.nav.etterlatte.statistikk.database
 
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
+import no.nav.etterlatte.statistikk.sak.BehandlingMetode
+import no.nav.etterlatte.statistikk.sak.BehandlingResultat
+import no.nav.etterlatte.statistikk.sak.SakRad
+import no.nav.etterlatte.statistikk.sak.SakUtland
+import no.nav.etterlatte.statistikk.sak.SoeknadFormat
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Statement
-import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
@@ -62,9 +64,9 @@ class SakstatistikkRepository(private val datasource: DataSource) {
         vedtakTidspunkt = getTimestamp("vedtak_tid")?.toTidspunkt(),
         behandlingType = enumValueOf(getString("behandling_type")),
         behandlingStatus = getString("behandling_status"),
-        behandlingResultat = getString("behandling_resultat"),
+        behandlingResultat = getString("behandling_resultat")?.let { enumValueOf<BehandlingResultat>(it) },
         resultatBegrunnelse = getString("resultat_begrunnelse"),
-        behandlingMetode = getString("behandling_metode"),
+        behandlingMetode = getString("behandling_metode")?.let { enumValueOf<BehandlingMetode>(it) },
         opprettetAv = getString("opprettet_av"),
         ansvarligBeslutter = getString("ansvarlig_beslutter"),
         aktorId = getString("aktor_id"),
@@ -75,8 +77,8 @@ class SakstatistikkRepository(private val datasource: DataSource) {
         vedtakLoependeTom = getDate("vedtak_loepende_tom")?.toLocalDate(),
         saksbehandler = getString("saksbehandler"),
         ansvarligEnhet = getString("ansvarlig_enhet"),
-        soeknadFormat = getString("soeknad_format"), // TODO
-        sakUtland = getString("sak_utland")
+        soeknadFormat = getString("soeknad_format")?.let { enumValueOf<SoeknadFormat>(it) },
+        sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) }
     )
 
     fun hentRader(): List<SakRad> {
@@ -99,33 +101,6 @@ class SakstatistikkRepository(private val datasource: DataSource) {
     }
 }
 
-data class SakRad(
-    val id: Long,
-    val behandlingId: UUID,
-    val sakId: Long,
-    val mottattTidspunkt: Tidspunkt,
-    val registrertTidspunkt: Tidspunkt,
-    val ferdigbehandletTidspunkt: Tidspunkt?,
-    val vedtakTidspunkt: Tidspunkt?,
-    val behandlingType: BehandlingType,
-    val behandlingStatus: String?,
-    val behandlingResultat: String?,
-    val resultatBegrunnelse: String?,
-    val saksbehandler: String?,
-    val ansvarligEnhet: String?,
-    val soeknadFormat: String?,
-    val sakUtland: String?,
-    val behandlingMetode: String?,
-    val opprettetAv: String?,
-    val ansvarligBeslutter: String?,
-    val aktorId: String,
-    val datoFoersteUtbetaling: LocalDate?,
-    val tekniskTid: Tidspunkt,
-    val sakYtelse: String,
-    val vedtakLoependeFom: LocalDate?,
-    val vedtakLoependeTom: LocalDate?
-)
-
 private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = this.apply {
     setObject(1, sakRad.behandlingId)
     setLong(2, sakRad.sakId)
@@ -135,9 +110,9 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = thi
     setTimestamp(6, sakRad.vedtakTidspunkt?.toTimestamp())
     setString(7, sakRad.behandlingType.name)
     setString(8, sakRad.behandlingStatus)
-    setString(9, sakRad.behandlingResultat)
+    setString(9, sakRad.behandlingResultat?.name)
     setString(10, sakRad.resultatBegrunnelse)
-    setString(11, sakRad.behandlingMetode)
+    setString(11, sakRad.behandlingMetode?.name)
     setString(12, sakRad.opprettetAv)
     setString(13, sakRad.ansvarligBeslutter)
     setString(14, sakRad.aktorId)
@@ -148,6 +123,6 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = thi
     setDate(19, sakRad.vedtakLoependeTom?.let { Date.valueOf(it) })
     setString(20, sakRad.saksbehandler)
     setString(21, sakRad.ansvarligEnhet)
-    setString(22, sakRad.soeknadFormat)
-    setString(23, sakRad.sakUtland)
+    setString(22, sakRad.soeknadFormat?.name)
+    setString(23, sakRad.sakUtland?.name)
 }

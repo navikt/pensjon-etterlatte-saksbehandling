@@ -3,10 +3,12 @@ package no.nav.etterlatte
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.DataSourceBuilder
-import no.nav.etterlatte.statistikk.database.SakRad
 import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
 import no.nav.etterlatte.statistikk.database.StatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRad
+import no.nav.etterlatte.statistikk.sak.BehandlingMetode
+import no.nav.etterlatte.statistikk.sak.SakRad
+import no.nav.etterlatte.statistikk.sak.SakUtland
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
@@ -95,9 +97,9 @@ internal class DBTest {
                 vedtakTidspunkt = null,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingStatus = VedtakHendelse.IVERKSATT.name,
-                behandlingResultat = "wow",
+                behandlingResultat = null,
                 resultatBegrunnelse = "for en begrunnelse",
-                behandlingMetode = "manuell",
+                behandlingMetode = BehandlingMetode.MANUELL,
                 opprettetAv = "test",
                 ansvarligBeslutter = "test testesen",
                 aktorId = "12345678911",
@@ -105,7 +107,11 @@ internal class DBTest {
                 tekniskTid = Tidspunkt.now(),
                 sakYtelse = "En ytelse",
                 vedtakLoependeFom = LocalDate.now(),
-                vedtakLoependeTom = LocalDate.now().plusYears(3)
+                vedtakLoependeTom = LocalDate.now().plusYears(3),
+                saksbehandler = "en saksbehandler",
+                ansvarligEnhet = "en enhet",
+                soeknadFormat = null,
+                sakUtland = SakUtland.NASJONAL
             )
         )
 

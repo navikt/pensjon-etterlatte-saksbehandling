@@ -99,7 +99,7 @@ class RealGrunnlagService(
             )
         )
 
-        this.lagreNyeOpplysninger(sakId, Foedselsnummer.of("1231"), opplysning)
+        this.lagreNyeOpplysninger(sakId, Foedselsnummer.of(behandling.soeker), opplysning)
         val grunnlagEndretMessage = JsonMessage.newMessage(
             eventName = "GRUNNLAG:GRUNNLAGENDRET",
             map = mapOf(correlationIdKey to getXCorrelationId(), "sakId" to sakId)

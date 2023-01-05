@@ -38,10 +38,23 @@ if (isDev) {
     tokenMiddleware(ApiConfig.vilkaarsvurdering.scope),
     proxy(ApiConfig.vilkaarsvurdering.url!!)
   )
+
   app.use(
     '/api/behandling/:behandlingsid/kommerbarnettilgode',
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url!!)
+  )
+
+  app.use(
+    '/api/behandlinger/:sakid/manueltopphoer',
+    tokenMiddleware(ApiConfig.behandling.scope),
+    proxy(ApiConfig.behandling.url!!)
+  )
+
+  app.use(
+    '/api/grunnlag/beregningsgrunnlag/:behandlingId',
+    tokenMiddleware(ApiConfig.grunnlag.scope),
+    proxy(ApiConfig.grunnlag.url!!)
   )
 
   app.use(
@@ -51,12 +64,6 @@ if (isDev) {
   )
 
   app.use('/api/oppgaver', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url!!))
-
-  app.use(
-    '/api/grunnlag/beregningsgrunnlag/:behandlingId',
-    tokenMiddleware(ApiConfig.grunnlag.scope),
-    proxy(ApiConfig.grunnlag.url!!)
-  )
 
   app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url!!))
 

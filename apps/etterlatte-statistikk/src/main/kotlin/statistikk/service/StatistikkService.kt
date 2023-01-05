@@ -91,7 +91,7 @@ class StatistikkService(
                 )
             },
             tekniskTid = detaljertBehandling.sistEndret.toTidspunkt(ZoneOffset.UTC),
-            sakYtelse = vedtak.sak.sakType,
+            sakYtelse = vedtak.sak.sakType.name,
             vedtakLoependeFom = vedtak.virk.fom.atDay(1),
             vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
@@ -176,7 +176,7 @@ class StatistikkService(
             aktorId = behandling.persongalleri.soeker,
             datoFoersteUtbetaling = null,
             tekniskTid = Tidspunkt(instant = behandling.sistEndret.toInstant(ZoneOffset.UTC)),
-            sakYtelse = sak.sakType,
+            sakYtelse = sak.sakType.name,
             vedtakLoependeFom = null,
             vedtakLoependeTom = null,
             saksbehandler = null,

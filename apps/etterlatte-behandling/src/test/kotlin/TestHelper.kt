@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
-import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -171,37 +170,21 @@ fun grunnlagsendringshendelseMedSamsvar(
     sakId: Long = 1,
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = LocalDateTime.now(),
-    data: Grunnlagsinformasjon,
+    fnr: String,
     status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     behandlingId: UUID? = null,
     hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER,
-    samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag? = when (data) {
-        is Grunnlagsinformasjon.Doedsfall -> samsvarMellomPdlOgGrunnlagDoed(data.hendelse.doedsdato)
-        is Grunnlagsinformasjon.Utflytting -> samsvarMellomPdlOgGrunnlagUtflytting(utlandUtflyttingTilSverige())
-        is Grunnlagsinformasjon.ForelderBarnRelasjon -> {
-            when (hendelseGjelderRolle) {
-                Saksrolle.SOEKER, Saksrolle.SOESKEN -> {
-                    samsvarMellomPdlOgGrunnlagBarn(toFoedselsnummer())
-                }
-                Saksrolle.AVDOED, Saksrolle.GJENLEVENDE -> {
-                    samsvarMellomPdlOgGrunnlagAnsvarligeForeldre(toFoedselsnummer())
-                }
-                Saksrolle.UKJENT -> {
-                    throw IllegalArgumentException("Skal ikke vaere mulig med saksrolle ukjent")
-                }
-            }
-        }
-    }
+    samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag?
 ) = Grunnlagsendringshendelse(
     id = id,
     sakId = sakId,
     type = type,
     opprettet = opprettet,
-    data = data,
     status = status,
     behandlingId = behandlingId,
     hendelseGjelderRolle = hendelseGjelderRolle,
-    samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag
+    samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag,
+    gjelderPerson = fnr
 )
 
 fun grunnlagsendringshendelseUtenSamsvar(
@@ -209,60 +192,39 @@ fun grunnlagsendringshendelseUtenSamsvar(
     sakId: Long = 1,
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = LocalDateTime.now(),
-    data: Grunnlagsinformasjon,
+    fnr: String?,
     status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     behandlingId: UUID? = null,
     hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER,
-    samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag? = when (data) {
-        is Grunnlagsinformasjon.Doedsfall -> ikkeSamsvarMellomPdlOgGrunnlagDoed(data.hendelse.doedsdato)
-        is Grunnlagsinformasjon.Utflytting -> ikkeSamsvarMellomPdlOgGrunnlagUtflytting(utlandUtflyttingTilSverige())
-        is Grunnlagsinformasjon.ForelderBarnRelasjon -> {
-            when (hendelseGjelderRolle) {
-                Saksrolle.SOEKER, Saksrolle.SOESKEN -> {
-                    ikkeSamsvarMellomPdlOgGrunnlagBarn(toFoedselsnummer())
-                }
-                Saksrolle.AVDOED, Saksrolle.GJENLEVENDE -> {
-                    ikkeSamsvarMellomPdlOgGrunnlagAnsvarligeForeldre(toFoedselsnummer())
-                }
-                Saksrolle.UKJENT -> {
-                    throw IllegalArgumentException("Skal ikke vaere mulig med saksrolle ukjent")
-                }
-            }
-        }
-    }
+    samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag?
 ) = Grunnlagsendringshendelse(
     id = id,
     sakId = sakId,
     type = type,
     opprettet = opprettet,
-    data = data,
     status = status,
     behandlingId = behandlingId,
     hendelseGjelderRolle = hendelseGjelderRolle,
-    samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag
+    samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag,
+    gjelderPerson = fnr
 )
 
 fun grunnlagsinformasjonDoedshendelse(
     avdoedFnr: String = "12345678911",
     doedsdato: LocalDate = LocalDate.of(2022, 1, 1),
     endringstype: Endringstype = Endringstype.OPPRETTET
-) =
-    Grunnlagsinformasjon.Doedsfall(
-        Doedshendelse(avdoedFnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
-    )
+) = Doedshendelse(avdoedFnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
 
 fun grunnlagsinformasjonUtflyttingshendelse(
     fnr: String = "12345678911",
     tilflyttingsLand: String = "Sverige",
     utflyttingsdato: LocalDate = LocalDate.of(2022, 8, 8)
-) = Grunnlagsinformasjon.Utflytting(
-    hendelse = UtflyttingsHendelse(
-        fnr = fnr,
-        tilflyttingsLand = tilflyttingsLand,
-        tilflyttingsstedIUtlandet = null,
-        utflyttingsdato = utflyttingsdato,
-        endringstype = Endringstype.OPPRETTET
-    )
+) = UtflyttingsHendelse(
+    fnr = fnr,
+    tilflyttingsLand = tilflyttingsLand,
+    tilflyttingsstedIUtlandet = null,
+    utflyttingsdato = utflyttingsdato,
+    endringstype = Endringstype.OPPRETTET
 )
 
 fun grunnlagsinformasjonForelderBarnRelasjonHendelse(
@@ -270,16 +232,13 @@ fun grunnlagsinformasjonForelderBarnRelasjonHendelse(
     relatertPersonsIdent: String = "98765432198",
     relatertPersonsRolle: String = "MOR",
     minRolleForPerson: String = "BARN"
-) = Grunnlagsinformasjon.ForelderBarnRelasjon(
-    hendelse = ForelderBarnRelasjonHendelse(
-        fnr = fnr,
-        relatertPersonsIdent = relatertPersonsIdent,
-        relatertPersonsRolle = relatertPersonsRolle,
-        minRolleForPerson = minRolleForPerson,
-        relatertPersonUtenFolkeregisteridentifikator = null,
-        endringstype = Endringstype.OPPRETTET
-    )
-
+) = ForelderBarnRelasjonHendelse(
+    fnr = fnr,
+    relatertPersonsIdent = relatertPersonsIdent,
+    relatertPersonsRolle = relatertPersonsRolle,
+    minRolleForPerson = minRolleForPerson,
+    relatertPersonUtenFolkeregisteridentifikator = null,
+    endringstype = Endringstype.OPPRETTET
 )
 
 fun kommerBarnetTilgode(

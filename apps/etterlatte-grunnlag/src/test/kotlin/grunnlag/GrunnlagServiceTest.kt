@@ -6,6 +6,7 @@ import io.mockk.mockk
 import lagGrunnlagHendelse
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
@@ -34,7 +35,9 @@ import java.util.*
 
 internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
-    private val grunnlagService = RealGrunnlagService(opplysningerMock)
+    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
+    private val grunnlagService = RealGrunnlagService(opplysningerMock, sendToRapid, behandlingKlient)
 
     private val testData = GrunnlagTestData()
 

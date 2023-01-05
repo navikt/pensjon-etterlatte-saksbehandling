@@ -82,3 +82,4 @@ spec:
           permissions:
             roles:
               - "kan-sette-kilde"
+        - application: etterlatte-grunnlag

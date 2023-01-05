@@ -23,8 +23,6 @@ spec:
       claims:
         extra:
           - NAVident
-  kafka:
-    pool: nav-dev
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -46,8 +44,6 @@ spec:
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEREGNING_URL

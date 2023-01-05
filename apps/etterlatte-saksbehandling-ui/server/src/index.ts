@@ -47,6 +47,12 @@ if (isDev) {
 
   app.use('/api/oppgaver', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url!!))
 
+  app.use(
+    '/api/grunnlag/beregningsgrunnlag/:behandlingId',
+    tokenMiddleware(ApiConfig.behandling.scope),
+    proxy(ApiConfig.behandling.url!!)
+  )
+
   app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url!!))
 
   app.use('/api/vedtak', tokenMiddleware(ApiConfig.vedtak.scope), proxy(ApiConfig.vedtak.url!!))

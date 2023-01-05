@@ -45,6 +45,10 @@ spec:
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
   accessPolicy:
     inbound:
       rules:
@@ -52,4 +56,9 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-brev-api
         - application: etterlatte-beregning
+        - application: etterlatte-behandling
+        - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-saksbehandling-ui-lokal
+    outbound:
+      rules:
         - application: etterlatte-behandling

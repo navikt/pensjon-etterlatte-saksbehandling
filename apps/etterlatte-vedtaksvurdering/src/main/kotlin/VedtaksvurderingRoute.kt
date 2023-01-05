@@ -75,7 +75,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         post("vedtak/attester/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                val attestert = service.attesterVedtak(behandlingId, saksbehandler)
+                val attestert = service.attesterVedtak(behandlingId, saksbehandler, accesstoken)
                 val vedtakHendelse = VedtakHendelse(
                     vedtakId = attestert.vedtakId,
                     inntruffet = Tidspunkt.now(),
@@ -96,7 +96,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         post("vedtak/fattvedtak/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                val fattetVedtak = service.fattVedtak(behandlingId, saksbehandler)
+                val fattetVedtak = service.fattVedtak(behandlingId, saksbehandler, accesstoken)
 
                 val vedtakHendelse = VedtakHendelse(
                     vedtakId = fattetVedtak.vedtakId,
@@ -111,7 +111,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
         post("vedtak/underkjenn/{behandlingId}") {
             val behandlingId = UUID.fromString(call.parameters["behandlingId"])
             val begrunnelse = call.receive<UnderkjennVedtakClientRequest>()
-            val underkjentVedtak = service.underkjennVedtak(behandlingId)
+            val underkjentVedtak = service.underkjennVedtak(behandlingId, accesstoken)
 
             val vedtakHendelse = VedtakHendelse(
                 vedtakId = underkjentVedtak.id,

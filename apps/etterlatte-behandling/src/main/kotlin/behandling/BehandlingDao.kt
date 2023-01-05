@@ -265,7 +265,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 foerstegangsbehandling.virkningstidspunkt?.toJson()
             )
             stmt.setString(14, kommerBarnetTilgode?.toJson())
-            stmt.setString(15, vilkaarStatus?.toJson())
+            stmt.setString(15, vilkaarStatus?.name)
         }
         stmt.executeUpdate()
     }
@@ -275,7 +275,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                 innsender, soeker, gjenlevende, avdoed, soesken, revurdering_aarsak, kommer_barnet_tilgode, vilkaar_status)
+                 innsender, soeker, gjenlevende, avdoed, soesken, revurdering_aarsak, kommer_barnet_tilgode, vilkaar_utfall)
                  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
@@ -301,7 +301,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             }
             stmt.setString(12, revurderingsaarsak.name)
             stmt.setString(13, kommerBarnetTilgode?.let { objectMapper.writeValueAsString(it) })
-            stmt.setString(14, vilkaarStatus?.toJson())
+            stmt.setString(14, vilkaarStatus?.name)
         }
         require(stmt.executeUpdate() == 1)
     }

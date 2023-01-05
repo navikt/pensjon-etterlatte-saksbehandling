@@ -34,20 +34,25 @@ class BeregningService(
     fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
-        return coroutineScope {
-            val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
-            val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
-            val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.await().sak, accessToken) }
+        return tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
+            coroutineScope {
+                val vilkaarsvurdering =
+                    async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
+                val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
+                val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.await().sak, accessToken) }
 
-            val beregning = lagBeregning(
-                grunnlag.await(),
-                behandling.await().virkningstidspunkt!!.dato,
-                YearMonth.now().plusMonths(3),
-                vilkaarsvurdering.await().resultat!!.utfall,
-                behandling.await().behandlingType!!,
-                behandlingId
-            )
-            beregningRepository.lagreEllerOppdaterBeregning(beregning)
+                val beregning = lagBeregning(
+                    grunnlag.await(),
+                    behandling.await().virkningstidspunkt!!.dato,
+                    YearMonth.now().plusMonths(3),
+                    vilkaarsvurdering.await().resultat!!.utfall,
+                    behandling.await().behandlingType!!,
+                    behandlingId
+                )
+                beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
+                    behandlingKlient.beregn(behandlingId, accessToken, true)
+                }
+            }
         }
     }
 
@@ -182,6 +187,20 @@ class BeregningService(
         if (fom.isBefore(virkFOM)) virkFOM else fom
 
     private fun foersteVirkFraDoedsdato(dødsdato: LocalDate): YearMonth = YearMonth.from(dødsdato).plusMonths(1)
+
+    private suspend fun tilstandssjekkFoerKjoerning(
+        behandlingId: UUID,
+        accessToken: String,
+        block: suspend () -> Beregning
+    ): Beregning {
+        val kanBeregne = behandlingKlient.beregn(behandlingId, accessToken, false)
+
+        if (!kanBeregne) {
+            throw IllegalStateException("Kunne ikke beregne, er i feil state")
+        }
+
+        return block()
+    }
 
     override fun slettSak(sakId: Long) {
         beregningRepository.slettBeregningsperioderISak(sakId)

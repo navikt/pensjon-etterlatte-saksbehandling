@@ -200,6 +200,16 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.settIverksatt(behandlingsId, false)
                 call.respond(HttpStatusCode.OK, "true")
             }
+
+            get("/beregn") {
+                foerstegangsbehandlingService.settBeregnet(behandlingsId)
+                call.respond(HttpStatusCode.OK, "true")
+            }
+
+            post("/beregn") {
+                foerstegangsbehandlingService.settBeregnet(behandlingsId, false)
+                call.respond(HttpStatusCode.OK, "true")
+            }
         }
 
         route("/sak") {

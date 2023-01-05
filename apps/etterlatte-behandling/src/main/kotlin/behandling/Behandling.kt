@@ -118,7 +118,7 @@ data class Foerstegangsbehandling(
         return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }
     }
 
-    fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(VILKAARSVURDERT) {
+    fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(listOf(VILKAARSVURDERT, BEREGNET)) {
         endreTilStatus(BEREGNET)
     }
 

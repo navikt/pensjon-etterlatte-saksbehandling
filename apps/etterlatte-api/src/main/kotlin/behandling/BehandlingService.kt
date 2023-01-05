@@ -167,11 +167,6 @@ class BehandlingService(
         return behandlingKlient.slettRevurderinger(sakId, accessToken)
     }
 
-    suspend fun avbrytBehanding(behandlingId: String, accessToken: String): Boolean {
-        logger.error("Avbryter behandling med behandingsId $behandlingId")
-        return behandlingKlient.avbrytBehandling(behandlingId, accessToken)
-    }
-
     suspend fun opprettManueltOpphoer(
         manueltOpphoerRequest: ManueltOpphoerRequest,
         accessToken: String

@@ -104,12 +104,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
             }
         }
 
-        post("avbryt") {
-            call.withUUID("behandlingId") {
-                call.respond(service.avbrytBehanding(it.toString(), getAccessToken(call)))
-            }
-        }
-
         post("virkningstidspunkt") {
             call.withUUID("behandlingId") {
                 val body = call.receive<VirkningstidspunktRequest>()

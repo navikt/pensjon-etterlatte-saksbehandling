@@ -69,6 +69,15 @@ fun Route.behandlingRoutes(
         }
     }
 
+    post("/api/behandling/{behandlingsid}/avbryt") {
+        val navIdent = navIdentFraToken() ?: return@post call.respond(
+            HttpStatusCode.Unauthorized,
+            "Kunne ikke hente ut navident for den som vil avbryte"
+        )
+        generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
+        call.respond(HttpStatusCode.OK)
+    }
+
     route("/behandlinger") {
         get {
             call.respond(
@@ -117,15 +126,6 @@ fun Route.behandlingRoutes(
                         call.respond(HttpStatusCode.OK)
                     }
                 }
-            }
-
-            post("/avbrytbehandling") {
-                val navIdent = navIdentFraToken() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "Kunne ikke hente ut navident for den som vil avbryte"
-                )
-                generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
-                call.respond(HttpStatusCode.OK)
             }
 
             post("/gyldigfremsatt") {

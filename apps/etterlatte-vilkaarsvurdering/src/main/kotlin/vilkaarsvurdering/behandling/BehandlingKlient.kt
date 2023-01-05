@@ -26,7 +26,7 @@ interface BehandlingKlient {
     suspend fun commitVilkaarsvurdering(
         behandlingId: UUID,
         accessToken: String,
-        utfall: VilkaarsvurderingUtfall?
+        utfall: VilkaarsvurderingUtfall
     ): Boolean
 }
 
@@ -71,7 +71,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun commitVilkaarsvurdering(
         behandlingId: UUID,
         accessToken: String,
-        utfall: VilkaarsvurderingUtfall?
+        utfall: VilkaarsvurderingUtfall
     ): Boolean {
         logger.info("Committer vilkaarsvurdering på behandling med id $behandlingId")
         val response = downstreamResourceClient.post(

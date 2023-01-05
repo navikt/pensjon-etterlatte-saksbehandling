@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.HttpStatusCode.Companion.PreconditionFailed
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
@@ -171,6 +172,8 @@ fun Route.behandlingRoutes(
             }
             post("/vilkaarsvurder") {
                 val utfall = call.parameters["utfall"]?.let { VilkaarsvurderingUtfall.valueOf(it) }
+                    ?: return@post call.respond(PreconditionFailed, "vilkaarsvurderiing kan ikke være null")
+
                 foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false, utfall)
                 call.respond(HttpStatusCode.OK, "true")
             }

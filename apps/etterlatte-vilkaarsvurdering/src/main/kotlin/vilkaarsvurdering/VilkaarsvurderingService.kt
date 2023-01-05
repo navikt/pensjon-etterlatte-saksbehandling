@@ -45,7 +45,8 @@ class VilkaarsvurderingService(
         resultat: VilkaarsvurderingResultat
     ): Vilkaarsvurdering = tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
         val vilkaarsvurdering = vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
-        behandlingKlient.commitVilkaarsvurdering(behandlingId, accessToken, vilkaarsvurdering.resultat?.utfall)
+        val utfall = vilkaarsvurdering.resultat?.utfall ?: throw IllegalStateException("Utfall kan ikke vaere null")
+        behandlingKlient.commitVilkaarsvurdering(behandlingId, accessToken, utfall)
         vilkaarsvurdering
     }
 

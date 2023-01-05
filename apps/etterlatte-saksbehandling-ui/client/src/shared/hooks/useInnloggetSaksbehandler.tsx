@@ -11,7 +11,7 @@ const useInnloggetSaksbehandler = () => {
   useEffect(() => {
     hentSaksbehandler({}, (response) => {
       if (response) {
-        dispatch(setSaksbehandler(JSON.parse(response.toString())))
+        dispatch(setSaksbehandler(response))
       }
     })
   }, [])

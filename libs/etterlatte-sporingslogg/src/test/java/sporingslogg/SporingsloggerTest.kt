@@ -28,13 +28,12 @@ internal class SporingsloggerTest {
                 endTime = timestamp,
                 sourceUserId = "U123456",
                 destinationUserId = "10458210115",
-                sourceProcessName = "vilkaarsvurdering",
                 flexString1 = Decision.Permit,
                 message = "Internbruker sjekker barnepensjon for innbygger"
             )
         )
         assertEquals(
-            "CEF:0|pensjon|etterlatte-vilkaarsvurdering|1.0|audit:access|On-behalf-of access|INFO|end=1580554800000 suid=U123456 duid=10458210115 sproc=vilkaarsvurdering flexString1Label=Decision flexString1=Permit msg=Internbruker sjekker barnepensjon for innbygger", // ktlint-disable max-line-length
+            "CEF:0|pensjon|etterlatte-vilkaarsvurdering|1.0|audit:access|On-behalf-of access|INFO|end=1580554800000 suid=U123456 duid=10458210115 flexString1Label=Decision flexString1=Permit msg=Internbruker sjekker barnepensjon for innbygger", // ktlint-disable max-line-length
             entry.format()
         )
     }
@@ -50,13 +49,12 @@ internal class SporingsloggerTest {
                 endTime = timestamp,
                 sourceUserId = "U123456",
                 destinationUserId = "10458210115",
-                sourceProcessName = "vilkaarsvurdering",
                 flexString1 = Decision.Deny,
                 message = "Internbruker oppdaterer barnepensjon for innbygger"
             )
         )
         assertEquals(
-            "CEF:0|pensjon|etterlatte-vilkaarsvurdering|1.0|audit:update|On-behalf-of access|WARN|end=1580554800000 suid=U123456 duid=10458210115 sproc=vilkaarsvurdering flexString1Label=Decision flexString1=Deny msg=Internbruker oppdaterer barnepensjon for innbygger", // ktlint-disable max-line-length
+            "CEF:0|pensjon|etterlatte-vilkaarsvurdering|1.0|audit:update|On-behalf-of access|WARN|end=1580554800000 suid=U123456 duid=10458210115 flexString1Label=Decision flexString1=Deny msg=Internbruker oppdaterer barnepensjon for innbygger", // ktlint-disable max-line-length
             entry.format()
         )
     }

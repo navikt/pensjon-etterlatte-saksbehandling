@@ -19,7 +19,8 @@ enum class DeviceEventClassId {
     Access,
     Create,
     Update,
-    Delete;
+    Delete,
+    Meta;
 
     fun format() = "audit:${name.lowercase()}"
 }
@@ -38,32 +39,25 @@ data class CEFEntry(
     val deviceEventClassId: DeviceEventClassId,
     val name: Name,
     val severity: Severity,
-    val extension: Extension?
+    val extension: Extension
 ) {
-    fun format(): String {
-        val formatertExtension = if (extension != null) "|${extension.format()}" else ""
-        return "$format:$versjon|$deviceVendor|etterlatte-$deviceProduct|$deviceVersion|" +
-            "${deviceEventClassId.format()}|${name.tekst}|$severity$formatertExtension"
-    }
+    fun format(): String = "$format:$versjon|$deviceVendor|etterlatte-$deviceProduct|$deviceVersion|" +
+        "${deviceEventClassId.format()}|${name.tekst}|$severity|${extension.format()}"
 }
 
 data class Extension(
     val endTime: Instant = Instant.now(),
     val sourceUserId: String, // merk: Vi støtter pr i dag ikke Azure AD ID’er, og vil ha behov for vanlig NAV ID.
     val destinationUserId: String,
-    val sourceProcessName: String,
     val request: String? = null,
     val flexString1: Decision? = null,
-    val flexString2: Pair<String, String>? = null,
     val message: String
 ) {
     fun format(): String {
         val flexString1Formatert =
             if (flexString1 != null) " flexString1Label=Decision flexString1=$flexString1" else ""
-        val flexString2Formatert =
-            if (flexString2 != null) "flexString2Label=${flexString2.first} flexString2=${flexString2.second}" else ""
         val requestFormatert = if (request != null) " request=$request" else ""
-        return "end=${endTime.toEpochMilli()} suid=$sourceUserId duid=$destinationUserId sproc=$sourceProcessName" +
-            "$requestFormatert$flexString1Formatert$flexString2Formatert msg=$message"
+        return "end=${endTime.toEpochMilli()} suid=$sourceUserId duid=$destinationUserId" +
+            "$requestFormatert$flexString1Formatert msg=$message"
     }
 }

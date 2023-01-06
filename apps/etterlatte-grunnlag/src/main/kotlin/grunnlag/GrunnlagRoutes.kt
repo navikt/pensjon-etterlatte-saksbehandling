@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
+import java.util.*
 
 fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
     route("grunnlag") {
@@ -49,14 +50,13 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
         post("/beregningsgrunnlag/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 val body = call.receive<SoeskenMedIBeregningDTO>()
-                call.respond(
-                    grunnlagService.lagreSoeskenMedIBeregning(
-                        behandlingId,
-                        body.soeskenMedIBeregning,
-                        saksbehandler,
-                        accesstoken
-                    )
+                grunnlagService.lagreSoeskenMedIBeregning(
+                    behandlingId,
+                    body.soeskenMedIBeregning,
+                    saksbehandler,
+                    accesstoken
                 )
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

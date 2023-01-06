@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -88,9 +87,6 @@ class RealGrunnlagService(
         saksbehandlerId: String,
         accessToken: String
     ) {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-
-        val sakId = behandling.sak
         val opplysning: List<Grunnlagsopplysning<JsonNode>> = listOf(
             lagOpplysning(
                 opplysningsType = Opplysningstype.SOESKEN_I_BEREGNINGEN,
@@ -99,13 +95,16 @@ class RealGrunnlagService(
             )
         )
 
-        this.lagreNyeOpplysninger(sakId, Foedselsnummer.of(behandling.soeker), opplysning)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+
+        val sakId = behandling.sak
+        lagreNyeOpplysninger(sakId, Foedselsnummer.of(behandling.soeker), opplysning)
         val grunnlagEndretMessage = JsonMessage.newMessage(
             eventName = "GRUNNLAG:GRUNNLAGENDRET",
-            map = mapOf(correlationIdKey to getXCorrelationId(), "sakId" to sakId)
+            map = mapOf(correlationIdKey to UUID.randomUUID(), "sakId" to sakId)
         )
         sendToRapid(grunnlagEndretMessage.toJson(), behandlingId)
-        logger.info("Lagt ut melding om grunnlagsendring")
+        logger.info("Lagt ut melding om grunnlagsendring for behandling $behandlingId")
     }
 
     fun <T> lagOpplysning(

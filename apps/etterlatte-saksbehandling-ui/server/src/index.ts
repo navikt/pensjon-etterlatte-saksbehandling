@@ -49,8 +49,8 @@ if (isDev) {
 
   app.use(
     '/api/grunnlag/beregningsgrunnlag/:behandlingId',
-    tokenMiddleware(ApiConfig.behandling.scope),
-    proxy(ApiConfig.behandling.url!!)
+    tokenMiddleware(ApiConfig.grunnlag.scope),
+    proxy(ApiConfig.grunnlag.url!!)
   )
 
   app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url!!))

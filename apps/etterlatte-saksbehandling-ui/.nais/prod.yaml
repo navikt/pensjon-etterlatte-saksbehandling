@@ -58,6 +58,8 @@ spec:
       value: http://etterlatte-behandling
     - name: VEDTAK_API_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: GRUNNLAG_API_URL
+      value: http://etterlatte-grunnlag
     - name: TILGANGSSTYRING_ENABLED
       value: 'true'
   accessPolicy:
@@ -73,3 +75,4 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-grunnlag

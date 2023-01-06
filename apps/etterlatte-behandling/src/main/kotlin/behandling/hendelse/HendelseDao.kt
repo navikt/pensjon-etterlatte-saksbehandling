@@ -53,7 +53,8 @@ class HendelseDao(private val connection: () -> Connection) {
     )
 
     fun vedtakHendelse(
-        behandling: Behandling,
+        behandlingId: UUID,
+        sakId: Long,
         vedtakId: Long,
         hendelse: HendelseType,
         inntruffet: Tidspunkt,
@@ -65,8 +66,8 @@ class HendelseDao(private val connection: () -> Connection) {
             "VEDTAK:${hendelse.name}",
             inntruffet,
             vedtakId,
-            behandling.id,
-            behandling.sak,
+            behandlingId,
+            sakId,
             saksbehandler,
             "SAKSBEHANDLER".takeIf { saksbehandler != null },
             kommentar,

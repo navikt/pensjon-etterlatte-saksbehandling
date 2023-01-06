@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.regler
 
+import beregning.ToDoRegelReferanse
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldHaveSize

@@ -2,7 +2,6 @@ package no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.trygdetidsfakto
 
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
-import no.nav.etterlatte.libs.regler.ToDoRegelReferanse
 import no.nav.etterlatte.libs.regler.beregning.AvdoedForelder
 import no.nav.etterlatte.libs.regler.beregning.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.BP_1967_DATO
@@ -17,7 +16,7 @@ private val trygdetidRegel: Regel<BarnepensjonGrunnlag, BigDecimal> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner avdødes trygdetid",
-        regelReferanse = ToDoRegelReferanse(),
+        regelReferanse = LesInputReferanse(beskrivelse = "Henter faktisk trygdetid fra input til beregningen"),
         finnFaktum = BarnepensjonGrunnlag::avdoedForelder,
         finnFelt = AvdoedForelder::trygdetid
     )
@@ -25,11 +24,14 @@ private val trygdetidRegel: Regel<BarnepensjonGrunnlag, BigDecimal> =
 private val maksTrygdetid = definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Full trygdetidsopptjening er 40 år",
-    regelReferanse = ToDoRegelReferanse(),
+    regelReferanse = GenerellRegel("BEREGNING-G-TTF", "Full trygdetidsopptjening er 40 år"),
     verdi = BigDecimal(40)
 )
 
-val trygdetidsFaktor = RegelMeta(gjelderFra = BP_1967_DATO, "Finn trygdetidsfaktor", ToDoRegelReferanse()) kombinerer
-    maksTrygdetid og trygdetidRegel med { maksTrygdetid, trygdetid ->
+val trygdetidsFaktor = RegelMeta(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Finn trygdetidsfaktor",
+    regelReferanse = BarnepensjonGammeltRegelverk(id = "BEREGNING-G-TTF", beskrivelse = "Finn trygdetidsfaktor")
+) kombinerer maksTrygdetid og trygdetidRegel med { maksTrygdetid, trygdetid ->
     minOf(trygdetid, maksTrygdetid) / maksTrygdetid
 }

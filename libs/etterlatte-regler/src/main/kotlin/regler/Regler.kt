@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.regler
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 data class RegelPeriode(val fraDato: LocalDate, val tilDato: LocalDate? = null) {
     init {
@@ -10,9 +11,13 @@ data class RegelPeriode(val fraDato: LocalDate, val tilDato: LocalDate? = null) 
     }
 }
 
-interface RegelReferanse
+interface RegelReferanse {
+    val id: String
+    val beskrivelse: String
+}
 
-data class ToDoRegelReferanse(val beskrivelse: String = "ToDo: Legg til referanse") : RegelReferanse
+data class LesInputReferanse(override val id: String = "INPUT", override val beskrivelse: String) :
+    RegelReferanse
 
 abstract class Regel<G, S>(
     open val gjelderFra: LocalDate,

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.regler
 
+import beregning.ToDoRegelReferanse
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

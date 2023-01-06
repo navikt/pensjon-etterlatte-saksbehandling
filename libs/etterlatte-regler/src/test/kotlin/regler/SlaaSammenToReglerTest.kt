@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.regler
 
+import beregning.ToDoRegelReferanse
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Test

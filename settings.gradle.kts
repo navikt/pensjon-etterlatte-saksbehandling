@@ -36,5 +36,6 @@ include(
     "libs:etterlatte-kafka",
     "libs:testdata",
     "libs:etterlatte-regler",
+    "libs:etterlatte-sporingslogg",
     "jobs:test-fordeler"
 )

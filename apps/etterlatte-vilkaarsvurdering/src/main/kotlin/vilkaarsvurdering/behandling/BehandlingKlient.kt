@@ -68,6 +68,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
+    internal data class TilVilkaarsvurderingJson(val utfall: VilkaarsvurderingUtfall)
     override suspend fun commitVilkaarsvurdering(
         behandlingId: UUID,
         accessToken: String,
@@ -77,7 +78,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         val response = downstreamResourceClient.post(
             resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/vilkaarsvurder"),
             accessToken = accessToken,
-            postBody = "{utfall: $utfall}"
+            postBody = TilVilkaarsvurderingJson(utfall)
         )
 
         return response.mapBoth(

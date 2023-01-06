@@ -81,7 +81,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
             ),
             kommerBarnetTilgode = null,
-            vilkaarStatus = null
+            vilkaarUtfall = null
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
@@ -117,7 +117,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
             ),
             kommerBarnetTilgode = null,
-            vilkaarStatus = null
+            vilkaarUtfall = null
         )
 
         val persongalleri = Persongalleri(

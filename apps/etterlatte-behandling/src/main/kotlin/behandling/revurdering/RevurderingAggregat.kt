@@ -40,7 +40,7 @@ class RevurderingAggregat(
                 persongalleri = persongalleri,
                 revurderingsaarsak = revurderingAarsak,
                 kommerBarnetTilgode = null,
-                vilkaarStatus = null
+                vilkaarUtfall = null
             )
                 .also {
                     behandlinger.opprettRevurdering(it)

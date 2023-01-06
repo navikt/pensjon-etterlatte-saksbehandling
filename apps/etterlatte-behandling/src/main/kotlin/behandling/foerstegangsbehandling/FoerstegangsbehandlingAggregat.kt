@@ -45,7 +45,7 @@ class FoerstegangsbehandlingAggregat(
                 gyldighetsproeving = null,
                 virkningstidspunkt = null,
                 kommerBarnetTilgode = null,
-                vilkaarStatus = null
+                vilkaarUtfall = null
             )
                 .also {
                     behandlinger.opprettFoerstegangsbehandling(it)

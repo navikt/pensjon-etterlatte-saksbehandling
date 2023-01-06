@@ -173,7 +173,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-        vilkaarStatus = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) }
+        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) }
     )
 
     private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
@@ -194,7 +194,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-        vilkaarStatus = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) }
+        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) }
     )
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
@@ -265,7 +265,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 foerstegangsbehandling.virkningstidspunkt?.toJson()
             )
             stmt.setString(14, kommerBarnetTilgode?.toJson())
-            stmt.setString(15, vilkaarStatus?.name)
+            stmt.setString(15, vilkaarUtfall?.name)
         }
         stmt.executeUpdate()
     }
@@ -301,7 +301,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             }
             stmt.setString(12, revurderingsaarsak.name)
             stmt.setString(13, kommerBarnetTilgode?.let { objectMapper.writeValueAsString(it) })
-            stmt.setString(14, vilkaarStatus?.name)
+            stmt.setString(14, vilkaarUtfall?.name)
         }
         require(stmt.executeUpdate() == 1)
     }

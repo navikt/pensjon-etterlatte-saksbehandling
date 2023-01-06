@@ -39,7 +39,7 @@ sealed class Behandling {
     abstract val type: BehandlingType
     abstract val persongalleri: Persongalleri
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
-    abstract val vilkaarStatus: VilkaarsvurderingUtfall?
+    abstract val vilkaarUtfall: VilkaarsvurderingUtfall?
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
     val oppgaveStatus get() = OppgaveStatus.from(status)
@@ -83,7 +83,7 @@ data class Foerstegangsbehandling(
     override val status: BehandlingStatus,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
-    override val vilkaarStatus: VilkaarsvurderingUtfall?,
+    override val vilkaarUtfall: VilkaarsvurderingUtfall?,
     val virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?
@@ -109,7 +109,7 @@ data class Foerstegangsbehandling(
     }
 
     fun tilOpprettet(): Foerstegangsbehandling {
-        return hvisRedigerbar { endreTilStatus(OPPRETTET) }.copy(vilkaarStatus = null)
+        return hvisRedigerbar { endreTilStatus(OPPRETTET) }.copy(vilkaarUtfall = null)
     }
 
     fun tilVilkaarsvurdert(utfall: VilkaarsvurderingUtfall?): Foerstegangsbehandling {
@@ -118,7 +118,7 @@ data class Foerstegangsbehandling(
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }.copy(vilkaarStatus = utfall)
+        return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }.copy(vilkaarUtfall = utfall)
     }
 
     fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(VILKAARSVURDERT) {
@@ -131,7 +131,12 @@ data class Foerstegangsbehandling(
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisTilstandEr(listOf(VILKAARSVURDERT, BEREGNET)) {
+        return hvisTilstandEr(listOf(BEREGNET, VILKAARSVURDERT)) {
+            require(vilkaarUtfall != null)
+            if (status == VILKAARSVURDERT) {
+                require(vilkaarUtfall == VilkaarsvurderingUtfall.IKKE_OPPFYLT)
+            }
+
             endreTilStatus(FATTET_VEDTAK)
         }
     }
@@ -161,7 +166,7 @@ data class Revurdering(
     override val status: BehandlingStatus,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
-    override val vilkaarStatus: VilkaarsvurderingUtfall?,
+    override val vilkaarUtfall: VilkaarsvurderingUtfall?,
     val revurderingsaarsak: RevurderingAarsak
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
@@ -198,7 +203,7 @@ data class ManueltOpphoer(
     override val kommerBarnetTilgode: KommerBarnetTilgode?
         get() = null
 
-    override val vilkaarStatus: VilkaarsvurderingUtfall?
+    override val vilkaarUtfall: VilkaarsvurderingUtfall?
         get() = null
 }
 

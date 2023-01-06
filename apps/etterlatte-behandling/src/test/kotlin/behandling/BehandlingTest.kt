@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalArgumentException
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -36,7 +37,7 @@ internal class BehandlingTest {
         virkningstidspunkt = null,
         soeknadMottattDato = LocalDateTime.now(),
         gyldighetsproeving = null,
-        vilkaarStatus = null
+        vilkaarUtfall = null
     )
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("saksbehandler01", Tidspunkt.now().instant)
@@ -50,11 +51,10 @@ internal class BehandlingTest {
         behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .let {
                 assertEquals(kommerBarnetTilgode, it.kommerBarnetTilgode)
                 assertEquals(virkningstidspunkt, it.virkningstidspunkt)
-                assertEquals(BehandlingStatus.VILKAARSVURDERT, it.status)
+                assertEquals(gyldighetsResultat, it.gyldighetsproeving)
             }
     }
 
@@ -64,6 +64,7 @@ internal class BehandlingTest {
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilBeregnet()
             .tilFattetVedtak()
 
         assertThrows<TilstandException.UgyldigtTilstand> {
@@ -77,6 +78,7 @@ internal class BehandlingTest {
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilBeregnet()
             .tilFattetVedtak()
             .tilAttestert()
             .tilIverksatt()
@@ -100,11 +102,39 @@ internal class BehandlingTest {
     }
 
     @Test
+    fun `kan ikke ga fra BEREGNET til FATTET VEDTAK uten oppfylt vilkaarsutfall`() {
+        assertThrows<Exception> {
+            behandling.tilVilkaarsvurdert(null).tilBeregnet().tilFattetVedtak()
+        }
+    }
+
+    @Test
+    fun `kan ga fra VILKAARSVURDERT til FATTET VEDTAK hvis vilkaarutfall er ikke oppfylt`() {
+        behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
+            .oppdaterGyldighetsproeving(gyldighetsResultat)
+            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.IKKE_OPPFYLT).tilFattetVedtak()
+    }
+
+    @Test
+    fun `kan ikke ga fra VILKAARSVURDERT til FATTET VEDTAK hvis vilkaarutfall oppfylt eller null`() {
+        val fyltUtBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
+            .oppdaterGyldighetsproeving(gyldighetsResultat)
+
+        assertThrows<IllegalArgumentException> { fyltUtBehandling.tilVilkaarsvurdert(null).tilFattetVedtak() }
+        assertThrows<IllegalArgumentException> {
+            fyltUtBehandling.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilFattetVedtak()
+        }
+    }
+
+    @Test
     fun `behandling kan endres igjen etter den har blitt returnet av attestant`() {
         val returnertBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilBeregnet()
             .tilFattetVedtak()
             .tilReturnert()
 

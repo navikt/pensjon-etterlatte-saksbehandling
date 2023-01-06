@@ -64,7 +64,7 @@ fun foerstegangsbehandling(
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
     kommerBarnetTilgode = kommerBarnetTilgode,
-    vilkaarStatus = vilkaarStatus
+    vilkaarUtfall = vilkaarStatus
 )
 
 fun revurdering(
@@ -86,7 +86,7 @@ fun revurdering(
     persongalleri = persongalleri,
     revurderingsaarsak = revurderingAarsak,
     kommerBarnetTilgode = kommerBarnetTilgode,
-    vilkaarStatus = vilkaarStatus
+    vilkaarUtfall = vilkaarStatus
 )
 
 fun manueltOpphoer(

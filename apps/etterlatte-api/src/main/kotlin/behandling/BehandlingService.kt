@@ -14,6 +14,10 @@ import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
 import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
+import sporingslogg.Decision
+import sporingslogg.HttpMethod
+import sporingslogg.Sporingslogg
+import sporingslogg.Sporingsrequest
 import java.time.YearMonth
 import java.util.*
 
@@ -29,11 +33,12 @@ class BehandlingService(
     private val vedtakKlient: EtterlatteVedtak,
     private val grunnlagKlient: EtterlatteGrunnlag,
     private val beregningKlient: BeregningKlient,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val sporingslogg: Sporingslogg
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
-    suspend fun hentPersonOgSaker(fnr: String, accessToken: String): PersonSakerResult {
+    suspend fun hentPersonOgSaker(fnr: String, accessToken: String, bruker: String): PersonSakerResult {
         logger.info("Henter person med tilhørende behandlinger")
 
         try {
@@ -47,15 +52,39 @@ class BehandlingService(
             val behandlingsListe = BehandlingListe(behandlinger)
             val grunnlagsendringshendelser = hentGrunnlagsendrinshendelser(sakIder, accessToken)
 
+            sporingslogg.logg(vellykkaRequest(fnr = fnr, bruker = bruker))
+
             return PersonSakerResult(person, behandlingsListe, grunnlagsendringshendelser)
         } catch (e: InvalidFoedselsnummer) {
+            sporingslogg.logg(feilendeRequest(fnr, bruker = bruker))
             logger.error("Henting av person fra pdl feilet pga ugyldig fødselsnummer", e)
             throw e
         } catch (e: Exception) {
+            sporingslogg.logg(feilendeRequest(fnr, bruker = bruker))
             logger.error("Henting av person med tilhørende behandlinger feilet", e)
             throw e
         }
     }
+
+    private fun vellykkaRequest(fnr: String, bruker: String) = Sporingsrequest(
+        kallendeApplikasjon = "api",
+        oppdateringstype = HttpMethod.GET,
+        brukerId = bruker,
+        hvemBlirSlaattOpp = fnr,
+        endepunkt = "/personer",
+        resultat = Decision.Permit,
+        melding = "Henta person og saker"
+    )
+
+    private fun feilendeRequest(fnr: String, bruker: String) = Sporingsrequest(
+        kallendeApplikasjon = "api",
+        oppdateringstype = HttpMethod.GET,
+        brukerId = bruker,
+        hvemBlirSlaattOpp = fnr,
+        endepunkt = "/personer",
+        resultat = Decision.Deny,
+        melding = "Henta person og saker feilet"
+    )
 
     private suspend fun hentGrunnlagsendrinshendelser(
         sakIder: List<Long>,

@@ -23,6 +23,7 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import sporingslogg.Sporingslogg
 
 class ApplicationContext(configLocation: String? = null) {
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
@@ -32,6 +33,7 @@ class ApplicationContext(configLocation: String? = null) {
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val beregningKlient = BeregningKlientImpl(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
+    private val sporingslogg = Sporingslogg()
     private val rapid: KafkaProdusent<String, String> =
         GcpKafkaConfig.fromEnv().standardProducer(System.getenv().getValue("KAFKA_RAPID_TOPIC"))
 
@@ -41,7 +43,8 @@ class ApplicationContext(configLocation: String? = null) {
         vedtakKlient = vedtakKlient,
         grunnlagKlient = grunnlagKlient,
         beregningKlient = beregningKlient,
-        vilkaarsvurderingKlient = vilkaarsvurderingKlient
+        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+        sporingslogg = sporingslogg
     )
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
     val grunnlagService = GrunnlagService(behandlingKlient, rapid)

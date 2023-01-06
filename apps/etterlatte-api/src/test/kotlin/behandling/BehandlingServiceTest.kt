@@ -2,6 +2,7 @@ package behandling
 
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
@@ -43,6 +44,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import sporingslogg.Sporingslogg
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -69,11 +71,17 @@ internal class BehandlingServiceTest {
     @MockK
     lateinit var vilkaarsvurderingKlient: VilkaarsvurderingKlient
 
+    @MockK
+    lateinit var sporingslogg: Sporingslogg
+
     @InjectMockKs
     lateinit var service: BehandlingService
 
     @BeforeEach
-    fun setUp() = MockKAnnotations.init(this)
+    fun setUp() {
+        MockKAnnotations.init(this)
+        every { sporingslogg.logg(any()) } returns Unit
+    }
     private val accessToken = UUID.randomUUID().toString()
     private val fnr = "11057523044"
 
@@ -87,7 +95,7 @@ internal class BehandlingServiceTest {
         coEvery { behandlingKlient.hentSakerForPerson(fnr, accessToken) } returns sakliste
         coEvery { behandlingKlient.hentBehandlingerForSak(1, accessToken) } returns BehandlingListe(emptyList())
 
-        val respons = runBlocking { service.hentPersonOgSaker(fnr, accessToken) }
+        val respons = runBlocking { service.hentPersonOgSaker(fnr, accessToken, "bruker1") }
 
         assertSame(person, respons.person)
         assertEquals(behandlingsListe, respons.behandlingListe)

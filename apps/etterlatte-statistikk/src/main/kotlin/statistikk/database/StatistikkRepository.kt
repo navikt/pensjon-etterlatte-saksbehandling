@@ -48,15 +48,6 @@ class StatistikkRepository(private val datasource: DataSource) {
         }
     }
 
-    fun slettSak(sakId: Long) {
-        connection.use {
-            it.prepareStatement(Queries.SLETT_STOENADSTATISTIKK_FOR_SAK).apply {
-                setLong(1, sakId)
-                execute()
-            }
-        }
-    }
-
     fun lagreStoenadsrad(stoenadsrad: StoenadRad): StoenadRad? {
         connection.use { conn ->
             val (statement, insertedRows) = conn.prepareStatement(
@@ -119,7 +110,6 @@ private object Queries {
         |   tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, vedtakLoependeTom 
         |FROM stoenad
     """.trimMargin()
-    const val SLETT_STOENADSTATISTIKK_FOR_SAK = "DELETE FROM stoenad WHERE sakId = ?"
 }
 
 data class StoenadRad(

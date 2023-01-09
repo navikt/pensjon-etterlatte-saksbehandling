@@ -20,16 +20,15 @@ import no.nav.etterlatte.statistikk.sak.BehandlingResultat
 import no.nav.etterlatte.statistikk.sak.SakRad
 import no.nav.etterlatte.statistikk.sak.SakUtland
 import no.nav.etterlatte.statistikk.sak.SoeknadFormat
-import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.Instant
 import java.time.ZoneOffset
-import java.util.UUID
+import java.util.*
 
 class StatistikkService(
     private val stoenadRepository: StatistikkRepository,
     private val sakRepository: SakstatistikkRepository,
     private val behandlingClient: BehandlingClient
-) : VedlikeholdService {
+) {
 
     fun registrerStatistikkForVedtak(vedtak: Vedtak, vedtakHendelse: VedtakHendelse): Pair<SakRad?, StoenadRad?> {
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakHendelse)
@@ -149,11 +148,6 @@ class StatistikkService(
             vedtak.virk.fom.atDay(1),
             vedtak.virk.tom?.atEndOfMonth()
         )
-    }
-
-    override fun slettSak(sakId: Long) {
-        stoenadRepository.slettSak(sakId)
-        sakRepository.slettSak(sakId)
     }
 
     private fun behandlingTilSakRad(behandling: Behandling, behandlingHendelse: BehandlingHendelse): SakRad {

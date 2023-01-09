@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
@@ -171,7 +172,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-        kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) }
+        kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
+        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) }
     )
 
     private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
@@ -191,7 +193,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
-        kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) }
+        kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
+        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) }
     )
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
@@ -229,8 +232,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt, kommer_barnet_tilgode)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt, kommer_barnet_tilgode, vilkaar_utfall)
+                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(foerstegangsbehandling) {
@@ -262,6 +265,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 foerstegangsbehandling.virkningstidspunkt?.toJson()
             )
             stmt.setString(14, kommerBarnetTilgode?.toJson())
+            stmt.setString(15, vilkaarUtfall?.name)
         }
         stmt.executeUpdate()
     }
@@ -271,8 +275,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                 innsender, soeker, gjenlevende, avdoed, soesken, revurdering_aarsak, kommer_barnet_tilgode)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 innsender, soeker, gjenlevende, avdoed, soesken, revurdering_aarsak, kommer_barnet_tilgode, vilkaar_utfall)
+                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(revurdering) {
@@ -297,6 +301,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             }
             stmt.setString(12, revurderingsaarsak.name)
             stmt.setString(13, kommerBarnetTilgode?.let { objectMapper.writeValueAsString(it) })
+            stmt.setString(14, vilkaarUtfall?.name)
         }
         require(stmt.executeUpdate() == 1)
     }

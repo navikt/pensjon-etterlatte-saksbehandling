@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -50,7 +51,8 @@ fun foerstegangsbehandling(
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
-    kommerBarnetTilgode: KommerBarnetTilgode? = null
+    kommerBarnetTilgode: KommerBarnetTilgode? = null,
+    vilkaarStatus: VilkaarsvurderingUtfall? = null
 ) = Foerstegangsbehandling(
     id = id,
     sak = sak,
@@ -61,7 +63,8 @@ fun foerstegangsbehandling(
     persongalleri = persongalleri,
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
-    kommerBarnetTilgode = kommerBarnetTilgode
+    kommerBarnetTilgode = kommerBarnetTilgode,
+    vilkaarUtfall = vilkaarStatus
 )
 
 fun revurdering(
@@ -72,7 +75,8 @@ fun revurdering(
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     persongalleri: Persongalleri = persongalleri(),
     revurderingAarsak: RevurderingAarsak,
-    kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode()
+    kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
+    vilkaarStatus: VilkaarsvurderingUtfall? = VilkaarsvurderingUtfall.OPPFYLT
 ) = Revurdering(
     id = id,
     sak = sak,
@@ -81,7 +85,8 @@ fun revurdering(
     status = status,
     persongalleri = persongalleri,
     revurderingsaarsak = revurderingAarsak,
-    kommerBarnetTilgode = kommerBarnetTilgode
+    kommerBarnetTilgode = kommerBarnetTilgode,
+    vilkaarUtfall = vilkaarStatus
 )
 
 fun manueltOpphoer(

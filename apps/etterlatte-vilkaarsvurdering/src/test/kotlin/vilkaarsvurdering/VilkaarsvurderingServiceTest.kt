@@ -66,7 +66,7 @@ internal class VilkaarsvurderingServiceTest {
         ).also { it.migrate() }
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk<DetaljertBehandling>().apply {
             every { id } returns UUID.randomUUID()
             every { sak } returns 1L
@@ -238,7 +238,7 @@ internal class VilkaarsvurderingServiceTest {
     @Test
     fun `skal ikke lagre hvis status-sjekk mot behandling feiler`() {
         val vilkaarsvurdering = runBlocking { opprettVilkaarsvurdering() }
-        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns false
 
         val vurdering = vilkaarsVurderingData()
         val vurdertVilkaar = VurdertVilkaar(

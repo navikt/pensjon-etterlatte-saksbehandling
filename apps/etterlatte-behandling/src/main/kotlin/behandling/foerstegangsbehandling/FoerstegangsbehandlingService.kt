@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.*
@@ -26,7 +27,7 @@ interface FoerstegangsbehandlingService {
     fun lagreVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
-    fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
+    fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true, utfall: VilkaarsvurderingUtfall?)
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
     fun settFattetVedtak(behandlingId: UUID, dryRun: Boolean = true)
     fun settAttestert(behandlingId: UUID, dryRun: Boolean = true)
@@ -89,8 +90,8 @@ class RealFoerstegangsbehandlingService(
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
         hentFoerstegangsbehandling(behandlingId).tilOpprettet().lagreEndring(dryRun)
     }
-    override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean) {
-        hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert().lagreEndring(dryRun)
+    override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean, utfall: VilkaarsvurderingUtfall?) {
+        hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert(utfall).lagreEndring(dryRun)
     }
 
     override fun settBeregnet(behandlingId: UUID, dryRun: Boolean) {

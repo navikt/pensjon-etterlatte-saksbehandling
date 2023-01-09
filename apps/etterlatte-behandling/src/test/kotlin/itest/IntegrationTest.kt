@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.FastsettVirkningstidspunktRequest
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.KommerBarnetTilgodeJson
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
+import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -55,6 +56,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.module
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
@@ -208,6 +210,8 @@ class ApplicationTest {
 
             client.post("/behandlinger/$behandlingId/vilkaarsvurder") {
                 addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(TilVilkaarsvurderingJson(VilkaarsvurderingUtfall.OPPFYLT))
             }.also {
                 beans.datasourceBuilder().dataSource.connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!

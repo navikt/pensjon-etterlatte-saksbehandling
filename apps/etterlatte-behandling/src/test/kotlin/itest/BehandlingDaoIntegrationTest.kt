@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.revurdering
@@ -672,7 +673,7 @@ internal class BehandlingDaoIntegrationTest {
             .oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert()
+            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .let {
                 behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
                 behandlingRepo.lagreGyldighetsproving(it)

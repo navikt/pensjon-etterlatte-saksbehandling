@@ -11,7 +11,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 
-fun Route.sakRoutes(sakService: SakService) {
+internal fun Route.sakRoutes(sakService: SakService) {
     get("/saker") {
         call.respond(Saker(inTransaction { sakService.hentSaker() }))
     }

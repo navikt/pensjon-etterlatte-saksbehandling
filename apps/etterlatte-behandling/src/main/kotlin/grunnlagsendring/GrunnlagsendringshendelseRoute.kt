@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 
-fun Route.grunnlagsendringshendelseRoute(
+internal fun Route.grunnlagsendringshendelseRoute(
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService
 ) {
     val logger = application.log

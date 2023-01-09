@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import no.nav.helse.rapids_rivers.RapidApplication
-import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 
 fun main() {
     System.getenv().toMutableMap().apply {
@@ -13,7 +12,6 @@ fun main() {
                     val behandlingservice = ab.createBehandlingService()
                     OppdaterBehandling(it, behandlingservice)
                     PdlHendelser(it, behandlingservice)
-                    it.registrerVedlikeholdsriver(behandlingservice)
                 }
                 .start()
         }

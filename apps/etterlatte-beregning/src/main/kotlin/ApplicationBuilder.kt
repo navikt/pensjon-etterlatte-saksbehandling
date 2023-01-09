@@ -35,7 +35,6 @@ import no.nav.etterlatte.model.grunnlag.GrunnlagKlientImpl
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
-import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 import java.util.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 
@@ -68,7 +67,6 @@ class ApplicationBuilder {
                 )
             }
             .build()
-            .also { it.registrerVedlikeholdsriver(beregningService) }
 
     fun start() = rapidsConnection.start()
 }

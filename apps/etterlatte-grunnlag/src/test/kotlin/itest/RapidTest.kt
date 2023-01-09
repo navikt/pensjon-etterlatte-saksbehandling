@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 import java.time.Instant
 import java.util.*
 
@@ -64,7 +63,6 @@ internal class RapidTest {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)
             BehandlingEndretHendlese(this, grunnlagService)
-            registrerVedlikeholdsriver(grunnlagService)
         }
     }
 

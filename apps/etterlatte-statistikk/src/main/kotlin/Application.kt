@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.statistikk.config.ApplicationContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 
 fun main() {
     with(ApplicationContext()) {
@@ -15,5 +14,4 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
         .apply {
             applicationContext.vedtakhendelserRiver
             applicationContext.behandlinghendelseRiver
-            registrerVedlikeholdsriver(applicationContext.statistikkService)
         }

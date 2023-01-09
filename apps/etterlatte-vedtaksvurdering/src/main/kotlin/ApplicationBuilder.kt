@@ -38,7 +38,6 @@ import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
-import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 import java.util.*
 
 class ApplicationBuilder {
@@ -73,7 +72,6 @@ class ApplicationBuilder {
             .build()
             .apply {
                 LagreIverksattVedtak(this, vedtaksvurderingService, behandlingHttpClient(env))
-                registrerVedlikeholdsriver(vedtaksvurderingService)
             }
 
     fun start() = rapidsConnection.start()

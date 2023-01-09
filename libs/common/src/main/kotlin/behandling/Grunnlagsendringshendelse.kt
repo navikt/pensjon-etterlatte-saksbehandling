@@ -2,9 +2,6 @@ package no.nav.etterlatte.libs.common.behandling
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
-import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
-import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Utland
@@ -19,31 +16,12 @@ data class Grunnlagsendringshendelse(
     val sakId: Long,
     val type: GrunnlagsendringsType,
     val opprettet: LocalDateTime,
-    val data: Grunnlagsinformasjon?,
     val status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     val behandlingId: UUID? = null,
     val hendelseGjelderRolle: Saksrolle,
+    val gjelderPerson: String?,
     val samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag? = null
 )
-
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed class Grunnlagsinformasjon {
-
-    @JsonTypeName("UTFLYTTING")
-    data class Utflytting(
-        val hendelse: UtflyttingsHendelse
-    ) : Grunnlagsinformasjon()
-
-    @JsonTypeName("DOEDSFALL")
-    data class Doedsfall(
-        val hendelse: Doedshendelse
-    ) : Grunnlagsinformasjon()
-
-    @JsonTypeName("FORELDER_BARN_RELASJON")
-    data class ForelderBarnRelasjon(
-        val hendelse: ForelderBarnRelasjonHendelse
-    ) : Grunnlagsinformasjon()
-}
 
 enum class GrunnlagsendringsType {
     DOEDSFALL, UTFLYTTING, FORELDER_BARN_RELASJON

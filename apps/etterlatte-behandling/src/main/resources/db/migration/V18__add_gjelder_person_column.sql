@@ -1,0 +1,1 @@
+ALTER TABLE grunnlagsendringshendelse ADD COLUMN gjelder_person TEXT;

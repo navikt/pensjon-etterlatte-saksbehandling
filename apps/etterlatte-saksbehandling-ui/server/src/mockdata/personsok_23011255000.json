@@ -102,7 +102,7 @@
         "status" : "VENTER_PAA_JOBB",
         "hendelseGjelderRolle" : "SOEKER",
         "gjelderPerson" : "23011255000",
-        "samsvarMedPdl" : {
+        "samsvarMellomPdlOgGrunnlag" : {
           "type" : "UTLAND",
           "fraGrunnlag" : {
             "innflyttingTilNorge" : [],
@@ -133,7 +133,7 @@
         "status" : "VENTER_PAA_JOBB",
         "hendelseGjelderRolle" : "SOEKER",
         "gjelderPerson" : "23011255000",
-        "samsvarMedPdl" : {
+        "samsvarMellomPdlOgGrunnlag" : {
           "type" : "ANSVARLIGE_FORELDRE",
           "fraGrunnlag" : [
             "18488230294",
@@ -154,7 +154,7 @@
         "status" : "VENTER_PAA_JOBB",
         "hendelseGjelderRolle" : "AVDOED",
         "gjelderPerson" : "18488230294",
-        "samsvarMedPdl" : {
+        "samsvarMellomPdlOgGrunnlag" : {
           "type" : "BARN",
           "fraGrunnlag" : [
             "23011255000"
@@ -174,11 +174,56 @@
         "status" : "VENTER_PAA_JOBB",
         "hendelseGjelderRolle" : "SOEKER",
         "gjelderPerson" : "23011255000",
-        "samsvarMedPdl" : {
+        "samsvarMellomPdlOgGrunnlag" : {
           "type" : "DOEDSDATO",
           "fraGrunnlag" : null,
           "fraPdl" : "2022-12-18",
           "samsvar" : false
+        }
+      },      {
+        "id" : "8bfa88f2-7b7e-40a1-98a8-7402f2a6d5d1",
+        "sakId" : 135,
+        "type" : "DOEDSFALL",
+        "opprettet" : "2023-01-04T10:06:41.900122",
+        "data" : {
+          "type" : "DOEDSFALL",
+          "hendelse" : {
+            "avdoedFnr" : "11468227004",
+            "doedsdato" : null,
+            "endringstype" : "ANNULLERT"
+          }
+        },
+        "status" : "FORKASTET",
+        "behandlingId" : null,
+        "hendelseGjelderRolle" : "AVDOED",
+        "samsvarMellomPdlOgGrunnlag" : {
+          "type" : "DOEDSDATO",
+          "fraGrunnlag" : "2022-08-17",
+          "fraPdl" : "2022-08-17",
+          "samsvar" : true
+        }
+      },
+      {
+        "id" : "c4e6ee42-5c86-4f7f-a495-9d40d2624fa5",
+        "sakId" : 135,
+        "type" : "DOEDSDATO",
+        "opprettet" : "2023-01-04T10:06:42.125769",
+        "data" : {
+          "type" : "DOEDSFALL",
+          "hendelse" : {
+            "avdoedFnr" : "11468227004",
+            "doedsdato" : "2022-08-17",
+            "endringstype" : "OPPRETTET"
+          }
+        },
+        "status" : "FORKASTET",
+        "behandlingId" : null,
+        "hendelseGjelderRolle" : "AVDOED",
+        "samsvarMellomPdlOgGrunnlag" : {
+          "type" : "DOEDSDATO",
+          "fraGrunnlag" : "2022-08-17",
+          "fraPdl" : "2022-08-17",
+          "samsvar" : true
         }
       }
     ]

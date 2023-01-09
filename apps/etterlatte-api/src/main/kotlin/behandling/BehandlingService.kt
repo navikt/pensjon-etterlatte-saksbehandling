@@ -9,15 +9,15 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.G
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.sporingslogg.Decision
+import no.nav.etterlatte.libs.sporingslogg.HttpMethod
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
 import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
-import sporingslogg.Decision
-import sporingslogg.HttpMethod
-import sporingslogg.Sporingslogg
-import sporingslogg.Sporingsrequest
 import java.time.YearMonth
 import java.util.*
 

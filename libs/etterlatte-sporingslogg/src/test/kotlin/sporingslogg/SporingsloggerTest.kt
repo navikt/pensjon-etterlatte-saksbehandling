@@ -1,4 +1,4 @@
-package sporingslogg
+package no.nav.etterlatte.libs.sporingslogg
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

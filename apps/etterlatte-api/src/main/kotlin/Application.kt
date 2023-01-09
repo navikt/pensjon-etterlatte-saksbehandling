@@ -18,7 +18,7 @@ import no.nav.etterlatte.behandling.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
-import sporingslogg.Sporingslogg
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 
 class ApplicationContext(configLocation: String? = null) {
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()

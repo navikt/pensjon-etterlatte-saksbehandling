@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import sporingslogg.Sporingslogg
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime

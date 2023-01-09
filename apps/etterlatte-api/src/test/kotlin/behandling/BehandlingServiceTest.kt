@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BeregningKlient
 import no.nav.etterlatte.behandling.EtterlatteGrunnlag
 import no.nav.etterlatte.behandling.EtterlatteVedtak
-import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.behandling.VilkaarsvurderingKlient
@@ -19,8 +18,6 @@ import no.nav.etterlatte.behandling.VirkningstidspunktResponse
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -250,24 +247,6 @@ internal class BehandlingServiceTest {
         assertEquals("TestOla", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(1)!!.fornavn)
         assertEquals(1, respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.size)
         assertEquals("TestKari", respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.get(0)!!.fornavn)
-    }
-
-    @Test
-    fun opprettManueltOpphoer() {
-        coEvery {
-            behandlingKlient.opprettManueltOpphoer(any(), any())
-        } returns Result.success(ManueltOpphoerResponse("123"))
-        val respons = runBlocking {
-            service.opprettManueltOpphoer(
-                manueltOpphoerRequest = ManueltOpphoerRequest(
-                    sak = 0,
-                    opphoerAarsaker = listOf(ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE),
-                    fritekstAarsak = "annen aarsak"
-                ),
-                accessToken = accessToken
-            )
-        }
-        assertEquals(respons.behandlingId, "123")
     }
 
     @Test

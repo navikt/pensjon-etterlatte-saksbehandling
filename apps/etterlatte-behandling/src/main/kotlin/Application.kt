@@ -36,6 +36,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
+import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
@@ -105,6 +106,7 @@ fun Application.module(beanFactory: BeanFactory) {
                 beanFactory.revurderingService(),
                 beanFactory.manueltOpphoerService()
             )
+            behandlingsstatusRoutes(beanFactory.foerstegangsbehandlingService())
             route("api") {
                 oppgaveRoutes(OppgaveDao(ds.dataSource))
             }

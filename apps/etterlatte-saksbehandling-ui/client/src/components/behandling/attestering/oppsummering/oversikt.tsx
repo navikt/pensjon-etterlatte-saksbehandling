@@ -10,7 +10,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
       case IBehandlingStatus.FATTET_VEDTAK:
-        return 'To-trinnskontroll'
+        return 'Attestering'
       case IBehandlingStatus.IVERKSATT:
         return 'Iverksatt'
       default:

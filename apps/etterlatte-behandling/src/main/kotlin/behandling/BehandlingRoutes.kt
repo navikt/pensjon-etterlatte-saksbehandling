@@ -33,13 +33,12 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 
-fun Route.behandlingRoutes(
+internal fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
     revurderingService: RevurderingService,
@@ -155,63 +154,6 @@ fun Route.behandlingRoutes(
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
             }
-
-            get("/opprett") {
-                foerstegangsbehandlingService.settOpprettet(behandlingsId)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-            post("/opprett") {
-                foerstegangsbehandlingService.settOpprettet(behandlingsId, false)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-
-            get("/vilkaarsvurder") {
-                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, true, null)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-            post("/vilkaarsvurder") {
-                val body = call.receive<TilVilkaarsvurderingJson>()
-
-                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false, body.utfall)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-
-            get("/fatteVedtak") {
-                foerstegangsbehandlingService.settFattetVedtak(behandlingsId)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-            post("/fatteVedtak") {
-                foerstegangsbehandlingService.settFattetVedtak(behandlingsId, false)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-
-            get("/returner") {
-                foerstegangsbehandlingService.settReturnert(behandlingsId)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-            post("/returner") {
-                foerstegangsbehandlingService.settReturnert(behandlingsId, false)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-
-            get("/iverksett") {
-                foerstegangsbehandlingService.settIverksatt(behandlingsId)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-            post("/iverksett") {
-                foerstegangsbehandlingService.settIverksatt(behandlingsId, false)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-
-            get("/beregn") {
-                foerstegangsbehandlingService.settBeregnet(behandlingsId)
-                call.respond(HttpStatusCode.OK, "true")
-            }
-
-            post("/beregn") {
-                foerstegangsbehandlingService.settBeregnet(behandlingsId, false)
-                call.respond(HttpStatusCode.OK, "true")
-            }
         }
 
         route("/sak") {
@@ -298,30 +240,33 @@ fun Route.behandlingRoutes(
                         ?: HttpStatusCode.NotFound
                 )
             }
-            post {
-                val manueltOpphoerRequest = call.receive<ManueltOpphoerRequest>()
-                logger.info("Mottat forespørsel om å gjennomføre et manuelt opphør på sak ${manueltOpphoerRequest.sak}")
-                try {
-                    val manueltOpphoer = manueltOpphoerService.opprettManueltOpphoer(manueltOpphoerRequest)
-                    if (manueltOpphoer == null) {
-                        logger.info(
-                            "Sak ${manueltOpphoerRequest.sak} hadde ikke gyldig status for manuelt opphør, så" +
-                                "ingen manuelt opphør blir opprettet"
-                        )
-                        call.respond(HttpStatusCode.Forbidden)
-                        return@post
-                    }
+        }
+    }
+
+    route("/api/behandlinger/{sakid}/manueltopphoer") {
+        post {
+            val manueltOpphoerRequest = call.receive<ManueltOpphoerRequest>()
+            logger.info("Mottat forespørsel om å gjennomføre et manuelt opphør på sak ${manueltOpphoerRequest.sak}")
+            try {
+                val manueltOpphoer = manueltOpphoerService.opprettManueltOpphoer(manueltOpphoerRequest)
+                if (manueltOpphoer == null) {
                     logger.info(
-                        "Manuelt opphør for sak ${manueltOpphoerRequest.sak} er opprettet med behandlingId " +
-                            "${manueltOpphoer.id}"
+                        "Sak ${manueltOpphoerRequest.sak} hadde ikke gyldig status for manuelt opphør, så" +
+                            "ingen manuelt opphør blir opprettet"
                     )
-                    call.respond(ManueltOpphoerResponse(behandlingId = manueltOpphoer.id.toString()))
-                } catch (e: Exception) {
-                    logger.error("Fikk en feil under oppretting av et manuelt opphør.", e)
-                    call.respond(
-                        HttpStatusCode.InternalServerError
-                    )
+                    call.respond(HttpStatusCode.Forbidden)
+                    return@post
                 }
+                logger.info(
+                    "Manuelt opphør for sak ${manueltOpphoerRequest.sak} er opprettet med behandlingId " +
+                        "${manueltOpphoer.id}"
+                )
+                call.respond(ManueltOpphoerResponse(behandlingId = manueltOpphoer.id.toString()))
+            } catch (e: Exception) {
+                logger.error("Fikk en feil under oppretting av et manuelt opphør.", e)
+                call.respond(
+                    HttpStatusCode.InternalServerError
+                )
             }
         }
     }
@@ -402,4 +347,3 @@ internal data class FastsettVirkningstidspunktResponse(
 }
 
 internal data class KommerBarnetTilgodeJson(val svar: JaNeiVetIkke, val begrunnelse: String)
-internal data class TilVilkaarsvurderingJson(val utfall: VilkaarsvurderingUtfall)

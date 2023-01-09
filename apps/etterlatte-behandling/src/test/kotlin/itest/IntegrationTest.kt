@@ -313,7 +313,7 @@ class ApplicationTest {
                 )
             }
 
-            val manueltOpphoer = client.post("/behandlinger/manueltopphoer") {
+            val manueltOpphoer = client.post("/api/behandlinger/${sak.id}/manueltopphoer") {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(

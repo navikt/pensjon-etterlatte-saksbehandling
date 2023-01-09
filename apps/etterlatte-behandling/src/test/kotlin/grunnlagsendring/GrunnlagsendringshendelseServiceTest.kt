@@ -10,15 +10,11 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendringshendelseUtenSamsvar
-import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
-import no.nav.etterlatte.grunnlagsinformasjonForelderBarnRelasjonHendelse
-import no.nav.etterlatte.grunnlagsinformasjonUtflyttingshendelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
-import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -66,7 +62,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringshendelse = grunnlagsendringshendelseUtenSamsvar(
             id = UUID.randomUUID(),
             sakId = sakId,
-            data = grunnlagsinformasjonDoedshendelse(fnr),
+            fnr = fnr,
             samsvarMellomPdlOgGrunnlag = null
         )
 
@@ -106,7 +102,6 @@ internal class GrunnlagsendringshendelseServiceTest {
             { assertEquals(1, lagredeGrunnlagsendringshendelser.size) },
             { assertEquals(sakId, opprettGrunnlagsendringshendelse.captured.sakId) },
             { assertEquals(GrunnlagsendringsType.DOEDSFALL, opprettGrunnlagsendringshendelse.captured.type) },
-            { assertTrue(opprettGrunnlagsendringshendelse.captured.data is Grunnlagsinformasjon.Doedsfall) },
             { assertTrue(opprettGrunnlagsendringshendelse.captured.opprettet >= LocalDateTime.now().minusSeconds(10)) },
             { assertEquals(1, lagredeGrunnlagsendringshendelser.size) },
             { assertEquals(grunnlagsendringshendelse, lagredeGrunnlagsendringshendelser.first()) }
@@ -120,13 +115,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grlagEndringUtflytting = grunnlagsendringshendelseUtenSamsvar(
             id = UUID.randomUUID(),
             sakId = sakId,
-            data = grunnlagsinformasjonUtflyttingshendelse(fnr),
+            fnr = fnr,
             samsvarMellomPdlOgGrunnlag = null
         )
         val grlagEndringForelderBarn = grunnlagsendringshendelseUtenSamsvar(
             id = UUID.randomUUID(),
             sakId = sakId,
-            data = grunnlagsinformasjonForelderBarnRelasjonHendelse(fnr),
+            fnr = fnr,
             samsvarMellomPdlOgGrunnlag = null
         )
 
@@ -193,7 +188,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             type = GrunnlagsendringsType.DOEDSFALL,
             id = UUID.randomUUID(),
             sakId = sakId,
-            data = grunnlagsinformasjonDoedshendelse(fnr, doedsdato),
+            fnr = fnr,
             samsvarMellomPdlOgGrunnlag = null
         )
 
@@ -201,7 +196,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             type = GrunnlagsendringsType.UTFLYTTING,
             id = UUID.randomUUID(),
             sakId = sakId,
-            data = grunnlagsinformasjonUtflyttingshendelse(fnr),
+            fnr = fnr,
             samsvarMellomPdlOgGrunnlag = null
         )
 
@@ -269,18 +264,14 @@ internal class GrunnlagsendringshendelseServiceTest {
             type = GrunnlagsendringsType.UTFLYTTING,
             id = UUID.randomUUID(),
             sakId = sakId,
-            data = grunnlagsinformasjonUtflyttingshendelse(
-                fnr = fnr,
-                tilflyttingsLand = tilflyttingsland,
-                utflyttingsdato = utflyttingsdato
-            ),
+            fnr = fnr,
             samsvarMellomPdlOgGrunnlag = null
         )
         val grunnlagsendringshendelse2 = grunnlagsendringshendelseUtenSamsvar(
             type = GrunnlagsendringsType.DOEDSFALL,
             id = UUID.randomUUID(),
             sakId = sakId,
-            data = grunnlagsinformasjonDoedshendelse(fnr),
+            fnr = fnr,
             samsvarMellomPdlOgGrunnlag = null
         )
 
@@ -347,17 +338,14 @@ internal class GrunnlagsendringshendelseServiceTest {
             type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
             id = UUID.randomUUID(),
             sakId = sakId,
-            data = grunnlagsinformasjonForelderBarnRelasjonHendelse(
-                fnr = "Soeker",
-                relatertPersonsIdent = "Ny forelder"
-            ),
+            fnr = "Soeker",
             samsvarMellomPdlOgGrunnlag = null
         )
         val grunnlagsendringshendelse2 = grunnlagsendringshendelseUtenSamsvar(
             type = GrunnlagsendringsType.DOEDSFALL,
             id = UUID.randomUUID(),
             sakId = sakId,
-            data = grunnlagsinformasjonDoedshendelse("Soeker"),
+            fnr = "Soeker",
             samsvarMellomPdlOgGrunnlag = null
         )
 
@@ -433,7 +421,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 id = grlg_id,
                 sakId = sakId,
                 opprettet = LocalDateTime.now().minusHours(1),
-                data = grunnlagsinformasjonDoedshendelse(avdoedFnr = avdoedFnr, doedsdato = doedsdato),
+                fnr = avdoedFnr,
                 hendelseGjelderRolle = rolle,
                 samsvarMellomPdlOgGrunnlag = null
             )

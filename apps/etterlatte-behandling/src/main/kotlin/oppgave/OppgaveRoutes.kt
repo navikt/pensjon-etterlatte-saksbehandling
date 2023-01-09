@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import java.util.*
 
-fun Route.oppgaveRoutes(repo: OppgaveDao) {
+internal fun Route.oppgaveRoutes(repo: OppgaveDao) {
     route("/oppgaver") {
         get {
             val bruker = Kontekst.get().AppUser

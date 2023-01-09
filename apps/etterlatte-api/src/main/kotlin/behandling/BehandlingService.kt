@@ -153,10 +153,6 @@ class BehandlingService(
         )
     }
 
-    suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {
-        return behandlingKlient.slettBehandlinger(sakId, accessToken)
-    }
-
     suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser {
         logger.info("Henter hendelser for behandling $behandlingId")
         return behandlingKlient.hentHendelserForBehandling(behandlingId, accessToken)

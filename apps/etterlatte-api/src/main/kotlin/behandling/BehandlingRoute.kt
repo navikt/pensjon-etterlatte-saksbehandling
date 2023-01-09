@@ -49,19 +49,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 }
             }
 
-            // Slett alle behandlinger på en sak
-            delete("behandlinger") {
-                val sakId = call.parameters["sakId"]?.toInt()
-                if (sakId == null) {
-                    call.response.status(HttpStatusCode(400, "Bad request"))
-                    call.respond("SakId mangler")
-                } else {
-                    if (service.slettBehandlinger(sakId, getAccessToken(call))) {
-                        call.respond(HttpStatusCode.OK)
-                    }
-                }
-            }
-
             post("manueltopphoer") {
                 try {
                     call.receive<ManueltOpphoerRequest>().also { req ->

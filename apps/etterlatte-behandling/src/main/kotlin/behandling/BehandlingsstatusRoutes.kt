@@ -33,6 +33,16 @@ internal fun Route.behandlingsstatusRoutes(foerstegangsbehandlingService: Foerst
             call.respond(HttpStatusCode.OK, "true")
         }
 
+        get("/beregn") {
+            foerstegangsbehandlingService.settBeregnet(behandlingsId)
+            call.respond(HttpStatusCode.OK, "true")
+        }
+
+        post("/beregn") {
+            foerstegangsbehandlingService.settBeregnet(behandlingsId, false)
+            call.respond(HttpStatusCode.OK, "true")
+        }
+
         get("/fatteVedtak") {
             foerstegangsbehandlingService.settFattetVedtak(behandlingsId)
             call.respond(HttpStatusCode.OK, "true")
@@ -51,22 +61,21 @@ internal fun Route.behandlingsstatusRoutes(foerstegangsbehandlingService: Foerst
             call.respond(HttpStatusCode.OK, "true")
         }
 
+        get("/attester") {
+            foerstegangsbehandlingService.settAttestert(behandlingsId)
+            call.respond(HttpStatusCode.OK, "true")
+        }
+        post("/attester") {
+            foerstegangsbehandlingService.settAttestert(behandlingsId, false)
+            call.respond(HttpStatusCode.OK, "true")
+        }
+
         get("/iverksett") {
             foerstegangsbehandlingService.settIverksatt(behandlingsId)
             call.respond(HttpStatusCode.OK, "true")
         }
         post("/iverksett") {
             foerstegangsbehandlingService.settIverksatt(behandlingsId, false)
-            call.respond(HttpStatusCode.OK, "true")
-        }
-
-        get("/beregn") {
-            foerstegangsbehandlingService.settBeregnet(behandlingsId)
-            call.respond(HttpStatusCode.OK, "true")
-        }
-
-        post("/beregn") {
-            foerstegangsbehandlingService.settBeregnet(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")
         }
     }

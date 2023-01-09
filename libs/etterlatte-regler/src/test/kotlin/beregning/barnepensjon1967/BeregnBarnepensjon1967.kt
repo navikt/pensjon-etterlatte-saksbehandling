@@ -1,14 +1,14 @@
-package beregning.barnepensjon1967
+package no.nav.etterlatte.libs.regler.beregning.barnepensjon1967
 
-import beregning.BarnepensjonGrunnlag
-import beregning.barnepensjon1967.barnekull.barnekullRegel
-import beregning.barnepensjon1967.trygdetidsfaktor.trygdetidsFaktor
-import regler.RegelMeta
-import regler.ToDoRegelReferanse
-import regler.definerKonstant
-import regler.kombinerer
-import regler.med
-import regler.og
+import no.nav.etterlatte.libs.regler.RegelMeta
+import no.nav.etterlatte.libs.regler.ToDoRegelReferanse
+import no.nav.etterlatte.libs.regler.beregning.BarnepensjonGrunnlag
+import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.barnekull.barnekullRegel
+import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.trygdetidsfaktor.trygdetidsFaktor
+import no.nav.etterlatte.libs.regler.definerKonstant
+import no.nav.etterlatte.libs.regler.kombinerer
+import no.nav.etterlatte.libs.regler.med
+import no.nav.etterlatte.libs.regler.og
 import java.math.RoundingMode
 import java.time.LocalDate
 

@@ -1,13 +1,13 @@
-package beregning
+package no.nav.etterlatte.libs.regler.beregning
 
-import beregning.barnepensjon1967.BP_1967_DATO
-import beregning.barnepensjon1967.beregnBarnepensjon1967Regel
-import beregning.barnepensjon2024.beregnBarnepensjon2024Regel
-import regler.FaktumNode
-import regler.RegelMeta
-import regler.ToDoRegelReferanse
-import regler.og
-import regler.velgNyesteGyldige
+import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.RegelMeta
+import no.nav.etterlatte.libs.regler.ToDoRegelReferanse
+import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.BP_1967_DATO
+import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.beregnBarnepensjon1967Regel
+import no.nav.etterlatte.libs.regler.beregning.barnepensjon2024.beregnBarnepensjon2024Regel
+import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import java.math.BigDecimal
 
 data class AvdoedForelder(val trygdetid: BigDecimal)

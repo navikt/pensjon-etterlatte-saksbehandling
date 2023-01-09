@@ -1,4 +1,4 @@
-package regler
+package no.nav.etterlatte.libs.regler
 
 import java.time.LocalDate
 

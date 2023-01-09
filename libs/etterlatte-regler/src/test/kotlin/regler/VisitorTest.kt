@@ -1,4 +1,4 @@
-package regler
+package no.nav.etterlatte.libs.regler
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize

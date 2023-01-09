@@ -1,4 +1,4 @@
-package regler
+package no.nav.etterlatte.libs.regler
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 
-class FinnFaktumIGrunnlagRegelTest {
+class
+FinnFaktumIGrunnlagRegelTest {
     data class Grunnlag(val testVerdi2021: FaktumNode<Int>)
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())

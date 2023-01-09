@@ -1,4 +1,4 @@
-package regler
+package no.nav.etterlatte.libs.regler
 
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test

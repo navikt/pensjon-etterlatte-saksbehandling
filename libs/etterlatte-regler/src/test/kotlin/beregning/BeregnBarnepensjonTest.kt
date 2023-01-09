@@ -1,13 +1,13 @@
-package beregning
+package no.nav.etterlatte.libs.regler.beregning
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.RegelPeriode
+import no.nav.etterlatte.libs.regler.eksekver
+import no.nav.etterlatte.libs.regler.finnAlleKnekkpunkter
 import org.junit.jupiter.api.Test
-import regler.FaktumNode
-import regler.RegelPeriode
-import regler.eksekver
-import regler.finnAlleKnekkpunkter
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate

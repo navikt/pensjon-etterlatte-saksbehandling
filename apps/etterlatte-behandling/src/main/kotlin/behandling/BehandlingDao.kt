@@ -423,17 +423,22 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun lagreNyttVirkningstidspunkt(behandlingId: UUID, virkningstidspunkt: Virkningstidspunkt) {
-        val statement =
-            connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
+        val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
         statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
     }
 
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
-        val statement =
-            connection().prepareStatement("UPDATE behandling SET kommer_barnet_tilgode = ? where id = ?")
+        val statement = connection().prepareStatement("UPDATE behandling SET kommer_barnet_tilgode = ? where id = ?")
         statement.setString(1, kommerBarnetTilgode.toJson())
+        statement.setObject(2, behandlingId)
+        statement.executeUpdate()
+    }
+
+    fun lagreVilkaarstatus(behandlingId: UUID, vilkaarUtfall: VilkaarsvurderingUtfall?) {
+        val statement = connection().prepareStatement("UPDATE behandling SET vilkaar_utfall = ? where id = ?")
+        statement.setString(1, vilkaarUtfall?.toString())
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
     }

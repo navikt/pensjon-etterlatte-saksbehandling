@@ -122,22 +122,20 @@ class GrunnlagsendringshendelseService(
                         )
                     }
                         .map { rolleOgSak ->
-                            inTransaction {
-                                logger.info(
-                                    "Oppretter grunnlagsendringshendelse for forelder-barn-relasjon-hendelse: " +
-                                        "$forelderBarnRelasjonHendelse"
+                            logger.info(
+                                "Oppretter grunnlagsendringshendelse for forelder-barn-relasjon-hendelse: " +
+                                    "$forelderBarnRelasjonHendelse"
+                            )
+                            grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                                Grunnlagsendringshendelse(
+                                    id = UUID.randomUUID(),
+                                    sakId = rolleOgSak.second,
+                                    type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+                                    opprettet = tidspunktForMottakAvHendelse,
+                                    hendelseGjelderRolle = rolleOgSak.first,
+                                    gjelderPerson = forelderBarnRelasjonHendelse.fnr
                                 )
-                                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                                    Grunnlagsendringshendelse(
-                                        id = UUID.randomUUID(),
-                                        sakId = rolleOgSak.second,
-                                        type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
-                                        opprettet = tidspunktForMottakAvHendelse,
-                                        hendelseGjelderRolle = rolleOgSak.first,
-                                        gjelderPerson = forelderBarnRelasjonHendelse.fnr
-                                    )
-                                )
-                            }
+                            )
                         }
                 }
             }

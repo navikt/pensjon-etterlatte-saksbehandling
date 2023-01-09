@@ -1,6 +1,5 @@
-package testdata.features.egendefinert
+package no.nav.etterlatte.testdata.features.egendefinert
 
-import JsonMessage
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
@@ -9,10 +8,11 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import no.nav.etterlatte.TestDataFeature
-import no.nav.etterlatte.logger
-import no.nav.etterlatte.navIdentFraToken
-import no.nav.etterlatte.producer
+import no.nav.etterlatte.testdata.JsonMessage
+import no.nav.etterlatte.testdata.TestDataFeature
+import no.nav.etterlatte.testdata.logger
+import no.nav.etterlatte.testdata.navIdentFraToken
+import no.nav.etterlatte.testdata.producer
 
 object EgendefinertMeldingFeature : TestDataFeature {
     override val beskrivelse: String

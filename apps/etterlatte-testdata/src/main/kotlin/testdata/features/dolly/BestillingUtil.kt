@@ -1,6 +1,6 @@
-package testdata.features.dolly
+package no.nav.etterlatte.testdata.features.dolly
 
-import dolly.BestillingRequest
+import no.nav.etterlatte.testdata.dolly.BestillingRequest
 
 fun generererBestilling(bestilling: BestillingRequest): String {
     val soeker = soeskenTemplate(true)

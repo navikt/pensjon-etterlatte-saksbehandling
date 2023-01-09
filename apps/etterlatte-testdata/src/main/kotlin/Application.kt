@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.testdata
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -8,8 +8,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import dolly.DollyClientImpl
-import dolly.DollyService
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.defaultRequest
@@ -47,16 +45,18 @@ import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
+import no.nav.etterlatte.testdata.dolly.DollyClientImpl
+import no.nav.etterlatte.testdata.dolly.DollyService
+import no.nav.etterlatte.testdata.features.SlettsakFeature
+import no.nav.etterlatte.testdata.features.dolly.DollyFeature
+import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeature
+import no.nav.etterlatte.testdata.features.index.IndexFeature
+import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
+import no.nav.etterlatte.testdata.features.standardmelding.StandardMeldingFeature
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import testdata.features.SlettsakFeature
-import testdata.features.dolly.DollyFeature
-import testdata.features.egendefinert.EgendefinertMeldingFeature
-import testdata.features.index.IndexFeature
-import testdata.features.soeknad.OpprettSoeknadFeature
-import testdata.features.standardmelding.StandardMeldingFeature
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 
 private val env = System.getenv()

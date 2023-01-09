@@ -1,4 +1,4 @@
-package dolly
+package no.nav.etterlatte.testdata.dolly
 
 import kotlinx.coroutines.runBlocking
 

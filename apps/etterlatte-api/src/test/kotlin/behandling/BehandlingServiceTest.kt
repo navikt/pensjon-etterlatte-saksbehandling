@@ -2,6 +2,7 @@ package behandling
 
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
@@ -10,7 +11,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BeregningKlient
 import no.nav.etterlatte.behandling.EtterlatteGrunnlag
 import no.nav.etterlatte.behandling.EtterlatteVedtak
-import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.behandling.VilkaarsvurderingKlient
@@ -18,8 +18,6 @@ import no.nav.etterlatte.behandling.VirkningstidspunktResponse
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -43,6 +41,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import sporingslogg.Sporingslogg
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -69,11 +68,17 @@ internal class BehandlingServiceTest {
     @MockK
     lateinit var vilkaarsvurderingKlient: VilkaarsvurderingKlient
 
+    @MockK
+    lateinit var sporingslogg: Sporingslogg
+
     @InjectMockKs
     lateinit var service: BehandlingService
 
     @BeforeEach
-    fun setUp() = MockKAnnotations.init(this)
+    fun setUp() {
+        MockKAnnotations.init(this)
+        every { sporingslogg.logg(any()) } returns Unit
+    }
     private val accessToken = UUID.randomUUID().toString()
     private val fnr = "11057523044"
 
@@ -87,7 +92,7 @@ internal class BehandlingServiceTest {
         coEvery { behandlingKlient.hentSakerForPerson(fnr, accessToken) } returns sakliste
         coEvery { behandlingKlient.hentBehandlingerForSak(1, accessToken) } returns BehandlingListe(emptyList())
 
-        val respons = runBlocking { service.hentPersonOgSaker(fnr, accessToken) }
+        val respons = runBlocking { service.hentPersonOgSaker(fnr, accessToken, "bruker1") }
 
         assertSame(person, respons.person)
         assertEquals(behandlingsListe, respons.behandlingListe)
@@ -242,24 +247,6 @@ internal class BehandlingServiceTest {
         assertEquals("TestOla", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(1)!!.fornavn)
         assertEquals(1, respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.size)
         assertEquals("TestKari", respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.get(0)!!.fornavn)
-    }
-
-    @Test
-    fun opprettManueltOpphoer() {
-        coEvery {
-            behandlingKlient.opprettManueltOpphoer(any(), any())
-        } returns Result.success(ManueltOpphoerResponse("123"))
-        val respons = runBlocking {
-            service.opprettManueltOpphoer(
-                manueltOpphoerRequest = ManueltOpphoerRequest(
-                    sak = 0,
-                    opphoerAarsaker = listOf(ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE),
-                    fritekstAarsak = "annen aarsak"
-                ),
-                accessToken = accessToken
-            )
-        }
-        assertEquals(respons.behandlingId, "123")
     }
 
     @Test

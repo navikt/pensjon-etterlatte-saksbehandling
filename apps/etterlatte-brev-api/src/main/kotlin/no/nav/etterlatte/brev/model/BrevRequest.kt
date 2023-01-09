@@ -55,6 +55,7 @@ data class RegoppslagResponseDTO(
 ) {
     data class Adresse(
         val type: AdresseType,
+        val adresseKilde: AdresseKilde,
         val adresselinje1: String,
         val adresselinje2: String?,
         val adresselinje3: String?,
@@ -66,5 +67,9 @@ data class RegoppslagResponseDTO(
 
     enum class AdresseType {
         NORSKPOSTADRESSE, UTENLANDSKPOSTADRESSE
+    }
+
+    enum class AdresseKilde {
+        BOSTEDSADRESSE, OPPHOLDSADRESSE, KONTAKTADRESSE, DELTBOSTED, KONTAKTINFORMASJONFORDØDSBO, ENHETPOSTADRESSE, ENHETFORRETNINGSADRESSE
     }
 }

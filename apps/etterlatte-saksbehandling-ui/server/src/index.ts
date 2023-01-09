@@ -45,6 +45,24 @@ if (isDev) {
     proxy(ApiConfig.behandling.url!!)
   )
 
+  app.use(
+    '/api/behandlinger/:sakid/manueltopphoer',
+    tokenMiddleware(ApiConfig.behandling.scope),
+    proxy(ApiConfig.behandling.url!!)
+  )
+
+  app.use(
+    '/api/grunnlag/beregningsgrunnlag/:behandlingId',
+    tokenMiddleware(ApiConfig.grunnlag.scope),
+    proxy(ApiConfig.grunnlag.url!!)
+  )
+
+  app.use(
+    '/api/behandling/:behandlingsid/avbryt',
+    tokenMiddleware(ApiConfig.behandling.scope),
+    proxy(ApiConfig.behandling.url!!)
+  )
+
   app.use('/api/oppgaver', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url!!))
 
   app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url!!))

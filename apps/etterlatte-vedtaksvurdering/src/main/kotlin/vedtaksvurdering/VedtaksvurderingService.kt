@@ -53,6 +53,8 @@ class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: VedtakEntity) :
     val vedtakId: Long = vedtak.id
 }
 
+object BehandlingstilstandException : IllegalStateException("Statussjekk for behandling feilet")
+
 class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository,
     private val beregningKlient: BeregningKlient,
@@ -124,6 +126,7 @@ class VedtaksvurderingService(
                     val beregningsResultat = Beregningsresultat.fraDto(beregningDTO)
                     Triple(beregningsResultat, vilkaarsvurdering, behandling.await())
                 }
+
                 null -> throw IllegalArgumentException(
                     "Resultat av vilkårsvurdering er null for behandling $behandlingId"
                 )
@@ -135,13 +138,17 @@ class VedtaksvurderingService(
         return hentFellesVedtakMedUtbetalingsperioder(behandlingId)
     }
 
-    fun hentFellesVedtakMedUtbetalingsperioder(behandlingId: UUID): Vedtak? {
+    private fun hentFellesVedtakMedUtbetalingsperioder(behandlingId: UUID): Vedtak? {
         return repository.hentVedtak(behandlingId)?.let {
             it.toDTO(repository.hentUtbetalingsPerioder(it.id))
         }
     }
 
-    fun fattVedtak(behandlingId: UUID, saksbehandler: String): Vedtak {
+    suspend fun fattVedtak(behandlingId: UUID, saksbehandler: String, accessToken: String): Vedtak {
+        if (!behandlingKlient.fattVedtak(behandlingId, accessToken)) {
+            throw BehandlingstilstandException
+        }
+
         val v = requireNotNull(hentVedtak(behandlingId)).also {
             if (it.vedtakFattet == true) throw KanIkkeEndreFattetVedtak(it)
         }
@@ -157,14 +164,20 @@ class VedtaksvurderingService(
         val fattetVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
         val statistikkmelding = lagStatistikkMelding(KafkaHendelseType.FATTET, fattetVedtak)
         sendToRapid(statistikkmelding, behandlingId)
+        behandlingKlient.fattVedtak(behandlingId, accessToken, true)
 
         return fattetVedtak
     }
 
-    fun attesterVedtak(
+    suspend fun attesterVedtak(
         behandlingId: UUID,
-        saksbehandler: String
+        saksbehandler: String,
+        accessToken: String
     ): Vedtak {
+        if (!behandlingKlient.attester(behandlingId, accessToken)) {
+            throw BehandlingstilstandException
+        }
+
         val vedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId)).also {
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
@@ -179,6 +192,7 @@ class VedtaksvurderingService(
 
         val message = lagStatistikkMelding(KafkaHendelseType.ATTESTERT, attestertVedtak)
         sendToRapid(message, behandlingId)
+        behandlingKlient.attester(behandlingId, accessToken, true)
 
         return attestertVedtak
     }
@@ -187,16 +201,22 @@ class VedtaksvurderingService(
         if (!b) throw function()
     }
 
-    fun underkjennVedtak(behandlingId: UUID): VedtakEntity {
+    suspend fun underkjennVedtak(behandlingId: UUID, accessToken: String): VedtakEntity {
+        if (!behandlingKlient.underkjenn(behandlingId, accessToken)) {
+            throw BehandlingstilstandException
+        }
+
         requireNotNull(hentVedtak(behandlingId)).also {
-            require(it.vedtakFattet != null) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
+            require(it.vedtakFattet == true) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
             require(it.attestant == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
         }
         repository.underkjennVedtak(behandlingId)
+        behandlingKlient.underkjenn(behandlingId, accessToken, true)
+
         return repository.hentVedtak(behandlingId)!!
     }
 
-    fun utbetalingsperioderFraVedtak(vedtak: Vedtak) =
+    private fun utbetalingsperioderFraVedtak(vedtak: Vedtak) =
         utbetalingsperioderFraVedtak(vedtak.type, vedtak.virk, vedtak.beregning?.sammendrag ?: emptyList())
 
     fun utbetalingsperioderFraVedtak(

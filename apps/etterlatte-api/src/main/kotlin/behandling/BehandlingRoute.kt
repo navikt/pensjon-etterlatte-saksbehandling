@@ -12,11 +12,10 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.ktor.saksbehandler
 import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
@@ -75,19 +74,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
                     }
                 }
             }
-
-            post("manueltopphoer") {
-                try {
-                    call.receive<ManueltOpphoerRequest>().also { req ->
-                        service.opprettManueltOpphoer(req, getAccessToken(call)).also { opprettet ->
-                            call.respond(opprettet)
-                        }
-                    }
-                } catch (e: Exception) {
-                    logger.error("Kunne ikke opprette manuelt opphoer", e)
-                    call.respond(HttpStatusCode.InternalServerError)
-                }
-            }
         }
     }
 
@@ -101,12 +87,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
         get("hendelser") {
             call.withUUID("behandlingId") {
                 call.respond(service.hentHendelserForBehandling(it.toString(), getAccessToken(call)))
-            }
-        }
-
-        post("avbryt") {
-            call.withUUID("behandlingId") {
-                call.respond(service.avbrytBehanding(it.toString(), getAccessToken(call)))
             }
         }
 
@@ -137,7 +117,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond("Fødselsnummer mangler")
             } else {
                 try {
-                    call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call)))
+                    call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call), saksbehandler))
                 } catch (e: InvalidFoedselsnummer) {
                     logger.error("Ugyldig fødselsnummer", e)
                     call.respond(HttpStatusCode.BadRequest, "Ugyldig fødselsnummer")

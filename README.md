@@ -14,6 +14,13 @@ Kan hentes ved å kjøre følgende kommando:
 ./get-secret.sh apps/<app_du_vil_lage_secrets_for>
 ```
 
+Hvis du får feilmelding `Not logged in or lacking rights. Ensure you're connected to naisdevice and gcp.`
+og du er sikker på du er koblet både naisdevice og gcp så kan det være at du må sette default namespace på context:
+
+```
+kubectl config set-context --current --namespace=etterlatte
+```
+
 Ved endring i filen kan denne kommandoen kjøres (OBS: dette innebærer at alle må hente tokens på nytt). Eksempel for etterlatte-saksbehandling-ui:
 ```
 kubectl apply -f apps/etterlatte-saksbehandling-ui/.nais/azuread-etterlatte-saksbehandling-ui-lokal.yaml
@@ -151,6 +158,15 @@ En app bygges og deployes automatisk når en endring legges til i `main`.
 
 For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
 
+## Lokal bygg/test - docker
+
+Docker må være installert og kjørende for at lokal bygg/test skal fungere. Hvis man bruker docker desktop så klarer testene
+å finne docker socket automatisk. Hvis man har colima kjørende så må man ha en symlink:
+
+```
+sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
+```
+
 # Varsling
 Det legges ut varsler om feilmeldinger i appene på Slack i kanalen `#team-etterlatte-alerts-dev` og `#team-etterlatte-alerts-prod`
 
@@ -161,3 +177,4 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 ## For NAV-ansatte
 
 Interne henvendelser kan sendes via Slack i kanalen #po-pensjon-team-etterlatte.
+

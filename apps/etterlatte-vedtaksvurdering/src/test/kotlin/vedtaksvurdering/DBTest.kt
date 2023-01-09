@@ -46,6 +46,7 @@ internal class DBTest {
 
     private val uuid = UUID.randomUUID()
     private val sakId = 123L
+    private val accessToken = "accessToken"
 
     @BeforeAll
     fun beforeAll() {
@@ -64,7 +65,7 @@ internal class DBTest {
         postgreSQLContainer.stop()
     }
 
-    fun lagreIverksattVedtak() {
+    private fun lagreIverksattVedtak() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(
             vedtakRepo,
@@ -123,6 +124,9 @@ internal class DBTest {
             .oppfylt.copy(
                 behandlingId = uuid
             )
+        coEvery { behandling.fattVedtak(any(), any(), any()) } returns true
+        coEvery { behandling.attester(any(), any(), any()) } returns true
+        coEvery { behandling.underkjenn(any(), any(), any()) } returns true
 
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, "access")
@@ -135,18 +139,18 @@ internal class DBTest {
         assert(vedtaket?.sak?.id != null)
         Assertions.assertNotNull(vedtaket?.virk)
 
-        vedtaksvurderingService.fattVedtak(uuid, "saksbehandler")
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
         val fattetVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
 
-        vedtaksvurderingService.underkjennVedtak(uuid)
+        runBlocking { vedtaksvurderingService.underkjennVedtak(uuid, accessToken) }
         val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
-        vedtaksvurderingService.fattVedtak(uuid, "saksbehandler")
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
 
-        vedtaksvurderingService.attesterVedtak(uuid, "attestant")
+        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, "attestant", accessToken) }
         val attestertVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)

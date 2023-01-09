@@ -1,6 +1,5 @@
 plugins {
     id("etterlatte.common")
-    id("etterlatte.kafka")
     id("etterlatte.rapids-and-rivers-ktor2")
 }
 
@@ -8,6 +7,7 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:etterlatte-sporingslogg"))
 
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)

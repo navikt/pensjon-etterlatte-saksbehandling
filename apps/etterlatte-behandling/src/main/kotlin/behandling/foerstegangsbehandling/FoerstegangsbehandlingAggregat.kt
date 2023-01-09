@@ -44,7 +44,8 @@ class FoerstegangsbehandlingAggregat(
                 persongalleri = persongalleri,
                 gyldighetsproeving = null,
                 virkningstidspunkt = null,
-                kommerBarnetTilgode = null
+                kommerBarnetTilgode = null,
+                vilkaarUtfall = null
             )
                 .also {
                     behandlinger.opprettFoerstegangsbehandling(it)
@@ -89,7 +90,7 @@ class FoerstegangsbehandlingAggregat(
         kommentar: String?,
         begrunnelse: String?
     ) {
-        lagretBehandling = registrerVedtakHendelseFelles(
+        registrerVedtakHendelseFelles(
             vedtakId = vedtakId,
             hendelse = hendelse,
             inntruffet = inntruffet,
@@ -97,8 +98,7 @@ class FoerstegangsbehandlingAggregat(
             kommentar = kommentar,
             begrunnelse = begrunnelse,
             lagretBehandling = lagretBehandling,
-            behandlinger = behandlinger,
             hendelser = hendelser
-        ) as Foerstegangsbehandling
+        )
     }
 }

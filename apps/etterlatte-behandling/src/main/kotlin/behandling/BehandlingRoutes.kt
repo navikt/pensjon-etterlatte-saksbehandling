@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
 import java.time.YearMonth
@@ -66,6 +67,15 @@ fun Route.behandlingRoutes(
                 call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
             }
         }
+    }
+
+    post("/api/behandling/{behandlingsid}/avbryt") {
+        val navIdent = navIdentFraToken() ?: return@post call.respond(
+            HttpStatusCode.Unauthorized,
+            "Kunne ikke hente ut navident for den som vil avbryte"
+        )
+        generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
+        call.respond(HttpStatusCode.OK)
     }
 
     route("/behandlinger") {
@@ -118,15 +128,6 @@ fun Route.behandlingRoutes(
                 }
             }
 
-            post("/avbrytbehandling") {
-                val navIdent = navIdentFraToken() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "Kunne ikke hente ut navident for den som vil avbryte"
-                )
-                generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
-                call.respond(HttpStatusCode.OK)
-            }
-
             post("/gyldigfremsatt") {
                 val body = call.receive<GyldighetsResultat>()
                 foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)
@@ -163,12 +164,15 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.settOpprettet(behandlingsId, false)
                 call.respond(HttpStatusCode.OK, "true")
             }
+
             get("/vilkaarsvurder") {
-                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId)
+                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, true, null)
                 call.respond(HttpStatusCode.OK, "true")
             }
             post("/vilkaarsvurder") {
-                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false)
+                val body = call.receive<TilVilkaarsvurderingJson>()
+
+                foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false, body.utfall)
                 call.respond(HttpStatusCode.OK, "true")
             }
 
@@ -185,7 +189,6 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.settReturnert(behandlingsId)
                 call.respond(HttpStatusCode.OK, "true")
             }
-
             post("/returner") {
                 foerstegangsbehandlingService.settReturnert(behandlingsId, false)
                 call.respond(HttpStatusCode.OK, "true")
@@ -195,9 +198,18 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.settIverksatt(behandlingsId)
                 call.respond(HttpStatusCode.OK, "true")
             }
-
             post("/iverksett") {
                 foerstegangsbehandlingService.settIverksatt(behandlingsId, false)
+                call.respond(HttpStatusCode.OK, "true")
+            }
+
+            get("/beregn") {
+                foerstegangsbehandlingService.settBeregnet(behandlingsId)
+                call.respond(HttpStatusCode.OK, "true")
+            }
+
+            post("/beregn") {
+                foerstegangsbehandlingService.settBeregnet(behandlingsId, false)
                 call.respond(HttpStatusCode.OK, "true")
             }
         }
@@ -294,30 +306,33 @@ fun Route.behandlingRoutes(
                         ?: HttpStatusCode.NotFound
                 )
             }
-            post {
-                val manueltOpphoerRequest = call.receive<ManueltOpphoerRequest>()
-                logger.info("Mottat forespørsel om å gjennomføre et manuelt opphør på sak ${manueltOpphoerRequest.sak}")
-                try {
-                    val manueltOpphoer = manueltOpphoerService.opprettManueltOpphoer(manueltOpphoerRequest)
-                    if (manueltOpphoer == null) {
-                        logger.info(
-                            "Sak ${manueltOpphoerRequest.sak} hadde ikke gyldig status for manuelt opphør, så" +
-                                "ingen manuelt opphør blir opprettet"
-                        )
-                        call.respond(HttpStatusCode.Forbidden)
-                        return@post
-                    }
+        }
+    }
+
+    route("/api/behandlinger/{sakid}/manueltopphoer") {
+        post {
+            val manueltOpphoerRequest = call.receive<ManueltOpphoerRequest>()
+            logger.info("Mottat forespørsel om å gjennomføre et manuelt opphør på sak ${manueltOpphoerRequest.sak}")
+            try {
+                val manueltOpphoer = manueltOpphoerService.opprettManueltOpphoer(manueltOpphoerRequest)
+                if (manueltOpphoer == null) {
                     logger.info(
-                        "Manuelt opphør for sak ${manueltOpphoerRequest.sak} er opprettet med behandlingId " +
-                            "${manueltOpphoer.id}"
+                        "Sak ${manueltOpphoerRequest.sak} hadde ikke gyldig status for manuelt opphør, så" +
+                            "ingen manuelt opphør blir opprettet"
                     )
-                    call.respond(ManueltOpphoerResponse(behandlingId = manueltOpphoer.id.toString()))
-                } catch (e: Exception) {
-                    logger.error("Fikk en feil under oppretting av et manuelt opphør.", e)
-                    call.respond(
-                        HttpStatusCode.InternalServerError
-                    )
+                    call.respond(HttpStatusCode.Forbidden)
+                    return@post
                 }
+                logger.info(
+                    "Manuelt opphør for sak ${manueltOpphoerRequest.sak} er opprettet med behandlingId " +
+                        "${manueltOpphoer.id}"
+                )
+                call.respond(ManueltOpphoerResponse(behandlingId = manueltOpphoer.id.toString()))
+            } catch (e: Exception) {
+                logger.error("Fikk en feil under oppretting av et manuelt opphør.", e)
+                call.respond(
+                    HttpStatusCode.InternalServerError
+                )
             }
         }
     }
@@ -398,3 +413,4 @@ internal data class FastsettVirkningstidspunktResponse(
 }
 
 internal data class KommerBarnetTilgodeJson(val svar: JaNeiVetIkke, val begrunnelse: String)
+internal data class TilVilkaarsvurderingJson(val utfall: VilkaarsvurderingUtfall)

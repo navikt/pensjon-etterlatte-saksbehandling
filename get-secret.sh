@@ -30,7 +30,7 @@ userIsAuthenticated() {
   if [ "$CAN_READ_SECRET" == "yes" ]; then
     info "User can read secrets in kubernetes. Continuing ..."
   else
-    error "Not logged in or lacking rights. Ensure you're connected to naisdevice and gcp."
+    error "Not logged in or lacking rights. Ensure you're connected to naisdevice and gcp and correct default namespace is set."
   fi
 }
 

@@ -39,7 +39,8 @@ class RevurderingAggregat(
                 status = BehandlingStatus.OPPRETTET,
                 persongalleri = persongalleri,
                 revurderingsaarsak = revurderingAarsak,
-                kommerBarnetTilgode = null
+                kommerBarnetTilgode = null,
+                vilkaarUtfall = null
             )
                 .also {
                     behandlinger.opprettRevurdering(it)
@@ -61,7 +62,7 @@ class RevurderingAggregat(
         kommentar: String?,
         begrunnelse: String?
     ) {
-        lagretBehandling = registrerVedtakHendelseFelles(
+        registrerVedtakHendelseFelles(
             vedtakId = vedtakId,
             hendelse = hendelse,
             inntruffet = inntruffet,
@@ -69,9 +70,8 @@ class RevurderingAggregat(
             kommentar = kommentar,
             begrunnelse = begrunnelse,
             lagretBehandling = lagretBehandling,
-            behandlinger = behandlinger,
             hendelser = hendelser
-        ) as Revurdering
+        )
     }
 
     fun serialiserbarUtgave() = lagretBehandling.copy()

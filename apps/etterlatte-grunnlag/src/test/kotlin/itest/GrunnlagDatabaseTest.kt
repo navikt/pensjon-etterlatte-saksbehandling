@@ -158,22 +158,6 @@ internal class GrunnlagDaoIntegrationTest {
     }
 
     @Test
-    fun `Det er mulig å slette alle opplysninger i en sak`() {
-        lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
-        lagGrunnlagsopplysning(SOESKEN_I_BEREGNINGEN).also {
-            opplysningRepo.leggOpplysningTilGrunnlag(
-                2,
-                it
-            )
-        }
-
-        opplysningRepo.slettAlleOpplysningerISak(2)
-        opplysningRepo.finnHendelserIGrunnlag(2).also {
-            assertEquals(0, it.size)
-        }
-    }
-
-    @Test
     fun `kan lage og hente periodiserte opplysninger`() {
         val opplysning = Grunnlagsopplysning(
             id = UUID.randomUUID(),

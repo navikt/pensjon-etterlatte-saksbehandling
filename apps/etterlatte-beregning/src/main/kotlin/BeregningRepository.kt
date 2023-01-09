@@ -16,13 +16,12 @@ import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningsperiodeDAO
 import java.io.Serializable
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 interface BeregningRepository {
     fun hent(behandlingId: UUID): Beregning?
     fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning
-    fun slettBeregningsperioderISak(sakId: Long)
 }
 
 class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRepository {
@@ -57,19 +56,6 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
             }
         }
         return hent(beregning.behandlingId)!!
-    }
-
-    override fun slettBeregningsperioderISak(sakId: Long) {
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = Queries.slettBeregningsperioderPaaSak,
-                    paramMap = mapOf("sakId" to sakId)
-                ).let { query ->
-                    tx.run(query.asUpdate)
-                }
-            }
-        }
     }
 
     private fun createMapFromBeregningsperiode(
@@ -171,10 +157,5 @@ private object Queries {
     val slettBeregning = """
         |DELETE FROM beregningsperiode
         |WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
-    """.trimMargin()
-
-    val slettBeregningsperioderPaaSak = """
-        |DELETE FROM beregningsperiode
-        |WHERE ${BeregningsperiodeDatabaseColumns.SakId.navn} = :sakId::BIGINT
     """.trimMargin()
 }

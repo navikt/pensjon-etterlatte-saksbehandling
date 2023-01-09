@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
-import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.Instant
 import java.util.*
 
@@ -43,7 +42,7 @@ class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
     private val sendToRapid: (String, UUID) -> Unit,
     private val behandlingKlient: BehandlingKlient
-) : GrunnlagService, VedlikeholdService {
+) : GrunnlagService {
 
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
@@ -145,9 +144,5 @@ class RealGrunnlagService(
                 opplysningDao.leggOpplysningTilGrunnlag(sak, opplysning, fnr)
             }
         }
-    }
-
-    override fun slettSak(sakId: Long) {
-        opplysningDao.slettAlleOpplysningerISak(sakId)
     }
 }

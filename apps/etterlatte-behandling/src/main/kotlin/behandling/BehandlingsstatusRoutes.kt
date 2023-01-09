@@ -11,7 +11,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 
-fun Route.behandlingsstatusRoutes(foerstegangsbehandlingService: FoerstegangsbehandlingService) {
+internal fun Route.behandlingsstatusRoutes(foerstegangsbehandlingService: FoerstegangsbehandlingService) {
     route("/behandlinger/{behandlingsid}") {
         get("/opprett") {
             foerstegangsbehandlingService.settOpprettet(behandlingsId)

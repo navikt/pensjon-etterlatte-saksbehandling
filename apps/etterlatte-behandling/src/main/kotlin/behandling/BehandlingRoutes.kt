@@ -38,7 +38,7 @@ import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 
-fun Route.behandlingRoutes(
+internal fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
     revurderingService: RevurderingService,

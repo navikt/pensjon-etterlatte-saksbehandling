@@ -121,7 +121,7 @@ data class Foerstegangsbehandling(
         return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }.copy(vilkaarUtfall = utfall)
     }
 
-    fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(listOf(VILKAARSVURDERT, BEREGNET)) {
+    fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(listOf(VILKAARSVURDERT, BEREGNET, RETURNERT)) {
         endreTilStatus(BEREGNET)
     }
 
@@ -131,7 +131,7 @@ data class Foerstegangsbehandling(
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisTilstandEr(listOf(BEREGNET, VILKAARSVURDERT)) {
+        return hvisTilstandEr(listOf(BEREGNET, VILKAARSVURDERT, RETURNERT)) {
             require(vilkaarUtfall != null)
             if (status == VILKAARSVURDERT) {
                 require(vilkaarUtfall == VilkaarsvurderingUtfall.IKKE_OPPFYLT)

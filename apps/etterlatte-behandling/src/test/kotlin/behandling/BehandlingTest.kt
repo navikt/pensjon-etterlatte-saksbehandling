@@ -161,4 +161,49 @@ internal class BehandlingTest {
                 assertEquals(it.status, BehandlingStatus.OPPRETTET)
             }
     }
+
+    @Test
+    fun `kan gaa fra RETURNERT til alle redigerbare states`() {
+        val initialBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
+            .oppdaterGyldighetsproeving(gyldighetsResultat)
+            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilBeregnet()
+            .tilFattetVedtak()
+
+        initialBehandling.tilReturnert().tilFattetVedtak()
+        initialBehandling.tilReturnert().tilBeregnet()
+        initialBehandling.tilReturnert().tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+        initialBehandling.tilReturnert().tilOpprettet()
+    }
+
+    @Test
+    fun `kan ikke gaa fra RETURNERT til ATTESTERT`() {
+        val behandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
+            .oppdaterGyldighetsproeving(gyldighetsResultat)
+            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilBeregnet()
+            .tilFattetVedtak()
+            .tilReturnert()
+
+        assertThrows<TilstandException.UgyldigtTilstand> {
+            behandling.tilAttestert()
+        }
+    }
+
+    @Test
+    fun `kan ikke gaa fra RETURNERT til IVERKSATT`() {
+        val behandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
+            .oppdaterGyldighetsproeving(gyldighetsResultat)
+            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilBeregnet()
+            .tilFattetVedtak()
+            .tilReturnert()
+
+        assertThrows<TilstandException.UgyldigtTilstand> {
+            behandling.tilIverksatt()
+        }
+    }
 }

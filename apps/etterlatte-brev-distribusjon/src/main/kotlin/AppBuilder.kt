@@ -1,20 +1,20 @@
 package no.nav.etterlatte
 
-import JournalpostServiceMock
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
-import journalpost.JournalpostService
-import journalpost.JournalpostServiceImpl
 import no.nav.etterlatte.brev.BrevServiceImpl
 import no.nav.etterlatte.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.distribusjon.DistribusjonService
 import no.nav.etterlatte.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.distribusjon.DistribusjonServiceMock
 import no.nav.etterlatte.journalpost.JournalpostKlient
+import no.nav.etterlatte.journalpost.JournalpostService
+import no.nav.etterlatte.journalpost.JournalpostServiceImpl
+import no.nav.etterlatte.journalpost.JournalpostServiceMock
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.security.ktor.clientCredential
 

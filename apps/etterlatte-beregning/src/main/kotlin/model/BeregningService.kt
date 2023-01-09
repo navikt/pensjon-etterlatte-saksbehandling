@@ -2,7 +2,6 @@ package no.nav.etterlatte.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import model.finnSoeskenperiode.FinnSoeskenPeriode
 import no.nav.etterlatte.BeregningRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -17,6 +16,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.behandling.BehandlingKlient
+import no.nav.etterlatte.model.finnSoeskenperiode.FinnSoeskenPeriode
 import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.LocalDate

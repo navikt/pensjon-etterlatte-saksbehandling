@@ -1,11 +1,7 @@
-package grunnlagsendring
+package no.nav.etterlatte.grunnlagsendring
 
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
-import no.nav.etterlatte.grunnlagsendring.samsvarAnsvarligeForeldre
-import no.nav.etterlatte.grunnlagsendring.samsvarBarn
-import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
-import no.nav.etterlatte.grunnlagsendring.samsvarUtflytting
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland

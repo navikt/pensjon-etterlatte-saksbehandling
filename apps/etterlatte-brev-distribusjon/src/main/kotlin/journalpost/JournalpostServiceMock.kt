@@ -1,4 +1,5 @@
-import journalpost.JournalpostService
+package no.nav.etterlatte.journalpost
+
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import org.slf4j.LoggerFactory

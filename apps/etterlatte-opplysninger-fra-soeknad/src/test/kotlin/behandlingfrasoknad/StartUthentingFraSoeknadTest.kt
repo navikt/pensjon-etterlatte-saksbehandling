@@ -1,4 +1,4 @@
-package behandlingfrasoknad
+package no.nav.etterlatte.behandlingfrasoknad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.every

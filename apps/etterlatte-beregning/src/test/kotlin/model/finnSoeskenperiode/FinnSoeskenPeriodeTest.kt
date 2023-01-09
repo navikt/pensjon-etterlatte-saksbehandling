@@ -1,8 +1,5 @@
 package no.nav.etterlatte.model.finnSoeskenperiode
 
-import model.finnSoeskenperiode.FinnSoeskenPeriode
-import model.finnSoeskenperiode.Soesken
-import model.finnSoeskenperiode.finnHelOgHalvsoesken
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning

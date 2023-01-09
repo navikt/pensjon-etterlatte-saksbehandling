@@ -1,4 +1,4 @@
-package person
+package no.nav.etterlatte.person
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.person.FoedselsnummerValidator.Companion.isValid

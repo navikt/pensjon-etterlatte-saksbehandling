@@ -1,4 +1,4 @@
-package behandling
+package no.nav.etterlatte.behandling
 
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -6,15 +6,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.BehandlingKlient
-import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.BeregningKlient
-import no.nav.etterlatte.behandling.EtterlatteGrunnlag
-import no.nav.etterlatte.behandling.EtterlatteVedtak
-import no.nav.etterlatte.behandling.PdltjenesterKlient
-import no.nav.etterlatte.behandling.Vedtak
-import no.nav.etterlatte.behandling.VilkaarsvurderingKlient
-import no.nav.etterlatte.behandling.VirkningstidspunktResponse
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -33,6 +24,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.typer.LagretHendelse
 import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Sak
@@ -41,7 +33,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime

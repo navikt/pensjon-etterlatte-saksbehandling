@@ -1,4 +1,4 @@
-package person
+package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer

@@ -1,4 +1,4 @@
-package model.avrund
+package no.nav.etterlatte.model.avrund
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

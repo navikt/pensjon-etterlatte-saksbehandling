@@ -1,8 +1,7 @@
-package utbetaling.iverksetting.utbetaling
+package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 

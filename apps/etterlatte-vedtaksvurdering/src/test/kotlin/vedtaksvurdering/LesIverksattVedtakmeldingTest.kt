@@ -1,4 +1,4 @@
-package vedtaksvurdering.rivers
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.mockk.every
 import io.mockk.mockk

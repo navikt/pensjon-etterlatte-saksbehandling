@@ -1,9 +1,8 @@
-package pdl.mapper
+package no.nav.etterlatte.pdl.mapper
 
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.pdl.PdlHentPerson
-import no.nav.etterlatte.pdl.mapper.UtlandMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

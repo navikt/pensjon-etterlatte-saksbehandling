@@ -1,6 +1,5 @@
-package model
+package no.nav.etterlatte.model
 
-import no.nav.etterlatte.model.Soeskenjustering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

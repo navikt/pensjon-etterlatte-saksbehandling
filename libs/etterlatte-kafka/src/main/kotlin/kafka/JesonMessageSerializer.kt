@@ -1,6 +1,5 @@
-package kafka
+package no.nav.etterlatte.kafka
 
-import no.nav.etterlatte.kafka.JsonMessage
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serializer
 

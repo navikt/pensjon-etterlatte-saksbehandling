@@ -1,4 +1,4 @@
-package utbetaling.avstemming.avstemmingsdata
+package no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata
 
 import no.nav.etterlatte.utbetaling.mockKonsistensavstemming
 import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
@@ -114,7 +114,7 @@ fun `liste av konsistensavstemmingsdata har rett struktur`(konsistensavstemmings
     }
 
     if (konsistensavstemmingsdata.subList(1, konsistensavstemmingsdata.size - 1)
-        .any { it.aksjonsdata.aksjonsType != "DATA" }
+            .any { it.aksjonsdata.aksjonsType != "DATA" }
     ) {
         throw IllegalArgumentException(
             "Aksjonstypen til en eller flere av meldingene mellom START og AVSL var ikke DATA"

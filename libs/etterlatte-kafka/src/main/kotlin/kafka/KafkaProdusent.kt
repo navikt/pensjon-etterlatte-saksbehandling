@@ -1,6 +1,5 @@
 package no.nav.etterlatte.kafka
 
-import kafka.JsonMessageSerializer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer

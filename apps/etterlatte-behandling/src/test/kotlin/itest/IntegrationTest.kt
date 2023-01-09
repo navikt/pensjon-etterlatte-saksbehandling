@@ -87,9 +87,7 @@ class ApplicationTest {
         testApplication {
             val client = createClient {
                 install(ContentNegotiation) {
-                    jackson {
-                        registerModule(JavaTimeModule())
-                    }
+                    jackson { registerModule(JavaTimeModule()) }
                 }
             }
             install(Authentication) {
@@ -374,7 +372,7 @@ class ApplicationTest {
                 UUID.fromString(it.body())
             }
 
-            client.post("/behandlinger/$behandlingIdNyFoerstegangsbehandling/avbrytbehandling") {
+            client.post("api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
                 addAuthSaksbehandler()
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)

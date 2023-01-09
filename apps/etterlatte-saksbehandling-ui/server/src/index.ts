@@ -38,9 +38,14 @@ if (isDev) {
     tokenMiddleware(ApiConfig.vilkaarsvurdering.scope),
     proxy(ApiConfig.vilkaarsvurdering.url!!)
   )
-
   app.use(
     '/api/behandling/:behandlingsid/kommerbarnettilgode',
+    tokenMiddleware(ApiConfig.behandling.scope),
+    proxy(ApiConfig.behandling.url!!)
+  )
+
+  app.use(
+    '/api/behandling/:behandlingsid/avbryt',
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url!!)
   )

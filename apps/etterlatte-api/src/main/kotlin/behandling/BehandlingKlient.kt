@@ -22,7 +22,6 @@ interface EtterlatteBehandling {
     suspend fun hentSaker(accessToken: String): Saker
     suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
-    suspend fun avbrytBehandling(behandlingId: String, accessToken: String): Boolean
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
     suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser
     suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean
@@ -126,28 +125,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             return objectMapper.readValue(json.toString(), DetaljertBehandling::class.java)
         } catch (e: Exception) {
             logger.error("Henting av behandlinger feilet", e)
-            throw e
-        }
-    }
-
-    override suspend fun avbrytBehandling(behandlingId: String, accessToken: String): Boolean {
-        logger.info("Avbryter behandling")
-        try {
-            downstreamResourceClient.post(
-                Resource(
-                    clientId,
-                    "$resourceUrl/behandlinger/$behandlingId/avbrytbehandling"
-                ),
-                accessToken,
-                ""
-            )
-                .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-            return true
-        } catch (e: Exception) {
-            logger.error("Avbryt behandling feilet", e)
             throw e
         }
     }

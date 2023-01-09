@@ -118,7 +118,6 @@ class RealManueltOpphoerService(
                 kommentar = kommentar,
                 begrunnelse = begrunnelse,
                 lagretBehandling = manueltOpphoer,
-                behandlinger = behandlinger,
                 hendelser = hendelser
             )
         }

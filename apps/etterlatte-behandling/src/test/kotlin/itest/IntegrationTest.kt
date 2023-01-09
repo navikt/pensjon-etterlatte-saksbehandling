@@ -123,7 +123,6 @@ class ApplicationTest {
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
                         LocalDateTime.now().toString()
                     )
-
                 )
             }.let {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -235,14 +234,26 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.get("/behandlinger/$behandlingId") {
+            client.post("/behandlinger/$behandlingId/beregn") {
                 addAuthSaksbehandler()
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
+                beans.datasourceBuilder().dataSource.connection.use {
+                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.BEREGNET, actual.status)
+                }
+
                 assertEquals(HttpStatusCode.OK, it.status)
-                val behandling: DetaljertBehandling = it.body()
-                assertNotNull(behandling.id)
-                assertEquals("FATTET_VEDTAK", behandling.status?.name)
+            }
+
+            client.post("/behandlinger/$behandlingId/fatteVedtak") {
+                addAuthSaksbehandler()
+            }.also {
+                beans.datasourceBuilder().dataSource.connection.use {
+                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
+                }
+
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.get("/api/oppgaver") {

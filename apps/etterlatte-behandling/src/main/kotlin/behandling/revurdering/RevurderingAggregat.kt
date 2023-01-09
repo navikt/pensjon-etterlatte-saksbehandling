@@ -61,7 +61,7 @@ class RevurderingAggregat(
         kommentar: String?,
         begrunnelse: String?
     ) {
-        lagretBehandling = registrerVedtakHendelseFelles(
+        registrerVedtakHendelseFelles(
             vedtakId = vedtakId,
             hendelse = hendelse,
             inntruffet = inntruffet,
@@ -69,9 +69,8 @@ class RevurderingAggregat(
             kommentar = kommentar,
             begrunnelse = begrunnelse,
             lagretBehandling = lagretBehandling,
-            behandlinger = behandlinger,
             hendelser = hendelser
-        ) as Revurdering
+        )
     }
 
     fun serialiserbarUtgave() = lagretBehandling.copy()

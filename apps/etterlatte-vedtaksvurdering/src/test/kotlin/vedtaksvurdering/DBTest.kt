@@ -160,8 +160,5 @@ internal class DBTest {
         lagreIverksattVedtak()
         val iverksattVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.IVERKSATT, iverksattVedtak?.vedtakStatus)
-
-        vedtaksvurderingService.slettSak(sakId)
-        Assertions.assertNull(vedtaksvurderingService.hentVedtak(uuid))
     }
 }

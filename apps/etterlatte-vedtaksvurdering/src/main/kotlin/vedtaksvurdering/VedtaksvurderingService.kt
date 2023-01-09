@@ -20,7 +20,6 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
-import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 import no.nav.etterlatte.vedtaksvurdering.Vedtak as VedtakEntity
 
@@ -61,7 +60,7 @@ class VedtaksvurderingService(
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
     private val sendToRapid: (String, UUID) -> Unit
-) : VedlikeholdService {
+) {
 
     fun lagreIverksattVedtak(behandlingId: UUID) {
         repository.hentVedtak(behandlingId)?.also {
@@ -283,10 +282,6 @@ class VedtaksvurderingService(
             behandlingId = behandlingId,
             accessToken = accessToken
         )
-    }
-
-    override fun slettSak(sakId: Long) {
-        repository.slettSak(sakId)
     }
 }
 

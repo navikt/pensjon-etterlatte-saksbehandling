@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import sporingslogg.Sporingslogg
 
 class ApplicationContext(configLocation: String? = null) {
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
@@ -27,6 +28,7 @@ class ApplicationContext(configLocation: String? = null) {
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val beregningKlient = BeregningKlientImpl(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
+    private val sporingslogg = Sporingslogg()
 
     val behandlingService: BehandlingService = BehandlingService(
         behandlingKlient = behandlingKlient,
@@ -34,7 +36,8 @@ class ApplicationContext(configLocation: String? = null) {
         vedtakKlient = vedtakKlient,
         grunnlagKlient = grunnlagKlient,
         beregningKlient = beregningKlient,
-        vilkaarsvurderingKlient = vilkaarsvurderingKlient
+        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+        sporingslogg = sporingslogg
     )
 
     private fun httpClient() = HttpClient {

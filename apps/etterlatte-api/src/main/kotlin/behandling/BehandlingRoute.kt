@@ -15,8 +15,8 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.ktor.saksbehandler
 import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
@@ -137,7 +137,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond("Fødselsnummer mangler")
             } else {
                 try {
-                    call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call)))
+                    call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call), saksbehandler))
                 } catch (e: InvalidFoedselsnummer) {
                     logger.error("Ugyldig fødselsnummer", e)
                     call.respond(HttpStatusCode.BadRequest, "Ugyldig fødselsnummer")

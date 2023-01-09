@@ -1,6 +1,5 @@
-package grunnlagsendring
+package no.nav.etterlatte.grunnlagsendring
 
-import GrunnlagTestData
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -12,9 +11,9 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.grunnlagsendring.GrunnlagClientImpl
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

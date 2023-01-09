@@ -1,15 +1,12 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
-import GrunnlagTestData
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
-import no.nav.etterlatte.grunnlag.OpplysningDao
-import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals

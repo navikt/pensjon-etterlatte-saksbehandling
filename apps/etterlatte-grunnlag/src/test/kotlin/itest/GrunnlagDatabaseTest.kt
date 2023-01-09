@@ -2,9 +2,6 @@ package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import grunnlag.ADRESSE_DEFAULT
-import grunnlag.SOEKER_FOEDSELSNUMMER
-import grunnlag.kilde
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -21,6 +18,9 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals

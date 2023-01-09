@@ -1,6 +1,5 @@
 package no.nav.etterlatte.person
 
-import GrunnlagTestData
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -22,6 +21,7 @@ import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.mockFolkeregisterident
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.module

@@ -1,12 +1,12 @@
+package no.nav.etterlatte
+
 import io.mockk.mockk
 import io.mockk.mockkClass
-import no.nav.etterlatte.BeregningRepository
-import no.nav.etterlatte.BeregningRepositoryImpl
-import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll

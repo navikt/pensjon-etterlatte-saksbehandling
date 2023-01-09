@@ -1,10 +1,10 @@
 import com.fasterxml.jackson.module.kotlin.readValue
-import grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.inntekt.Ident
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.InntektsKomponentenResponse
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.OpplysningsByggerService
 import org.junit.jupiter.api.Assertions.assertEquals

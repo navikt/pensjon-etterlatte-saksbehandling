@@ -1,7 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import GrunnlagTestData
-import behandling.VirkningstidspunktTestData
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -26,6 +24,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import org.junit.jupiter.api.AfterAll

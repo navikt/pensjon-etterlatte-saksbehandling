@@ -1,11 +1,8 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
-import GrunnlagTestData
 import io.mockk.every
 import io.mockk.mockk
 import lagGrunnlagHendelse
-import no.nav.etterlatte.grunnlag.OpplysningDao
-import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -24,6 +21,10 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.kilde
+import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

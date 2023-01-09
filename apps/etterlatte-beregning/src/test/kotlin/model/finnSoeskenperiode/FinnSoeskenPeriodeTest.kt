@@ -1,10 +1,8 @@
-package model.finnSoeskenperiode
+package no.nav.etterlatte.model.finnSoeskenperiode
 
-import GrunnlagTestData
-import grunnlag.ADRESSE_DEFAULT
-import grunnlag.HALVSOESKEN_FOEDSELSNUMMER
-import grunnlag.HELSOESKEN_FOEDSELSNUMMER
-import grunnlag.kilde
+import model.finnSoeskenperiode.FinnSoeskenPeriode
+import model.finnSoeskenperiode.Soesken
+import model.finnSoeskenperiode.finnHelOgHalvsoesken
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
@@ -17,6 +15,11 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.F
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

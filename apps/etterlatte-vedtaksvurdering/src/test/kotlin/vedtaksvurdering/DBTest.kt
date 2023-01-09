@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.mockk.coEvery
 import io.mockk.every
@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
 import no.nav.etterlatte.vedtaksvurdering.database.DataSourceBuilder
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource

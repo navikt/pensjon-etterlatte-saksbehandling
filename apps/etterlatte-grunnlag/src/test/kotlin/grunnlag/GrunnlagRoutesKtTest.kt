@@ -1,6 +1,5 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
-import GrunnlagTestData
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -11,9 +10,8 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.apiModule
-import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.libs.common.serialize
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions

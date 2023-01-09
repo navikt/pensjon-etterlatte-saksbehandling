@@ -1,7 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import GrunnlagTestData
-import behandling.VirkningstidspunktTestData
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -30,6 +28,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server

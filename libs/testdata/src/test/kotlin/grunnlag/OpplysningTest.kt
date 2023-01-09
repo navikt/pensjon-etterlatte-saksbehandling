@@ -1,6 +1,5 @@
-package grunnlag
+package no.nav.etterlatte.libs.testdata.grunnlag
 
-import GrunnlagTestData
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.objectMapper

@@ -1,4 +1,4 @@
-package grunnlag
+package no.nav.etterlatte.libs.testdata.grunnlag
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning

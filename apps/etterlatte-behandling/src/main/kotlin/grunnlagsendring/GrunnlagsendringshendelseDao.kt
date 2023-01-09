@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
@@ -171,17 +172,16 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
 
     private fun ResultSet.asGrunnlagsendringshendelse(): Grunnlagsendringshendelse {
         return Grunnlagsendringshendelse(
-            getObject("id") as UUID,
-            getLong("sak_id"),
-            GrunnlagsendringsType.valueOf(getString("type")),
-            getTimestamp("opprettet").toLocalDateTime(),
-            GrunnlagsendringStatus.valueOf(getString("status")),
-            getObject("behandling_id")?.let { it as UUID },
-            Saksrolle.valueOf(getString("hendelse_gjelder_rolle")),
-            getString("gjelder_person"),
-            objectMapper.readValue(
-                getString("samsvar_mellom_pdl_og_grunnlag"),
-                SamsvarMellomPdlOgGrunnlag::class.java
+            id = getObject("id") as UUID,
+            sakId = getLong("sak_id"),
+            type = GrunnlagsendringsType.valueOf(getString("type")),
+            opprettet = getTimestamp("opprettet").toLocalDateTime(),
+            status = GrunnlagsendringStatus.valueOf(getString("status")),
+            behandlingId = getObject("behandling_id")?.let { it as UUID },
+            hendelseGjelderRolle = Saksrolle.valueOf(getString("hendelse_gjelder_rolle")),
+            gjelderPerson = getString("gjelder_person"),
+            samsvarMellomPdlOgGrunnlag = objectMapper.readValue(
+                getString("samsvar_mellom_pdl_og_grunnlag")
             )
         )
     }

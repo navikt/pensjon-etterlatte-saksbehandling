@@ -91,7 +91,14 @@ class RealFoerstegangsbehandlingService(
         hentFoerstegangsbehandling(behandlingId).tilOpprettet().lagreEndring(dryRun)
     }
     override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean, utfall: VilkaarsvurderingUtfall?) {
-        hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert(utfall).lagreEndring(dryRun)
+        val behandling = hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert(utfall)
+
+        if (!dryRun) {
+            inTransaction {
+                behandlinger.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+                behandlinger.lagreVilkaarstatus(behandling.id, behandling.vilkaarUtfall)
+            }
+        }
     }
 
     override fun settBeregnet(behandlingId: UUID, dryRun: Boolean) {

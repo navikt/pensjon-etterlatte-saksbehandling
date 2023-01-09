@@ -23,7 +23,6 @@ interface RevurderingService {
         revurderingAarsak: RevurderingAarsak
     ): Revurdering
 
-    fun slettRevurderingISak(sakId: Long)
     fun hentRevurderingerISak(sakId: Long): List<Revurdering>
 }
 
@@ -32,12 +31,6 @@ class RealRevurderingService(
     private val revurderingFactory: RevurderingFactory,
     private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>
 ) : RevurderingService {
-
-    override fun slettRevurderingISak(sakId: Long) {
-        return inTransaction {
-            behandlinger.slettRevurderingerISak(sakId)
-        }
-    }
 
     override fun hentRevurderingerISak(sakId: Long): List<Revurdering> {
         return behandlinger.alleBehandlingerISakAvType(sakId, BehandlingType.REVURDERING)

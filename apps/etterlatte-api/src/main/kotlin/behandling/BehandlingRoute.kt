@@ -62,20 +62,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 }
             }
 
-            delete("revurderinger") {
-                val sakId = call.parameters["sakId"]?.toInt()
-                if (sakId == null) {
-                    call.response.status(HttpStatusCode(400, "Bad request"))
-                    call.respond("SakId mangler")
-                } else {
-                    if (service.slettRevurderinger(sakId, getAccessToken(call))) {
-                        call.respond(HttpStatusCode.OK)
-                    } else {
-                        call.respond(HttpStatusCode.InternalServerError)
-                    }
-                }
-            }
-
             post("manueltopphoer") {
                 try {
                     call.receive<ManueltOpphoerRequest>().also { req ->

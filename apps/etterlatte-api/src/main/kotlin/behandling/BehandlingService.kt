@@ -162,11 +162,6 @@ class BehandlingService(
         return behandlingKlient.hentHendelserForBehandling(behandlingId, accessToken)
     }
 
-    suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean {
-        logger.error("Ikke bruk dette i prod, slett endepunktet så raskt som mulig! Slett revurderinger er ban")
-        return behandlingKlient.slettRevurderinger(sakId, accessToken)
-    }
-
     suspend fun opprettManueltOpphoer(
         manueltOpphoerRequest: ManueltOpphoerRequest,
         accessToken: String

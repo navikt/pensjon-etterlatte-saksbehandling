@@ -407,13 +407,6 @@ class BehandlingDao(private val connection: () -> Connection) {
             else -> null
         }
 
-    fun slettRevurderingerISak(sakId: Long) {
-        val statement =
-            connection().prepareStatement("DELETE from behandling where sak_id = ? AND behandlingstype = 'REVURDERING'")
-        statement.setLong(1, sakId)
-        statement.executeUpdate()
-    }
-
     fun avbrytBehandling(behandlingId: UUID): Behandling {
         return this.lagreStatus(
             behandling = behandlingId,

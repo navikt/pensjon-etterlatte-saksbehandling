@@ -13,12 +13,15 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -31,6 +34,7 @@ import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -40,6 +44,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.util.*
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingRoutesTest {
@@ -51,6 +56,7 @@ internal class VilkaarsvurderingRoutesTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
+    private lateinit var ds: DataSource
 
     @BeforeAll
     fun before() {
@@ -58,21 +64,19 @@ internal class VilkaarsvurderingRoutesTest {
         System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
         System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
         postgreSQLContainer.start()
-
-        val ds = DataSourceBuilder.createDataSource(
+        ds = DataSourceBuilder.createDataSource(
             postgreSQLContainer.jdbcUrl,
             postgreSQLContainer.username,
             postgreSQLContainer.password
         ).also { it.migrate() }
 
         vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(
-                VilkaarsvurderingRepository(ds),
-                behandlingKlient,
-                grunnlagKlient
-            )
+            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.opprett(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery {
             grunnlagKlient.hentGrunnlagMedVersjon(
@@ -81,6 +85,13 @@ internal class VilkaarsvurderingRoutesTest {
                 any()
             )
         } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+    }
+
+    @AfterEach
+    fun afterEach() {
+        ds.connection.use {
+            it.prepareStatement("TRUNCATE vilkaarsvurdering CASCADE;").execute()
+        }
     }
 
     @AfterAll
@@ -105,7 +116,7 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
-            opprettVilkaarsvurdering()
+            opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             val response = client.get("/api/vilkaarsvurdering/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -175,7 +186,7 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
-            val vilkaarsvurdering = opprettVilkaarsvurdering()
+            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
                 vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.DOEDSFALL_FORELDER)?.id!!,
@@ -214,7 +225,7 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
-            val vilkaarsvurdering = opprettVilkaarsvurdering()
+            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
                 vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORUTGAAENDE_MEDLEMSKAP)?.id!!,
@@ -283,7 +294,7 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
-            val vilkaarsvurdering = opprettVilkaarsvurdering()
+            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
                 vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.DOEDSFALL_FORELDER)?.id!!,
@@ -333,7 +344,7 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
-            opprettVilkaarsvurdering()
+            opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
             val resultat = VurdertVilkaarsvurderingResultatDto(
                 resultat = VilkaarsvurderingUtfall.OPPFYLT,
                 kommentar = "Søker oppfyller vurderingen"
@@ -366,9 +377,97 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
-    private fun opprettVilkaarsvurdering(): Vilkaarsvurdering =
+    @Test
+    fun `faar 401 hvis spoerring ikke har access token`() {
+        testApplication {
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            val response = client.get("/api/vilkaarsvurdering/$behandlingId")
+
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+    }
+
+    @Test
+    fun `statussjekk kalles paa en gang for å sjekke tilstandet paa behandling`() {
+        val behandlingKlient = mockk<BehandlingKlient>()
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
+
+        val vilkaarsvurderingServiceImpl =
+            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+
+        testApplication {
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+
+            coVerifyOrder {
+                behandlingKlient.vilkaarsvurder(any(), any(), false)
+            }
+        }
+    }
+
+    @Test
+    fun `kan ikke opprette vilkaarsvurdering hvis statussjekk feiler`() {
+        val behandlingKlient = mockk<BehandlingKlient>()
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
+
+        val vilkaarsvurderingServiceImpl =
+            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+
+        testApplication {
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+
+            val response = client.get("/api/vilkaarsvurdering/$behandlingId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            assertEquals(HttpStatusCode.PreconditionFailed, response.status)
+        }
+    }
+
+    @Test
+    fun `kan ikke endre vilkaarsvurdering hvis statussjekk feiler`() {
+        val behandlingKlient = mockk<BehandlingKlient>()
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returnsMany listOf(true, false)
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
+
+        val vilkaarsvurderingServiceImpl =
+            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+
+        testApplication {
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+
+            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+
+            val vurdertVilkaarDto = VurdertVilkaarDto(
+                vilkaarId = vilkaarsvurdering
+                    .hentVilkaarMedHovedvilkaarType(VilkaarType.FORUTGAAENDE_MEDLEMSKAP)?.id!!,
+                hovedvilkaar = VilkaarTypeOgUtfall(
+                    type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
+                    resultat = Utfall.OPPFYLT
+                ),
+                kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.FORUTGAAENDE_MEDLEMSKAP}"
+            )
+
+            val response = client.post("/api/vilkaarsvurdering/$behandlingId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, "application/json")
+                setBody(vurdertVilkaarDto.toJson())
+            }
+
+            assertEquals(HttpStatusCode.PreconditionFailed, response.status)
+            val actual = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(behandlingId, token)
+            assertEquals(vilkaarsvurdering, actual)
+        }
+    }
+
+    private fun opprettVilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService): Vilkaarsvurdering =
         runBlocking {
-            vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(
+            vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(
                 behandlingId,
                 oboToken
             )
@@ -383,9 +482,15 @@ internal class VilkaarsvurderingRoutesTest {
         every { revurderingsaarsak } returns null
     }
 
+    private fun lagSak() = mockk<Sak>().apply {
+        every { id } returns 1L
+        every { ident } returns "ident"
+        every { sakType } returns SakType.BARNEPENSJON
+    }
+
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        val oboToken = "token"
+        const val oboToken = "token"
         const val ISSUER_ID = "azure"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }

@@ -19,7 +19,7 @@ export const Innhold = styled.div`
 `
 
 export const VilkaarWrapper = styled.div`
-  padding: 1em 1em 1em 0;
+  padding: 1em 1em 1em 2em;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -47,20 +47,8 @@ export const VilkaarInfobokser = styled.div`
 `
 
 export const VilkaarColumn = styled.div`
-  width: calc((100% / 4) - (60px / 4));
-
-  @media (max-width: 1900px) {
-    width: calc((100% / 3) - (40px / 3));
-  }
-
-  @media (max-width: 1600px) {
-    width: calc((100% / 2) - (20px / 2));
-  }
-
-  @media (max-width: 1300px) {
-    width: 100%;
-  }
-
+  height: fit-content;
+  
   .missing {
     color: red;
   }

@@ -12,7 +12,7 @@ import { loggerRouter } from './routers/loggerRouter'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
-const clientPath = path.resolve(__dirname, '../client')
+const clientPath = path.resolve(__dirname, '..', 'client')
 const isDev = process.env.NODE_ENV !== 'production'
 
 const app = express()
@@ -25,7 +25,6 @@ app.use(['/health/isAlive', '/health/isReady'], (req: Request, res: Response) =>
 })
 
 if (isDev) {
-  // TODO: Legge til resterende mocks
   logger.info('Mocking all endpoints')
   app.use('/api', mockRouter)
 } else {
@@ -44,6 +43,14 @@ if (isDev) {
     '/api/behandling/:behandlingsid/kommerbarnettilgode',
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url!!)
+  )
+
+  app.use('/api/oppgaver', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url!!))
+
+  app.use(
+    '/api/grunnlag/beregningsgrunnlag/:behandlingId',
+    tokenMiddleware(ApiConfig.grunnlag.scope),
+    proxy(ApiConfig.grunnlag.url!!)
   )
 
   app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url!!))

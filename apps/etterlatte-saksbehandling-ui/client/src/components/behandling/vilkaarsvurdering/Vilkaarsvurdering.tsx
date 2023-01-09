@@ -1,4 +1,4 @@
-import { Content, Header } from '~shared/styled'
+import { Content, ContentHeader } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { hentVilkaarsvurdering, IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
@@ -9,6 +9,8 @@ import { RequestStatus } from './utils'
 import Spinner from '~shared/Spinner'
 import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
+import { Heading } from '@navikt/ds-react'
+import { HeadingWrapper } from '../soeknadsoversikt/styled'
 
 export const Vilkaarsvurdering = () => {
   const location = useLocation()
@@ -54,9 +56,13 @@ export const Vilkaarsvurdering = () => {
 
   return (
     <Content>
-      <Header>
-        <h1>Vilkårsvurdering</h1>
-      </Header>
+      <ContentHeader>
+        <HeadingWrapper>
+          <Heading size={'large'} level={'1'}>
+            Vilkårsvurdering
+          </Heading>
+        </HeadingWrapper>
+      </ContentHeader>
 
       {behandlingId && status === RequestStatus.ok && vilkaarsvurdering?.virkningstidspunkt && (
         <>

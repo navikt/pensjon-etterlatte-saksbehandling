@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
@@ -15,13 +16,19 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class BehandlingEndretHendelseTest {
     companion object {
         val opplysningerMock = mockk<OpplysningDao>()
     }
 
-    private val inspector = TestRapid().apply { BehandlingEndretHendlese(this, RealGrunnlagService(opplysningerMock)) }
+    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
+
+    private val inspector = TestRapid().apply {
+        BehandlingEndretHendlese(this, RealGrunnlagService(opplysningerMock, sendToRapid, behandlingKlient))
+    }
 
     @BeforeEach
     fun init() {

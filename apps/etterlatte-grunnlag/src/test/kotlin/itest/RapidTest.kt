@@ -2,6 +2,7 @@ package itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import grunnlag.statiskUuid
+import io.mockk.mockk
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
@@ -9,6 +10,7 @@ import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -34,6 +36,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 import java.time.Instant
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RapidTest {
@@ -43,6 +46,8 @@ internal class RapidTest {
     private lateinit var opplysningRepo: OpplysningDao
     private lateinit var grunnlagService: RealGrunnlagService
     private lateinit var inspector: TestRapid
+    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
     fun beforeAll() {
@@ -54,7 +59,7 @@ internal class RapidTest {
         dsb.migrate()
         opplysningRepo = OpplysningDao(dsb.dataSource)
 
-        grunnlagService = RealGrunnlagService(opplysningRepo)
+        grunnlagService = RealGrunnlagService(opplysningRepo, sendToRapid, behandlingKlient)
         inspector = TestRapid().apply {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)

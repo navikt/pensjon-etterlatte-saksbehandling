@@ -124,33 +124,33 @@ export const Vurdering = ({
       {vilkaar.vurdering && !aktivVurdering && (
         <>
           <KildeVilkaar>
-            <Heading size="small">{overskrift()}</Heading>
+            <Heading size="small" level={"2"}>{overskrift()}</Heading>
             <VilkaarVurdertInformasjon>
-              <Detail size="medium">Manuelt av {vilkaar.vurdering?.saksbehandler}</Detail>
-              <Detail size="medium">
+              <Detail>Manuelt av {vilkaar.vurdering?.saksbehandler}</Detail>
+              <Detail>
                 Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}
               </Detail>
             </VilkaarVurdertInformasjon>
             {oppfyltUnntaksvilkaar && (
               <VilkaarVurdertInformasjon>
-                <Heading size="xsmall">Unntak er oppfylt</Heading>
+                <Heading size="xsmall" level={"3"}>Unntak er oppfylt</Heading>
                 <BodyShort size="small">{oppfyltUnntaksvilkaar?.tittel}</BodyShort>
               </VilkaarVurdertInformasjon>
             )}
             {vilkaar.vurdering?.kommentar && (
               <VilkaarVurdertInformasjon>
-                <Heading size="xsmall">Begrunnelse</Heading>
+                <Heading size="xsmall" level={"3"}>Begrunnelse</Heading>
                 <BodyShort size="small">{vilkaar.vurdering?.kommentar}</BodyShort>
               </VilkaarVurdertInformasjon>
             )}
           </KildeVilkaar>
 
           <RedigerWrapper onClick={redigerVilkaar}>
-            <Edit />
+            <Edit aria-hidden={"true"} />
             <span className={'text'}> Rediger</span>
           </RedigerWrapper>
           <RedigerWrapper onClick={slettVurderingAvVilkaar}>
-            <Delete />
+            <Delete aria-hidden={"true"} />
             <span className={'text'}> Slett</span>
           </RedigerWrapper>
         </>

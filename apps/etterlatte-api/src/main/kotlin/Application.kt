@@ -12,14 +12,9 @@ import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BeregningKlientImpl
 import no.nav.etterlatte.behandling.GrunnlagKlient
-import no.nav.etterlatte.behandling.GrunnlagService
-import no.nav.etterlatte.behandling.OppgaveService
 import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.VedtakKlient
 import no.nav.etterlatte.behandling.VilkaarsvurderingKlientImpl
-import no.nav.etterlatte.kafka.GcpKafkaConfig
-import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -34,8 +29,6 @@ class ApplicationContext(configLocation: String? = null) {
     private val beregningKlient = BeregningKlientImpl(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
     private val sporingslogg = Sporingslogg()
-    private val rapid: KafkaProdusent<String, String> =
-        GcpKafkaConfig.fromEnv().standardProducer(System.getenv().getValue("KAFKA_RAPID_TOPIC"))
 
     val behandlingService: BehandlingService = BehandlingService(
         behandlingKlient = behandlingKlient,
@@ -46,8 +39,6 @@ class ApplicationContext(configLocation: String? = null) {
         vilkaarsvurderingKlient = vilkaarsvurderingKlient,
         sporingslogg = sporingslogg
     )
-    val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
-    val grunnlagService = GrunnlagService(behandlingKlient, rapid)
 
     private fun httpClient() = HttpClient {
         install(ContentNegotiation) {

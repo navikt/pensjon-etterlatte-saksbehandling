@@ -74,6 +74,7 @@ export const Search = () => {
         hideLabel
         onChange={setSearchInput}
         onKeyUp={onEnter}
+        autoComplete="off"
       >
         <SearchField.Button onClick={search} />
       </SearchField>

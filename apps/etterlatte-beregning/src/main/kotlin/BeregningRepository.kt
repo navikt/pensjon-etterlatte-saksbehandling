@@ -72,7 +72,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
         }
     }
 
-    fun createMapFromBeregningsperiode(
+    private fun createMapFromBeregningsperiode(
         beregningsperiode: Beregningsperiode,
         beregning: Beregning
     ): Map<String, Serializable?> {

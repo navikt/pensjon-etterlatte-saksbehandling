@@ -1,6 +1,5 @@
 plugins {
     id("etterlatte.common")
-    id("etterlatte.kafka")
     id("etterlatte.rapids-and-rivers-ktor2")
 }
 

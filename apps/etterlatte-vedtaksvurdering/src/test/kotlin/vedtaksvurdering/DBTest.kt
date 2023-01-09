@@ -1,14 +1,17 @@
 package vedtaksvurdering
 
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
@@ -43,6 +46,7 @@ internal class DBTest {
 
     private val uuid = UUID.randomUUID()
     private val sakId = 123L
+    private val accessToken = "accessToken"
 
     @BeforeAll
     fun beforeAll() {
@@ -61,7 +65,7 @@ internal class DBTest {
         postgreSQLContainer.stop()
     }
 
-    fun lagreIverksattVedtak() {
+    private fun lagreIverksattVedtak() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(
             vedtakRepo,
@@ -111,10 +115,18 @@ internal class DBTest {
             null,
             null
         )
+        coEvery { behandling.hentSak(any(), any()) } returns mockk<Sak>().apply {
+            every { id } returns 1L
+            every { ident } returns "ident"
+            every { sakType } returns SakType.BARNEPENSJON
+        }
         coEvery { vilkaarsvurdering.hentVilkaarsvurdering(any(), any()) } returns VilkaarsvurderingTestData
             .oppfylt.copy(
                 behandlingId = uuid
             )
+        coEvery { behandling.fattVedtak(any(), any(), any()) } returns true
+        coEvery { behandling.attester(any(), any(), any()) } returns true
+        coEvery { behandling.underkjenn(any(), any(), any()) } returns true
 
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, "access")
@@ -127,18 +139,18 @@ internal class DBTest {
         assert(vedtaket?.sak?.id != null)
         Assertions.assertNotNull(vedtaket?.virk)
 
-        vedtaksvurderingService.fattVedtak(uuid, "saksbehandler")
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
         val fattetVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
 
-        vedtaksvurderingService.underkjennVedtak(uuid)
+        runBlocking { vedtaksvurderingService.underkjennVedtak(uuid, accessToken) }
         val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
-        vedtaksvurderingService.fattVedtak(uuid, "saksbehandler")
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
 
-        vedtaksvurderingService.attesterVedtak(uuid, "attestant")
+        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, "attestant", accessToken) }
         val attestertVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)

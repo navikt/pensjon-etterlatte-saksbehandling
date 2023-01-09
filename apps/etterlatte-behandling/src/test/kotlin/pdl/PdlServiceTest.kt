@@ -10,8 +10,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
-import no.nav.etterlatte.libs.common.behandling.KorrektIPDL
-import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.STOR_SNERK
+import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
@@ -29,64 +31,73 @@ internal class PdlServiceTest {
     fun `hent pdlModell skal returnere en Person`() {
         val klient = mockHttpClient(mockPerson())
         val pdlService = PdlService(klient, "url")
-        val fnr = "70078749472"
+        val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModell(fnr, rolle)
-        assertEquals(resultat.fornavn, "Test")
-        assertEquals(resultat.etternavn, "Testulfsen")
+        val resultat = pdlService.hentPdlModell(fnr.value, rolle)
+        assertEquals("Ola", resultat.fornavn.verdi)
+        assertEquals("Nordmann", resultat.etternavn.verdi)
     }
 
     @Test
-    fun `skal returnere KorrektIPDL JA dersom person har doedsdato i pdl`() {
-        val klient = mockHttpClient(mockPerson(doedsdato = LocalDate.of(2022, 10, 8)))
+    fun `skal hente doedsdato`() {
+        val klient = mockHttpClient(mockPerson())
         val pdlService = PdlService(klient, "url")
-        val fnr = "70078749472"
-        val resultat = pdlService.personErDoed(fnr)
-        assertEquals(KorrektIPDL.JA, resultat)
+        val fnr = TRIVIELL_MIDTPUNKT
+        val rolle = PersonRolle.BARN
+        val resultat = pdlService.hentAnsvarligeForeldre(fnr.value, rolle)
+        assertEquals(mockPerson().doedsdato?.verdi, resultat)
     }
 
     @Test
-    fun `skal returnere KorrektIPDL NEI dersom person ikke har doedsdato i pdl`() {
-        val klient = mockHttpClient(mockPerson(doedsdato = null))
+    fun `skal hente ansvarlige foreldre`() {
+        val familierelasjon = FamilieRelasjon(ansvarligeForeldre = listOf(STOR_SNERK), barn = null, foreldre = null)
+        val mockperson = mockPerson(familieRelasjon = familierelasjon)
+        val klient = mockHttpClient(mockperson)
         val pdlService = PdlService(klient, "url")
-        val fnr = "70078749472"
-        val resultat = pdlService.personErDoed(fnr)
-        assertEquals(KorrektIPDL.NEI, resultat)
+        val fnr = TRIVIELL_MIDTPUNKT
+        val rolle = PersonRolle.BARN
+        val resultat = pdlService.hentAnsvarligeForeldre(fnr.value, rolle)
+        assertEquals(familierelasjon.ansvarligeForeldre, resultat)
     }
 
     @Test
-    fun `skal returnere KorrektIPDL JA dersom person har utflytting fra Norge`() {
-        val klient = mockHttpClient(
-            mockPerson(
-                utland = Utland(
-                    innflyttingTilNorge = listOf(),
-                    utflyttingFraNorge = listOf(
-                        UtflyttingFraNorge(tilflyttingsland = "Sveits", dato = LocalDate.of(2022, 4, 3))
-                    )
+    fun `skal hente barn`() {
+        val familierelasjon = FamilieRelasjon(barn = listOf(STOR_SNERK), ansvarligeForeldre = null, foreldre = null)
+        val mockperson = mockPerson(familieRelasjon = familierelasjon)
+        val klient = mockHttpClient(mockperson)
+        val pdlService = PdlService(klient, "url")
+        val fnr = TRIVIELL_MIDTPUNKT
+        val rolle = PersonRolle.BARN
+        val resultat = pdlService.hentBarn(fnr.value, rolle)
+        assertEquals(familierelasjon.barn, resultat)
+    }
+
+    @Test
+    fun `skal hente utland`() {
+        val utland = Utland(
+            innflyttingTilNorge = null,
+            utflyttingFraNorge = listOf(
+                UtflyttingFraNorge(
+                    tilflyttingsland = "Sverige",
+                    dato = LocalDate.now()
                 )
             )
         )
+        val mockperson = mockPerson(utland = utland)
+        val klient = mockHttpClient(mockperson)
         val pdlService = PdlService(klient, "url")
-        val fnr = "70078749472"
-        val resultat = pdlService.personHarUtflytting(fnr)
-        assertEquals(KorrektIPDL.JA, resultat)
+        val fnr = TRIVIELL_MIDTPUNKT
+        val rolle = PersonRolle.BARN
+        val resultat = pdlService.hentUtland(fnr.value, rolle)
+        assertEquals(utland, resultat)
     }
 
-    @Test
-    fun `skal returnere KorrektIPDL NEI dersom person ikke har utflytting fra Norge`() {
-        val klient = mockHttpClient(mockPerson())
-        val pdlService = PdlService(klient, "url")
-        val fnr = "70078749472"
-        val resultat = pdlService.personHarUtflytting(fnr)
-        assertEquals(KorrektIPDL.NEI, resultat)
-    }
-
-    private fun mockHttpClient(personRespons: Person): HttpClient {
+    private fun mockHttpClient(personRespons: PersonDTO): HttpClient {
         val httpClient = HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
                     when (request.url.fullPath) {
-                        "/url/person" -> respond(personRespons.toJson(), HttpStatusCode.OK, defaultHeaders)
+                        "/url/person/v2" -> respond(personRespons.toJson(), HttpStatusCode.OK, defaultHeaders)
                         else -> error("Unhandled ${request.url.fullPath}")
                     }
                 }

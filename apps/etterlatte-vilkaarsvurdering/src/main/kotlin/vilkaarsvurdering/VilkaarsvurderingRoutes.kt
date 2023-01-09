@@ -35,6 +35,12 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 } catch (e: VirkningstidspunktIkkeSattException) {
                     logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                     call.respond(HttpStatusCode.PreconditionFailed)
+                } catch (e: BehandlingstilstandException) {
+                    logger.error(
+                        "Kunne ikke opprette vilkaarsvurdering for behandling $behandlingId. " +
+                            "Statussjekk for behandling feilet"
+                    )
+                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
                 }
             }
         }
@@ -45,17 +51,34 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(saksbehandler)
 
                 logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
-                val vilkaarsvurdering =
-                    vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
-                call.respond(vilkaarsvurdering.toDto())
+                try {
+                    val vilkaarsvurdering =
+                        vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(behandlingId, accesstoken, vurdertVilkaar)
+                    call.respond(vilkaarsvurdering.toDto())
+                } catch (e: BehandlingstilstandException) {
+                    logger.error(
+                        "Kunne ikke oppdatere vilkaarsvurdering for behandling $behandlingId. " +
+                            "Statussjekk for behandling feilet"
+                    )
+                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+                }
             }
         }
 
         delete("/{behandlingId}/{vilkaarId}") {
             withParam("behandlingId", "vilkaarId") { behandlingId, vilkaarId ->
                 logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
-                val vilkaarsvurdering = vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarId)
-                call.respond(vilkaarsvurdering.toDto())
+                try {
+                    val vilkaarsvurdering =
+                        vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, accesstoken, vilkaarId)
+                    call.respond(vilkaarsvurdering.toDto())
+                } catch (e: BehandlingstilstandException) {
+                    logger.error(
+                        "Kunne ikke slette vilkaarsvurdering for behandling $behandlingId. " +
+                            "Statussjekk for behandling feilet"
+                    )
+                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+                }
             }
         }
 
@@ -66,17 +89,33 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                     val vurdertResultat = vurdertResultatDto.toVilkaarsvurderingResultat(saksbehandler)
 
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
-                    val vilkaarsvurdering =
-                        vilkaarsvurderingService.oppdaterTotalVurdering(behandlingId, vurdertResultat)
-                    call.respond(vilkaarsvurdering.toDto())
+                    try {
+                        val vilkaarsvurdering =
+                            vilkaarsvurderingService.oppdaterTotalVurdering(behandlingId, accesstoken, vurdertResultat)
+                        call.respond(vilkaarsvurdering.toDto())
+                    } catch (e: BehandlingstilstandException) {
+                        logger.error(
+                            "Kunne ikke oppdatere total-vurdering for behandling $behandlingId. " +
+                                "Statussjekk for behandling feilet"
+                        )
+                        call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+                    }
                 }
             }
 
             delete("/{behandlingId}") {
                 withBehandlingId { behandlingId ->
                     logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
-                    val vilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
-                    call.respond(vilkaarsvurdering.toDto())
+                    try {
+                        val vilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId, accesstoken)
+                        call.respond(vilkaarsvurdering.toDto())
+                    } catch (e: BehandlingstilstandException) {
+                        logger.error(
+                            "Kunne ikke slette vilkårsvurderingsresultat for behandling $behandlingId. " +
+                                "Statussjekk feilet for behandling feilet"
+                        )
+                        call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+                    }
                 }
             }
         }

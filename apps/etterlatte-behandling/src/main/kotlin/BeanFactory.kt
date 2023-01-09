@@ -26,6 +26,8 @@ import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.database.DataSourceBuilder
+import no.nav.etterlatte.grunnlagsendring.GrunnlagClient
+import no.nav.etterlatte.grunnlagsendring.GrunnlagClientImpl
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -67,6 +69,7 @@ interface BeanFactory {
     fun leaderElection(): LeaderElection
     fun grunnlagsendringshendelseJob(): Timer
     fun grunnlagHttpClient(): HttpClient
+    fun grunnlagClient(): GrunnlagClient
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -142,11 +145,14 @@ abstract class CommonFactory : BeanFactory {
 
     override fun pdlService() = PdlService(pdlHttpClient(), "http://etterlatte-pdltjenester")
 
+    override fun grunnlagClient() = GrunnlagClientImpl(grunnlagHttpClient())
+
     override fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             grunnlagsendringshendelseDao(),
             generellBehandlingService(),
-            pdlService()
+            pdlService(),
+            grunnlagClient()
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(
@@ -193,23 +199,20 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
         }
         install(Auth) {
             clientCredential {
-                env.toMutableMap()
+                config = env.toMutableMap()
                     .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("GRUNNLAG_AZURE_SCOPE"))) }
             }
         }
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())
-            url("http://etterlatte-grunnlag/")
+            url("http://etterlatte-grunnlag/api/")
         }
     }
 
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-            Duration.of(
-                1,
-                ChronoUnit.MINUTES
-            ).toMillis()
+            Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

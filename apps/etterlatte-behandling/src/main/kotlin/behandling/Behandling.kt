@@ -89,9 +89,7 @@ data class Foerstegangsbehandling(
 
     private val erFyltUt: Boolean
         get() {
-            return (virkningstidspunkt != null) &&
-                (gyldighetsproeving != null) &&
-                (kommerBarnetTilgode != null)
+            return (virkningstidspunkt != null) && (gyldighetsproeving != null) && (kommerBarnetTilgode != null)
         }
 
     fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Foerstegangsbehandling = hvisRedigerbar {
@@ -107,6 +105,10 @@ data class Foerstegangsbehandling(
         endreTilStatus(OPPRETTET).copy(kommerBarnetTilgode = kommerBarnetTilgode)
     }
 
+    fun tilOpprettet(): Foerstegangsbehandling {
+        return hvisRedigerbar { endreTilStatus(OPPRETTET) }
+    }
+
     fun tilVilkaarsvurdert(): Foerstegangsbehandling {
         if (!erFyltUt) {
             logger.info(("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert"))
@@ -116,7 +118,7 @@ data class Foerstegangsbehandling(
         return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }
     }
 
-    fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(VILKAARSVURDERT) {
+    fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(listOf(VILKAARSVURDERT, BEREGNET)) {
         endreTilStatus(BEREGNET)
     }
 

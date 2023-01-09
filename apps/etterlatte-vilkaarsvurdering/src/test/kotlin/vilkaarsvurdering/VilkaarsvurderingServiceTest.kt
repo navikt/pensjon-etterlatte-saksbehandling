@@ -13,10 +13,12 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
@@ -31,8 +33,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -62,6 +66,7 @@ internal class VilkaarsvurderingServiceTest {
         ).also { it.migrate() }
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk<DetaljertBehandling>().apply {
             every { id } returns UUID.randomUUID()
             every { sak } returns 1L
@@ -69,6 +74,11 @@ internal class VilkaarsvurderingServiceTest {
             every { soeker } returns "10095512345"
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
             every { revurderingsaarsak } returns null
+        }
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns mockk<Sak>().apply {
+            every { id } returns 1L
+            every { ident } returns "ident"
+            every { sakType } returns SakType.BARNEPENSJON
         }
 
         repository = VilkaarsvurderingRepository(ds)
@@ -137,22 +147,25 @@ internal class VilkaarsvurderingServiceTest {
             vurdering = vurdering
         )
 
-        val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar)
+        runBlocking {
+            val vilkaarsvurderingOppdatert =
+                service.oppdaterVurderingPaaVilkaar(uuid, accesstoken, vurdertVilkaar)
 
-        vilkaarsvurderingOppdatert shouldNotBe null
-        vilkaarsvurderingOppdatert.vilkaar
-            .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
-            .let { vilkaar ->
-                vilkaar.hovedvilkaar.resultat shouldBe Utfall.OPPFYLT
-                vilkaar.unntaksvilkaar?.forEach {
-                    it.resultat shouldBe null
+            vilkaarsvurderingOppdatert shouldNotBe null
+            vilkaarsvurderingOppdatert.vilkaar
+                .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
+                .let { vilkaar ->
+                    vilkaar.hovedvilkaar.resultat shouldBe Utfall.OPPFYLT
+                    vilkaar.unntaksvilkaar?.forEach {
+                        it.resultat shouldBe null
+                    }
+                    vilkaar.vurdering?.let {
+                        it.saksbehandler shouldBe vurdering.saksbehandler
+                        it.kommentar shouldBe vurdering.kommentar
+                        it.tidspunkt shouldNotBe null
+                    }
                 }
-                vilkaar.vurdering?.let {
-                    it.saksbehandler shouldBe vurdering.saksbehandler
-                    it.kommentar shouldBe vurdering.kommentar
-                    it.tidspunkt shouldNotBe null
-                }
-            }
+        }
     }
 
     @Test
@@ -170,22 +183,25 @@ internal class VilkaarsvurderingServiceTest {
             vurdering = vurdering
         )
 
-        val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar)
+        runBlocking {
+            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, accesstoken, vurdertVilkaar)
 
-        vilkaarsvurderingOppdatert shouldNotBe null
-        vilkaarsvurderingOppdatert.vilkaar
-            .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
-            .let { vilkaar ->
-                vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
-                val unntaksvilkaar = vilkaar.unntaksvilkaar?.first { it.type == vurdertVilkaar.unntaksvilkaar?.type }
-                unntaksvilkaar?.resultat shouldBe Utfall.OPPFYLT
+            vilkaarsvurderingOppdatert shouldNotBe null
+            vilkaarsvurderingOppdatert.vilkaar
+                .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
+                .let { vilkaar ->
+                    vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
+                    val unntaksvilkaar =
+                        vilkaar.unntaksvilkaar?.first { it.type == vurdertVilkaar.unntaksvilkaar?.type }
+                    unntaksvilkaar?.resultat shouldBe Utfall.OPPFYLT
 
-                vilkaar.vurdering?.let {
-                    it.saksbehandler shouldBe vurdering.saksbehandler
-                    it.kommentar shouldBe vurdering.kommentar
-                    it.tidspunkt shouldNotBe null
+                    vilkaar.vurdering?.let {
+                        it.saksbehandler shouldBe vurdering.saksbehandler
+                        it.kommentar shouldBe vurdering.kommentar
+                        it.tidspunkt shouldNotBe null
+                    }
                 }
-            }
+        }
     }
 
     @Test
@@ -199,22 +215,45 @@ internal class VilkaarsvurderingServiceTest {
             vurdering = vurdering
         )
 
-        val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, vurdertVilkaar)
+        runBlocking {
+            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, accesstoken, vurdertVilkaar)
 
-        vilkaarsvurderingOppdatert shouldNotBe null
-        vilkaarsvurderingOppdatert.vilkaar
-            .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
-            .let { vilkaar ->
-                vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
-                vilkaar.unntaksvilkaar?.forEach {
-                    it.resultat shouldBe Utfall.IKKE_OPPFYLT
+            vilkaarsvurderingOppdatert shouldNotBe null
+            vilkaarsvurderingOppdatert.vilkaar
+                .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
+                .let { vilkaar ->
+                    vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
+                    vilkaar.unntaksvilkaar?.forEach {
+                        it.resultat shouldBe Utfall.IKKE_OPPFYLT
+                    }
+                    vilkaar.vurdering?.let {
+                        it.saksbehandler shouldBe vurdering.saksbehandler
+                        it.kommentar shouldBe vurdering.kommentar
+                        it.tidspunkt shouldNotBe null
+                    }
                 }
-                vilkaar.vurdering?.let {
-                    it.saksbehandler shouldBe vurdering.saksbehandler
-                    it.kommentar shouldBe vurdering.kommentar
-                    it.tidspunkt shouldNotBe null
-                }
+        }
+    }
+
+    @Test
+    fun `skal ikke lagre hvis status-sjekk mot behandling feiler`() {
+        val vilkaarsvurdering = runBlocking { opprettVilkaarsvurdering() }
+        coEvery { behandlingKlient.vilkaarsvurder(any(), any(), any()) } returns false
+
+        val vurdering = vilkaarsVurderingData()
+        val vurdertVilkaar = VurdertVilkaar(
+            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORTSATT_MEDLEMSKAP)?.id!!,
+            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.FORTSATT_MEDLEMSKAP, resultat = Utfall.IKKE_OPPFYLT),
+            vurdering = vurdering
+        )
+
+        runBlocking {
+            assertThrows<IllegalStateException> {
+                service.oppdaterVurderingPaaVilkaar(uuid, accesstoken, vurdertVilkaar)
             }
+            val actual = service.hentEllerOpprettVilkaarsvurdering(uuid, accesstoken)
+            actual shouldBe vilkaarsvurdering
+        }
     }
 
     @Test

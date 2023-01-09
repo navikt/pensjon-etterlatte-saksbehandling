@@ -27,6 +27,8 @@ spec:
     sidecar:
       enabled: true
       autoLogin: true
+  envFrom:
+    - secret: saksbehandler-secret
   liveness:
     path: /health/isAlive
     initialDelay: 10
@@ -56,6 +58,10 @@ spec:
       value: http://etterlatte-behandling
     - name: VEDTAK_API_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: GRUNNLAG_API_URL
+      value: http://etterlatte-grunnlag
+    - name: TILGANGSSTYRING_ENABLED
+      value: 'false'
   accessPolicy:
     outbound:
       external:
@@ -69,3 +75,4 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-grunnlag

@@ -16,7 +16,7 @@ import { FilterPar, IOppgave, StatusFilter, statusFilter } from './typer/oppgave
 import { ariaSortMap, FeltSortOrder } from './typer/oppgavefelter'
 import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 import styled from 'styled-components'
-import { Heading } from '@navikt/ds-react'
+import { Heading, Pagination } from '@navikt/ds-react'
 import { globalFilterFunction, tildeltFilterFunction } from './filtere/oppgaveListeFiltere'
 import { useAppSelector } from '~store/Store'
 
@@ -47,12 +47,8 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filte
     prepareRow,
     setGlobalFilter,
     setAllFilters,
-    canPreviousPage,
-    canNextPage,
     pageCount,
     gotoPage,
-    nextPage,
-    previousPage,
     setPageSize,
     filteredRows,
     state: { pageIndex, pageSize },
@@ -87,7 +83,7 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filte
 
   return (
     <Styles>
-      <Heading size={'medium'} spacing level={"2"}>
+      <Heading size={'medium'} spacing level={'2'}>
         Oppgaveliste
       </Heading>
       <table {...getTableProps()}>
@@ -130,28 +126,25 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filte
           })}
         </tbody>
       </table>
-      <div className={'pagination'}>
-        <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-          {'<<'}
-        </button>
-        <button onClick={() => previousPage()} disabled={!canPreviousPage}>
-          {'<'}
-        </button>
-        <button onClick={() => nextPage()} disabled={!canNextPage}>
-          {'>'}
-        </button>
-        <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
-          {'>>'}
-        </button>
-        <span>
+
+      <PaginationWrapper>
+        <Pagination
+          page={pageIndex + 1}
+          count={pageCount}
+          onPageChange={(pageNumber) => gotoPage(pageNumber - 1)}
+          size={'small'}
+          prevNextTexts
+        />
+        <p>
           Viser {pageIndex * pageSize + 1} - {pageIndex * pageSize + page.length} av {filteredRows.length} oppgaver
           (totalt {data.length} oppgaver)
-        </span>
+        </p>
         <select
           value={pageSize}
           onChange={(e) => {
             setPageSize(Number(e.target.value))
           }}
+          title={'Antall elementer som vises'}
         >
           {[10, 20, 30, 40, 50].map((pageSize) => (
             <option key={pageSize} value={pageSize}>
@@ -159,7 +152,7 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filte
             </option>
           ))}
         </select>
-      </div>
+      </PaginationWrapper>
     </Styles>
   )
 }
@@ -201,18 +194,17 @@ const Styles = styled.div`
       min-width: 170px;
     }
   }
+`
 
-  .pagination {
-    padding-top: 1rem;
+const PaginationWrapper = styled.div`
+  display: flex;
+  gap: 0.5em;
+  flex-wrap: wrap;
+  margin: 0.5em 0;
 
-    button {
-      padding: 0 0.5rem 0 0.5rem;
-      margin: 0 1px 0 1px;
-    }
-
-    span {
-      margin: 0 1rem 0 1rem;
-    }
+  > p {
+    margin: 0;
+    line-height: 32px;
   }
 `
 

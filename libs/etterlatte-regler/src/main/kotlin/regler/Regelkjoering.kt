@@ -2,12 +2,17 @@ package regler
 
 import java.time.LocalDate
 
-sealed class RegelkjoeringResultat<S> {
-    data class Suksess<S>(val resultat: Map<RegelPeriode, SubsumsjonsNode<S>>) : RegelkjoeringResultat<S>()
-    data class UgyldigPeriode<S>(val ugyldigeReglerForPeriode: List<Regel<*, *>>) : RegelkjoeringResultat<S>()
+sealed class RegelkjoeringResultat<S>(open val reglerVersjon: String) {
+    data class Suksess<S>(val resultat: Map<RegelPeriode, SubsumsjonsNode<S>>, override val reglerVersjon: String) :
+        RegelkjoeringResultat<S>(reglerVersjon)
+
+    data class UgyldigPeriode<S>(val ugyldigeReglerForPeriode: List<Regel<*, *>>, override val reglerVersjon: String) :
+        RegelkjoeringResultat<S>(reglerVersjon)
 }
 
 object Regelkjoering {
+    private val reglerVersjon = Properties.reglerVersjon
+
     fun <G, S> eksekver(
         regel: Regel<G, S>,
         grunnlag: G,
@@ -31,9 +36,9 @@ object Regelkjoering {
                 }
                 .toList()
                 .associateWith { p -> regel.anvend(grunnlag, p) }
-                .let { RegelkjoeringResultat.Suksess(it) }
+                .let { RegelkjoeringResultat.Suksess(it, reglerVersjon) }
         } else {
-            RegelkjoeringResultat.UgyldigPeriode(ugyldigePerioder)
+            RegelkjoeringResultat.UgyldigPeriode(ugyldigePerioder, reglerVersjon)
         }
     }
 

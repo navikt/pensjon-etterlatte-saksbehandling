@@ -43,7 +43,7 @@ export const KommerBarnetTilGodeVurdering = ({
         />
       ) : (
         <div>
-          <VurderingsTitle>{tittel}</VurderingsTitle>
+          <VurderingsTitle title={tittel} />
           {kommerBarnetTilgode?.kilde ? (
             <>
               <Undertekst $gray>{`Manuelt av ${kommerBarnetTilgode.kilde.ident}`}</Undertekst>

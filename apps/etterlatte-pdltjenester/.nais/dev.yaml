@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  ingresses:
+    - "https://etterlatte-pdltjenester.dev.intern.nav.no"
   liveness:
     path: "internal/isalive"
     initialDelay: 60
@@ -56,3 +58,5 @@ spec:
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-hendelser-pdl
         - application: etterlatte-behandling
+        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui

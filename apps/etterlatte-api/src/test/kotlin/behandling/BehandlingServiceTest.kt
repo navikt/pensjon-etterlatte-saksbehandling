@@ -30,7 +30,6 @@ import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -43,9 +42,6 @@ internal class BehandlingServiceTest {
 
     @MockK
     lateinit var behandlingKlient: BehandlingKlient
-
-    @MockK
-    lateinit var pdlKlient: PdltjenesterKlient
 
     @MockK
     lateinit var vedtakKlient: EtterlatteVedtak
@@ -72,22 +68,6 @@ internal class BehandlingServiceTest {
     }
     private val accessToken = UUID.randomUUID().toString()
     private val fnr = "11057523044"
-
-    @Test
-    fun hentPerson() {
-        val person = mockPerson()
-        val sakliste = Saker(listOf(Sak("fnr", "", 1)))
-        val behandlingsListe = BehandlingListe(behandlinger = emptyList())
-
-        coEvery { pdlKlient.hentPerson(fnr, accessToken) } returns person
-        coEvery { behandlingKlient.hentSakerForPerson(fnr, accessToken) } returns sakliste
-        coEvery { behandlingKlient.hentBehandlingerForSak(1, accessToken) } returns BehandlingListe(emptyList())
-
-        val respons = runBlocking { service.hentPersonOgSaker(fnr, accessToken, "bruker1") }
-
-        assertSame(person, respons.person)
-        assertEquals(behandlingsListe, respons.behandlingListe)
-    }
 
     @Test
     fun hentSaker() {

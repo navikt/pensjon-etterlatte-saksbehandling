@@ -8,10 +8,19 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.toBehandlingSammendrag
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.SakType
 
-internal fun Route.sakRoutes(sakService: SakService) {
+internal fun Route.sakRoutes(
+    sakService: SakService,
+    generellBehandlingService: GenerellBehandlingService,
+    grunnlagsendringshendelseService: GrunnlagsendringshendelseService
+) {
     get("/saker") {
         call.respond(Saker(inTransaction { sakService.hentSaker() }))
     }
@@ -44,6 +53,26 @@ internal fun Route.sakRoutes(sakService: SakService) {
                 val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
                 call.respond(inTransaction { sakService.finnEllerOpprettSak(ident, type) })
             }
+        }
+    }
+
+    route("/api/personer/{fnr}") {
+        get("behandlinger") {
+            call.respond(
+                sakService.finnSaker(requireNotNull(call.parameters["fnr"])).map { sak ->
+                    generellBehandlingService.hentBehandlingerISak(sak.id).map {
+                        it.toBehandlingSammendrag()
+                    }.let { BehandlingListe(it) }
+                }
+            )
+        }
+
+        get("grunnlagsendringshendelser") {
+            call.respond(
+                sakService.finnSaker(requireNotNull(call.parameters["fnr"])).map { sak ->
+                    GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
+                }
+            )
         }
     }
 }

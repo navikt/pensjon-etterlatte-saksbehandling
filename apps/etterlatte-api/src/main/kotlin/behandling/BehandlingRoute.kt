@@ -11,18 +11,13 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
-import no.nav.etterlatte.libs.ktor.saksbehandler
-import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
 fun Route.behandlingRoute(service: BehandlingService) {
-    val logger = LoggerFactory.getLogger(this::class.java)
-
     route("saker") {
         // hent alle sakerª
         get {
@@ -77,23 +72,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
                         getAccessToken(call)
                     )
                 )
-            }
-        }
-    }
-
-    route("personer") {
-        get("{fnr}") {
-            val fnr = call.parameters["fnr"]
-            if (fnr == null) {
-                call.response.status(HttpStatusCode(400, "Bad request"))
-                call.respond("Fødselsnummer mangler")
-            } else {
-                try {
-                    call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call), saksbehandler))
-                } catch (e: InvalidFoedselsnummer) {
-                    logger.error("Ugyldig fødselsnummer", e)
-                    call.respond(HttpStatusCode.BadRequest, "Ugyldig fødselsnummer")
-                }
             }
         }
     }

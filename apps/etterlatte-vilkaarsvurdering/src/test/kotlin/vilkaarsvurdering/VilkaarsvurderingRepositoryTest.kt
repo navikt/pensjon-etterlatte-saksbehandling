@@ -187,7 +187,6 @@ internal class VilkaarsvurderingRepository2Test {
 
     companion object {
         val vilkaarsvurdering = Vilkaarsvurdering(
-            sakId = 1234L,
             behandlingId = UUID.randomUUID(),
             grunnlagVersjon = 1L,
             virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,

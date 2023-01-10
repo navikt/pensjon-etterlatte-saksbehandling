@@ -11,7 +11,6 @@ import java.util.*
 
 data class Vilkaarsvurdering(
     val id: UUID = UUID.randomUUID(),
-    val sakId: Long,
     val behandlingId: UUID,
     val grunnlagVersjon: Long,
     val virkningstidspunkt: YearMonth,

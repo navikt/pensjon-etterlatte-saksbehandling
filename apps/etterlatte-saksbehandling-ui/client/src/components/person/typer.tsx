@@ -112,6 +112,6 @@ export interface Grunnlagsendringshendelse {
   behandlingId?: string
   opprettet: string
   hendelseGjelderRolle: Saksrolle
-  gjelderPerson?: string
+  gjelderPerson: string
   samsvarMellomPdlOgGrunnlag: SamsvarMellomGrunnlagOgPdl
 }

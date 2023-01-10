@@ -192,19 +192,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun slettSak(sakId: Long) {
-        connection.use {
-            it.prepareStatement(Queries.slettUtbetalingsperioderISak).apply {
-                setLong(1, sakId)
-                executeUpdate()
-            }
-            it.prepareStatement(Queries.slettVedtakISak).apply {
-                setLong(1, sakId)
-                executeUpdate()
-            }
-        }
-    }
-
     private fun ResultSet.toVedtak() = Vedtak(
         sakId = getLong(1),
         behandlingId = getObject(2) as UUID,
@@ -245,9 +232,6 @@ private object Queries {
     val lagreUtbetalingsperiode =
         "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"
     val hentUtbetalingsperiode = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?"
-    val slettUtbetalingsperioderISak =
-        "DELETE FROM utbetalingsperiode WHERE vedtakid in (SELECT id from vedtak where sakid = ?)"
-    val slettVedtakISak = "DELETE FROM vedtak WHERE sakid = ?"
     val lagreIverksattVedtak = "UPDATE vedtak SET vedtakstatus = ? WHERE behandlingId = ?"
 }
 

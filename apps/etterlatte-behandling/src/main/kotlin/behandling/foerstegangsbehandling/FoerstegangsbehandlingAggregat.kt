@@ -100,7 +100,7 @@ class FoerstegangsbehandlingAggregat(
             begrunnelse = begrunnelse,
             lagretBehandling = lagretBehandling,
             hendelser = hendelser,
-            behandlingDao
+            behandlingDao = behandlingDao
         )
     }
 }

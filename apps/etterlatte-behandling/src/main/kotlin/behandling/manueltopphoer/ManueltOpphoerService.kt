@@ -121,7 +121,7 @@ class RealManueltOpphoerService(
                 begrunnelse = begrunnelse,
                 lagretBehandling = manueltOpphoer,
                 hendelser = hendelser,
-                behandlingDao
+                behandlingDao = behandlingDao
             )
         }
     }

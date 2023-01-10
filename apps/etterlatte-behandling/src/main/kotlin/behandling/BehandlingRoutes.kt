@@ -330,10 +330,7 @@ data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: St
         throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
     }
 
-    fun isValid() = when (dato.year) {
-        in (0..9999) -> true
-        else -> false
-    }
+    fun isValid() = dato.year in (0..9999)
 }
 
 internal data class FastsettVirkningstidspunktResponse(

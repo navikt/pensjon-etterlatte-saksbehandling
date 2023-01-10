@@ -20,7 +20,6 @@ FinnFaktumIGrunnlagRegelTest {
     private val finnFaktumIGrunnlagRegel: Regel<Grunnlag, Int> = finnFaktumIGrunnlag(
         gjelderFra = LocalDate.of(1900, 1, 1),
         beskrivelse = "Finner testverdi for 2021",
-        regelReferanse = ToDoRegelReferanse(),
         finnFaktum = Grunnlag::testVerdi2021,
         finnFelt = { it }
     )

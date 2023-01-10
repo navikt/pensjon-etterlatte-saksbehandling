@@ -11,7 +11,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.ktor.saksbehandler
@@ -45,19 +44,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
                     call.respond("SakId mangler")
                 } else {
                     call.respond(service.hentBehandlingerForSak(sakId, getAccessToken(call)))
-                }
-            }
-
-            post("manueltopphoer") {
-                try {
-                    call.receive<ManueltOpphoerRequest>().also { req ->
-                        service.opprettManueltOpphoer(req, getAccessToken(call)).also { opprettet ->
-                            call.respond(opprettet)
-                        }
-                    }
-                } catch (e: Exception) {
-                    logger.error("Kunne ikke opprette manuelt opphoer", e)
-                    call.respond(HttpStatusCode.InternalServerError)
                 }
             }
         }

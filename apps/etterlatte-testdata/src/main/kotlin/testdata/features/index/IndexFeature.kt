@@ -5,9 +5,9 @@ import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import no.nav.etterlatte.testdata.TestDataFeature
-import no.nav.etterlatte.testdata.features
-import no.nav.etterlatte.testdata.navIdentFraToken
+import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.features
+import no.nav.etterlatte.navIdentFraToken
 
 object IndexFeature : TestDataFeature {
     override val beskrivelse: String

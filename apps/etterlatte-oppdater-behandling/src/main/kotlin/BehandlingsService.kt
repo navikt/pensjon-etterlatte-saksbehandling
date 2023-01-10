@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -10,9 +9,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import rapidsandrivers.vedlikehold.VedlikeholdService
 
-interface Behandling : VedlikeholdService {
+interface Behandling {
     fun grunnlagEndretISak(sak: Long)
 
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
@@ -27,13 +25,6 @@ class BehandlingsService(
     override fun grunnlagEndretISak(sak: Long) {
         runBlocking {
             behandling_app.post("$url/saker/$sak/hendelse/grunnlagendret") {}
-        }
-    }
-
-    override fun slettSak(sakId: Long) {
-        runBlocking {
-            behandling_app.delete("$url/sak/$sakId/behandlinger")
-            behandling_app.delete("$url/saker/$sakId/")
         }
     }
 

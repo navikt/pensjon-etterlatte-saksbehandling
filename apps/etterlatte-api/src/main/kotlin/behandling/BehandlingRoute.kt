@@ -7,7 +7,6 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -45,33 +44,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
                     call.respond("SakId mangler")
                 } else {
                     call.respond(service.hentBehandlingerForSak(sakId, getAccessToken(call)))
-                }
-            }
-
-            // Slett alle behandlinger på en sak
-            delete("behandlinger") {
-                val sakId = call.parameters["sakId"]?.toInt()
-                if (sakId == null) {
-                    call.response.status(HttpStatusCode(400, "Bad request"))
-                    call.respond("SakId mangler")
-                } else {
-                    if (service.slettBehandlinger(sakId, getAccessToken(call))) {
-                        call.respond(HttpStatusCode.OK)
-                    }
-                }
-            }
-
-            delete("revurderinger") {
-                val sakId = call.parameters["sakId"]?.toInt()
-                if (sakId == null) {
-                    call.response.status(HttpStatusCode(400, "Bad request"))
-                    call.respond("SakId mangler")
-                } else {
-                    if (service.slettRevurderinger(sakId, getAccessToken(call))) {
-                        call.respond(HttpStatusCode.OK)
-                    } else {
-                        call.respond(HttpStatusCode.InternalServerError)
-                    }
                 }
             }
         }

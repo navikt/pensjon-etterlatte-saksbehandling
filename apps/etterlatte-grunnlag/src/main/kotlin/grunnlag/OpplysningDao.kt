@@ -128,14 +128,6 @@ class OpplysningDao(private val datasource: DataSource) {
                     behandlingsopplysning.periode?.tom?.let { setString(9, it.toString()) } ?: setNull(9, VARCHAR)
                 }.executeQuery().apply { next() }.getLong("hendelsenummer")
         }
-
-    fun slettAlleOpplysningerISak(sakId: Long) =
-        connection.use {
-            it.prepareStatement("""DELETE FROM grunnlagshendelse where sak_id = ?""")
-                .apply {
-                    setLong(1, sakId)
-                }.execute()
-        }
 }
 
 fun JsonNode?.serialize() = this?.let { objectMapper.writeValueAsString(it) }

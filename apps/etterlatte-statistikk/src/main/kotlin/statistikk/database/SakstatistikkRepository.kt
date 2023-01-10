@@ -93,12 +93,6 @@ class SakstatistikkRepository(private val datasource: DataSource) {
         )
         return statement.executeQuery().toList { tilSakRad() }
     }
-
-    fun slettSak(sakId: Long) {
-        val statement = connection.prepareStatement("DELETE FROM sak WHERE sak_id = ?")
-        statement.setLong(1, sakId)
-        statement.executeUpdate()
-    }
 }
 
 private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = this.apply {

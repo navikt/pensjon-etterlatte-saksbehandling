@@ -18,18 +18,17 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.model.behandling.BehandlingKlient
 import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
-import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 class BeregningService(
     private val beregningRepository: BeregningRepository,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val behandlingKlient: BehandlingKlient
-) : VedlikeholdService {
+) {
 
     fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
 
@@ -200,10 +199,6 @@ class BeregningService(
         }
 
         return block()
-    }
-
-    override fun slettSak(sakId: Long) {
-        beregningRepository.slettBeregningsperioderISak(sakId)
     }
 }
 

@@ -11,7 +11,6 @@ import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.helse.rapids_rivers.RapidApplication
-import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 import java.util.*
 
 fun main() {
@@ -36,7 +35,6 @@ class ApplicationBuilder {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)
             BehandlingEndretHendlese(this, grunnlagService)
-            registrerVedlikeholdsriver(grunnlagService)
         }
 
     private fun publiser(melding: String, key: UUID) {

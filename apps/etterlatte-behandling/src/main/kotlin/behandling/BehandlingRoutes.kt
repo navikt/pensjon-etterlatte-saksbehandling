@@ -231,14 +231,6 @@ internal fun Route.behandlingRoutes(
                     } ?: HttpStatusCode.NotFound
                 )
             }
-
-            // TODO: SLETT! DENNE!! DETTE ER KUN TIL TESTING! IKKE KJØR I PROD MED MINDRE DU VIL HA SPARKEN
-            route("/{sakid}") {
-                delete {
-                    revurderingService.slettRevurderingISak(sakId)
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
         }
 
         route("/manueltopphoer") {

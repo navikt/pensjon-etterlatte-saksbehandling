@@ -22,9 +22,7 @@ interface EtterlatteBehandling {
     suspend fun hentSaker(accessToken: String): Saker
     suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
-    suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
     suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser
-    suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean
     suspend fun opprettManueltOpphoer(manueltOpphoerRequest: ManueltOpphoerRequest, accessToken: String):
         Result<ManueltOpphoerResponse>
 
@@ -129,21 +127,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         }
     }
 
-    override suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {
-        logger.info("Sletter behandlinger på en sak")
-        try {
-            downstreamResourceClient.delete(Resource(clientId, "$resourceUrl/sak/$sakId/behandlinger"), accessToken, "")
-                .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-            return true
-        } catch (e: Exception) {
-            logger.error("Henting av behandlinger feilet", e)
-            throw e
-        }
-    }
-
     override suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser {
         logger.info("Henter hendelser for en behandling")
         try {
@@ -165,32 +148,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         } catch (e: Exception) {
             logger.error("Henting av hendelser feilet", e)
             throw e
-        }
-    }
-
-    override suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean {
-        logger.info("sletter revurderinger for en sak")
-        return try {
-            val json =
-                downstreamResourceClient.delete(
-                    Resource(clientId, "$resourceUrl/behandlinger/revurdering/$sakId"),
-                    accessToken,
-                    ""
-                )
-                    .mapBoth(
-                        success = { true },
-                        failure = { throwableErrorMessage ->
-                            throw Error(
-                                throwableErrorMessage.message,
-                                throwableErrorMessage.throwable
-                            )
-                        }
-                    )
-            logger.info("Slettet revurderinger for sak med id $sakId")
-            json
-        } catch (e: Exception) {
-            logger.error("Sletting av revurderinger for sak med id $sakId feilet.", e)
-            false
         }
     }
 

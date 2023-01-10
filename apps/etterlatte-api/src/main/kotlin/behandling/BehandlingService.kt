@@ -153,18 +153,9 @@ class BehandlingService(
         )
     }
 
-    suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {
-        return behandlingKlient.slettBehandlinger(sakId, accessToken)
-    }
-
     suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser {
         logger.info("Henter hendelser for behandling $behandlingId")
         return behandlingKlient.hentHendelserForBehandling(behandlingId, accessToken)
-    }
-
-    suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean {
-        logger.error("Ikke bruk dette i prod, slett endepunktet så raskt som mulig! Slett revurderinger er ban")
-        return behandlingKlient.slettRevurderinger(sakId, accessToken)
     }
 
     suspend fun opprettManueltOpphoer(

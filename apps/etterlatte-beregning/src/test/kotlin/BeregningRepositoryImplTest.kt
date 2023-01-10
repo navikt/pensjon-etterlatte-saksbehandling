@@ -110,17 +110,4 @@ internal class BeregningRepositoryImplTest {
 
         assertEquals(nyBeregning, beregningHentetNy)
     }
-
-    @Test
-    fun `skal slette alle beregningperioder basert på sakId`() {
-        val beregning = initiellBeregning()
-        val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
-
-        assertDoesNotThrow { beregningRepository.hent(beregning.behandlingId) }
-
-        beregningRepository.slettBeregningsperioderISak(lagretBeregning.grunnlagMetadata.sakId)
-
-        val emptyBeregning = beregningRepository.hent(beregning.behandlingId)
-        assertNull(emptyBeregning)
-    }
 }

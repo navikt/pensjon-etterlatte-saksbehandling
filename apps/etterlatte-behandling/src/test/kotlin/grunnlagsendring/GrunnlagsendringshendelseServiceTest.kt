@@ -9,18 +9,20 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
-import no.nav.etterlatte.grunnlagsendringshendelseUtenSamsvar
+import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import no.nav.etterlatte.pdl.PdlService
+import no.nav.etterlatte.pdl.PdlServiceImpl
+import no.nav.etterlatte.pdl.hentDoedsdato
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -59,7 +61,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT),
             foerstegangsbehandling(sak = sakId, status = BehandlingStatus.FATTET_VEDTAK)
         )
-        val grunnlagsendringshendelse = grunnlagsendringshendelseUtenSamsvar(
+        val grunnlagsendringshendelse = grunnlagsendringshendelseMedSamsvar(
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
@@ -81,7 +83,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { alleSakIderForSoekerMedFnr(fnr) } returns listOf(1L)
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val pdlService = mockk<PdlService>()
+        val pdlService = mockk<PdlServiceImpl>()
         val grunnlagClient = mockk<GrunnlagClient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
@@ -112,13 +114,13 @@ internal class GrunnlagsendringshendelseServiceTest {
     fun `skal opprette grunnlagsendringshendelser i databasen for utflytting og forelder-barn`() {
         val sakId = 1L
         val fnr = "Soeker"
-        val grlagEndringUtflytting = grunnlagsendringshendelseUtenSamsvar(
+        val grlagEndringUtflytting = grunnlagsendringshendelseMedSamsvar(
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
             samsvarMellomPdlOgGrunnlag = null
         )
-        val grlagEndringForelderBarn = grunnlagsendringshendelseUtenSamsvar(
+        val grlagEndringForelderBarn = grunnlagsendringshendelseMedSamsvar(
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
@@ -138,7 +140,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
         val grunnlagClient = mockk<GrunnlagClient>()
-        val pdlService = mockk<PdlService>()
+        val pdlService = mockk<PdlServiceImpl>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -184,7 +186,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = 1L
         val fnr = "Soeker"
         val doedsdato = LocalDate.of(2022, 7, 8)
-        val grunnlagsendringshendelse1 = grunnlagsendringshendelseUtenSamsvar(
+        val grunnlagsendringshendelse1 = grunnlagsendringshendelseMedSamsvar(
             type = GrunnlagsendringsType.DOEDSFALL,
             id = UUID.randomUUID(),
             sakId = sakId,
@@ -192,7 +194,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             samsvarMellomPdlOgGrunnlag = null
         )
 
-        val grunnlagsendringshendelse2 = grunnlagsendringshendelseUtenSamsvar(
+        val grunnlagsendringshendelse2 = grunnlagsendringshendelseMedSamsvar(
             type = GrunnlagsendringsType.UTFLYTTING,
             id = UUID.randomUUID(),
             sakId = sakId,
@@ -214,7 +216,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val pdlService = mockk<PdlService>()
+        val pdlService = mockk<PdlServiceImpl>()
         val grunnlagClient = mockk<GrunnlagClient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
@@ -260,14 +262,14 @@ internal class GrunnlagsendringshendelseServiceTest {
         val fnr = "Soeker"
         val tilflyttingsland = "Sverige"
         val utflyttingsdato = LocalDate.of(2022, 2, 8)
-        val grunnlagsendringshendelse1 = grunnlagsendringshendelseUtenSamsvar(
+        val grunnlagsendringshendelse1 = grunnlagsendringshendelseMedSamsvar(
             type = GrunnlagsendringsType.UTFLYTTING,
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
             samsvarMellomPdlOgGrunnlag = null
         )
-        val grunnlagsendringshendelse2 = grunnlagsendringshendelseUtenSamsvar(
+        val grunnlagsendringshendelse2 = grunnlagsendringshendelseMedSamsvar(
             type = GrunnlagsendringsType.DOEDSFALL,
             id = UUID.randomUUID(),
             sakId = sakId,
@@ -289,7 +291,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val pdlService = mockk<PdlService>()
+        val pdlService = mockk<PdlServiceImpl>()
         val grunnlagClient = mockk<GrunnlagClient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
@@ -334,14 +336,14 @@ internal class GrunnlagsendringshendelseServiceTest {
     @Test
     fun `skal ikke opprette ny forelder-barn-relasjon-hendelse dersom en lignende allerede eksisterer`() {
         val sakId = 1L
-        val grunnlagsendringshendelse1 = grunnlagsendringshendelseUtenSamsvar(
+        val grunnlagsendringshendelse1 = grunnlagsendringshendelseMedSamsvar(
             type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = "Soeker",
             samsvarMellomPdlOgGrunnlag = null
         )
-        val grunnlagsendringshendelse2 = grunnlagsendringshendelseUtenSamsvar(
+        val grunnlagsendringshendelse2 = grunnlagsendringshendelseMedSamsvar(
             type = GrunnlagsendringsType.DOEDSFALL,
             id = UUID.randomUUID(),
             sakId = sakId,
@@ -363,7 +365,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val pdlService = mockk<PdlService>()
+        val pdlService = mockk<PdlServiceImpl>()
         val grunnlagClient = mockk<GrunnlagClient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
@@ -417,7 +419,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val rolle = Saksrolle.SOEKER
         val personRolle = rolle.toPersonrolle()
         val grunnlagsendringshendelser = listOf(
-            grunnlagsendringshendelseUtenSamsvar(
+            grunnlagsendringshendelseMedSamsvar(
                 id = grlg_id,
                 sakId = sakId,
                 opprettet = LocalDateTime.now().minusHours(1),
@@ -443,9 +445,11 @@ internal class GrunnlagsendringshendelseServiceTest {
                 )
             } returns Unit
         }
-        val pdlService = mockk<PdlService> {
-            every { hentDoedsdato(avdoedFnr, personRolle) } returns doedsdato
+        val mockPdlModel = mockk<PersonDTO>()
+        val pdlService = mockk<PdlServiceImpl> {
+            every { hentPdlModell(avdoedFnr, personRolle) } returns mockPdlModel
         }
+        every { mockPdlModel.hentDoedsdato() } returns doedsdato
 
         val behandlingId = UUID.randomUUID()
         val generellBehandlingService = mockk<GenerellBehandlingService> {

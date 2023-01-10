@@ -39,6 +39,7 @@ import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.pdl.PdlService
+import no.nav.etterlatte.pdl.PdlServiceImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
@@ -143,7 +144,7 @@ abstract class CommonFactory : BeanFactory {
     override fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao { databaseContext().activeTx() }
 
-    override fun pdlService() = PdlService(pdlHttpClient(), "http://etterlatte-pdltjenester")
+    override fun pdlService() = PdlServiceImpl(pdlHttpClient(), "http://etterlatte-pdltjenester")
 
     override fun grunnlagClient() = GrunnlagClientImpl(grunnlagHttpClient())
 

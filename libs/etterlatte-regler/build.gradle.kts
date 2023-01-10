@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-    testImplementation(Jackson.DatatypeJsr310)
-    testImplementation(Jackson.ModuleKotlin)
+    api(Jackson.DatatypeJsr310)
+    api(Jackson.ModuleKotlin)
     testImplementation(Jupiter.Api)
     testRuntimeOnly(Jupiter.Engine)
     testImplementation(Kotest.AssertionsCore)

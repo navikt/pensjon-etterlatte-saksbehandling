@@ -28,16 +28,16 @@ abstract class Regel<G, S>(
     abstract fun accept(visitor: RegelVisitor)
 }
 
-open class SlaaSammenToRegler<C, D, G, S, A : Regel<G, C>, B : Regel<G, D>>(
+open class SlaaSammenToRegler<G, S, S1, S2, R1 : Regel<G, S1>, R2 : Regel<G, S2>>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
     @JsonIgnore
-    val regel1: A,
+    val regel1: R1,
     @JsonIgnore
-    val regel2: B,
+    val regel2: R2,
     @JsonIgnore
-    val slaasammenFunksjon: (C, D) -> S
+    val slaasammenFunksjon: (S1, S2) -> S
 ) : Regel<G, S>(
     gjelderFra = gjelderFra,
     beskrivelse = beskrivelse,
@@ -60,18 +60,18 @@ open class SlaaSammenToRegler<C, D, G, S, A : Regel<G, C>, B : Regel<G, D>>(
     }
 }
 
-open class SlaaSammenTreRegler<D, E, F, G, S, A : Regel<G, D>, B : Regel<G, E>, C : Regel<G, F>>(
+open class SlaaSammenTreRegler<S1, S2, S3, G, S, R1 : Regel<G, S1>, R2 : Regel<G, S2>, R3 : Regel<G, S3>>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     override val regelReferanse: RegelReferanse,
     @JsonIgnore
-    val regel1: A,
+    val regel1: R1,
     @JsonIgnore
-    val regel2: B,
+    val regel2: R2,
     @JsonIgnore
-    val regel3: C,
+    val regel3: R3,
     @JsonIgnore
-    val slaasammenFunksjon: (D, E, F) -> S
+    val slaasammenFunksjon: (S1, S2, S3) -> S
 ) : Regel<G, S>(
     gjelderFra = gjelderFra,
     beskrivelse = beskrivelse,
@@ -162,11 +162,11 @@ open class GangSammenRegel<G>(
     }
 }
 
-open class FinnFaktumIGrunnlagRegel<G, T, A : FaktumNode<T>, S>(
+open class FinnFaktumIGrunnlagRegel<G, T, F : FaktumNode<T>, S>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     @JsonIgnore
-    val finnFaktum: (G) -> A,
+    val finnFaktum: (G) -> F,
     @JsonIgnore
     val finnFelt: (T) -> S
 ) : Regel<G, S>(

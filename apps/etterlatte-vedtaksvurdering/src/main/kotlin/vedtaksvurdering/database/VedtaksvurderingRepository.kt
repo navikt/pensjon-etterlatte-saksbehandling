@@ -25,9 +25,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     private val connection get() = datasource.connection
 
     companion object {
-        fun using(datasource: DataSource): VedtaksvurderingRepository {
-            return VedtaksvurderingRepository(datasource)
-        }
+        fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
     }
 
     fun opprettVedtak(
@@ -98,44 +96,36 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun hentVedtak(behandlingsId: UUID): Vedtak? {
-        val resultat = connection.use {
-            val statement = it.prepareStatement(Queries.hentVedtak)
-            statement.setObject(1, behandlingsId)
-            statement.executeQuery().singleOrNull {
-                toVedtak()
-            }
+    fun hentVedtak(behandlingsId: UUID): Vedtak? = connection.use {
+        val statement = it.prepareStatement(Queries.hentVedtak)
+        statement.setObject(1, behandlingsId)
+        statement.executeQuery().singleOrNull {
+            toVedtak()
         }
-        return resultat
     }
 
-    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> {
-        val resultat = connection.use { it ->
-            val statement = it.prepareStatement(Queries.hentUtbetalingsperiode)
-            statement.setLong(1, vedtakId)
-            statement.executeQuery().toList {
-                Utbetalingsperiode(
-                    getLong("id"),
-                    Periode(
-                        YearMonth.from(getDate("datoFom").toLocalDate()),
-                        getDate("datoTom")?.toLocalDate()?.let(YearMonth::from)
-                    ),
-                    getBigDecimal("beloep"),
-                    UtbetalingsperiodeType.valueOf(getString("type"))
-                )
-            }
+    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = connection.use {
+        val statement = it.prepareStatement(Queries.hentUtbetalingsperiode)
+        statement.setLong(1, vedtakId)
+        statement.executeQuery().toList {
+            Utbetalingsperiode(
+                getLong("id"),
+                Periode(
+                    YearMonth.from(getDate("datoFom").toLocalDate()),
+                    getDate("datoTom")?.toLocalDate()?.let(YearMonth::from)
+                ),
+                getBigDecimal("beloep"),
+                UtbetalingsperiodeType.valueOf(getString("type"))
+            )
         }
-        return resultat
     }
 
-    private inline fun <reified T> ResultSet.getJsonObject(c: Int): T? {
-        return getString(c)?.let {
-            try {
-                objectMapper.readValue(it)
-            } catch (ex: Exception) {
-                logger.warn("vedtak ${getLong("id")} kan ikke lese kolonne $c")
-                null
-            }
+    private inline fun <reified T> ResultSet.getJsonObject(c: Int): T? = getString(c)?.let {
+        try {
+            objectMapper.readValue(it)
+        } catch (ex: Exception) {
+            logger.warn("vedtak ${getLong("id")} kan ikke lese kolonne $c")
+            null
         }
     }
 
@@ -213,44 +203,40 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 
 private object Queries {
 
-    val opprettVedtak = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" // ktlint-disable max-line-length
-    val oppdaterVedtak = "UPDATE vedtak SET datovirkfom = ?, beregningsresultat = ?, vilkaarsresultat = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
+    const val opprettVedtak = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" // ktlint-disable max-line-length
+    const val oppdaterVedtak = "UPDATE vedtak SET datovirkfom = ?, beregningsresultat = ?, vilkaarsresultat = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
 
-    val fattVedtak =
+    const val fattVedtak =
         "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now(), vedtakstatus = ?  WHERE behandlingId = ?" // ktlint-disable max-line-length
-    val attesterVedtak =
+    const val attesterVedtak =
         "UPDATE vedtak SET attestant = ?, datoAttestert = now(), vedtakstatus = ? WHERE behandlingId = ?"
-    val underkjennVedtak =
+    const val underkjennVedtak =
         "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
-    val hentVedtakBolk =
+    const val hentVedtakBolk =
         "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat," +
             "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
             "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(?)"
-    val hentVedtak =
+    const val hentVedtak =
         "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
 
-    val lagreUtbetalingsperiode =
+    const val lagreUtbetalingsperiode =
         "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"
-    val hentUtbetalingsperiode = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?"
-    val lagreIverksattVedtak = "UPDATE vedtak SET vedtakstatus = ? WHERE behandlingId = ?"
+    const val hentUtbetalingsperiode = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?"
+    const val lagreIverksattVedtak = "UPDATE vedtak SET vedtakstatus = ? WHERE behandlingId = ?"
 }
 
-private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
-    return if (next()) {
-        block().also {
-            require(!next()) { "Skal være unik" }
-        }
+private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? = if (next()) {
+    block().also {
+        require(!next()) { "Skal være unik" }
+    }
+} else {
+    null
+}
+
+fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> = generateSequence {
+    if (next()) {
+        block()
     } else {
         null
     }
-}
-
-fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
-    return generateSequence {
-        if (next()) {
-            block()
-        } else {
-            null
-        }
-    }.toList()
-}
+}.toList()

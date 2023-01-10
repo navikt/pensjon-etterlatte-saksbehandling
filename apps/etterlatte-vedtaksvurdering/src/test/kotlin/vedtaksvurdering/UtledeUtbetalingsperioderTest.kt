@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.mockk.mockk
 import no.nav.etterlatte.VedtaksvurderingService

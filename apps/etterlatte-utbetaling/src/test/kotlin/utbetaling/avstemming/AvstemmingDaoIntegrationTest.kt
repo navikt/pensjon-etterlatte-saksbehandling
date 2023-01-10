@@ -6,6 +6,7 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
+import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
-import utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit

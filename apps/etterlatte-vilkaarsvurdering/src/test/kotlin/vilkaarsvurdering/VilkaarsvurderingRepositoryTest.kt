@@ -1,7 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import GrunnlagTestData
-import behandling.VirkningstidspunktTestData
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -12,6 +10,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

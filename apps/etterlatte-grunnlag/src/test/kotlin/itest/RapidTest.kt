@@ -1,7 +1,6 @@
-package itest
+package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.databind.JsonNode
-import grunnlag.statiskUuid
 import io.mockk.mockk
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.DataSourceBuilder
@@ -24,6 +23,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll

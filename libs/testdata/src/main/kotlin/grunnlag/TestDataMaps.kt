@@ -1,4 +1,4 @@
-package grunnlag
+package no.nav.etterlatte.libs.testdata.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -28,7 +28,7 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.toJsonNode
-import personTestData
+import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth

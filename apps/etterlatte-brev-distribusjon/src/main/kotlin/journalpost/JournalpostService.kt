@@ -1,8 +1,7 @@
-package journalpost
+package no.nav.etterlatte.journalpost
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService
-import no.nav.etterlatte.journalpost.JournalpostKlient
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker

@@ -1,10 +1,8 @@
-package utbetaling.avstemming
+package no.nav.etterlatte.utbetaling.avstemming
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
-import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.config.LeaderElection
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.junit.jupiter.api.Assertions

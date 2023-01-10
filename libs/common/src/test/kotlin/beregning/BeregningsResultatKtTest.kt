@@ -1,4 +1,4 @@
-package beregning
+package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.beregning.erInklusiv

@@ -1,4 +1,4 @@
-package model.avrund
+package no.nav.etterlatte.model.avrund
 
 import java.math.BigDecimal
 import java.math.RoundingMode

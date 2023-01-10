@@ -1,3 +1,5 @@
+package no.nav.etterlatte.journalpost
+
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe

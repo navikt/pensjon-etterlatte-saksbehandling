@@ -1,4 +1,4 @@
-package regler
+package no.nav.etterlatte.libs.regler
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.Instant

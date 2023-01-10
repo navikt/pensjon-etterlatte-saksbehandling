@@ -1,4 +1,4 @@
-package regler
+package no.nav.etterlatte.libs.regler
 
 import java.math.BigDecimal
 import java.time.LocalDate

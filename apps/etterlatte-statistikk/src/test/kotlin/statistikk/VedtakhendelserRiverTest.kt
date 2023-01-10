@@ -1,4 +1,4 @@
-package statistikk
+package no.nav.etterlatte.statistikk
 
 import io.mockk.every
 import io.mockk.mockk

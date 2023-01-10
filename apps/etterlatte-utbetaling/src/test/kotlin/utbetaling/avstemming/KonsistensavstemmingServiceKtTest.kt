@@ -1,4 +1,4 @@
-package utbetaling.avstemming
+package no.nav.etterlatte.utbetaling.avstemming
 
 import io.mockk.every
 import io.mockk.mockk
@@ -6,8 +6,6 @@ import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
-import no.nav.etterlatte.utbetaling.avstemming.OppdragForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId

@@ -1,4 +1,4 @@
-package sporingslogg
+package no.nav.etterlatte.libs.sporingslogg
 
 class Sporingslogg {
 

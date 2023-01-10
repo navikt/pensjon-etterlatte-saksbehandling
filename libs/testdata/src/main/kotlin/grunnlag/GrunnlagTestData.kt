@@ -1,10 +1,6 @@
+package no.nav.etterlatte.libs.testdata.grunnlag
+
 import com.fasterxml.jackson.databind.JsonNode
-import grunnlag.avdoedTestopplysningerMap
-import grunnlag.gjenlevendeTestopplysningerMap
-import grunnlag.halvsoeskenTestopplysningerMap
-import grunnlag.kilde
-import grunnlag.soekerTestopplysningerMap
-import grunnlag.soeskenTestopplysningerMap
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -13,6 +9,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOEDESBARN
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import java.util.UUID.randomUUID
 
 data class GrunnlagTestData(

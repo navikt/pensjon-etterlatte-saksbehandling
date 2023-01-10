@@ -1,4 +1,4 @@
-package behandling
+package no.nav.etterlatte.libs.testdata.behandling
 
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning

@@ -1,3 +1,5 @@
+package no.nav.etterlatte.libs.testdata.pdl
+
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentAdressebeskyttelse

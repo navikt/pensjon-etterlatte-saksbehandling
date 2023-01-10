@@ -1,4 +1,4 @@
-package utbetaling.avstemming.avstemmingsdata
+package no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata
 
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming

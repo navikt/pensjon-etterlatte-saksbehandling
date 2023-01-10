@@ -1,11 +1,5 @@
-package grunnlagsendring
+package no.nav.etterlatte.grunnlagsendring
 
-import GrunnlagTestData
-import grunnlag.kilde
-import no.nav.etterlatte.grunnlagsendring.ansvarligeForeldre
-import no.nav.etterlatte.grunnlagsendring.barn
-import no.nav.etterlatte.grunnlagsendring.doedsdato
-import no.nav.etterlatte.grunnlagsendring.utland
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -16,6 +10,8 @@ import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

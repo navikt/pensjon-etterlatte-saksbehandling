@@ -1,4 +1,4 @@
-package regler
+package no.nav.etterlatte.libs.regler
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning

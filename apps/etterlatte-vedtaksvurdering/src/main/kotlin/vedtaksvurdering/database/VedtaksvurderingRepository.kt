@@ -1,10 +1,14 @@
 package no.nav.etterlatte.vedtaksvurdering.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotliquery.Row
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -102,15 +106,48 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                 executeQuery().toList { toVedtak() }
             }
         }
-
-    fun hentVedtak(behandlingsId: UUID): Vedtak? = connection.use {
+    fun hentVedtak(behandlingsId: UUID): Vedtak? {
         val hentVedtak =
-            "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
-        it.prepareStatement(hentVedtak).run {
-            setUUID(1, behandlingsId)
-            executeQuery().singleOrNull { toVedtak() }
-        }
+            "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = :behandlingId" // ktlint-disable max-line-length
+        return hentMedKotliquery(query = hentVedtak, params = mapOf("behandlingId" to behandlingsId)) { it.toVedtak() }
     }
+
+    private fun <T> hentMedKotliquery(
+        query: String,
+        params: Map<String, Any>,
+        converter: (r: Row) -> T
+    ) = kotliquery.using(sessionOf(datasource)) { session ->
+        queryOf(statement = query, paramMap = params)
+            .let { query ->
+                session.run(
+                    query.map { row -> converter.invoke(row) }
+                        .asSingle
+                )
+            }
+    }
+
+    private fun Row.toVedtak() = Vedtak(
+        sakId = longOrNull("sakid"),
+        behandlingId = uuid("behandlingid"),
+        saksbehandlerId = stringOrNull("saksbehandlerid"),
+        beregningsResultat = stringOrNull("beregningsresultat").let {
+            objectMapper.readValue(
+                it,
+                Beregningsresultat::class.java
+            )
+        },
+        vilkaarsResultat = stringOrNull("vilkaarsresultat")?.toJsonNode(),
+        vedtakFattet = boolean("vedtakfattet"),
+        id = long("id"),
+        fnr = stringOrNull("fnr"),
+        datoFattet = sqlTimestampOrNull("datofattet")?.toInstant(),
+        datoattestert = sqlTimestampOrNull("datoattestert")?.toInstant(),
+        attestant = stringOrNull("attestant"),
+        virkningsDato = sqlDateOrNull("datovirkfom")?.toLocalDate(),
+        vedtakStatus = stringOrNull("vedtakstatus")?.let { VedtakStatus.valueOf(it) },
+        sakType = SakType.valueOf(string("saktype")),
+        behandlingType = BehandlingType.valueOf(string("behandlingtype"))
+    )
 
     fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = connection.use {
         val hentUtbetalingsperiode = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?"

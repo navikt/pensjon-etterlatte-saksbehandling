@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(Database.KotliQuery)
 
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)

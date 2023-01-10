@@ -1,6 +1,14 @@
 import { IDetaljertBehandling, Virkningstidspunkt, IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 
+export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
+  return apiClient.get(`/personer/${fnr}/behandlinger`)
+}
+
+export const hentGrunnlagsendringshendelserForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
+  return apiClient.get(`/personer/${fnr}/grunnlagsendringshendelser`)
+}
+
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {
   return apiClient.get(`/behandling/${id}`)
 }

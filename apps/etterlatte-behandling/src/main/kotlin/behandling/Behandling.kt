@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
@@ -240,3 +241,21 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
         }
     )
 }
+
+fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
+    id = this.id,
+    sak = this.sak,
+    status = this.status,
+    soeknadMottattDato = if (this is Foerstegangsbehandling) {
+        this.soeknadMottattDato
+    } else {
+        this.behandlingOpprettet
+    },
+    behandlingOpprettet = this.behandlingOpprettet,
+    behandlingType = this.type,
+    aarsak = when (this) {
+        is Foerstegangsbehandling -> "SOEKNAD"
+        is Revurdering -> this.revurderingsaarsak.name
+        is ManueltOpphoer -> "MANUELT OPPHOER"
+    }
+)

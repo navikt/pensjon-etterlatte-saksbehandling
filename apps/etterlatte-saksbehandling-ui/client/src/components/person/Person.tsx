@@ -60,8 +60,8 @@ export const Person = () => {
     )
   }
 
-  const navn = personData?.person.fornavn + ' ' + personData?.person.etternavn
-  const personInfo = personData ? { navn: navn, fnr: personData?.person.foedselsnummer, type: 'Etterlatt' } : null
+  const navn = personData?.fornavn + ' ' + personData?.etternavn
+  const personInfo = personData ? { navn: navn, fnr: personData?.foedselsnummer, type: 'Etterlatt' } : null
 
   return (
     <>
@@ -75,10 +75,7 @@ export const Person = () => {
               <TabElement>Dokumentoversikt</TabElement>
             </Tlist>
             <TabPanel>
-              <Saksoversikt
-                behandlingliste={personData?.behandlingListe.behandlinger}
-                grunnlagshendelser={personData?.grunnlagsendringshendelser?.hendelser}
-              />
+              <Saksoversikt fnr={match.fnr} />
             </TabPanel>
             <TabPanel>
               <Dokumentoversikt {...testDokumenter} fnr={match.fnr} />

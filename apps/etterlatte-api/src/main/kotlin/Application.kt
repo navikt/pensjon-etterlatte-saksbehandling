@@ -12,7 +12,6 @@ import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BeregningKlientImpl
 import no.nav.etterlatte.behandling.GrunnlagKlient
-import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.VedtakKlient
 import no.nav.etterlatte.behandling.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
@@ -32,12 +31,10 @@ class ApplicationContext(configLocation: String? = null) {
 
     val behandlingService: BehandlingService = BehandlingService(
         behandlingKlient = behandlingKlient,
-        pdlKlient = PdltjenesterKlient(config, httpClient()),
         vedtakKlient = vedtakKlient,
         grunnlagKlient = grunnlagKlient,
         beregningKlient = beregningKlient,
-        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-        sporingslogg = sporingslogg
+        vilkaarsvurderingKlient = vilkaarsvurderingKlient
     )
 
     private fun httpClient() = HttpClient {

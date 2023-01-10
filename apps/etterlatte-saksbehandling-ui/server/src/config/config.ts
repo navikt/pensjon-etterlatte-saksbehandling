@@ -43,4 +43,8 @@ export const ApiConfig = {
     url: process.env.VEDTAK_API_URL || 'https://etterlatte-vedtaksvurdering.dev.intern.nav.no',
     scope: process.env.VEDTAK_API_SCOPE || 'api://069b1b2c-0a06-4cc9-8418-f100b8ff71be/.default',
   },
+  pdltjenester: {
+    url: process.env.PDLTJENESTER_API_URL || 'https://etterlatte-pdltjenester.dev.intern.nav.no',
+    scope: process.env.PDLTJENESTER_API_SCOPE || 'api://8a5e70a5-2ba8-4951-8a7f-1ee2b442fb0c/.default',
+  },
 }

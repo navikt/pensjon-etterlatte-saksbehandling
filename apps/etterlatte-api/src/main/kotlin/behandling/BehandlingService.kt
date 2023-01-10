@@ -7,12 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
-import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.sporingslogg.Decision
-import no.nav.etterlatte.libs.sporingslogg.HttpMethod
-import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
 import no.nav.etterlatte.typer.LagretHendelser
@@ -21,89 +15,14 @@ import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.*
 
-data class PersonSakerResult(
-    val person: Person,
-    val behandlingListe: BehandlingListe,
-    val grunnlagsendringshendelser: GrunnlagsendringshendelseListe = GrunnlagsendringshendelseListe(emptyList())
-)
-
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
-    private val pdlKlient: PdltjenesterKlient,
     private val vedtakKlient: EtterlatteVedtak,
     private val grunnlagKlient: EtterlatteGrunnlag,
     private val beregningKlient: BeregningKlient,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
-    private val sporingslogg: Sporingslogg
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
-
-    suspend fun hentPersonOgSaker(fnr: String, accessToken: String, bruker: String): PersonSakerResult {
-        logger.info("Henter person med tilhørende behandlinger")
-
-        try {
-            val person = pdlKlient.hentPerson(fnr, accessToken)
-            val saker = behandlingKlient.hentSakerForPerson(fnr, accessToken)
-            val sakIder = saker.saker.map { it.id }.distinct()
-
-            val behandlinger = sakIder.map { behandlingKlient.hentBehandlingerForSak(it.toInt(), accessToken) }
-                .flatMap { it.behandlinger }
-
-            val behandlingsListe = BehandlingListe(behandlinger)
-            val grunnlagsendringshendelser = hentGrunnlagsendrinshendelser(sakIder, accessToken)
-
-            sporingslogg.logg(vellykkaRequest(fnr = fnr, bruker = bruker))
-
-            return PersonSakerResult(person, behandlingsListe, grunnlagsendringshendelser)
-        } catch (e: InvalidFoedselsnummer) {
-            sporingslogg.logg(feilendeRequest(fnr, bruker = bruker))
-            logger.error("Henting av person fra pdl feilet pga ugyldig fødselsnummer", e)
-            throw e
-        } catch (e: Exception) {
-            sporingslogg.logg(feilendeRequest(fnr, bruker = bruker))
-            logger.error("Henting av person med tilhørende behandlinger feilet", e)
-            throw e
-        }
-    }
-
-    private fun vellykkaRequest(fnr: String, bruker: String) = Sporingsrequest(
-        kallendeApplikasjon = "api",
-        oppdateringstype = HttpMethod.GET,
-        brukerId = bruker,
-        hvemBlirSlaattOpp = fnr,
-        endepunkt = "/personer",
-        resultat = Decision.Permit,
-        melding = "Henta person og saker"
-    )
-
-    private fun feilendeRequest(fnr: String, bruker: String) = Sporingsrequest(
-        kallendeApplikasjon = "api",
-        oppdateringstype = HttpMethod.GET,
-        brukerId = bruker,
-        hvemBlirSlaattOpp = fnr,
-        endepunkt = "/personer",
-        resultat = Decision.Deny,
-        melding = "Henta person og saker feilet"
-    )
-
-    private suspend fun hentGrunnlagsendrinshendelser(
-        sakIder: List<Long>,
-        accessToken: String
-    ): GrunnlagsendringshendelseListe {
-        return try {
-            val grunnlagsendringshendelser = sakIder.flatMap {
-                behandlingKlient.hentGrunnlagsendringshendelserForSak(it.toInt(), accessToken).hendelser
-            }
-            GrunnlagsendringshendelseListe(hendelser = grunnlagsendringshendelser)
-        } catch (e: Exception) {
-            logger.error(
-                "Fikk ikke hentet grunnlagsendringshendelser for saker med " +
-                    "ider ${sakIder.joinToString { it.toString() }}",
-                e
-            )
-            GrunnlagsendringshendelseListe(emptyList())
-        }
-    }
 
     suspend fun hentSaker(accessToken: String): Saker {
         logger.info("Henter alle saker")

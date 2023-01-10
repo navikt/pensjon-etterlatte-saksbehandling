@@ -106,7 +106,7 @@ export const Search = () => {
           </span>
           <SearchResult link={true} onClick={goToPerson}>
             <div className="text">
-              {searchResult.person.fornavn} {searchResult.person.etternavn}
+              {searchResult.fornavn} {searchResult.etternavn}
             </div>
           </SearchResult>
         </Dropdown>

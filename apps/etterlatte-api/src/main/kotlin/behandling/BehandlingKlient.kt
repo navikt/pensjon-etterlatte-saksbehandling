@@ -5,7 +5,6 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -18,7 +17,6 @@ import java.time.Instant
 import java.time.YearMonth
 
 interface EtterlatteBehandling {
-    suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker
     suspend fun hentSaker(accessToken: String): Saker
     suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
@@ -26,15 +24,12 @@ interface EtterlatteBehandling {
     suspend fun opprettManueltOpphoer(manueltOpphoerRequest: ManueltOpphoerRequest, accessToken: String):
         Result<ManueltOpphoerResponse>
 
-    suspend fun hentGrunnlagsendringshendelserForSak(sakId: Int, accessToken: String): GrunnlagsendringshendelseListe
     suspend fun fastsettVirkningstidspunkt(
         behandlingId: String,
         dato: YearMonth,
         accessToken: String
     ): VirkningstidspunktResponse
 }
-
-data class GrunnlagsendringshendelseListe(val hendelser: List<Grunnlagsendringshendelse>)
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehandling {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
@@ -44,28 +39,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
 
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
-
-    override suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker {
-        try {
-            logger.info("Henter saker for en person fra behandling")
-            val json = downstreamResourceClient
-                .get(
-                    Resource(
-                        clientId,
-                        "$resourceUrl/personer/$fnr/saker"
-                    ),
-                    accessToken
-                ).mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            return objectMapper.readValue(json.toString(), Saker::class.java)
-        } catch (e: Exception) {
-            logger.error("Henting av saker for en person feilet", e)
-            throw e
-        }
-    }
 
     override suspend fun hentSaker(accessToken: String): Saker {
         try {
@@ -180,28 +153,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         } catch (e: Exception) {
             logger.error("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} feilet. ", e)
             Result.failure(e)
-        }
-    }
-
-    override suspend fun hentGrunnlagsendringshendelserForSak(
-        sakId: Int,
-        accessToken: String
-    ): GrunnlagsendringshendelseListe {
-        return try {
-            val json = downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/grunnlagsendringshendelse/$sakId"),
-                accessToken
-            )
-                .mapBoth(
-                    success = { json -> json.response },
-                    failure = { throwableErrorMessage ->
-                        throw Error(throwableErrorMessage.message, throwableErrorMessage.throwable)
-                    }
-                )
-            objectMapper.readValue(json.toString(), GrunnlagsendringshendelseListe::class.java)
-        } catch (e: Exception) {
-            logger.error("Kunne ikke hente grunnlagsendringshendelser for sak med id $sakId på grunn av feil", e)
-            throw e
         }
     }
 

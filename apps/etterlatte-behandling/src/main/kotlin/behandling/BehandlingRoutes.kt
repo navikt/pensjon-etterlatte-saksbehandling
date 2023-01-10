@@ -160,23 +160,7 @@ internal fun Route.behandlingRoutes(
             get("/{sakid}") {
                 call.respond(
                     generellBehandlingService.hentBehandlingerISak(sakId).map {
-                        BehandlingSammendrag(
-                            id = it.id,
-                            sak = it.sak,
-                            status = it.status,
-                            soeknadMottattDato = if (it is Foerstegangsbehandling) {
-                                it.soeknadMottattDato
-                            } else {
-                                it.behandlingOpprettet
-                            },
-                            behandlingOpprettet = it.behandlingOpprettet,
-                            behandlingType = it.type,
-                            aarsak = when (it) {
-                                is Foerstegangsbehandling -> "SOEKNAD"
-                                is Revurdering -> it.revurderingsaarsak.name
-                                is ManueltOpphoer -> "MANUELT OPPHOER"
-                            }
-                        )
+                        it.toBehandlingSammendrag()
                     }.let { BehandlingListe(it) }
                 )
             }

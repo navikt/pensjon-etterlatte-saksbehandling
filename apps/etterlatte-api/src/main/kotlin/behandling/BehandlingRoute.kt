@@ -1,23 +1,21 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
-import java.time.Instant
-import java.time.LocalDate
-import java.time.YearMonth
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
+import no.nav.etterlatte.libs.ktor.saksbehandler
+import org.slf4j.LoggerFactory
 import java.util.*
 
 fun Route.behandlingRoute(service: BehandlingService) {
+    val logger = LoggerFactory.getLogger(this::class.java)
+
     route("saker") {
         // hent alle sakerª
         get {
@@ -56,39 +54,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond(service.hentHendelserForBehandling(it.toString(), getAccessToken(call)))
             }
         }
-
-        post("virkningstidspunkt") {
-            call.withUUID("behandlingId") {
-                val body = call.receive<VirkningstidspunktRequest>()
-
-                if (!body.isValid()) {
-                    return@withUUID call.respond(HttpStatusCode.BadRequest)
-                }
-
-                call.respond(
-                    service.fastsettVirkningstidspunkt(
-                        it.toString(),
-                        body.dato,
-                        getAccessToken(call)
-                    )
-                )
-            }
-        }
-    }
-}
-
-data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String) {
-    val dato: YearMonth = try {
-        LocalDate.ofInstant(Instant.parse(_dato), norskTidssone).let {
-            YearMonth.of(it.year, it.month)
-        }
-    } catch (e: Exception) {
-        throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
-    }
-
-    fun isValid() = when (dato.year) {
-        in (0..9999) -> true
-        else -> false
     }
 }
 

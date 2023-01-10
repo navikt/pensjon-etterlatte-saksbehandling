@@ -336,7 +336,6 @@ data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: St
     }
 }
 
-internal data class FastsettVirkningstidspunktRequest(val dato: YearMonth) // TODO: used?
 internal data class FastsettVirkningstidspunktResponse(
     val dato: YearMonth,
     val kilde: Grunnlagsopplysning.Saksbehandler

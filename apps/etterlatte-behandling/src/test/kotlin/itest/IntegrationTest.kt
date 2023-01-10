@@ -23,7 +23,6 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsBehov
-import no.nav.etterlatte.behandling.FastsettVirkningstidspunktRequest
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.KommerBarnetTilgodeJson
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
@@ -171,16 +170,17 @@ class ApplicationTest {
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
             }
 
-            client.post("/behandlinger/$behandlingId/virkningstidspunkt") {
+            client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    FastsettVirkningstidspunktRequest(YearMonth.parse("2021-01"))
+                    mapOf("dato" to "2022-02-01T01:00:00.000Z")
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
+
                 val expected = FastsettVirkningstidspunktResponse(
-                    YearMonth.of(2021, 1),
+                    YearMonth.of(2022, 2),
                     Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Instant.now())
                 )
                 assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)

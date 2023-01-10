@@ -49,7 +49,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setString(3, fnr)
             statement.setString(4, behandlingtype.name)
             statement.setString(5, saktype.toString())
-            statement.setString(6, VedtakStatus.BEREGNET.toString())
+            statement.setVedtakstatus(6, VedtakStatus.BEREGNET)
             statement.setDate(7, Date.valueOf(virkningsDato))
             statement.setString(8, objectMapper.writeValueAsString(beregningsresultat))
             statement.setString(9, objectMapper.writeValueAsString(vilkaarsresultat))
@@ -81,7 +81,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         .also { logger.info("Lagrer iverksatt vedtak") }
         .use {
             it.prepareStatement("UPDATE vedtak SET vedtakstatus = ? WHERE behandlingId = ?").run {
-                setString(1, VedtakStatus.IVERKSATT.name)
+                setVedtakstatus(1, VedtakStatus.IVERKSATT)
                 setUUID(2, behandlingsId)
                 require(executeUpdate() == 1)
             }
@@ -143,7 +143,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             val statement = it.prepareStatement(fattVedtak)
             statement.setString(1, saksbehandlerId)
             statement.setBoolean(2, true)
-            statement.setString(3, VedtakStatus.FATTET_VEDTAK.name)
+            statement.setVedtakstatus(3, VedtakStatus.FATTET_VEDTAK)
             statement.setUUID(4, behandlingsId)
             statement.execute()
         }
@@ -179,7 +179,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     "UPDATE vedtak SET attestant = ?, datoAttestert = now(), vedtakstatus = ? WHERE behandlingId = ?"
                 )
             statement.setString(1, saksbehandlerId)
-            statement.setString(2, VedtakStatus.ATTESTERT.name)
+            statement.setVedtakstatus(2, VedtakStatus.ATTESTERT)
             statement.setUUID(3, behandlingsId)
             statement.execute()
         }
@@ -192,7 +192,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             val underkjennVedtak =
                 "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
             val statement = it.prepareStatement(underkjennVedtak)
-            statement.setString(1, VedtakStatus.RETURNERT.name)
+            statement.setVedtakstatus(1, VedtakStatus.RETURNERT)
             statement.setUUID(2, behandlingsId)
             statement.execute()
         }
@@ -218,6 +218,9 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 }
 
 private fun PreparedStatement.setUUID(index: Int, id: UUID) = setObject(index, id)
+
+private fun PreparedStatement.setVedtakstatus(index: Int, vedtakStatus: VedtakStatus) =
+    setString(index, vedtakStatus.name)
 
 private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? = if (next()) {
     block().also {

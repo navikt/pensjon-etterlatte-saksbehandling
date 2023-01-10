@@ -13,20 +13,19 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import org.slf4j.LoggerFactory
 import java.util.*
 
 interface GenerellBehandlingService {
 
     fun hentBehandlinger(): List<Behandling>
-    fun hentBehandling(behandling: UUID): Behandling?
-    fun hentBehandlingstype(behandling: UUID): BehandlingType?
+    fun hentBehandling(behandlingId: UUID): Behandling?
+    fun hentBehandlingstype(behandlingId: UUID): BehandlingType?
     fun hentBehandlingerISak(sakid: Long): List<Behandling>
     fun slettBehandlingerISak(sak: Long)
-    fun avbrytBehandling(behandling: UUID, saksbehandler: String)
+    fun avbrytBehandling(behandlingId: UUID, saksbehandler: String)
     fun grunnlagISakEndret(sak: Long)
     fun registrerVedtakHendelse(
-        behandling: UUID,
+        behandlingId: UUID,
         vedtakId: Long,
         hendelse: HendelseType,
         inntruffet: Tidspunkt,
@@ -35,10 +34,10 @@ interface GenerellBehandlingService {
         begrunnelse: String?
     )
 
-    fun hentHendelserIBehandling(behandling: UUID): List<LagretHendelse>
+    fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse>
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
     fun alleSakIderForSoekerMedFnr(fnr: String): List<Long>
-    fun hentDetaljertBehandling(behandlingsId: UUID): DetaljertBehandling?
+    fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
     fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
 }
 
@@ -51,20 +50,18 @@ class RealGenerellBehandlingService(
     private val manueltOpphoerService: ManueltOpphoerService
 ) : GenerellBehandlingService {
 
-    val logger = LoggerFactory.getLogger(this::class.java)
-
     override fun hentBehandlinger(): List<Behandling> {
         return inTransaction { behandlinger.alleBehandlinger() }
     }
 
-    override fun hentBehandling(behandling: UUID): Behandling? {
+    override fun hentBehandling(behandlingId: UUID): Behandling? {
         return inTransaction {
-            behandlinger.hentBehandlingType(behandling)?.let { behandlinger.hentBehandling(behandling, it) }
+            behandlinger.hentBehandlingType(behandlingId)?.let { behandlinger.hentBehandling(behandlingId, it) }
         }
     }
 
-    override fun hentBehandlingstype(behandling: UUID): BehandlingType? {
-        return inTransaction { behandlinger.hentBehandlingType(behandling) }
+    override fun hentBehandlingstype(behandlingId: UUID): BehandlingType? {
+        return inTransaction { behandlinger.hentBehandlingType(behandlingId) }
     }
 
     override fun hentBehandlingerISak(sakid: Long): List<Behandling> {
@@ -108,12 +105,12 @@ class RealGenerellBehandlingService(
         }
     }
 
-    override fun hentDetaljertBehandling(behandlingsId: UUID): DetaljertBehandling? {
-        return hentBehandling(behandlingsId)?.toDetaljertBehandling()
+    override fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling? {
+        return hentBehandling(behandlingId)?.toDetaljertBehandling()
     }
 
     override fun registrerVedtakHendelse(
-        behandling: UUID,
+        behandlingId: UUID,
         vedtakId: Long,
         hendelse: HendelseType,
         inntruffet: Tidspunkt,
@@ -122,37 +119,42 @@ class RealGenerellBehandlingService(
         begrunnelse: String?
     ) {
         inTransaction {
-            behandlinger.hentBehandlingType(behandling)?.let {
+            behandlinger.hentBehandlingType(behandlingId)?.let {
                 when (it) {
                     BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                        foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling).registrerVedtakHendelse(
+                        foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId).registrerVedtakHendelse(
                             vedtakId,
                             hendelse,
                             inntruffet,
                             saksbehandler,
                             kommentar,
-                            begrunnelse
+                            begrunnelse,
+                            behandlinger
                         )
                     }
+
                     BehandlingType.REVURDERING -> {
-                        revurderingFactory.hentRevurdering(behandling).registrerVedtakHendelse(
+                        revurderingFactory.hentRevurdering(behandlingId).registrerVedtakHendelse(
                             vedtakId,
                             hendelse,
                             inntruffet,
                             saksbehandler,
                             kommentar,
-                            begrunnelse
+                            begrunnelse,
+                            behandlinger
                         )
                     }
+
                     BehandlingType.MANUELT_OPPHOER -> {
                         manueltOpphoerService.registrerVedtakHendelse(
-                            behandling,
+                            behandlingId,
                             vedtakId,
                             hendelse,
                             inntruffet,
                             saksbehandler,
                             kommentar,
-                            begrunnelse
+                            begrunnelse,
+                            behandlinger
                         )
                     }
                 }

@@ -219,23 +219,6 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
-                addAuthSaksbehandler()
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    VedtakHendelse(
-                        12L,
-                        "Saksbehandlier",
-                        Tidspunkt.now(),
-                        null,
-                        null
-                    )
-                )
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
             client.post("/behandlinger/$behandlingId/beregn") {
                 addAuthSaksbehandler()
             }.also {
@@ -266,6 +249,42 @@ class ApplicationTest {
                 val oppgaver: OppgaveListeDto = it.body()
                 assertEquals(1, oppgaver.oppgaver.size)
                 assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
+            }
+
+            client.post("/behandlinger/$behandlingId/attester") {
+                addAuthSaksbehandler()
+            }.also {
+                beans.datasourceBuilder().dataSource.connection.use {
+                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.ATTESTERT, actual.status)
+                }
+
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            client.post("/behandlinger/$behandlingId/hendelser/vedtak/IVERKSATT") {
+                addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    VedtakHendelse(
+                        12L,
+                        null,
+                        Tidspunkt.now(),
+                        null,
+                        null
+                    )
+                )
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            client.get("/behandlinger/$behandlingId") {
+                addAuthSaksbehandler()
+            }.also {
+                val behandling = it.body<DetaljertBehandling>()
+
+                assertEquals(HttpStatusCode.OK, it.status)
+                assertEquals(BehandlingStatus.IVERKSATT, behandling.status)
             }
 
             client.post("/grunnlagsendringshendelse/doedshendelse") {

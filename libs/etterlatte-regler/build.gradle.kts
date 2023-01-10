@@ -1,5 +1,5 @@
 import java.io.FileOutputStream
-import java.util.Properties
+import java.util.*
 
 plugins {
     kotlin("jvm")
@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":libs:common"))
-
+    api(Jackson.DatatypeJsr310)
+    api(Jackson.ModuleKotlin)
     testImplementation(Jupiter.Api)
     testRuntimeOnly(Jupiter.Engine)
     testImplementation(Kotest.AssertionsCore)

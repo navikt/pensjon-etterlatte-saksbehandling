@@ -48,7 +48,7 @@ class SlaaSammenTreReglerTest {
             regel.gjelderFra shouldBe regelSomBrukerVerdienFraTreAndreRegler.gjelderFra
             regel.beskrivelse shouldBe regelSomBrukerVerdienFraTreAndreRegler.beskrivelse
             regel.regelReferanse shouldBe regelSomBrukerVerdienFraTreAndreRegler.regelReferanse
-            children.size shouldBe 3
+            noder.size shouldBe 3
         }
     }
 

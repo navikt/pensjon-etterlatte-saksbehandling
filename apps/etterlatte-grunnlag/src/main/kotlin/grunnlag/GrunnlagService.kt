@@ -98,7 +98,7 @@ class RealGrunnlagService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
 
         val sakId = behandling.sak
-        lagreNyeOpplysninger(sakId, Foedselsnummer.of(behandling.soeker), opplysning)
+        lagreNyeOpplysninger(sakId, null, opplysning)
         val grunnlagEndretMessage = JsonMessage.newMessage(
             eventName = "GRUNNLAG:GRUNNLAGENDRET",
             map = mapOf(correlationIdKey to getCorrelationId(), "sakId" to sakId)

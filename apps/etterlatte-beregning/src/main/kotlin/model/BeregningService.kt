@@ -41,12 +41,12 @@ class BeregningService(
                 val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.await().sak, accessToken) }
 
                 val beregning = lagBeregning(
-                    grunnlag.await(),
-                    behandling.await().virkningstidspunkt!!.dato,
-                    YearMonth.now().plusMonths(3),
-                    vilkaarsvurdering.await().resultat!!.utfall,
-                    behandling.await().behandlingType!!,
-                    behandlingId
+                    grunnlag = grunnlag.await(),
+                    virkFOM = behandling.await().virkningstidspunkt!!.dato,
+                    virkTOM = YearMonth.now().plusMonths(3),
+                    vilkaarsvurderingUtfall = vilkaarsvurdering.await().resultat!!.utfall,
+                    behandlingType = behandling.await().behandlingType!!,
+                    behandlingId = behandlingId
                 )
                 beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
                     behandlingKlient.beregn(behandlingId, accessToken, true)

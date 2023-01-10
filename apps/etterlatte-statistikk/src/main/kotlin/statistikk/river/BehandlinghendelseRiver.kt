@@ -21,12 +21,12 @@ class BehandlinghendelseRiver(
     rapidsConnection: RapidsConnection,
     private val service: StatistikkService
 ) : River.PacketListener {
-    val behandlingshendelser = listOf(
+    private val behandlingshendelser = listOf(
         "BEHANDLING:AVBRUTT",
         "BEHANDLING:OPPRETTET"
     )
 
-    val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         River(rapidsConnection).apply {

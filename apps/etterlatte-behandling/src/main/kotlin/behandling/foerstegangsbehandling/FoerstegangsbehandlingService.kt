@@ -96,7 +96,7 @@ class RealFoerstegangsbehandlingService(
         if (!dryRun) {
             inTransaction {
                 behandlinger.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
-                behandlinger.lagreVilkaarstatus(behandling.id, behandling.vilkaarUtfall)
+                behandlinger.lagreVilkaarstatus(behandling.id, behandling.vilkaarUtfall) // Maa lagre vilkaarsutfall
             }
         }
     }

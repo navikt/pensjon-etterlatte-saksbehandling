@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.regler
 
-import beregning.ToDoRegelReferanse
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldHaveSize
@@ -8,6 +7,7 @@ import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.containADigit
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.regler.beregning.toDoRegelReferanse
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -36,7 +36,6 @@ internal class RegelkjoeringTest {
     private val regel2021: Regel<Grunnlag, Int> = finnFaktumIGrunnlag(
         gjelderFra = gjelderFra2021,
         beskrivelse = "Finner testverdi for 2021",
-        regelReferanse = ToDoRegelReferanse(),
         finnFaktum = Grunnlag::testVerdi2021,
         finnFelt = { it }
     )
@@ -44,7 +43,6 @@ internal class RegelkjoeringTest {
     private val regel2022: Regel<Grunnlag, Int> = finnFaktumIGrunnlag(
         gjelderFra = gjelderFra2022,
         beskrivelse = "Finner testverdi for 2022",
-        regelReferanse = ToDoRegelReferanse(),
         finnFaktum = Grunnlag::testVerdi2022,
         finnFelt = { it }
     )
@@ -52,7 +50,6 @@ internal class RegelkjoeringTest {
     private val regel2023: Regel<Grunnlag, Int> = finnFaktumIGrunnlag(
         gjelderFra = gjelderFra2023,
         beskrivelse = "Finner testverdi for 2023",
-        regelReferanse = ToDoRegelReferanse(),
         finnFaktum = Grunnlag::testVerdi2023,
         finnFelt = { it }
     )
@@ -60,7 +57,7 @@ internal class RegelkjoeringTest {
     private val velgNyesteGyldigeRegel = RegelMeta(
         gjelderFra = gjelderFra1900,
         beskrivelse = "Finner testverdi for rett virkningstidspunkt",
-        regelReferanse = ToDoRegelReferanse()
+        regelReferanse = toDoRegelReferanse
     ) velgNyesteGyldige (regel2021 og regel2022 og regel2023)
 
     @Test

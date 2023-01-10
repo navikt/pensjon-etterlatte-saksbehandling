@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.regler
 
-import beregning.ToDoRegelReferanse
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.regler.beregning.toDoRegelReferanse
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -13,28 +13,28 @@ class GangSammenRegelTest {
     private val regel1 = definerKonstant<TestGrunnlag, BigDecimal>(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Tallet 2",
-        regelReferanse = ToDoRegelReferanse(),
+        regelReferanse = toDoRegelReferanse,
         verdi = 2.toBigDecimal()
     )
 
     private val regel2 = definerKonstant<TestGrunnlag, BigDecimal>(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Tallet 3",
-        regelReferanse = ToDoRegelReferanse(),
+        regelReferanse = toDoRegelReferanse,
         verdi = 3.toBigDecimal()
     )
 
     private val regel3 = definerKonstant<TestGrunnlag, BigDecimal>(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Tallet 4",
-        regelReferanse = ToDoRegelReferanse(),
+        regelReferanse = toDoRegelReferanse,
         verdi = 4.toBigDecimal()
     )
 
     private val regelSomMultiplisererTreVerdier = RegelMeta(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Regel som bruker resultatet av tre andre regler og multipliserer disse",
-        regelReferanse = ToDoRegelReferanse()
+        regelReferanse = toDoRegelReferanse
     ) multipliser (regel1 og regel2 og regel3)
 
     @Test

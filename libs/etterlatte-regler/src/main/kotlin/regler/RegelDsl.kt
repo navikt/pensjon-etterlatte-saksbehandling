@@ -70,13 +70,11 @@ private fun <G> gangSammenRegler(
 fun <G, T, A : FaktumNode<T>, S> finnFaktumIGrunnlag(
     gjelderFra: LocalDate,
     beskrivelse: String,
-    regelReferanse: RegelReferanse,
     finnFaktum: (G) -> A,
     finnFelt: (T) -> S
 ): Regel<G, S> = FinnFaktumIGrunnlagRegel(
     gjelderFra,
     beskrivelse,
-    regelReferanse,
     finnFaktum,
     finnFelt
 )

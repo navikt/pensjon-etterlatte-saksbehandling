@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.regler
 
-import beregning.ToDoRegelReferanse
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.regler.beregning.toDoRegelReferanse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -12,7 +12,7 @@ class KonstantRegelTest {
     private val regelSomReturnererKonstantVerdi = definerKonstant<TestGrunnlag, Int>(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Tallet 2",
-        regelReferanse = ToDoRegelReferanse(),
+        regelReferanse = toDoRegelReferanse,
         verdi = 2
     )
 

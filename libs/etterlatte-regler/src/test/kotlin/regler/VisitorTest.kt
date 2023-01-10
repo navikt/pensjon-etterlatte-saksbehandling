@@ -1,30 +1,30 @@
 package no.nav.etterlatte.libs.regler
 
-import beregning.ToDoRegelReferanse
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.regler.beregning.toDoRegelReferanse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class VisitorTest {
     private object TestGrunnlag
 
-    private val regel1 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_1, "Tallet 1", ToDoRegelReferanse(), 1)
-    private val regel2 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_2, "Tallet 2", ToDoRegelReferanse(), 2)
-    private val regel3 = definerKonstant<TestGrunnlag, Long>(GJELDER_FRA_2, "Tallet 3", ToDoRegelReferanse(), 3)
-    private val regel4 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_3, "Tallet 4", ToDoRegelReferanse(), 4)
+    private val regel1 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_1, "Tallet 1", toDoRegelReferanse, 1)
+    private val regel2 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_2, "Tallet 2", toDoRegelReferanse, 2)
+    private val regel3 = definerKonstant<TestGrunnlag, Long>(GJELDER_FRA_2, "Tallet 3", toDoRegelReferanse, 3)
+    private val regel4 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_3, "Tallet 4", toDoRegelReferanse, 4)
     private val regelSomBrukerVerdienFraTreAndreRegler = RegelMeta(
         gjelderFra = GJELDER_FRA_3,
         beskrivelse = "Regel som bruker resultatet av tre andre regler",
-        regelReferanse = ToDoRegelReferanse()
+        regelReferanse = toDoRegelReferanse
     ) kombinerer regel1 og regel2 og regel3 med { verdi1, verdi2, verdi3 ->
         verdi1 + verdi2 + verdi3
     }
     private val regelSomKombinererToRegler = RegelMeta(
         gjelderFra = GJELDER_FRA_3,
         beskrivelse = "Regel som kombinerer to regler",
-        regelReferanse = ToDoRegelReferanse()
+        regelReferanse = toDoRegelReferanse
     ) kombinerer regelSomBrukerVerdienFraTreAndreRegler og regel4 med { verdi1, verdi2 ->
         verdi1 + verdi2
     }
@@ -65,7 +65,7 @@ internal class VisitorTest {
         val velgNyesteGyldigeRegler = RegelMeta(
             gjelderFra = GJELDER_FRA_3,
             beskrivelse = "Regel som velger nyeste regel",
-            regelReferanse = ToDoRegelReferanse()
+            regelReferanse = toDoRegelReferanse
         ) velgNyesteGyldige (regel1 og regel2)
 
         velgNyesteGyldigeRegler.finnUgyldigePerioder(RegelPeriode(GJELDER_FRA_1.minusMonths(1))) shouldHaveSize 1

@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.regler
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
 
 data class RegelPeriode(val fraDato: LocalDate, val tilDato: LocalDate? = null) {
     init {
@@ -11,13 +10,7 @@ data class RegelPeriode(val fraDato: LocalDate, val tilDato: LocalDate? = null) 
     }
 }
 
-interface RegelReferanse {
-    val id: String
-    val beskrivelse: String
-}
-
-data class LesInputReferanse(override val id: String = "INPUT", override val beskrivelse: String) :
-    RegelReferanse
+data class RegelReferanse(val id: String, val versjon: String = "1")
 
 abstract class Regel<G, S>(
     open val gjelderFra: LocalDate,
@@ -172,7 +165,6 @@ open class GangSammenRegel<G>(
 open class FinnFaktumIGrunnlagRegel<G, T, A : FaktumNode<T>, S>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
-    override val regelReferanse: RegelReferanse,
     @JsonIgnore
     val finnFaktum: (G) -> A,
     @JsonIgnore
@@ -180,7 +172,7 @@ open class FinnFaktumIGrunnlagRegel<G, T, A : FaktumNode<T>, S>(
 ) : Regel<G, S>(
     gjelderFra = gjelderFra,
     beskrivelse = beskrivelse,
-    regelReferanse = regelReferanse
+    regelReferanse = RegelReferanse(id = "INPUT")
 ) {
     override fun accept(visitor: RegelVisitor) {
         visitor.visit(this)

@@ -43,17 +43,18 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         .use {
             val opprettVedtak =
                 "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" // ktlint-disable max-line-length
-            val statement = it.prepareStatement(opprettVedtak)
-            statement.setUUID(1, behandlingsId)
-            statement.setLong(2, sakid)
-            statement.setString(3, fnr)
-            statement.setString(4, behandlingtype.name)
-            statement.setString(5, saktype.toString())
-            statement.setVedtakstatus(6, VedtakStatus.BEREGNET)
-            statement.setDate(7, Date.valueOf(virkningsDato))
-            statement.setJSONString(8, beregningsresultat)
-            statement.setJSONString(9, vilkaarsresultat)
-            statement.execute()
+            it.prepareStatement(opprettVedtak).run {
+                setUUID(1, behandlingsId)
+                setLong(2, sakid)
+                setString(3, fnr)
+                setString(4, behandlingtype.name)
+                setString(5, saktype.toString())
+                setVedtakstatus(6, VedtakStatus.BEREGNET)
+                setDate(7, Date.valueOf(virkningsDato))
+                setJSONString(8, beregningsresultat)
+                setJSONString(9, vilkaarsresultat)
+                execute()
+            }
         }
 
     fun oppdaterVedtak(
@@ -66,12 +67,13 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         .use {
             val oppdaterVedtak =
                 "UPDATE vedtak SET datovirkfom = ?, beregningsresultat = ?, vilkaarsresultat = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
-            val statement = it.prepareStatement(oppdaterVedtak)
-            statement.setDate(1, Date.valueOf(virkningsDato))
-            statement.setJSONString(2, beregningsresultat)
-            statement.setJSONString(3, vilkaarsresultat)
-            statement.setUUID(4, behandlingsId)
-            require(statement.executeUpdate() == 1)
+            it.prepareStatement(oppdaterVedtak).run {
+                setDate(1, Date.valueOf(virkningsDato))
+                setJSONString(2, beregningsresultat)
+                setJSONString(3, vilkaarsresultat)
+                setUUID(4, behandlingsId)
+                require(executeUpdate() == 1)
+            }
         }
 
     // Kan det finnes flere vedtak for en behandling? Hør med Henrik
@@ -95,18 +97,18 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
                     "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(?)"
             val identer = it.createArrayOf("uuid", behandlingsidenter.toTypedArray())
-            val statement = it.prepareStatement(hentVedtakBolk)
-            statement.setArray(1, identer)
-            statement.executeQuery().toList { toVedtak() }
+            it.prepareStatement(hentVedtakBolk).run {
+                setArray(1, identer)
+                executeQuery().toList { toVedtak() }
+            }
         }
 
     fun hentVedtak(behandlingsId: UUID): Vedtak? = connection.use {
         val hentVedtak =
             "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
-        val statement = it.prepareStatement(hentVedtak)
-        statement.setUUID(1, behandlingsId)
-        statement.executeQuery().singleOrNull {
-            toVedtak()
+        it.prepareStatement(hentVedtak).run {
+            setUUID(1, behandlingsId)
+            executeQuery().singleOrNull { toVedtak() }
         }
     }
 
@@ -140,12 +142,13 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         connection.use {
             val fattVedtak =
                 "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now(), vedtakstatus = ?  WHERE behandlingId = ?" // ktlint-disable max-line-length
-            val statement = it.prepareStatement(fattVedtak)
-            statement.setString(1, saksbehandlerId)
-            statement.setBoolean(2, true)
-            statement.setVedtakstatus(3, VedtakStatus.FATTET_VEDTAK)
-            statement.setUUID(4, behandlingsId)
-            statement.execute()
+            it.prepareStatement(fattVedtak).run {
+                setString(1, saksbehandlerId)
+                setBoolean(2, true)
+                setVedtakstatus(3, VedtakStatus.FATTET_VEDTAK)
+                setUUID(4, behandlingsId)
+                execute()
+            }
         }
     }
 
@@ -178,10 +181,12 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                 it.prepareStatement(
                     "UPDATE vedtak SET attestant = ?, datoAttestert = now(), vedtakstatus = ? WHERE behandlingId = ?"
                 )
-            statement.setString(1, saksbehandlerId)
-            statement.setVedtakstatus(2, VedtakStatus.ATTESTERT)
-            statement.setUUID(3, behandlingsId)
-            statement.execute()
+            statement.run {
+                setString(1, saksbehandlerId)
+                setVedtakstatus(2, VedtakStatus.ATTESTERT)
+                setUUID(3, behandlingsId)
+                execute()
+            }
         }
     }
 
@@ -191,10 +196,11 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         connection.use {
             val underkjennVedtak =
                 "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
-            val statement = it.prepareStatement(underkjennVedtak)
-            statement.setVedtakstatus(1, VedtakStatus.RETURNERT)
-            statement.setUUID(2, behandlingsId)
-            statement.execute()
+            it.prepareStatement(underkjennVedtak).run {
+                setVedtakstatus(1, VedtakStatus.RETURNERT)
+                setUUID(2, behandlingsId)
+                execute()
+            }
         }
     }
 

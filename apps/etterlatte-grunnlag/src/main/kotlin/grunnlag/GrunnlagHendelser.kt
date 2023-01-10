@@ -60,11 +60,19 @@ class GrunnlagHendelser(
                         }
                     }
 
-                    grunnlagService.lagreNyeOpplysninger(
-                        sakId,
-                        packet["fnr"].textValue()?.let { Foedselsnummer.of(it) },
-                        opplysninger
-                    )
+                    val fnr = packet["fnr"].textValue()
+                    if (fnr == null) {
+                        grunnlagService.lagreNyeSaksopplysninger(
+                            sakId,
+                            opplysninger
+                        )
+                    } else {
+                        grunnlagService.lagreNyePersonopplysninger(
+                            sakId,
+                            Foedselsnummer.of(fnr),
+                            opplysninger
+                        )
+                    }
 
                     JsonMessage.newMessage(
                         eventName = "GRUNNLAG:GRUNNLAGENDRET",

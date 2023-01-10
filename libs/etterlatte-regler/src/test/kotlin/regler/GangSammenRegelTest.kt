@@ -46,7 +46,7 @@ class GangSammenRegelTest {
             regel.gjelderFra shouldBe regelSomMultiplisererTreVerdier.gjelderFra
             regel.beskrivelse shouldBe regelSomMultiplisererTreVerdier.beskrivelse
             regel.regelReferanse shouldBe regelSomMultiplisererTreVerdier.regelReferanse
-            children.size shouldBe 3
+            noder.size shouldBe 3
         }
     }
 

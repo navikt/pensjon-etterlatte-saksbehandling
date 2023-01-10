@@ -55,7 +55,7 @@ open class SlaaSammenToRegler<C, D, G, S, A : Regel<G, C>, B : Regel<G, D>>(
         return SubsumsjonsNode(
             verdi = slaasammenFunksjon(verdi1.verdi, verdi2.verdi),
             regel = this,
-            children = listOf(verdi1, verdi2)
+            noder = listOf(verdi1, verdi2)
         )
     }
 }
@@ -91,7 +91,7 @@ open class SlaaSammenTreRegler<D, E, F, G, S, A : Regel<G, D>, B : Regel<G, E>, 
         return SubsumsjonsNode(
             verdi = slaasammenFunksjon(verdi1.verdi, verdi2.verdi, verdi3.verdi),
             regel = this,
-            children = listOf(verdi1, verdi2, verdi3)
+            noder = listOf(verdi1, verdi2, verdi3)
         )
     }
 }
@@ -125,7 +125,7 @@ open class VelgNyesteGyldigRegel<G, S>(
         return SubsumsjonsNode(
             verdi = regel.verdi,
             regel = this,
-            children = listOf(regel)
+            noder = listOf(regel)
         )
     }
 
@@ -157,7 +157,7 @@ open class GangSammenRegel<G>(
         return SubsumsjonsNode(
             verdi = verdi,
             regel = this,
-            children = noder
+            noder = noder
         )
     }
 }
@@ -183,7 +183,7 @@ open class FinnFaktumIGrunnlagRegel<G, T, A : FaktumNode<T>, S>(
         return SubsumsjonsNode(
             verdi = finnFelt(faktum.verdi),
             regel = this,
-            children = listOf(faktum)
+            noder = listOf(faktum)
         )
     }
 }
@@ -205,7 +205,7 @@ open class KonstantRegel<G, S>(
     override fun anvendRegel(grunnlag: G, periode: RegelPeriode): SubsumsjonsNode<S> = SubsumsjonsNode(
         verdi = verdi,
         regel = this,
-        children = listOf()
+        noder = listOf()
     )
 }
 

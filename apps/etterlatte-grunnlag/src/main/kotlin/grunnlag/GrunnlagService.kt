@@ -22,7 +22,8 @@ import java.util.*
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
-    fun lagreNyeOpplysninger(sak: Long, fnr: Foedselsnummer?, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
+    fun lagreNyeSaksopplysninger(sak: Long, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
+    fun lagreNyePersonopplysninger(sak: Long, fnr: Foedselsnummer, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
     fun hentOpplysningsgrunnlag(sak: Long): Grunnlag?
     fun hentOpplysningsgrunnlagMedVersjon(sak: Long, versjon: Long): Grunnlag?
     fun hentOpplysningsgrunnlag(
@@ -98,7 +99,7 @@ class RealGrunnlagService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
 
         val sakId = behandling.sak
-        lagreNyeOpplysninger(sakId, null, opplysning)
+        lagreNyeSaksopplysninger(sakId, opplysning)
         val grunnlagEndretMessage = JsonMessage.newMessage(
             eventName = "GRUNNLAG:GRUNNLAGENDRET",
             map = mapOf(correlationIdKey to getCorrelationId(), "sakId" to sakId)
@@ -129,9 +130,9 @@ class RealGrunnlagService(
         return opplysningDao.finnNyesteGrunnlag(sak, opplysningstype)?.opplysning
     }
 
-    override fun lagreNyeOpplysninger(
+    override fun lagreNyePersonopplysninger(
         sak: Long,
-        fnr: Foedselsnummer?,
+        fnr: Foedselsnummer,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>
     ) {
         logger.info("Oppretter et grunnlag")
@@ -142,6 +143,22 @@ class RealGrunnlagService(
                 logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
             } else {
                 opplysningDao.leggOpplysningTilGrunnlag(sak, opplysning, fnr)
+            }
+        }
+    }
+
+    override fun lagreNyeSaksopplysninger(
+        sak: Long,
+        nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>
+    ) {
+        logger.info("Oppretter et grunnlag")
+        val gjeldendeGrunnlag = opplysningDao.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
+
+        for (opplysning in nyeOpplysninger) {
+            if (opplysning.id in gjeldendeGrunnlag) {
+                logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
+            } else {
+                opplysningDao.leggOpplysningTilGrunnlag(sak, opplysning, null)
             }
         }
     }

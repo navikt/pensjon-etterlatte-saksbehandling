@@ -37,9 +37,9 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         virkningsDato: LocalDate,
         beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto
-    ) {
-        logger.info("Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid")
-        connection.use {
+    ) = connection
+        .also { logger.info("Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid") }
+        .use {
             val statement = it.prepareStatement(Queries.opprettVedtak)
             statement.setObject(1, behandlingsId)
             statement.setLong(2, sakid)
@@ -52,16 +52,15 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setString(9, objectMapper.writeValueAsString(vilkaarsresultat))
             statement.execute()
         }
-    }
 
     fun oppdaterVedtak(
         behandlingsId: UUID,
         beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto,
         virkningsDato: LocalDate
-    ) {
-        logger.info("Oppdaterer vedtak behandlingid: $behandlingsId ")
-        connection.use {
+    ) = connection
+        .also { logger.info("Oppdaterer vedtak behandlingid: $behandlingsId ") }
+        .use {
             val statement = it.prepareStatement(Queries.oppdaterVedtak)
             statement.setDate(1, Date.valueOf(virkningsDato))
             statement.setString(2, objectMapper.writeValueAsString(beregningsresultat))
@@ -69,32 +68,28 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setObject(4, behandlingsId)
             require(statement.executeUpdate() == 1)
         }
-    }
 
     // Kan det finnes flere vedtak for en behandling? Hør med Henrik
     fun lagreIverksattVedtak(
         behandlingsId: UUID
-    ) {
-        logger.info("Lagrer iverksatt vedtak")
-        connection.use {
+    ) = connection
+        .also { logger.info("Lagrer iverksatt vedtak") }
+        .use {
             it.prepareStatement(Queries.lagreIverksattVedtak).run {
                 setString(1, VedtakStatus.IVERKSATT.name)
                 setObject(2, behandlingsId)
                 require(executeUpdate() == 1)
             }
         }
-    }
 
-    fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> {
-        logger.info("Henter alle vedtak")
-
-        return connection.use {
+    fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> = connection
+        .also { logger.info("Henter alle vedtak") }
+        .use {
             val identer = it.createArrayOf("uuid", behandlingsidenter.toTypedArray())
             val statement = it.prepareStatement(Queries.hentVedtakBolk)
             statement.setArray(1, identer)
             statement.executeQuery().toList { toVedtak() }
         }
-    }
 
     fun hentVedtak(behandlingsId: UUID): Vedtak? = connection.use {
         val statement = it.prepareStatement(Queries.hentVedtak)
@@ -203,8 +198,10 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 
 private object Queries {
 
-    const val opprettVedtak = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" // ktlint-disable max-line-length
-    const val oppdaterVedtak = "UPDATE vedtak SET datovirkfom = ?, beregningsresultat = ?, vilkaarsresultat = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
+    const val opprettVedtak =
+        "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" // ktlint-disable max-line-length
+    const val oppdaterVedtak =
+        "UPDATE vedtak SET datovirkfom = ?, beregningsresultat = ?, vilkaarsresultat = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
 
     const val fattVedtak =
         "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now(), vedtakstatus = ?  WHERE behandlingId = ?" // ktlint-disable max-line-length

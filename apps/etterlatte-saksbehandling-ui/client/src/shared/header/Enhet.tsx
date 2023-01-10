@@ -3,6 +3,7 @@ import { useAppSelector } from '~store/Store'
 import { Select } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { IEnhet } from '~store/reducers/SaksbehandlerReducer'
+import { LocalStorageKeys } from "~shared/types/LocalStorage";
 
 const isNotValid = (value: string | null): value is string => [null, undefined, ''].includes(value)
 
@@ -12,11 +13,11 @@ export const Enhet = () => {
 
   useEffect(() => {
     if (!enheter.length) {
-      localStorage.removeItem('enhet')
+      localStorage.removeItem(LocalStorageKeys.ENHET)
       return
     }
 
-    const enhet = localStorage.getItem('enhet')
+    const enhet = localStorage.getItem(LocalStorageKeys.ENHET)
     if (isNotValid(enhet)) {
       if (enheter.length) setValgtEnhet(enheter[0])
     } else {
@@ -25,15 +26,15 @@ export const Enhet = () => {
   }, [])
 
   useEffect(() => {
-    if (valgtEnhet === undefined && localStorage.getItem('enhet') !== undefined) return
-    localStorage.setItem('enhet', JSON.stringify(valgtEnhet))
+    if (valgtEnhet === undefined && localStorage.getItem(LocalStorageKeys.ENHET) !== undefined) return
+    localStorage.setItem(LocalStorageKeys.ENHET, JSON.stringify(valgtEnhet))
   }, [valgtEnhet])
 
   return (
     <EnhetWrap>
       <Select
         label={''}
-        value={valgtEnhet ? valgtEnhet.enhetId : ''}
+        value={valgtEnhet?.enhetId ?? ''}
         key={'Enhet'}
         onChange={(e) => {
           setValgtEnhet(hentEnhet(enheter, e.target.value))

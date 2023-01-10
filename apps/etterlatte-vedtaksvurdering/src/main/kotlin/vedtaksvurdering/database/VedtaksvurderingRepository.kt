@@ -51,8 +51,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setString(5, saktype.toString())
             statement.setVedtakstatus(6, VedtakStatus.BEREGNET)
             statement.setDate(7, Date.valueOf(virkningsDato))
-            statement.setString(8, objectMapper.writeValueAsString(beregningsresultat))
-            statement.setString(9, objectMapper.writeValueAsString(vilkaarsresultat))
+            statement.setJSONString(8, beregningsresultat)
+            statement.setJSONString(9, vilkaarsresultat)
             statement.execute()
         }
 
@@ -68,8 +68,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                 "UPDATE vedtak SET datovirkfom = ?, beregningsresultat = ?, vilkaarsresultat = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
             val statement = it.prepareStatement(oppdaterVedtak)
             statement.setDate(1, Date.valueOf(virkningsDato))
-            statement.setString(2, objectMapper.writeValueAsString(beregningsresultat))
-            statement.setString(3, objectMapper.writeValueAsString(vilkaarsresultat))
+            statement.setJSONString(2, beregningsresultat)
+            statement.setJSONString(3, vilkaarsresultat)
             statement.setUUID(4, behandlingsId)
             require(statement.executeUpdate() == 1)
         }
@@ -221,6 +221,9 @@ private fun PreparedStatement.setUUID(index: Int, id: UUID) = setObject(index, i
 
 private fun PreparedStatement.setVedtakstatus(index: Int, vedtakStatus: VedtakStatus) =
     setString(index, vedtakStatus.name)
+
+private fun <T> PreparedStatement.setJSONString(index: Int, obj: T) =
+    setString(index, objectMapper.writeValueAsString(obj))
 
 private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? = if (next()) {
     block().also {

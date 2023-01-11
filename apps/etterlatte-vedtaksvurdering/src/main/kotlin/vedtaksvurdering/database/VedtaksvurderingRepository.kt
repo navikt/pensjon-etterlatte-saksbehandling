@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
@@ -66,19 +67,28 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto,
         virkningsDato: LocalDate
-    ) = connection
-        .also { logger.info("Oppdaterer vedtak behandlingid: $behandlingsId ") }
-        .use {
-            val oppdaterVedtak =
-                "UPDATE vedtak SET datovirkfom = ?, beregningsresultat = ?, vilkaarsresultat = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
-            it.prepareStatement(oppdaterVedtak).run {
-                setDate(1, Date.valueOf(virkningsDato))
-                setJSONString(2, beregningsresultat)
-                setJSONString(3, vilkaarsresultat)
-                setUUID(4, behandlingsId)
-                require(executeUpdate() == 1)
-            }
+    ) = oppdater(
+        query = "UPDATE vedtak SET datovirkfom = :datovirkfom, beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat WHERE behandlingId = :behandlingid", // ktlint-disable max-line-length
+        params = mapOf(
+            "datovirkfom" to Date.valueOf(virkningsDato),
+            "beregningsresultat" to objectMapper.writeValueAsString(beregningsresultat),
+            "vilkaarsresultat" to objectMapper.writeValueAsString(vilkaarsresultat),
+            "behandlingid" to behandlingsId
+        ),
+        loggtekst = "Oppdaterer vedtak behandlingid: $behandlingsId "
+    )
+
+    private fun oppdater(query: String, params: Map<String, Any>, loggtekst: String) {
+        using(sessionOf(datasource)) { session ->
+            queryOf(
+                statement = query,
+                paramMap = params
+            )
+                .also { logger.info(loggtekst) }
+                .let { session.run(it.asUpdate) }
+                .also { require(it == 1) }
         }
+    }
 
     // Kan det finnes flere vedtak for en behandling? Hør med Henrik
     fun lagreIverksattVedtak(
@@ -106,6 +116,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                 executeQuery().toList { toVedtak() }
             }
         }
+
     fun hentVedtak(behandlingsId: UUID): Vedtak? {
         val hentVedtak =
             "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = :behandlingId" // ktlint-disable max-line-length
@@ -116,7 +127,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         query: String,
         params: Map<String, Any>,
         converter: (r: Row) -> T
-    ) = kotliquery.using(sessionOf(datasource)) { session ->
+    ) = using(sessionOf(datasource)) { session ->
         queryOf(statement = query, paramMap = params)
             .let { query ->
                 session.run(
@@ -267,14 +278,6 @@ private fun PreparedStatement.setVedtakstatus(index: Int, vedtakStatus: VedtakSt
 
 private fun <T> PreparedStatement.setJSONString(index: Int, obj: T) =
     setString(index, objectMapper.writeValueAsString(obj))
-
-private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? = if (next()) {
-    block().also {
-        require(!next()) { "Skal være unik" }
-    }
-} else {
-    null
-}
 
 fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> = generateSequence {
     if (next()) {

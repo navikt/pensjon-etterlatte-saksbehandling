@@ -93,15 +93,11 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     // Kan det finnes flere vedtak for en behandling? Hør med Henrik
     fun lagreIverksattVedtak(
         behandlingsId: UUID
-    ) = connection
-        .also { logger.info("Lagrer iverksatt vedtak") }
-        .use {
-            it.prepareStatement("UPDATE vedtak SET vedtakstatus = ? WHERE behandlingId = ?").run {
-                setVedtakstatus(1, VedtakStatus.IVERKSATT)
-                setUUID(2, behandlingsId)
-                require(executeUpdate() == 1)
-            }
-        }
+    ) = oppdater(
+        query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+        params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT, "behandlingId" to behandlingsId),
+        loggtekst = "Lagrer iverksatt vedtak"
+    )
 
     fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> = connection
         .also { logger.info("Henter alle vedtak") }

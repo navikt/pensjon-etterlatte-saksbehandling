@@ -17,10 +17,12 @@ export const Vurdering = ({
   vilkaar,
   oppdaterVilkaar,
   behandlingId,
+  kunLesetilgang,
 }: {
   vilkaar: Vilkaar
   oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string
+  kunLesetilgang: boolean
 }) => {
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
   const [resultat, setResultat] = useState<VurderingsResultat>()
@@ -124,35 +126,43 @@ export const Vurdering = ({
       {vilkaar.vurdering && !aktivVurdering && (
         <>
           <KildeVilkaar>
-            <Heading size="small" level={"2"}>{overskrift()}</Heading>
+            <Heading size="small" level={'2'}>
+              {overskrift()}
+            </Heading>
             <VilkaarVurdertInformasjon>
               <Detail>Manuelt av {vilkaar.vurdering?.saksbehandler}</Detail>
-              <Detail>
-                Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}
-              </Detail>
+              <Detail>Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}</Detail>
             </VilkaarVurdertInformasjon>
             {oppfyltUnntaksvilkaar && (
               <VilkaarVurdertInformasjon>
-                <Heading size="xsmall" level={"3"}>Unntak er oppfylt</Heading>
+                <Heading size="xsmall" level={'3'}>
+                  Unntak er oppfylt
+                </Heading>
                 <BodyShort size="small">{oppfyltUnntaksvilkaar?.tittel}</BodyShort>
               </VilkaarVurdertInformasjon>
             )}
             {vilkaar.vurdering?.kommentar && (
               <VilkaarVurdertInformasjon>
-                <Heading size="xsmall" level={"3"}>Begrunnelse</Heading>
+                <Heading size="xsmall" level={'3'}>
+                  Begrunnelse
+                </Heading>
                 <BodyShort size="small">{vilkaar.vurdering?.kommentar}</BodyShort>
               </VilkaarVurdertInformasjon>
             )}
           </KildeVilkaar>
 
-          <RedigerWrapper onClick={redigerVilkaar}>
-            <Edit aria-hidden={"true"} />
-            <span className={'text'}> Rediger</span>
-          </RedigerWrapper>
-          <RedigerWrapper onClick={slettVurderingAvVilkaar}>
-            <Delete aria-hidden={"true"} />
-            <span className={'text'}> Slett</span>
-          </RedigerWrapper>
+          {!kunLesetilgang && (
+            <>
+              <RedigerWrapper onClick={redigerVilkaar}>
+                <Edit aria-hidden={'true'} />
+                <span className={'text'}> Rediger</span>
+              </RedigerWrapper>
+              <RedigerWrapper onClick={slettVurderingAvVilkaar}>
+                <Delete aria-hidden={'true'} />
+                <span className={'text'}> Slett</span>
+              </RedigerWrapper>
+            </>
+          )}
         </>
       )}
       {aktivVurdering && (

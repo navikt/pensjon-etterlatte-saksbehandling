@@ -12,8 +12,10 @@ import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerBarnetTilgode,
+  kunLesetilgang,
 }: {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
+  kunLesetilgang: boolean
 }) => {
   const [redigeringsModus, setRedigeringsModus] = useState(false)
 
@@ -66,9 +68,11 @@ export const KommerBarnetTilGodeVurdering = ({
               <div>{kommerBarnetTilgode.begrunnelse}</div>
             </BegrunnelseWrapper>
           )}
-          <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
-            <Edit /> Rediger
-          </RedigerWrapper>
+          {!kunLesetilgang && (
+            <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
+              <Edit /> Rediger
+            </RedigerWrapper>
+          )}
         </div>
       )}
     </VurderingsContainer>

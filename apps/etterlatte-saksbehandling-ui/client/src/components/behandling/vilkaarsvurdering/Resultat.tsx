@@ -22,6 +22,7 @@ type Props = {
   vilkaarsvurdering: IVilkaarsvurdering
   oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string
+  kunLesetilgang: boolean
 }
 const MIN_KOMMENTAR_LENGDE = 1
 
@@ -30,6 +31,7 @@ export const Resultat: React.FC<Props> = ({
   vilkaarsvurdering,
   oppdaterVilkaar,
   behandlingId,
+  kunLesetilgang,
 }) => {
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
@@ -109,10 +111,12 @@ export const Resultat: React.FC<Props> = ({
                 </Heading>
                 <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
               </Kommentar>
-              <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
-                <Delete aria-hidden={'true'} />
-                <span className={'text'}>Slett vurdering</span>
-              </SlettWrapper>
+              {!kunLesetilgang && (
+                <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
+                  <Delete aria-hidden={'true'} />
+                  <span className={'text'}>Slett vurdering</span>
+                </SlettWrapper>
+              )}
             </ContentWrapper>
           )}
 

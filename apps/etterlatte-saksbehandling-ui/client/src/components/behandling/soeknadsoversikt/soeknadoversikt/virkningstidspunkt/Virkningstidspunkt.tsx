@@ -24,13 +24,15 @@ import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
   return (
     <InfoElement>
-      <Label size="small" as={"p"}>{label}</Label>
+      <Label size="small" as={'p'}>
+        {label}
+      </Label>
       <div>{tekst}</div>
     </InfoElement>
   )
 }
 
-const Virkningstidspunkt = () => {
+const Virkningstidspunkt = ({ kunLesetilgang }: { kunLesetilgang: boolean }) => {
   const dispatch = useAppDispatch()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
@@ -50,7 +52,9 @@ const Virkningstidspunkt = () => {
 
   return (
     <>
-      <Heading size={"medium"} level={"2"}>Virkningstidspunkt</Heading>
+      <Heading size={'medium'} level={'2'}>
+        Virkningstidspunkt
+      </Heading>
       <SoeknadOversiktWrapper>
         <InfobokserWrapper>
           <Infoboks>
@@ -77,7 +81,7 @@ const Virkningstidspunkt = () => {
             />
           </div>
           <div>
-            <VurderingsTitle title={"Virkningstidspunkt"} />
+            <VurderingsTitle title={'Virkningstidspunkt'} />
             <div>
               {rediger ? (
                 <>
@@ -145,9 +149,11 @@ const Virkningstidspunkt = () => {
                   ) : (
                     <Undertekst $gray>Ikke vurdert</Undertekst>
                   )}
-                  <RedigerWrapper onClick={() => setRediger(true)}>
-                    <Edit /> Rediger
-                  </RedigerWrapper>
+                  {!kunLesetilgang && (
+                    <RedigerWrapper onClick={() => setRediger(true)}>
+                      <Edit /> Rediger
+                    </RedigerWrapper>
+                  )}
                 </div>
               )}
             </div>

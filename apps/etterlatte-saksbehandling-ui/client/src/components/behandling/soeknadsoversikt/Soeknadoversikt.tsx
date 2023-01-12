@@ -43,7 +43,7 @@ export const Soeknadsoversikt = () => {
         </HeadingWrapper>
         <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
       </ContentHeader>
-      <SoeknadOversikt behandling={behandling} />
+      <SoeknadOversikt behandling={behandling} kunLesetilgang={!behandles} />
       <Border />
       <Familieforhold behandling={behandling} />
       {behandles ? (
@@ -58,5 +58,3 @@ export const Soeknadsoversikt = () => {
     </Content>
   )
 }
-
-

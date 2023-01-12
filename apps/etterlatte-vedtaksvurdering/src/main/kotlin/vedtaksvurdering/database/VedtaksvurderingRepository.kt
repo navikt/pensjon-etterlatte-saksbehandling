@@ -180,19 +180,16 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun fattVedtak(saksbehandlerId: String, behandlingsId: UUID) {
-        connection.use {
-            val fattVedtak =
-                "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now(), vedtakstatus = ?  WHERE behandlingId = ?" // ktlint-disable max-line-length
-            it.prepareStatement(fattVedtak).run {
-                setString(1, saksbehandlerId)
-                setBoolean(2, true)
-                setVedtakstatus(3, VedtakStatus.FATTET_VEDTAK)
-                setUUID(4, behandlingsId)
-                execute()
-            }
-        }
-    }
+    fun fattVedtak(saksbehandlerId: String, behandlingsId: UUID) = oppdater(
+        query = "UPDATE vedtak SET saksbehandlerId = :saksbehandlerId, vedtakfattet = :vedtakfattet, datoFattet = now(), vedtakstatus = :vedtakstatus  WHERE behandlingId = :behandlingId", // ktlint-disable max-line-lengt
+        params = mapOf(
+            "saksbehandlerId" to saksbehandlerId,
+            "vedtakfattet" to true,
+            "vedtakstatus" to VedtakStatus.FATTET_VEDTAK,
+            "behandlingId" to behandlingsId
+        ),
+        loggtekst = "Fatter vedtok for behandling $behandlingsId"
+    )
 
     fun attesterVedtak(
         saksbehandlerId: String,

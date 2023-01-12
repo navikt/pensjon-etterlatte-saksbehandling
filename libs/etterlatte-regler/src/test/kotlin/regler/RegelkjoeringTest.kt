@@ -2,7 +2,6 @@ package no.nav.etterlatte.libs.regler
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.containADigit
@@ -60,8 +59,8 @@ internal class RegelkjoeringTest {
     fun `Skal periodisere resultatet basert paa alle knekkpunkter i grafen`() {
         when (val perioder = velgNyesteGyldigeRegel.eksekver(grunnlag, RegelPeriode(gjelderFra2021))) {
             is RegelkjoeringResultat.Suksess -> {
-                perioder.resultat shouldHaveSize 3
-                perioder.resultat.keys shouldContainExactly setOf(
+                perioder.periodiserteResultater shouldHaveSize 3
+                perioder.periodiserteResultater.map { it.periode } shouldContainExactly setOf(
                     RegelPeriode(gjelderFra2021, gjelderFra2022.minusDays(1)),
                     RegelPeriode(gjelderFra2022, gjelderFra2023.minusDays(1)),
                     RegelPeriode(gjelderFra2023)

@@ -2,8 +2,13 @@ package no.nav.etterlatte.libs.regler
 
 import java.time.LocalDate
 
+data class PeriodisertResultat<S>(val periode: RegelPeriode, val resultat: SubsumsjonsNode<S>)
+
 sealed class RegelkjoeringResultat<S>(open val reglerVersjon: String) {
-    data class Suksess<S>(val resultat: Map<RegelPeriode, SubsumsjonsNode<S>>, override val reglerVersjon: String) :
+    data class Suksess<S>(
+        val periodiserteResultater: List<PeriodisertResultat<S>>,
+        override val reglerVersjon: String
+    ) :
         RegelkjoeringResultat<S>(reglerVersjon)
 
     data class UgyldigPeriode<S>(val ugyldigeReglerForPeriode: List<Regel<*, *>>, override val reglerVersjon: String) :
@@ -36,7 +41,12 @@ object Regelkjoering {
                 }
                 .toList()
                 .associateWith { p -> regel.anvend(grunnlag, p) }
-                .let { RegelkjoeringResultat.Suksess(it, reglerVersjon) }
+                .let {
+                    RegelkjoeringResultat.Suksess(
+                        periodiserteResultater = it.entries.map { (key, value) -> PeriodisertResultat(key, value) },
+                        reglerVersjon = reglerVersjon
+                    )
+                }
         } else {
             RegelkjoeringResultat.UgyldigPeriode(ugyldigePerioder, reglerVersjon)
         }

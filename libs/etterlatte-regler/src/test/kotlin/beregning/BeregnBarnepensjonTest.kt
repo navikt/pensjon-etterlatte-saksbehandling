@@ -32,13 +32,12 @@ class BeregnBarnepensjonTest {
     fun `Skal eksekvere regel for barnepensjon`() {
         val periode = RegelPeriode(LocalDate.of(2022, 1, 1), LocalDate.of(2025, 1, 1))
 
-        val resultat = beregnBarnepensjonRegel.eksekver(grunnlag, periode)
-        println(resultat.toJson())
+        val resultat = kroneavrundetBarnepensjonRegel.eksekver(grunnlag, periode)
     }
 
     @Test
     fun `Skal finne alle knekkpunktene i regelverket`() {
-        val knekkpunkter = beregnBarnepensjonRegel.finnAlleKnekkpunkter()
+        val knekkpunkter = kroneavrundetBarnepensjonRegel.finnAlleKnekkpunkter()
 
         knekkpunkter.size shouldBe 2
     }

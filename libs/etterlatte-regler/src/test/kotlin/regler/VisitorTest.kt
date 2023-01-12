@@ -18,14 +18,14 @@ internal class VisitorTest {
         gjelderFra = GJELDER_FRA_3,
         beskrivelse = "Regel som bruker resultatet av tre andre regler",
         regelReferanse = toDoRegelReferanse
-    ) kombinerer regel1 og regel2 og regel3 med { verdi1, verdi2, verdi3 ->
+    ) benytter regel1 og regel2 og regel3 med { verdi1, verdi2, verdi3 ->
         verdi1 + verdi2 + verdi3
     }
     private val regelSomKombinererToRegler = RegelMeta(
         gjelderFra = GJELDER_FRA_3,
         beskrivelse = "Regel som kombinerer to regler",
         regelReferanse = toDoRegelReferanse
-    ) kombinerer regelSomBrukerVerdienFraTreAndreRegler og regel4 med { verdi1, verdi2 ->
+    ) benytter regelSomBrukerVerdienFraTreAndreRegler og regel4 med { verdi1, verdi2 ->
         verdi1 + verdi2
     }
 

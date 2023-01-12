@@ -34,7 +34,7 @@ class SlaaSammenTreReglerTest {
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Regel som bruker resultatet av tre andre regler",
         regelReferanse = toDoRegelReferanse
-    ) kombinerer regel1 og regel2 og regel3 med { verdi1, verdi2, verdi3 ->
+    ) benytter regel1 og regel2 og regel3 med { verdi1, verdi2, verdi3 ->
         verdi1 + verdi2.toInt() + verdi3
     }
 

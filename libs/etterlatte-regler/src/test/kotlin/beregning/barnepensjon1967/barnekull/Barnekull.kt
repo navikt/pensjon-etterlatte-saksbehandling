@@ -3,11 +3,11 @@ package no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.barnekull
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
+import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.beregning.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.BP_1967_DATO
 import no.nav.etterlatte.libs.regler.definerKonstant
 import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
-import no.nav.etterlatte.libs.regler.kombinerer
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.multipliser
 import no.nav.etterlatte.libs.regler.og
@@ -57,6 +57,6 @@ val barnekullRegel = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET")
-) kombinerer belopForFoersteBarn og belopForEtterfoelgendeBarn og antallSoeskenIKullet med { foerstebarnSats, etterfoelgendeBarnSats, antallSoesken ->
+) benytter belopForFoersteBarn og belopForEtterfoelgendeBarn og antallSoeskenIKullet med { foerstebarnSats, etterfoelgendeBarnSats, antallSoesken ->
     (foerstebarnSats + (etterfoelgendeBarnSats * antallSoesken.toBigDecimal())) / (antallSoesken + 1).toBigDecimal()
 }

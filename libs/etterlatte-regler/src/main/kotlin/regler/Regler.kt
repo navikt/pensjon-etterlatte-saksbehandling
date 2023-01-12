@@ -60,6 +60,34 @@ open class SlaaSammenToRegler<G, S, S1, S2, R1 : Regel<G, S1>, R2 : Regel<G, S2>
     }
 }
 
+open class TransformasjonsRegel<G, S, S1, R : Regel<G, S1>>(
+    override val gjelderFra: LocalDate,
+    override val beskrivelse: String,
+    override val regelReferanse: RegelReferanse,
+    @JsonIgnore
+    val opprinneligRegel: R,
+    @JsonIgnore
+    val transformerFunksjon: (S1) -> S
+) : Regel<G, S>(
+    gjelderFra = gjelderFra,
+    beskrivelse = beskrivelse,
+    regelReferanse = regelReferanse
+) {
+    override fun accept(visitor: RegelVisitor) {
+        visitor.visit(this)
+        opprinneligRegel.accept(visitor)
+    }
+
+    override fun anvendRegel(grunnlag: G, periode: RegelPeriode): SubsumsjonsNode<S> {
+        val verdi = opprinneligRegel.anvend(grunnlag, periode)
+        return SubsumsjonsNode(
+            verdi = transformerFunksjon(verdi.verdi),
+            regel = this,
+            noder = listOf(verdi)
+        )
+    }
+}
+
 open class SlaaSammenTreRegler<S1, S2, S3, G, S, R1 : Regel<G, S1>, R2 : Regel<G, S2>, R3 : Regel<G, S3>>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,

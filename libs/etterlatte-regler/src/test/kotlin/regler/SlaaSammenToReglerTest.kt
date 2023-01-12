@@ -27,7 +27,7 @@ class SlaaSammenToReglerTest {
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Regel som bruker resultatet av to andre regler",
         regelReferanse = toDoRegelReferanse
-    ) kombinerer regel1 og regel2 med { verdi1, verdi2 ->
+    ) benytter regel1 og regel2 med { verdi1, verdi2 ->
         verdi1 + verdi2.toInt()
     }
 

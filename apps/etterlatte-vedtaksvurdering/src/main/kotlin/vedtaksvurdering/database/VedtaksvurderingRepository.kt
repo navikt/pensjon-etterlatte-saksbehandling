@@ -93,7 +93,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         behandlingsId: UUID
     ) = oppdater(
         query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
-        params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT, "behandlingId" to behandlingsId),
+        params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingsId),
         loggtekst = "Lagrer iverksatt vedtak"
     ).also { require(it == 1) }
 
@@ -169,7 +169,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     )
 
     fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = hentListeMedKotliquery(
-        query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?",
+        query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
         params = mapOf("vedtakid" to vedtakId)
     ) {
         Utbetalingsperiode(

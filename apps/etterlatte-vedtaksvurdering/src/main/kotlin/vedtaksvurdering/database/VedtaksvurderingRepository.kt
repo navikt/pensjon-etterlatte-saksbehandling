@@ -185,7 +185,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         params = mapOf(
             "saksbehandlerId" to saksbehandlerId,
             "vedtakfattet" to true,
-            "vedtakstatus" to VedtakStatus.FATTET_VEDTAK,
+            "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
             "behandlingId" to behandlingsId
         ),
         loggtekst = "Fatter vedtok for behandling $behandlingsId"
@@ -234,7 +234,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     ) {
         oppdater(
             "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
-            params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT, "behandlingId" to behandlingsId),
+            params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingsId),
             loggtekst = "Underkjenner vedtak for behandling $behandlingsId"
         )
     }

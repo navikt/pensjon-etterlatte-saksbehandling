@@ -1,7 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering.database
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
+import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -105,19 +105,14 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         loggtekst = "Lagrer iverksatt vedtak"
     ).also { require(it == 1) }
 
-    fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> = connection
-        .also { logger.info("Henter alle vedtak") }
-        .use {
-            val hentVedtakBolk =
-                "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat," +
-                    "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
-                    "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(?)"
-            val identer = it.createArrayOf("uuid", behandlingsidenter.toTypedArray())
-            it.prepareStatement(hentVedtakBolk).run {
-                setArray(1, identer)
-                executeQuery().toList { toVedtak() }
-            }
-        }
+    fun hentVedtakBolk(behandlingsidenter: List<UUID>) = hentListeMedKotliquery(
+        query = "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat," +
+            "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
+            "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(?)",
+        { session: Session -> mapOf("behandlingId" to session.createArrayOf("uuid", behandlingsidenter)) }
+    ) {
+        it.toVedtak()
+    }
 
     fun hentVedtak(behandlingsId: UUID): Vedtak? {
         val hentVedtak =
@@ -141,10 +136,10 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 
     private fun <T> hentListeMedKotliquery(
         query: String,
-        params: Map<String, Any>,
+        params: (s: Session) -> Map<String, Any?>,
         converter: (r: Row) -> T
     ): List<T> = using(sessionOf(datasource)) { session ->
-        queryOf(statement = query, paramMap = params)
+        queryOf(statement = query, paramMap = params.invoke(session))
             .let { query ->
                 session.run(
                     query.map { row -> converter.invoke(row) }
@@ -178,7 +173,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 
     fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = hentListeMedKotliquery(
         query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
-        params = mapOf("vedtakid" to vedtakId)
+        params = { mapOf("vedtakid" to vedtakId) }
     ) {
         Utbetalingsperiode(
             it.long("id"),
@@ -189,15 +184,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             it.bigDecimalOrNull("beloep"),
             UtbetalingsperiodeType.valueOf(it.string("type"))
         )
-    }
-
-    private inline fun <reified T> ResultSet.getJsonObject(c: Int): T? = getString(c)?.let {
-        try {
-            objectMapper.readValue(it)
-        } catch (ex: Exception) {
-            logger.warn("vedtak ${getLong("id")} kan ikke lese kolonne $c")
-            null
-        }
     }
 
     fun fattVedtak(saksbehandlerId: String, behandlingsId: UUID) = oppdater(
@@ -258,24 +244,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             loggtekst = "Underkjenner vedtak for behandling $behandlingsId"
         )
     }
-
-    private fun ResultSet.toVedtak() = Vedtak(
-        sakId = getLong(1),
-        behandlingId = getObject(2) as UUID,
-        saksbehandlerId = getString(3),
-        beregningsResultat = getJsonObject(4),
-        vilkaarsResultat = getJsonObject(5),
-        vedtakFattet = getBoolean(6),
-        id = getLong(7),
-        fnr = getString(8),
-        datoFattet = getTimestamp(9)?.toInstant(),
-        datoattestert = getTimestamp(10)?.toInstant(),
-        attestant = getString(11),
-        virkningsDato = getDate(12)?.toLocalDate(),
-        vedtakStatus = getString(13)?.let { VedtakStatus.valueOf(it) },
-        sakType = SakType.valueOf(getString(14)),
-        behandlingType = BehandlingType.valueOf(getString(15))
-    )
 }
 
 private fun PreparedStatement.setUUID(index: Int, id: UUID) = setObject(index, id)

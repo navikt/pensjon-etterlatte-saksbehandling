@@ -43,24 +43,22 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         virkningsDato: LocalDate,
         beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto
-    ) = connection
-        .also { logger.info("Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid") }
-        .use {
-            val opprettVedtak =
-                "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" // ktlint-disable max-line-length
-            it.prepareStatement(opprettVedtak).run {
-                setUUID(1, behandlingsId)
-                setLong(2, sakid)
-                setString(3, fnr)
-                setString(4, behandlingtype.name)
-                setString(5, saktype.toString())
-                setVedtakstatus(6, VedtakStatus.BEREGNET)
-                setDate(7, Date.valueOf(virkningsDato))
-                setJSONString(8, beregningsresultat)
-                setJSONString(9, vilkaarsresultat)
-                execute()
-            }
-        }
+    ) = opprett(
+        query = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) " + // ktlint-disable max-line-length
+            "VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :datovirkfom, :beregningsresultat, :vilkaarsresultat)", // ktlint-disable max-line-length
+        params = mapOf(
+            "behandlingId" to behandlingsId,
+            "sakid" to sakid,
+            "fnr" to fnr,
+            "behandlingtype" to behandlingtype.name,
+            "saktype" to saktype.name,
+            "vedtakstatus" to VedtakStatus.BEREGNET.name,
+            "datovirkfom" to Date.valueOf(virkningsDato),
+            "beregningsresultat" to beregningsresultat?.let { objectMapper.writeValueAsString(it) },
+            "vilkaarsresultat" to vilkaarsresultat.let { objectMapper.writeValueAsString(it) }
+        ),
+        loggtekst = "Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid"
+    )
 
     fun oppdaterVedtak(
         behandlingsId: UUID,
@@ -86,6 +84,16 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             )
                 .also { logger.info(loggtekst) }
                 .let { session.run(it.asUpdate) }
+        }
+
+    private fun opprett(query: String, params: Map<String, Any?>, loggtekst: String) =
+        using(sessionOf(datasource)) { session ->
+            queryOf(
+                statement = query,
+                paramMap = params
+            )
+                .also { logger.info(loggtekst) }
+                .let { session.run(it.asExecute) }
         }
 
     // Kan det finnes flere vedtak for en behandling? Hør med Henrik
@@ -149,7 +157,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         sakId = longOrNull("sakid"),
         behandlingId = uuid("behandlingid"),
         saksbehandlerId = stringOrNull("saksbehandlerid"),
-        beregningsResultat = stringOrNull("beregningsresultat").let {
+        beregningsResultat = stringOrNull("beregningsresultat")?.let {
             objectMapper.readValue(
                 it,
                 Beregningsresultat::class.java
@@ -274,9 +282,6 @@ private fun PreparedStatement.setUUID(index: Int, id: UUID) = setObject(index, i
 
 private fun PreparedStatement.setVedtakstatus(index: Int, vedtakStatus: VedtakStatus) =
     setString(index, vedtakStatus.name)
-
-private fun <T> PreparedStatement.setJSONString(index: Int, obj: T) =
-    setString(index, objectMapper.writeValueAsString(obj))
 
 fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> = generateSequence {
     if (next()) {

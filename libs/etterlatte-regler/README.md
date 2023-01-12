@@ -50,7 +50,7 @@ antall perioder.
 ### Regelflyt
 Vanligvis vil det være behov for å definere flere ulike regler med avhengigheter til hverandre. Rammeverket
 har støtte for å sette sammen regler i en regelflyt ved bruk av ulike regeltyper. Eksempler på ulike typer
-regler er `transformer`, `kombiner`, `definerKonstant`, `finnFaktumIGrunnlag`, `velgNyesteGyldige` osv. Her er det god
+regler er `benytter`, `definerKonstant`, `finnFaktumIGrunnlag`, `velgNyesteGyldige` osv. Her er det god
 fleksibilitet for å definere flere typer ved behov for dette. 
 
 ### Regel
@@ -68,7 +68,7 @@ val trygdetidsFaktor = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Finn trygdetidsfaktor",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-TRYGDETIDSFAKTOR")
-) kombinerer maksTrygdetid og trygdetidRegel med { maksTrygdetid, trygdetid ->
+) benytter maksTrygdetid og trygdetidRegel med { maksTrygdetid, trygdetid ->
     minOf(trygdetid, maksTrygdetid) / maksTrygdetid
 }
 ```

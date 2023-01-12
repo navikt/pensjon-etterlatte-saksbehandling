@@ -131,6 +131,20 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             }
     }
 
+    private fun <T> hentListeMedKotliquery(
+        query: String,
+        params: Map<String, Any>,
+        converter: (r: Row) -> T
+    ): List<T> = using(sessionOf(datasource)) { session ->
+        queryOf(statement = query, paramMap = params)
+            .let { query ->
+                session.run(
+                    query.map { row -> converter.invoke(row) }
+                        .asList
+                )
+            }
+    }
+
     private fun Row.toVedtak() = Vedtak(
         sakId = longOrNull("sakid"),
         behandlingId = uuid("behandlingid"),
@@ -154,21 +168,19 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         behandlingType = BehandlingType.valueOf(string("behandlingtype"))
     )
 
-    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = connection.use {
-        val hentUtbetalingsperiode = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?"
-        val statement = it.prepareStatement(hentUtbetalingsperiode)
-        statement.setLong(1, vedtakId)
-        statement.executeQuery().toList {
-            Utbetalingsperiode(
-                getLong("id"),
-                Periode(
-                    YearMonth.from(getDate("datoFom").toLocalDate()),
-                    getDate("datoTom")?.toLocalDate()?.let(YearMonth::from)
-                ),
-                getBigDecimal("beloep"),
-                UtbetalingsperiodeType.valueOf(getString("type"))
-            )
-        }
+    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = hentListeMedKotliquery(
+        query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?",
+        params = mapOf("vedtakid" to vedtakId)
+    ) {
+        Utbetalingsperiode(
+            it.long("id"),
+            Periode(
+                YearMonth.from(it.localDate("datoFom")),
+                it.localDateOrNull("datoTom")?.let(YearMonth::from)
+            ),
+            it.bigDecimalOrNull("beloep"),
+            UtbetalingsperiodeType.valueOf(it.string("type"))
+        )
     }
 
     private inline fun <reified T> ResultSet.getJsonObject(c: Int): T? = getString(c)?.let {

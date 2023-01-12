@@ -2,9 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering.database
 
 import kotliquery.Row
 import kotliquery.Session
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
@@ -16,7 +13,6 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.vedtaksvurdering.Beregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -27,8 +23,9 @@ import javax.sql.DataSource
 
 class VedtaksvurderingRepository(private val datasource: DataSource) {
 
-    private val logger = LoggerFactory.getLogger(VedtaksvurderingRepository::class.java)
     private val connection get() = datasource.connection
+
+    private val repositoryProxy: RepositoryProxy = RepositoryProxy(datasource)
 
     companion object {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
@@ -43,7 +40,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         virkningsDato: LocalDate,
         beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto
-    ) = opprett(
+    ) = repositoryProxy.opprett(
         query = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) " + // ktlint-disable max-line-length
             "VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :datovirkfom, :beregningsresultat, :vilkaarsresultat)", // ktlint-disable max-line-length
         params = mapOf(
@@ -65,7 +62,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto,
         virkningsDato: LocalDate
-    ) = oppdater(
+    ) = repositoryProxy.oppdater(
         query = "UPDATE vedtak SET datovirkfom = :datovirkfom, beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat WHERE behandlingId = :behandlingid", // ktlint-disable max-line-length
         params = mapOf(
             "datovirkfom" to Date.valueOf(virkningsDato),
@@ -76,36 +73,16 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         loggtekst = "Oppdaterer vedtak behandlingid: $behandlingsId "
     ).also { require(it == 1) }
 
-    private fun oppdater(query: String, params: Map<String, Any>, loggtekst: String) =
-        using(sessionOf(datasource)) { session ->
-            queryOf(
-                statement = query,
-                paramMap = params
-            )
-                .also { logger.info(loggtekst) }
-                .let { session.run(it.asUpdate) }
-        }
-
-    private fun opprett(query: String, params: Map<String, Any?>, loggtekst: String) =
-        using(sessionOf(datasource)) { session ->
-            queryOf(
-                statement = query,
-                paramMap = params
-            )
-                .also { logger.info(loggtekst) }
-                .let { session.run(it.asExecute) }
-        }
-
     // Kan det finnes flere vedtak for en behandling? Hør med Henrik
     fun lagreIverksattVedtak(
         behandlingsId: UUID
-    ) = oppdater(
+    ) = repositoryProxy.oppdater(
         query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
         params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingsId),
         loggtekst = "Lagrer iverksatt vedtak"
     ).also { require(it == 1) }
 
-    fun hentVedtakBolk(behandlingsidenter: List<UUID>) = hentListeMedKotliquery(
+    fun hentVedtakBolk(behandlingsidenter: List<UUID>) = repositoryProxy.hentListeMedKotliquery(
         query = "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat," +
             "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
             "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(?)",
@@ -117,35 +94,10 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     fun hentVedtak(behandlingsId: UUID): Vedtak? {
         val hentVedtak =
             "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = :behandlingId" // ktlint-disable max-line-length
-        return hentMedKotliquery(query = hentVedtak, params = mapOf("behandlingId" to behandlingsId)) { it.toVedtak() }
-    }
-
-    private fun <T> hentMedKotliquery(
-        query: String,
-        params: Map<String, Any>,
-        converter: (r: Row) -> T
-    ) = using(sessionOf(datasource)) { session ->
-        queryOf(statement = query, paramMap = params)
-            .let { query ->
-                session.run(
-                    query.map { row -> converter.invoke(row) }
-                        .asSingle
-                )
-            }
-    }
-
-    private fun <T> hentListeMedKotliquery(
-        query: String,
-        params: (s: Session) -> Map<String, Any?>,
-        converter: (r: Row) -> T
-    ): List<T> = using(sessionOf(datasource)) { session ->
-        queryOf(statement = query, paramMap = params.invoke(session))
-            .let { query ->
-                session.run(
-                    query.map { row -> converter.invoke(row) }
-                        .asList
-                )
-            }
+        return repositoryProxy.hentMedKotliquery(
+            query = hentVedtak,
+            params = mapOf("behandlingId" to behandlingsId)
+        ) { it.toVedtak() }
     }
 
     private fun Row.toVedtak() = Vedtak(
@@ -171,7 +123,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         behandlingType = BehandlingType.valueOf(string("behandlingtype"))
     )
 
-    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = hentListeMedKotliquery(
+    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = repositoryProxy.hentListeMedKotliquery(
         query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
         params = { mapOf("vedtakid" to vedtakId) }
     ) {
@@ -186,7 +138,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         )
     }
 
-    fun fattVedtak(saksbehandlerId: String, behandlingsId: UUID) = oppdater(
+    fun fattVedtak(saksbehandlerId: String, behandlingsId: UUID) = repositoryProxy.oppdater(
         query = "UPDATE vedtak SET saksbehandlerId = :saksbehandlerId, vedtakfattet = :vedtakfattet, datoFattet = now(), vedtakstatus = :vedtakstatus  WHERE behandlingId = :behandlingId", // ktlint-disable max-line-lengt
         params = mapOf(
             "saksbehandlerId" to saksbehandlerId,
@@ -238,7 +190,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     fun underkjennVedtak(
         behandlingsId: UUID
     ) {
-        oppdater(
+        repositoryProxy.oppdater(
             "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
             params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingsId),
             loggtekst = "Underkjenner vedtak for behandling $behandlingsId"

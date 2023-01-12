@@ -60,7 +60,7 @@ internal class RegelkjoeringTest {
         when (val perioder = velgNyesteGyldigeRegel.eksekver(grunnlag, RegelPeriode(gjelderFra2021))) {
             is RegelkjoeringResultat.Suksess -> {
                 perioder.periodiserteResultater shouldHaveSize 3
-                perioder.periodiserteResultater shouldContainExactly setOf(
+                perioder.periodiserteResultater.map { it.periode } shouldContainExactly setOf(
                     RegelPeriode(gjelderFra2021, gjelderFra2022.minusDays(1)),
                     RegelPeriode(gjelderFra2022, gjelderFra2023.minusDays(1)),
                     RegelPeriode(gjelderFra2023)

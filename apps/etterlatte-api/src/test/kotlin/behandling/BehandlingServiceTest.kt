@@ -6,8 +6,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.behandling.BehandlingListe
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -19,7 +17,6 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -27,8 +24,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.typer.LagretHendelse
 import no.nav.etterlatte.typer.LagretHendelser
-import no.nav.etterlatte.typer.Sak
-import no.nav.etterlatte.typer.Saker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -68,28 +63,6 @@ internal class BehandlingServiceTest {
     }
     private val accessToken = UUID.randomUUID().toString()
     private val fnr = "11057523044"
-
-    @Test
-    fun hentSaker() {
-        val saker = Saker(listOf(Sak(fnr, SoeknadType.BARNEPENSJON.name, 43)))
-        coEvery { behandlingKlient.hentSaker(accessToken) } returns saker
-
-        val respons = runBlocking { service.hentSaker(accessToken) }
-
-        assertEquals(1, respons.saker.size)
-        assertEquals(saker.saker.first(), respons.saker.first())
-    }
-
-    @Test
-    fun hentBehandlingerForSak() {
-        val behandling = BehandlingSammendrag(UUID.randomUUID(), 4, null, null, null, null, null)
-        coEvery { behandlingKlient.hentBehandlingerForSak(4, accessToken) } returns BehandlingListe(listOf(behandling))
-
-        val respons = runBlocking { service.hentBehandlingerForSak(4, accessToken) }
-
-        assertEquals(1, respons.behandlinger.size)
-        assertEquals(behandling.id, respons.behandlinger.first().id)
-    }
 
     @Test
     fun hentBehandling() {

@@ -76,9 +76,9 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             "behandlingid" to behandlingsId
         ),
         loggtekst = "Oppdaterer vedtak behandlingid: $behandlingsId "
-    )
+    ).also { require(it == 1) }
 
-    private fun oppdater(query: String, params: Map<String, Any>, loggtekst: String) {
+    private fun oppdater(query: String, params: Map<String, Any>, loggtekst: String) =
         using(sessionOf(datasource)) { session ->
             queryOf(
                 statement = query,
@@ -86,9 +86,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             )
                 .also { logger.info(loggtekst) }
                 .let { session.run(it.asUpdate) }
-                .also { require(it == 1) }
         }
-    }
 
     // Kan det finnes flere vedtak for en behandling? Hør med Henrik
     fun lagreIverksattVedtak(
@@ -97,7 +95,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
         params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT, "behandlingId" to behandlingsId),
         loggtekst = "Lagrer iverksatt vedtak"
-    )
+    ).also { require(it == 1) }
 
     fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> = connection
         .also { logger.info("Henter alle vedtak") }
@@ -237,15 +235,11 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     fun underkjennVedtak(
         behandlingsId: UUID
     ) {
-        connection.use {
-            val underkjennVedtak =
-                "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
-            it.prepareStatement(underkjennVedtak).run {
-                setVedtakstatus(1, VedtakStatus.RETURNERT)
-                setUUID(2, behandlingsId)
-                execute()
-            }
-        }
+        oppdater(
+            "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
+            params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT, "behandlingId" to behandlingsId),
+            loggtekst = "Underkjenner vedtak for behandling $behandlingsId"
+        )
     }
 
     private fun ResultSet.toVedtak() = Vedtak(

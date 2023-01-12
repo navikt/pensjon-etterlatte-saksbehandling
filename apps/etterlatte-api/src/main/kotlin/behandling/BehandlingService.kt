@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
@@ -10,7 +9,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.S
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
 import no.nav.etterlatte.typer.LagretHendelser
-import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.*
@@ -23,16 +21,6 @@ class BehandlingService(
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
-
-    suspend fun hentSaker(accessToken: String): Saker {
-        logger.info("Henter alle saker")
-        return behandlingKlient.hentSaker(accessToken)
-    }
-
-    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe {
-        logger.info("Henter behandlinger for sak $sakId")
-        return behandlingKlient.hentBehandlingerForSak(sakId, accessToken)
-    }
 
     suspend fun hentBehandling(behandlingId: String, accessToken: String) = coroutineScope {
         logger.info("Henter behandling")

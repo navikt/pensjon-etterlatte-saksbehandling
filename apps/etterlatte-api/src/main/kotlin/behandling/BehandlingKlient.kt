@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.objectMapper
@@ -11,14 +10,11 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.typer.LagretHendelser
-import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.YearMonth
 
 interface EtterlatteBehandling {
-    suspend fun hentSaker(accessToken: String): Saker
-    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
     suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser
     suspend fun opprettManueltOpphoer(manueltOpphoerRequest: ManueltOpphoerRequest, accessToken: String):
@@ -39,46 +35,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
 
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
-
-    override suspend fun hentSaker(accessToken: String): Saker {
-        try {
-            logger.info("Henter alle saker")
-
-            val json = downstreamResourceClient
-                .get(
-                    Resource(
-                        clientId,
-                        "$resourceUrl/saker"
-                    ),
-                    accessToken
-                ).mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            return objectMapper.readValue(json.toString(), Saker::class.java)
-        } catch (e: Exception) {
-            logger.error("Henting av saker fra behandling feilet", e)
-            throw e
-        }
-    }
-
-    override suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe {
-        logger.info("Henter alle behandlinger i en sak")
-
-        try {
-            val json =
-                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/sak/$sakId/behandlinger"), accessToken)
-                    .mapBoth(
-                        success = { json -> json },
-                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                    ).response
-            return objectMapper.readValue(json.toString(), BehandlingListe::class.java)
-        } catch (e: Exception) {
-            logger.error("Henting av behandlinger feilet", e)
-            throw e
-        }
-    }
 
     override suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandling {
         logger.info("Henter behandling")

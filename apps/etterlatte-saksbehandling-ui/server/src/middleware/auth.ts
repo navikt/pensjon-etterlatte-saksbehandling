@@ -7,6 +7,10 @@ import { parseJwt } from '../utils/parsejwt'
 export const hasBeenIssued = (issuedAtTime: number) => issuedAtTime < utcSecondsSinceEpoch() // sjekker at issued-date har vært
 export const hasExpired = (expires: number) => expires < utcSecondsSinceEpoch()
 
+interface SaksbehandlerIdentMedEnhet {
+  [key: string]: string
+}
+
 export const authenticateUser = (req: Request, res: Response, next: NextFunction) => {
   /* NAIS notes
         Token Validation
@@ -44,8 +48,8 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
     const NAVident = parsedToken.NAVident
     const cluster = process.env.NAIS_CLUSTER_NAME
     if (['prod-gcp', 'dev-gcp'].includes(cluster!!)) {
-      const saksbehandlere = process.env.saksbehandlere?.split(':')
-      if (!saksbehandlere?.includes(NAVident)) {
+      const saksbehandlere: SaksbehandlerIdentMedEnhet = JSON.parse(process.env.saksbehandlere!!)
+      if (!Object.keys(saksbehandlere).includes(NAVident)) {
         logger.error(`Saksbehandler utenfor scope forsøke å logge på, ident: ${NAVident}`)
         return res.status(401).send('Saksbehandler mangler tilgang')
       }

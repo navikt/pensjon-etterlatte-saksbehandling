@@ -24,7 +24,7 @@ class SakOgBehandlingService(
                 soeker = grunnlag.mapSoeker(),
                 avdoed = grunnlag.mapAvdoed()
             ),
-            vedtak = ForenkletVedtak(vedtak.vedtakId, vedtak.type),
+            vedtak = ForenkletVedtak(vedtak.vedtakId, vedtak.type, vedtak.vedtakFattet?.ansvarligEnhet!!),
             utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )
     }

@@ -6,16 +6,9 @@ plugins {
 
 dependencies {
     implementation(project(":libs:etterlatte-ktor"))
-
-    implementation(Ktor2.CallLogging)
-    implementation(Ktor2.StatusPages)
-    implementation(Ktor2.ServerContentNegotiation)
-    implementation(NavFelles.TokenValidationKtor2)
-
+    implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:common"))
-    implementation(Database.Postgresql)
-    implementation(Database.HikariCP)
     implementation(Database.FlywayDB)
     implementation(Database.KotliQuery)
 

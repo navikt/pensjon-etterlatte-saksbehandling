@@ -15,6 +15,7 @@ interface GrunnlagClient {
 class GrunnlagClientImpl(private val grunnlagHttpClient: HttpClient) : GrunnlagClient {
 
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
+        println("kun endring for test")
         return grunnlagHttpClient.get("grunnlag/$sakId") {
             accept(ContentType.Application.Json)
         }.body()

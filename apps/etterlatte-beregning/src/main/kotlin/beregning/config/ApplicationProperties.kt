@@ -1,9 +1,12 @@
-package no.nav.etterlatte.config
+package no.nav.etterlatte.beregning.config
+
+import no.nav.etterlatte.libs.database.jdbcUrl
 
 class ApplicationProperties(
     val jdbcUrl: String,
     val dbUsername: String,
-    val dbPassword: String
+    val dbPassword: String,
+    val httpPort: Int
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) = env.run {
@@ -14,14 +17,15 @@ class ApplicationProperties(
                     value("DB_DATABASE")
                 ),
                 dbUsername = value("DB_USERNAME"),
-                dbPassword = value("DB_PASSWORD")
+                dbPassword = value("DB_PASSWORD"),
+                httpPort = valueOrNull("HTTP_PORT")?.toInt() ?: 8080
             )
         }
 
         private fun Map<String, String>.value(property: String): String =
             requireNotNull(this[property]) { "Property $property was null" }
+
+        private fun Map<String, String>.valueOrNull(property: String): String? =
+            this[property]
     }
 }
-
-private fun jdbcUrl(host: String, port: Int, databaseName: String) =
-    "jdbc:postgresql://$host:$port/$databaseName"

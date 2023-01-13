@@ -1,4 +1,4 @@
-package no.nav.etterlatte.model
+package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode

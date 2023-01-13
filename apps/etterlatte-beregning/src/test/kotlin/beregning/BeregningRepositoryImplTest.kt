@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.beregning
 
 import io.mockk.mockk
 import io.mockk.mockkClass
@@ -9,8 +9,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.model.Beregning
-import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll

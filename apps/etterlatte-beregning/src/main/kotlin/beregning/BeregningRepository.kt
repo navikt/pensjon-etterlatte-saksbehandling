@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.beregning
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
@@ -12,8 +12,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.model.Beregning
-import no.nav.etterlatte.model.BeregningsperiodeDAO
 import java.io.Serializable
 import java.time.YearMonth
 import java.util.*

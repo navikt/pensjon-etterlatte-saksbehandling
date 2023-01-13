@@ -1,10 +1,9 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.config
 
 class ApplicationProperties(
     val jdbcUrl: String,
     val dbUsername: String,
     val dbPassword: String
-
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) = env.run {

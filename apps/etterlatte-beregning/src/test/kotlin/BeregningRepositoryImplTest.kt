@@ -6,16 +6,16 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.model.Beregning
 import no.nav.etterlatte.model.BeregningService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.YearMonth
@@ -31,13 +31,13 @@ internal class BeregningRepositoryImplTest {
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
-        val ds = DataSourceBuilder(
+        val ds = DataSourceBuilder.createDataSource(
             postgreSQLContainer.jdbcUrl,
             postgreSQLContainer.username,
             postgreSQLContainer.password
         ).also { it.migrate() }
 
-        beregningRepository = BeregningRepositoryImpl(ds.dataSource())
+        beregningRepository = BeregningRepositoryImpl(ds)
     }
 
     @AfterAll

@@ -8,8 +8,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.model.BeregningService
-import no.nav.etterlatte.model.getAccessToken
 
 fun Route.beregning(beregningService: BeregningService) {
     route("/api/beregning") {
@@ -25,8 +25,7 @@ fun Route.beregning(beregningService: BeregningService) {
 
         post("/{behandlingId}") {
             withBehandlingId {
-                val accessToken = getAccessToken(call)
-                val beregning = beregningService.lagreBeregning(it, accessToken)
+                val beregning = beregningService.lagreBeregning(it, accesstoken)
                 call.respond(beregning.toDTO())
             }
         }

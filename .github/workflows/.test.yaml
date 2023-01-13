@@ -18,11 +18,3 @@ jobs:
           cache: gradle
       - name: Gradle test and build
         run: ./gradlew :apps:${{ github.workflow }}:test
-      - name: Build and publish docker image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker build --tag ${{ env.image }} --tag {{ env.GITHUB_REF_NAME }} -f docker/Dockerfile apps/${{ github.workflow }}
-          docker push ${{ env.image }}
-

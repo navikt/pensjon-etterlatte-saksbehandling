@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
+      branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.base_ref }}
     outputs:
       image: ${{ env.image }}
     steps:
@@ -34,4 +35,6 @@ jobs:
         run: |
           docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker build --tag ${{ env.image }} -f docker/Dockerfile apps/${{ github.workflow }}
+          docker tag ${{ env.image }} ${{ env.branch-image }}
           docker push ${{ env.image }}
+          docker push ${{ env.branch-image }}

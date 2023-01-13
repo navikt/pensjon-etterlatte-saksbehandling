@@ -1,19 +1,18 @@
-package no.nav.etterlatte.libs.regler.beregning
+package no.nav.etterlatte.libs.regler.beregning.barnepensjon1967
 
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
-import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.BP_1967_DATO
-import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.beregnBarnepensjon1967Regel
-import no.nav.etterlatte.libs.regler.beregning.barnepensjon2024.beregnBarnepensjon2024Regel
+import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.barnekull.barnepensjonSatsRegel
+import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
-import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDate
 
-val toDoRegelReferanse = RegelReferanse("ToDo")
+val BP_1967_DATO: LocalDate = LocalDate.of(1967, 1, 1)
 
 data class AvdoedForelder(val trygdetid: BigDecimal)
 data class BarnepensjonGrunnlag(
@@ -22,16 +21,18 @@ data class BarnepensjonGrunnlag(
     val avdoedForelder: FaktumNode<AvdoedForelder>
 )
 
-val beregnBarnepensjonRegel = RegelMeta(
+val beregnBarnepensjon1967Regel = RegelMeta(
     gjelderFra = BP_1967_DATO,
-    beskrivelse = "Velger hvilke regelverk som skal anvendes for beregning av barnepensjon",
-    regelReferanse = toDoRegelReferanse
-) velgNyesteGyldige (beregnBarnepensjon1967Regel og beregnBarnepensjon2024Regel)
+    beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID")
+) benytter barnepensjonSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
+    (sats * trygdetidsfaktor)
+}
 
 val kroneavrundetBarnepensjonRegel = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Gjør en kroneavrunding av barnepensjonen",
     regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING")
-) benytter beregnBarnepensjonRegel med { beregnetBarnepensjon ->
+) benytter beregnBarnepensjon1967Regel med { beregnetBarnepensjon ->
     beregnetBarnepensjon.setScale(0, RoundingMode.HALF_UP).toInt()
 }

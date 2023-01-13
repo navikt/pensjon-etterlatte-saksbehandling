@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":libs:common"))
+    implementation(project(":libs:etterlatte-regler"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:ktor2client-onbehalfof"))
@@ -30,6 +31,7 @@ dependencies {
     testImplementation(TestContainer.Postgresql)
 
     testImplementation(MockK.MockK)
+    testImplementation(Kotest.AssertionsCore)
     testImplementation(Kotlinx.CoroutinesCore)
     testImplementation(project(":libs:testdata"))
 }

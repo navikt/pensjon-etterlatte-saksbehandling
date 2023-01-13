@@ -9,3 +9,4 @@ data class KildeSaksbehandler(
 )
 
 val saksbehandler = KildeSaksbehandler("Z12345")
+val toDoRegelReferanse = RegelReferanse("ToDo")

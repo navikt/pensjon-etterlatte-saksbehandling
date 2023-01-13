@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.regler
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.libs.regler.beregning.toDoRegelReferanse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 

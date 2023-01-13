@@ -1,11 +1,11 @@
-package no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.barnekull
+package no.nav.etterlatte.beregning.regler.sats
 
+import no.nav.etterlatte.beregning.regler.BP_1967_DATO
+import no.nav.etterlatte.beregning.regler.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
-import no.nav.etterlatte.libs.regler.beregning.BarnepensjonGrunnlag
-import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.BP_1967_DATO
 import no.nav.etterlatte.libs.regler.definerKonstant
 import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
@@ -53,7 +53,7 @@ private val belopForEtterfoelgendeBarn = RegelMeta(
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-FLERBARN")
 ) multipliser (prosentsatsEtterfoelgendeBarnKonstant og grunnbeloep)
 
-val barnekullRegel = RegelMeta(
+val barnepensjonSatsRegel = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET")

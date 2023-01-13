@@ -59,6 +59,14 @@ internal class DBTest {
         dsb.migrate()
     }
 
+    private fun settOppService() = VedtaksvurderingService(
+        VedtaksvurderingRepository(dataSource),
+        beregning,
+        vilkaarsvurdering,
+        behandling,
+        sendToRapid
+    )
+
     @AfterAll
     fun afterAll() {
         postgreSQLContainer.stop()
@@ -78,8 +86,8 @@ internal class DBTest {
 
     @Test
     fun testDB() {
-        val uuid = UUID.randomUUID()
-        val vedtaksvurderingService = settOpp(uuid)
+        val vedtaksvurderingService = settOppService()
+        val uuid = UUID.randomUUID().also { settOpp(it) }
 
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, "access")
@@ -115,16 +123,7 @@ internal class DBTest {
         Assertions.assertEquals(VedtakStatus.IVERKSATT, iverksattVedtak?.vedtakStatus)
     }
 
-    private fun settOpp(uuid: UUID): VedtaksvurderingService {
-        val vedtakRepo = VedtaksvurderingRepository(dataSource)
-        val vedtaksvurderingService = VedtaksvurderingService(
-            vedtakRepo,
-            beregning,
-            vilkaarsvurdering,
-            behandling,
-            sendToRapid
-        )
-
+    private fun settOpp(uuid: UUID) {
         val beregningDTO = BeregningDTO(
             UUID.randomUUID(),
             uuid,
@@ -134,8 +133,8 @@ internal class DBTest {
             ),
             Metadata(1L, 1L)
         )
-        coEvery { beregning.hentBeregning(any(), any()) } returns beregningDTO
-        coEvery { behandling.hentBehandling(any(), any()) } returns DetaljertBehandling(
+        coEvery { beregning.hentBeregning(uuid, any()) } returns beregningDTO
+        coEvery { behandling.hentBehandling(uuid, any()) } returns DetaljertBehandling(
             uuid,
             sakId,
             LocalDateTime.now(),
@@ -157,34 +156,33 @@ internal class DBTest {
             every { ident } returns "ident"
             every { sakType } returns SakType.BARNEPENSJON
         }
-        coEvery { vilkaarsvurdering.hentVilkaarsvurdering(any(), any()) } returns VilkaarsvurderingTestData
+        coEvery { vilkaarsvurdering.hentVilkaarsvurdering(uuid, any()) } returns VilkaarsvurderingTestData
             .oppfylt.copy(
                 behandlingId = uuid
             )
-        coEvery { behandling.fattVedtak(any(), any(), any()) } returns true
-        coEvery { behandling.attester(any(), any(), any()) } returns true
-        coEvery { behandling.underkjenn(any(), any(), any()) } returns true
-        return vedtaksvurderingService
+        coEvery { behandling.fattVedtak(uuid, any(), any()) } returns true
+        coEvery { behandling.attester(uuid, any(), any()) } returns true
+        coEvery { behandling.underkjenn(uuid, any(), any()) } returns true
     }
 
     @Test
     fun `kan hente vedtak i bolk`() {
-        val behandlingId = UUID.randomUUID()
-        val vedtaksvurderingService = settOpp(behandlingId)
+        val vedtaksvurderingService = settOppService()
+        val behandling1Id = UUID.randomUUID().also { settOpp(it) }
+        val behandling2Id = UUID.randomUUID().also { settOpp(it) }
+        val behandling3Id = UUID.randomUUID().also { settOpp(it) }
 
         runBlocking {
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandlingId, "access")
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandling1Id, "access")
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandling2Id, "access")
         }
 
-        val vedtaket: Vedtak? = vedtaksvurderingService.hentFellesvedtak(behandlingId)
+        runBlocking {
+            vedtaksvurderingService.fattVedtak(behandling1Id, "saksbehandler", accessToken)
+            vedtaksvurderingService.fattVedtak(behandling2Id, "saksbehandler", accessToken)
+        }
 
-        assert(vedtaket?.beregning != null)
-        assert(vedtaket?.vilkaarsvurdering != null)
-        assert(vedtaket?.sak?.id != null)
-        Assertions.assertNotNull(vedtaket?.virk)
-
-        runBlocking { vedtaksvurderingService.fattVedtak(behandlingId, "saksbehandler", accessToken) }
-
-        vedtaksvurderingService.hentVedtakBolk(listOf(behandlingId))
+        val vedtakene = vedtaksvurderingService.hentVedtakBolk(listOf(behandling1Id, behandling2Id, behandling3Id))
+        Assertions.assertEquals(2, vedtakene.map { it.id }.distinct().size)
     }
 }

@@ -57,7 +57,9 @@ internal class VedtaksvurderingServiceTest {
         null,
         null,
         null,
-        BehandlingType.FØRSTEGANGSBEHANDLING
+        BehandlingType.FØRSTEGANGSBEHANDLING,
+        null,
+        null
     )
 
     @Test

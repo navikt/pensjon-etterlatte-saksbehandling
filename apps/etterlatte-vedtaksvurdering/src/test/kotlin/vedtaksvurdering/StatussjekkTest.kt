@@ -43,6 +43,7 @@ class StatussjekkTest {
     private val behandlingId = UUID.randomUUID()
 
     private lateinit var vedtakRepo: VedtaksvurderingRepository
+    private val saksbehandlereSecret = mapOf("saksbehandler" to "4808")
 
     @BeforeAll
     fun beforeAll() {
@@ -99,7 +100,7 @@ class StatussjekkTest {
         opprettVedtak()
 
         runBlocking {
-            vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, accessToken)
+            vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, saksbehandlereSecret, accessToken)
         }
 
         coVerifyOrder {
@@ -120,11 +121,11 @@ class StatussjekkTest {
         )
         coEvery { behandling.fattVedtak(any(), any(), any()) } returns true
         opprettVedtak()
-        vedtakRepo.fattVedtak(saksbehandler, behandlingId)
+        vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
 
         runBlocking {
             assertThrows<Exception> {
-                vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, accessToken)
+                vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, saksbehandlereSecret, accessToken)
             }
         }
 
@@ -144,10 +145,10 @@ class StatussjekkTest {
             sendToRapid
         )
         opprettVedtak()
-        vedtakRepo.fattVedtak(saksbehandler, behandlingId)
+        vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
 
         runBlocking {
-            vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, accessToken)
+            vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, saksbehandlereSecret, accessToken)
         }
 
         coVerifyOrder {
@@ -171,7 +172,7 @@ class StatussjekkTest {
 
         runBlocking {
             assertThrows<Exception> {
-                vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, accessToken)
+                vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, saksbehandlereSecret, accessToken)
             }
         }
 
@@ -191,7 +192,7 @@ class StatussjekkTest {
             sendToRapid
         )
         opprettVedtak()
-        vedtakRepo.fattVedtak(saksbehandler, behandlingId)
+        vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
 
         runBlocking {
             vedtaksvurderingService.underkjennVedtak(behandlingId, accessToken)

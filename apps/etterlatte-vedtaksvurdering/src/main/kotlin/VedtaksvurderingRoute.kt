@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 private val logger = LoggerFactory.getLogger("RouteApi")
-fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
+fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, saksbehandlere: Map<String, String>) {
     route("api") {
         get("behandlinger/{behandlingId}/vedtak") {
             withBehandlingId { behandlingId ->
@@ -57,7 +57,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         post("vedtak/attester/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                val attestert = service.attesterVedtak(behandlingId, saksbehandler, accesstoken)
+                val attestert = service.attesterVedtak(behandlingId, saksbehandler, saksbehandlere, accesstoken)
                 val vedtakHendelse = VedtakHendelse(
                     vedtakId = attestert.vedtakId,
                     inntruffet = Tidspunkt.now(),
@@ -78,7 +78,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         post("vedtak/fattvedtak/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                val fattetVedtak = service.fattVedtak(behandlingId, saksbehandler, accesstoken)
+                val fattetVedtak = service.fattVedtak(behandlingId, saksbehandler, saksbehandlere, accesstoken)
 
                 val vedtakHendelse = VedtakHendelse(
                     vedtakId = fattetVedtak.vedtakId,

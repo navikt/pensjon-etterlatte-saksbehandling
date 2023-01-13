@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
@@ -63,11 +64,18 @@ class ApplicationBuilder {
         behandlingKlient,
         ::publiser
     )
+    private fun getSaksbehandlere(): Map<String, String> {
+        val saksbehandlereSecret = env["saksbehandlere"]!!
+        return objectMapper.readValue(
+            saksbehandlereSecret,
+            object : TypeReference<Map<String, String>>() {}
+        )
+    }
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {
-                restModule(vedtaksvurderingService = vedtaksvurderingService)
+                restModule(vedtaksvurderingService = vedtaksvurderingService, saksbehandlere = getSaksbehandlere())
             }
             .build()
             .apply {
@@ -80,7 +88,8 @@ class ApplicationBuilder {
 }
 
 fun Application.restModule(
-    vedtaksvurderingService: VedtaksvurderingService
+    vedtaksvurderingService: VedtaksvurderingService,
+    saksbehandlere: Map<String, String>
 ) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
@@ -108,7 +117,7 @@ fun Application.restModule(
 
     routing {
         authenticate {
-            vedtaksvurderingRoute(vedtaksvurderingService)
+            vedtaksvurderingRoute(vedtaksvurderingService, saksbehandlere)
         }
     }
 }

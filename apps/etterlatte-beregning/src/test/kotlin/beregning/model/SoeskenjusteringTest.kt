@@ -1,4 +1,4 @@
-package no.nav.etterlatte.model
+package no.nav.etterlatte.beregning.model
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

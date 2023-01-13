@@ -1,8 +1,13 @@
-package no.nav.etterlatte.model
+package no.nav.etterlatte.beregning
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.BeregningRepository
+import no.nav.etterlatte.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
+import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.beregning.model.FinnSoeskenPeriode
+import no.nav.etterlatte.beregning.model.Grunnbeloep
+import no.nav.etterlatte.beregning.model.Soeskenjustering
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
@@ -15,9 +20,6 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.model.behandling.BehandlingKlient
-import no.nav.etterlatte.model.finnSoeskenperiode.FinnSoeskenPeriode
-import no.nav.etterlatte.model.grunnlag.GrunnlagKlient
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth

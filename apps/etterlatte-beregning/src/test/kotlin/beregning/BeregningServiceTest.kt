@@ -1,7 +1,9 @@
-package no.nav.etterlatte.model
+package no.nav.etterlatte.beregning
 
 import io.mockk.mockk
-import no.nav.etterlatte.BeregningRepository
+import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -10,8 +12,6 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
-import no.nav.etterlatte.model.behandling.BehandlingKlientImpl
-import no.nav.etterlatte.model.grunnlag.GrunnlagKlientImpl
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

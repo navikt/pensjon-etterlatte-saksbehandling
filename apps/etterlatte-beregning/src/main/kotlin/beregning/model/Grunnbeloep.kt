@@ -1,4 +1,4 @@
-package no.nav.etterlatte.model
+package no.nav.etterlatte.beregning.model
 
 import no.nav.etterlatte.libs.common.objectMapper
 import java.io.FileNotFoundException

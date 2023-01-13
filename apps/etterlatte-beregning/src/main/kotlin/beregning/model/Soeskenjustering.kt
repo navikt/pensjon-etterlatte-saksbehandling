@@ -1,6 +1,5 @@
-package no.nav.etterlatte.model
+package no.nav.etterlatte.beregning.model
 
-import no.nav.etterlatte.model.avrund.avrund
 import java.math.BigDecimal
 
 private val `0,4` = 0.4.toBigDecimal()

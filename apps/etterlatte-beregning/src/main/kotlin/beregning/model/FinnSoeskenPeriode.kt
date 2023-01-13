@@ -1,4 +1,4 @@
-package no.nav.etterlatte.model.finnSoeskenperiode
+package no.nav.etterlatte.beregning.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode

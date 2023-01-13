@@ -1,11 +1,11 @@
-package no.nav.etterlatte.libs.regler.beregning.barnepensjon1967
+package no.nav.etterlatte.beregning.regler
 
+import no.nav.etterlatte.beregning.regler.sats.barnepensjonSatsRegel
+import no.nav.etterlatte.beregning.regler.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
-import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.barnekull.barnepensjonSatsRegel
-import no.nav.etterlatte.libs.regler.beregning.barnepensjon1967.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import java.math.BigDecimal

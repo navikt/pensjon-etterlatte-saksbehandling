@@ -5,10 +5,10 @@ import { Heading } from '@navikt/ds-react'
 
 interface Props {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
-  kunLesetilgang: boolean
+  redigerbar: boolean
 }
 
-export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, kunLesetilgang }: Props) => (
+export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, redigerbar }: Props) => (
   <>
     <Heading size={'medium'} level={'2'}>
       Vurdering om pensjonen kommer barnet til gode
@@ -18,7 +18,7 @@ export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, kunLesetilgan
         <InfoWrapper>Har barnet samme adresse som den gjenlevende forelder?</InfoWrapper>
       </InfobokserWrapper>
       <VurderingsWrapper>
-        <KommerBarnetTilGodeVurdering kommerBarnetTilgode={kommerBarnetTilgode} kunLesetilgang={kunLesetilgang} />
+        <KommerBarnetTilGodeVurdering kommerBarnetTilgode={kommerBarnetTilgode} redigerbar={redigerbar} />
       </VurderingsWrapper>
     </SoeknadOversiktWrapper>
   </>

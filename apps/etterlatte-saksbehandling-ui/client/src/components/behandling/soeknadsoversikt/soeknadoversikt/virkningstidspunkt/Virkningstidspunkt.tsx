@@ -34,7 +34,7 @@ export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
 }
 
 interface Props {
-  kunLesetilgang: boolean
+  redigerbar: boolean
   behandling: IDetaljertBehandling
   virkningstidspunkt: Virkningstidspunkt | null
   avdoedDoedsdato: string | undefined
@@ -152,7 +152,7 @@ const Virkningstidspunkt = (props: Props) => {
                   ) : (
                     <Undertekst $gray>Ikke vurdert</Undertekst>
                   )}
-                  {!props.kunLesetilgang && (
+                  {props.redigerbar && (
                     <RedigerWrapper onClick={() => setRediger(true)}>
                       <Edit /> Rediger
                     </RedigerWrapper>

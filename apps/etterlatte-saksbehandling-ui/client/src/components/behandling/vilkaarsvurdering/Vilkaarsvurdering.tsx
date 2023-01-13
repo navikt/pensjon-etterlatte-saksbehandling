@@ -76,7 +76,7 @@ export const Vilkaarsvurdering = () => {
               vilkaar={value}
               oppdaterVilkaar={oppdaterVilkaarsvurdering}
               behandlingId={behandlingId}
-              kunLesetilgang={!behandles}
+              redigerbar={behandles}
             />
           ))}
 
@@ -85,7 +85,7 @@ export const Vilkaarsvurdering = () => {
             vilkaarsvurdering={vilkaarsvurdering}
             oppdaterVilkaar={oppdaterVilkaarsvurdering}
             behandlingId={behandlingId}
-            kunLesetilgang={!behandles}
+            redigerbar={behandles}
           />
         </>
       )}

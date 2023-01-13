@@ -17,12 +17,12 @@ export const Vurdering = ({
   vilkaar,
   oppdaterVilkaar,
   behandlingId,
-  kunLesetilgang,
+  redigerbar,
 }: {
   vilkaar: Vilkaar
   oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string
-  kunLesetilgang: boolean
+  redigerbar: boolean
 }) => {
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
   const [resultat, setResultat] = useState<VurderingsResultat>()
@@ -151,7 +151,7 @@ export const Vurdering = ({
             )}
           </KildeVilkaar>
 
-          {!kunLesetilgang && (
+          {redigerbar && (
             <>
               <RedigerWrapper onClick={redigerVilkaar}>
                 <Edit aria-hidden={'true'} />

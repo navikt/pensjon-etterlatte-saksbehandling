@@ -14,16 +14,12 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.vedtaksvurdering.Beregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import java.sql.Date
-import java.sql.PreparedStatement
-import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-class VedtaksvurderingRepository(private val datasource: DataSource) {
-
-    private val connection get() = datasource.connection
+class VedtaksvurderingRepository(datasource: DataSource) {
 
     private val repositoryProxy: RepositoryProxy = RepositoryProxy(datasource)
 
@@ -85,7 +81,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     fun hentVedtakBolk(behandlingsidenter: List<UUID>) = repositoryProxy.hentListeMedKotliquery(
         query = "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat," +
             "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
-            "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(?)",
+            "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(:behandlingId)",
         { session: Session -> mapOf("behandlingId" to session.createArrayOf("uuid", behandlingsidenter)) }
     ) {
         it.toVedtak()
@@ -155,58 +151,35 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         vedtakId: Long,
         utbetalingsperioder: List<Utbetalingsperiode>
     ) {
-        connection.use {
-            val lagreUtbetalingsperiode =
-                "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"
-            val insertPersoderStatement = it.prepareStatement(lagreUtbetalingsperiode)
-            utbetalingsperioder.forEach {
-                insertPersoderStatement.setLong(1, vedtakId)
-                insertPersoderStatement.setDate(2, it.periode.fom.atDay(1).let(Date::valueOf))
-                insertPersoderStatement.setDate(3, it.periode.tom?.atEndOfMonth()?.let(Date::valueOf))
-                insertPersoderStatement.setString(4, it.type.name)
-                insertPersoderStatement.setBigDecimal(5, it.beloep)
-
-                insertPersoderStatement.addBatch()
-            }
-            if (utbetalingsperioder.isNotEmpty()) {
-                insertPersoderStatement.executeBatch().forEach {
-                    require(it == 1)
-                }
-            }
-
-            val statement =
-                it.prepareStatement(
-                    "UPDATE vedtak SET attestant = ?, datoAttestert = now(), vedtakstatus = ? WHERE behandlingId = ?"
-                )
-            statement.run {
-                setString(1, saksbehandlerId)
-                setVedtakstatus(2, VedtakStatus.ATTESTERT)
-                setUUID(3, behandlingsId)
-                execute()
-            }
+        utbetalingsperioder.forEach {
+            repositoryProxy.opprett(
+                query = "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) " +
+                    "VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)",
+                params = mapOf(
+                    "vedtakid" to vedtakId,
+                    "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
+                    "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
+                    "type" to it.type.name,
+                    "beloep" to it.beloep
+                ),
+                loggtekst = "Attesterer vedtak"
+            )
         }
+        repositoryProxy.oppdater(
+            query = "UPDATE vedtak SET attestant = :attestant, datoAttestert = now(), vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
+            params = mapOf(
+                "attestant" to saksbehandlerId,
+                "vedtakstatus" to VedtakStatus.ATTESTERT.name,
+                "behandlingId" to behandlingsId
+            ),
+            loggtekst = "Attesterer vedtak $vedtakId"
+        ).also { require(it == 1) }
     }
 
-    fun underkjennVedtak(
-        behandlingsId: UUID
-    ) {
+    fun underkjennVedtak(behandlingsId: UUID) =
         repositoryProxy.oppdater(
             "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
             params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingsId),
             loggtekst = "Underkjenner vedtak for behandling $behandlingsId"
         )
-    }
 }
-
-private fun PreparedStatement.setUUID(index: Int, id: UUID) = setObject(index, id)
-
-private fun PreparedStatement.setVedtakstatus(index: Int, vedtakStatus: VedtakStatus) =
-    setString(index, vedtakStatus.name)
-
-fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> = generateSequence {
-    if (next()) {
-        block()
-    } else {
-        null
-    }
-}.toList()

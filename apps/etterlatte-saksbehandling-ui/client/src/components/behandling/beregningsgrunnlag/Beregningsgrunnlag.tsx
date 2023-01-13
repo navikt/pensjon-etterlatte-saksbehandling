@@ -89,16 +89,23 @@ const Beregningsgrunnlag = () => {
             <Controller
               name={`beregningsgrunnlag.${index}.skalBrukes`}
               control={control}
-              render={(soesken) => (
-                <RadioGroupRow
-                  legend="Oppdras sammen"
-                  value={soesken.field.value}
-                  onChange={(value: boolean) => soesken.field.onChange(value)}
-                >
-                  <Radio value={true}>Ja</Radio>
-                  <Radio value={false}>Nei</Radio>
-                </RadioGroupRow>
-              )}
+              render={(soesken) =>
+                behandles ? (
+                  <RadioGroupRow
+                    legend="Oppdras sammen"
+                    value={soesken.field.value}
+                    onChange={(value: boolean) => soesken.field.onChange(value)}
+                  >
+                    <Radio value={true}>Ja</Radio>
+                    <Radio value={false}>Nei</Radio>
+                  </RadioGroupRow>
+                ) : (
+                  <OppdrasSammenLes>
+                    <strong>Oppdras sammen</strong>
+                    <label>{soesken.field.value ? 'Ja' : 'Nei'}</label>
+                  </OppdrasSammenLes>
+                )
+              }
             />
           </SoeskenContainer>
         ))}
@@ -115,6 +122,11 @@ const Beregningsgrunnlag = () => {
     </Content>
   )
 }
+
+const OppdrasSammenLes = styled.div`
+  display: flex;
+  flex-direction: column;
+`
 
 const SoeskenContainer = styled.div`
   display: flex;

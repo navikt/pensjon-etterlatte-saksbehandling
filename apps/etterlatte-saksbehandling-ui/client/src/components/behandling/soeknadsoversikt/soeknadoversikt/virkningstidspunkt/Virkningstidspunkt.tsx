@@ -9,34 +9,45 @@ import { Calender, Edit } from '@navikt/ds-icons'
 import { RedigerWrapper } from '../kommerBarnetTilgode/KommerBarnetTilGodeVurdering'
 import { formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
-import { useApiCall, isPending, isFailure } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {
-  SoeknadOversiktWrapper,
-  InfobokserWrapper,
   Infoboks,
+  InfobokserWrapper,
+  SoeknadOversiktWrapper,
+  Undertekst,
   VurderingsContainer,
   VurderingsTitle,
-  Undertekst,
 } from '../../styled'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
+import { IDetaljertBehandling, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 
 export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
   return (
     <InfoElement>
-      <Label size="small" as={"p"}>{label}</Label>
+      <Label size="small" as={'p'}>
+        {label}
+      </Label>
       <div>{tekst}</div>
     </InfoElement>
   )
 }
 
-const Virkningstidspunkt = () => {
+interface Props {
+  redigerbar: boolean
+  behandling: IDetaljertBehandling
+  virkningstidspunkt: Virkningstidspunkt | null
+  avdoedDoedsdato: string | undefined
+  soeknadMottattDato: string
+  behandlingId: string
+}
+
+const Virkningstidspunkt = (props: Props) => {
   const dispatch = useAppDispatch()
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const [rediger, setRediger] = useState(false)
   const [formData, setFormData] = useState<Date | null>(
-    behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
+    props.virkningstidspunkt ? new Date(props.virkningstidspunkt.dato) : null
   )
   const [virkningstidspunkt, fastsettVirkningstidspunktRequest] = useApiCall(fastsettVirkningstidspunkt)
 
@@ -46,38 +57,34 @@ const Virkningstidspunkt = () => {
     datepickerRef.current.setFocus()
   }
 
-  const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
-
   return (
     <>
-      <Heading size={"medium"} level={"2"}>Virkningstidspunkt</Heading>
+      <Heading size={'medium'} level={'2'}>
+        Virkningstidspunkt
+      </Heading>
       <SoeknadOversiktWrapper>
         <InfobokserWrapper>
           <Infoboks>
             Barnepensjon innvilges tidligst fra og med måneden etter dødsfall, og kan gis for opptil tre år før måneden
             kravet ble satt fram
           </Infoboks>
-          <Info label="Dødsdato" tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : ''} />
-          <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
+          <Info label="Dødsdato" tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''} />
+          <Info label="Søknad mottatt" tekst={formaterStringDato(props.soeknadMottattDato)} />
           <Info
             label="Virkningstidspunkt"
-            tekst={
-              behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt.dato) : 'Ikke vurdert'
-            }
+            tekst={props.virkningstidspunkt ? formaterStringDato(props.virkningstidspunkt.dato) : 'Ikke vurdert'}
           />
         </InfobokserWrapper>
 
         <VurderingsContainer>
           <div>
             <GyldighetIcon
-              status={
-                behandling.virkningstidspunkt !== null ? VurderingsResultat.OPPFYLT : VurderingsResultat.IKKE_OPPFYLT
-              }
+              status={props.virkningstidspunkt !== null ? VurderingsResultat.OPPFYLT : VurderingsResultat.IKKE_OPPFYLT}
               large
             />
           </div>
           <div>
-            <VurderingsTitle title={"Virkningstidspunkt"} />
+            <VurderingsTitle title={'Virkningstidspunkt'} />
             <div>
               {rediger ? (
                 <>
@@ -112,7 +119,7 @@ const Virkningstidspunkt = () => {
                     <Button
                       onClick={() => {
                         if (!formData) return
-                        fastsettVirkningstidspunktRequest({ dato: formData, id: behandling.id }, (res) => {
+                        fastsettVirkningstidspunktRequest({ dato: formData, id: props.behandlingId }, (res) => {
                           dispatch(oppdaterVirkningstidspunkt(res))
                           setRediger(false)
                         })
@@ -133,21 +140,23 @@ const Virkningstidspunkt = () => {
                 </>
               ) : (
                 <div>
-                  {behandling.virkningstidspunkt ? (
+                  {props.virkningstidspunkt ? (
                     <>
-                      <Undertekst $gray>Manuelt av {behandling.virkningstidspunkt.kilde.ident}</Undertekst>
+                      <Undertekst $gray>Manuelt av {props.virkningstidspunkt.kilde.ident}</Undertekst>
                       <Undertekst $gray spacing>
                         {`Sist endret ${formaterStringDato(
-                          behandling.virkningstidspunkt.kilde.tidspunkt
-                        )} kl.${formaterStringTidspunkt(behandling.virkningstidspunkt.kilde.tidspunkt)}`}
+                          props.virkningstidspunkt.kilde.tidspunkt
+                        )} kl.${formaterStringTidspunkt(props.virkningstidspunkt.kilde.tidspunkt)}`}
                       </Undertekst>
                     </>
                   ) : (
                     <Undertekst $gray>Ikke vurdert</Undertekst>
                   )}
-                  <RedigerWrapper onClick={() => setRediger(true)}>
-                    <Edit /> Rediger
-                  </RedigerWrapper>
+                  {props.redigerbar && (
+                    <RedigerWrapper onClick={() => setRediger(true)}>
+                      <Edit /> Rediger
+                    </RedigerWrapper>
+                  )}
                 </div>
               )}
             </div>

@@ -30,6 +30,14 @@ import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.BeregningKlientTest
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingTest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -460,9 +468,26 @@ fun HttpRequestBuilder.addAuthServiceBruker() {
 class TestBeanFactory(
     private val jdbcUrl: String
 ) : CommonFactory() {
+
     val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
+
+    override fun vedtakKlient(): VedtakKlient {
+        return VedtakKlientTest()
+    }
+
+    override fun grunnlagKlient(): GrunnlagKlient {
+        return GrunnlagKlientTest()
+    }
+
+    override fun beregningKlient(): BeregningKlient {
+        return BeregningKlientTest()
+    }
+
+    override fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient {
+        return VilkaarsvurderingTest()
+    }
 
     override fun pdlHttpClient(): HttpClient = HttpClient(MockEngine) {
         engine {

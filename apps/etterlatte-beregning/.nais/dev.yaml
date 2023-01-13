@@ -67,3 +67,4 @@ spec:
         - application: etterlatte-api
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-behandling

@@ -17,12 +17,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond(service.hentBehandling(it.toString(), getAccessToken(call)))
             }
         }
-
-        get("hendelser") {
-            call.withUUID("behandlingId") {
-                call.respond(service.hentHendelserForBehandling(it.toString(), getAccessToken(call)))
-            }
-        }
     }
 }
 

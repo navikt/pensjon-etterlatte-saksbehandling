@@ -44,7 +44,6 @@ internal class DBTest {
     private val behandling = mockk<BehandlingKlient>(relaxed = true)
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
-    private val uuid = UUID.randomUUID()
     private val sakId = 123L
     private val accessToken = "accessToken"
 
@@ -65,7 +64,7 @@ internal class DBTest {
         postgreSQLContainer.stop()
     }
 
-    private fun lagreIverksattVedtak() {
+    private fun lagreIverksattVedtak(behandlingid: UUID) {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(
             vedtakRepo,
@@ -74,11 +73,49 @@ internal class DBTest {
             behandling,
             sendToRapid
         )
-        vedtaksvurderingService.lagreIverksattVedtak(uuid)
+        vedtaksvurderingService.lagreIverksattVedtak(behandlingid)
     }
 
     @Test
     fun testDB() {
+        val uuid = UUID.randomUUID()
+        val vedtaksvurderingService = settOpp(uuid)
+
+        runBlocking {
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, "access")
+        }
+
+        val vedtaket: Vedtak? = vedtaksvurderingService.hentFellesvedtak(uuid)
+
+        assert(vedtaket?.beregning != null)
+        assert(vedtaket?.vilkaarsvurdering != null)
+        assert(vedtaket?.sak?.id != null)
+        Assertions.assertNotNull(vedtaket?.virk)
+
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
+        val fattetVedtak = vedtaksvurderingService.hentVedtak(uuid)
+        Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
+        Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
+
+        runBlocking { vedtaksvurderingService.underkjennVedtak(uuid, accessToken) }
+        val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
+        Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
+
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
+
+        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, "attestant", accessToken) }
+        val attestertVedtak = vedtaksvurderingService.hentVedtak(uuid)
+        Assertions.assertNotNull(attestertVedtak?.attestant)
+        Assertions.assertNotNull(attestertVedtak?.datoattestert)
+        Assertions.assertNotNull(attestertVedtak?.virkningsDato)
+        Assertions.assertEquals(VedtakStatus.ATTESTERT, attestertVedtak?.vedtakStatus)
+
+        lagreIverksattVedtak(uuid)
+        val iverksattVedtak = vedtaksvurderingService.hentVedtak(uuid)
+        Assertions.assertEquals(VedtakStatus.IVERKSATT, iverksattVedtak?.vedtakStatus)
+    }
+
+    private fun settOpp(uuid: UUID): VedtaksvurderingService {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(
             vedtakRepo,
@@ -127,38 +164,27 @@ internal class DBTest {
         coEvery { behandling.fattVedtak(any(), any(), any()) } returns true
         coEvery { behandling.attester(any(), any(), any()) } returns true
         coEvery { behandling.underkjenn(any(), any(), any()) } returns true
+        return vedtaksvurderingService
+    }
+
+    @Test
+    fun `kan hente vedtak i bolk`() {
+        val behandlingId = UUID.randomUUID()
+        val vedtaksvurderingService = settOpp(behandlingId)
 
         runBlocking {
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, "access")
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandlingId, "access")
         }
 
-        val vedtaket: Vedtak? = vedtaksvurderingService.hentFellesvedtak(uuid)
+        val vedtaket: Vedtak? = vedtaksvurderingService.hentFellesvedtak(behandlingId)
 
         assert(vedtaket?.beregning != null)
         assert(vedtaket?.vilkaarsvurdering != null)
         assert(vedtaket?.sak?.id != null)
         Assertions.assertNotNull(vedtaket?.virk)
 
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
-        val fattetVedtak = vedtaksvurderingService.hentVedtak(uuid)
-        Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
-        Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
+        runBlocking { vedtaksvurderingService.fattVedtak(behandlingId, "saksbehandler", accessToken) }
 
-        runBlocking { vedtaksvurderingService.underkjennVedtak(uuid, accessToken) }
-        val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
-        Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
-
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
-
-        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, "attestant", accessToken) }
-        val attestertVedtak = vedtaksvurderingService.hentVedtak(uuid)
-        Assertions.assertNotNull(attestertVedtak?.attestant)
-        Assertions.assertNotNull(attestertVedtak?.datoattestert)
-        Assertions.assertNotNull(attestertVedtak?.virkningsDato)
-        Assertions.assertEquals(VedtakStatus.ATTESTERT, attestertVedtak?.vedtakStatus)
-
-        lagreIverksattVedtak()
-        val iverksattVedtak = vedtaksvurderingService.hentVedtak(uuid)
-        Assertions.assertEquals(VedtakStatus.IVERKSATT, iverksattVedtak?.vedtakStatus)
+        vedtaksvurderingService.hentVedtakBolk(listOf(behandlingId))
     }
 }

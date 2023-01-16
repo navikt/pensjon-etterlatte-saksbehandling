@@ -146,6 +146,7 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `skal opprette manuelt opphoer`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val virkDato = YearMonth.of(2022, 8)
         val behandling = ManueltOpphoer(
             sak = sak1,
             persongalleri = persongalleri(),
@@ -154,13 +155,19 @@ internal class BehandlingDaoIntegrationTest {
                 ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
             ),
             fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem",
-            virkningstidspunkt = null // TODO
+            virkningstidspunkt = Virkningstidspunkt(
+                virkDato,
+                Grunnlagsopplysning.Saksbehandler.create(
+                    saksbehandlerToken
+                )
+            )
         )
         val lagretBehandling = behandlingRepo.opprettManueltOpphoer(behandling)
         assertEquals(sak1, lagretBehandling.sak)
         assertEquals(persongalleri(), lagretBehandling.persongalleri)
         assertTrue(ManueltOpphoerAarsak.SOESKEN_DOED in lagretBehandling.opphoerAarsaker)
         assertTrue(ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED in lagretBehandling.opphoerAarsaker)
+        assertEquals(virkDato, lagretBehandling.virkningstidspunkt?.dato)
         assertEquals("Umulig å revurdere i nytt saksbehandlingssystem", lagretBehandling.fritekstAarsak)
     }
 

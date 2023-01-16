@@ -13,9 +13,6 @@ spec:
   replyUrls:
     - url: "http://localhost:3000/oauth2/callback"
   preAuthorizedApplications:
-    - application: etterlatte-api
-      cluster: dev-gcp
-      namespace: etterlatte
     - application: etterlatte-brev-api
       cluster: dev-gcp
       namespace: etterlatte

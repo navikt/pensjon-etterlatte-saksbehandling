@@ -27,10 +27,6 @@ export const ApiConfig = {
     url: process.env.GRUNNLAG_API_URL || 'https://etterlatte-grunnlag.dev.intern.nav.no',
     scope: process.env.GRUNNLAG_API_SCOPE || 'api://ce96a301-13db-4409-b277-5b27f464d08b/.default',
   },
-  api: {
-    url: process.env.API_URL || 'https://etterlatte-api.dev.intern.nav.no',
-    scope: process.env.API_SCOPE || 'api://783cea60-43b5-459c-bdd3-de3325bd716a/.default',
-  },
   brev: {
     url: process.env.BREV_API_URL || 'https://etterlatte-brev-api.dev.intern.nav.no',
     scope: process.env.BREV_API_SCOPE || 'api://d6add52a-5807-49cd-a181-76908efee836/.default',

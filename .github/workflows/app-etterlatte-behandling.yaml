@@ -25,10 +25,10 @@ on:
       - libs/common/**
 
 jobs:
-  test:
-    if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/.test.yaml
-
   build:
+    if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
     secrets: inherit
+
+  tilbakestill:
+    uses: ./.github/workflows/etterlatte-tilbakestill-alle.yaml

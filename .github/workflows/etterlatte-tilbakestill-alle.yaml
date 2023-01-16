@@ -1,0 +1,10 @@
+name: etterlatte-tilbakestill-alle
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+
+jobs:
+  tilbakestill-behandling:
+    uses: ./.github/workflows/.tilbakestill.yaml
+    with:
+      applikasjon: behandling

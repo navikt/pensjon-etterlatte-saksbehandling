@@ -55,7 +55,6 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-api
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-brev-api
         - application: etterlatte-beregning

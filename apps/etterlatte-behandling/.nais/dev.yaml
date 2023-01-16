@@ -87,7 +87,6 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
-        - application: etterlatte-api
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-oppdater-behandling
         - application: etterlatte-statistikk

@@ -82,8 +82,6 @@ if (isDev) {
   app.use('/api/vedtak', tokenMiddleware(ApiConfig.vedtak.scope), proxy(ApiConfig.vedtak.url!!))
 
   app.use(['/api/brev', '/api/dokumenter'], tokenMiddleware(ApiConfig.brev.scope), proxy(ApiConfig.brev.url!!))
-
-  app.use('/api', tokenMiddleware(ApiConfig.api.scope), proxy(ApiConfig.api.url!!))
 }
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: Request, res: Response) => {

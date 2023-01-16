@@ -1,4 +1,4 @@
-name: .tilbakestill.yaml
+name: .deploy-main.yaml
 
 on:
   workflow_call:
@@ -12,8 +12,8 @@ env:
   image: ghcr.io/${{ github.repository }}/etterlatte-${{ inputs.applikasjon }}:main
 
 jobs:
-  tilbakestill:
-    name: tilbakestill-dev
+  deploy-main:
+    name: deploy-main
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

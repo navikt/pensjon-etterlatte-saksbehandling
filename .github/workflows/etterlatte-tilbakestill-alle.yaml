@@ -5,117 +5,117 @@ on:
 
 jobs:
   tilbakestill-behandling:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: behandling
     secrets: inherit
   tilbakestill-beregning:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: beregning
     secrets: inherit
   tilbakestill-brev-api:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: brev-api
     secrets: inherit
   tilbakestill-brev-distribusjon:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: brev-distribusjon
     secrets: inherit
   tilbakestill-brreg:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: brreg
     secrets: inherit
   tilbakestill-fordeler:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: fordeler
     secrets: inherit
   tilbakestill-grunnlag:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: grunnlag
     secrets: inherit
   tilbakestill-gyldig-soeknad:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: gyldig-soeknad
     secrets: inherit
   tilbakestill-hendelser-pdl:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: hendelser-pdl
     secrets: inherit
   tilbakestill-medl-proxy:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: medl-proxy
     secrets: inherit
   tilbakestill-oppdater-behandling:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: oppdater-behandling
     secrets: inherit
   tilbakestill-opplysninger-fra-inntektskomponenten:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: opplysninger-fra-inntektskomponenten
     secrets: inherit
   tilbakestill-opplysninger-fra-pdl:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: opplysninger-fra-pdl
     secrets: inherit
   tilbakestill-opplysninger-fra-soeknad:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: opplysninger-fra-soeknad
     secrets: inherit
   tilbakestill-overvaaking:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: overvaaking
     secrets: inherit
   tilbakestill-pdltjenester:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: pdltjenester
     secrets: inherit
   tilbakestill-saksbehandling-ui:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: saksbehandling-ui
     secrets: inherit
   tilbakestill-statistikk:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: statistikk
     secrets: inherit
   tilbakestill-testdata:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: testdata
     secrets: inherit
   tilbakestill-tilbakekreving:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: tilbakekreving
     secrets: inherit
   tilbakestill-utbetaling:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: utbetaling
     secrets: inherit
   tilbakestill-vedtaksvurdering:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: vedtaksvurdering
     secrets: inherit
   tilbakestill-vilkaarsvurdering:
-    uses: ./.github/workflows/.tilbakestill.yaml
+    uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: vilkaarsvurdering
     secrets: inherit

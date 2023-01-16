@@ -25,12 +25,18 @@ on:
       - libs/common/**
 
 jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.test.yaml
+
   build:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
     secrets: inherit
 
-  tilbakestill:
-    if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/etterlatte-tilbakestill-alle.yaml
+  deploy:
+    needs: build
+    uses: ./.github/workflows/.deploy.yaml
+    with:
+      image: ${{ needs.build.outputs.image }}
     secrets: inherit

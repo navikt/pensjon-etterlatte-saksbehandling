@@ -19,7 +19,7 @@ data class Grunnlagsendringshendelse(
     val status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     val behandlingId: UUID? = null,
     val hendelseGjelderRolle: Saksrolle,
-    val gjelderPerson: String?,
+    val gjelderPerson: String,
     val samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag? = null
 )
 

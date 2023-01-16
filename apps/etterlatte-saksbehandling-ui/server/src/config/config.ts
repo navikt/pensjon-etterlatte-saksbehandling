@@ -27,10 +27,6 @@ export const ApiConfig = {
     url: process.env.GRUNNLAG_API_URL || 'https://etterlatte-grunnlag.dev.intern.nav.no',
     scope: process.env.GRUNNLAG_API_SCOPE || 'api://ce96a301-13db-4409-b277-5b27f464d08b/.default',
   },
-  api: {
-    url: process.env.API_URL || 'https://etterlatte-api.dev.intern.nav.no',
-    scope: process.env.API_SCOPE || 'api://783cea60-43b5-459c-bdd3-de3325bd716a/.default',
-  },
   brev: {
     url: process.env.BREV_API_URL || 'https://etterlatte-brev-api.dev.intern.nav.no',
     scope: process.env.BREV_API_SCOPE || 'api://d6add52a-5807-49cd-a181-76908efee836/.default',
@@ -42,5 +38,9 @@ export const ApiConfig = {
   vedtak: {
     url: process.env.VEDTAK_API_URL || 'https://etterlatte-vedtaksvurdering.dev.intern.nav.no',
     scope: process.env.VEDTAK_API_SCOPE || 'api://069b1b2c-0a06-4cc9-8418-f100b8ff71be/.default',
+  },
+  pdltjenester: {
+    url: process.env.PDLTJENESTER_API_URL || 'https://etterlatte-pdltjenester.dev.intern.nav.no',
+    scope: process.env.PDLTJENESTER_API_SCOPE || 'api://8a5e70a5-2ba8-4951-8a7f-1ee2b442fb0c/.default',
   },
 }

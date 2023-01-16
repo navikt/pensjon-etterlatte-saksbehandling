@@ -3,7 +3,6 @@ package no.nav.etterlatte.grunnlagsendring
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
-import no.nav.etterlatte.grunnlagsendringshendelseUtenSamsvar
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
 import no.nav.etterlatte.grunnlagsinformasjonForelderBarnRelasjonHendelse
 import no.nav.etterlatte.grunnlagsinformasjonUtflyttingshendelse
@@ -336,23 +335,23 @@ internal class GrunnlagsendringshendelseDaoTest {
         val fnrDoedshendelse = grunnlagsinformasjonDoedshendelse().avdoedFnr
 
         listOf(
-            grunnlagsendringshendelseUtenSamsvar(
+            grunnlagsendringshendelseMedSamsvar(
                 id = id1,
                 sakId = sak1,
                 fnr = fnrDoedshendelse,
-                samsvarMellomPdlOgGrunnlag = null
+                samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag
             ),
-            grunnlagsendringshendelseUtenSamsvar(
+            grunnlagsendringshendelseMedSamsvar(
                 id = id2,
                 sakId = sak2,
                 fnr = fnrDoedshendelse,
-                samsvarMellomPdlOgGrunnlag = null
+                samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag
             ),
-            grunnlagsendringshendelseUtenSamsvar(
+            grunnlagsendringshendelseMedSamsvar(
                 id = id3,
                 sakId = sak2,
                 fnr = fnrDoedshendelse,
-                samsvarMellomPdlOgGrunnlag = null
+                samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag
             )
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)

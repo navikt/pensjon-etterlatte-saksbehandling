@@ -3,10 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.Revurdering
-import no.nav.etterlatte.grunnlagsendring.samsvarAnsvarligeForeldre
-import no.nav.etterlatte.grunnlagsendring.samsvarBarn
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
-import no.nav.etterlatte.grunnlagsendring.samsvarUtflytting
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
@@ -30,7 +27,6 @@ import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -122,22 +118,6 @@ fun persongalleri(
     gjenlevende = gjenlevende
 )
 
-fun utlandUtflyttingTilSverige() = Utland(
-    innflyttingTilNorge = null,
-    utflyttingFraNorge = listOf(
-        UtflyttingFraNorge("Sverige", LocalDate.of(2022, 10, 10))
-    )
-)
-
-fun tomUtland() = Utland(innflyttingTilNorge = null, utflyttingFraNorge = null)
-
-fun toFoedselsnummer() = listOf(
-    Foedselsnummer.of("11057523044"),
-    Foedselsnummer.of("03126822412")
-)
-
-fun tomFoedselsnummer() = null
-
 fun samsvarMellomPdlOgGrunnlagDoed(
     doedsdato: LocalDate?
 ) = samsvarDoedsdatoer(doedsdato, doedsdato)
@@ -146,58 +126,12 @@ fun ikkeSamsvarMellomPdlOgGrunnlagDoed(
     doedsdato: LocalDate?
 ) = samsvarDoedsdatoer(doedsdato, null)
 
-fun samsvarMellomPdlOgGrunnlagUtflytting(
-    utflytting: Utland?
-) = samsvarUtflytting(utflytting, utflytting)
-
-fun ikkeSamsvarMellomPdlOgGrunnlagUtflytting(
-    utflytting: Utland?
-) = samsvarUtflytting(utflytting, null)
-
-fun samsvarMellomPdlOgGrunnlagBarn(
-    barn: List<Foedselsnummer>
-) = samsvarBarn(barn, barn)
-
-fun ikkeSamsvarMellomPdlOgGrunnlagBarn(
-    barn: List<Foedselsnummer>
-) = samsvarBarn(barn, tomFoedselsnummer())
-
-fun samsvarMellomPdlOgGrunnlagAnsvarligeForeldre(
-    ansvarligeForeldre: List<Foedselsnummer>
-) = samsvarAnsvarligeForeldre(ansvarligeForeldre, ansvarligeForeldre)
-
-fun ikkeSamsvarMellomPdlOgGrunnlagAnsvarligeForeldre(
-    ansvarligeForeldre: List<Foedselsnummer>
-) = samsvarAnsvarligeForeldre(ansvarligeForeldre, tomFoedselsnummer())
-
 fun grunnlagsendringshendelseMedSamsvar(
     id: UUID = UUID.randomUUID(),
     sakId: Long = 1,
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = LocalDateTime.now(),
     fnr: String,
-    status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-    behandlingId: UUID? = null,
-    hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER,
-    samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag?
-) = Grunnlagsendringshendelse(
-    id = id,
-    sakId = sakId,
-    type = type,
-    opprettet = opprettet,
-    status = status,
-    behandlingId = behandlingId,
-    hendelseGjelderRolle = hendelseGjelderRolle,
-    samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag,
-    gjelderPerson = fnr
-)
-
-fun grunnlagsendringshendelseUtenSamsvar(
-    id: UUID = UUID.randomUUID(),
-    sakId: Long = 1,
-    type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
-    opprettet: LocalDateTime = LocalDateTime.now(),
-    fnr: String?,
     status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     behandlingId: UUID? = null,
     hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER,

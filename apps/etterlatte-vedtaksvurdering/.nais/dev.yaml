@@ -57,11 +57,11 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-api
         - application: etterlatte-brev-api
         - application: etterlatte-brev-api-lokal
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-behandling
     outbound:
       rules:
         - application: etterlatte-vilkaarsvurdering

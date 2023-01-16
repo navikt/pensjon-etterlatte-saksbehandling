@@ -105,7 +105,6 @@ class VilkaarsvurderingService(
 
         return vilkaarsvurderingRepository.opprettVilkaarsvurdering(
             Vilkaarsvurdering(
-                sakId = behandling.sak,
                 behandlingId = behandlingId,
                 vilkaar = vilkaar,
                 virkningstidspunkt = virkningstidspunkt.dato,

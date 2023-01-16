@@ -2,6 +2,8 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
@@ -20,6 +22,14 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
@@ -38,7 +48,9 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.pdl.PdlService
+import no.nav.etterlatte.pdl.PdlServiceImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
@@ -70,6 +82,10 @@ interface BeanFactory {
     fun grunnlagsendringshendelseJob(): Timer
     fun grunnlagHttpClient(): HttpClient
     fun grunnlagClient(): GrunnlagClient
+    fun vedtakKlient(): VedtakKlient
+    fun grunnlagKlient(): GrunnlagKlient
+    fun beregningKlient(): BeregningKlient
+    fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -127,15 +143,20 @@ abstract class CommonFactory : BeanFactory {
             hendelseDao()
         )
 
-    override fun generellBehandlingService(): GenerellBehandlingService =
-        RealGenerellBehandlingService(
+    override fun generellBehandlingService(): GenerellBehandlingService {
+        return RealGenerellBehandlingService(
             behandlingDao(),
             behandlingHendelser().nyHendelse,
             foerstegangsbehandlingFactory(),
             revurderingFactory(),
             hendelseDao(),
-            manueltOpphoerService()
+            manueltOpphoerService(),
+            vedtakKlient(),
+            grunnlagKlient(),
+            beregningKlient(),
+            vilkaarsvurderingKlient()
         )
+    }
 
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
@@ -143,7 +164,7 @@ abstract class CommonFactory : BeanFactory {
     override fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao { databaseContext().activeTx() }
 
-    override fun pdlService() = PdlService(pdlHttpClient(), "http://etterlatte-pdltjenester")
+    override fun pdlService() = PdlServiceImpl(pdlHttpClient(), "http://etterlatte-pdltjenester")
 
     override fun grunnlagClient() = GrunnlagClientImpl(grunnlagHttpClient())
 
@@ -209,10 +230,27 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
         }
     }
 
+    private val config: Config = ConfigFactory.load()
+    override fun vedtakKlient(): VedtakKlient {
+        return VedtakKlientImpl(config, httpClient())
+    }
+
+    override fun grunnlagKlient(): GrunnlagKlient {
+        return GrunnlagKlientImpl(config, httpClient())
+    }
+
+    override fun beregningKlient(): BeregningKlient {
+        return BeregningKlientImpl(config, httpClient())
+    }
+
+    override fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient {
+        return VilkaarsvurderingKlientImpl(config, httpClient())
+    }
+
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-            Duration.of(1, ChronoUnit.MINUTES).toMillis()
+                Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

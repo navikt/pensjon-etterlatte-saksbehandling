@@ -194,7 +194,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 "id" to vilkaarsvurdering.id,
                 "behandling_id" to vilkaarsvurdering.behandlingId,
                 "virkningstidspunkt" to vilkaarsvurdering.virkningstidspunkt.atDay(1),
-                "sak_id" to vilkaarsvurdering.sakId,
                 "grunnlag_versjon" to vilkaarsvurdering.grunnlagVersjon
             )
         ).let { tx.run(it.asUpdate) }
@@ -256,7 +255,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
     private fun Row.toVilkaarsvurdering(vilkaar: List<Vilkaar>) =
         Vilkaarsvurdering(
             id = uuid("id"),
-            sakId = long("sak_id"),
             behandlingId = uuid("behandling_id"),
             grunnlagVersjon = long("grunnlag_versjon"),
             virkningstidspunkt = YearMonth.from(localDate("virkningstidspunkt")),
@@ -314,8 +312,8 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
 
     private object Queries {
         const val lagreVilkaarsvurdering = """
-            INSERT INTO vilkaarsvurdering(id, behandling_id, virkningstidspunkt, sak_id, grunnlag_versjon) 
-            VALUES(:id, :behandling_id, :virkningstidspunkt, :sak_id, :grunnlag_versjon)
+            INSERT INTO vilkaarsvurdering(id, behandling_id, virkningstidspunkt, grunnlag_versjon) 
+            VALUES(:id, :behandling_id, :virkningstidspunkt, :grunnlag_versjon)
         """
 
         const val lagreVilkaar = """
@@ -360,7 +358,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         """
 
         const val hentVilkaarsvurdering = """
-            SELECT id, behandling_id, virkningstidspunkt, sak_id, grunnlag_versjon, resultat_utfall, 
+            SELECT id, behandling_id, virkningstidspunkt, grunnlag_versjon, resultat_utfall, 
                 resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler 
             FROM vilkaarsvurdering WHERE behandling_id = :behandling_id
         """

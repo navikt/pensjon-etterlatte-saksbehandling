@@ -22,6 +22,7 @@ export interface VilkaarProps {
   vilkaar: Vilkaar
   oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string
+  redigerbar: boolean
 }
 
 export const ManueltVilkaar = (props: VilkaarProps) => {
@@ -70,6 +71,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                   vilkaar={vilkaar}
                   oppdaterVilkaar={props.oppdaterVilkaar}
                   behandlingId={props.behandlingId}
+                  redigerbar={props.redigerbar}
                 />
               </VilkaarlisteTitle>
             </VilkaarVurderingContainer>

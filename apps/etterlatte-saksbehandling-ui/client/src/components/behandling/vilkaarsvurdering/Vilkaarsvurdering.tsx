@@ -8,9 +8,10 @@ import { Resultat } from './Resultat'
 import { RequestStatus } from './utils'
 import Spinner from '~shared/Spinner'
 import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { Heading } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 export const Vilkaarsvurdering = () => {
   const location = useLocation()
@@ -18,6 +19,8 @@ export const Vilkaarsvurdering = () => {
   const dispatch = useAppDispatch()
   const [vilkaarsvurdering, setVilkaarsvurdering] = useState<IVilkaarsvurdering | undefined>(undefined)
   const [status, setStatus] = useState<RequestStatus>(RequestStatus.notStarted)
+  const behandlingstatus = useAppSelector((state) => state.behandlingReducer.behandling.status)
+  const behandles = hentBehandlesFraStatus(behandlingstatus)
 
   const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering: IVilkaarsvurdering) => {
     setVilkaarsvurdering(oppdatertVilkaarsvurdering)
@@ -73,6 +76,7 @@ export const Vilkaarsvurdering = () => {
               vilkaar={value}
               oppdaterVilkaar={oppdaterVilkaarsvurdering}
               behandlingId={behandlingId}
+              redigerbar={behandles}
             />
           ))}
 
@@ -81,6 +85,7 @@ export const Vilkaarsvurdering = () => {
             vilkaarsvurdering={vilkaarsvurdering}
             oppdaterVilkaar={oppdaterVilkaarsvurdering}
             behandlingId={behandlingId}
+            redigerbar={behandles}
           />
         </>
       )}

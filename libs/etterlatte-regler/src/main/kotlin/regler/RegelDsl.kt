@@ -43,6 +43,20 @@ private fun <G, S, S1, S2, S3, R1 : Regel<G, S1>, R2 : Regel<G, S2>, R3 : Regel<
     slaasammenFunksjon = slaaSammenFunksjon
 )
 
+private fun <G, S, S1, R : Regel<G, S1>> transformerRegel(
+    gjelderFra: LocalDate,
+    beskrivelse: String,
+    regelReferanse: RegelReferanse,
+    opprinneligRegel: R,
+    transformerFunksjon: (S1) -> S
+) = TransformasjonsRegel(
+    gjelderFra = gjelderFra,
+    beskrivelse = beskrivelse,
+    regelReferanse = regelReferanse,
+    opprinneligRegel = opprinneligRegel,
+    transformerFunksjon = transformerFunksjon
+)
+
 private fun <G, S> velgNyesteRegel(
     gjelderFra: LocalDate,
     beskrivelse: String,
@@ -91,7 +105,7 @@ fun <G, S> definerKonstant(
     verdi
 )
 
-infix fun <G, S> RegelMeta.kombinerer(regel1: Regel<G, S>) = this to regel1
+infix fun <G, S> RegelMeta.benytter(regel1: Regel<G, S>) = this to regel1
 
 infix fun <G> RegelMeta.multipliser(regler: List<Regel<G, BigDecimal>>) = gangSammenRegler(
     gjelderFra = gjelderFra,
@@ -113,6 +127,15 @@ infix fun <G, S1, S2, S3> Pair<Pair<RegelMeta, Regel<G, S1>>, Regel<G, S2>>.og(t
 
 infix fun <G, S> Regel<G, S>.og(that: Regel<G, S>) = listOf(this, that)
 infix fun <G, S> List<Regel<G, S>>.og(that: Regel<G, S>) = this.plus(that)
+
+infix fun <G, S, S1> Pair<RegelMeta, Regel<G, S1>>.med(f: (S1) -> S) = transformerRegel(
+    gjelderFra = first.gjelderFra,
+    beskrivelse = first.beskrivelse,
+    regelReferanse = first.regelReferanse,
+    opprinneligRegel = second,
+    transformerFunksjon = f
+)
+
 infix fun <G, S1, S2, S> Pair<Pair<RegelMeta, Regel<G, S1>>, Regel<G, S2>>.med(f: (S1, S2) -> S) =
     slaaSammenToRegler(
         gjelderFra = first.first.gjelderFra,

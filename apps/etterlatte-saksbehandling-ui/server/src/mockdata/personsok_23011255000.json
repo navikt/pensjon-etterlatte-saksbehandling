@@ -180,19 +180,13 @@
           "fraPdl" : "2022-12-18",
           "samsvar" : false
         }
-      },      {
+      },
+      {
         "id" : "8bfa88f2-7b7e-40a1-98a8-7402f2a6d5d1",
         "sakId" : 135,
         "type" : "DOEDSFALL",
         "opprettet" : "2023-01-04T10:06:41.900122",
-        "data" : {
-          "type" : "DOEDSFALL",
-          "hendelse" : {
-            "avdoedFnr" : "11468227004",
-            "doedsdato" : null,
-            "endringstype" : "ANNULLERT"
-          }
-        },
+        "gjelderPerson" : "11468227004",
         "status" : "FORKASTET",
         "behandlingId" : null,
         "hendelseGjelderRolle" : "AVDOED",
@@ -208,14 +202,7 @@
         "sakId" : 135,
         "type" : "DOEDSDATO",
         "opprettet" : "2023-01-04T10:06:42.125769",
-        "data" : {
-          "type" : "DOEDSFALL",
-          "hendelse" : {
-            "avdoedFnr" : "11468227004",
-            "doedsdato" : "2022-08-17",
-            "endringstype" : "OPPRETTET"
-          }
-        },
+        "gjelderPerson" : "11468227004",
         "status" : "FORKASTET",
         "behandlingId" : null,
         "hendelseGjelderRolle" : "AVDOED",

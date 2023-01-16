@@ -50,24 +50,6 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                     behandlingId = behandlingId,
                     accessToken = accesstoken
                 )
-                val vedtakHendelse = VedtakHendelse(
-                    vedtakId = nyttVedtak.vedtakId,
-                    inntruffet = Tidspunkt.now(),
-                    saksbehandler = saksbehandler
-                )
-
-                service.postTilVedtakhendelse(
-                    behandlingId,
-                    accesstoken,
-                    HendelseType.VILKAARSVURDERT,
-                    vedtakHendelse
-                )
-                service.postTilVedtakhendelse(
-                    behandlingId,
-                    accesstoken,
-                    HendelseType.BEREGNET,
-                    vedtakHendelse
-                )
 
                 call.respond(nyttVedtak)
             }
@@ -132,8 +114,6 @@ private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
 private data class VedtakBolkResponse(val vedtak: List<Vedtak>)
 
 enum class HendelseType {
-    VILKAARSVURDERT,
-    BEREGNET,
     FATTET,
     ATTESTERT,
     UNDERKJENT,

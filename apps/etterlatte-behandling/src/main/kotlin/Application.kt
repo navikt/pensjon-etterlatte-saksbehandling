@@ -95,13 +95,16 @@ fun Application.module(beanFactory: BeanFactory) {
         }
     }
 
+    val generellBehandlingService = beanFactory.generellBehandlingService()
+    val grunnlagsendringshendelseService = beanFactory.grunnlagsendringshendelseService()
+
     routing {
         naisprobes()
         authenticate {
             attachContekst(ds.dataSource)
-            sakRoutes(beanFactory.sakService())
+            sakRoutes(beanFactory.sakService(), generellBehandlingService, grunnlagsendringshendelseService)
             behandlingRoutes(
-                beanFactory.generellBehandlingService(),
+                generellBehandlingService,
                 beanFactory.foerstegangsbehandlingService(),
                 beanFactory.revurderingService(),
                 beanFactory.manueltOpphoerService()
@@ -110,7 +113,7 @@ fun Application.module(beanFactory: BeanFactory) {
             route("api") {
                 oppgaveRoutes(OppgaveDao(ds.dataSource))
             }
-            grunnlagsendringshendelseRoute(beanFactory.grunnlagsendringshendelseService())
+            grunnlagsendringshendelseRoute(grunnlagsendringshendelseService)
         }
     }
     beanFactory.behandlingHendelser().start()

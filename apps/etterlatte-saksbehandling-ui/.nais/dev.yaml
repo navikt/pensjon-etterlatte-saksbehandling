@@ -48,8 +48,6 @@ spec:
       cpu: 200m
       memory: 256Mi
   env:
-    - name: API_URL
-      value: http://etterlatte-api
     - name: BREV_API_URL
       value: http://etterlatte-brev-api
     - name: VILKAARSVURDERING_API_URL
@@ -69,10 +67,10 @@ spec:
         - host: https://login.microsoftonline.com
         - host: graph.microsoft.com
       rules:
-        - application: etterlatte-api
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
+        - application: etterlatte-pdltjenester

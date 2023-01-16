@@ -55,7 +55,35 @@ open class SlaaSammenToRegler<G, S, S1, S2, R1 : Regel<G, S1>, R2 : Regel<G, S2>
         return SubsumsjonsNode(
             verdi = slaasammenFunksjon(verdi1.verdi, verdi2.verdi),
             regel = this,
-            children = listOf(verdi1, verdi2)
+            noder = listOf(verdi1, verdi2)
+        )
+    }
+}
+
+open class TransformasjonsRegel<G, S, S1, R : Regel<G, S1>>(
+    override val gjelderFra: LocalDate,
+    override val beskrivelse: String,
+    override val regelReferanse: RegelReferanse,
+    @JsonIgnore
+    val opprinneligRegel: R,
+    @JsonIgnore
+    val transformerFunksjon: (S1) -> S
+) : Regel<G, S>(
+    gjelderFra = gjelderFra,
+    beskrivelse = beskrivelse,
+    regelReferanse = regelReferanse
+) {
+    override fun accept(visitor: RegelVisitor) {
+        visitor.visit(this)
+        opprinneligRegel.accept(visitor)
+    }
+
+    override fun anvendRegel(grunnlag: G, periode: RegelPeriode): SubsumsjonsNode<S> {
+        val verdi = opprinneligRegel.anvend(grunnlag, periode)
+        return SubsumsjonsNode(
+            verdi = transformerFunksjon(verdi.verdi),
+            regel = this,
+            noder = listOf(verdi)
         )
     }
 }
@@ -91,7 +119,7 @@ open class SlaaSammenTreRegler<S1, S2, S3, G, S, R1 : Regel<G, S1>, R2 : Regel<G
         return SubsumsjonsNode(
             verdi = slaasammenFunksjon(verdi1.verdi, verdi2.verdi, verdi3.verdi),
             regel = this,
-            children = listOf(verdi1, verdi2, verdi3)
+            noder = listOf(verdi1, verdi2, verdi3)
         )
     }
 }
@@ -125,7 +153,7 @@ open class VelgNyesteGyldigRegel<G, S>(
         return SubsumsjonsNode(
             verdi = regel.verdi,
             regel = this,
-            children = listOf(regel)
+            noder = listOf(regel)
         )
     }
 
@@ -157,7 +185,7 @@ open class GangSammenRegel<G>(
         return SubsumsjonsNode(
             verdi = verdi,
             regel = this,
-            children = noder
+            noder = noder
         )
     }
 }
@@ -183,7 +211,7 @@ open class FinnFaktumIGrunnlagRegel<G, T, F : FaktumNode<T>, S>(
         return SubsumsjonsNode(
             verdi = finnFelt(faktum.verdi),
             regel = this,
-            children = listOf(faktum)
+            noder = listOf(faktum)
         )
     }
 }
@@ -205,7 +233,7 @@ open class KonstantRegel<G, S>(
     override fun anvendRegel(grunnlag: G, periode: RegelPeriode): SubsumsjonsNode<S> = SubsumsjonsNode(
         verdi = verdi,
         regel = this,
-        children = listOf()
+        noder = listOf()
     )
 }
 

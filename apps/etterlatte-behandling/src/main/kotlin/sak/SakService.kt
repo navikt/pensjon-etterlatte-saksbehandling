@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 
 interface SakService {
@@ -16,8 +17,12 @@ class RealSakService(private val dao: SakDao) : SakService {
         return dao.hentSaker()
     }
 
+    private fun finnSakerForPerson(person: String) = dao.finnSaker(person)
+
     override fun finnSaker(person: String): List<Sak> {
-        return dao.finnSaker(person)
+        return inTransaction {
+            finnSakerForPerson(person)
+        }
     }
 
     override fun slettSak(id: Long) {
@@ -30,7 +35,7 @@ class RealSakService(private val dao: SakDao) : SakService {
     }
 
     override fun finnSak(person: String, type: SakType): Sak? {
-        return finnSaker(person).find { it.sakType == type }
+        return finnSakerForPerson(person).find { it.sakType == type }
     }
 
     override fun finnSak(id: Long): Sak? {

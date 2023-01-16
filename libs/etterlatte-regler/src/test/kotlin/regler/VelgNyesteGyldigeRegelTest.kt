@@ -2,10 +2,7 @@ package no.nav.etterlatte.libs.regler
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.regler.beregning.toDoRegelReferanse
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.LocalDate
 
 class VelgNyesteGyldigeRegelTest {
@@ -14,8 +11,6 @@ class VelgNyesteGyldigeRegelTest {
         val testVerdi2022: FaktumNode<Int>,
         val testVerdi2023: FaktumNode<Int>
     )
-
-    private val saksbehandler = Grunnlagsopplysning.Saksbehandler("Z12345", Instant.now())
 
     private fun grunnlag() = Grunnlag(
         testVerdi2021 = FaktumNode(2021, saksbehandler, "Verdi for test"),
@@ -60,8 +55,8 @@ class VelgNyesteGyldigeRegelTest {
         val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(), RegelPeriode(LocalDate.of(2025, 1, 1)))
 
         resultat.verdi shouldBe 2023
-        resultat.children.size shouldBe 1
-        when (val node = resultat.children.first()) {
+        resultat.noder.size shouldBe 1
+        when (val node = resultat.noder.first()) {
             is SubsumsjonsNode -> {
                 node.verdi shouldBe 2023
                 node.regel shouldBe regel2023
@@ -75,8 +70,8 @@ class VelgNyesteGyldigeRegelTest {
         val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(), RegelPeriode(LocalDate.of(2022, 5, 1)))
 
         resultat.verdi shouldBe 2022
-        resultat.children.size shouldBe 1
-        when (val node = resultat.children.first()) {
+        resultat.noder.size shouldBe 1
+        when (val node = resultat.noder.first()) {
             is SubsumsjonsNode -> {
                 node.verdi shouldBe 2022
                 node.regel shouldBe regel2022
@@ -90,8 +85,8 @@ class VelgNyesteGyldigeRegelTest {
         val resultat = velgNyesteGyldigeRegel.anvend(grunnlag(), RegelPeriode(LocalDate.of(2021, 1, 1)))
 
         resultat.verdi shouldBe 2021
-        resultat.children.size shouldBe 1
-        when (val node = resultat.children.first()) {
+        resultat.noder.size shouldBe 1
+        when (val node = resultat.noder.first()) {
             is SubsumsjonsNode -> {
                 node.verdi shouldBe 2021
                 node.regel shouldBe regel2021

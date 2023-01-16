@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.regler
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.libs.regler.beregning.toDoRegelReferanse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -27,7 +26,7 @@ class SlaaSammenToReglerTest {
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Regel som bruker resultatet av to andre regler",
         regelReferanse = toDoRegelReferanse
-    ) kombinerer regel1 og regel2 med { verdi1, verdi2 ->
+    ) benytter regel1 og regel2 med { verdi1, verdi2 ->
         verdi1 + verdi2.toInt()
     }
 
@@ -41,7 +40,7 @@ class SlaaSammenToReglerTest {
             regel.gjelderFra shouldBe regelSomBrukerVerdienFraToAndreRegler.gjelderFra
             regel.beskrivelse shouldBe regelSomBrukerVerdienFraToAndreRegler.beskrivelse
             regel.regelReferanse shouldBe regelSomBrukerVerdienFraToAndreRegler.regelReferanse
-            children.size shouldBe 2
+            noder.size shouldBe 2
         }
     }
 

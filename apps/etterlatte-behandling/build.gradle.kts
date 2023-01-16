@@ -6,7 +6,10 @@ plugins {
 dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:ktor2client-onbehalfof"))
+    implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:rapidsandrivers-extras"))
+
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)
@@ -22,6 +25,7 @@ dependencies {
     implementation(Ktor2.Auth)
     implementation(Ktor2.StatusPages)
     implementation(Ktor2.CallLogging)
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.14")
 
     implementation(Micrometer.Prometheus)
     implementation(Jackson.DatatypeJsr310)

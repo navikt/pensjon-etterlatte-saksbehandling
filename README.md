@@ -32,9 +32,6 @@ fra .env-filen til appen sine miljøvariabler.
 
 ## Apper
 
-[etterlatte-api](apps/etterlatte-api) \
-Tjeneste som kobler frontend og backend sammen. Kallene gjøres i hovedsak via REST, med unntak av posting av data til grunnlag som lager en kafka-melding.
-
 [etterlatte-behandling](apps/etterlatte-behandling) \
 Tjeneste som holder styr på behandlinger.
 
@@ -122,8 +119,6 @@ gyldig-soeknad --> pdl
 
 behandling -.- t2[/"Behandling opprettet\n inkludert persongalleri\n fra s&oslash;knad"/]:::msg -.-> grunnlag
 behandling -.- t3[/"Behandling uten grunnlag"/]:::msg -.-> grunnlag
-behandling --> etterlatte-api:::app
-etterlatte-api --> frontend:::front
 
 subgraph registere["Registere"]
     pdl["PDL-tjenester"]
@@ -149,7 +144,6 @@ t9 -.-> beregning:::kafka
 beregning -.- t11[/"Beregnet behandling"/]:::msg -.-> vedtaksvurdering
 
 vedtaksvurdering <--> db2[(Database)]:::db
-vedtaksvurdering -.-> etterlatte-api
 ```
 
 # Bygg og deploy

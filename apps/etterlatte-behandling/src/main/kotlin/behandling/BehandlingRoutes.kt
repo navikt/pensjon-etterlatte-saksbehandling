@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -32,9 +33,12 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
@@ -45,9 +49,14 @@ internal fun Route.behandlingRoutes(
     manueltOpphoerService: ManueltOpphoerService
 ) {
     val logger = application.log
+    route("/api/behandling/{behandlingsid}") {
+        get {
+            val detaljertBehandlingDTO =
+                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, accesstoken)
+            call.respond<DetaljertBehandlingDto>(detaljertBehandlingDTO)
+        }
 
-    route("/api/behandling/{behandlingsid}/kommerbarnettilgode") {
-        post {
+        post("/kommerbarnettilgode") {
             val navIdent = navIdentFraToken() ?: return@post call.respond(
                 HttpStatusCode.Unauthorized,
                 "Kunne ikke hente ut navident for vurdering av ytelsen kommer barnet tilgode"
@@ -66,19 +75,44 @@ internal fun Route.behandlingRoutes(
                 call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
             }
         }
-    }
 
-    post("/api/behandling/{behandlingsid}/avbryt") {
-        val navIdent = navIdentFraToken() ?: return@post call.respond(
-            HttpStatusCode.Unauthorized,
-            "Kunne ikke hente ut navident for den som vil avbryte"
-        )
-        generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
-        call.respond(HttpStatusCode.OK)
+        post("/avbryt") {
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for den som vil avbryte"
+            )
+            generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
+            call.respond(HttpStatusCode.OK)
+        }
+
+        post("/virkningstidspunkt") {
+            logger.debug("Prøver å fastsette virkningstidspunkt")
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
+            )
+            val body = call.receive<VirkningstidspunktRequest>()
+            if (!body.isValid()) {
+                return@post call.respond(HttpStatusCode.BadRequest)
+            }
+
+            try {
+                val virkningstidspunkt =
+                    foerstegangsbehandlingService.lagreVirkningstidspunkt(behandlingsId, body.dato, navIdent)
+
+                call.respondText(
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.OK,
+                    text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
+                )
+            } catch (e: TilstandException.UgyldigtTilstand) {
+                call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+            }
+        }
     }
 
     route("/behandlinger") {
-        get {
+        get { // TODO kan slettes? finner ingen spor i loggen.
             call.respond(
                 generellBehandlingService.hentBehandlinger().map {
                     BehandlingSammendrag(
@@ -132,51 +166,13 @@ internal fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)
                 call.respond(HttpStatusCode.OK)
             }
-
-            post("/virkningstidspunkt") {
-                logger.debug("Prøver å fastsette virkningstidspunkt")
-                val navIdent = navIdentFraToken() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
-                )
-                val body = call.receive<FastsettVirkningstidspunktRequest>()
-
-                try {
-                    val virkningstidspunkt =
-                        foerstegangsbehandlingService.lagreVirkningstidspunkt(behandlingsId, body.dato, navIdent)
-
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
-                    )
-                } catch (e: TilstandException.UgyldigtTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
-                }
-            }
         }
 
         route("/sak") {
             get("/{sakid}") {
                 call.respond(
                     generellBehandlingService.hentBehandlingerISak(sakId).map {
-                        BehandlingSammendrag(
-                            id = it.id,
-                            sak = it.sak,
-                            status = it.status,
-                            soeknadMottattDato = if (it is Foerstegangsbehandling) {
-                                it.soeknadMottattDato
-                            } else {
-                                it.behandlingOpprettet
-                            },
-                            behandlingOpprettet = it.behandlingOpprettet,
-                            behandlingType = it.type,
-                            aarsak = when (it) {
-                                is Foerstegangsbehandling -> "SOEKNAD"
-                                is Revurdering -> it.revurderingsaarsak.name
-                                is ManueltOpphoer -> "MANUELT OPPHOER"
-                            }
-                        )
+                        it.toBehandlingSammendrag()
                     }.let { BehandlingListe(it) }
                 )
             }
@@ -310,11 +306,10 @@ internal fun Route.behandlingRoutes(
 }
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
-    get() = requireNotNull(call.parameters["behandlingsid"]).let {
-        UUID.fromString(
-            it
-        )
-    }
+    get() = call.parameters["behandlingsid"]?.let { UUID.fromString(it) } ?: throw NullPointerException(
+        "BehandlingsId er ikke i path params"
+    )
+
 inline val PipelineContext<*, ApplicationCall>.sakId get() = requireNotNull(call.parameters["sakid"]).toLong()
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
     ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()
@@ -333,7 +328,18 @@ data class LagretHendelser(
 
 data class ManueltOpphoerResponse(val behandlingId: String)
 
-internal data class FastsettVirkningstidspunktRequest(val dato: YearMonth)
+data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String) {
+    val dato: YearMonth = try {
+        LocalDate.ofInstant(Instant.parse(_dato), norskTidssone).let {
+            YearMonth.of(it.year, it.month)
+        }
+    } catch (e: Exception) {
+        throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
+    }
+
+    fun isValid() = dato.year in (0..9999)
+}
+
 internal data class FastsettVirkningstidspunktResponse(
     val dato: YearMonth,
     val kilde: Grunnlagsopplysning.Saksbehandler

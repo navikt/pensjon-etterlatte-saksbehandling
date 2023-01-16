@@ -6,7 +6,6 @@ include(
     "apps:etterlatte-fordeler",
     "apps:etterlatte-overvaaking",
     "apps:etterlatte-pdltjenester",
-    "apps:etterlatte-api",
     "apps:etterlatte-behandling",
     "apps:etterlatte-brreg",
     "apps:etterlatte-medl-proxy",

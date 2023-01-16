@@ -23,7 +23,6 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsBehov
-import no.nav.etterlatte.behandling.FastsettVirkningstidspunktRequest
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.KommerBarnetTilgodeJson
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
@@ -31,6 +30,14 @@ import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.BeregningKlientTest
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingTest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -171,16 +178,17 @@ class ApplicationTest {
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
             }
 
-            client.post("/behandlinger/$behandlingId/virkningstidspunkt") {
+            client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    FastsettVirkningstidspunktRequest(YearMonth.parse("2021-01"))
+                    mapOf("dato" to "2022-02-01T01:00:00.000Z")
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
+
                 val expected = FastsettVirkningstidspunktResponse(
-                    YearMonth.of(2021, 1),
+                    YearMonth.of(2022, 2),
                     Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Instant.now())
                 )
                 assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)
@@ -219,23 +227,6 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
-                addAuthSaksbehandler()
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    VedtakHendelse(
-                        12L,
-                        "Saksbehandlier",
-                        Tidspunkt.now(),
-                        null,
-                        null
-                    )
-                )
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
             client.post("/behandlinger/$behandlingId/beregn") {
                 addAuthSaksbehandler()
             }.also {
@@ -266,6 +257,42 @@ class ApplicationTest {
                 val oppgaver: OppgaveListeDto = it.body()
                 assertEquals(1, oppgaver.oppgaver.size)
                 assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
+            }
+
+            client.post("/behandlinger/$behandlingId/attester") {
+                addAuthSaksbehandler()
+            }.also {
+                beans.datasourceBuilder().dataSource.connection.use {
+                    val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
+                    assertEquals(BehandlingStatus.ATTESTERT, actual.status)
+                }
+
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            client.post("/behandlinger/$behandlingId/hendelser/vedtak/IVERKSATT") {
+                addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    VedtakHendelse(
+                        12L,
+                        null,
+                        Tidspunkt.now(),
+                        null,
+                        null
+                    )
+                )
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            client.get("/behandlinger/$behandlingId") {
+                addAuthSaksbehandler()
+            }.also {
+                val behandling = it.body<DetaljertBehandling>()
+
+                assertEquals(HttpStatusCode.OK, it.status)
+                assertEquals(BehandlingStatus.IVERKSATT, behandling.status)
             }
 
             client.post("/grunnlagsendringshendelse/doedshendelse") {
@@ -441,9 +468,26 @@ fun HttpRequestBuilder.addAuthServiceBruker() {
 class TestBeanFactory(
     private val jdbcUrl: String
 ) : CommonFactory() {
+
     val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
+
+    override fun vedtakKlient(): VedtakKlient {
+        return VedtakKlientTest()
+    }
+
+    override fun grunnlagKlient(): GrunnlagKlient {
+        return GrunnlagKlientTest()
+    }
+
+    override fun beregningKlient(): BeregningKlient {
+        return BeregningKlientTest()
+    }
+
+    override fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient {
+        return VilkaarsvurderingTest()
+    }
 
     override fun pdlHttpClient(): HttpClient = HttpClient(MockEngine) {
         engine {

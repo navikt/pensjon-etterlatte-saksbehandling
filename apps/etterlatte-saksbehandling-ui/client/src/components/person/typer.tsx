@@ -18,17 +18,13 @@ export interface IPersonInfo {
 }
 
 export interface IPersonResult {
-  person: {
-    fornavn: string
-    etternavn: string
-    foedselsnummer: string
-  }
-  behandlingListe: {
-    behandlinger: IBehandlingsammendrag[]
-  }
-  grunnlagsendringshendelser?: {
-    hendelser: Grunnlagsendringshendelse[]
-  }
+  fornavn: string
+  etternavn: string
+  foedselsnummer: string
+}
+
+export interface IBehandlingListe {
+  behandlinger: IBehandlingsammendrag[]
 }
 
 export interface IBehandlingsammendrag {
@@ -104,6 +100,10 @@ const SAKSROLLER = ['SOEKER', 'INNSENDER', 'SOESKEN', 'AVDOED', 'GJENLEVENDE', '
 
 export type Saksrolle = typeof SAKSROLLER[number]
 
+export interface GrunnlagsendringsListe {
+  hendelser: Grunnlagsendringshendelse[]
+}
+
 export interface Grunnlagsendringshendelse {
   id: string
   sakId: number
@@ -112,6 +112,6 @@ export interface Grunnlagsendringshendelse {
   behandlingId?: string
   opprettet: string
   hendelseGjelderRolle: Saksrolle
-  gjelderPerson?: string
+  gjelderPerson: string
   samsvarMellomPdlOgGrunnlag: SamsvarMellomGrunnlagOgPdl
 }

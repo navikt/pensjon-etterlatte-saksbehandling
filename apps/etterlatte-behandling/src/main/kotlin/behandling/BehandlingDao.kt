@@ -368,7 +368,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         statement.executeUpdate()
     }
 
-    // TODO ai: brukes kun i test
     fun lagreStatus(lagretBehandling: Behandling) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }

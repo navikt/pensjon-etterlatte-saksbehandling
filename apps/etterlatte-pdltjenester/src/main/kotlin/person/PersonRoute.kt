@@ -32,6 +32,17 @@ fun Route.personApi(service: PersonService) {
         }
     }
 
+    route("/api/person") {
+        val logger = application.log
+
+        post {
+            val hentPersonRequest = call.receive<HentPersonRequest>()
+            logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
+
+            service.hentPerson(hentPersonRequest).let { call.respond(it) }
+        }
+    }
+
     route("folkeregisterident") {
         val logger = application.log
 

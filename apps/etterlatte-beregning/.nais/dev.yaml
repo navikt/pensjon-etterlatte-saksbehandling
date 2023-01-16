@@ -12,10 +12,10 @@ spec:
     - "https://etterlatte-beregning.dev.intern.nav.no"
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -64,6 +64,6 @@ spec:
       rules:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
-        - application: etterlatte-api
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-behandling

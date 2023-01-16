@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.vedtaksvurdering.Beregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
+import java.io.Serializable
 import java.sql.Date
 import java.time.LocalDate
 import java.time.YearMonth
@@ -151,17 +152,19 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         vedtakId: Long,
         utbetalingsperioder: List<Utbetalingsperiode>
     ) {
-        utbetalingsperioder.forEach {
-            repositoryProxy.opprett(
+        utbetalingsperioder.map {
+            mapOf<String, Serializable?>(
+                "vedtakid" to vedtakId,
+                "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
+                "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
+                "type" to it.type.name,
+                "beloep" to it.beloep
+            )
+        }.let {
+            repositoryProxy.opprettFlere(
                 query = "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) " +
                     "VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)",
-                params = mapOf(
-                    "vedtakid" to vedtakId,
-                    "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
-                    "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
-                    "type" to it.type.name,
-                    "beloep" to it.beloep
-                ),
+                params = it,
                 loggtekst = "Attesterer vedtak"
             )
         }

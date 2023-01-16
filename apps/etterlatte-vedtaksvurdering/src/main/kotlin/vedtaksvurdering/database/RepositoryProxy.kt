@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import org.slf4j.LoggerFactory
+import java.io.Serializable
 import javax.sql.DataSource
 
 class RepositoryProxy(private val datasource: DataSource) {
@@ -30,6 +31,12 @@ class RepositoryProxy(private val datasource: DataSource) {
             )
                 .also { logger.info(loggtekst) }
                 .let { session.run(it.asUpdate) }
+        }
+
+    internal fun opprettFlere(query: String, params: List<Map<String, Serializable?>>, loggtekst: String) =
+        using(sessionOf(datasource)) { session ->
+            logger.info(loggtekst)
+            session.batchPreparedNamedStatement(query, params)
         }
 
     internal fun <T> hentMedKotliquery(

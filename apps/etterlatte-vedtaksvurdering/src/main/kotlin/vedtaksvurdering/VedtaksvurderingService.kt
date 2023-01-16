@@ -59,7 +59,8 @@ class VedtaksvurderingService(
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val sendToRapid: (String, UUID) -> Unit
+    private val sendToRapid: (String, UUID) -> Unit,
+    private val saksbehandlere: Map<String, String>
 ) {
 
     fun lagreIverksattVedtak(behandlingId: UUID) {
@@ -146,7 +147,6 @@ class VedtaksvurderingService(
     suspend fun fattVedtak(
         behandlingId: UUID,
         saksbehandler: String,
-        saksbehandlere: Map<String, String>,
         accessToken: String
     ): Vedtak {
         if (!behandlingKlient.fattVedtak(behandlingId, accessToken)) {
@@ -179,7 +179,6 @@ class VedtaksvurderingService(
     suspend fun attesterVedtak(
         behandlingId: UUID,
         saksbehandler: String,
-        saksbehandlere: Map<String, String>,
         accessToken: String
     ): Vedtak {
         if (!behandlingKlient.attester(behandlingId, accessToken)) {

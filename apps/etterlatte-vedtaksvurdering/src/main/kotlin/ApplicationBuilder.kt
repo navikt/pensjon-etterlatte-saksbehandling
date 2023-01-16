@@ -57,13 +57,7 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlientImpl(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    private val vedtaksvurderingService = VedtaksvurderingService(
-        vedtakRepo,
-        beregningKlient,
-        vilkaarsvurderingKlient,
-        behandlingKlient,
-        ::publiser
-    )
+
     private fun getSaksbehandlere(): Map<String, String> {
         val saksbehandlereSecret = env["saksbehandlere"]!!
         return objectMapper.readValue(
@@ -72,10 +66,20 @@ class ApplicationBuilder {
         )
     }
 
+    private val vedtaksvurderingService = VedtaksvurderingService(
+        vedtakRepo,
+        beregningKlient,
+        vilkaarsvurderingKlient,
+        behandlingKlient,
+        ::publiser,
+        getSaksbehandlere()
+
+    )
+
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {
-                restModule(vedtaksvurderingService = vedtaksvurderingService, saksbehandlere = getSaksbehandlere())
+                restModule(vedtaksvurderingService = vedtaksvurderingService)
             }
             .build()
             .apply {
@@ -88,8 +92,7 @@ class ApplicationBuilder {
 }
 
 fun Application.restModule(
-    vedtaksvurderingService: VedtaksvurderingService,
-    saksbehandlere: Map<String, String>
+    vedtaksvurderingService: VedtaksvurderingService
 ) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
@@ -117,7 +120,7 @@ fun Application.restModule(
 
     routing {
         authenticate {
-            vedtaksvurderingRoute(vedtaksvurderingService, saksbehandlere)
+            vedtaksvurderingRoute(vedtaksvurderingService)
         }
     }
 }

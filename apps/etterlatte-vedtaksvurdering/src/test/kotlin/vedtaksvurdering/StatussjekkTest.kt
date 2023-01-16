@@ -95,12 +95,13 @@ class StatussjekkTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
         opprettVedtak()
 
         runBlocking {
-            vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, saksbehandlereSecret, accessToken)
+            vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, accessToken)
         }
 
         coVerifyOrder {
@@ -117,7 +118,8 @@ class StatussjekkTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
         coEvery { behandling.fattVedtak(any(), any(), any()) } returns true
         opprettVedtak()
@@ -125,7 +127,7 @@ class StatussjekkTest {
 
         runBlocking {
             assertThrows<Exception> {
-                vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, saksbehandlereSecret, accessToken)
+                vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, accessToken)
             }
         }
 
@@ -142,13 +144,14 @@ class StatussjekkTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
         opprettVedtak()
         vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
 
         runBlocking {
-            vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, saksbehandlereSecret, accessToken)
+            vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, accessToken)
         }
 
         coVerifyOrder {
@@ -165,14 +168,15 @@ class StatussjekkTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
         coEvery { behandling.attester(any(), any(), any()) } returns true
         opprettVedtak()
 
         runBlocking {
             assertThrows<Exception> {
-                vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, saksbehandlereSecret, accessToken)
+                vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, accessToken)
             }
         }
 
@@ -189,7 +193,8 @@ class StatussjekkTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
         opprettVedtak()
         vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
@@ -212,7 +217,8 @@ class StatussjekkTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
         coEvery { behandling.underkjenn(any(), any(), any()) } returns true
         opprettVedtak()

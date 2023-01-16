@@ -48,6 +48,8 @@ internal class DBTest {
     private val sakId = 123L
     private val accessToken = "accessToken"
 
+    private val saksbehandlereSecret = mapOf("saksbehandler" to "4808", "attestant" to "4808")
+
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
@@ -72,7 +74,8 @@ internal class DBTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
         vedtaksvurderingService.lagreIverksattVedtak(uuid)
     }
@@ -85,7 +88,8 @@ internal class DBTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
 
         val beregningDTO = BeregningDTO(
@@ -138,12 +142,11 @@ internal class DBTest {
         assert(vedtaket?.vilkaarsvurdering != null)
         assert(vedtaket?.sak?.id != null)
         Assertions.assertNotNull(vedtaket?.virk)
-        val saksbehandlereSecret = mapOf("saksbehandler" to "4808")
+
         runBlocking {
             vedtaksvurderingService.fattVedtak(
                 uuid,
                 "saksbehandler",
-                saksbehandlereSecret,
                 accessToken
             )
         }
@@ -156,11 +159,11 @@ internal class DBTest {
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
         runBlocking {
-            vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", saksbehandlereSecret, accessToken)
+            vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken)
         }
 
         runBlocking {
-            vedtaksvurderingService.attesterVedtak(uuid, "attestant", mapOf("attestant" to "4808"), accessToken)
+            vedtaksvurderingService.attesterVedtak(uuid, "attestant", accessToken)
         }
         val attestertVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)

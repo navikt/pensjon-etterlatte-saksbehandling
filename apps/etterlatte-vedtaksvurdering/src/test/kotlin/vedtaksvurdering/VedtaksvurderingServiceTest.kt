@@ -35,6 +35,7 @@ internal class VedtaksvurderingServiceTest {
         beregningMock,
         vilkaarsvurderingMock,
         behandlingMock,
+        mockk(),
         mockk()
     )
 

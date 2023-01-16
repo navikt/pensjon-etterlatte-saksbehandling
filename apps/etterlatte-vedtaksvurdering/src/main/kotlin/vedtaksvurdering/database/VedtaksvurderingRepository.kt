@@ -139,19 +139,21 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun fattVedtak(saksbehandlerId: String, behandlingsId: UUID) {
+    fun fattVedtak(saksbehandlerId: String, saksbehandlerEnhet: String, behandlingsId: UUID) {
         connection.use {
             val statement = it.prepareStatement(Queries.fattVedtak)
             statement.setString(1, saksbehandlerId)
-            statement.setBoolean(2, true)
-            statement.setString(3, VedtakStatus.FATTET_VEDTAK.name)
-            statement.setObject(4, behandlingsId)
+            statement.setString(2, saksbehandlerEnhet)
+            statement.setBoolean(3, true)
+            statement.setString(4, VedtakStatus.FATTET_VEDTAK.name)
+            statement.setObject(5, behandlingsId)
             statement.execute()
         }
     }
 
     fun attesterVedtak(
         saksbehandlerId: String,
+        saksbehandlerEnhet: String,
         behandlingsId: UUID,
         vedtakId: Long,
         utbetalingsperioder: List<Utbetalingsperiode>
@@ -175,8 +177,9 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 
             val statement = it.prepareStatement(Queries.attesterVedtak)
             statement.setString(1, saksbehandlerId)
-            statement.setString(2, VedtakStatus.ATTESTERT.name)
-            statement.setObject(3, behandlingsId)
+            statement.setString(2, saksbehandlerEnhet)
+            statement.setString(3, VedtakStatus.ATTESTERT.name)
+            statement.setObject(4, behandlingsId)
             statement.execute()
         }
     }
@@ -220,7 +223,9 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         virkningsDato = getDate(12)?.toLocalDate(),
         vedtakStatus = getString(13)?.let { VedtakStatus.valueOf(it) },
         sakType = SakType.valueOf(getString(14)),
-        behandlingType = BehandlingType.valueOf(getString(15))
+        behandlingType = BehandlingType.valueOf(getString(15)),
+        attestertVedtakEnhet = getString(16),
+        fattetVedtakEnhet = getString(17)
     )
 }
 
@@ -230,9 +235,9 @@ private object Queries {
     val oppdaterVedtak = "UPDATE vedtak SET datovirkfom = ?, beregningsresultat = ?, vilkaarsresultat = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
 
     val fattVedtak =
-        "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now(), vedtakstatus = ?  WHERE behandlingId = ?" // ktlint-disable max-line-length
+        "UPDATE vedtak SET saksbehandlerId = ?, fattetVedtakEnhet = ?, vedtakfattet = ?, datoFattet = now(), vedtakstatus = ?  WHERE behandlingId = ?" // ktlint-disable max-line-length
     val attesterVedtak =
-        "UPDATE vedtak SET attestant = ?, datoAttestert = now(), vedtakstatus = ? WHERE behandlingId = ?"
+        "UPDATE vedtak SET attestant = ?, attestertVedtakEnhet = ?, datoAttestert = now(), vedtakstatus = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
     val underkjennVedtak =
         "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE behandlingId = ?" // ktlint-disable max-line-length
     val hentVedtakBolk =
@@ -240,7 +245,7 @@ private object Queries {
             "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
             "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(?)"
     val hentVedtak =
-        "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
+        "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, attestertVedtakEnhet, fattetVedtakEnhet FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
 
     val lagreUtbetalingsperiode =
         "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"

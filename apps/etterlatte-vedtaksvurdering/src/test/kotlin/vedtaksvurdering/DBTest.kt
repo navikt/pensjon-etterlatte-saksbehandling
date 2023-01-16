@@ -48,6 +48,8 @@ internal class DBTest {
     private val sakId = 123L
     private val accessToken = "accessToken"
 
+    private val saksbehandlereSecret = mapOf("saksbehandler" to "4808", "attestant" to "4808")
+
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
@@ -72,7 +74,8 @@ internal class DBTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
         vedtaksvurderingService.lagreIverksattVedtak(uuid)
     }
@@ -85,7 +88,8 @@ internal class DBTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
 
         val beregningDTO = BeregningDTO(
@@ -139,7 +143,13 @@ internal class DBTest {
         assert(vedtaket?.sak?.id != null)
         Assertions.assertNotNull(vedtaket?.virk)
 
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
+        runBlocking {
+            vedtaksvurderingService.fattVedtak(
+                uuid,
+                "saksbehandler",
+                accessToken
+            )
+        }
         val fattetVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
@@ -148,9 +158,13 @@ internal class DBTest {
         val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
+        runBlocking {
+            vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken)
+        }
 
-        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, "attestant", accessToken) }
+        runBlocking {
+            vedtaksvurderingService.attesterVedtak(uuid, "attestant", accessToken)
+        }
         val attestertVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)

@@ -60,8 +60,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                 val attestert = service.attesterVedtak(behandlingId, saksbehandler, accesstoken)
                 val vedtakHendelse = VedtakHendelse(
                     vedtakId = attestert.vedtakId,
-                    inntruffet = Tidspunkt.now(),
-                    saksbehandler = saksbehandler
+                    inntruffet = Tidspunkt.now()
                 )
 
                 service.postTilVedtakhendelse(behandlingId, accesstoken, HendelseType.ATTESTERT, vedtakHendelse)

@@ -40,7 +40,9 @@ data class Vedtak(
     val attestant: String?,
     val virkningsDato: LocalDate?,
     val vedtakStatus: VedtakStatus?,
-    val behandlingType: BehandlingType
+    val behandlingType: BehandlingType,
+    val attestertVedtakEnhet: String?,
+    val fattetVedtakEnhet: String?
 ) {
     fun toDTO(utbetalingsperioder: List<Utbetalingsperiode>) = Vedtak(
         vedtakId = this.id,
@@ -87,7 +89,7 @@ data class Vedtak(
             this.saksbehandlerId?.let { ansvarligSaksbehandler ->
                 VedtakFattet(
                     ansvarligSaksbehandler,
-                    "0000",
+                    fattetVedtakEnhet!!,
                     this.datoFattet?.atZone(
                         ZoneOffset.UTC
                     )!!
@@ -99,7 +101,7 @@ data class Vedtak(
         attestasjon = this.attestant?.let { attestant ->
             Attestasjon(
                 attestant,
-                "0000",
+                attestertVedtakEnhet!!,
                 this.datoattestert!!.atZone(ZoneOffset.UTC)
             )
         }

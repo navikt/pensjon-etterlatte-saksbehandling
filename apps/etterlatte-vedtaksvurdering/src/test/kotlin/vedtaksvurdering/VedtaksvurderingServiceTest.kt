@@ -35,6 +35,7 @@ internal class VedtaksvurderingServiceTest {
         beregningMock,
         vilkaarsvurderingMock,
         behandlingMock,
+        mockk(),
         mockk()
     )
 
@@ -57,7 +58,9 @@ internal class VedtaksvurderingServiceTest {
         null,
         null,
         null,
-        BehandlingType.FØRSTEGANGSBEHANDLING
+        BehandlingType.FØRSTEGANGSBEHANDLING,
+        null,
+        null
     )
 
     @Test

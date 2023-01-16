@@ -58,8 +58,6 @@ spec:
       value: http://etterlatte-vedtaksvurdering
     - name: GRUNNLAG_API_URL
       value: http://etterlatte-grunnlag
-    - name: TILGANGSSTYRING_ENABLED
-      value: 'false'
   accessPolicy:
     outbound:
       external:

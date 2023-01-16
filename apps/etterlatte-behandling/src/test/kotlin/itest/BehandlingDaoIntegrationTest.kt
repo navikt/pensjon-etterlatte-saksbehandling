@@ -285,7 +285,12 @@ internal class BehandlingDaoIntegrationTest {
                 ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
             ),
             fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem",
-            virkningstidspunkt = null // TODO
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 8),
+                Grunnlagsopplysning.Saksbehandler.create(
+                    saksbehandlerToken
+                )
+            )
         ).also {
             behandlingRepo.opprettManueltOpphoer(it)
         }

@@ -83,7 +83,7 @@ internal class RealManueltOpphoerServiceTest {
         val hendelse_slot = slot<Pair<UUID, BehandlingHendelseType>>()
 
         val behandlingerMock = mockk<BehandlingDao> {
-            every { alleBehandingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
+            every { alleBehandlingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
                 foerstegangsbehandling(sak = sak)
             )
             every { opprettManueltOpphoer(capture(opprettBehandling_slot)) } returns manueltOpphoer(
@@ -134,7 +134,7 @@ internal class RealManueltOpphoerServiceTest {
         )
         val alleBehandlingerISak_sak = slot<Long>()
         val behandlingerMock = mockk<BehandlingDao> {
-            every { alleBehandingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
+            every { alleBehandlingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
                 manueltOpphoer(sak = sak)
             )
         }

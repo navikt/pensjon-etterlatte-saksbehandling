@@ -15,6 +15,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -57,22 +58,24 @@ class RealManueltOpphoerService(
         opphoerRequest: ManueltOpphoerRequest
     ): ManueltOpphoer? {
         return inTransaction {
-            val forrigeBehandling =
-                behandlinger.alleBehandingerISak(opphoerRequest.sak).`siste ikke-avbrutte behandling`()
+            val alleBehandlingerISak = behandlinger.alleBehandlingerISak(opphoerRequest.sak)
+            val forrigeBehandling = alleBehandlingerISak.`siste ikke-avbrutte behandling`()
 
             when (forrigeBehandling) {
                 is Foerstegangsbehandling -> ManueltOpphoer(
                     sak = forrigeBehandling.sak,
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
-                    fritekstAarsak = opphoerRequest.fritekstAarsak
+                    fritekstAarsak = opphoerRequest.fritekstAarsak,
+                    virkningstidspunkt = forrigeBehandling.virkningstidspunkt
                 )
 
                 is Revurdering -> ManueltOpphoer(
                     sak = forrigeBehandling.sak,
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
-                    fritekstAarsak = opphoerRequest.fritekstAarsak
+                    fritekstAarsak = opphoerRequest.fritekstAarsak,
+                    virkningstidspunkt = alleBehandlingerISak.tidligsteIverksatteVirkningstidspunkt()
                 )
 
                 is ManueltOpphoer -> {
@@ -97,7 +100,7 @@ class RealManueltOpphoerService(
             runBlocking {
                 behandlingHendelser.send(lagretManueltOpphoer.id to BehandlingHendelseType.OPPRETTET)
             }
-            logger.info("Manuelt opphoer er opprettet.")
+            logger.info("Manuelt opphoer med id=${lagretManueltOpphoer.id} er opprettet.")
         }
     }
 
@@ -126,7 +129,11 @@ class RealManueltOpphoerService(
         }
     }
 
-    private fun List<Behandling>.`siste ikke-avbrutte behandling`() =
+    private fun List<Behandling>.`siste ikke-avbrutte behandling`(): Behandling? =
         this.sortedByDescending { it.behandlingOpprettet }
             .firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
+    private fun List<Behandling>.tidligsteIverksatteVirkningstidspunkt(): Virkningstidspunkt? =
+        this.filter { it.status == BehandlingStatus.IVERKSATT }
+            .mapNotNull { it.virkningstidspunkt }
+            .minByOrNull { it.dato }
 }

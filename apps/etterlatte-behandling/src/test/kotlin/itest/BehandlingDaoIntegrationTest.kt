@@ -153,7 +153,8 @@ internal class BehandlingDaoIntegrationTest {
                 ManueltOpphoerAarsak.SOESKEN_DOED,
                 ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
             ),
-            fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem"
+            fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem",
+            virkningstidspunkt = null // TODO
         )
         val lagretBehandling = behandlingRepo.opprettManueltOpphoer(behandling)
         assertEquals(sak1, lagretBehandling.sak)
@@ -220,10 +221,10 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.opprettFoerstegangsbehandling(b)
         }
 
-        assertEquals(2, behandlingRepo.alleBehandingerISak(sak1).size)
+        assertEquals(2, behandlingRepo.alleBehandlingerISak(sak1).size)
         behandlingRepo.slettBehandlingerISak(sak1)
-        assertEquals(0, behandlingRepo.alleBehandingerISak(sak1).size)
-        assertEquals(1, behandlingRepo.alleBehandingerISak(sak2).size)
+        assertEquals(0, behandlingRepo.alleBehandlingerISak(sak1).size)
+        assertEquals(1, behandlingRepo.alleBehandlingerISak(sak2).size)
     }
 
     @Test
@@ -235,13 +236,13 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.opprettFoerstegangsbehandling(b)
         }
 
-        var behandling = behandlingRepo.alleBehandingerISak(sak1)
+        var behandling = behandlingRepo.alleBehandlingerISak(sak1)
         assertEquals(1, behandling.size)
         assertEquals(false, behandling.first().status == BehandlingStatus.AVBRUTT)
 
         val avbruttbehandling = (behandling.first() as Foerstegangsbehandling).copy(status = BehandlingStatus.AVBRUTT)
         behandlingRepo.lagreStatus(avbruttbehandling)
-        behandling = behandlingRepo.alleBehandingerISak(sak1)
+        behandling = behandlingRepo.alleBehandlingerISak(sak1)
         assertEquals(1, behandling.size)
         assertEquals(true, behandling.first().status == BehandlingStatus.AVBRUTT)
     }
@@ -276,7 +277,8 @@ internal class BehandlingDaoIntegrationTest {
                 ManueltOpphoerAarsak.SOESKEN_DOED,
                 ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
             ),
-            fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem"
+            fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem",
+            virkningstidspunkt = null // TODO
         ).also {
             behandlingRepo.opprettManueltOpphoer(it)
         }
@@ -516,7 +518,7 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.opprettFoerstegangsbehandling(it)
         }
 
-        val lagredeBehandlinger = behandlingRepo.alleBehandingerISak(sak1)
+        val lagredeBehandlinger = behandlingRepo.alleBehandlingerISak(sak1)
         val alleLoependeBehandlinger = behandlingRepo.alleAktiveBehandlingerISak(sak1)
         assertEquals(4, lagredeBehandlinger.size)
         assertEquals(2, alleLoependeBehandlinger.size)

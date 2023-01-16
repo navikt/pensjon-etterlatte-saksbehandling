@@ -21,6 +21,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: apps/main/.nais/dev.yaml
+          RESOURCE: apps/etterlatte-${{ inputs.applikasjon }}/.nais/dev.yaml
           VAR: image=${{ env.image }}
-    secrets: inherit

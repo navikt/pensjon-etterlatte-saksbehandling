@@ -31,4 +31,6 @@ jobs:
     secrets: inherit
 
   tilbakestill:
+    if: github.event_name != 'pull_request'
     uses: ./.github/workflows/etterlatte-tilbakestill-alle.yaml
+    secrets: inherit

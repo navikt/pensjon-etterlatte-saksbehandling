@@ -1,6 +1,7 @@
 name: etterlatte-tilbakestill-alle
 
 on:
+  pull_request:
   workflow_dispatch: # Allow manually triggered workflow run
 
 jobs:
@@ -8,3 +9,4 @@ jobs:
     uses: ./.github/workflows/.tilbakestill.yaml
     with:
       applikasjon: behandling
+    secrets: inherit

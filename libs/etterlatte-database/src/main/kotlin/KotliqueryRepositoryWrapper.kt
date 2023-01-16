@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.database
+package no.nav.etterlatte.libs.database
 
 import kotliquery.Row
 import kotliquery.Session
@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory
 import java.io.Serializable
 import javax.sql.DataSource
 
-class RepositoryProxy(private val datasource: DataSource) {
+class KotliqueryRepositoryWrapper(private val datasource: DataSource) {
 
-    private val logger = LoggerFactory.getLogger(RepositoryProxy::class.java)
+    private val logger = LoggerFactory.getLogger(KotliqueryRepositoryWrapper::class.java)
 
-    internal fun opprett(query: String, params: Map<String, Any?>, loggtekst: String) =
+    fun opprett(query: String, params: Map<String, Any?>, loggtekst: String) =
         using(sessionOf(datasource)) { session ->
             queryOf(
                 statement = query,
@@ -23,7 +23,7 @@ class RepositoryProxy(private val datasource: DataSource) {
                 .let { session.run(it.asExecute) }
         }
 
-    internal fun oppdater(query: String, params: Map<String, Any>, loggtekst: String) =
+    fun oppdater(query: String, params: Map<String, Any>, loggtekst: String) =
         using(sessionOf(datasource)) { session ->
             queryOf(
                 statement = query,
@@ -33,13 +33,13 @@ class RepositoryProxy(private val datasource: DataSource) {
                 .let { session.run(it.asUpdate) }
         }
 
-    internal fun opprettFlere(query: String, params: List<Map<String, Serializable?>>, loggtekst: String) =
+    fun opprettFlere(query: String, params: List<Map<String, Serializable?>>, loggtekst: String) =
         using(sessionOf(datasource)) { session ->
             logger.info(loggtekst)
             session.batchPreparedNamedStatement(query, params)
         }
 
-    internal fun <T> hentMedKotliquery(
+    fun <T> hentMedKotliquery(
         query: String,
         params: Map<String, Any>,
         converter: (r: Row) -> T
@@ -53,7 +53,7 @@ class RepositoryProxy(private val datasource: DataSource) {
             }
     }
 
-    internal fun <T> hentListeMedKotliquery(
+    fun <T> hentListeMedKotliquery(
         query: String,
         params: (s: Session) -> Map<String, Any?>,
         converter: (r: Row) -> T

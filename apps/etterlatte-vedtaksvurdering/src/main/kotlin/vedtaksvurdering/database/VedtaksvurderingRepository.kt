@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import no.nav.etterlatte.vedtaksvurdering.Beregningsresultat
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import java.io.Serializable
@@ -22,7 +23,7 @@ import javax.sql.DataSource
 
 class VedtaksvurderingRepository(datasource: DataSource) {
 
-    private val repositoryProxy: RepositoryProxy = RepositoryProxy(datasource)
+    private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(datasource)
 
     companion object {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
@@ -37,7 +38,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         virkningsDato: LocalDate,
         beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto
-    ) = repositoryProxy.opprett(
+    ) = repositoryWrapper.opprett(
         query = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) " + // ktlint-disable max-line-length
             "VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :datovirkfom, :beregningsresultat, :vilkaarsresultat)", // ktlint-disable max-line-length
         params = mapOf(
@@ -59,7 +60,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         beregningsresultat: Beregningsresultat?,
         vilkaarsresultat: VilkaarsvurderingDto,
         virkningsDato: LocalDate
-    ) = repositoryProxy.oppdater(
+    ) = repositoryWrapper.oppdater(
         query = "UPDATE vedtak SET datovirkfom = :datovirkfom, beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat WHERE behandlingId = :behandlingid", // ktlint-disable max-line-length
         params = mapOf(
             "datovirkfom" to Date.valueOf(virkningsDato),
@@ -73,13 +74,13 @@ class VedtaksvurderingRepository(datasource: DataSource) {
     // Kan det finnes flere vedtak for en behandling? Hør med Henrik
     fun lagreIverksattVedtak(
         behandlingsId: UUID
-    ) = repositoryProxy.oppdater(
+    ) = repositoryWrapper.oppdater(
         query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
         params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingsId),
         loggtekst = "Lagrer iverksatt vedtak"
     ).also { require(it == 1) }
 
-    fun hentVedtakBolk(behandlingsidenter: List<UUID>) = repositoryProxy.hentListeMedKotliquery(
+    fun hentVedtakBolk(behandlingsidenter: List<UUID>) = repositoryWrapper.hentListeMedKotliquery(
         query = """SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat,
             vedtakfattet, id, fnr, datoFattet, datoattestert, attestant,
             datoVirkFom, vedtakstatus, saktype, behandlingtype, attestertVedtakEnhet, fattetVedtakEnhet 
@@ -92,7 +93,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
     fun hentVedtak(behandlingsId: UUID): Vedtak? {
         val hentVedtak =
             "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, attestertVedtakEnhet, fattetVedtakEnhet FROM vedtak WHERE behandlingId = :behandlingId" // ktlint-disable max-line-length
-        return repositoryProxy.hentMedKotliquery(
+        return repositoryWrapper.hentMedKotliquery(
             query = hentVedtak,
             params = mapOf("behandlingId" to behandlingsId)
         ) { it.toVedtak() }
@@ -123,7 +124,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         fattetVedtakEnhet = stringOrNull("fattetVedtakEnhet")
     )
 
-    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = repositoryProxy.hentListeMedKotliquery(
+    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = repositoryWrapper.hentListeMedKotliquery(
         query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
         params = { mapOf("vedtakid" to vedtakId) }
     ) {
@@ -138,17 +139,18 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         )
     }
 
-    fun fattVedtak(saksbehandlerId: String, saksbehandlerEnhet: String, behandlingsId: UUID) = repositoryProxy.oppdater(
-        query = "UPDATE vedtak SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, vedtakfattet = :vedtakfattet, datoFattet = now(), vedtakstatus = :vedtakstatus  WHERE behandlingId = :behandlingId", // ktlint-disable max-line-lengt
-        params = mapOf(
-            "saksbehandlerId" to saksbehandlerId,
-            "saksbehandlerEnhet" to saksbehandlerEnhet,
-            "vedtakfattet" to true,
-            "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
-            "behandlingId" to behandlingsId
-        ),
-        loggtekst = "Fatter vedtok for behandling $behandlingsId"
-    )
+    fun fattVedtak(saksbehandlerId: String, saksbehandlerEnhet: String, behandlingsId: UUID) =
+        repositoryWrapper.oppdater(
+            query = "UPDATE vedtak SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, vedtakfattet = :vedtakfattet, datoFattet = now(), vedtakstatus = :vedtakstatus  WHERE behandlingId = :behandlingId", // ktlint-disable max-line-lengt
+            params = mapOf(
+                "saksbehandlerId" to saksbehandlerId,
+                "saksbehandlerEnhet" to saksbehandlerEnhet,
+                "vedtakfattet" to true,
+                "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
+                "behandlingId" to behandlingsId
+            ),
+            loggtekst = "Fatter vedtok for behandling $behandlingsId"
+        )
 
     fun attesterVedtak(
         saksbehandlerId: String,
@@ -166,14 +168,14 @@ class VedtaksvurderingRepository(datasource: DataSource) {
                 "beloep" to it.beloep
             )
         }.let {
-            repositoryProxy.opprettFlere(
+            repositoryWrapper.opprettFlere(
                 query = "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) " +
                     "VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)",
                 params = it,
                 loggtekst = "Attesterer vedtak"
             )
         }
-        repositoryProxy.oppdater(
+        repositoryWrapper.oppdater(
             query = "UPDATE vedtak SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = now(), vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
             params = mapOf(
                 "attestant" to saksbehandlerId,
@@ -186,7 +188,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
     }
 
     fun underkjennVedtak(behandlingsId: UUID) =
-        repositoryProxy.oppdater(
+        repositoryWrapper.oppdater(
             "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
             params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingsId),
             loggtekst = "Underkjenner vedtak for behandling $behandlingsId"

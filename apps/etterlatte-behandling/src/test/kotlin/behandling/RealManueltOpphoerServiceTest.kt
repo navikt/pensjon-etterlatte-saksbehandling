@@ -12,16 +12,24 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.itest.saksbehandlerToken
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.manueltOpphoer
+import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
+import java.time.YearMonth
 import java.util.*
 
 internal class RealManueltOpphoerServiceTest {
@@ -119,6 +127,79 @@ internal class RealManueltOpphoerServiceTest {
             { assertEquals(BehandlingHendelseType.OPPRETTET, hendelse_slot.captured.second) },
             { assertEquals(behandlingId, returnertManueltOpphoer?.id) }
         )
+    }
+
+    @Test
+    fun `manuelt opphør får tidligste virkningstidspunkt fra iverksatte behandlinger på saken`() {
+        val brukerFnr = "123"
+        val sakId = 1L
+        val manueltOpphoerRequest = ManueltOpphoerRequest(
+            sak = sakId,
+            opphoerAarsaker = listOf(
+                ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
+                ManueltOpphoerAarsak.SOESKEN_DOED
+            ),
+            fritekstAarsak = "Det var enda en opphoersaarsak"
+        )
+        val opprettetManueltOpphoerSlot = slot<ManueltOpphoer>()
+        val behandlingerMock = mockk<BehandlingDao> {
+            every { alleBehandlingerISak(any()) } returns listOf(
+                foerstegangsbehandling(
+                    sak = sakId,
+                    status = BehandlingStatus.IVERKSATT,
+                    persongalleri = Persongalleri(
+                        soeker = brukerFnr
+                    ),
+                    virkningstidspunkt = Virkningstidspunkt(
+                        YearMonth.of(2022, 8),
+                        Grunnlagsopplysning.Saksbehandler.create(
+                            saksbehandlerToken
+                        )
+                    )
+                ),
+                revurdering(
+                    sak = sakId,
+                    status = BehandlingStatus.IVERKSATT,
+                    persongalleri = Persongalleri(soeker = brukerFnr),
+                    virkningstidspunkt = Virkningstidspunkt(
+                        YearMonth.of(2022, 10),
+                        Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken)
+                    ),
+                    revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                ),
+                revurdering(
+                    sak = sakId,
+                    status = BehandlingStatus.VILKAARSVURDERT,
+                    persongalleri = Persongalleri(soeker = brukerFnr),
+                    virkningstidspunkt = Virkningstidspunkt(
+                        YearMonth.of(2022, 5),
+                        Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken)
+                    ),
+                    revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                )
+            )
+            every { opprettManueltOpphoer(capture(opprettetManueltOpphoerSlot)) } returns manueltOpphoer(
+                sak = manueltOpphoerRequest.sak,
+                behandlingId = UUID.randomUUID(),
+                opphoerAarsaker = manueltOpphoerRequest.opphoerAarsaker,
+                fritekstAarsak = manueltOpphoerRequest.fritekstAarsak
+            )
+        }
+
+        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>> {
+            coEvery { send(any()) } returns Unit
+        }
+        val hendelserMock = mockk<HendelseDao> {
+            every { behandlingOpprettet(any()) } returns Unit
+        }
+        val sut = RealManueltOpphoerService(
+            behandlingerMock,
+            hendelsesKanal,
+            hendelserMock
+        )
+
+        sut.opprettManueltOpphoer(manueltOpphoerRequest)
+        assertEquals(YearMonth.of(2022, 8), opprettetManueltOpphoerSlot.captured.virkningstidspunkt?.dato)
     }
 
     @Test

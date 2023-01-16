@@ -21,6 +21,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.CoroutineScope
@@ -93,20 +94,30 @@ class AzureAdClient(
         runCatching {
             httpClient.get(url) {
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
-            }.body<JsonNode>()
+            }
+        }.mapCatching { response ->
+            response.checkForError()
         }.fold(
-            onSuccess = { result -> Ok(result) },
-            onFailure = { error -> error.handleError("Could not GET $url") }
+            onSuccess = { result -> Ok(result.body()) },
+            onFailure = { error ->
+                val downstreamResourceClient = when (error) {
+                    is HttpStatusRuntimeException -> error.downstreamStatusCode
+                    else -> null
+                }
+
+                error.handleError("Could not GET $url", downstreamResourceClient)
+            }
         )
 
-    private suspend fun Throwable.handleError(message: String): Err<ThrowableErrorMessage> {
+    private suspend fun Throwable.handleError(message: String, downstreamResourceClient: HttpStatusCode?):
+        Err<ThrowableErrorMessage> {
         val responseBody: String? = when (this) {
             is ResponseException -> this.response.bodyAsText()
             else -> null
         }
         return "$message. response body: $responseBody"
             .also { errorMessage -> logger.error(errorMessage, this) }
-            .let { errorMessage -> Err(ThrowableErrorMessage(errorMessage, this)) }
+            .let { errorMessage -> Err(ThrowableErrorMessage(errorMessage, this, downstreamResourceClient)) }
     }
 
     // Service-to-service access token request (client credentials grant)

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.ktorobo
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
@@ -16,9 +15,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
 
@@ -83,20 +80,16 @@ class DownstreamResourceClient(
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
             }
         }
-            .mapCatching { result ->
-                if (!result.status.isSuccess()) {
-                    throw RuntimeException("received response with status ${result.status.value} from downstream api")
-                }
-
-                result
+            .mapCatching { response ->
+                response.checkForError()
             }
             .fold(
                 onSuccess = { result ->
                     Ok(result.body())
                 },
                 onFailure = { error ->
-                    logger.error("received error from downstream api", error)
-                    Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
+                    logger.error("received error from downstream api: get", error)
+                    error.toErr(resource.url)
                 }
             )
 
@@ -113,12 +106,8 @@ class DownstreamResourceClient(
                 setBody(postBody)
             }
         }
-            .mapCatching { result ->
-                if (!result.status.isSuccess()) {
-                    throw RuntimeException("received response with status ${result.status.value} from downstream api")
-                }
-
-                result
+            .mapCatching { response ->
+                response.checkForError()
             }
             .fold(
                 onSuccess = { result ->
@@ -130,8 +119,8 @@ class DownstreamResourceClient(
                     }
                 },
                 onFailure = { error ->
-                    logger.error("received error from downstream api", error)
-                    Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
+                    logger.error("received error from downstream api: post", error)
+                    error.toErr(resource.url)
                 }
             )
 
@@ -148,20 +137,16 @@ class DownstreamResourceClient(
                 setBody(postBody)
             }
         }
-            .mapCatching { result ->
-                if (!result.status.isSuccess()) {
-                    throw RuntimeException("received response with status ${result.status.value} from downstream api")
-                }
-
-                result
+            .mapCatching { response ->
+                response.checkForError()
             }
             .fold(
                 onSuccess = { result ->
                     Ok(result.body())
                 },
                 onFailure = { error ->
-                    logger.error("received error from downstream api", error)
-                    Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
+                    logger.error("received error from downstream api: delete", error)
+                    error.toErr(resource.url)
                 }
             )
 }

@@ -80,9 +80,10 @@ class VedtaksvurderingRepository(datasource: DataSource) {
     ).also { require(it == 1) }
 
     fun hentVedtakBolk(behandlingsidenter: List<UUID>) = repositoryProxy.hentListeMedKotliquery(
-        query = "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat," +
-            "vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
-            "datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak where behandlingId = ANY(:behandlingId)",
+        query = """SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat,
+            vedtakfattet, id, fnr, datoFattet, datoattestert, attestant,
+            datoVirkFom, vedtakstatus, saktype, behandlingtype, attestertVedtakEnhet, fattetVedtakEnhet 
+            FROM vedtak where behandlingId = ANY(:behandlingId)""",
         { session: Session -> mapOf("behandlingId" to session.createArrayOf("uuid", behandlingsidenter)) }
     ) {
         it.toVedtak()
@@ -90,7 +91,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
 
     fun hentVedtak(behandlingsId: UUID): Vedtak? {
         val hentVedtak =
-            "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = :behandlingId" // ktlint-disable max-line-length
+            "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, attestertVedtakEnhet, fattetVedtakEnhet FROM vedtak WHERE behandlingId = :behandlingId" // ktlint-disable max-line-length
         return repositoryProxy.hentMedKotliquery(
             query = hentVedtak,
             params = mapOf("behandlingId" to behandlingsId)
@@ -117,7 +118,9 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         virkningsDato = sqlDateOrNull("datovirkfom")?.toLocalDate(),
         vedtakStatus = stringOrNull("vedtakstatus")?.let { VedtakStatus.valueOf(it) },
         sakType = SakType.valueOf(string("saktype")),
-        behandlingType = BehandlingType.valueOf(string("behandlingtype"))
+        behandlingType = BehandlingType.valueOf(string("behandlingtype")),
+        attestertVedtakEnhet = stringOrNull("attestertVedtakEnhet"),
+        fattetVedtakEnhet = stringOrNull("fattetVedtakEnhet")
     )
 
     fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = repositoryProxy.hentListeMedKotliquery(
@@ -135,10 +138,11 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         )
     }
 
-    fun fattVedtak(saksbehandlerId: String, behandlingsId: UUID) = repositoryProxy.oppdater(
-        query = "UPDATE vedtak SET saksbehandlerId = :saksbehandlerId, vedtakfattet = :vedtakfattet, datoFattet = now(), vedtakstatus = :vedtakstatus  WHERE behandlingId = :behandlingId", // ktlint-disable max-line-lengt
+    fun fattVedtak(saksbehandlerId: String, saksbehandlerEnhet: String, behandlingsId: UUID) = repositoryProxy.oppdater(
+        query = "UPDATE vedtak SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, vedtakfattet = :vedtakfattet, datoFattet = now(), vedtakstatus = :vedtakstatus  WHERE behandlingId = :behandlingId", // ktlint-disable max-line-lengt
         params = mapOf(
             "saksbehandlerId" to saksbehandlerId,
+            "saksbehandlerEnhet" to saksbehandlerEnhet,
             "vedtakfattet" to true,
             "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
             "behandlingId" to behandlingsId
@@ -170,9 +174,10 @@ class VedtaksvurderingRepository(datasource: DataSource) {
             )
         }
         repositoryProxy.oppdater(
-            query = "UPDATE vedtak SET attestant = :attestant, datoAttestert = now(), vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
+            query = "UPDATE vedtak SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = now(), vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
             params = mapOf(
                 "attestant" to saksbehandlerId,
+                "attestertVedtakEnhet" to saksbehandlerEnhet,
                 "vedtakstatus" to VedtakStatus.ATTESTERT.name,
                 "behandlingId" to behandlingsId
             ),

@@ -66,7 +66,8 @@ internal class DBTest {
         beregning,
         vilkaarsvurdering,
         behandling,
-        sendToRapid
+        sendToRapid,
+        saksbehandlereSecret
     )
 
     @AfterAll

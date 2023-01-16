@@ -47,6 +47,8 @@ internal class DBTest {
     private val sakId = 123L
     private val accessToken = "accessToken"
 
+    private val saksbehandlereSecret = mapOf("saksbehandler" to "4808", "attestant" to "4808")
+
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
@@ -79,7 +81,8 @@ internal class DBTest {
             beregning,
             vilkaarsvurdering,
             behandling,
-            sendToRapid
+            sendToRapid,
+            saksbehandlereSecret
         )
         vedtaksvurderingService.lagreIverksattVedtak(behandlingid)
     }

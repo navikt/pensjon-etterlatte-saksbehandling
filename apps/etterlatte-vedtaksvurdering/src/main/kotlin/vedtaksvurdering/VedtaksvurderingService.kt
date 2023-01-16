@@ -59,7 +59,8 @@ class VedtaksvurderingService(
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val sendToRapid: (String, UUID) -> Unit
+    private val sendToRapid: (String, UUID) -> Unit,
+    private val saksbehandlere: Map<String, String>
 ) {
 
     fun lagreIverksattVedtak(behandlingId: UUID) {
@@ -143,7 +144,11 @@ class VedtaksvurderingService(
         }
     }
 
-    suspend fun fattVedtak(behandlingId: UUID, saksbehandler: String, accessToken: String): Vedtak {
+    suspend fun fattVedtak(
+        behandlingId: UUID,
+        saksbehandler: String,
+        accessToken: String
+    ): Vedtak {
         if (!behandlingKlient.fattVedtak(behandlingId, accessToken)) {
             throw BehandlingstilstandException
         }
@@ -157,7 +162,10 @@ class VedtaksvurderingService(
                 if (it.beregning == null) throw VedtakKanIkkeFattes(v)
             }
             if (it.vilkaarsvurdering == null) throw VedtakKanIkkeFattes(v)
-            repository.fattVedtak(saksbehandler, behandlingId)
+            val saksbehandlerEnhet = saksbehandlere[saksbehandler]
+                ?: throw SaksbehandlerManglerEnhet("Saksbehandler $saksbehandler mangler enhet fra secret")
+
+            repository.fattVedtak(saksbehandler, saksbehandlerEnhet, behandlingId)
         }
 
         val fattetVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
@@ -181,8 +189,13 @@ class VedtaksvurderingService(
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
         }
+
+        val saksbehandlerEnhet = saksbehandlere[saksbehandler]
+            ?: throw SaksbehandlerManglerEnhet("Saksbehandler $saksbehandler mangler enhet fra secret")
+
         repository.attesterVedtak(
             saksbehandler,
+            saksbehandlerEnhet,
             behandlingId,
             vedtak.vedtakId,
             utbetalingsperioderFraVedtak(vedtak)
@@ -284,6 +297,8 @@ class VedtaksvurderingService(
         )
     }
 }
+
+class SaksbehandlerManglerEnhet(message: String) : Exception(message)
 
 private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak) =
     JsonMessage.newMessage(mapOf(eventNameKey to vedtakhendelse.toString(), "vedtak" to vedtak)).toJson()

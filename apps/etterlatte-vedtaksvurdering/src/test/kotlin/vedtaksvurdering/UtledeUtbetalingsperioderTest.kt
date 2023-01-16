@@ -21,7 +21,14 @@ internal class UtledeUtbetalingsperioderTest {
     private val beregning = mockk<BeregningKlient>(relaxed = true)
     private val vilkaarsvurdering = mockk<VilkaarsvurderingKlient>(relaxed = true)
     private val behandling = mockk<BehandlingKlient>(relaxed = true)
-    private val service = VedtaksvurderingService(repositoryMock, beregning, vilkaarsvurdering, behandling, mockk())
+    private val service = VedtaksvurderingService(
+        repositoryMock,
+        beregning,
+        vilkaarsvurdering,
+        behandling,
+        mockk(),
+        mockk()
+    )
 
     @Test
     fun `vedtak med sluttdato uten beregninger skal ha en opphørsperiode`() {

@@ -33,7 +33,7 @@ data class Behandling(
 data class ForenkletVedtak(
     val id: Long,
     val type: VedtakType,
-    val enhet: String = "0805" // TODO: Midlertidig Porsgrunn inntil vedtak inneholder gyldig enhet
+    val enhet: String
 )
 
 data class Utbetalingsinfo(

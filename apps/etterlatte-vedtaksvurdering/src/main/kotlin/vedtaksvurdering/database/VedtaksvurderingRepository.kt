@@ -148,6 +148,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
 
     fun attesterVedtak(
         saksbehandlerId: String,
+        saksbehandlerEnhet: String,
         behandlingsId: UUID,
         vedtakId: Long,
         utbetalingsperioder: List<Utbetalingsperiode>

@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
 import java.time.LocalDate
@@ -49,6 +50,12 @@ internal fun Route.behandlingRoutes(
 ) {
     val logger = application.log
     route("/api/behandling/{behandlingsid}") {
+        get {
+            val detaljertBehandlingDTO =
+                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, accesstoken)
+            call.respond<DetaljertBehandlingDto>(detaljertBehandlingDTO)
+        }
+
         post("/kommerbarnettilgode") {
             val navIdent = navIdentFraToken() ?: return@post call.respond(
                 HttpStatusCode.Unauthorized,
@@ -105,7 +112,7 @@ internal fun Route.behandlingRoutes(
     }
 
     route("/behandlinger") {
-        get {
+        get { // TODO kan slettes? finner ingen spor i loggen.
             call.respond(
                 generellBehandlingService.hentBehandlinger().map {
                     BehandlingSammendrag(

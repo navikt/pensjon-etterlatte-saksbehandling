@@ -1,17 +1,24 @@
 package no.nav.etterlatte.behandling
 
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
@@ -38,6 +45,7 @@ interface GenerellBehandlingService {
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
     fun alleSakIderForSoekerMedFnr(fnr: String): List<Long>
     fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
+    suspend fun hentDetaljertBehandlingMedTilbehoer(behandlingId: UUID, accessToken: String): DetaljertBehandlingDto
     fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
 }
 
@@ -47,7 +55,11 @@ class RealGenerellBehandlingService(
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
     private val revurderingFactory: RevurderingFactory,
     private val hendelser: HendelseDao,
-    private val manueltOpphoerService: ManueltOpphoerService
+    private val manueltOpphoerService: ManueltOpphoerService,
+    private val vedtakKlient: VedtakKlient,
+    private val grunnlagKlient: GrunnlagKlient,
+    private val beregningKlient: BeregningKlient,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) : GenerellBehandlingService {
 
     override fun hentBehandlinger(): List<Behandling> {
@@ -107,6 +119,58 @@ class RealGenerellBehandlingService(
 
     override fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling? {
         return hentBehandling(behandlingId)?.toDetaljertBehandling()
+    }
+
+    override suspend fun hentDetaljertBehandlingMedTilbehoer(behandlingId: UUID, accessToken: String):
+        DetaljertBehandlingDto {
+        val detaljertBehandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
+        val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
+        val sakId = detaljertBehandling.sak
+        return coroutineScope {
+            val vedtak = async { vedtakKlient.hentVedtak(behandlingId.toString(), accessToken) }
+            val avdoed = async {
+                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, accessToken)
+            }
+            val gjenlevende = async {
+                grunnlagKlient.finnPersonOpplysning(
+                    sakId,
+                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                    accessToken
+                )
+            }
+            val soeker = async {
+                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, accessToken)
+            }
+            val beregning = async {
+                beregningKlient.hentBeregning(UUID.fromString(behandlingId.toString()), accessToken)
+            }
+            val vilkaarsvurdering = async {
+                vilkaarsvurderingKlient.hentVilkaarsvurdering(
+                    behandlingId,
+                    accessToken
+                )
+            }
+            DetaljertBehandlingDto(
+                id = detaljertBehandling.id,
+                sak = detaljertBehandling.sak,
+                gyldighetsprøving = detaljertBehandling.gyldighetsproeving,
+                kommerBarnetTilgode = detaljertBehandling.kommerBarnetTilgode,
+                vilkårsprøving = vilkaarsvurdering.await(),
+                beregning = beregning.await(),
+                saksbehandlerId = vedtak.await()?.saksbehandlerId,
+                fastsatt = vedtak.await()?.vedtakFattet,
+                datoFattet = vedtak.await()?.datoFattet,
+                datoattestert = vedtak.await()?.datoattestert,
+                attestant = vedtak.await()?.attestant,
+                soeknadMottattDato = detaljertBehandling.soeknadMottattDato,
+                virkningstidspunkt = detaljertBehandling.virkningstidspunkt,
+                status = detaljertBehandling.status,
+                hendelser = hendelserIBehandling,
+                familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
+                behandlingType = detaljertBehandling.behandlingType,
+                søker = soeker.await()?.opplysning
+            )
+        }
     }
 
     override fun registrerVedtakHendelse(

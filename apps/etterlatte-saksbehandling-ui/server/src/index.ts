@@ -50,6 +50,12 @@ if (isDev) {
   )
 
   app.use(
+    '/api/behandling/:behandlingsid',
+    tokenMiddleware(ApiConfig.behandling.scope),
+    proxy(ApiConfig.behandling.url!!)
+  )
+
+  app.use(
     '/api/behandlinger/:sakid/manueltopphoer',
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url!!)

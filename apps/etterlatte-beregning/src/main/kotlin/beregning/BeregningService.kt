@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.beregning.erInklusiv
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
@@ -114,7 +113,6 @@ class BeregningService(
                 }
             }
             BehandlingType.MANUELT_OPPHOER -> {
-                val datoFom = foersteVirkFraDoedsdato(grunnlag.hentAvdoed().hentDoedsdato()?.verdi!!)
                 return Beregning(
                     beregningId = UUID.randomUUID(),
                     behandlingId = behandlingId,
@@ -122,12 +120,12 @@ class BeregningService(
                         Beregningsperiode(
                             delytelsesId = "BP",
                             type = Beregningstyper.GP,
-                            datoFOM = datoFom,
+                            datoFOM = virkFOM,
                             datoTOM = null,
                             utbetaltBeloep = 0,
                             soeskenFlokk = listOf(),
-                            grunnbelopMnd = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløpPerMåned,
-                            grunnbelop = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløp,
+                            grunnbelopMnd = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløpPerMåned,
+                            grunnbelop = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløp,
                             trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
                         )
                     ),
@@ -186,8 +184,6 @@ class BeregningService(
 
     private fun beregnFoersteFom(fom: YearMonth, virkFOM: YearMonth): YearMonth =
         if (fom.isBefore(virkFOM)) virkFOM else fom
-
-    private fun foersteVirkFraDoedsdato(dødsdato: LocalDate): YearMonth = YearMonth.from(dødsdato).plusMonths(1)
 
     private suspend fun tilstandssjekkFoerKjoerning(
         behandlingId: UUID,

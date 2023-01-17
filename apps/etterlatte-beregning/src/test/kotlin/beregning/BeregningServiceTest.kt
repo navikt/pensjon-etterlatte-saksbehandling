@@ -96,7 +96,7 @@ internal class BeregningServiceTest {
     }
 
     @Test
-    fun `ved manuelt opphoer skal virkFOM settes til foerste i maaneden etter doedsdato`() {
+    fun `ved manuelt opphoer skal virkningstidspunkt i den eneste beregningsperioden settes til virkFOM`() {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val resultat = BeregningService(
             beregningRepository,
@@ -105,7 +105,7 @@ internal class BeregningServiceTest {
             behandlingKlientImpl
         ).lagBeregning(
             grunnlag = grunnlag,
-            virkFOM = mockk(),
+            virkFOM = YearMonth.of(2022, 8),
             virkTOM = mockk(),
             vilkaarsvurderingUtfall = mockk(),
             behandlingType = BehandlingType.MANUELT_OPPHOER,
@@ -113,7 +113,7 @@ internal class BeregningServiceTest {
         )
 
         assertEquals(1, resultat.beregningsperioder.size)
-        assertEquals(YearMonth.of(2022, 9), resultat.beregningsperioder.first().datoFOM)
+        assertEquals(YearMonth.of(2022, 8), resultat.beregningsperioder.first().datoFOM)
     }
 
     @Test

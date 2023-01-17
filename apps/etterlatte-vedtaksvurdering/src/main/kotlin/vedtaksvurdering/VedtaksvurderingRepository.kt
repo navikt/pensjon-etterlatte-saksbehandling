@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.database
+package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -9,8 +9,8 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
-import no.nav.etterlatte.vedtaksvurdering.Beregningsresultat
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
+import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
@@ -254,24 +254,4 @@ private object Queries {
         "DELETE FROM utbetalingsperiode WHERE vedtakid in (SELECT id from vedtak where sakid = ?)"
     val slettVedtakISak = "DELETE FROM vedtak WHERE sakid = ?"
     val lagreIverksattVedtak = "UPDATE vedtak SET vedtakstatus = ? WHERE behandlingId = ?"
-}
-
-private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
-    return if (next()) {
-        block().also {
-            require(!next()) { "Skal være unik" }
-        }
-    } else {
-        null
-    }
-}
-
-fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
-    return generateSequence {
-        if (next()) {
-            block()
-        } else {
-            null
-        }
-    }.toList()
 }

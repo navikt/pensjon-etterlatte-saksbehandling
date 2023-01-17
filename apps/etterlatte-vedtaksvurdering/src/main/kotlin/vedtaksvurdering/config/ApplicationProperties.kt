@@ -1,9 +1,10 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.vedtaksvurdering.config
 
 class ApplicationProperties(
     val jdbcUrl: String,
     val dbUsername: String,
-    val dbPassword: String
+    val dbPassword: String,
+    val behandlingScope: String
 
 ) {
     companion object {
@@ -15,7 +16,8 @@ class ApplicationProperties(
                     value("DB_DATABASE")
                 ),
                 dbUsername = value("DB_USERNAME"),
-                dbPassword = value("DB_PASSWORD")
+                dbPassword = value("DB_PASSWORD"),
+                behandlingScope = value("BEHANDLING_AZURE_SCOPE")
             )
         }
 

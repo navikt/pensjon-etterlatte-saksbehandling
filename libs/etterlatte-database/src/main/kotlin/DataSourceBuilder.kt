@@ -25,7 +25,7 @@ object DataSourceBuilder {
             it.password = password
             it.transactionIsolation = "TRANSACTION_SERIALIZABLE"
             it.initializationFailTimeout = 6000
-            it.maximumPoolSize = 3
+            it.maximumPoolSize = 10
             it.validate()
         }
         return HikariDataSource(hikariConfig)

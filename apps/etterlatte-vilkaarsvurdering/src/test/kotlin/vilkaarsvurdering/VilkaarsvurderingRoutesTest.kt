@@ -379,6 +379,44 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
+    fun `skal ikke kunne endre eller slette vilkaar naar totalresultat er satt`() {
+        testApplication {
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+
+            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            val resultat = VurdertVilkaarsvurderingResultatDto(
+                resultat = VilkaarsvurderingUtfall.OPPFYLT,
+                kommentar = "Søker oppfyller vurderingen"
+            )
+            client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {
+                setBody(resultat.toJson())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+            val vurdertVilkaarDto = VurdertVilkaarDto(
+                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.DOEDSFALL_FORELDER)?.id!!,
+                hovedvilkaar = VilkaarTypeOgUtfall(
+                    VilkaarType.DOEDSFALL_FORELDER,
+                    Utfall.OPPFYLT
+                ),
+                unntaksvilkaar = null,
+                kommentar = "Søker oppfyller vilkåret"
+            )
+
+            client.post("/api/vilkaarsvurdering/$behandlingId") {
+                setBody(vurdertVilkaarDto.toJson())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let { assertEquals(HttpStatusCode.PreconditionFailed, it.status) }
+            client.delete("/api/vilkaarsvurdering/$behandlingId/${vurdertVilkaarDto.vilkaarId}") {
+                setBody(vurdertVilkaarDto.toJson())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let { assertEquals(HttpStatusCode.PreconditionFailed, it.status) }
+        }
+    }
+
+    @Test
     fun `faar 401 hvis spoerring ikke har access token`() {
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
@@ -389,7 +427,7 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
-    fun `statussjekk kalles paa en gang for å sjekke tilstandet paa behandling`() {
+    fun `statussjekk kalles paa en gang for aa sjekke tilstanden paa behandling`() {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns true

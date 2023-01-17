@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.foerstegangsbehandling
 
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles

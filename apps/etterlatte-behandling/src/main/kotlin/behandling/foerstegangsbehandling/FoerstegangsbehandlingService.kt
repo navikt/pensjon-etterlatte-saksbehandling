@@ -4,7 +4,7 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
-import no.nav.etterlatte.behandling.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri

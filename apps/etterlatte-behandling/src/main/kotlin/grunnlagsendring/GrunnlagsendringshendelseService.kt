@@ -1,8 +1,8 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.hendelse
 
-import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDateTime

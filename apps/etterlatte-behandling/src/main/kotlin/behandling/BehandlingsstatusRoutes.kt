@@ -8,74 +8,72 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 
-internal fun Route.behandlingsstatusRoutes(foerstegangsbehandlingService: FoerstegangsbehandlingService) {
+internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingStatusService) {
     route("/behandlinger/{behandlingsid}") {
         get("/opprett") {
-            foerstegangsbehandlingService.settOpprettet(behandlingsId)
+            behandlingsstatusService.settOpprettet(behandlingsId)
             call.respond(HttpStatusCode.OK, "true")
         }
         post("/opprett") {
-            foerstegangsbehandlingService.settOpprettet(behandlingsId, false)
+            behandlingsstatusService.settOpprettet(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")
         }
 
         get("/vilkaarsvurder") {
-            foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, true, null)
+            behandlingsstatusService.settVilkaarsvurdert(behandlingsId, true, null)
             call.respond(HttpStatusCode.OK, "true")
         }
         post("/vilkaarsvurder") {
             val body = call.receive<TilVilkaarsvurderingJson>()
 
-            foerstegangsbehandlingService.settVilkaarsvurdert(behandlingsId, false, body.utfall)
+            behandlingsstatusService.settVilkaarsvurdert(behandlingsId, false, body.utfall)
             call.respond(HttpStatusCode.OK, "true")
         }
 
         get("/beregn") {
-            foerstegangsbehandlingService.settBeregnet(behandlingsId)
+            behandlingsstatusService.settBeregnet(behandlingsId)
             call.respond(HttpStatusCode.OK, "true")
         }
 
         post("/beregn") {
-            foerstegangsbehandlingService.settBeregnet(behandlingsId, false)
+            behandlingsstatusService.settBeregnet(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")
         }
 
         get("/fatteVedtak") {
-            foerstegangsbehandlingService.settFattetVedtak(behandlingsId)
+            behandlingsstatusService.settFattetVedtak(behandlingsId)
             call.respond(HttpStatusCode.OK, "true")
         }
         post("/fatteVedtak") {
-            foerstegangsbehandlingService.settFattetVedtak(behandlingsId, false)
+            behandlingsstatusService.settFattetVedtak(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")
         }
-
-        get("/returner") {
-            foerstegangsbehandlingService.settReturnert(behandlingsId)
-            call.respond(HttpStatusCode.OK, "true")
-        }
+            .get("/returner") {
+                behandlingsstatusService.settReturnert(behandlingsId)
+                call.respond(HttpStatusCode.OK, "true")
+            }
         post("/returner") {
-            foerstegangsbehandlingService.settReturnert(behandlingsId, false)
+            behandlingsstatusService.settReturnert(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")
         }
 
         get("/attester") {
-            foerstegangsbehandlingService.settAttestert(behandlingsId)
+            behandlingsstatusService.settAttestert(behandlingsId)
             call.respond(HttpStatusCode.OK, "true")
         }
         post("/attester") {
-            foerstegangsbehandlingService.settAttestert(behandlingsId, false)
+            behandlingsstatusService.settAttestert(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")
         }
 
         get("/iverksett") {
-            foerstegangsbehandlingService.settIverksatt(behandlingsId)
+            behandlingsstatusService.settIverksatt(behandlingsId)
             call.respond(HttpStatusCode.OK, "true")
         }
         post("/iverksett") {
-            foerstegangsbehandlingService.settIverksatt(behandlingsId, false)
+            behandlingsstatusService.settIverksatt(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")
         }
     }

@@ -75,7 +75,7 @@ jobs:
         run: |
           docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker build --tag ${{ env.IMAGE }} --tag ${{ env.branch-image }} apps/${{ env.APP_NAME }}
-          docker push ${{ IMAGE }}
+          docker push ${{ env.IMAGE }}
           docker push ${{ env.branch-image }}
 
   deploy-to-dev-gcp:

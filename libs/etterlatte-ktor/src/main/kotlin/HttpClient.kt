@@ -22,14 +22,24 @@ fun httpClient() = HttpClient(OkHttp) {
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
-fun httpClientClientCredentials(scope: String) = HttpClient(OkHttp) {
+fun httpClientClientCredentials(
+    azureAppClientId: String,
+    azureAppJwk: String,
+    azureAppWellKnownUrl: String,
+    azureAppScope: String
+) = HttpClient(OkHttp) {
     expectSuccess = true
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
     install(Auth) {
         clientCredential {
-            config = mapOf("AZURE_APP_OUTBOUND_SCOPE" to scope)
+            config = mapOf(
+                "AZURE_APP_CLIENT_ID" to azureAppClientId,
+                "AZURE_APP_JWK" to azureAppJwk,
+                "AZURE_APP_WELL_KNOWN_URL" to azureAppWellKnownUrl,
+                "AZURE_APP_OUTBOUND_SCOPE" to azureAppScope
+            )
         }
     }
     defaultRequest {

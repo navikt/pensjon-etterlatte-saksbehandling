@@ -62,7 +62,12 @@ class ApplicationBuilder {
                 LagreIverksattVedtak(
                     rapidsConnection = this,
                     vedtaksvurderingService = vedtaksvurderingService,
-                    behandlingHttpClient = httpClientClientCredentials(properties.behandlingScope)
+                    behandlingHttpClient = httpClientClientCredentials(
+                        azureAppClientId = config.getString("azure.app.client.id"),
+                        azureAppJwk = config.getString("azure.app.client.secret"),
+                        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                        azureAppScope = config.getString("behandling.azure.scope")
+                    )
                 )
             }
 

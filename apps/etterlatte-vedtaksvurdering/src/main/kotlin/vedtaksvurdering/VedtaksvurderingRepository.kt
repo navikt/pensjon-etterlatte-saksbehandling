@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.database
+package no.nav.etterlatte.vedtaksvurdering
 
 import kotliquery.Row
 import kotliquery.Session
@@ -12,8 +12,6 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
-import no.nav.etterlatte.vedtaksvurdering.Beregningsresultat
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import java.io.Serializable
 import java.sql.Date
 import java.time.LocalDate

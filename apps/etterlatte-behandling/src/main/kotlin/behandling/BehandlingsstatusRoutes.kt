@@ -50,10 +50,10 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             behandlingsstatusService.settFattetVedtak(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")
         }
-            .get("/returner") {
-                behandlingsstatusService.settReturnert(behandlingsId)
-                call.respond(HttpStatusCode.OK, "true")
-            }
+        get("/returner") {
+            behandlingsstatusService.settReturnert(behandlingsId)
+            call.respond(HttpStatusCode.OK, "true")
+        }
         post("/returner") {
             behandlingsstatusService.settReturnert(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")

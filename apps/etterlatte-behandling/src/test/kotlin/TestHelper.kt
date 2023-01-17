@@ -71,7 +71,8 @@ fun revurdering(
     persongalleri: Persongalleri = persongalleri(),
     revurderingAarsak: RevurderingAarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
-    vilkaarStatus: VilkaarsvurderingUtfall? = VilkaarsvurderingUtfall.OPPFYLT
+    vilkaarStatus: VilkaarsvurderingUtfall? = VilkaarsvurderingUtfall.OPPFYLT,
+    virkningstidspunkt: Virkningstidspunkt? = null
 ) = Revurdering(
     id = id,
     sak = sak,
@@ -81,7 +82,8 @@ fun revurdering(
     persongalleri = persongalleri,
     revurderingsaarsak = revurderingAarsak,
     kommerBarnetTilgode = kommerBarnetTilgode,
-    vilkaarUtfall = vilkaarStatus
+    vilkaarUtfall = vilkaarStatus,
+    virkningstidspunkt = virkningstidspunkt
 )
 
 fun manueltOpphoer(
@@ -92,7 +94,8 @@ fun manueltOpphoer(
         ManueltOpphoerAarsak.SOESKEN_DOED,
         ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
     ),
-    fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem"
+    fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
+    virkningstidspunkt: Virkningstidspunkt? = null
 ) = ManueltOpphoer(
     id = behandlingId,
     sak = sak,
@@ -101,7 +104,8 @@ fun manueltOpphoer(
     status = BehandlingStatus.OPPRETTET,
     persongalleri = persongalleri,
     opphoerAarsaker = opphoerAarsaker,
-    fritekstAarsak = fritekstAarsak
+    fritekstAarsak = fritekstAarsak,
+    virkningstidspunkt = virkningstidspunkt
 )
 
 fun persongalleri(

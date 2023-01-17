@@ -112,7 +112,7 @@ class RealGenerellBehandlingServiceTest {
     fun `skal hente behandlinger i sak`() {
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val behandlingerMock = mockk<BehandlingDao> {
-            every { alleBehandingerISak(1) } returns listOf(
+            every { alleBehandlingerISak(1) } returns listOf(
                 revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
                 foerstegangsbehandling(sak = 1)
             )

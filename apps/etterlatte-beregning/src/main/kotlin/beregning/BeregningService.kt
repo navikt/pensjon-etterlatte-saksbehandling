@@ -26,9 +26,10 @@ import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
-import java.time.LocalDate
+import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.*
+import java.util.UUID.randomUUID
 
 class BeregningService(
     private val beregningRepository: BeregningRepository,
@@ -36,17 +37,20 @@ class BeregningService(
     private val grunnlagKlient: GrunnlagKlient,
     private val behandlingKlient: BehandlingKlient
 ) {
+    private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
     fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
+        logger.info("Oppretter barnepensjonberegning for behandlingId=$behandlingId")
         return tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
             coroutineScope {
-                val vilkaarsvurdering =
-                    async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
                 val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
                 val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.await().sak, accessToken) }
-                val beregning = lagBeregning(grunnlag.await(), behandling.await(), vilkaarsvurdering.await())
+                val vilkaarsvurdering =
+                    async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
+
+                val beregning = beregnBarnepensjon(grunnlag.await(), behandling.await(), vilkaarsvurdering.await())
 
                 beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
                     behandlingKlient.beregn(behandlingId, accessToken, true)
@@ -55,43 +59,114 @@ class BeregningService(
         }
     }
 
-    fun lagBeregning(
+    fun beregnBarnepensjon(
         grunnlag: Grunnlag,
         behandling: DetaljertBehandling,
         vilkaarsvurdering: VilkaarsvurderingDto
     ): Beregning {
-        val behandlingType = behandling.behandlingType!!
-        val virkningstidspunkt = behandling.virkningstidspunkt?.dato!!
-        val vilkaarsvurderingUtfall = vilkaarsvurdering.resultat!!.utfall
+        val behandlingType = requireNotNull(behandling.behandlingType)
+        val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
+        val vilkaarsvurderingUtfall = requireNotNull(vilkaarsvurdering.resultat?.utfall)
         val grunnbeloep = Grunnbeloep.hentGjeldendeG(virkningstidspunkt)
-        val barnepensjonBeregningsgrunnlag = opprettBeregningsgrunnlag(
-            grunnbeloep = grunnbeloep,
-            soeskenJustering = grunnlag.sak.hentSoeskenjustering()!!
-        )
+        val beregningsgrunnlag =
+            opprettBeregningsgrunnlag(grunnbeloep, requireNotNull(grunnlag.sak.hentSoeskenjustering()))
+
+        logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> beregnFoerstegangsbehandling(
-                behandling = behandling,
-                grunnlag = grunnlag,
-                barnepensjonGrunnlag = barnepensjonBeregningsgrunnlag,
-                virkningstidspunkt = virkningstidspunkt,
-                grunnbeloep = grunnbeloep
-            )
-            BehandlingType.REVURDERING -> beregnRevurdering(
-                vilkaarsvurderingUtfall = vilkaarsvurderingUtfall,
-                behandling = behandling,
-                grunnlag = grunnlag,
-                barnepensjonGrunnlag = barnepensjonBeregningsgrunnlag,
-                virkningstidspunkt = virkningstidspunkt,
-                grunnbeloep = grunnbeloep
-            )
-            BehandlingType.MANUELT_OPPHOER -> beregnManueltOpphoer(
-                behandling = behandling,
-                grunnlag = grunnlag,
-                barnepensjonGrunnlag = barnepensjonBeregningsgrunnlag,
-                grunnbeloep = grunnbeloep
-            )
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
+                beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt, grunnbeloep)
+            BehandlingType.REVURDERING ->
+                when (vilkaarsvurderingUtfall) {
+                    VilkaarsvurderingUtfall.OPPFYLT -> beregn(
+                        behandling,
+                        grunnlag,
+                        beregningsgrunnlag,
+                        virkningstidspunkt,
+                        grunnbeloep
+                    )
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
+                        beregnOpphoer(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt, grunnbeloep)
+                }
+            BehandlingType.MANUELT_OPPHOER -> {
+                beregnManueltOpphoer(grunnlag, behandling, beregningsgrunnlag, grunnbeloep)
+            }
         }
+    }
+
+    private fun beregn(
+        behandling: DetaljertBehandling,
+        grunnlag: Grunnlag,
+        beregningsgrunnlag: BarnepensjonGrunnlag,
+        virkningstidspunkt: YearMonth,
+        grunnbeloep: G
+    ): Beregning {
+        val resultat = kroneavrundetBarnepensjonRegel.eksekver(
+            grunnlag = beregningsgrunnlag,
+            periode = RegelPeriode(virkningstidspunkt.atDay(1))
+        )
+
+        return when (resultat) {
+            is RegelkjoeringResultat.Suksess ->
+                Beregning(
+                    beregningId = randomUUID(),
+                    behandlingId = behandling.id,
+                    beregningsperioder = resultat.periodiserteResultater.map { periodisertResultat ->
+                        Beregningsperiode(
+                            delytelsesId = "BP",
+                            type = Beregningstyper.GP,
+                            datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
+                            datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
+                            utbetaltBeloep = periodisertResultat.resultat.verdi,
+                            soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
+                            grunnbelopMnd = grunnbeloep.grunnbeløpPerMåned,
+                            grunnbelop = grunnbeloep.grunnbeløp,
+                            trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt()
+                        )
+                    },
+                    beregnetDato = Tidspunkt.now(),
+                    grunnlagMetadata = grunnlag.metadata
+                )
+            is RegelkjoeringResultat.UgyldigPeriode ->
+                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+        }
+    }
+
+    private fun beregnOpphoer(
+        behandling: DetaljertBehandling,
+        grunnlag: Grunnlag,
+        beregningsgrunnlag: BarnepensjonGrunnlag,
+        virkningstidspunkt: YearMonth,
+        grunnbeloep: G
+    ) = Beregning(
+        beregningId = randomUUID(),
+        behandlingId = behandling.id,
+        beregningsperioder = listOf(
+            Beregningsperiode(
+                delytelsesId = "BP",
+                type = Beregningstyper.GP,
+                datoFOM = virkningstidspunkt,
+                datoTOM = null,
+                utbetaltBeloep = 0,
+                soeskenFlokk = emptyList(),
+                grunnbelopMnd = grunnbeloep.grunnbeløpPerMåned,
+                grunnbelop = grunnbeloep.grunnbeløp,
+                trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt()
+            )
+        ),
+        beregnetDato = Tidspunkt.now(),
+        grunnlagMetadata = grunnlag.metadata
+    )
+
+    private fun beregnManueltOpphoer(
+        grunnlag: Grunnlag,
+        behandling: DetaljertBehandling,
+        beregningsgrunnlag: BarnepensjonGrunnlag,
+        grunnbeloep: G
+    ): Beregning {
+        val doedsdato = requireNotNull(grunnlag.hentAvdoed().hentDoedsdato()?.verdi)
+        val virkningstidspunkt = YearMonth.from(doedsdato).plusMonths(1)
+        return beregnOpphoer(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt, grunnbeloep)
     }
 
     private fun opprettBeregningsgrunnlag(
@@ -120,148 +195,6 @@ class BeregningService(
         )
     )
 
-    private fun beregnFoerstegangsbehandling(
-        behandling: DetaljertBehandling,
-        grunnlag: Grunnlag,
-        barnepensjonGrunnlag: BarnepensjonGrunnlag,
-        virkningstidspunkt: YearMonth,
-        grunnbeloep: G
-    ): Beregning {
-        val resultat = kroneavrundetBarnepensjonRegel.eksekver(
-            grunnlag = barnepensjonGrunnlag,
-            periode = RegelPeriode(virkningstidspunkt.atDay(1))
-        )
-
-        when (resultat) {
-            is RegelkjoeringResultat.Suksess -> {
-                val beregningsperioder = resultat.periodiserteResultater.map { periodisertResultat ->
-                    Beregningsperiode(
-                        delytelsesId = "BP",
-                        type = Beregningstyper.GP,
-                        datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
-                        datoTOM = YearMonth.from(periodisertResultat.periode.tilDato),
-                        utbetaltBeloep = periodisertResultat.resultat.verdi,
-                        soeskenFlokk = barnepensjonGrunnlag.soeskenKull.verdi.map { it.value },
-                        grunnbelopMnd = grunnbeloep.grunnbeløpPerMåned,
-                        grunnbelop = grunnbeloep.grunnbeløp,
-                        trygdetid = barnepensjonGrunnlag.avdoedForelder.verdi.trygdetid.toInt()
-                    )
-                }
-
-                return Beregning(
-                    beregningId = UUID.randomUUID(),
-                    behandlingId = behandling.id,
-                    beregningsperioder = beregningsperioder,
-                    beregnetDato = Tidspunkt.now(),
-                    grunnlagMetadata = grunnlag.metadata
-                )
-            }
-            is RegelkjoeringResultat.UgyldigPeriode -> {
-                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
-            }
-        }
-    }
-
-    private fun beregnRevurdering(
-        vilkaarsvurderingUtfall: VilkaarsvurderingUtfall,
-        behandling: DetaljertBehandling,
-        grunnlag: Grunnlag,
-        barnepensjonGrunnlag: BarnepensjonGrunnlag,
-        virkningstidspunkt: YearMonth,
-        grunnbeloep: G
-    ): Beregning {
-        when (vilkaarsvurderingUtfall) {
-            VilkaarsvurderingUtfall.OPPFYLT -> {
-                val resultat = kroneavrundetBarnepensjonRegel.eksekver(
-                    grunnlag = barnepensjonGrunnlag,
-                    periode = RegelPeriode(virkningstidspunkt.atDay(1))
-                )
-
-                when (resultat) {
-                    is RegelkjoeringResultat.Suksess -> {
-                        val beregningsperioder = resultat.periodiserteResultater.map { periodisertResultat ->
-                            Beregningsperiode(
-                                delytelsesId = "BP",
-                                type = Beregningstyper.GP,
-                                datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
-                                datoTOM = YearMonth.from(periodisertResultat.periode.tilDato),
-                                utbetaltBeloep = periodisertResultat.resultat.verdi,
-                                soeskenFlokk = barnepensjonGrunnlag.soeskenKull.verdi.map { it.value },
-                                grunnbelopMnd = grunnbeloep.grunnbeløpPerMåned,
-                                grunnbelop = grunnbeloep.grunnbeløp,
-                                trygdetid = barnepensjonGrunnlag.avdoedForelder.verdi.trygdetid.toInt()
-                            )
-                        }
-
-                        return Beregning(
-                            beregningId = UUID.randomUUID(),
-                            behandlingId = behandling.id,
-                            beregningsperioder = beregningsperioder,
-                            beregnetDato = Tidspunkt.now(),
-                            grunnlagMetadata = grunnlag.metadata
-                        )
-                    }
-                    is RegelkjoeringResultat.UgyldigPeriode -> {
-                        throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
-                    }
-                }
-            }
-            VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
-                return Beregning(
-                    beregningId = UUID.randomUUID(),
-                    behandlingId = behandling.id,
-                    beregningsperioder = listOf(
-                        Beregningsperiode(
-                            delytelsesId = "BP",
-                            type = Beregningstyper.GP,
-                            datoFOM = virkningstidspunkt,
-                            datoTOM = null,
-                            utbetaltBeloep = 0,
-                            soeskenFlokk = emptyList(),
-                            grunnbelopMnd = grunnbeloep.grunnbeløpPerMåned,
-                            grunnbelop = grunnbeloep.grunnbeløp,
-                            trygdetid = barnepensjonGrunnlag.avdoedForelder.verdi.trygdetid.toInt()
-                        )
-                    ),
-                    beregnetDato = Tidspunkt.now(),
-                    grunnlagMetadata = grunnlag.metadata
-                )
-            }
-        }
-    }
-
-    private fun beregnManueltOpphoer(
-        behandling: DetaljertBehandling,
-        grunnlag: Grunnlag,
-        barnepensjonGrunnlag: BarnepensjonGrunnlag,
-        grunnbeloep: G
-    ): Beregning {
-        val virkningstidspunkt = virkningstidspunktFraDoedsdato(grunnlag.hentAvdoed().hentDoedsdato()?.verdi!!) // TODO
-        return Beregning(
-            beregningId = UUID.randomUUID(),
-            behandlingId = behandling.id,
-            beregningsperioder = listOf(
-                Beregningsperiode(
-                    delytelsesId = "BP",
-                    type = Beregningstyper.GP,
-                    datoFOM = virkningstidspunkt,
-                    datoTOM = null,
-                    utbetaltBeloep = 0,
-                    soeskenFlokk = emptyList(),
-                    grunnbelopMnd = grunnbeloep.grunnbeløpPerMåned,
-                    grunnbelop = grunnbeloep.grunnbeløp,
-                    trygdetid = barnepensjonGrunnlag.avdoedForelder.verdi.trygdetid.toInt()
-                )
-            ),
-            beregnetDato = Tidspunkt.now(),
-            grunnlagMetadata = grunnlag.metadata
-        )
-    }
-
-    private fun virkningstidspunktFraDoedsdato(doedsdato: LocalDate): YearMonth = YearMonth.from(doedsdato).plusMonths(
-        1
-    )
-
     private suspend fun tilstandssjekkFoerKjoerning(
         behandlingId: UUID,
         accessToken: String,
@@ -276,141 +209,3 @@ class BeregningService(
         return block()
     }
 }
-
-/*
-fun lagBeregning(
-    grunnlag: Grunnlag,
-    virkFOM: YearMonth,
-    virkTOM: YearMonth,
-    vilkaarsvurderingUtfall: VilkaarsvurderingUtfall,
-    behandlingType: BehandlingType,
-    behandlingId: UUID
-): Beregning {
-    return when (behandlingType) {
-        BehandlingType.FØRSTEGANGSBEHANDLING -> {
-            val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
-            Beregning(
-                beregningId = UUID.randomUUID(),
-                behandlingId = behandlingId,
-                beregningsperioder = beregningsperioder,
-                beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
-                grunnlagMetadata = grunnlag.metadata
-            )
-        }
-
-        BehandlingType.REVURDERING -> {
-            when (vilkaarsvurderingUtfall) {
-                VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
-                    Beregning(
-                        beregningId = UUID.randomUUID(),
-                        behandlingId = behandlingId,
-                        beregningsperioder = listOf(
-                            Beregningsperiode(
-                                delytelsesId = "BP",
-                                type = Beregningstyper.GP,
-                                datoFOM = virkFOM,
-                                datoTOM = null,
-                                utbetaltBeloep = 0,
-                                soeskenFlokk = listOf(),
-                                grunnbelopMnd = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløpPerMåned,
-                                grunnbelop = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløp,
-                                trygdetid = 40 // TODO: Må fikses med andresaker som IKKE har 40 års trygdetid
-                            )
-                        ),
-                        beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
-                        grunnlagMetadata = grunnlag.metadata
-                    )
-                }
-
-                else -> {
-                    val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
-                    Beregning(
-                        beregningId = UUID.randomUUID(),
-                        behandlingId = behandlingId,
-                        beregningsperioder = beregningsperioder,
-                        beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
-                        grunnlagMetadata = grunnlag.metadata
-                    )
-                }
-            }
-        }
-        BehandlingType.MANUELT_OPPHOER -> {
-            val datoFom = foersteVirkFraDoedsdato(grunnlag.hentAvdoed().hentDoedsdato()?.verdi!!)
-            return Beregning(
-                beregningId = UUID.randomUUID(),
-                behandlingId = behandlingId,
-                beregningsperioder = listOf(
-                    Beregningsperiode(
-                        delytelsesId = "BP",
-                        type = Beregningstyper.GP,
-                        datoFOM = datoFom,
-                        datoTOM = null,
-                        utbetaltBeloep = 0,
-                        soeskenFlokk = listOf(),
-                        grunnbelopMnd = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløpPerMåned,
-                        grunnbelop = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløp,
-                        trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
-                    )
-                ),
-                beregnetDato = LocalDateTime.now().toTidspunkt(norskTidssone),
-                grunnlagMetadata = grunnlag.metadata
-            )
-        }
-    }
-}
-
-private fun finnBeregningsperioder(
-    grunnlag: Grunnlag,
-    virkFOM: YearMonth,
-    virkTOM: YearMonth
-): List<Beregningsperiode> {
-    val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
-    val soeskenPerioder = FinnSoeskenPeriode(grunnlag, virkFOM).hentSoeskenperioder()
-    val alleFOM = (grunnbeloep.map { it.dato } + soeskenPerioder.map { it.datoFOM } + virkTOM).map {
-        beregnFoersteFom(it, virkFOM)
-    }.distinct().sorted().zipWithNext()
-        .map { Pair(it.first, it.second.minusMonths(1)) }
-
-    val beregningsperioder = alleFOM.mapIndexed { index, (fom, tom) ->
-        val gjeldendeG = Grunnbeloep.hentGjeldendeG(fom)
-        val flokkForPeriode = hentFlokkforPeriode(fom, tom, soeskenPerioder)
-        val utbetaltBeloep = Soeskenjustering(flokkForPeriode.size, gjeldendeG.grunnbeløp).beloep
-        val søkersFødselsdato = grunnlag.soeker.hentFoedselsdato()?.verdi
-
-        val datoTom = if (index == alleFOM.lastIndex && søkersFødselsdato != null) {
-            beregnSisteTom(søkersFødselsdato, tom)
-        } else {
-            tom
-        }
-
-        Beregningsperiode(
-            delytelsesId = "BP",
-            type = Beregningstyper.GP,
-            datoFOM = fom,
-            datoTOM = datoTom,
-            grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
-            grunnbelop = gjeldendeG.grunnbeløp,
-            soeskenFlokk = flokkForPeriode.map { it.foedselsnummer.value },
-            utbetaltBeloep = utbetaltBeloep,
-            trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
-        )
-    }
-
-    return beregningsperioder
-}
-
-private fun hentFlokkforPeriode(
-    datoFOM: YearMonth,
-    datoTOM: YearMonth,
-    soeskenPeriode: List<SoeskenPeriode>
-): List<Person> = soeskenPeriode.firstOrNull { it.erInklusiv(datoFOM, datoTOM) }?.soeskenFlokk ?: emptyList()
-
-private fun beregnFoersteFom(fom: YearMonth, virkFOM: YearMonth): YearMonth =
-    if (fom.isBefore(virkFOM)) virkFOM else fom
-
-
-fun beregnSisteTom(fødselsdato: LocalDate, tom: YearMonth): YearMonth? {
-    val fyller18YearMonth = YearMonth.from(fødselsdato).plusYears(18)
-    return if (fyller18YearMonth.isAfter(tom)) null else fyller18YearMonth
-}
-*/

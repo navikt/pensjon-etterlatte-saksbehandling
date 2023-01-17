@@ -22,7 +22,7 @@ fun httpClient() = HttpClient(OkHttp) {
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
-fun httpClient(scope: String) = HttpClient(OkHttp) {
+fun httpClientClientCredentials(scope: String) = HttpClient(OkHttp) {
     expectSuccess = true
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))

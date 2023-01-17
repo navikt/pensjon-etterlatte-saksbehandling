@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
@@ -61,7 +62,7 @@ class ApplicationBuilder {
                 LagreIverksattVedtak(
                     rapidsConnection = this,
                     vedtaksvurderingService = vedtaksvurderingService,
-                    behandlingHttpClient = httpClient(properties.behandlingScope)
+                    behandlingHttpClient = httpClientClientCredentials(properties.behandlingScope)
                 )
             }
 

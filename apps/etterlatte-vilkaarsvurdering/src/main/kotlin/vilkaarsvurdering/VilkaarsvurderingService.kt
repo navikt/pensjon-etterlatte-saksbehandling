@@ -2,6 +2,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -21,7 +22,8 @@ class VirkningstidspunktIkkeSattException(message: String) : RuntimeException(me
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingKlient: BehandlingKlient,
-    private val grunnlagKlient: GrunnlagKlient
+    private val grunnlagKlient: GrunnlagKlient,
+    private val sessionFactory: SessionFactory
 ) {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingService::class.java)
 
@@ -44,16 +46,44 @@ class VilkaarsvurderingService(
         accessToken: String,
         resultat: VilkaarsvurderingResultat
     ): Vilkaarsvurdering = tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
-        val vilkaarsvurdering = vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
-        val utfall = vilkaarsvurdering.resultat?.utfall ?: throw IllegalStateException("Utfall kan ikke vaere null")
-        behandlingKlient.commitVilkaarsvurdering(behandlingId, accessToken, utfall)
+        val vilkaarsvurdering = sessionFactory.withTransactionalSession { tx ->
+            val vilkaarsvurdering =
+                vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat, tx)
+            val utfall = vilkaarsvurdering.resultat?.utfall ?: throw IllegalStateException("Utfall kan ikke vaere null")
+            runBlocking {
+                if (!behandlingKlient.commitVilkaarsvurdering(behandlingId, accessToken, utfall)) {
+                    logger.error(
+                        "Endring av behandlingsstatus feilet under oppdatering av vilkaarsvurdering " +
+                            "for behandling: $behandlingId"
+                    )
+                    throw RuntimeException("Endring av behandlingsstatus feilet under oppdatering av vilkaarsvurdering")
+                }
+            }
+
+            vilkaarsvurdering
+        }
+
         vilkaarsvurdering
     }
 
     suspend fun slettTotalVurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
         if (behandlingKlient.opprett(behandlingId, accessToken, false)) {
-            val vilkaarsvurdering = vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
-            behandlingKlient.opprett(behandlingId, accessToken, true)
+            val vilkaarsvurdering = sessionFactory.withTransactionalSession { tx ->
+                val vilkaarsvurdering = vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId, tx)
+                runBlocking {
+                    if (!behandlingKlient.opprett(behandlingId, accessToken, true)) {
+                        logger.error(
+                            "Endring av behandlingsstatus feilet under sletting av vilkaarsvurdering " +
+                                "for behandling: $behandlingId"
+                        )
+                        throw RuntimeException(
+                            "Endring av behandlingsstatus feilet under oppdatering av vilkaarsvurdering"
+                        )
+                    }
+                }
+
+                vilkaarsvurdering
+            }
 
             return vilkaarsvurdering
         }

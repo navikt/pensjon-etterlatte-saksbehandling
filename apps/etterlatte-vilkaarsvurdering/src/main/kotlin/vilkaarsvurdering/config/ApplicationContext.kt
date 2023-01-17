@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.vilkaarsvurdering.PostgresSessionFactory
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlientImpl
@@ -20,6 +21,7 @@ class ApplicationContext {
     val vilkaarsvurderingService = VilkaarsvurderingService(
         vilkaarsvurderingRepository = VilkaarsvurderingRepository(dataSource),
         behandlingKlient = BehandlingKlientImpl(config, httpClient()),
-        grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
+        grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
+        sessionFactory = PostgresSessionFactory(dataSource)
     )
 }

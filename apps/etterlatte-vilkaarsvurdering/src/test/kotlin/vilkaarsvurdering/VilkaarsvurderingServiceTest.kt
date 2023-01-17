@@ -85,7 +85,8 @@ internal class VilkaarsvurderingServiceTest {
         service = VilkaarsvurderingService(
             repository,
             behandlingKlient,
-            grunnlagKlient
+            grunnlagKlient,
+            PostgresSessionFactory(ds)
         )
     }
 

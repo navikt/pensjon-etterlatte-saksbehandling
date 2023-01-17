@@ -32,6 +32,7 @@ internal class VilkaarsvurderingRepository2Test {
 
     private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository
     private lateinit var ds: DataSource
+    private lateinit var sessionFactory: SessionFactory
 
     @BeforeAll
     fun beforeAll() {
@@ -42,6 +43,7 @@ internal class VilkaarsvurderingRepository2Test {
             postgreSQLContainer.username,
             postgreSQLContainer.password
         ).also { it.migrate() }
+        sessionFactory = PostgresSessionFactory(ds)
 
         vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds)
     }
@@ -82,11 +84,13 @@ internal class VilkaarsvurderingRepository2Test {
     fun `skal sette resultat paa vilkaarsvurdering`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
 
-        val oppdatertVilkaarsvurdering =
+        val oppdatertVilkaarsvurdering = sessionFactory.withTransactionalSession {
             vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
                 opprettetVilkaarsvurdering.behandlingId,
-                vilkaarsvurderingResultat
+                vilkaarsvurderingResultat,
+                it
             )
+        }
 
         with(oppdatertVilkaarsvurdering.resultat!!) {
             utfall shouldBe vilkaarsvurderingResultat.utfall
@@ -100,12 +104,17 @@ internal class VilkaarsvurderingRepository2Test {
     fun `skal sette resultat paa vilkaarsvurdering og slette det`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
 
-        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
-            opprettetVilkaarsvurdering.behandlingId,
-            vilkaarsvurderingResultat
-        )
-        val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(opprettetVilkaarsvurdering.behandlingId)
+        sessionFactory.withTransactionalSession {
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+                opprettetVilkaarsvurdering.behandlingId,
+                vilkaarsvurderingResultat,
+                it
+            )
+        }
+
+        val oppdatertVilkaarsvurdering = sessionFactory.withTransactionalSession {
+            vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(opprettetVilkaarsvurdering.behandlingId, it)
+        }
 
         oppdatertVilkaarsvurdering.resultat shouldBe null
     }

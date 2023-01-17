@@ -28,18 +28,28 @@ import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(private val ds: DataSource) {
 
-    fun hent(behandlingId: UUID): Vilkaarsvurdering? =
-        using(sessionOf(ds)) { session ->
-            queryOf(Queries.hentVilkaarsvurdering, mapOf("behandling_id" to behandlingId))
-                .let { query ->
-                    session.run(
-                        query.map { row ->
-                            val vilkaarsvurderingId = row.uuid("id")
-                            row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, session))
-                        }.asSingle
-                    )
-                }
-        }
+    fun hent(behandlingId: UUID): Vilkaarsvurdering? {
+        return using(sessionOf(ds)) { session -> hentVilkaarsvurdering(behandlingId, session) }
+    }
+
+    private fun hent(behandlingId: UUID, tx: TransactionalSession): Vilkaarsvurdering? {
+        return hentVilkaarsvurdering(behandlingId, tx)
+    }
+
+    private fun hentVilkaarsvurdering(
+        behandlingId: UUID,
+        session: Session
+    ): Vilkaarsvurdering? {
+        return queryOf(Queries.hentVilkaarsvurdering, mapOf("behandling_id" to behandlingId))
+            .let { query ->
+                session.run(
+                    query.map { row ->
+                        val vilkaarsvurderingId = row.uuid("id")
+                        row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, session))
+                    }.asSingle
+                )
+            }
+    }
 
     fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =
         using(sessionOf(ds)) { session ->
@@ -60,35 +70,32 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
 
     fun lagreVilkaarsvurderingResultat(
         behandlingId: UUID,
-        resultat: VilkaarsvurderingResultat
+        resultat: VilkaarsvurderingResultat,
+        tx: TransactionalSession
     ): Vilkaarsvurdering {
-        using(sessionOf(ds)) { session ->
-            val vilkaarsvurdering = hentNonNull(behandlingId)
+        val vilkaarsvurdering = hentNonNull(behandlingId, tx)
 
-            queryOf(
-                statement = Queries.lagreVilkaarsvurderingResultat,
-                paramMap = mapOf(
-                    "id" to vilkaarsvurdering.id,
-                    "resultat_utfall" to resultat.utfall.name,
-                    "resultat_kommentar" to resultat.kommentar,
-                    "resultat_tidspunkt" to Timestamp.valueOf(resultat.tidspunkt),
-                    "resultat_saksbehandler" to resultat.saksbehandler
-                )
-            ).let { session.run(it.asUpdate) }
-        }
+        queryOf(
+            statement = Queries.lagreVilkaarsvurderingResultat,
+            paramMap = mapOf(
+                "id" to vilkaarsvurdering.id,
+                "resultat_utfall" to resultat.utfall.name,
+                "resultat_kommentar" to resultat.kommentar,
+                "resultat_tidspunkt" to Timestamp.valueOf(resultat.tidspunkt),
+                "resultat_saksbehandler" to resultat.saksbehandler
+            )
+        ).let { tx.run(it.asUpdate) }
 
-        return hentNonNull(behandlingId)
+        return hentNonNull(behandlingId, tx)
     }
 
-    fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering {
-        using(sessionOf(ds)) { session ->
-            val vilkaarsvurdering = hentNonNull(behandlingId)
+    fun slettVilkaarsvurderingResultat(behandlingId: UUID, tx: TransactionalSession): Vilkaarsvurdering {
+        val vilkaarsvurdering = hentNonNull(behandlingId, tx)
 
-            queryOf(Queries.slettVilkaarsvurderingResultat, mapOf("id" to vilkaarsvurdering.id))
-                .let { session.run(it.asUpdate) }
-        }
+        queryOf(Queries.slettVilkaarsvurderingResultat, mapOf("id" to vilkaarsvurdering.id))
+            .let { tx.run(it.asUpdate) }
 
-        return hentNonNull(behandlingId)
+        return hentNonNull(behandlingId, tx)
     }
 
     fun lagreVilkaarResultat(
@@ -157,8 +164,15 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             }
         }.let { hentNonNull(behandlingId) }
 
-    private fun hentNonNull(behandlingId: UUID): Vilkaarsvurdering =
-        hent(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
+    private fun hentNonNull(behandlingId: UUID, tx: TransactionalSession? = null): Vilkaarsvurdering {
+        val vilkaarsvurdering = if (tx == null) {
+            hent(behandlingId)
+        } else {
+            hent(behandlingId, tx)
+        }
+
+        return vilkaarsvurdering ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
+    }
 
     private fun hentVilkaar(vilkaarsvurderingId: UUID, session: Session): List<Vilkaar> =
         queryOf(Queries.hentVilkaar, mapOf("vilkaarsvurdering_id" to vilkaarsvurderingId))

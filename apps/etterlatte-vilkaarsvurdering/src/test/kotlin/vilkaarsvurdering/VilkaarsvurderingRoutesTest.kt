@@ -71,7 +71,12 @@ internal class VilkaarsvurderingRoutesTest {
         ).also { it.migrate() }
 
         vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds),
+                behandlingKlient,
+                grunnlagKlient,
+                PostgresSessionFactory(ds)
+            )
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns true
@@ -396,7 +401,12 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds),
+                behandlingKlient,
+                grunnlagKlient,
+                PostgresSessionFactory(ds)
+            )
 
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
@@ -416,7 +426,12 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds),
+                behandlingKlient,
+                grunnlagKlient,
+                PostgresSessionFactory(ds)
+            )
 
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
@@ -437,7 +452,12 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds),
+                behandlingKlient,
+                grunnlagKlient,
+                PostgresSessionFactory(ds)
+            )
 
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
@@ -457,7 +477,12 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds),
+                behandlingKlient,
+                grunnlagKlient,
+                PostgresSessionFactory(ds)
+            )
 
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
@@ -478,7 +503,12 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds),
+                behandlingKlient,
+                grunnlagKlient,
+                PostgresSessionFactory(ds)
+            )
 
         testApplication {
             application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
@@ -504,6 +534,81 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(HttpStatusCode.PreconditionFailed, response.status)
             val actual = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(behandlingId, token)
             assertEquals(vilkaarsvurdering, actual)
+        }
+    }
+
+    @Test
+    fun `oppdaterer ikke hvis endring av behandlingsstatus feiler`() {
+        val behandlingKlient = mockk<BehandlingKlient>()
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns true
+        coEvery { behandlingKlient.commitVilkaarsvurdering(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
+
+        val vilkaarsvurderingServiceImpl =
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds),
+                behandlingKlient,
+                grunnlagKlient,
+                PostgresSessionFactory(ds)
+            )
+
+        testApplication {
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+
+            opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            val vurdertResultat = VurdertVilkaarsvurderingResultatDto(VilkaarsvurderingUtfall.OPPFYLT, "")
+
+            val response = client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, "application/json")
+                setBody(vurdertResultat.toJson())
+            }
+
+            val actual = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(behandlingId, token)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
+            assertEquals(null, actual.resultat)
+        }
+    }
+
+    @Test
+    fun `sletter ikke hvis endring av behandlingsstatus feiler`() {
+        val behandlingKlient = mockk<BehandlingKlient>()
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
+        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns true
+        coEvery { behandlingKlient.commitVilkaarsvurdering(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.opprett(any(), any(), false) } returns true
+        coEvery { behandlingKlient.opprett(any(), any(), true) } returns false
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
+
+        val vilkaarsvurderingServiceImpl =
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds),
+                behandlingKlient,
+                grunnlagKlient,
+                PostgresSessionFactory(ds)
+            )
+
+        testApplication {
+            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+
+            opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            val vurdertResultat = VurdertVilkaarsvurderingResultatDto(VilkaarsvurderingUtfall.OPPFYLT, "")
+
+            client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, "application/json")
+                setBody(vurdertResultat.toJson())
+            }
+
+            val response = client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.ContentType, "application/json")
+            }
+
+            val actual = vilkaarsvurderingServiceImpl.hentEllerOpprettVilkaarsvurdering(behandlingId, token)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
+            assertNotNull(actual.resultat)
         }
     }
 

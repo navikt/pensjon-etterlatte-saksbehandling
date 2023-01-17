@@ -71,9 +71,10 @@ jobs:
       - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.ref_name }}
         run: |
           docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker build --tag ${IMAGE} apps/${APP_NAME}
+          docker build --tag ${IMAGE} --tag ${{ env.branch-image }} apps/${APP_NAME}
           docker push ${IMAGE}
 
   deploy-to-dev-gcp:

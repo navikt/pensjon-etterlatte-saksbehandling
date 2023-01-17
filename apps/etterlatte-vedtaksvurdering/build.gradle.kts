@@ -26,6 +26,7 @@ dependencies {
     implementation(Jackson.ModuleKotlin)
 
     implementation(NavFelles.TokenValidationKtor2)
+    implementation(Database.KotliQuery)
 
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)

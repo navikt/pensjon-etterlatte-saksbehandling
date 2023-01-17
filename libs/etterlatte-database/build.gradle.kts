@@ -14,6 +14,7 @@ dependencies {
     implementation(Database.Postgresql)
     implementation(Database.FlywayDB)
     implementation(Database.HikariCP)
+    implementation(Database.KotliQuery)
 
     testImplementation(Jupiter.Engine)
     testImplementation(TestContainer.Jupiter)

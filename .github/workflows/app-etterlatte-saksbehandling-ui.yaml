@@ -3,6 +3,7 @@ name: etterlatte-saksbehandling-ui
 env:
   IMAGE: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
   APP_NAME: ${{ github.workflow }}
+  branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.ref_name }}
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
@@ -71,10 +72,9 @@ jobs:
       - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.ref_name }}
         run: |
           docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker build --tag ${IMAGE} --tag ${branch-image} apps/${APP_NAME}
+          docker build --tag ${{ IMAGE }} --tag ${{ branch-image }} apps/${{ APP_NAME }}
           docker push ${IMAGE}
 
   deploy-to-dev-gcp:

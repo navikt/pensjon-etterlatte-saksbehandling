@@ -1,7 +1,7 @@
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { Child } from '@navikt/ds-icons'
-import { PersonDetailWrapper, TypeStatusWrap } from '../../styled'
+import { PersonDetailWrapper } from '../../styled'
 import { IPdlPerson } from '~shared/types/Person'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import differenceInYears from 'date-fns/differenceInYears'
@@ -25,7 +25,6 @@ export const Barn: React.FC<Props> = ({ person, doedsdato }) => {
         </span>
         {`${person.fornavn} ${person.etternavn}`}{' '}
         <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
-        <TypeStatusWrap type="barn">Mottaker av pensjon</TypeStatusWrap>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.foedselsnummer} />

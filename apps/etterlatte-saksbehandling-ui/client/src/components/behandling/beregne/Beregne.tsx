@@ -1,5 +1,5 @@
 import { Content, ContentHeader } from '~shared/styled'
-import { HeadingWrapper, TypeStatusWrap } from '../soeknadsoversikt/styled'
+import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
@@ -52,11 +52,6 @@ export const Beregne = () => {
           </Heading>
         </HeadingWrapper>
         <InfoWrapper>
-          <DetailWrapper>
-            <TypeStatusWrap type="barn">Barnepensjon</TypeStatusWrap>
-            <TypeStatusWrap type="statsborgerskap">Nasjonal sak</TypeStatusWrap>
-          </DetailWrapper>
-
           <div className="text">
             Vilkårsresultat: <strong>{formaterVedtaksResultat(vedtaksresultat, virkningstidspunkt)}</strong>
           </div>
@@ -86,17 +81,13 @@ export const Beregne = () => {
 }
 
 const InfoWrapper = styled.div`
-  margin-top: 5em;
+  margin-top: 1em;
   max-width: 500px;
   .text {
-    margin: 2em 0 5em 0;
+    margin: 1em 0 5em 0;
   }
 `
-const DetailWrapper = styled.div`
-  display: flex;
-  max-width: 400px;
-  margin-left: 0;
-`
+
 const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
   margin-top: 8px;
 `

@@ -4,10 +4,6 @@ export const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
 `
 
-export const IconWrapper = styled.span`
-  margin-left: -55px;
-  margin-right: 40px;
-`
 export const PersonInfoWrapper = styled.div`
   padding-top: 1.2em;
   display: inline-flex;

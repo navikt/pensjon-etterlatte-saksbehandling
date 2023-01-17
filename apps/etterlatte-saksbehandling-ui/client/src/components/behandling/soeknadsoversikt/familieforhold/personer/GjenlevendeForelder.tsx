@@ -1,7 +1,6 @@
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { People } from '@navikt/ds-icons'
-import { ForelderWrap } from '../../styled'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
 import { PersonStatus, RelatertPersonsRolle } from '~components/behandling/types'
@@ -26,7 +25,6 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
         <span className="personRolle">
           ({innsenderErGjenlevendeForelder && PersonStatus.GJENLEVENDE_FORELDER + ' ' + RelatertPersonsRolle.FORELDER})
         </span>
-        <ForelderWrap>Innsender av søknad</ForelderWrap>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.foedselsnummer} />

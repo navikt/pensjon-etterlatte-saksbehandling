@@ -5,7 +5,6 @@ import { useRef, useState } from 'react'
 import { GyldighetIcon } from '~shared/icons/gyldigIcon'
 import { oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { Calender, Edit } from '@navikt/ds-icons'
-
 import { RedigerWrapper } from '../kommerBarnetTilgode/KommerBarnetTilGodeVurdering'
 import { formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
@@ -21,6 +20,7 @@ import {
 import { useAppDispatch } from '~store/Store'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { IDetaljertBehandling, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { addMonths } from "date-fns";
 
 export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
   return (
@@ -101,6 +101,7 @@ const Virkningstidspunkt = (props: Props) => {
                         onChange={(date: Date) => setFormData(date)}
                         autoComplete="off"
                         showMonthYearPicker
+                        maxDate={addMonths(new Date(), 1)}
                       />
                     </div>
                     <KalenderIkon

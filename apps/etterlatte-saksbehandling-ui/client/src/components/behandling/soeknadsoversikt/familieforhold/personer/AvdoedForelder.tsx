@@ -5,7 +5,7 @@ import { People } from '@navikt/ds-icons'
 import { format } from 'date-fns'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { PersonStatus, RelatertPersonsRolle } from '~components/behandling/types'
-import { ForelderWrap } from '../../styled'
+import { Detail } from '@navikt/ds-react'
 
 type Props = {
   person: IPdlPerson
@@ -22,7 +22,7 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
         <span className="personRolle">
           ({PersonStatus.AVDOED} {RelatertPersonsRolle.FORELDER})
         </span>
-        <ForelderWrap avdoed={true}>Død {format(new Date(person.doedsdato), 'dd.MM.yyyy')}</ForelderWrap>
+        <Detail>Død {format(new Date(person.doedsdato), 'dd.MM.yyyy')}</Detail>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.foedselsnummer} />

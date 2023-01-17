@@ -6,6 +6,7 @@ import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalite
 
 enum Variants {
     NEUTRAL= 'neutral',
+    INFO= 'info',
     INFO_FILLED= 'info-filled',
     ALT1 = 'alt1',
     ALT1_FILLED= 'alt1-filled',
@@ -20,14 +21,14 @@ export const tagColors = {
   [BehandlingTypeFilter.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
   [BehandlingTypeFilter.REVURDERING]: Variants.ALT3_FILLED,
   [SoeknadTypeFilter.VELG]: Variants.NEUTRAL,
-  [SoeknadTypeFilter.GJENLEVENDEPENSJON]: Variants.INFO_FILLED,
-  [SoeknadTypeFilter.BARNEPENSJON]: Variants.ALT2_FILLED,
+  [SoeknadTypeFilter.GJENLEVENDEPENSJON]: Variants.ALT1_FILLED,
+  [SoeknadTypeFilter.BARNEPENSJON]: Variants.INFO,
   [IBehandlingsType.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
   [IBehandlingsType.REVURDERING]: Variants.ALT3_FILLED,
   [IBehandlingsType.MANUELT_OPPHOER]: Variants.ALT3_FILLED,
-  [ISaksType.BARNEPENSJON]: Variants.ALT2_FILLED,
-  [ISaksType.GJENLEVENDEPENSJON]: Variants.INFO_FILLED,
-  [INasjonalitetsType.NASJONAL]: Variants.ALT2,
+  [ISaksType.BARNEPENSJON]: Variants.INFO,
+  [ISaksType.GJENLEVENDEPENSJON]: Variants.ALT1_FILLED,
+  [INasjonalitetsType.NASJONAL]: Variants.INFO_FILLED,
   [INasjonalitetsType.UTLAND]: Variants.ALT3,
 }
 
@@ -35,5 +36,6 @@ export const TagList = styled.ul`
   display: flex;
   list-style-type: none;
   gap: 0.5em;
+  margin-top: 0.5em;
 `
 

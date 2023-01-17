@@ -132,28 +132,3 @@ export const DashedBorder = styled.div`
   padding: 1px;
   margin-bottom: 1em;
 `
-
-export const TypeStatusWrap = styled.div<{ type: string }>`
-  background-color: ${(props) => (props.type === 'barn' ? '#ccf1d6' : '#ffeccc')};
-  border: 1px solid ${(props) => (props.type === 'barn' ? '#33aa5f;' : '#ffc166')};
-  padding: 0.1em 0.5em;
-  border-radius: 4px;
-  font-weight: normal;
-  font-size: 14px;
-  height: 25px;
-  margin-right: ${(props) => (props.type === 'barn' ? '1em;' : '0.5em')};
-  display: inline-block;
-`
-
-export const ForelderWrap = styled.div<{ avdoed?: boolean }>`
-  background-color: ${(props) => (props.avdoed ? '#262626' : '#ffeccc')};
-  color: ${(props) => (props.avdoed ? '#FFFFFF' : '262626')};
-  border: 1px solid ${(props) => (props.avdoed ? '#262626' : '#262626')};
-  height: 25px;
-  padding: 0.1em 0.5em;
-  border-radius: 4px;
-  font-weight: normal;
-  font-size: 14px;
-  margin-right: 0.9em;
-  display: inline-block;
-`

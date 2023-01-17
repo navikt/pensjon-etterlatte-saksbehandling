@@ -3,6 +3,10 @@ import { useAppSelector } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { formaterEnumTilLesbarString, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
+import { Tag } from '@navikt/ds-react'
+import { tagColors, TagList } from '~shared/Tags'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.ident)
@@ -27,6 +31,18 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       <Overskrift>{formaterEnumTilLesbarString(behandlingsInfo?.type ?? '')}</Overskrift>
       <UnderOverskrift>{hentStatus()}</UnderOverskrift>
       {fattetDato && <Tekst>{fattetDato}</Tekst>}
+      <TagList>
+        <li>
+          <Tag variant={tagColors[ISaksType.BARNEPENSJON]} size={'small'}>
+            {formaterEnumTilLesbarString(ISaksType.BARNEPENSJON)}
+          </Tag>
+        </li>
+        <li>
+          <Tag variant={tagColors[INasjonalitetsType.NASJONAL]} size={'small'}>
+            {formaterEnumTilLesbarString(INasjonalitetsType.NASJONAL)}
+          </Tag>
+        </li>
+      </TagList>
       <div className="info">
         <Info>Saksbehandler</Info>
         <Tekst>{behandlingsInfo.saksbehandler ? behandlingsInfo.saksbehandler : innloggetSaksbehandler}</Tekst>

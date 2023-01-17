@@ -18,8 +18,6 @@ import {
   VurderingsResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
-import { tagColors, TagList } from '~shared/Tags'
-import { formaterEnumTilLesbarString } from '~utils/formattering'
 
 interface VilkaarOption {
   value: string
@@ -28,9 +26,7 @@ interface VilkaarOption {
 
 export const Vedtaksbrev = () => {
   const { behandlingId } = useParams()
-  const { sak, soeknadMottattDato, behandlingType, status } = useAppSelector(
-    (state) => state.behandlingReducer.behandling
-  )
+  const { sak, soeknadMottattDato, status } = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const [fileURL, setFileURL] = useState<string>()
   const [vedtaksbrevId, setVedtaksbrevId] = useState<string>()
@@ -119,20 +115,6 @@ export const Vedtaksbrev = () => {
               <Heading spacing size={'large'} level={'1'}>
                 Vedtaksbrev
               </Heading>
-              <div className="details">
-                <TagList>
-                  <li>
-                    <Tag variant={tagColors[behandlingType]} size={'small'}>
-                      {formaterEnumTilLesbarString(behandlingType)}
-                    </Tag>
-                  </li>
-                  <li>
-                    <Tag variant={tagColors[ISaksType.BARNEPENSJON]} size={'small'}>
-                      {formaterEnumTilLesbarString(ISaksType.BARNEPENSJON)}
-                    </Tag>
-                  </li>
-                </TagList>
-              </div>
             </HeadingWrapper>
             <Soeknadsdato mottattDato={soeknadMottattDato} />
           </ContentHeader>

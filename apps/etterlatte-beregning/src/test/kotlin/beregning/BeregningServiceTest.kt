@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
@@ -23,7 +22,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 import java.util.UUID.randomUUID
 
 internal class BeregningServiceTest {
@@ -157,13 +155,10 @@ internal class BeregningServiceTest {
     }
 
     @Test
-    fun `skal sette beloep til 0 paafoelgende mnd etter doedsfall ved manuelt opphoer`() {
+    fun `skal sette beloep til 0 ved manuelt opphoer`() {
         val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
         val behandling = behandling(BehandlingType.MANUELT_OPPHOER)
         val grunnlag = grunnlag(soesken = emptyList())
-
-        val doedsdato = requireNotNull(grunnlag.hentAvdoed().hentDoedsdato()?.verdi)
-        val virkningstidspunkt = YearMonth.from(doedsdato).plusMonths(1)
 
         val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
 
@@ -177,7 +172,7 @@ internal class BeregningServiceTest {
                 delytelsesId shouldBe "BP"
                 type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe 0
-                datoFOM shouldBe virkningstidspunkt
+                datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
                 grunnbelop shouldBe 111477
                 grunnbelopMnd shouldBe 9290

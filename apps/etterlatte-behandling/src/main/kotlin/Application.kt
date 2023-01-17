@@ -109,7 +109,7 @@ fun Application.module(beanFactory: BeanFactory) {
                 beanFactory.revurderingService(),
                 beanFactory.manueltOpphoerService()
             )
-            behandlingsstatusRoutes(beanFactory.behandlingSstatusService())
+            behandlingsstatusRoutes(beanFactory.behandlingsStatusService())
             route("api") {
                 oppgaveRoutes(OppgaveDao(ds.dataSource))
             }

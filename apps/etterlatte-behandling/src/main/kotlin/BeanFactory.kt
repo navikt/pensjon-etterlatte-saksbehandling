@@ -88,7 +88,7 @@ interface BeanFactory {
     fun grunnlagKlient(): GrunnlagKlient
     fun beregningKlient(): BeregningKlient
     fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient
-    fun behandlingSstatusService(): BehandlingStatusService
+    fun behandlingsStatusService(): BehandlingStatusService
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -125,7 +125,7 @@ abstract class CommonFactory : BeanFactory {
 
     override fun sakService(): SakService = RealSakService(sakDao())
 
-    override fun behandlingSstatusService(): BehandlingStatusService {
+    override fun behandlingsStatusService(): BehandlingStatusService {
         return BehandlingStatusServiceImpl(behandlingDao())
     }
 

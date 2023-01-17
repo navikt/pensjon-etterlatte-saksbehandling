@@ -54,7 +54,7 @@ data class ManueltOpphoer(
 
     override fun tilBeregnet(): ManueltOpphoer = hvisTilstandEr(
         listOf(
-            BehandlingStatus.VILKAARSVURDERT,
+            BehandlingStatus.OPPRETTET,
             BehandlingStatus.BEREGNET,
             BehandlingStatus.RETURNERT
         )

@@ -6,6 +6,11 @@ plugins {
 
 dependencies {
     implementation(project(":libs:common"))
+    implementation(project(":libs:etterlatte-database"))
+    implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:ktor2client-onbehalfof"))
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
+
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)
     implementation(Ktor2.ServerContentNegotiation)
@@ -21,10 +26,6 @@ dependencies {
     implementation(Jackson.ModuleKotlin)
 
     implementation(NavFelles.TokenValidationKtor2)
-    implementation(project(":libs:ktor2client-onbehalfof"))
-    implementation(project(":libs:etterlatte-database"))
-    implementation(project(":libs:etterlatte-ktor"))
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(Database.KotliQuery)
 
     testImplementation(MockK.MockK)

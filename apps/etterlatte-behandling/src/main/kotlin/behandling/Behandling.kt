@@ -41,6 +41,7 @@ sealed class Behandling {
     abstract val persongalleri: Persongalleri
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val vilkaarUtfall: VilkaarsvurderingUtfall?
+    abstract val virkningstidspunkt: Virkningstidspunkt?
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
     val oppgaveStatus get() = OppgaveStatus.from(status)
@@ -85,7 +86,7 @@ data class Foerstegangsbehandling(
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val vilkaarUtfall: VilkaarsvurderingUtfall?,
-    val virkningstidspunkt: Virkningstidspunkt?,
+    override val virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?
 ) : Behandling() {
@@ -168,6 +169,7 @@ data class Revurdering(
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val vilkaarUtfall: VilkaarsvurderingUtfall?,
+    override val virkningstidspunkt: Virkningstidspunkt?,
     val revurderingsaarsak: RevurderingAarsak
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
@@ -180,6 +182,7 @@ data class ManueltOpphoer(
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
     override val persongalleri: Persongalleri,
+    override val virkningstidspunkt: Virkningstidspunkt?,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
     val fritekstAarsak: String?
 ) : Behandling() {
@@ -189,7 +192,8 @@ data class ManueltOpphoer(
         sak: Long,
         persongalleri: Persongalleri,
         opphoerAarsaker: List<ManueltOpphoerAarsak>,
-        fritekstAarsak: String?
+        fritekstAarsak: String?,
+        virkningstidspunkt: Virkningstidspunkt?
     ) : this(
         id = UUID.randomUUID(),
         sak = sak,
@@ -198,7 +202,8 @@ data class ManueltOpphoer(
         status = OPPRETTET,
         persongalleri = persongalleri,
         opphoerAarsaker = opphoerAarsaker,
-        fritekstAarsak = fritekstAarsak
+        fritekstAarsak = fritekstAarsak,
+        virkningstidspunkt = virkningstidspunkt
     )
 
     override val kommerBarnetTilgode: KommerBarnetTilgode?
@@ -229,11 +234,7 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
         gyldighetsproeving = gyldighetsproeving,
         status = status,
         behandlingType = type,
-        virkningstidspunkt = when (this) {
-            is Foerstegangsbehandling -> this.virkningstidspunkt
-            is ManueltOpphoer -> null
-            is Revurdering -> null
-        },
+        virkningstidspunkt = this.virkningstidspunkt,
         kommerBarnetTilgode = kommerBarnetTilgode,
         revurderingsaarsak = when (this) {
             is Revurdering -> revurderingsaarsak

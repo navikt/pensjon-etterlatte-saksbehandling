@@ -17,7 +17,7 @@ import java.util.*
 
 class RevurderingAggregat(
     id: UUID,
-    private val behandlinger: BehandlingDao,
+    behandlinger: BehandlingDao,
     private val hendelser: HendelseDao
 ) {
     companion object {
@@ -40,7 +40,8 @@ class RevurderingAggregat(
                 persongalleri = persongalleri,
                 revurderingsaarsak = revurderingAarsak,
                 kommerBarnetTilgode = null,
-                vilkaarUtfall = null
+                vilkaarUtfall = null,
+                virkningstidspunkt = null
             )
                 .also {
                     behandlinger.opprettRevurdering(it)

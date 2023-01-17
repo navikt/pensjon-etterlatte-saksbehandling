@@ -13,6 +13,7 @@ dependencies {
     api(kotlin("reflect"))
 
     implementation(project(":libs:common"))
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
 
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)

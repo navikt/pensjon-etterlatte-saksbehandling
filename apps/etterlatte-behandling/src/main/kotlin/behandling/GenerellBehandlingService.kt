@@ -78,7 +78,7 @@ class RealGenerellBehandlingService(
 
     override fun hentBehandlingerISak(sakid: Long): List<Behandling> {
         return inTransaction {
-            behandlinger.alleBehandingerISak(sakid)
+            behandlinger.alleBehandlingerISak(sakid)
         }
     }
 

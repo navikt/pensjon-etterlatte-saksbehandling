@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
-      branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.base_ref }}
+      branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.ref_name }}
     outputs:
       image: ${{ env.image }}
     steps:

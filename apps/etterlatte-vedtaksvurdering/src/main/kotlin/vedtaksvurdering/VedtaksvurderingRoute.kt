@@ -1,10 +1,12 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -13,13 +15,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import org.slf4j.LoggerFactory
 import java.util.*
 
-private val logger = LoggerFactory.getLogger("RouteApi")
 fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
     route("api") {
+        val logger = application.log
+
         get("behandlinger/{behandlingId}/vedtak") {
             withBehandlingId { behandlingId ->
                 val vedtaksresultat = service.hentVedtak(behandlingId)

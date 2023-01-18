@@ -8,15 +8,15 @@ class MaskerFnrKtTest {
 
     @Test
     fun `maskerFnr bytter ut personnummer med xxxxx`() {
-        assertEquals("114682xxxxx", "11468227004".maskerFnr())
-        assertEquals("134882xxxxx", "13488246113".maskerFnr())
+        assertEquals("114682*****", "11468227004".maskerFnr())
+        assertEquals("134882*****", "13488246113".maskerFnr())
     }
 
     @Test
     fun `maskerFnr håndterer kortere eller lengre (korrupte) fnr`() {
-        assertEquals("xxxxx", "".maskerFnr())
-        assertEquals("xxxxx", "123".maskerFnr())
-        assertEquals("134882xxxxx", "134882".maskerFnr())
-        assertEquals("134882xxxxx", "1348824611313488246113".maskerFnr())
+        assertEquals("*****", "".maskerFnr())
+        assertEquals("*****", "123".maskerFnr())
+        assertEquals("134882*****", "134882".maskerFnr())
+        assertEquals("134882*****", "1348824611313488246113".maskerFnr())
     }
 }

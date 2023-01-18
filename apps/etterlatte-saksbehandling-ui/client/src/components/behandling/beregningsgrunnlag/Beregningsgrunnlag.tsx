@@ -1,12 +1,11 @@
 import { BodyShort, Button, Heading, Loader, Radio, RadioGroup } from '@navikt/ds-react'
 import { Content, ContentHeader } from '~shared/styled'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { Barn } from '../soeknadsoversikt/familieforhold/personer/Barn'
 import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
 import styled from 'styled-components'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { lagreSoeskenMedIBeregning } from '~shared/api/behandling'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { Controller, useForm } from 'react-hook-form'
 import { formaterStringDato } from '~utils/formattering'
@@ -14,10 +13,15 @@ import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppSelector } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
+import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { hentSoeskenMedIBeregning, lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
+import { SoeskenMedIBeregning } from '~shared/types/Grunnlagsopplysning'
+import Spinner from '~shared/Spinner'
+import { IPdlPerson } from '~shared/types/Person'
 
-interface SoeskenMedIBeregning {
+interface FormValues {
   foedselsnummer: string
-  skalBrukes: boolean
+  skalBrukes?: boolean
 }
 
 const Beregningsgrunnlag = () => {
@@ -25,30 +29,36 @@ const Beregningsgrunnlag = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const [isLoading, setIsLoading] = useState(false)
+  const [beregningsgrunnlag, hentBeregningsgrunnlag] = useApiCall(hentSoeskenMedIBeregning)
+  const { control, handleSubmit, setValue } = useForm<{ beregningsgrunnlag: FormValues[] }>()
+
+  useEffect(() => {
+    hentBeregningsgrunnlag(behandling.sak, (result) => {
+      setValue('beregningsgrunnlag', result.opplysning.beregningsgrunnlag)
+    })
+  }, [])
 
   if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <div style={{ color: 'red' }}>Familieforhold kan ikke hentes ut</div>
   }
 
-  const soeker = behandling.søker
-  const soesken = behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
-    (barn) => barn.foedselsnummer !== soeker?.foedselsnummer
-  )
-  const beregningsperiode = behandling.beregning?.beregningsperioder ?? []
+  const soesken: IPdlPerson[] =
+    behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
+      (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
+    ) ?? []
 
-  const { control, handleSubmit } = useForm<{ beregningsgrunnlag: SoeskenMedIBeregning[] }>({
-    defaultValues: {
-      beregningsgrunnlag:
-        soesken?.map((person) => ({
-          foedselsnummer: person.foedselsnummer,
-          skalBrukes: !!beregningsperiode[0]?.soeskenFlokk?.find((fnr) => fnr === person.foedselsnummer),
-        })) ?? [],
-    },
-  })
-
-  const lagBeregning = () => opprettEllerEndreBeregning(behandling.id).then(() => next())
+  const onSubmit = async (beregningsgrunnlag: SoeskenMedIBeregning[]) => {
+    setIsLoading(true)
+    await lagreSoeskenMedIBeregning(behandling.id, beregningsgrunnlag)
+      .then(() => opprettEllerEndreBeregning(behandling.id))
+      .then(() => next())
+      .finally(() => setIsLoading(false))
+  }
 
   const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
+
+  const visSøskenjustering =
+    isSuccess(beregningsgrunnlag) || (isFailure(beregningsgrunnlag) && beregningsgrunnlag.error.statusCode === 404)
 
   return (
     <Content>
@@ -71,44 +81,41 @@ const Beregningsgrunnlag = () => {
       </ContentHeader>
       <FamilieforholdWrapper
         id="form"
-        onSubmit={handleSubmit(async (formValues) => {
-          if (formValues.beregningsgrunnlag.length >= 0) {
-            setIsLoading(true)
-
-            await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
-              .then(() => lagBeregning())
-              .finally(() => setIsLoading(false))
-          }
-        })}
+        onSubmit={handleSubmit(
+          async ({ beregningsgrunnlag }) =>
+            validerSoeskenjustering(soesken, beregningsgrunnlag) && (await onSubmit(beregningsgrunnlag))
+        )}
       >
         {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
         <Border />
-        {soesken?.map((barn, index) => (
-          <SoeskenContainer key={barn.foedselsnummer}>
-            <Soesken person={barn} familieforhold={behandling.familieforhold!} />
-            <Controller
-              name={`beregningsgrunnlag.${index}.skalBrukes`}
-              control={control}
-              render={(soesken) =>
-                behandles ? (
-                  <RadioGroupRow
-                    legend="Oppdras sammen"
-                    value={soesken.field.value}
-                    onChange={(value: boolean) => soesken.field.onChange(value)}
-                  >
-                    <Radio value={true}>Ja</Radio>
-                    <Radio value={false}>Nei</Radio>
-                  </RadioGroupRow>
-                ) : (
-                  <OppdrasSammenLes>
-                    <strong>Oppdras sammen</strong>
-                    <label>{soesken.field.value ? 'Ja' : 'Nei'}</label>
-                  </OppdrasSammenLes>
-                )
-              }
-            />
-          </SoeskenContainer>
-        ))}
+        <Spinner visible={isPendingOrInitial(beregningsgrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
+        {visSøskenjustering &&
+          soesken.map((barn, index) => (
+            <SoeskenContainer key={barn.foedselsnummer}>
+              <Soesken person={barn} familieforhold={behandling.familieforhold!} />
+              <Controller
+                name={`beregningsgrunnlag.${index}.skalBrukes`}
+                control={control}
+                render={(soesken) =>
+                  behandles ? (
+                    <RadioGroupRow
+                      legend="Oppdras sammen"
+                      value={soesken.field.value ?? null}
+                      onChange={(value: boolean) => soesken.field.onChange(value)}
+                    >
+                      <Radio value={true}>Ja</Radio>
+                      <Radio value={false}>Nei</Radio>
+                    </RadioGroupRow>
+                  ) : (
+                    <OppdrasSammenLes>
+                      <strong>Oppdras sammen</strong>
+                      <label>{soesken.field.value ? 'Ja' : 'Nei'}</label>
+                    </OppdrasSammenLes>
+                  )
+                }
+              />
+            </SoeskenContainer>
+          ))}
       </FamilieforholdWrapper>
       {behandles ? (
         <BehandlingHandlingKnapper>
@@ -122,6 +129,9 @@ const Beregningsgrunnlag = () => {
     </Content>
   )
 }
+
+const validerSoeskenjustering = (soesken: IPdlPerson[], justering: FormValues[]): justering is SoeskenMedIBeregning[] =>
+  soesken.length === justering.length && justering.every((barn) => barn.skalBrukes !== undefined)
 
 const OppdrasSammenLes = styled.div`
   display: flex;

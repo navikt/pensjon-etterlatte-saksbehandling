@@ -61,11 +61,7 @@ if (isDev) {
     proxy(ApiConfig.behandling.url!!)
   )
 
-  app.use(
-    '/api/grunnlag/beregningsgrunnlag/:behandlingId',
-    tokenMiddleware(ApiConfig.grunnlag.scope),
-    proxy(ApiConfig.grunnlag.url!!)
-  )
+  app.use('/api/grunnlag', tokenMiddleware(ApiConfig.grunnlag.scope), proxy(ApiConfig.grunnlag.url!!))
 
   app.use('/api/person', tokenMiddleware(ApiConfig.pdltjenester.scope), proxy(ApiConfig.pdltjenester.url!!))
 

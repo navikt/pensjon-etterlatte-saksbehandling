@@ -1,4 +1,4 @@
-import { IDetaljertBehandling, Virkningstidspunkt, IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling, IKommerBarnetTilgode, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
@@ -53,13 +53,6 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
     svar: args.svar,
     begrunnelse: args.begrunnelse,
   })
-}
-
-export const lagreSoeskenMedIBeregning = async (
-  behandlingsId: string,
-  soeskenMedIBeregning: { foedselsnummer: string; skalBrukes: boolean }[]
-): Promise<ApiResponse<any>> => {
-  return apiClient.post(`/grunnlag/beregningsgrunnlag/${behandlingsId}`, { soeskenMedIBeregning })
 }
 
 interface GrunnlagResponse {

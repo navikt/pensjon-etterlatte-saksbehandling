@@ -49,8 +49,8 @@ class LivsHendelser(config: AppConfig) : ILivsHendelser {
     }
 
     override fun personErDod(fnr: String, doedsdato: String?, endringstype: Endringstype) {
-        logger.info("Poster at person $fnr er doed")
-        val avdoedDoedsdato = doedsdato.parseDato(fnr, logger)
+        logger.info("Poster at en person er doed")
+        val avdoedDoedsdato = doedsdato.parseDato(logger)
         val doedshendelse = Doedshendelse(
             avdoedFnr = fnr,
             doedsdato = avdoedDoedsdato,
@@ -81,8 +81,8 @@ class LivsHendelser(config: AppConfig) : ILivsHendelser {
         utflyttingsdato: String?,
         endringstype: Endringstype
     ) {
-        logger.info("Poster at person $fnr har flyttet til utlandet")
-        val utflyttingsdato = utflyttingsdato.parseDato(fnr, logger)
+        logger.info("Poster en at person har flyttet til utlandet")
+        val utflyttingsdato = utflyttingsdato.parseDato(logger)
         val utflyttingsHendelse = UtflyttingsHendelse(
             fnr = fnr,
             tilflyttingsLand = tilflyttingsLand,
@@ -113,7 +113,7 @@ class LivsHendelser(config: AppConfig) : ILivsHendelser {
         relatertPersonUtenFolkeregisteridentifikator: String?,
         endringstype: Endringstype
     ) {
-        logger.info("Poster at person $fnr har endret forelder-barn-relasjon")
+        logger.info("Poster at en person har endret forelder-barn-relasjon")
         val forelderBarnRelasjonHendelse = ForelderBarnRelasjonHendelse(
             fnr = fnr,
             relatertPersonsIdent = relatertPersonsIdent,
@@ -145,8 +145,8 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
     val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun personErDod(fnr: String, doedsdato: String?, endringstype: Endringstype) {
-        logger.info("Poster at person $fnr er doed")
-        val avdoedDoedsdato = doedsdato.parseDato(fnr, logger)
+        logger.info("Poster at en person er doed")
+        val avdoedDoedsdato = doedsdato.parseDato(logger)
         val doedshendelse = Doedshendelse(avdoedFnr = fnr, doedsdato = avdoedDoedsdato, endringstype = endringstype)
         context.publish(
             UUID.randomUUID().toString(),
@@ -170,8 +170,8 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
         utflyttingsdato: String?,
         endringstype: Endringstype
     ) {
-        logger.info("Poster at person $fnr har flyttet til utlandet")
-        val utflyttingsdato = utflyttingsdato.parseDato(fnr, logger)
+        logger.info("Poster at en person har flyttet til utlandet")
+        val utflyttingsdato = utflyttingsdato.parseDato(logger)
         val utflyttingsHendelse = UtflyttingsHendelse(
             fnr = fnr,
             tilflyttingsLand = tilflyttingsLand,
@@ -200,7 +200,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
         relatertPersonUtenFolkeregisteridentifikator: String?,
         endringstype: Endringstype
     ) {
-        logger.info("Poster at person $fnr har endret forelder-barn-relasjon")
+        logger.info("Poster at en person har endret forelder-barn-relasjon")
         val forelderBarnRelasjonHendelse = ForelderBarnRelasjonHendelse(
             fnr = fnr,
             relatertPersonsIdent = relatertPersonsIdent,
@@ -221,11 +221,11 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
     }
 }
 
-fun String?.parseDato(fnr: String, logger: Logger): LocalDate? = try {
+fun String?.parseDato(logger: Logger): LocalDate? = try {
     this?.let { LocalDate.parse(it) }
 } catch (e: Exception) {
     logger.warn(
-        "Kunne ikke parse doedsdato for person med ident $fnr. " +
+        "Kunne ikke parse doedsdato for en person " +
             "Verdien for doedsdato er: $this. Vi bruker null som dødsdato.",
         e
     )

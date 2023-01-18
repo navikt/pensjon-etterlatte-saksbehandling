@@ -25,12 +25,11 @@ class Dodsmeldinger(config: AppConfig) : IDodsmeldinger {
     }
 
     override fun personErDod(ident: String, doedsdato: String?, endringstype: Endringstype) {
-        logger.info("Poster at person $ident er doed")
         val avdoedDoedsdato: LocalDate? = try {
             doedsdato?.let { LocalDate.parse(it) }
         } catch (e: Exception) {
             logger.warn(
-                "Kunne ikke parse doedsdato for person med ident $ident. " +
+                "Kunne ikke parse doedsdato for person. " +
                     "Verdien for doedsdato er: $doedsdato. Vi bruker null som dødsdato.",
                 e
             )
@@ -64,12 +63,12 @@ class DodsmeldingerRapid(private val context: RapidsConnection) : IDodsmeldinger
     val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun personErDod(ident: String, doedsdato: String?, endringstype: Endringstype) {
-        logger.info("Poster at person $ident er doed")
+        logger.info("Poster at en person er doed")
         val avdoedDoedsdato: LocalDate? = try {
             doedsdato?.let { LocalDate.parse(it) }
         } catch (e: Exception) {
             logger.warn(
-                "Kunne ikke parse doedsdato for person med ident $ident. " +
+                "Kunne ikke parse doedsdato for person. " +
                     "Verdien for doedsdato er: $doedsdato. Vi bruker null som dødsdato.",
                 e
             )

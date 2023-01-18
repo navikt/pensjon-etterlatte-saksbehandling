@@ -31,12 +31,6 @@ class LyttPaaHendelser(
                 "DOEDSFALL_V1" -> haandterDoedsendelse(it)
                 "UTFLYTTING_FRA_NORGE" -> haandterUtflyttingFraNorge(it)
                 "FORELDERBARNRELASJON_V1" -> haandterForelderBarnRelasjon(it)
-                else -> {
-                    log.info(
-                        "Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet} " +
-                            " for ident ${it.personidenter}: $it"
-                    )
-                }
             }
         }
 
@@ -47,7 +41,6 @@ class LyttPaaHendelser(
 
     private fun haandterForelderBarnRelasjon(personhendelse: Personhendelse) {
         val hendelseType = "Forelder-barn-relasjon-hendelse"
-        personhendelse.loggHendelse(hendelseType)
         try {
             val personnummer = runBlocking {
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
@@ -71,7 +64,6 @@ class LyttPaaHendelser(
 
     private fun haandterDoedsendelse(personhendelse: Personhendelse) {
         val hendelseType = "Doedshendelse"
-        personhendelse.loggHendelse(hendelseType)
         try {
             val personnummer = runBlocking {
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
@@ -82,7 +74,7 @@ class LyttPaaHendelser(
                 doedsdato = try {
                     personhendelse.doedsfall?.doedsdato?.format(DateTimeFormatter.ISO_DATE)
                 } catch (e: Exception) {
-                    log.info("Kunne ikke String-formatere dato")
+                    log.warn("Kunne ikke String-formatere dato i en dødshendelse")
                     null
                 },
                 endringstype = endringstype
@@ -95,7 +87,6 @@ class LyttPaaHendelser(
 
     fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
         val hendelseType = "Utflytting fra Norge-hendelse"
-        personhendelse.loggHendelse(hendelseType)
         try {
             val personnummer = runBlocking {
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
@@ -108,7 +99,7 @@ class LyttPaaHendelser(
                 utflyttingsdato = try {
                     personhendelse.utflyttingFraNorge?.utflyttingsdato?.format(DateTimeFormatter.ISO_DATE)
                 } catch (e: Exception) {
-                    log.info("Kunne ikke String-formatere dato")
+                    log.warn("Kunne ikke String-formatere dato i en utflyttingshendelse")
                     null
                 },
                 endringstype = endringstype
@@ -118,15 +109,9 @@ class LyttPaaHendelser(
         }
     }
 
-    private fun Personhendelse.loggHendelse(hendelseType: String) {
-        log.info(
-            "$hendelseType mottatt for : $personidenter med endringstype $endringstype. Hendelse: $this"
-        )
-    }
-
     private fun Personhendelse.loggFeilVedHaandtering(hendelseType: String, e: Exception) {
         log.error(
-            "kunne ikke haandtere $hendelseType " + "for ${personidenter.firstOrNull()}. Dette skyldes sannsynligvis" +
+            "kunne ikke haandtere $hendelseType " + "for en personident. Dette skyldes sannsynligvis" +
                 "at personhendelsen ser annerledes ut enn forventet, eller at det var problem med henting av " +
                 "folkeregisteridentifikatoren fra PDL",
             e

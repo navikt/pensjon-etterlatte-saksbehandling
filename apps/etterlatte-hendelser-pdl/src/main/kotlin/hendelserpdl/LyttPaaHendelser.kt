@@ -31,6 +31,7 @@ class LyttPaaHendelser(
                 "DOEDSFALL_V1" -> haandterDoedsendelse(it)
                 "UTFLYTTING_FRA_NORGE" -> haandterUtflyttingFraNorge(it)
                 "FORELDERBARNRELASJON_V1" -> haandterForelderBarnRelasjon(it)
+                else -> log.info("Så en hendelse av type ${it.opplysningstype} som vi ikke håndterer")
             }
         }
 
@@ -58,7 +59,7 @@ class LyttPaaHendelser(
                 )
             }
         } catch (e: Exception) {
-            personhendelse.loggFeilVedHaandtering(hendelseType, e)
+            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
         }
     }
 
@@ -80,7 +81,7 @@ class LyttPaaHendelser(
                 endringstype = endringstype
             )
         } catch (e: Exception) {
-            personhendelse.loggFeilVedHaandtering(hendelseType, e)
+            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
         }
         dodsmeldinger++
     }
@@ -105,13 +106,13 @@ class LyttPaaHendelser(
                 endringstype = endringstype
             )
         } catch (e: Exception) {
-            personhendelse.loggFeilVedHaandtering(hendelseType, e)
+            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
         }
     }
 
-    private fun Personhendelse.loggFeilVedHaandtering(hendelseType: String, e: Exception) {
+    private fun loggFeilVedHaandtering(hendelsesid: String, hendelseType: String, e: Exception) {
         log.error(
-            "kunne ikke haandtere $hendelseType " + "for en personident. Dette skyldes sannsynligvis" +
+            "kunne ikke haandtere $hendelseType for hendelsen med id=$hendelsesid. Dette skyldes sannsynligvis" +
                 "at personhendelsen ser annerledes ut enn forventet, eller at det var problem med henting av " +
                 "folkeregisteridentifikatoren fra PDL",
             e

@@ -28,9 +28,6 @@ on:
       - apps/etterlatte-saksbehandling-ui/**
 
 jobs:
-  slug:
-    - name: Inject slug/short variables
-      uses: rlespinasse/github-slug-action@v4
   test:
     if: github.event_name == 'pull_request'
     name: Test
@@ -63,6 +60,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4
       - name: Install and build
         working-directory: apps/${{ env.APP_NAME }}
         run: |

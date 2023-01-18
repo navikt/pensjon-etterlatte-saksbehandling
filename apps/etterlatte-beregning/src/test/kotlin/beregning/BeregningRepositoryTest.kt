@@ -94,8 +94,7 @@ internal class BeregningRepositoryTest {
                     datoTOM = null,
                     utbetaltBeloep = 3000,
                     soeskenFlokk = listOf("12345678901"),
-                    grunnbelopMnd = 10000,
-                    grunnbelop = 100_000,
+                    grunnbelopMnd = 10_000,
                     trygdetid = 40
                 )
             )

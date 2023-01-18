@@ -110,7 +110,7 @@ class BeregningService(
                             datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
                             beloep = periodisertResultat.resultat.verdi,
                             grunnbeloep = requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep()) {
-                                "Anvendt grunnbeløp ikke funnet i beregning"
+                                "Anvendt grunnbeløp ikke funnet for perioden"
                             },
                             beregningsgrunnlag = beregningsgrunnlag
                         )
@@ -166,7 +166,6 @@ class BeregningService(
         utbetaltBeloep = beloep,
         soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
         grunnbelopMnd = grunnbeloep,
-        grunnbelop = 0, // TODO
         trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt()
     )
 

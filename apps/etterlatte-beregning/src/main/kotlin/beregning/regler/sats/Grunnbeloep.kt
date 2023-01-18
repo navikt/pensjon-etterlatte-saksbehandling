@@ -7,7 +7,7 @@ import java.math.BigDecimal
 import java.time.YearMonth
 
 object Grunnbeloep {
-    val alleGrunnbeloep: List<G> =
+    val historiskeGrunnbeloep: List<G> =
         objectMapper.readValue(readFile("/grunnbelop.json"), GrunnbeloepListe::class.java).grunnbeloep
 
     private fun readFile(file: String) = Grunnbeloep::class.java.getResource(file)?.readText()

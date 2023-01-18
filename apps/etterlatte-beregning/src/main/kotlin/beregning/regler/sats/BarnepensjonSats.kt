@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import java.math.BigDecimal
 
-val historiskeGrunnbeloep = Grunnbeloep.alleGrunnbeloep.map { grunnbeloep ->
+val historiskeGrunnbeloep = Grunnbeloep.historiskeGrunnbeloep.map { grunnbeloep ->
     val grunnbeloepGyldigFra = grunnbeloep.dato.atDay(1)
     definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
         gjelderFra = grunnbeloepGyldigFra,

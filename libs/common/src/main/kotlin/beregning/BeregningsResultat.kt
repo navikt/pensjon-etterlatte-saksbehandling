@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.common.beregning
 
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 import java.util.*
@@ -42,15 +41,5 @@ data class Beregningsperiode(
     val utbetaltBeloep: Int,
     val soeskenFlokk: List<String>?,
     val grunnbelopMnd: Int,
-    val grunnbelop: Int,
     val trygdetid: Int
 )
-
-data class SoeskenPeriode(
-    val datoFOM: YearMonth,
-    val datoTOM: YearMonth,
-    val soeskenFlokk: List<Person>
-)
-
-fun SoeskenPeriode.erInklusiv(FOM: YearMonth, TOM: YearMonth) =
-    !FOM.isBefore(this.datoFOM) && !TOM.isAfter(this.datoTOM)

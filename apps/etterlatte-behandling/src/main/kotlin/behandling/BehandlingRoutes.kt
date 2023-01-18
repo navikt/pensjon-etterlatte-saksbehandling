@@ -128,7 +128,8 @@ internal fun Route.behandlingRoutes(
                         if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                         it.behandlingOpprettet,
                         it.type,
-                        if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
+                        if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD",
+                        it.virkningstidspunkt
                     )
                 }.let { BehandlingListe(it) }
             )
@@ -293,7 +294,8 @@ internal fun Route.behandlingRoutes(
                             is Foerstegangsbehandling -> "SOEKNAD"
                             is Revurdering -> it.revurderingsaarsak.name
                             is ManueltOpphoer -> "MANUELT OPPHOER"
-                        }
+                        },
+                        virkningstidspunkt = it.virkningstidspunkt
                     )
                 }.let { BehandlingListe(it) }
             )

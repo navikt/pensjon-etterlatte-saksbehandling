@@ -39,7 +39,7 @@ export interface Vilkaar {
   id: string
   hovedvilkaar: Hovedvilkaar
   unntaksvilkaar?: Unntaksvilkaar[]
-  vurdering?: VurdertResultat
+  vurdering?: VurdertResultat | null
   grunnlag: Vilkaarsgrunnlag<any>[]
 }
 
@@ -55,7 +55,7 @@ export interface Hovedvilkaar {
   tittel: string
   beskrivelse: string
   lovreferanse: Paragraf
-  resultat?: VurderingsResultat
+  resultat?: VurderingsResultat | null
 }
 
 export interface Unntaksvilkaar {

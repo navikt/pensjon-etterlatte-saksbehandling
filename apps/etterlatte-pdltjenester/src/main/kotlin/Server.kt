@@ -4,6 +4,7 @@ import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.cio.CIO
@@ -25,6 +26,7 @@ import no.nav.etterlatte.ktortokenexchange.secureRoutUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktor.hentSaksbehandler
 import no.nav.etterlatte.person.PdlFantIkkePerson
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.person.personApi
@@ -39,7 +41,8 @@ class Server(applicationContext: ApplicationContext) {
             module {
                 module(
                     securityContextMediator = applicationContext.securityMediator,
-                    personService = applicationContext.personService
+                    personService = applicationContext.personService,
+                    saksbehandlerProvider = { hentSaksbehandler(it) }
                 )
             }
             connector { port = 8080 }
@@ -51,7 +54,8 @@ class Server(applicationContext: ApplicationContext) {
 
 fun io.ktor.server.application.Application.module(
     securityContextMediator: SecurityContextMediator,
-    personService: PersonService
+    personService: PersonService,
+    saksbehandlerProvider: (call: ApplicationCall) -> String
 ) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
@@ -89,7 +93,7 @@ fun io.ktor.server.application.Application.module(
     routing {
         healthApi()
         secureRoutUsing(securityContextMediator) {
-            personApi(personService)
+            personApi(personService, saksbehandlerProvider)
         }
     }
 }

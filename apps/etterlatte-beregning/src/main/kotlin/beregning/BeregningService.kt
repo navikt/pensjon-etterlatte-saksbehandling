@@ -5,10 +5,9 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.beregning.model.G
-import no.nav.etterlatte.beregning.model.Grunnbeloep
 import no.nav.etterlatte.beregning.regler.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.BarnepensjonGrunnlag
+import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.DelytelseId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentSoeskenjustering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
@@ -66,30 +67,23 @@ class BeregningService(
     ): Beregning {
         val behandlingType = requireNotNull(behandling.behandlingType)
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
-        val vilkaarsvurderingUtfall = requireNotNull(vilkaarsvurdering.resultat?.utfall)
-        val grunnbeloep = Grunnbeloep.hentGjeldendeG(virkningstidspunkt)
-        val beregningsgrunnlag =
-            opprettBeregningsgrunnlag(grunnbeloep, requireNotNull(grunnlag.sak.hentSoeskenjustering()))
+        val beregningsgrunnlag = opprettBeregningsgrunnlag(requireNotNull(grunnlag.sak.hentSoeskenjustering()))
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
-                beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt, grunnbeloep)
-            BehandlingType.REVURDERING ->
-                when (vilkaarsvurderingUtfall) {
-                    VilkaarsvurderingUtfall.OPPFYLT -> beregn(
-                        behandling,
-                        grunnlag,
-                        beregningsgrunnlag,
-                        virkningstidspunkt,
-                        grunnbeloep
-                    )
+                beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+            BehandlingType.REVURDERING -> {
+                when (requireNotNull(vilkaarsvurdering.resultat?.utfall)) {
+                    VilkaarsvurderingUtfall.OPPFYLT ->
+                        beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
-                        beregnOpphoer(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt, grunnbeloep)
+                        beregnOpphoer(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
                 }
+            }
             BehandlingType.MANUELT_OPPHOER -> {
-                beregnOpphoer(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt, grunnbeloep)
+                beregnOpphoer(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
             }
         }
     }
@@ -98,8 +92,7 @@ class BeregningService(
         behandling: DetaljertBehandling,
         grunnlag: Grunnlag,
         beregningsgrunnlag: BarnepensjonGrunnlag,
-        virkningstidspunkt: YearMonth,
-        grunnbeloep: G
+        virkningstidspunkt: YearMonth
     ): Beregning {
         val resultat = kroneavrundetBarnepensjonRegel.eksekver(
             grunnlag = beregningsgrunnlag,
@@ -116,7 +109,9 @@ class BeregningService(
                             datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
                             datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
                             beloep = periodisertResultat.resultat.verdi,
-                            grunnbeloep = grunnbeloep,
+                            grunnbeloep = requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep()) {
+                                "Anvendt grunnbeløp ikke funnet i beregning"
+                            },
                             beregningsgrunnlag = beregningsgrunnlag
                         )
                     }
@@ -130,8 +125,7 @@ class BeregningService(
         behandling: DetaljertBehandling,
         grunnlag: Grunnlag,
         beregningsgrunnlag: BarnepensjonGrunnlag,
-        virkningstidspunkt: YearMonth,
-        grunnbeloep: G
+        virkningstidspunkt: YearMonth
     ) = beregning(
         behandling = behandling,
         grunnlag = grunnlag,
@@ -140,7 +134,7 @@ class BeregningService(
                 datoFOM = virkningstidspunkt,
                 datoTOM = null,
                 beloep = 0,
-                grunnbeloep = grunnbeloep,
+                grunnbeloep = 0,
                 beregningsgrunnlag = beregningsgrunnlag
             )
         )
@@ -162,7 +156,7 @@ class BeregningService(
         datoFOM: YearMonth,
         datoTOM: YearMonth? = null,
         beloep: Int,
-        grunnbeloep: G,
+        grunnbeloep: Int,
         beregningsgrunnlag: BarnepensjonGrunnlag
     ) = Beregningsperiode(
         delytelsesId = DelytelseId.BP,
@@ -171,25 +165,14 @@ class BeregningService(
         datoTOM = datoTOM,
         utbetaltBeloep = beloep,
         soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
-        grunnbelopMnd = grunnbeloep.grunnbeløpPerMåned,
-        grunnbelop = grunnbeloep.grunnbeløp,
+        grunnbelopMnd = grunnbeloep,
+        grunnbelop = 0, // TODO
         trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt()
     )
 
     private fun opprettBeregningsgrunnlag(
-        grunnbeloep: G,
         soeskenJustering: Opplysning.Konstant<Beregningsgrunnlag>
     ) = BarnepensjonGrunnlag(
-        grunnbeloep = FaktumNode(
-            verdi = grunnbeloep.grunnbeløpPerMåned.toBigDecimal(),
-            kilde = "System",
-            beskrivelse = "Grunnbeløp"
-        ),
-        antallSoeskenIKullet = FaktumNode(
-            verdi = soeskenJustering.verdi.beregningsgrunnlag.filter { it.skalBrukes }.size,
-            kilde = soeskenJustering.kilde,
-            beskrivelse = "Antall søsken i kullet"
-        ),
         soeskenKull = FaktumNode(
             verdi = soeskenJustering.verdi.beregningsgrunnlag.filter { it.skalBrukes }.map { it.foedselsnummer },
             kilde = soeskenJustering.kilde,
@@ -197,7 +180,7 @@ class BeregningService(
         ),
         avdoedForelder = FaktumNode(
             verdi = AvdoedForelder(40.0.toBigDecimal()),
-            kilde = "System",
+            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Instant.now(), "1"),
             beskrivelse = "Trygdetid avdøed forelder"
         )
     )

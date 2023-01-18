@@ -63,7 +63,6 @@ internal class BeregningServiceTest {
                 utbetaltBeloep shouldBe 3716
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelop shouldBe 111477
                 grunnbelopMnd shouldBe 9290
                 soeskenFlokk shouldBe emptyList()
                 trygdetid shouldBe 40
@@ -91,9 +90,35 @@ internal class BeregningServiceTest {
                 utbetaltBeloep shouldBe 3019
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelop shouldBe 111477
                 grunnbelopMnd shouldBe 9290
                 soeskenFlokk shouldBe listOf(FNR_1)
+                trygdetid shouldBe 40
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne barnepensjon foerstegangsbehandling - to soesken`() {
+        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
+        val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = grunnlag(soesken = listOf(FNR_1, FNR_2))
+
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+
+        with(beregning) {
+            beregningId shouldNotBe null
+            behandlingId shouldBe behandling.id
+            beregnetDato shouldNotBe null
+            grunnlagMetadata shouldBe grunnlag.metadata
+            beregningsperioder.size shouldBe 1
+            with(beregningsperioder.first()) {
+                delytelsesId shouldBe DelytelseId.BP
+                type shouldBe Beregningstyper.GP
+                utbetaltBeloep shouldBe 2787
+                datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                datoTOM shouldBe null
+                grunnbelopMnd shouldBe 9290
+                soeskenFlokk shouldBe listOf(FNR_1, FNR_2)
                 trygdetid shouldBe 40
             }
         }
@@ -119,7 +144,6 @@ internal class BeregningServiceTest {
                 utbetaltBeloep shouldBe 3716
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelop shouldBe 111477
                 grunnbelopMnd shouldBe 9290
                 soeskenFlokk shouldBe emptyList()
                 trygdetid shouldBe 40
@@ -147,8 +171,7 @@ internal class BeregningServiceTest {
                 utbetaltBeloep shouldBe 0
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelop shouldBe 111477
-                grunnbelopMnd shouldBe 9290
+                grunnbelopMnd shouldBe 0
                 soeskenFlokk shouldBe emptyList()
                 trygdetid shouldBe 40
             }
@@ -175,8 +198,7 @@ internal class BeregningServiceTest {
                 utbetaltBeloep shouldBe 0
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelop shouldBe 111477
-                grunnbelopMnd shouldBe 9290
+                grunnbelopMnd shouldBe 0
                 soeskenFlokk shouldBe emptyList()
                 trygdetid shouldBe 40
             }
@@ -209,5 +231,6 @@ internal class BeregningServiceTest {
 
     companion object {
         const val FNR_1 = "11057523044"
+        const val FNR_2 = "19040550081"
     }
 }

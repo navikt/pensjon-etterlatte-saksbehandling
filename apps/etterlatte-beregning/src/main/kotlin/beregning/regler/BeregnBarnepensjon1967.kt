@@ -17,8 +17,6 @@ val BP_1967_DATO: LocalDate = LocalDate.of(1967, 1, 1)
 
 data class AvdoedForelder(val trygdetid: BigDecimal)
 data class BarnepensjonGrunnlag(
-    val grunnbeloep: FaktumNode<BigDecimal>,
-    val antallSoeskenIKullet: FaktumNode<Int>,
     val soeskenKull: FaktumNode<List<Foedselsnummer>>,
     val avdoedForelder: FaktumNode<AvdoedForelder>
 )

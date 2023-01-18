@@ -11,6 +11,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.fordeler.Fordeler
 import no.nav.etterlatte.fordeler.FordelerKriterier
 import no.nav.etterlatte.fordeler.FordelerService
+import no.nav.etterlatte.fordeler.digdirkrr.KontaktinfoKlient
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -32,17 +33,22 @@ fun main() {
         .also {
             Fordeler(
                 rapidsConnection = it,
-                fordelerService = FordelerService(FordelerKriterier(), pdlTjenesterKlient(env))
+                fordelerService = FordelerService(FordelerKriterier(digdirkrrKlient(env)), pdlTjenesterKlient(env))
             )
         }.start()
 }
 
 private fun pdlTjenesterKlient(env: MutableMap<String, String>) = PdlTjenesterKlient(
-    client = pdlTjenesterHttpClient(env),
+    client = ClientCredentialsHttpClient(env, requireNotNull(env.get("PDL_AZURE_SCOPE"))),
     apiUrl = requireNotNull(env["PDL_URL"])
 )
 
-private fun pdlTjenesterHttpClient(env: MutableMap<String, String>) = HttpClient(OkHttp) {
+private fun digdirkrrKlient(env: MutableMap<String, String>) = KontaktinfoKlient(
+    client = ClientCredentialsHttpClient(env, requireNotNull(env.get("DIGDIR_KRR_AZURE_SCOPE"))),
+    apiUrl = requireNotNull(env["DIGDIRR_KRR_URL"])
+)
+
+private fun ClientCredentialsHttpClient(env: MutableMap<String, String>, azureScope: String) = HttpClient(OkHttp) {
     expectSuccess = true
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
@@ -50,7 +56,7 @@ private fun pdlTjenesterHttpClient(env: MutableMap<String, String>) = HttpClient
     install(Auth) {
         clientCredential {
             config =
-                env.toMutableMap().apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("PDL_AZURE_SCOPE"))) }
+                env.toMutableMap().apply { put("AZURE_APP_OUTBOUND_SCOPE", azureScope) }
         }
     }
     defaultRequest {

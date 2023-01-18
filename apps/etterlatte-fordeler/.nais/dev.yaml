@@ -38,8 +38,13 @@ spec:
       value: http://etterlatte-pdltjenester/person
     - name: PDL_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: DIGDIRR_KRR_URL #Usikker på om vi kan kalle tjenesten deres uten https.
+      value: http://digdir-krr-proxy.dev.intern.nav.no
+    - name: DIGDIR_KRR_AZURE_SCOPE
+      value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
         - application: etterlatte-gyldig-soeknad
+        - application: digdir-krr-proxy

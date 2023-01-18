@@ -1,5 +1,7 @@
 package no.nav.etterlatte.fordeler
 
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.fordeler.digdirkrr.KontaktinfoKlient
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -11,6 +13,8 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import org.slf4j.LoggerFactory
 
 private const val NORGE = "NOR"
 
@@ -47,11 +51,13 @@ enum class FordelerKriterie(val forklaring: String) {
     GJENLEVENDE_HAR_IKKE_FORELDREANSVAR("Gjenlevende søker har ikke foreldreanvar"),
     GJENLEVENDE_HAR_ADRESSEBESKYTTELSE("Gjenlevende har adressebeskyttelse"),
 
-    INNSENDER_ER_IKKE_FORELDER("Søker er ikke markert som forelder i søknaden")
+    INNSENDER_ER_IKKE_FORELDER("Søker er ikke markert som forelder i søknaden"),
+
+    SOEKER_HAR_GYLDIG_BOKMAALR("Søker må ha bokmål i KRR, eller bokmål på søknad hvis ikke registrert i KRR")
 }
 
-class FordelerKriterier {
-
+class FordelerKriterier(private val kontaktinfoKlient: KontaktinfoKlient) {
+    private val logger = LoggerFactory.getLogger(this.javaClass.name)
     fun sjekkMotKriterier(
         barn: Person,
         avdoed: Person,
@@ -65,9 +71,21 @@ class FordelerKriterier {
     }
 
     /**
-     * Grunnlag for regler er også dokumenter på Confluence: https://confluence.adeo.no/display/TE/Fordelingsapp
+     * Grunnlag for regler er også dokumentert på Confluence: https://confluence.adeo.no/display/TE/Fordelingsapp
      */
     private fun fordelerKriterier(barn: Person, avdoed: Person, gjenlevende: Person) = listOf(
+        Kriterie(FordelerKriterie.SOEKER_HAR_GYLDIG_BOKMAALR) {
+            val kontaktinfo = runBlocking {
+                kontaktinfoKlient.hentSpraak(barn.foedselsnummer)
+            }
+            logger.info("Fikk språk ${kontaktinfo.spraak} søknad språk: ${it.spraak}")
+            if (kontaktinfo.spraak == null && Spraak.NB == it.spraak) {
+                false
+            } else {
+                kontaktinfo.spraak != "NB"
+            }
+        },
+
         // Barn (søker)
         Kriterie(FordelerKriterie.BARN_ER_FOR_GAMMELT) { forGammel(barn) },
         Kriterie(FordelerKriterie.BARN_ER_IKKE_NORSK_STATSBORGER) { ikkeNorskStatsborger(barn) },
@@ -103,6 +121,7 @@ class FordelerKriterier {
 
         // Innsender
         Kriterie(FordelerKriterie.INNSENDER_ER_IKKE_FORELDER) { innsenderIkkeForelder(it) }
+
     )
 
     private fun ikkeForelderTilBarn(avdoed: Person, barn: Person): Boolean {

@@ -1,10 +1,14 @@
 package no.nav.etterlatte.fordeler
 
+import io.mockk.coEvery
+import io.mockk.mockk
 import no.nav.etterlatte.FNR_1
 import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_4
 import no.nav.etterlatte.FNR_5
 import no.nav.etterlatte.SVERIGE
+import no.nav.etterlatte.fordeler.digdirkrr.KontaktInfo
+import no.nav.etterlatte.fordeler.digdirkrr.KontaktinfoKlient
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
@@ -19,14 +23,20 @@ import no.nav.etterlatte.mockUgyldigAdresse
 import no.nav.etterlatte.readSoknad
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
 
 internal class FordelerKriterierTest {
+    private val kontaktinfoKlient = mockk<KontaktinfoKlient>()
+    private val fordelerKriterier = FordelerKriterier(kontaktinfoKlient)
 
-    private val fordelerKriterier = FordelerKriterier()
+    @BeforeEach
+    fun init() {
+        coEvery { kontaktinfoKlient.hentSpraak(any()) } returns KontaktInfo(null)
+    }
 
     @Test
     fun `soeknad er en gyldig kandidat for fordeling`() {

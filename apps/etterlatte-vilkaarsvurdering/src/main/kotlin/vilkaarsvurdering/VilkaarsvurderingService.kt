@@ -32,7 +32,7 @@ class VilkaarsvurderingService(
             logger.info("Vilkårsvurdering finnes for behandling $behandlingId")
             vilkaarsvurdering
         } else {
-            tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
+            tilstandssjekkFoerKjoering(behandlingId, accessToken) {
                 logger.info("Ny vilkårsvurdering opprettes for behandling $behandlingId")
                 opprettVilkaarsvurdering(behandlingId, accessToken)
             }
@@ -43,7 +43,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         accessToken: String,
         resultat: VilkaarsvurderingResultat
-    ): Vilkaarsvurdering = tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
+    ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, accessToken) {
         val vilkaarsvurdering = vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
         val utfall = vilkaarsvurdering.resultat?.utfall ?: throw IllegalStateException("Utfall kan ikke vaere null")
         behandlingKlient.commitVilkaarsvurdering(behandlingId, accessToken, utfall)
@@ -65,15 +65,29 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         accessToken: String,
         vurdertVilkaar: VurdertVilkaar
-    ): Vilkaarsvurdering =
-        tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
-            vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
+    ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, accessToken) {
+        if (vilkaarsvurderingRepository.hent(behandlingId)?.resultat != null) {
+            throw VilkaarsvurderingTilstandException(
+                "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering " +
+                    "som har et resultat"
+            )
+        }
+        vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
+    }
+
+    suspend fun slettVurderingPaaVilkaar(
+        behandlingId: UUID,
+        accessToken: String,
+        vilkaarId: UUID
+    ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, accessToken) {
+        if (vilkaarsvurderingRepository.hent(behandlingId)?.resultat != null) {
+            throw VilkaarsvurderingTilstandException(
+                "Kan ikke slette et vilkår ($vilkaarId) på en vilkårsvurdering som har et resultat"
+            )
         }
 
-    suspend fun slettVurderingPaaVilkaar(behandlingId: UUID, accessToken: String, vilkaarId: UUID): Vilkaarsvurdering =
-        tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
-            vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
-        }
+        vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
+    }
 
     private suspend fun opprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
         val (behandling, grunnlag, sak) = hentDataForVilkaarsvurdering(behandlingId, accessToken)
@@ -113,7 +127,7 @@ class VilkaarsvurderingService(
         )
     }
 
-    private suspend fun tilstandssjekkFoerKjoerning(
+    private suspend fun tilstandssjekkFoerKjoering(
         behandlingId: UUID,
         accessToken: String,
         block: suspend () -> Vilkaarsvurdering
@@ -152,3 +166,4 @@ class VilkaarsvurderingService(
 }
 
 object BehandlingstilstandException : IllegalStateException()
+class VilkaarsvurderingTilstandException(message: String) : IllegalStateException(message)

@@ -61,6 +61,12 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             "Statussjekk for behandling feilet"
                     )
                     call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+                } catch (e: VilkaarsvurderingTilstandException) {
+                    logger.error(e.message)
+                    call.respond(
+                        HttpStatusCode.PreconditionFailed,
+                        "Kan ikke endre vurdering av vilkår på en vilkårsvurdering som har et resultat."
+                    )
                 }
             }
         }
@@ -78,6 +84,12 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             "Statussjekk for behandling feilet"
                     )
                     call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+                } catch (e: VilkaarsvurderingTilstandException) {
+                    logger.error(e.message)
+                    call.respond(
+                        HttpStatusCode.PreconditionFailed,
+                        "Kan ikke slette vurdering av vilkår på en vilkårsvurdering som har et resultat."
+                    )
                 }
             }
         }

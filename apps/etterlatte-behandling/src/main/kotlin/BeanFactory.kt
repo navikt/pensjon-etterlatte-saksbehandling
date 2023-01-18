@@ -14,6 +14,8 @@ import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelser
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.RealGenerellBehandlingService
@@ -86,6 +88,7 @@ interface BeanFactory {
     fun grunnlagKlient(): GrunnlagKlient
     fun beregningKlient(): BeregningKlient
     fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient
+    fun behandlingsStatusService(): BehandlingStatusService
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -121,6 +124,10 @@ abstract class CommonFactory : BeanFactory {
     }
 
     override fun sakService(): SakService = RealSakService(sakDao())
+
+    override fun behandlingsStatusService(): BehandlingStatusService {
+        return BehandlingStatusServiceImpl(behandlingDao())
+    }
 
     override fun foerstegangsbehandlingService(): FoerstegangsbehandlingService =
         RealFoerstegangsbehandlingService(
@@ -250,7 +257,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-                Duration.of(1, ChronoUnit.MINUTES).toMillis()
+            Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

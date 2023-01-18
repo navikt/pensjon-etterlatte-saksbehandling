@@ -2,12 +2,12 @@ package no.nav.etterlatte.behandling.manueltopphoer
 
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
-import no.nav.etterlatte.behandling.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.ManueltOpphoer
-import no.nav.etterlatte.behandling.Revurdering
+import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles

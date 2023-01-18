@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.Revurdering
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingAggregat
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType

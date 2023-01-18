@@ -1,6 +1,6 @@
 package no.nav.etterlatte.behandling.hendelse
 
-import no.nav.etterlatte.behandling.Behandling
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt

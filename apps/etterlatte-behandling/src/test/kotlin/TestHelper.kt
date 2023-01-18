@@ -1,8 +1,8 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.behandling.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.ManueltOpphoer
-import no.nav.etterlatte.behandling.Revurdering
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus

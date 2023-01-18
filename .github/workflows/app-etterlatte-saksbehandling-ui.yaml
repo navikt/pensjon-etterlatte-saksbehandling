@@ -3,7 +3,7 @@ name: etterlatte-saksbehandling-ui
 env:
   IMAGE: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
   APP_NAME: ${{ github.workflow }}
-  branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.ref_name }}
+  branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.ref_slug }}
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
@@ -28,6 +28,9 @@ on:
       - apps/etterlatte-saksbehandling-ui/**
 
 jobs:
+  slug:
+    - name: Inject slug/short variables
+      uses: rlespinasse/github-slug-action@v4
   test:
     if: github.event_name == 'pull_request'
     name: Test

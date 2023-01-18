@@ -8,12 +8,15 @@ on:
         value: ${{ jobs.build-and-publish.outputs.image }}
 
 jobs:
+  slug:
+    - name: Inject slug/short variables
+      uses: rlespinasse/github-slug-action@v4
   build-and-publish:
     name: Build & publish
     runs-on: ubuntu-latest
     env:
       image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
-      branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.ref_name }}
+      branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.ref_slug }}
     outputs:
       image: ${{ env.image }}
     steps:

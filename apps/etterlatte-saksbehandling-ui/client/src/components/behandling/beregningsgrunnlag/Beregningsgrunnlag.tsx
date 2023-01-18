@@ -57,7 +57,7 @@ const Beregningsgrunnlag = () => {
 
   const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
 
-  const visSøskenjustering =
+  const visSoeskenjustering =
     isSuccess(beregningsgrunnlag) || (isFailure(beregningsgrunnlag) && beregningsgrunnlag.error.statusCode === 404)
 
   return (
@@ -89,7 +89,7 @@ const Beregningsgrunnlag = () => {
         {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
         <Border />
         <Spinner visible={isPendingOrInitial(beregningsgrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
-        {visSøskenjustering &&
+        {visSoeskenjustering &&
           soesken.map((barn, index) => (
             <SoeskenContainer key={barn.foedselsnummer}>
               <Soesken person={barn} familieforhold={behandling.familieforhold!} />

@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
+import no.nav.etterlatte.libs.common.beregning.DelytelseId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -17,7 +18,7 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BeregningRepositoryImplTest {
+internal class BeregningRepositoryTest {
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
@@ -87,7 +88,7 @@ internal class BeregningRepositoryImplTest {
             grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
             beregningsperioder = listOf(
                 Beregningsperiode(
-                    delytelsesId = "BP",
+                    delytelsesId = DelytelseId.BP,
                     type = Beregningstyper.GP,
                     datoFOM = datoFOM,
                     datoTOM = null,

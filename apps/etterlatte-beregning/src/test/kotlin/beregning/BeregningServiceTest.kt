@@ -10,6 +10,7 @@ import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
+import no.nav.etterlatte.libs.common.beregning.DelytelseId
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -57,7 +58,7 @@ internal class BeregningServiceTest {
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe "BP"
+                delytelsesId shouldBe DelytelseId.BP
                 type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe 3716
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -85,7 +86,7 @@ internal class BeregningServiceTest {
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe "BP"
+                delytelsesId shouldBe DelytelseId.BP
                 type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe 3019
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -113,7 +114,7 @@ internal class BeregningServiceTest {
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe "BP"
+                delytelsesId shouldBe DelytelseId.BP
                 type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe 3716
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -141,7 +142,7 @@ internal class BeregningServiceTest {
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe "BP"
+                delytelsesId shouldBe DelytelseId.BP
                 type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe 0
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -169,7 +170,7 @@ internal class BeregningServiceTest {
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe "BP"
+                delytelsesId shouldBe DelytelseId.BP
                 type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe 0
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato

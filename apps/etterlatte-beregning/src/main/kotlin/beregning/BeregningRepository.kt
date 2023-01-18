@@ -7,6 +7,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
+import no.nav.etterlatte.libs.common.beregning.DelytelseId
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -111,7 +112,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
         grunnlagMetadata = basePeriode.grunnlagMetadata,
         beregningsperioder = beregningsperioder.map {
             Beregningsperiode(
-                delytelsesId = "BP", // TODO sj: Dette feltet må mappes riktig / finne ut hvilken informasjon vi trenger
+                delytelsesId = DelytelseId.BP, // TODO sj: Dette feltet må mappes riktig
                 type = Beregningstyper.GP, // TODO sj: Dette feltet må mappes riktig
                 datoFOM = it.datoFOM,
                 datoTOM = it.datoTOM,

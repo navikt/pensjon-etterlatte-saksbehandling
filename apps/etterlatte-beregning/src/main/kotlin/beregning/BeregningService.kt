@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
+import no.nav.etterlatte.libs.common.beregning.DelytelseId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentSoeskenjustering
@@ -164,7 +165,7 @@ class BeregningService(
         grunnbeloep: G,
         beregningsgrunnlag: BarnepensjonGrunnlag
     ) = Beregningsperiode(
-        delytelsesId = "BP",
+        delytelsesId = DelytelseId.BP,
         type = Beregningstyper.GP,
         datoFOM = datoFOM,
         datoTOM = datoTOM,

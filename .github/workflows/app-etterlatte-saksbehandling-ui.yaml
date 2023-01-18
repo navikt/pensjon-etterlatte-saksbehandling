@@ -3,7 +3,7 @@ name: etterlatte-saksbehandling-ui
 env:
   IMAGE: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
   APP_NAME: ${{ github.workflow }}
-  branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.ref_name }}
+  branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
@@ -60,6 +60,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4
       - name: Install and build
         working-directory: apps/${{ env.APP_NAME }}
         run: |
@@ -74,9 +76,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker build --tag ${{ env.IMAGE }} --tag ${{ env.branch-image }} apps/${{ env.APP_NAME }}
+          docker build --tag ${{ env.IMAGE }} --tag ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }} apps/${{ env.APP_NAME }}
           docker push ${{ env.IMAGE }}
-          docker push ${{ env.branch-image }}
+          docker push ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}
 
   deploy-to-dev-gcp:
     name: Deploy to dev-gcp

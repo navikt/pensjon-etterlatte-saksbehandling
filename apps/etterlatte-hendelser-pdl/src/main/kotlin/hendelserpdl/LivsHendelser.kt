@@ -81,7 +81,7 @@ class LivsHendelser(config: AppConfig) : ILivsHendelser {
         utflyttingsdato: String?,
         endringstype: Endringstype
     ) {
-        logger.info("Poster en at person har flyttet til utlandet")
+        logger.info("Poster at en person har flyttet til utlandet")
         val utflyttingsdato = utflyttingsdato.parseDato(logger)
         val utflyttingsHendelse = UtflyttingsHendelse(
             fnr = fnr,

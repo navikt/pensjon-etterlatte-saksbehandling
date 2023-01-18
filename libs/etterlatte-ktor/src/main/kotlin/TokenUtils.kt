@@ -26,3 +26,7 @@ inline val PipelineContext<*, ApplicationCall>.accesstoken: String
             throw Exception("Missing authorization header")
         }
     }
+
+data class SaksbehandlerProvider(val saksbehandler: (call: ApplicationCall) -> String) {
+    fun invoke(call: ApplicationCall) = saksbehandler.invoke(call)
+}

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.person
 
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -11,8 +10,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.ktor.SaksbehandlerProvider
 
-fun Route.personApi(service: PersonService, saksbehandlerProvider: (call: ApplicationCall) -> String) {
+fun Route.personApi(service: PersonService, saksbehandlerProvider: SaksbehandlerProvider) {
     route("person") {
         val logger = application.log
 

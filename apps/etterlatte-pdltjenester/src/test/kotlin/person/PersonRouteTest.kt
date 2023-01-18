@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.SaksbehandlerProvider
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.mockFolkeregisterident
 import no.nav.etterlatte.mockPerson
@@ -46,7 +47,13 @@ class PersonRouteTest {
 
         coEvery { personService.hentPerson(hentPersonRequest, any()) } returns GrunnlagTestData().soeker
 
-        withTestApplication({ module(securityContextMediator, personService, { saksbehandler }) }) {
+        withTestApplication({
+            module(
+                securityContextMediator,
+                personService,
+                SaksbehandlerProvider { saksbehandler }
+            )
+        }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentPersonRequest.toJson())
@@ -68,7 +75,13 @@ class PersonRouteTest {
 
         coEvery { personService.hentOpplysningsperson(hentPersonRequest, any()) } returns mockPerson()
 
-        withTestApplication({ module(securityContextMediator, personService) { saksbehandler } }) {
+        withTestApplication({
+            module(
+                securityContextMediator,
+                personService,
+                SaksbehandlerProvider { saksbehandler }
+            )
+        }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT_V2) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentPersonRequest.toJson())
@@ -92,7 +105,13 @@ class PersonRouteTest {
             "70078749472"
         )
 
-        withTestApplication({ module(securityContextMediator, personService) { saksbehandler } }) {
+        withTestApplication({
+            module(
+                securityContextMediator,
+                personService,
+                SaksbehandlerProvider { saksbehandler }
+            )
+        }) {
             handleRequest(HttpMethod.Post, FOLKEREGISTERIDENT_ENDEPUNKT) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentFolkeregisterIdentRequest.toJson())
@@ -116,7 +135,13 @@ class PersonRouteTest {
             personService.hentPerson(hentPersonRequest, any())
         } throws PdlForesporselFeilet("Noe feilet")
 
-        withTestApplication({ module(securityContextMediator, personService) { saksbehandler } }) {
+        withTestApplication({
+            module(
+                securityContextMediator,
+                personService,
+                SaksbehandlerProvider { saksbehandler }
+            )
+        }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentPersonRequest.toJson())
@@ -144,7 +169,7 @@ class PersonRouteTest {
 
         testApplication {
             application {
-                module(securityContextMediator, personService) { saksbehandler }
+                module(securityContextMediator, personService, SaksbehandlerProvider { saksbehandler })
             }
             client.post(FOLKEREGISTERIDENT_ENDEPUNKT) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

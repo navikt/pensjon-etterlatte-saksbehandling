@@ -102,7 +102,6 @@ data class Foerstegangsbehandling(
         endreTilStatus(BehandlingStatus.IVERKSATT)
     }
 
-    /* TODO ai: Legg denne på Behandling-klassen når flere behandlingstyper skal støtte ny behandlingsflyt */
     private fun endreTilStatus(status: BehandlingStatus) =
         this.copy(status = status, sistEndret = LocalDateTime.now())
 }

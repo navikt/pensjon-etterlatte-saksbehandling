@@ -1,3 +1,4 @@
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingStatus, IBehandlingsType, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 
 export interface Dokument {
@@ -36,6 +37,7 @@ export interface IBehandlingsammendrag {
   behandlingType: IBehandlingsType
   aarsak: AarsaksTyper
   virkningstidspunkt?: Virkningstidspunkt
+  vilkaarsvurderingutfall?: VilkaarsvurderingResultat
 }
 
 export enum AarsaksTyper {

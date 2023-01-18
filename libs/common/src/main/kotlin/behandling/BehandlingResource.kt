@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.util.*
 
@@ -14,7 +15,8 @@ data class BehandlingSammendrag(
     val behandlingOpprettet: LocalDateTime?,
     val behandlingType: BehandlingType?,
     val aarsak: String?,
-    val virkningstidspunkt: Virkningstidspunkt?
+    val virkningstidspunkt: Virkningstidspunkt?,
+    val vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?
 )
 
 data class DetaljertBehandling(

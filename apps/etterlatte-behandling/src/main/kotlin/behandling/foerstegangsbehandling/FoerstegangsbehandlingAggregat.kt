@@ -65,12 +65,14 @@ class FoerstegangsbehandlingAggregat(
                 behandlinger.lagreGyldighetsproving(it)
                 logger.info("behandling ${it.id} i sak ${it.sak} er gyldighetsprøvd")
             }
+            .also { behandlinger.lagreStatus(it) }
     }
 
     fun lagreVirkningstidspunkt(yearMonth: YearMonth, ident: String): Virkningstidspunkt {
         lagretBehandling =
             lagretBehandling.oppdaterVirkningstidspunkt(yearMonth, Grunnlagsopplysning.Saksbehandler.create(ident))
                 .also { behandlinger.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!) }
+                .also { behandlinger.lagreStatus(it) }
 
         return lagretBehandling.virkningstidspunkt!!
     }
@@ -78,6 +80,7 @@ class FoerstegangsbehandlingAggregat(
     fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
         lagretBehandling = lagretBehandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .also { behandlinger.lagreKommerBarnetTilgode(it.id, kommerBarnetTilgode) }
+            .also { behandlinger.lagreStatus(it) }
     }
 
     fun serialiserbarUtgave() = lagretBehandling.copy()

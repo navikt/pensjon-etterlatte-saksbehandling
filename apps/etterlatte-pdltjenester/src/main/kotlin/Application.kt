@@ -14,6 +14,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediatorFactory
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.person.PersonService
@@ -25,7 +26,8 @@ class ApplicationContext(configLocation: String? = null) {
     val securityMediator: SecurityContextMediator = SecurityContextMediatorFactory.from(config)
     val personService: PersonService = PersonService(
         PdlKlient(pdlhttpclient(config.getConfig("no.nav.etterlatte.tjenester.pdl.aad"))),
-        ParallelleSannheterKlient(ppsHttpClient(), config.getString("no.nav.etterlatte.tjenester.pps.url"))
+        ParallelleSannheterKlient(ppsHttpClient(), config.getString("no.nav.etterlatte.tjenester.pps.url")),
+        Sporingslogg()
     )
 
     private fun pdlhttpclient(aad: Config) = HttpClient(OkHttp) {

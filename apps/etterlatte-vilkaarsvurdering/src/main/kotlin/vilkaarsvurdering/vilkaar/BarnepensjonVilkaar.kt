@@ -76,11 +76,14 @@ object BarnepensjonVilkaar {
             beggeForeldreDoedeLaerlingPraktikantInntektUnder2G()
         ),
         grunnlag = with(grunnlag) {
-            val virkningstidspunktBehandling = virkningstidspunkt.toVilkaarsgrunnlag()
+            /**
+             * EY-1561: Fjerner virkningstidspunkt fra grunnlaget siden vi ikke har kontroll på om virk. har endret seg.
+             * val virkningstidspunktBehandling = virkningstidspunkt.toVilkaarsgrunnlag()
+             */
             val foedselsdatoBarn = soeker.hentFoedselsdato()?.toVilkaarsgrunnlag(SOEKER_FOEDSELSDATO)
             val doedsdatoAvdoed = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(AVDOED_DOEDSDATO)
 
-            listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed, virkningstidspunktBehandling)
+            listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed /*, virkningstidspunktBehandling*/)
         }
     )
 

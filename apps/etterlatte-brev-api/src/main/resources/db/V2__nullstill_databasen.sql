@@ -1,0 +1,1 @@
+TRUNCATE brev, mottaker, innhold, status, hendelse;

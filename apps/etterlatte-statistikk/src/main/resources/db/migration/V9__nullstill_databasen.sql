@@ -1,0 +1,1 @@
+TRUNCATE sak_statistikk, sak, stoenad;

@@ -1,0 +1,1 @@
+TRUNCATE delvilkaar, grunnlag, vilkaar, vilkaarsvurdering;

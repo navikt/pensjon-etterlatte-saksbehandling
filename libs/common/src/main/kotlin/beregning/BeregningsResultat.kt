@@ -1,10 +1,13 @@
 package no.nav.etterlatte.libs.common.beregning
 
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
+
+enum class DelytelseId {
+    BP
+}
 
 enum class Beregningstyper {
     GP,
@@ -31,7 +34,7 @@ data class BeregningDTO(
 )
 
 data class Beregningsperiode(
-    val delytelsesId: String,
+    val delytelsesId: DelytelseId,
     val type: Beregningstyper,
     val datoFOM: YearMonth,
     val datoTOM: YearMonth?,
@@ -41,12 +44,3 @@ data class Beregningsperiode(
     val grunnbelop: Int,
     val trygdetid: Int
 )
-
-data class SoeskenPeriode(
-    val datoFOM: YearMonth,
-    val datoTOM: YearMonth,
-    val soeskenFlokk: List<Person>
-)
-
-fun SoeskenPeriode.erInklusiv(FOM: YearMonth, TOM: YearMonth) =
-    !FOM.isBefore(this.datoFOM) && !TOM.isAfter(this.datoTOM)

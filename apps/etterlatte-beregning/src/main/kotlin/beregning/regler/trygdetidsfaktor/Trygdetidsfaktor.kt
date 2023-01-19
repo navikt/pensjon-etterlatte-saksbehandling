@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import java.math.BigDecimal
 
-private val trygdetidRegel: Regel<BarnepensjonGrunnlag, BigDecimal> =
+val trygdetidRegel: Regel<BarnepensjonGrunnlag, BigDecimal> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner avdødes trygdetid",
@@ -21,7 +21,7 @@ private val trygdetidRegel: Regel<BarnepensjonGrunnlag, BigDecimal> =
         finnFelt = AvdoedForelder::trygdetid
     )
 
-private val maksTrygdetid = definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
+val maksTrygdetid = definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Full trygdetidsopptjening er 40 år",
     regelReferanse = RegelReferanse("BP-BEREGNING-1967-TRYGDETIDSFAKTOR"),

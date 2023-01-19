@@ -1,14 +1,11 @@
 package no.nav.etterlatte.beregning
 
-import io.mockk.mockk
-import io.mockk.mockkClass
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.beregning.Beregningstyper
+import no.nav.etterlatte.libs.common.beregning.DelytelseId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -18,9 +15,10 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.YearMonth
 import java.util.*
+import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BeregningRepositoryImplTest {
+internal class BeregningRepositoryTest {
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
@@ -29,6 +27,7 @@ internal class BeregningRepositoryImplTest {
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
+
         val ds = DataSourceBuilder.createDataSource(
             postgreSQLContainer.jdbcUrl,
             postgreSQLContainer.username,
@@ -43,35 +42,17 @@ internal class BeregningRepositoryImplTest {
         postgreSQLContainer.stop()
     }
 
-    private fun initiellBeregning(
-        opplysningsgrunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-    ): Beregning {
-        return BeregningService(
-            beregningRepository,
-            mockk(),
-            mockk(),
-            mockk()
-        ).lagBeregning(
-            grunnlag = opplysningsgrunnlag,
-            virkFOM = YearMonth.of(2021, 2),
-            virkTOM = YearMonth.of(2021, 9),
-            vilkaarsvurderingUtfall = mockkClass(VilkaarsvurderingUtfall::class),
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            behandlingId = UUID.randomUUID()
-        )
-    }
-
     @Test
     fun `lagre() skal returnere samme data som faktisk ble lagret`() {
-        val beregning = initiellBeregning()
+        val beregning = beregning()
         val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
 
         assertEquals(beregning, lagretBeregning)
     }
 
     @Test
-    fun `det som hentes ut skal være likt det som originalt ble lagret`() {
-        val beregningLagret = initiellBeregning()
+    fun `det som hentes ut skal vaere likt det som originalt ble lagret`() {
+        val beregningLagret = beregning()
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
 
         val beregningHentet = beregningRepository.hent(beregningLagret.behandlingId)
@@ -81,31 +62,46 @@ internal class BeregningRepositoryImplTest {
 
     @Test
     fun `skal oppdatere og eller lagre beregning`() {
-        val beregningLagret = initiellBeregning()
+        val beregningLagret = beregning()
 
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
         val beregningHentet = beregningRepository.hent(beregningLagret.behandlingId)
 
         assertEquals(beregningLagret, beregningHentet)
 
-        val opplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val nyBeregning = beregning(beregningLagret.behandlingId, YearMonth.of(2022, 2))
 
-        val nyBeregning = BeregningService(beregningRepository, mockk(), mockk(), mockk()).lagBeregning(
-            grunnlag = opplysningsgrunnlag,
-            virkFOM = YearMonth.of(2021, 2),
-            virkTOM = YearMonth.of(2024, 12),
-            vilkaarsvurderingUtfall = mockkClass(VilkaarsvurderingUtfall::class),
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            behandlingId = beregningLagret.behandlingId
-        ).copy(
-            grunnlagMetadata = Metadata(
-                sakId = beregningLagret.grunnlagMetadata.sakId,
-                versjon = beregningLagret.grunnlagMetadata.versjon + 1
-            )
-        )
         beregningRepository.lagreEllerOppdaterBeregning(nyBeregning)
         val beregningHentetNy = beregningRepository.hent(beregningLagret.behandlingId)
 
         assertEquals(nyBeregning, beregningHentetNy)
+    }
+
+    private fun beregning(
+        behandlingId: UUID = randomUUID(),
+        datoFOM: YearMonth = YearMonth.of(2021, 2)
+    ) =
+        Beregning(
+            beregningId = randomUUID(),
+            behandlingId = behandlingId,
+            beregnetDato = Tidspunkt.now(),
+            grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
+            beregningsperioder = listOf(
+                Beregningsperiode(
+                    delytelsesId = DelytelseId.BP,
+                    type = Beregningstyper.GP,
+                    datoFOM = datoFOM,
+                    datoTOM = null,
+                    utbetaltBeloep = 3000,
+                    soeskenFlokk = listOf(FNR_1),
+                    grunnbelopMnd = 10_000,
+                    grunnbelop = 100_000,
+                    trygdetid = 40
+                )
+            )
+        )
+
+    companion object {
+        const val FNR_1 = "11057523044"
     }
 }

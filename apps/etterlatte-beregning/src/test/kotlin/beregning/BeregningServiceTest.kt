@@ -1,144 +1,244 @@
 package no.nav.etterlatte.beregning
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.Beregningstyper
+import no.nav.etterlatte.libs.common.beregning.DelytelseId
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID.randomUUID
 
 internal class BeregningServiceTest {
 
-    private val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
-    private val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-    private val behandlingId = randomUUID()
     private val beregningRepository = mockk<BeregningRepository>()
-    private val vilkaarsvurderingKlientImpl = mockk<VilkaarsvurderingKlient>()
-    private val grunnlagKlientImpl = mockk<GrunnlagKlientImpl>()
-    private val behandlingKlientImpl = mockk<BehandlingKlientImpl>()
-    private val testData = GrunnlagTestData(
-        opplysningsmapSoeskenOverrides = mapOf(
-            Opplysningstype.FOEDSELSDATO to Opplysning.Konstant(
+    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
+    private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
+    private val behandlingKlient = mockk<BehandlingKlientImpl>()
+    private lateinit var beregningService: BeregningService
+
+    @BeforeEach
+    fun setup() {
+        beregningService = BeregningService(
+            beregningRepository = beregningRepository,
+            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+            grunnlagKlient = grunnlagKlient,
+            behandlingKlient = behandlingKlient
+        )
+    }
+
+    @Test
+    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken`() {
+        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
+        val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = grunnlag(soesken = emptyList())
+
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+
+        with(beregning) {
+            beregningId shouldNotBe null
+            behandlingId shouldBe behandling.id
+            beregnetDato shouldNotBe null
+            grunnlagMetadata shouldBe grunnlag.metadata
+            beregningsperioder.size shouldBe 1
+            with(beregningsperioder.first()) {
+                delytelsesId shouldBe DelytelseId.BP
+                type shouldBe Beregningstyper.GP
+                utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
+                datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                datoTOM shouldBe null
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                soeskenFlokk shouldBe emptyList()
+                trygdetid shouldBe MAKS_TRYGDETID
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken`() {
+        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
+        val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = grunnlag(soesken = listOf(FNR_1))
+
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+
+        with(beregning) {
+            beregningId shouldNotBe null
+            behandlingId shouldBe behandling.id
+            beregnetDato shouldNotBe null
+            grunnlagMetadata shouldBe grunnlag.metadata
+            beregningsperioder.size shouldBe 1
+            with(beregningsperioder.first()) {
+                delytelsesId shouldBe DelytelseId.BP
+                type shouldBe Beregningstyper.GP
+                utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_JAN_23
+                datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                datoTOM shouldBe null
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                soeskenFlokk shouldBe listOf(FNR_1)
+                trygdetid shouldBe MAKS_TRYGDETID
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne barnepensjon foerstegangsbehandling - to soesken`() {
+        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
+        val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = grunnlag(soesken = listOf(FNR_1, FNR_2))
+
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+
+        with(beregning) {
+            beregningId shouldNotBe null
+            behandlingId shouldBe behandling.id
+            beregnetDato shouldNotBe null
+            grunnlagMetadata shouldBe grunnlag.metadata
+            beregningsperioder.size shouldBe 1
+            with(beregningsperioder.first()) {
+                delytelsesId shouldBe DelytelseId.BP
+                type shouldBe Beregningstyper.GP
+                utbetaltBeloep shouldBe BP_BELOEP_TO_SOESKEN_JAN_23
+                datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                datoTOM shouldBe null
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                soeskenFlokk shouldBe listOf(FNR_1, FNR_2)
+                trygdetid shouldBe MAKS_TRYGDETID
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne barnepensjon revurdering - ingen soesken`() {
+        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
+        val behandling = behandling(BehandlingType.REVURDERING)
+        val grunnlag = grunnlag(soesken = emptyList())
+
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+
+        with(beregning) {
+            beregningId shouldNotBe null
+            behandlingId shouldBe behandling.id
+            beregnetDato shouldNotBe null
+            grunnlagMetadata shouldBe grunnlag.metadata
+            beregningsperioder.size shouldBe 1
+            with(beregningsperioder.first()) {
+                delytelsesId shouldBe DelytelseId.BP
+                type shouldBe Beregningstyper.GP
+                utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
+                datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                datoTOM shouldBe null
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                soeskenFlokk shouldBe emptyList()
+                trygdetid shouldBe MAKS_TRYGDETID
+            }
+        }
+    }
+
+    @Test
+    fun `skal sette beloep til 0 ved revurdering og vilkaar ikke oppfylt`() {
+        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = false)
+        val behandling = behandling(BehandlingType.REVURDERING)
+        val grunnlag = grunnlag(soesken = emptyList())
+
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+
+        with(beregning) {
+            beregningId shouldNotBe null
+            behandlingId shouldBe behandling.id
+            beregnetDato shouldNotBe null
+            grunnlagMetadata shouldBe grunnlag.metadata
+            beregningsperioder.size shouldBe 1
+            with(beregningsperioder.first()) {
+                delytelsesId shouldBe DelytelseId.BP
+                type shouldBe Beregningstyper.GP
+                utbetaltBeloep shouldBe 0
+                datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                datoTOM shouldBe null
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                soeskenFlokk shouldBe emptyList()
+                trygdetid shouldBe MAKS_TRYGDETID
+            }
+        }
+    }
+
+    @Test
+    fun `skal sette beloep til 0 ved manuelt opphoer`() {
+        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
+        val behandling = behandling(BehandlingType.MANUELT_OPPHOER)
+        val grunnlag = grunnlag(soesken = emptyList())
+
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+
+        with(beregning) {
+            beregningId shouldNotBe null
+            behandlingId shouldBe behandling.id
+            beregnetDato shouldNotBe null
+            grunnlagMetadata shouldBe grunnlag.metadata
+            beregningsperioder.size shouldBe 1
+            with(beregningsperioder.first()) {
+                delytelsesId shouldBe DelytelseId.BP
+                type shouldBe Beregningstyper.GP
+                utbetaltBeloep shouldBe 0
+                datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                datoTOM shouldBe null
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                soeskenFlokk shouldBe emptyList()
+                trygdetid shouldBe MAKS_TRYGDETID
+            }
+        }
+    }
+
+    private fun grunnlag(soesken: List<String>) = GrunnlagTestData(
+        opplysningsmapSakOverrides = mapOf(
+            Opplysningstype.SOESKEN_I_BEREGNINGEN to Opplysning.Konstant(
                 randomUUID(),
                 kilde,
-                LocalDate.of(2003, 12, 12).toJsonNode()
+                Beregningsgrunnlag(
+                    soesken.map {
+                        SoeskenMedIBeregning(Foedselsnummer.of(it), true)
+                    }
+                ).toJsonNode()
             )
         )
-    )
-    private val opplysningsgrunnlag = testData.hentOpplysningsgrunnlag()
+    ).hentOpplysningsgrunnlag()
 
-    private val beregningsperioder = BeregningService(
-        beregningRepository,
-        vilkaarsvurderingKlientImpl,
-        grunnlagKlientImpl,
-        behandlingKlientImpl
-    ).lagBeregning(
-        opplysningsgrunnlag,
-        YearMonth.of(2021, 2),
-        YearMonth.of(2021, 9),
-        vilkaarsvurdering.resultat!!.utfall,
-        behandlingType,
-        behandlingId
-    ).beregningsperioder
-
-    @Test
-    fun beregnResultat() {
-        beregningsperioder[0].also {
-            assertEquals(YearMonth.of(2021, 2), it.datoFOM)
-            assertEquals(YearMonth.of(2021, 4), it.datoTOM)
-        }
-        beregningsperioder[1].also {
-            assertEquals(YearMonth.of(2021, 5), it.datoFOM)
-            assertEquals(YearMonth.of(2021, 8), it.datoTOM)
-        }
-        beregningsperioder[2].also {
-            assertEquals(YearMonth.of(2021, 9), it.datoFOM)
-            assertEquals(YearMonth.of(2021, 12), it.datoTOM)
-        }
-        beregningsperioder[3].also {
-            assertEquals(YearMonth.of(2022, 1), it.datoFOM)
-            assertEquals(null, it.datoTOM)
-        }
-    }
-
-    @Test
-    fun `ved revurdering og ikke oppfylte vilkaar skal beregningsresultat settes til kr 0`() {
-        val virkFOM = YearMonth.of(2022, 5)
-        val virkTOM = YearMonth.of(2022, 10)
-        val resultat = BeregningService(
-            beregningRepository,
-            vilkaarsvurderingKlientImpl,
-            grunnlagKlientImpl,
-            behandlingKlientImpl
-        ).lagBeregning(
-            grunnlag = Grunnlag.empty(),
-            virkFOM = virkFOM,
-            virkTOM = virkTOM,
-            vilkaarsvurderingUtfall = VilkaarsvurderingTestData.ikkeOppfylt.resultat!!.utfall,
-            behandlingType = BehandlingType.REVURDERING,
-            behandlingId
-        )
-        assertEquals(virkFOM, resultat.beregningsperioder.first().datoFOM)
-        assertEquals(null, resultat.beregningsperioder.first().datoTOM)
-        assertEquals(0, resultat.beregningsperioder.first().utbetaltBeloep)
-    }
-
-    @Test
-    fun `ved manuelt opphoer skal virkningstidspunkt i den eneste beregningsperioden settes til virkFOM`() {
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val resultat = BeregningService(
-            beregningRepository,
-            vilkaarsvurderingKlientImpl,
-            grunnlagKlientImpl,
-            behandlingKlientImpl
-        ).lagBeregning(
-            grunnlag = grunnlag,
-            virkFOM = YearMonth.of(2022, 8),
-            virkTOM = mockk(),
-            vilkaarsvurderingUtfall = mockk(),
-            behandlingType = BehandlingType.MANUELT_OPPHOER,
-            behandlingId
-        )
-
-        assertEquals(1, resultat.beregningsperioder.size)
-        assertEquals(YearMonth.of(2022, 8), resultat.beregningsperioder.first().datoFOM)
-    }
-
-    @Test
-    fun `beregningsperiodene får riktig beloep`() {
-        assertEquals(2534, beregningsperioder[0].utbetaltBeloep)
-        assertEquals(2660, beregningsperioder[1].utbetaltBeloep)
-        assertEquals(2660, beregningsperioder[2].utbetaltBeloep)
-        assertEquals(2882, beregningsperioder[3].utbetaltBeloep)
-    }
-
-    @Nested
-    inner class BeregnSisteTom {
-        @Test
-        fun `skal returnere foedselsdato om soeker blir 18 i loepet av perioden`() {
-            val foedselsdato = LocalDate.of(2004, 3, 23)
-            assertEquals(YearMonth.of(2022, 3), beregnSisteTom(foedselsdato, YearMonth.of(2022, 3)))
-
-            val foedselsdato2 = LocalDate.of(2004, 2, 23)
-            assertEquals(YearMonth.of(2022, 2), beregnSisteTom(foedselsdato2, YearMonth.of(2022, 3)))
+    private fun behandling(type: BehandlingType, virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23): DetaljertBehandling =
+        mockk<DetaljertBehandling>().apply {
+            every { id } returns randomUUID()
+            every { behandlingType } returns type
+            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         }
 
-        @Test
-        fun `skal returnere null om soeker er under 18 i hele perioden`() {
-            val foedselsdato = LocalDate.of(2004, 4, 23)
-            assertEquals(null, beregnSisteTom(foedselsdato, YearMonth.of(2022, 3)))
-        }
+    private fun vilkaarsvurdering(oppfylt: Boolean) =
+        if (oppfylt) VilkaarsvurderingTestData.oppfylt else VilkaarsvurderingTestData.ikkeOppfylt
+
+    companion object {
+        val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, 1)
+        const val GRUNNBELOEP_JAN_23: Int = 9290
+        const val BP_BELOEP_INGEN_SOESKEN_JAN_23: Int = 3716
+        const val BP_BELOEP_ETT_SOESKEN_JAN_23: Int = 3019
+        const val BP_BELOEP_TO_SOESKEN_JAN_23: Int = 2787
+        const val MAKS_TRYGDETID: Int = 40
+
+        const val FNR_1 = "11057523044"
+        const val FNR_2 = "19040550081"
     }
 }

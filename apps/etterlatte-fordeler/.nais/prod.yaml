@@ -38,7 +38,12 @@ spec:
       value: http://etterlatte-pdltjenester/person
     - name: PDL_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: DIGDIRR_KRR_URL
+      value: https://digdir-krr-proxy.intern.nav.no
+    - name: DIGDIR_KRR_AZURE_SCOPE
+      value: api://prod-gcp.team-rocket.digdir-krr-proxy/.default
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
+        - application: digdir-krr-proxy

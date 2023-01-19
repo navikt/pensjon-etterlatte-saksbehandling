@@ -14,6 +14,8 @@ import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelser
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.RealGenerellBehandlingService
@@ -87,6 +89,7 @@ interface BeanFactory {
     fun grunnlagKlient(): GrunnlagKlient
     fun beregningKlient(): BeregningKlient
     fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient
+    fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
 }
 
@@ -123,6 +126,10 @@ abstract class CommonFactory : BeanFactory {
     }
 
     override fun sakService(): SakService = RealSakService(sakDao())
+
+    override fun behandlingsStatusService(): BehandlingStatusService {
+        return BehandlingStatusServiceImpl(behandlingDao())
+    }
 
     override fun foerstegangsbehandlingService(): FoerstegangsbehandlingService =
         RealFoerstegangsbehandlingService(

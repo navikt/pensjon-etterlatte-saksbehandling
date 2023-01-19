@@ -17,6 +17,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
+import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -123,7 +129,8 @@ internal fun Route.behandlingRoutes(
                         if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                         it.behandlingOpprettet,
                         it.type,
-                        if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
+                        if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD",
+                        it.virkningstidspunkt
                     )
                 }.let { BehandlingListe(it) }
             )
@@ -288,7 +295,8 @@ internal fun Route.behandlingRoutes(
                             is Foerstegangsbehandling -> "SOEKNAD"
                             is Revurdering -> it.revurderingsaarsak.name
                             is ManueltOpphoer -> "MANUELT OPPHOER"
-                        }
+                        },
+                        virkningstidspunkt = it.virkningstidspunkt
                     )
                 }.let { BehandlingListe(it) }
             )

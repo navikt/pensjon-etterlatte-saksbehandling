@@ -2,12 +2,12 @@ package no.nav.etterlatte.behandling.revurdering
 
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
-import no.nav.etterlatte.behandling.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.ManueltOpphoer
-import no.nav.etterlatte.behandling.Revurdering
+import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak

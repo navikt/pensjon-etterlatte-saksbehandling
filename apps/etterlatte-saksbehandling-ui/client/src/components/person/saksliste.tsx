@@ -3,7 +3,7 @@ import { AarsaksTyper, IBehandlingsammendrag } from './typer'
 import { formaterStringDato, formaterEnumTilLesbarString } from '~utils/formattering'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
-const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
+const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat']
 
 export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
   return (
@@ -28,6 +28,9 @@ export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendra
               <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarsak(behandling.aarsak)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.status}`}>
                 {formaterEnumTilLesbarString(endringStatusNavn(behandling.status))}
+              </Table.DataCell>
+              <Table.DataCell key={'virkningstidspunkt'}>
+                {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
               </Table.DataCell>
               {
                 //todo: legg inn vedtaksdato/iversettelsesdato og resultat når det er klart

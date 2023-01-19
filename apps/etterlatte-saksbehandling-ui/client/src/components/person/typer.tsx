@@ -1,4 +1,4 @@
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 
 export interface Dokument {
   dato: string
@@ -35,6 +35,7 @@ export interface IBehandlingsammendrag {
   behandlingOpprettet: string
   behandlingType: IBehandlingsType
   aarsak: AarsaksTyper
+  virkningstidspunkt?: Virkningstidspunkt
 }
 
 export enum AarsaksTyper {

@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -107,7 +106,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
                 Beregningsresultat::class.java
             )
         },
-        vilkaarsResultat = stringOrNull("vilkaarsresultat")?.toJsonNode(),
+        vilkaarsResultat = stringOrNull("vilkaarsresultat")?.let { objectMapper.readTree(it) },
         vedtakFattet = boolean("vedtakfattet"),
         id = long("id"),
         fnr = stringOrNull("fnr"),

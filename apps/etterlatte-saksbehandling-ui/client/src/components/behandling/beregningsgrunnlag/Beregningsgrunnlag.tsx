@@ -1,6 +1,6 @@
 import { BodyShort, Button, Heading, Loader, Radio, RadioGroup } from '@navikt/ds-react'
 import { Content, ContentHeader } from '~shared/styled'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { Barn } from '../soeknadsoversikt/familieforhold/personer/Barn'
 import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
@@ -13,7 +13,7 @@ import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppSelector } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
-import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentSoeskenMedIBeregning, lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
 import { SoeskenMedIBeregning } from '~shared/types/Grunnlagsopplysning'
 import Spinner from '~shared/Spinner'
@@ -28,8 +28,9 @@ const Beregningsgrunnlag = () => {
   const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
-  const [isLoading, setIsLoading] = useState(false)
   const [beregningsgrunnlag, hentBeregningsgrunnlag] = useApiCall(hentSoeskenMedIBeregning)
+  const [soeskenMedIBeregning, postSoeskenMedIBeregning] = useApiCall(lagreSoeskenMedIBeregning)
+  const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const { control, handleSubmit, setValue } = useForm<{ beregningsgrunnlag: FormValues[] }>()
 
   useEffect(() => {
@@ -47,13 +48,10 @@ const Beregningsgrunnlag = () => {
       (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
     ) ?? []
 
-  const onSubmit = async (beregningsgrunnlag: SoeskenMedIBeregning[]) => {
-    setIsLoading(true)
-    await lagreSoeskenMedIBeregning(behandling.id, beregningsgrunnlag)
-      .then(() => opprettEllerEndreBeregning(behandling.id))
-      .then(() => next())
-      .finally(() => setIsLoading(false))
-  }
+  const onSubmit = (beregningsgrunnlag: SoeskenMedIBeregning[]) =>
+    postSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning: beregningsgrunnlag }, () =>
+      postOpprettEllerEndreBeregning(behandling.id, () => next())
+    )
 
   const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
 
@@ -82,8 +80,8 @@ const Beregningsgrunnlag = () => {
       <FamilieforholdWrapper
         id="form"
         onSubmit={handleSubmit(
-          async ({ beregningsgrunnlag }) =>
-            validerSoeskenjustering(soesken, beregningsgrunnlag) && (await onSubmit(beregningsgrunnlag))
+          ({ beregningsgrunnlag }) =>
+            validerSoeskenjustering(soesken, beregningsgrunnlag) && onSubmit(beregningsgrunnlag)
         )}
       >
         {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
@@ -120,7 +118,7 @@ const Beregningsgrunnlag = () => {
       {behandles ? (
         <BehandlingHandlingKnapper>
           <Button variant="primary" size="medium" form="form">
-            Beregne og fatte vedtak {isLoading && <Loader />}
+            Beregne og fatte vedtak {(isPending(soeskenMedIBeregning) || isPending(endreBeregning)) && <Loader />}
           </Button>
         </BehandlingHandlingKnapper>
       ) : (

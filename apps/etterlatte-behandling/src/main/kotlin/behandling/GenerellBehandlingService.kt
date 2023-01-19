@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.libs.sporingslogg.Decision
@@ -186,19 +187,19 @@ class RealGenerellBehandlingService(
                 behandlingType = detaljertBehandling.behandlingType,
                 søker = soeker.await()?.opplysning
             ).also {
-                gjenlevende.await()?.fnr?.let { loggRequest(saksbehandler, it.value) }
-                soeker.await()?.fnr?.let { loggRequest(saksbehandler, it.value) }
+                gjenlevende.await()?.fnr?.let { loggRequest(saksbehandler, it) }
+                soeker.await()?.fnr?.let { loggRequest(saksbehandler, it) }
             }
         }
     }
 
-    private fun loggRequest(saksbehandler: Saksbehandler, blirSlaattOpp: String) =
+    private fun loggRequest(saksbehandler: Saksbehandler, fnr: Foedselsnummer) =
         sporingslogg.logg(
             Sporingsrequest(
                 kallendeApplikasjon = "behandling",
                 oppdateringstype = HttpMethod.GET,
                 brukerId = saksbehandler.ident,
-                hvemBlirSlaattOpp = blirSlaattOpp,
+                hvemBlirSlaattOpp = fnr.value,
                 endepunkt = "behandling",
                 resultat = Decision.Permit,
                 melding = "Hent behandling var vellykka"

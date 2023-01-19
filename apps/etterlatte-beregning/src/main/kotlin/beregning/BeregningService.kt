@@ -42,6 +42,8 @@ class BeregningService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
+    private val FASTSATT_TRYGDETID_PILOT = 40 // Trygdetid er alltid 40 år i pilot
+
     fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
 
     suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
@@ -210,7 +212,7 @@ class BeregningService(
             beskrivelse = "Søsken i kullet"
         ),
         avdoedForelder = FaktumNode(
-            verdi = AvdoedForelder(40.0.toBigDecimal()),
+            verdi = AvdoedForelder(FASTSATT_TRYGDETID_PILOT.toBigDecimal()),
             kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Instant.now(), "1"),
             beskrivelse = "Trygdetid avdøed forelder"
         )

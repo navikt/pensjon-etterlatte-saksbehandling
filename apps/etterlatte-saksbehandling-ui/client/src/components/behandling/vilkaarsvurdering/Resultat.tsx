@@ -190,10 +190,10 @@ const TekstWrapper = styled.div`
 
 const Kommentar = styled.div`
   margin-top: 20px;
-  margin-bottom: 20px;
 `
 
 const SlettWrapper = styled.div`
+  margin-top: 20px;
   display: inline-flex;
   cursor: pointer;
   color: #0067c5;

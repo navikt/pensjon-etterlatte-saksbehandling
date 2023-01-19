@@ -5,7 +5,7 @@ import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBeh
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 
-const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', 'Kilde']
+const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']
 
 export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
   return (
@@ -77,18 +77,21 @@ function endringStatusNavn(status: IBehandlingStatus) {
 function resultatTekst(behandling: IBehandlingsammendrag): string {
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      return resultatTekstFoerstegangsbehandling(behandling.vilkaarsvurderingutfall)
-    case IBehandlingsType.REVURDERING:
+      return behandling.status === IBehandlingStatus.AVBRUTT
+        ? 'Avbrutt'
+        : resultatTekstFoerstegangsbehandling(behandling.vilkaarsvurderingutfall)
     case IBehandlingsType.MANUELT_OPPHOER:
+      return behandling.status === IBehandlingStatus.AVBRUTT ? 'Avbrutt' : 'Opphørt: Må behandles i Pesys'
+    case IBehandlingsType.REVURDERING:
     default:
       return ''
   }
 }
 
 function resultatTekstFoerstegangsbehandling(vilkaarsvurderingResultat?: VilkaarsvurderingResultat): string {
-  if (!vilkaarsvurderingResultat) return ''
-
   switch (vilkaarsvurderingResultat) {
+    case undefined:
+      return ''
     case VilkaarsvurderingResultat.OPPFYLT:
       return 'Innvilget'
     case VilkaarsvurderingResultat.IKKE_OPPFYLT:

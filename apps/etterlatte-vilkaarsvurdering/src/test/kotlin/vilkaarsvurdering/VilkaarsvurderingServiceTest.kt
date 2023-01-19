@@ -121,7 +121,7 @@ internal class VilkaarsvurderingServiceTest {
         vilkaarsvurdering.vilkaar shouldHaveSize 5
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.ALDER_BARN }.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
-            vilkaar.grunnlag!! shouldHaveSize 3
+            vilkaar.grunnlag!! shouldHaveSize 2
 
             requireNotNull(vilkaar.grunnlag?.get(0)).let {
                 it.opplysningsType shouldBe VilkaarOpplysningType.SOEKER_FOEDSELSDATO

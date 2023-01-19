@@ -49,6 +49,7 @@ import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.pdl.PdlService
 import no.nav.etterlatte.pdl.PdlServiceImpl
 import no.nav.etterlatte.sak.RealSakService
@@ -86,6 +87,7 @@ interface BeanFactory {
     fun grunnlagKlient(): GrunnlagKlient
     fun beregningKlient(): BeregningKlient
     fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient
+    fun sporingslogg(): Sporingslogg
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -154,7 +156,8 @@ abstract class CommonFactory : BeanFactory {
             vedtakKlient(),
             grunnlagKlient(),
             beregningKlient(),
-            vilkaarsvurderingKlient()
+            vilkaarsvurderingKlient(),
+            sporingslogg()
         )
     }
 
@@ -184,6 +187,8 @@ abstract class CommonFactory : BeanFactory {
         periode = Duration.of(1, ChronoUnit.MINUTES),
         minutterGamleHendelser = 1L
     ).schedule()
+
+    override fun sporingslogg(): Sporingslogg = Sporingslogg()
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {

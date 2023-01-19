@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.grunnlag
 
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 interface GrunnlagKlient {
@@ -45,12 +47,17 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                 ).response
 
             objectMapper.readValue(json.toString())
-        }.let {
-            when (it) {
-                is Success -> it.content
-                is Failure -> {
-                    logger.error("Klarte ikke hente ut grunnlag for sak med id $sakId. ", it.lastError())
-                    throw it.exceptions.last()
+        }.let { result ->
+            when (result) {
+                is Success -> result.content
+                is Failure -> with(result) {
+                    if (lastError() is JsonMappingException) {
+                        logger.error("Klarte ikke deserialisere grunnlag for sak=$sakId. Se sikkerlog for detaljer.")
+                        sikkerLogg.error("Feil under deserialisering av grunnlag", lastError())
+                    } else {
+                        logger.error("Klarte ikke hente ut grunnlag for sak med id $sakId.", lastError())
+                    }
+                    throw exceptions.last()
                 }
             }
         }

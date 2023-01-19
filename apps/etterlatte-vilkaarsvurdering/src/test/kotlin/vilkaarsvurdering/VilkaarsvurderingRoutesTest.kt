@@ -79,13 +79,6 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.opprett(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery {
-            grunnlagKlient.hentGrunnlagMedVersjon(
-                any(),
-                any(),
-                any()
-            )
-        } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
     @AfterEach

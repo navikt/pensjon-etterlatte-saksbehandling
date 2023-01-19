@@ -181,11 +181,10 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal sette beloep til 0 ved manuelt opphoer`() {
-        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
         val behandling = behandling(BehandlingType.MANUELT_OPPHOER)
         val grunnlag = grunnlag(soesken = emptyList())
 
-        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+        val beregning = beregningService.beregnManueltOpphoerBarnepensjon(grunnlag, behandling)
 
         with(beregning) {
             beregningId shouldNotBe null

@@ -48,18 +48,45 @@ class BeregningService(
         logger.info("Oppretter barnepensjonberegning for behandlingId=$behandlingId")
         return tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
             coroutineScope {
-                val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
-                val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.await().sak, accessToken) }
-                val vilkaarsvurdering =
-                    async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
+                val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+                val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, accessToken) }
 
-                val beregning = beregnBarnepensjon(grunnlag.await(), behandling.await(), vilkaarsvurdering.await())
+                val beregning = when (behandling.behandlingType) {
+                    BehandlingType.MANUELT_OPPHOER -> beregnManueltOpphoerBarnepensjon(
+                        grunnlag = grunnlag.await(),
+                        behandling = behandling
+                    )
 
+                    else -> {
+                        val vilkaarsvurdering =
+                            async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
+                        beregnBarnepensjon(grunnlag.await(), behandling, vilkaarsvurdering.await())
+                    }
+                }
                 beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
                     behandlingKlient.beregn(behandlingId, accessToken, true)
                 }
             }
         }
+    }
+
+    fun beregnManueltOpphoerBarnepensjon(
+        grunnlag: Grunnlag,
+        behandling: DetaljertBehandling
+    ): Beregning {
+        if (behandling.behandlingType != BehandlingType.MANUELT_OPPHOER) {
+            throw IllegalArgumentException(
+                "Fikk en behandling med id=${behandling.id} av type ${behandling.behandlingType} " +
+                    "som ikke kan beregnes som et manuelt opphør."
+            )
+        }
+        val beregningsgrunnlag = opprettBeregningsgrunnlag(requireNotNull(grunnlag.sak.hentSoeskenjustering()))
+        return beregnOpphoer(
+            behandling = behandling,
+            grunnlag = grunnlag,
+            beregningsgrunnlag = beregningsgrunnlag,
+            virkningstidspunkt = behandling.virkningstidspunkt!!.dato
+        )
     }
 
     fun beregnBarnepensjon(
@@ -76,17 +103,18 @@ class BeregningService(
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
                 beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+
             BehandlingType.REVURDERING -> {
                 when (requireNotNull(vilkaarsvurdering.resultat?.utfall)) {
                     VilkaarsvurderingUtfall.OPPFYLT ->
                         beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
                         beregnOpphoer(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
                 }
             }
-            BehandlingType.MANUELT_OPPHOER -> {
-                beregnOpphoer(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
-            }
+
+            else -> throw IllegalArgumentException("Kan ikke beregne manuelt opphør med en vilkårsvurdering!")
         }
     }
 
@@ -118,6 +146,7 @@ class BeregningService(
                         )
                     }
                 )
+
             is RegelkjoeringResultat.UgyldigPeriode ->
                 throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }

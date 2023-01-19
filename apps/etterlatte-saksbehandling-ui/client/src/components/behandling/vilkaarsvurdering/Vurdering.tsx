@@ -34,7 +34,7 @@ export const Vurdering = ({
   const vilkaarVurdert = () => {
     !resultat ? setRadioError('Du må velge et svar') : setRadioError(undefined)
     !(kommentar.length >= MIN_KOMMENTAR_LENGDE)
-      ? setKommentarError('Begrunnelse er påkrevet')
+      ? setKommentarError('Du må oppgi en begrunnelse')
       : setKommentarError(undefined)
 
     if (

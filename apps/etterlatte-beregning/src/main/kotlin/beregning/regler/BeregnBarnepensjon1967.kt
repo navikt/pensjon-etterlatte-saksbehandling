@@ -2,13 +2,22 @@ package no.nav.etterlatte.beregning.regler
 
 import no.nav.etterlatte.beregning.regler.sats.barnepensjonSatsRegel
 import no.nav.etterlatte.beregning.regler.trygdetidsfaktor.trygdetidsFaktor
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
+import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
+
+data class AvdoedForelder(val trygdetid: BigDecimal)
+data class BarnepensjonGrunnlag(
+    val soeskenKull: FaktumNode<List<Foedselsnummer>>,
+    val avdoedForelder: FaktumNode<AvdoedForelder>
+)
 
 val BP_1967_DATO: LocalDate = LocalDate.of(1967, 1, 1)
 

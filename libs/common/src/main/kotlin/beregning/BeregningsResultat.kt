@@ -41,5 +41,6 @@ data class Beregningsperiode(
     val utbetaltBeloep: Int,
     val soeskenFlokk: List<String>?,
     val grunnbelopMnd: Int,
+    val grunnbelop: Int,
     val trygdetid: Int
 )

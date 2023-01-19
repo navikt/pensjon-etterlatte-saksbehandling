@@ -71,6 +71,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
             "utbetaltBeloep" to beregningsperiode.utbetaltBeloep,
             "soeskenFlokk" to beregningsperiode.soeskenFlokk?.toJson(),
             "grunnbeloepMnd" to beregningsperiode.grunnbelopMnd,
+            "grunnbeloep" to beregningsperiode.grunnbelop,
             "sakId" to beregning.grunnlagMetadata.sakId,
             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
         )
@@ -89,6 +90,7 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
             objectMapper.readValue(it)
         },
         grunnbelopMnd = int(BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn),
+        grunnbelop = int(BeregningsperiodeDatabaseColumns.Grunnbeloep.navn),
         grunnlagMetadata = Metadata(
             sakId = long(BeregningsperiodeDatabaseColumns.SakId.navn),
             versjon = long(BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn)
@@ -117,6 +119,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                 utbetaltBeloep = it.utbetaltBeloep,
                 soeskenFlokk = it.soeskenFlokk,
                 grunnbelopMnd = it.grunnbelopMnd,
+                grunnbelop = it.grunnbelop,
                 trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
             )
         }
@@ -134,6 +137,7 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
     UtbetaltBeloep("utbetaltBeloep"),
     SoeskenFlokk("soeskenFlokk"),
     GrunnbeloepMnd("grunnbeloepMnd"),
+    Grunnbeloep("grunnbeloep"),
     SakId("sakId"),
     GrunnlagVersjon("grunnlagVersjon")
 }
@@ -145,8 +149,8 @@ private object Queries {
     """.trimMargin()
 
     val lagreBeregningsperioder = """
-        |INSERT INTO beregningsperiode(${BeregningsperiodeDatabaseColumns.Id.navn}, ${BeregningsperiodeDatabaseColumns.BeregningId.navn}, ${BeregningsperiodeDatabaseColumns.BehandlingId.navn}, ${BeregningsperiodeDatabaseColumns.BeregnetDato.navn}, ${BeregningsperiodeDatabaseColumns.DatoFOM.navn}, ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, ${BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn}, ${BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn}, ${BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn}, ${BeregningsperiodeDatabaseColumns.SakId.navn}, ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}) 
-        |VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT) 
+        |INSERT INTO beregningsperiode(${BeregningsperiodeDatabaseColumns.Id.navn}, ${BeregningsperiodeDatabaseColumns.BeregningId.navn}, ${BeregningsperiodeDatabaseColumns.BehandlingId.navn}, ${BeregningsperiodeDatabaseColumns.BeregnetDato.navn}, ${BeregningsperiodeDatabaseColumns.DatoFOM.navn}, ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, ${BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn}, ${BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn}, ${BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn}, ${BeregningsperiodeDatabaseColumns.Grunnbeloep.navn}, ${BeregningsperiodeDatabaseColumns.SakId.navn}, ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}) 
+        |VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT) 
     """.trimMargin()
 
     val slettBeregning = """

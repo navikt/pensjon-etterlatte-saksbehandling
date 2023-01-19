@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 import java.util.UUID.randomUUID
 
 internal class BeregningServiceTest {
@@ -60,12 +61,12 @@ internal class BeregningServiceTest {
             with(beregningsperioder.first()) {
                 delytelsesId shouldBe DelytelseId.BP
                 type shouldBe Beregningstyper.GP
-                utbetaltBeloep shouldBe 3716
+                utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelopMnd shouldBe 9290
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                 soeskenFlokk shouldBe emptyList()
-                trygdetid shouldBe 40
+                trygdetid shouldBe MAKS_TRYGDETID
             }
         }
     }
@@ -87,12 +88,12 @@ internal class BeregningServiceTest {
             with(beregningsperioder.first()) {
                 delytelsesId shouldBe DelytelseId.BP
                 type shouldBe Beregningstyper.GP
-                utbetaltBeloep shouldBe 3019
+                utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_JAN_23
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelopMnd shouldBe 9290
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                 soeskenFlokk shouldBe listOf(FNR_1)
-                trygdetid shouldBe 40
+                trygdetid shouldBe MAKS_TRYGDETID
             }
         }
     }
@@ -114,12 +115,12 @@ internal class BeregningServiceTest {
             with(beregningsperioder.first()) {
                 delytelsesId shouldBe DelytelseId.BP
                 type shouldBe Beregningstyper.GP
-                utbetaltBeloep shouldBe 2787
+                utbetaltBeloep shouldBe BP_BELOEP_TO_SOESKEN_JAN_23
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelopMnd shouldBe 9290
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                 soeskenFlokk shouldBe listOf(FNR_1, FNR_2)
-                trygdetid shouldBe 40
+                trygdetid shouldBe MAKS_TRYGDETID
             }
         }
     }
@@ -141,12 +142,12 @@ internal class BeregningServiceTest {
             with(beregningsperioder.first()) {
                 delytelsesId shouldBe DelytelseId.BP
                 type shouldBe Beregningstyper.GP
-                utbetaltBeloep shouldBe 3716
+                utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelopMnd shouldBe 9290
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                 soeskenFlokk shouldBe emptyList()
-                trygdetid shouldBe 40
+                trygdetid shouldBe MAKS_TRYGDETID
             }
         }
     }
@@ -171,9 +172,9 @@ internal class BeregningServiceTest {
                 utbetaltBeloep shouldBe 0
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelopMnd shouldBe 0
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                 soeskenFlokk shouldBe emptyList()
-                trygdetid shouldBe 40
+                trygdetid shouldBe MAKS_TRYGDETID
             }
         }
     }
@@ -198,9 +199,9 @@ internal class BeregningServiceTest {
                 utbetaltBeloep shouldBe 0
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
-                grunnbelopMnd shouldBe 0
+                grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                 soeskenFlokk shouldBe emptyList()
-                trygdetid shouldBe 40
+                trygdetid shouldBe MAKS_TRYGDETID
             }
         }
     }
@@ -219,17 +220,24 @@ internal class BeregningServiceTest {
         )
     ).hentOpplysningsgrunnlag()
 
-    private fun behandling(type: BehandlingType): DetaljertBehandling =
+    private fun behandling(type: BehandlingType, virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
             every { behandlingType } returns type
-            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         }
 
     private fun vilkaarsvurdering(oppfylt: Boolean) =
         if (oppfylt) VilkaarsvurderingTestData.oppfylt else VilkaarsvurderingTestData.ikkeOppfylt
 
     companion object {
+        val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, 1)
+        const val GRUNNBELOEP_JAN_23: Int = 9290
+        const val BP_BELOEP_INGEN_SOESKEN_JAN_23: Int = 3716
+        const val BP_BELOEP_ETT_SOESKEN_JAN_23: Int = 3019
+        const val BP_BELOEP_TO_SOESKEN_JAN_23: Int = 2787
+        const val MAKS_TRYGDETID: Int = 40
+
         const val FNR_1 = "11057523044"
         const val FNR_2 = "19040550081"
     }

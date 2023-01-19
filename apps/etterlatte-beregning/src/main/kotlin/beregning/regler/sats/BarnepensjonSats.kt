@@ -1,5 +1,7 @@
 package no.nav.etterlatte.beregning.regler.sats
 
+import no.nav.etterlatte.beregning.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.regler.BP_1967_DATO
 import no.nav.etterlatte.beregning.regler.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.regler.Regel
@@ -9,26 +11,25 @@ import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.definerKonstant
 import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
-import no.nav.etterlatte.libs.regler.multipliser
 import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import java.math.BigDecimal
 
-val historiskeGrunnbeloep = Grunnbeloep.historiskeGrunnbeloep.map { grunnbeloep ->
+val historiskeGrunnbeloep = GrunnbeloepRepository.historiskeGrunnbeloep.map { grunnbeloep ->
     val grunnbeloepGyldigFra = grunnbeloep.dato.atDay(1)
-    definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
+    definerKonstant<BarnepensjonGrunnlag, Grunnbeloep>(
         gjelderFra = grunnbeloepGyldigFra,
         beskrivelse = "Grunnbeløp gyldig fra $grunnbeloepGyldigFra",
-        regelReferanse = RegelReferanse(id = "TODO"),
-        verdi = grunnbeloep.grunnbeloepPerMaaned.toBigDecimal()
+        regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP"),
+        verdi = grunnbeloep
     )
 }
 
-val grunnbeloep: Regel<BarnepensjonGrunnlag, BigDecimal> = RegelMeta(
+val grunnbeloep: Regel<BarnepensjonGrunnlag, Grunnbeloep> = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Finner grunnbeløp",
-    regelReferanse = RegelReferanse(id = "TODO")
-) velgNyesteGyldige (historiskeGrunnbeloep)
+    regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP")
+) velgNyesteGyldige historiskeGrunnbeloep
 
 private val antallSoeskenIKullet: Regel<BarnepensjonGrunnlag, Int> = finnFaktumIGrunnlag(
     gjelderFra = BP_1967_DATO,
@@ -48,7 +49,9 @@ val belopForFoersteBarn = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Satser i kr av for første barn",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ETTBARN")
-) multipliser (prosentsatsFoersteBarnKonstant og grunnbeloep)
+) benytter prosentsatsFoersteBarnKonstant og grunnbeloep med { prosentsatsFoersteBarn, grunnbeloep ->
+    prosentsatsFoersteBarn * grunnbeloep.grunnbeloepPerMaaned.toBigDecimal()
+}
 
 val prosentsatsEtterfoelgendeBarnKonstant = definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
     gjelderFra = BP_1967_DATO,
@@ -61,7 +64,9 @@ val belopForEtterfoelgendeBarn = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Satser i kr av for etterfølgende barn",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-FLERBARN")
-) multipliser (prosentsatsEtterfoelgendeBarnKonstant og grunnbeloep)
+) benytter prosentsatsEtterfoelgendeBarnKonstant og grunnbeloep med { prosentsatsEtterfoelgendeBarn, grunnbeloep ->
+    prosentsatsEtterfoelgendeBarn * grunnbeloep.grunnbeloepPerMaaned.toBigDecimal()
+}
 
 val barnepensjonSatsRegel = RegelMeta(
     gjelderFra = BP_1967_DATO,

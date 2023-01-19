@@ -16,6 +16,7 @@ data class BeregningsperiodeDAO(
     val utbetaltBeloep: Int,
     val soeskenFlokk: List<String>?,
     val grunnbelopMnd: Int,
+    val grunnbelop: Int,
     val grunnlagMetadata: Metadata
 )
 

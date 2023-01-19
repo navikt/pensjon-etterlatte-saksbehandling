@@ -93,10 +93,15 @@ internal class BeregningRepositoryTest {
                     datoFOM = datoFOM,
                     datoTOM = null,
                     utbetaltBeloep = 3000,
-                    soeskenFlokk = listOf("12345678901"),
+                    soeskenFlokk = listOf(FNR_1),
                     grunnbelopMnd = 10_000,
+                    grunnbelop = 100_000,
                     trygdetid = 40
                 )
             )
         )
+
+    companion object {
+        const val FNR_1 = "11057523044"
+    }
 }

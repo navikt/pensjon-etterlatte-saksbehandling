@@ -37,7 +37,7 @@ class SakOgBehandlingService(
             Beregningsperiode(
                 datoFOM = it.datoFOM.atDay(1),
                 datoTOM = it.datoTOM?.atEndOfMonth(),
-                grunnbeloep = it.grunnbelop,
+                grunnbeloep = it.grunnbelopMnd,
                 antallBarn = (it.soeskenFlokk?.size ?: 0) + 1,
                 utbetaltBeloep = it.utbetaltBeloep,
                 trygdetid = it.trygdetid

@@ -2,6 +2,8 @@ package no.nav.etterlatte.beregning
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.beregning.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
@@ -134,7 +136,7 @@ class BeregningService(
                 datoFOM = virkningstidspunkt,
                 datoTOM = null,
                 beloep = 0,
-                grunnbeloep = 0,
+                grunnbeloep = GrunnbeloepRepository.hentGjeldendeGrunnbeloep(virkningstidspunkt),
                 beregningsgrunnlag = beregningsgrunnlag
             )
         )
@@ -156,7 +158,7 @@ class BeregningService(
         datoFOM: YearMonth,
         datoTOM: YearMonth? = null,
         beloep: Int,
-        grunnbeloep: Int,
+        grunnbeloep: Grunnbeloep,
         beregningsgrunnlag: BarnepensjonGrunnlag
     ) = Beregningsperiode(
         delytelsesId = DelytelseId.BP,
@@ -165,7 +167,8 @@ class BeregningService(
         datoTOM = datoTOM,
         utbetaltBeloep = beloep,
         soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
-        grunnbelopMnd = grunnbeloep,
+        grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
+        grunnbelop = grunnbeloep.grunnbeloep,
         trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt()
     )
 

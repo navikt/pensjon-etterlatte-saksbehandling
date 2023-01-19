@@ -24,7 +24,6 @@ type Props = {
   behandlingId: string
   redigerbar: boolean
 }
-const MIN_KOMMENTAR_LENGDE = 1
 
 export const Resultat: React.FC<Props> = ({
   virkningstidspunktDato,
@@ -36,7 +35,6 @@ export const Resultat: React.FC<Props> = ({
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
-  const [kommentarError, setKommentarError] = useState<string>()
 
   const alleVilkaarErVurdert = !vilkaarsvurdering.vilkaar.some((vilkaar) => !vilkaar.vurdering)
 
@@ -53,16 +51,8 @@ export const Resultat: React.FC<Props> = ({
     !(svar && [ISvar.JA, ISvar.NEI].includes(svar))
       ? setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
       : setRadioError(undefined)
-    !(kommentar.length >= MIN_KOMMENTAR_LENGDE)
-      ? setKommentarError('Begrunnelse er påkrevet')
-      : setKommentarError(undefined)
 
-    if (
-      radioError === undefined &&
-      kommentarError === undefined &&
-      svar !== undefined &&
-      kommentar.length >= MIN_KOMMENTAR_LENGDE
-    ) {
+    if (radioError === undefined && svar !== undefined) {
       lagreTotalVurdering(behandlingId, svarTilTotalResultat(svar), kommentar).then((response) => {
         if (response.status == 'ok') {
           oppdaterVilkaar(response.data)
@@ -80,7 +70,6 @@ export const Resultat: React.FC<Props> = ({
     setSvar(undefined)
     setRadioError(undefined)
     setKommentar('')
-    setKommentarError(undefined)
   }
 
   const status =
@@ -105,12 +94,14 @@ export const Resultat: React.FC<Props> = ({
               {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
                 <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(virkningstidspunktDato)}</BodyShort>
               )}
-              <Kommentar>
-                <Heading size="xsmall" level={'3'}>
-                  Begrunnelse
-                </Heading>
-                <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
-              </Kommentar>
+              {vilkaarsvurdering?.resultat?.kommentar && (
+                <Kommentar>
+                  <Heading size="xsmall" level={'3'}>
+                    Begrunnelse
+                  </Heading>
+                  <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
+                </Kommentar>
+              )}
               {redigerbar && (
                 <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
                   <Delete aria-hidden={'true'} />
@@ -142,18 +133,16 @@ export const Resultat: React.FC<Props> = ({
                 </RadioGroup>
               </RadioGroupWrapper>
               <Textarea
-                label="Begrunnelse (obligatorisk)"
+                label="Begrunnelse"
                 hideLabel={false}
-                placeholder="Gi en begrunnelse for vurderingen"
+                placeholder="Valgfritt"
                 value={kommentar}
                 onChange={(e) => {
                   const kommentarLocal = e.target.value
                   setKommentar(kommentarLocal)
-                  kommentarLocal.length >= MIN_KOMMENTAR_LENGDE && setKommentarError(undefined)
                 }}
                 minRows={3}
                 size="medium"
-                error={kommentarError ? kommentarError : false}
                 autoComplete="off"
               />
               <Button variant={'primary'} size={'small'} onClick={lagreVilkaarsvurderingResultat}>

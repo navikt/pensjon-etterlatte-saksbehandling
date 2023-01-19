@@ -1,9 +1,11 @@
 import { Table, Link } from '@navikt/ds-react'
 import { AarsaksTyper, IBehandlingsammendrag } from './typer'
 import { formaterStringDato, formaterEnumTilLesbarString } from '~utils/formattering'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 
-const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat']
+const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']
 
 export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
   return (
@@ -36,6 +38,9 @@ export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendra
                 //todo: legg inn vedtaksdato/iversettelsesdato og resultat når det er klart
               }
               <Table.DataCell key={'vedtaksdato'}></Table.DataCell>
+              <Table.DataCell key={'resultat'}>
+                {erFerdigBehandlet(behandling.status) ? resultatTekst(behandling) : ''}
+              </Table.DataCell>
               <Table.DataCell key={i}>
                 <Link href={`/behandling/${behandling.id}/soeknadsoversikt`}>Gå til behandling</Link>
               </Table.DataCell>
@@ -66,5 +71,30 @@ function endringStatusNavn(status: IBehandlingStatus) {
       return 'Iverksatt'
     default:
       return status
+  }
+}
+
+function resultatTekst(behandling: IBehandlingsammendrag): string {
+  switch (behandling.behandlingType) {
+    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
+      return behandling.status === IBehandlingStatus.AVBRUTT
+        ? 'Avbrutt'
+        : resultatTekstFoerstegangsbehandling(behandling.vilkaarsvurderingutfall)
+    case IBehandlingsType.MANUELT_OPPHOER:
+      return behandling.status === IBehandlingStatus.AVBRUTT ? 'Avbrutt' : 'Opphørt: Må behandles i Pesys'
+    case IBehandlingsType.REVURDERING:
+    default:
+      return ''
+  }
+}
+
+function resultatTekstFoerstegangsbehandling(vilkaarsvurderingResultat?: VilkaarsvurderingResultat): string {
+  switch (vilkaarsvurderingResultat) {
+    case undefined:
+      return ''
+    case VilkaarsvurderingResultat.OPPFYLT:
+      return 'Innvilget'
+    case VilkaarsvurderingResultat.IKKE_OPPFYLT:
+      return 'Avslått'
   }
 }

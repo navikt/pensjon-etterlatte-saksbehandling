@@ -23,6 +23,14 @@ export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
   )
 }
 
+export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
+  return (
+    status === IBehandlingStatus.ATTESTERT ||
+    status === IBehandlingStatus.IVERKSATT ||
+    status === IBehandlingStatus.AVBRUTT
+  )
+}
+
 export const hentKriterierMedOpplysning = (
   vilkaar: IVilkaarsproving | undefined,
   kriterieType: Kriterietype,

@@ -51,17 +51,18 @@ class BeregningService(
                 val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
                 val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, accessToken) }
 
-                if (behandling.behandlingType == BehandlingType.MANUELT_OPPHOER) {
-                    return@coroutineScope beregnManueltOpphoerBarnepensjon(
+                val beregning = when (behandling.behandlingType) {
+                    BehandlingType.MANUELT_OPPHOER -> beregnManueltOpphoerBarnepensjon(
                         grunnlag = grunnlag.await(),
                         behandling = behandling
                     )
+
+                    else -> {
+                        val vilkaarsvurdering =
+                            async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
+                        beregnBarnepensjon(grunnlag.await(), behandling, vilkaarsvurdering.await())
+                    }
                 }
-
-                val vilkaarsvurdering =
-                    async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
-                val beregning = beregnBarnepensjon(grunnlag.await(), behandling, vilkaarsvurdering.await())
-
                 beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
                     behandlingKlient.beregn(behandlingId, accessToken, true)
                 }

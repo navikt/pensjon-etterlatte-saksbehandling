@@ -37,7 +37,7 @@ export interface IBehandlingsammendrag {
   behandlingType: IBehandlingsType
   aarsak: AarsaksTyper
   virkningstidspunkt?: Virkningstidspunkt
-  vilkaarsvurderingutfall?: VilkaarsvurderingResultat
+  vilkaarsvurderingUtfall?: VilkaarsvurderingResultat
 }
 
 export enum AarsaksTyper {

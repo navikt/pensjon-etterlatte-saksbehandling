@@ -79,7 +79,7 @@ function resultatTekst(behandling: IBehandlingsammendrag): string {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandling.status === IBehandlingStatus.AVBRUTT
         ? 'Avbrutt'
-        : resultatTekstFoerstegangsbehandling(behandling.vilkaarsvurderingutfall)
+        : resultatTekstFoerstegangsbehandling(behandling.vilkaarsvurderingUtfall)
     case IBehandlingsType.MANUELT_OPPHOER:
       return behandling.status === IBehandlingStatus.AVBRUTT ? 'Avbrutt' : 'Opphørt: Må behandles i Pesys'
     case IBehandlingsType.REVURDERING:

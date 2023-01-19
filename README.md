@@ -161,6 +161,19 @@ Docker må være installert og kjørende for at lokal bygg/test skal fungere. Hv
 sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
 ```
 
+## Arbeidsflyter og bygging
+Foruten lokal Gradle-bruk skjer bygging via Github Actions. Vi har definert flere arbeidsflyter (workflows) som spiller sammen.
+Hver app har sin app-etterlatte-[appnavn].yaml i .github/workflows. Denne fila må ha samme navn som appen har under apps/
+
+Denne spesifiserer noen parametre og kaller igjen videre. I en pull request blir test-bygget kjørt, ved merge til main blir bygg- og deploy-bygga kjørt
+Vi har én .test.yaml, én .build.yaml og én .deploy.yaml som alle apps bruker. build tagger imaget med sha samt hvilken git-grein det blir bygga fra (oftest main).
+
+Fra GitHub er det også mulig å kjøre et bygg for en enkelt app på valgfri git-grein. Denne bruker samme byggejobb som nevnt over.
+
+For å sette alle applikasjonene i dev tilbake til main, har vi en egen byggejobb _etterlatte-tilbakestill-alle.yaml_. Denne deployer for kvar applikasjon nyaste image som er tagga med _main_.
+
+For frontend-appen _saksbehandling-ui_ gjør vi det litt annerledes, så den har sine egne byggejobber deklarert i si yaml-fil.
+
 # Varsling
 Det legges ut varsler om feilmeldinger i appene på Slack i kanalen `#team-etterlatte-alerts-dev` og `#team-etterlatte-alerts-prod`
 

@@ -13,10 +13,12 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingStatusService) {
     route("/behandlinger/{behandlingsid}") {
         get("/opprett") {
+            /* Kalles kun av vilkårsvurdering når total-vurdering slettes */
             behandlingsstatusService.settOpprettet(behandlingsId)
             call.respond(HttpStatusCode.OK, "true")
         }
         post("/opprett") {
+            /* Kalles kun av vilkårsvurdering når total-vurdering slettes */
             behandlingsstatusService.settOpprettet(behandlingsId, false)
             call.respond(HttpStatusCode.OK, "true")
         }

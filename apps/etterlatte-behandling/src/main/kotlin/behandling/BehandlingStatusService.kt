@@ -18,7 +18,14 @@ interface BehandlingStatusService {
 
 class BehandlingStatusServiceImpl constructor(private val behandlingDao: BehandlingDao) : BehandlingStatusService {
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
-        hentBehandling(behandlingId).tilOpprettet().lagreEndring(dryRun)
+        val behandling = hentBehandling(behandlingId).tilOpprettet()
+
+        if (!dryRun) {
+            inTransaction {
+                behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+                behandlingDao.lagreVilkaarstatus(behandling.id, behandling.vilkaarUtfall)
+            }
+        }
     }
 
     override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean, utfall: VilkaarsvurderingUtfall?) {

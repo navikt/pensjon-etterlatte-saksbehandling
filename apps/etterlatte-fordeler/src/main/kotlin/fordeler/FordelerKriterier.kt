@@ -53,7 +53,7 @@ enum class FordelerKriterie(val forklaring: String) {
 
     INNSENDER_ER_IKKE_FORELDER("Søker er ikke markert som forelder i søknaden"),
 
-    SOEKER_HAR_GYLDIG_BOKMAALR("Søker må ha bokmål i KRR, eller bokmål på søknad hvis ikke registrert i KRR")
+    SOEKER_HAR_IKKE_SPRAAK_BOKMAAL("Søker må ha bokmål i KRR, eller bokmål på søknad hvis ikke registrert i KRR")
 }
 
 class FordelerKriterier(private val kontaktinfoKlient: KontaktinfoKlient) {
@@ -74,17 +74,7 @@ class FordelerKriterier(private val kontaktinfoKlient: KontaktinfoKlient) {
      * Grunnlag for regler er også dokumentert på Confluence: https://confluence.adeo.no/display/TE/Fordelingsapp
      */
     private fun fordelerKriterier(barn: Person, avdoed: Person, gjenlevende: Person) = listOf(
-        Kriterie(FordelerKriterie.SOEKER_HAR_GYLDIG_BOKMAALR) {
-            val kontaktinfo = runBlocking {
-                kontaktinfoKlient.hentSpraak(barn.foedselsnummer)
-            }
-            logger.info("Fikk språk ${kontaktinfo.spraak} søknad språk: ${it.spraak}")
-            if (kontaktinfo.spraak == null && Spraak.NB == it.spraak) {
-                false
-            } else {
-                kontaktinfo.spraak != "NB"
-            }
-        },
+        Kriterie(FordelerKriterie.SOEKER_HAR_IKKE_SPRAAK_BOKMAAL) { harRiktigSpraak(barn, it) },
 
         // Barn (søker)
         Kriterie(FordelerKriterie.BARN_ER_FOR_GAMMELT) { forGammel(barn) },
@@ -193,6 +183,17 @@ class FordelerKriterier(private val kontaktinfoKlient: KontaktinfoKlient) {
             adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
             adresse1?.postnr == adresse2?.postnr
 
+    private fun harRiktigSpraak(barn: Person, barnepensjon: Barnepensjon): Boolean {
+        val kontaktinfo = runBlocking {
+            kontaktinfoKlient.hentSpraak(barn.foedselsnummer)
+        }
+        logger.info("Fikk språk fra kontaktinfo ${kontaktinfo.spraak} søknad språk: ${barnepensjon.spraak}")
+        return if (kontaktinfo.spraak == null) {
+            barnepensjon.spraak != Spraak.NB
+        } else {
+            kontaktinfo.spraak.lowercase() != Spraak.NB.verdi
+        }
+    }
     private fun forGammel(person: Person, alder: Int = 14): Boolean {
         return person.alder()?.let { it > alder } ?: true
     }

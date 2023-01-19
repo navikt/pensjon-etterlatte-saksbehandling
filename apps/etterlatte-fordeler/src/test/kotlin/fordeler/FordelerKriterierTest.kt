@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.mockUgyldigAdresse
@@ -492,6 +493,42 @@ internal class FordelerKriterierTest {
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_HAR_ADRESSEBESKYTTELSE))
+    }
+
+    @Test
+    fun `Skal ikke fordele saker der KRR returnerer engelsk`() {
+        val barn = mockPerson()
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
+        coEvery { kontaktinfoKlient.hentSpraak(any()) } returns KontaktInfo(Spraak.EN.verdi)
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.SOEKER_HAR_IKKE_SPRAAK_BOKMAAL))
+    }
+
+    @Test
+    fun `Skal ikke fordele saker der KRR returnerer nynorsk`() {
+        val barn = mockPerson()
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
+        coEvery { kontaktinfoKlient.hentSpraak(any()) } returns KontaktInfo(Spraak.NN.verdi)
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.SOEKER_HAR_IKKE_SPRAAK_BOKMAAL))
+    }
+
+    @Test
+    fun `Skal fordele til ny løsning hvis KRR returnerer bokmål`() {
+        val barn = mockPerson()
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
+        coEvery { kontaktinfoKlient.hentSpraak(any()) } returns KontaktInfo(Spraak.NB.verdi)
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertFalse(fordelerResultat.forklaring.contains(FordelerKriterie.SOEKER_HAR_IKKE_SPRAAK_BOKMAAL))
     }
 
     companion object {

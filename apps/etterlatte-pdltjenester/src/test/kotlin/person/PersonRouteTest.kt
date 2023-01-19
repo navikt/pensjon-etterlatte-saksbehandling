@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.libs.ktor.SaksbehandlerProvider
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.mockFolkeregisterident
@@ -36,7 +37,7 @@ class PersonRouteTest {
 
     private val personService = mockk<PersonService>()
     private val securityContextMediator = spyk<SecurityContextMediatorStub>()
-    private val saksbehandler = "A1234"
+    private val saksbehandler = Saksbehandler("A1234")
 
     @Test
     fun `skal returnere person`() {

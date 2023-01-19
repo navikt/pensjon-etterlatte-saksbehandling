@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
@@ -26,7 +27,7 @@ class PersonService(
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
-    suspend fun hentPerson(hentPersonRequest: HentPersonRequest, saksbehandler: String): Person {
+    suspend fun hentPerson(hentPersonRequest: HentPersonRequest, saksbehandler: Saksbehandler): Person {
         logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")
 
         return pdlKlient.hentPerson(hentPersonRequest.foedselsnummer, hentPersonRequest.rolle).let {
@@ -65,27 +66,27 @@ class PersonService(
         }
     }
 
-    private fun vellykkaRequest(ident: String, bruker: String, endepunkt: String) = Sporingsrequest(
+    private fun vellykkaRequest(ident: String, bruker: Saksbehandler, endepunkt: String) = Sporingsrequest(
         kallendeApplikasjon = "pdltjenester",
         oppdateringstype = HttpMethod.GET,
-        brukerId = bruker,
+        brukerId = bruker.ident,
         hvemBlirSlaattOpp = ident,
         endepunkt = "/$endepunkt",
         resultat = Decision.Permit,
         melding = "Hent $endepunkt var vellykka"
     )
 
-    private fun feilendeRequest(ident: String, bruker: String, endepunkt: String) = Sporingsrequest(
+    private fun feilendeRequest(ident: String, bruker: Saksbehandler, endepunkt: String) = Sporingsrequest(
         kallendeApplikasjon = "api",
         oppdateringstype = HttpMethod.GET,
-        brukerId = bruker,
+        brukerId = bruker.ident,
         hvemBlirSlaattOpp = ident,
         endepunkt = "/$endepunkt",
         resultat = Decision.Deny,
         melding = "Hent $endepunkt feilet"
     )
 
-    suspend fun hentOpplysningsperson(hentPersonRequest: HentPersonRequest, saksbehandler: String): PersonDTO {
+    suspend fun hentOpplysningsperson(hentPersonRequest: HentPersonRequest, saksbehandler: Saksbehandler): PersonDTO {
         logger.info("Henter opplysninger for person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")
 
         return pdlKlient.hentPerson(hentPersonRequest.foedselsnummer, hentPersonRequest.rolle).let {
@@ -126,7 +127,7 @@ class PersonService(
 
     suspend fun hentFolkeregisterIdent(
         hentFolkeregisterIdentRequest: HentFolkeregisterIdentRequest,
-        saksbehandler: String
+        saksbehandler: Saksbehandler
     ): FolkeregisterIdent {
         logger.info("Henter folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} fra PDL")
 

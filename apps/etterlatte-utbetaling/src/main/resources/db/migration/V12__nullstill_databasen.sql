@@ -1,0 +1,1 @@
+TRUNCATE utbetalingshendelse, avstemming, utbetalingslinje, utbetaling;

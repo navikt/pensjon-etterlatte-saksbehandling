@@ -1,0 +1,1 @@
+TRUNCATE vedtak, utbetalingsperiode;

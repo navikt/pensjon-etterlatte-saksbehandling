@@ -1,0 +1,1 @@
+TRUNCATE behandlinghendelse, grunnlagsendringshendelse, behandling, sak;

@@ -1,15 +1,22 @@
 import { BodyLong, Loader } from '@navikt/ds-react'
 import styled from 'styled-components'
 
-const Spinner = ({ visible, label, margin = '3em' }: { visible: boolean; label: string; margin?: string }) => {
+interface Props {
+  visible: boolean
+  label: string
+  margin?: string
+  variant?: 'neutral' | 'interaction' | 'inverted'
+}
+
+const Spinner = ({ visible, label, margin = '3em', variant }: Props) => {
   if (!visible) return null
 
   return (
     <SpinnerWrap margin={margin}>
       <div className={'spinner-overlay'}>
         <div className={'spinner-content'}>
-          <Loader />
-            {label && <BodyLong spacing>{label}</BodyLong>}
+          <Loader variant={variant} />
+          {label && <BodyLong spacing>{label}</BodyLong>}
         </div>
       </div>
     </SpinnerWrap>

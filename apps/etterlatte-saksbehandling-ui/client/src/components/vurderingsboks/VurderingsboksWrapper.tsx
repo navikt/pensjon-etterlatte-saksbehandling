@@ -2,17 +2,17 @@ import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { Delete, Edit } from '@navikt/ds-icons'
 import React, { ReactElement, useState } from 'react'
 import styled from 'styled-components'
+import Spinner from '~shared/Spinner'
 
 interface Props {
   tittel: string
   subtittelKomponent?: ReactElement
-  oppfyltUnntaksvilkaarstittel?: string
   kommentar?: string
   defaultRediger?: boolean
   redigerbar: boolean
-  slettVurdering: () => void
+  slett: (onSuccess?: () => void) => void
   children: ReactElement
-  lagreklikk: (onSuccess?: () => void) => Promise<any>
+  lagreklikk: (onSuccess?: () => void) => void
   avbrytklikk: (onSuccess?: () => void) => void
 }
 
@@ -24,28 +24,20 @@ export const VurderingsboksWrapper = (props: Props) => {
     <div>
       {!rediger && (
         <>
-          <KildeVilkaar>
+          <Oppsummering>
             <Heading size="small" level={'2'}>
               {props.tittel}
             </Heading>
             {props.subtittelKomponent ?? <></>}
-            {props.oppfyltUnntaksvilkaarstittel && (
-              <VilkaarVurdertInformasjon>
-                <Heading size="xsmall" level={'3'}>
-                  Unntak er oppfylt
-                </Heading>
-                <BodyShort size="small">{props.oppfyltUnntaksvilkaarstittel}</BodyShort>
-              </VilkaarVurdertInformasjon>
-            )}
             {props.kommentar && (
-              <VilkaarVurdertInformasjon>
+              <Kommentar>
                 <Heading size="xsmall" level={'3'}>
                   Begrunnelse
                 </Heading>
                 <BodyShort size="small">{props.kommentar}</BodyShort>
-              </VilkaarVurdertInformasjon>
+              </Kommentar>
             )}
-          </KildeVilkaar>
+          </Oppsummering>
 
           {props.redigerbar && (
             <>
@@ -53,8 +45,19 @@ export const VurderingsboksWrapper = (props: Props) => {
                 <Edit aria-hidden={'true'} />
                 <span className={'text'}> Rediger</span>
               </RedigerWrapper>
-              <RedigerWrapper onClick={props.slettVurdering}>
-                <Delete aria-hidden={'true'} />
+              <RedigerWrapper
+                onClick={async () => {
+                  new Promise(() => {
+                    setLagrer(true)
+                    props.slett(() => setLagrer(false))
+                  })
+                }}
+              >
+                {lagrer ? (
+                  <Spinner visible={true} label={''} margin={'0'} variant={'interaction'} />
+                ) : (
+                  <Delete aria-hidden={'true'} />
+                )}
                 <span className={'text'}> Slett</span>
               </RedigerWrapper>
             </>
@@ -69,9 +72,14 @@ export const VurderingsboksWrapper = (props: Props) => {
               loading={lagrer}
               variant={'primary'}
               size={'small'}
-              onClick={() => {
+              onClick={async () => {
                 setLagrer(true)
-                props.lagreklikk(() => setRediger(false)).finally(() => setLagrer(false))
+                new Promise(() =>
+                  props.lagreklikk(() => {
+                    setRediger(false)
+                    setLagrer(false)
+                  })
+                )
               }}
             >
               Lagre
@@ -104,7 +112,7 @@ const RedigerWrapper = styled.div`
   }
 `
 
-const KildeVilkaar = styled.div`
+const Oppsummering = styled.div`
   font-size: 0.7em;
 
   p {
@@ -119,7 +127,7 @@ const VurderingKnapper = styled.div`
   }
 `
 
-const VilkaarVurdertInformasjon = styled.div`
+const Kommentar = styled.div`
   margin-bottom: 1.5em;
   color: var(--navds-global-color-gray-700);
 `

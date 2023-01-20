@@ -12,14 +12,14 @@ interface RegelVisitor {
 }
 
 class FinnAlleReglerVisitor : Visitor {
-    val regler = mutableListOf<String>()
+    val regler = mutableListOf<Regel<*, *>>()
     override fun visit(node: Node<*>) {}
     override fun visit(node: SubsumsjonsNode<*>) {
-        regler += node.regel.beskrivelse
+        regler += node.regel
     }
 }
 
-fun Node<*>.finnAlleRegler(): List<String> {
+fun Node<*>.finnAnvendteRegler(): List<Regel<*, *>> {
     val finnAlleReglerVisitor = FinnAlleReglerVisitor()
 
     accept(finnAlleReglerVisitor)

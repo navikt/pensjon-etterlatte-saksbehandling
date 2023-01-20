@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.behandling
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -13,12 +12,17 @@ class SakOgBehandlingService(
     private val saksbehandlere: Map<String, String>
 ) {
 
-    suspend fun hentBehandling(sakId: Long, behandlingId: String, saksbehandler: String, accessToken: String): Behandling {
+    suspend fun hentBehandling(
+        sakId: Long,
+        behandlingId: String,
+        saksbehandler: String,
+        accessToken: String
+    ): Behandling {
         val vedtak = vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(sakId, accessToken)
 
         val saksbehandlerEnhet = saksbehandlere[saksbehandler]
-            ?: throw SaksbehandlerManglerEnhet("Saksbehandler $saksbehandler mangler enhet fra secret")
+            ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
 
         return Behandling(
             sakId = sakId,
@@ -29,7 +33,11 @@ class SakOgBehandlingService(
                 soeker = grunnlag.mapSoeker(),
                 avdoed = grunnlag.mapAvdoed()
             ),
-            vedtak = ForenkletVedtak(vedtak.vedtakId, vedtak.type, vedtak.vedtakFattet?.ansvarligEnhet ?: saksbehandlerEnhet),
+            vedtak = ForenkletVedtak(
+                vedtak.vedtakId,
+                vedtak.type,
+                vedtak.vedtakFattet?.ansvarligEnhet ?: saksbehandlerEnhet
+            ),
             utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )
     }
@@ -60,4 +68,4 @@ class SakOgBehandlingService(
     }
 }
 
-class SaksbehandlerManglerEnhet(message: String) : Exception(message)
+class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

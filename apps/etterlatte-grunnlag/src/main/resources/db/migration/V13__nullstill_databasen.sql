@@ -1,1 +1,1 @@
-TRUNCATE grunnlagshendelse, opplysning;
+TRUNCATE grunnlagshendelse;

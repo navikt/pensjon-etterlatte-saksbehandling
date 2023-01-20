@@ -49,10 +49,11 @@ internal class VedtaksbrevRouteTest {
 
     @Test
     fun `Endepunkt for oppretting eller oppdatering av vedtaksbrev`() {
-        coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any()) } returns 1
+        coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any(), any()) } returns 1
 
         val sakId = 123456L
         val behandlingId = UUID.randomUUID().toString()
+        val saksbehandler = "S123456"
         val token = accessToken
 
         testApplication {
@@ -73,7 +74,7 @@ internal class VedtaksbrevRouteTest {
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
-        coVerify(exactly = 1) { vedtaksbrevService.oppdaterVedtaksbrev(sakId, behandlingId, "", token) }
+        coVerify(exactly = 1) { vedtaksbrevService.oppdaterVedtaksbrev(sakId, behandlingId, saksbehandler, token) }
     }
 
     @Test

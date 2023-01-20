@@ -60,40 +60,38 @@ export const Vurdering = ({
     return vilkaarForm.resultat !== undefined && (vilkaarForm?.kommentar ?? '').length >= MIN_KOMMENTAR_LENGDE
   }
 
-  const vilkaarVurdert = (onSuccess?: () => void) => {
-    if (valider(vilkaarutkast)) {
-      const unntaksvilkaar =
-        vilkaarutkast.resultat == VurderingsResultat.IKKE_OPPFYLT &&
-        vilkaarutkast.vilkaarsUnntakType &&
-        vilkaarutkast.vilkaarsUnntakType !== ''
-          ? {
-              unntaksvilkaar: {
-                type: vilkaarutkast.vilkaarsUnntakType,
-                resultat: VurderingsResultat.OPPFYLT,
-              },
-            }
-          : {}
-
-      return postVurderVilkaar(
-        {
-          behandlingId,
-          request: {
-            vilkaarId: vilkaar.id,
-            hovedvilkaar: {
-              type: vilkaar.hovedvilkaar.type,
-              resultat: vilkaarutkast.resultat,
+  const vilkaarVurdert = (values: VilkaarFormValidert, onSuccess?: () => void) => {
+    const unntaksvilkaar =
+      values.resultat == VurderingsResultat.IKKE_OPPFYLT &&
+      values.vilkaarsUnntakType &&
+      values.vilkaarsUnntakType !== ''
+        ? {
+            unntaksvilkaar: {
+              type: values.vilkaarsUnntakType,
+              resultat: VurderingsResultat.OPPFYLT,
             },
-            ...unntaksvilkaar,
-            kommentar: vilkaarutkast.kommentar,
+          }
+        : {}
+
+    return postVurderVilkaar(
+      {
+        behandlingId,
+        request: {
+          vilkaarId: vilkaar.id,
+          hovedvilkaar: {
+            type: vilkaar.hovedvilkaar.type,
+            resultat: values.resultat,
           },
+          ...unntaksvilkaar,
+          kommentar: values.kommentar,
         },
-        (response) => {
-          oppdaterVilkaar(response)
-          setAktivVurdering(false)
-          onSuccess?.()
-        }
-      )
-    }
+      },
+      (response) => {
+        oppdaterVilkaar(response)
+        setAktivVurdering(false)
+        onSuccess?.()
+      }
+    )
   }
 
   const slettVurderingAvVilkaar = () =>
@@ -162,7 +160,7 @@ export const Vurdering = ({
           defaultRediger={aktivVurdering}
           redigerbar={redigerbar}
           slett={slettVurderingAvVilkaar}
-          lagreklikk={vilkaarVurdert}
+          lagreklikk={(callback) => (valider(vilkaarutkast) ? vilkaarVurdert(vilkaarutkast, callback) : {})}
           avbrytklikk={reset}
         >
           <>

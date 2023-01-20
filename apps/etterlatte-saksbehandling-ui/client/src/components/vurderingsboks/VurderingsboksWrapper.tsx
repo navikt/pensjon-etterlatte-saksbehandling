@@ -74,11 +74,8 @@ export const VurderingsboksWrapper = (props: Props) => {
               size={'small'}
               onClick={async () => {
                 setLagrer(true)
-                new Promise(() =>
-                  props.lagreklikk(() => {
-                    setRediger(false)
-                    setLagrer(false)
-                  })
+                new Promise((resolve) => resolve(props.lagreklikk(() => setRediger(false)))).finally(() =>
+                  setLagrer(false)
                 )
               }}
             >

@@ -74,7 +74,7 @@ class FordelerKriterier(private val kontaktinfoKlient: KontaktinfoKlient) {
      * Grunnlag for regler er også dokumentert på Confluence: https://confluence.adeo.no/display/TE/Fordelingsapp
      */
     private fun fordelerKriterier(barn: Person, avdoed: Person, gjenlevende: Person) = listOf(
-        Kriterie(FordelerKriterie.SOEKER_HAR_IKKE_SPRAAK_BOKMAAL) { harRiktigSpraak(barn, it) },
+        Kriterie(FordelerKriterie.SOEKER_HAR_IKKE_SPRAAK_BOKMAAL) { harIkkeValgtBokmaal(barn, it) },
 
         // Barn (søker)
         Kriterie(FordelerKriterie.BARN_ER_FOR_GAMMELT) { forGammel(barn) },
@@ -183,7 +183,7 @@ class FordelerKriterier(private val kontaktinfoKlient: KontaktinfoKlient) {
             adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
             adresse1?.postnr == adresse2?.postnr
 
-    private fun harRiktigSpraak(barn: Person, barnepensjon: Barnepensjon): Boolean {
+    private fun harIkkeValgtBokmaal(barn: Person, barnepensjon: Barnepensjon): Boolean {
         val kontaktinfo = runBlocking {
             kontaktinfoKlient.hentSpraak(barn.foedselsnummer)
         }

@@ -47,17 +47,16 @@ data class Vedtak(
     fun toDTO(utbetalingsperioder: List<Utbetalingsperiode>) = Vedtak(
         vedtakId = this.id,
         virk = Periode(
-            this.virkningsDato?.let(YearMonth::from)
-                ?: YearMonth.now(),
+            this.virkningsDato?.let(YearMonth::from) ?: YearMonth.now(),
             null
         ), // må få inn dette på toppnivå?
         sak = Sak(this.fnr!!, this.sakType!!, this.sakId!!),
         behandling = Behandling(this.behandlingType, behandlingId),
         type = if (this.vilkaarsResultat?.get("resultat")?.get("utfall")
-                ?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
+            ?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
         ) {
             VedtakType.INNVILGELSE
-        } else if (this.behandlingType == BehandlingType.REVURDERING) {
+        } else if (this.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.MANUELT_OPPHOER)) {
             VedtakType.OPPHOER
         } else {
             VedtakType.AVSLAG
@@ -71,8 +70,7 @@ data class Vedtak(
                     Beregningsperiode(
                         Periode(
                             YearMonth.from(it.datoFOM),
-                            it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }
-                                ?.let(YearMonth::from)
+                            it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }?.let(YearMonth::from)
                         ),
                         BigDecimal.valueOf(it.utbetaltBeloep.toLong())
                     )

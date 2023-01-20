@@ -34,7 +34,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         behandlingtype: BehandlingType,
         virkningsDato: LocalDate,
         beregningsresultat: Beregningsresultat?,
-        vilkaarsresultat: VilkaarsvurderingDto
+        vilkaarsresultat: VilkaarsvurderingDto?
     ) = repositoryWrapper.opprett(
         query = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) " + // ktlint-disable max-line-length
             "VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :datovirkfom, :beregningsresultat, :vilkaarsresultat)", // ktlint-disable max-line-length
@@ -47,7 +47,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
             "vedtakstatus" to VedtakStatus.BEREGNET.name,
             "datovirkfom" to Date.valueOf(virkningsDato),
             "beregningsresultat" to beregningsresultat?.let { objectMapper.writeValueAsString(it) },
-            "vilkaarsresultat" to vilkaarsresultat.let { objectMapper.writeValueAsString(it) }
+            "vilkaarsresultat" to vilkaarsresultat?.let { objectMapper.writeValueAsString(it) }
         ),
         loggtekst = "Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid"
     )
@@ -55,14 +55,14 @@ class VedtaksvurderingRepository(datasource: DataSource) {
     fun oppdaterVedtak(
         behandlingsId: UUID,
         beregningsresultat: Beregningsresultat?,
-        vilkaarsresultat: VilkaarsvurderingDto,
+        vilkaarsresultat: VilkaarsvurderingDto?,
         virkningsDato: LocalDate
     ) = repositoryWrapper.oppdater(
         query = "UPDATE vedtak SET datovirkfom = :datovirkfom, beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat WHERE behandlingId = :behandlingid", // ktlint-disable max-line-length
         params = mapOf(
             "datovirkfom" to Date.valueOf(virkningsDato),
             "beregningsresultat" to objectMapper.writeValueAsString(beregningsresultat),
-            "vilkaarsresultat" to objectMapper.writeValueAsString(vilkaarsresultat),
+            "vilkaarsresultat" to vilkaarsresultat?.let { objectMapper.writeValueAsString(it) },
             "behandlingid" to behandlingsId
         ),
         loggtekst = "Oppdaterer vedtak behandlingid: $behandlingsId "

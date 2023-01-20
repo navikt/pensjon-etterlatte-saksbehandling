@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.beregning
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
@@ -10,10 +11,7 @@ enum class DelytelseId {
 }
 
 enum class Beregningstyper {
-    GP,
-    GBBP,
-    BPGP,
-    BIPIDYBOPIDY
+    GP
 }
 
 enum class Endringskode {
@@ -22,7 +20,7 @@ enum class Endringskode {
 }
 
 enum class BeregningsResultatType {
-    BEREGNET, FAARIKKEPAENG
+    BEREGNET
 }
 
 data class BeregningDTO(
@@ -42,5 +40,7 @@ data class Beregningsperiode(
     val soeskenFlokk: List<String>?,
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
-    val trygdetid: Int
+    val trygdetid: Int,
+    val regelResultat: ObjectNode? = null,
+    val regelVersjon: String? = null
 )

@@ -2,7 +2,6 @@ package no.nav.etterlatte.beregning
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.beregning.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
@@ -21,6 +20,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentSoeskenjustering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -147,14 +147,22 @@ class BeregningService(
                                 .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet()
                         )
 
-                        beregningsperiode(
+                        val grunnbeloep = requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep()) {
+                            "Anvendt grunnbeløp ikke funnet for perioden"
+                        }
+
+                        Beregningsperiode(
+                            delytelsesId = DelytelseId.BP,
+                            type = Beregningstyper.GP,
                             datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
                             datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
-                            beloep = periodisertResultat.resultat.verdi,
-                            grunnbeloep = requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep()) {
-                                "Anvendt grunnbeløp ikke funnet for perioden"
-                            },
-                            beregningsgrunnlag = beregningsgrunnlag
+                            utbetaltBeloep = periodisertResultat.resultat.verdi,
+                            soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
+                            grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
+                            grunnbelop = grunnbeloep.grunnbeloep,
+                            trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt(),
+                            regelResultat = objectMapper.valueToTree(periodisertResultat),
+                            regelVersjon = periodisertResultat.reglerVersjon
                         )
                     }
                 )
@@ -169,19 +177,27 @@ class BeregningService(
         grunnlag: Grunnlag,
         beregningsgrunnlag: BarnepensjonGrunnlag,
         virkningstidspunkt: YearMonth
-    ) = beregning(
-        behandling = behandling,
-        grunnlag = grunnlag,
-        beregningsperioder = listOf(
-            beregningsperiode(
-                datoFOM = virkningstidspunkt,
-                datoTOM = null,
-                beloep = 0,
-                grunnbeloep = GrunnbeloepRepository.hentGjeldendeGrunnbeloep(virkningstidspunkt),
-                beregningsgrunnlag = beregningsgrunnlag
+    ): Beregning {
+        val grunnbeloep = GrunnbeloepRepository.hentGjeldendeGrunnbeloep(virkningstidspunkt)
+
+        return beregning(
+            behandling = behandling,
+            grunnlag = grunnlag,
+            beregningsperioder = listOf(
+                Beregningsperiode(
+                    delytelsesId = DelytelseId.BP,
+                    type = Beregningstyper.GP,
+                    datoFOM = virkningstidspunkt,
+                    datoTOM = null,
+                    utbetaltBeloep = 0,
+                    soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
+                    grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
+                    grunnbelop = grunnbeloep.grunnbeloep,
+                    trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt()
+                )
             )
         )
-    )
+    }
 
     private fun beregning(
         behandling: DetaljertBehandling,
@@ -193,24 +209,6 @@ class BeregningService(
         beregningsperioder = beregningsperioder,
         beregnetDato = Tidspunkt.now(),
         grunnlagMetadata = grunnlag.metadata
-    )
-
-    private fun beregningsperiode(
-        datoFOM: YearMonth,
-        datoTOM: YearMonth? = null,
-        beloep: Int,
-        grunnbeloep: Grunnbeloep,
-        beregningsgrunnlag: BarnepensjonGrunnlag
-    ) = Beregningsperiode(
-        delytelsesId = DelytelseId.BP,
-        type = Beregningstyper.GP,
-        datoFOM = datoFOM,
-        datoTOM = datoTOM,
-        utbetaltBeloep = beloep,
-        soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
-        grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
-        grunnbelop = grunnbeloep.grunnbeloep,
-        trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt()
     )
 
     private fun opprettBeregningsgrunnlag(

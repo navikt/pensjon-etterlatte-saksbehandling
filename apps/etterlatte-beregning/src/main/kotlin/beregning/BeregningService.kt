@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
+import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.YearMonth
@@ -137,6 +138,15 @@ class BeregningService(
                     behandling = behandling,
                     grunnlag = grunnlag,
                     beregningsperioder = resultat.periodiserteResultater.map { periodisertResultat ->
+                        logger.info(
+                            "Beregnet barnepensjon for periode fra={} til={} og beløp={} med regler={}",
+                            periodisertResultat.periode.fraDato,
+                            periodisertResultat.periode.tilDato,
+                            periodisertResultat.resultat.verdi,
+                            periodisertResultat.resultat.finnAnvendteRegler()
+                                .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet()
+                        )
+
                         beregningsperiode(
                             datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
                             datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },

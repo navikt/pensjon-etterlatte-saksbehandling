@@ -1,1 +1,1 @@
-TRUNCATE sak_statistikk, sak, stoenad;
+TRUNCATE sak, stoenad;

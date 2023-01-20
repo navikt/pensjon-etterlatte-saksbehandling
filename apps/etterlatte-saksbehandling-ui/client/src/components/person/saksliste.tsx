@@ -1,11 +1,39 @@
 import { Table, Link } from '@navikt/ds-react'
-import { AarsaksTyper, IBehandlingsammendrag } from './typer'
+import { AarsaksTyper, IBehandlingsammendrag, VedtakSammendrag } from './typer'
 import { formaterStringDato, formaterEnumTilLesbarString } from '~utils/formattering'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { useEffect, useState } from 'react'
+import { hentVedtakSammendrag } from '~shared/api/vedtak'
 
 const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']
+
+const VedtaksDato = (props: { behandlingsId: string }) => {
+  const [vedtak, setVedtak] = useState<VedtakSammendrag | undefined>(undefined)
+
+  useEffect(() => {
+    const getVedtakSammendrag = async (behandlingsId: string) => {
+      const response = await hentVedtakSammendrag(behandlingsId)
+
+      if (response.status === 'ok') {
+        const responseData: VedtakSammendrag = response?.data
+
+        setVedtak(responseData)
+      } else {
+        setVedtak(response?.error)
+      }
+    }
+
+    getVedtakSammendrag(props.behandlingsId)
+  }, [])
+
+  // TODO - sjekk om det er attestert eller fattet dato
+
+  const attestertDato = vedtak?.datoAttestert
+
+  return <>{attestertDato ? formaterStringDato(attestertDato) : ''}</>
+}
 
 export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
   return (
@@ -34,10 +62,9 @@ export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendra
               <Table.DataCell key={'virkningstidspunkt'}>
                 {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
               </Table.DataCell>
-              {
-                //todo: legg inn vedtaksdato/iversettelsesdato og resultat når det er klart
-              }
-              <Table.DataCell key={'vedtaksdato'}></Table.DataCell>
+              <Table.DataCell key={'vedtaksdato'}>
+                <VedtaksDato behandlingsId={behandling.id} />
+              </Table.DataCell>
               <Table.DataCell key={'resultat'}>
                 {erFerdigBehandlet(behandling.status) ? resultatTekst(behandling) : ''}
               </Table.DataCell>

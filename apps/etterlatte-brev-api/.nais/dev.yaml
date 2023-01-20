@@ -26,6 +26,9 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+      claims:
+        extra:
+          - NAVident
   envFrom:
     - secret: saksbehandler-secret
   kafka:

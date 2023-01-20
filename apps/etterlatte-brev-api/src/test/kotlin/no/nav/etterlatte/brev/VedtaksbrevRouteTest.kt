@@ -73,7 +73,7 @@ internal class VedtaksbrevRouteTest {
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
-        coVerify(exactly = 1) { vedtaksbrevService.oppdaterVedtaksbrev(sakId, behandlingId, token) }
+        coVerify(exactly = 1) { vedtaksbrevService.oppdaterVedtaksbrev(sakId, behandlingId, "", token) }
     }
 
     @Test

@@ -26,6 +26,8 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+  envFrom:
+    - secret: saksbehandler-secret
   kafka:
     pool: nav-dev
   replicas:

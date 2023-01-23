@@ -20,8 +20,9 @@ export const avbrytBehandling = async (id: string): Promise<ApiResponse<unknown>
 export const fastsettVirkningstidspunkt = async (args: {
   id: string
   dato: Date
+  begrunnelse: string
 }): Promise<ApiResponse<Virkningstidspunkt>> => {
-  return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, { dato: args.dato })
+  return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, { dato: args.dato, begrunnelse: args.begrunnelse })
 }
 
 export const fattVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {

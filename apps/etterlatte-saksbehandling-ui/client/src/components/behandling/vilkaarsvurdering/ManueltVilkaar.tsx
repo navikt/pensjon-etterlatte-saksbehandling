@@ -10,11 +10,9 @@ import {
   VilkaarVurderingContainer,
   VilkaarWrapper,
 } from './styled'
-import React from 'react'
 import { Vilkaar, IVilkaarsvurdering, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
-import { VurderingsResultat as VurderingsresultatOld } from '~shared/types/VurderingsResultat'
-import { StatusIcon } from '~shared/icons/statusIcon'
+import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
 import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 import { Link } from '@navikt/ds-react'
 
@@ -28,22 +26,22 @@ export interface VilkaarProps {
 export const ManueltVilkaar = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const status = (): VurderingsresultatOld => {
+  const status = (): StatusIconProps => {
     if (vilkaar.vurdering) {
       if (
         vilkaar.hovedvilkaar.resultat == VurderingsResultat.OPPFYLT ||
         vilkaar.unntaksvilkaar?.some((unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat)
       ) {
-        return VurderingsresultatOld.OPPFYLT
+        return 'success'
       } else if (
         vilkaar.hovedvilkaar.resultat == VurderingsResultat.IKKE_OPPFYLT &&
         !vilkaar.unntaksvilkaar?.some((unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat)
       ) {
-        return VurderingsresultatOld.IKKE_OPPFYLT
+        return 'error'
       }
     }
 
-    return VurderingsresultatOld.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+    return 'warning'
   }
 
   return (
@@ -53,7 +51,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
           <VilkaarInfobokser>
             <VilkaarColumn>
               <Title>
-                <StatusIcon status={status()} noLeftPadding />
+                <StatusIcon status={status()} />
                 <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
                   {vilkaar.hovedvilkaar.lovreferanse.paragraf} {vilkaar.hovedvilkaar.tittel}
                 </Link>

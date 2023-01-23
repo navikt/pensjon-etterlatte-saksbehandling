@@ -1,14 +1,12 @@
-import { GyldighetIcon } from '~shared/icons/gyldigIcon'
-import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
+import { Undertekst, VurderingsTitle } from '../../styled'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { EndreVurdering } from './EndreVurdering'
 import { formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
-import { svarTilVurderingsstatus } from '../../utils'
 import { Edit } from '@navikt/ds-icons'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
+import { Button } from '@navikt/ds-react'
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerBarnetTilgode,
@@ -27,17 +25,7 @@ export const KommerBarnetTilGodeVurdering = ({
       : 'Usikkert om pensjonen kommer barnet til gode'
 
   return (
-    <VurderingsContainer>
-      <div>
-        <GyldighetIcon
-          large
-          status={
-            kommerBarnetTilgode?.svar
-              ? svarTilVurderingsstatus(kommerBarnetTilgode.svar)
-              : VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-          }
-        />
-      </div>
+    <>
       {redigeringsModus ? (
         <EndreVurdering
           kommerBarnetTilgode={kommerBarnetTilgode}
@@ -45,37 +33,40 @@ export const KommerBarnetTilGodeVurdering = ({
         />
       ) : (
         <div>
-          <VurderingsTitle title={tittel} />
           {kommerBarnetTilgode?.kilde ? (
             <>
+              <VurderingsTitle title={tittel} />
               <Undertekst $gray>{`Manuelt av ${kommerBarnetTilgode.kilde.ident}`}</Undertekst>
               <Undertekst $gray spacing>{`Sist endret ${formaterStringDato(
                 kommerBarnetTilgode.kilde.tidspunkt
               )} kl.${formaterStringTidspunkt(kommerBarnetTilgode.kilde.tidspunkt)}`}</Undertekst>
+
+              <Undertekst spacing>
+                Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
+              </Undertekst>
+              {kommerBarnetTilgode?.svar && <div>{JaNeiRec[kommerBarnetTilgode.svar]}</div>}
+              {kommerBarnetTilgode?.begrunnelse && (
+                <BegrunnelseWrapper>
+                  <Bold>Begrunnelse</Bold>
+                  <div>{kommerBarnetTilgode.begrunnelse}</div>
+                </BegrunnelseWrapper>
+              )}
+              {redigerbar && (
+                <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
+                  <Edit /> Rediger
+                </RedigerWrapper>
+              )}
             </>
           ) : (
-            <Undertekst $gray spacing>
-              Ikke vurdert
-            </Undertekst>
-          )}
-          <Undertekst spacing>
-            Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
-          </Undertekst>
-          {kommerBarnetTilgode?.svar && <div>{JaNeiRec[kommerBarnetTilgode.svar]}</div>}
-          {kommerBarnetTilgode?.begrunnelse && (
-            <BegrunnelseWrapper>
-              <Bold>Begrunnelse</Bold>
-              <div>{kommerBarnetTilgode.begrunnelse}</div>
-            </BegrunnelseWrapper>
-          )}
-          {redigerbar && (
-            <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
-              <Edit /> Rediger
+            <RedigerWrapper>
+              <Button variant="secondary" onClick={() => setRedigeringsModus(true)}>
+                Legg til vurdering
+              </Button>
             </RedigerWrapper>
           )}
         </div>
       )}
-    </VurderingsContainer>
+    </>
   )
 }
 

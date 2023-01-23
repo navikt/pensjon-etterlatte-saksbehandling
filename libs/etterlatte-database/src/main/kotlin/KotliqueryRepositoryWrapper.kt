@@ -23,7 +23,7 @@ class KotliqueryRepositoryWrapper(private val datasource: DataSource) {
                 .let { session.run(it.asExecute) }
         }
 
-    fun oppdater(query: String, params: Map<String, Any>, loggtekst: String) =
+    fun oppdater(query: String, params: Map<String, Any?>, loggtekst: String) =
         using(sessionOf(datasource)) { session ->
             queryOf(
                 statement = query,

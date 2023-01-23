@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -106,6 +107,33 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             service.hentDataForVedtak(behandlingId, accessToken)
             coVerify(exactly = 0) { beregningMock.hentBeregning(behandlingId, accessToken) }
+        }
+    }
+
+    @Test
+    fun `hentDataForVedtak skal hente beregning og ikke vilkaaarsvurdering hvis behandlingstypen er MANUELT_OPPHOER`() {
+        coEvery { behandlingMock.hentBehandling(any(), any()) } returns DetaljertBehandling(
+            id = behandlingId,
+            sak = 0,
+            behandlingOpprettet = LocalDateTime.now(),
+            sistEndret = LocalDateTime.now(),
+            soeknadMottattDato = null,
+            innsender = null,
+            soeker = null,
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            gyldighetsproeving = null,
+            status = null,
+            behandlingType = BehandlingType.MANUELT_OPPHOER,
+            virkningstidspunkt = null,
+            kommerBarnetTilgode = null,
+            revurderingsaarsak = null
+        )
+        runBlocking {
+            service.hentDataForVedtak(behandlingId, accessToken)
+            coVerify(exactly = 0) { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) }
+            coVerify(exactly = 1) { beregningMock.hentBeregning(behandlingId, accessToken) }
         }
     }
 }

@@ -49,12 +49,13 @@
                 <th>Avdød</th>
                 <th>Gjenlevende (innsender)</th>
                 <th>Barn</th>
+                <th>Antall Søsken</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td colspan="4" class="text-center">
+                <td colspan="5" class="text-center">
                     Du har ingen familier, vennligst opprett en nedenfor &#128106;
                 </td>
             </tr>
@@ -176,6 +177,7 @@
                 const avdoedTableElement = document.createElement('td')
                 const gjenlevendeTableElement = document.createElement('td')
                 const barnTableElement = document.createElement('td')
+                const antallSoeskenTableElement = document.createElement('td')
                 const buttonTableElement = document.createElement('td')
 
                 const button = document.createElement('button')
@@ -196,6 +198,10 @@
                 barnTableElement.innerHTML = barn
                 barnTableElement.style.width = '300px'
                 tableRow.appendChild(barnTableElement)
+
+                antallSoeskenTableElement.innerHTML = soesken.length ?? '0'
+                antallSoeskenTableElement.style.width = '300px'
+                tableRow.appendChild(antallSoeskenTableElement)
 
                 buttonTableElement.appendChild(button)
                 buttonTableElement.style.textAlign = 'center'

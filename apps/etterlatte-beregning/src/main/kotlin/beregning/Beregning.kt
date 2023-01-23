@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
@@ -11,6 +12,7 @@ import java.util.*
 data class BeregningsperiodeDAO(
     val beregningId: UUID,
     val behandlingId: UUID,
+    val type: Beregningstype,
     val beregnetDato: Tidspunkt,
     val datoFOM: YearMonth,
     val datoTOM: YearMonth?,
@@ -27,6 +29,7 @@ data class BeregningsperiodeDAO(
 data class Beregning(
     val beregningId: UUID,
     val behandlingId: UUID,
+    val type: Beregningstype,
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: Tidspunkt,
     val grunnlagMetadata: Metadata
@@ -35,6 +38,7 @@ data class Beregning(
         BeregningDTO(
             beregningId = beregningId,
             behandlingId = behandlingId,
+            type = type,
             beregningsperioder = beregningsperioder,
             beregnetDato = beregnetDato,
             grunnlagMetadata = grunnlagMetadata

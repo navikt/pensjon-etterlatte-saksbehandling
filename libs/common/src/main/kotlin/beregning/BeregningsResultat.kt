@@ -6,34 +6,21 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 import java.util.*
 
-enum class DelytelseId {
-    BP
-}
-
-enum class Beregningstyper {
-    GP
-}
-
-enum class Endringskode {
-    NY,
-    REVURDERING
-}
-
-enum class BeregningsResultatType {
-    BEREGNET
+enum class Beregningstype {
+    BP,
+    GP // TODO fjernes - må være her for å være bakoverkompatibel med eksisterende vedtak
 }
 
 data class BeregningDTO(
     val beregningId: UUID,
     val behandlingId: UUID,
+    val type: Beregningstype,
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: Tidspunkt,
     val grunnlagMetadata: Metadata
 )
 
 data class Beregningsperiode(
-    val delytelsesId: DelytelseId,
-    val type: Beregningstyper,
     val datoFOM: YearMonth,
     val datoTOM: YearMonth?,
     val utbetaltBeloep: Int,

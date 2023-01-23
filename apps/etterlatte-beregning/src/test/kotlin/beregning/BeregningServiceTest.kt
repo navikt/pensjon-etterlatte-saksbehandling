@@ -9,8 +9,7 @@ import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.DelytelseId
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -55,12 +54,11 @@ internal class BeregningServiceTest {
         with(beregning) {
             beregningId shouldNotBe null
             behandlingId shouldBe behandling.id
+            type shouldBe Beregningstype.BP
             beregnetDato shouldNotBe null
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe DelytelseId.BP
-                type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
@@ -84,12 +82,11 @@ internal class BeregningServiceTest {
         with(beregning) {
             beregningId shouldNotBe null
             behandlingId shouldBe behandling.id
+            type shouldBe Beregningstype.BP
             beregnetDato shouldNotBe null
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe DelytelseId.BP
-                type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_JAN_23
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
@@ -111,12 +108,11 @@ internal class BeregningServiceTest {
         with(beregning) {
             beregningId shouldNotBe null
             behandlingId shouldBe behandling.id
+            type shouldBe Beregningstype.BP
             beregnetDato shouldNotBe null
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe DelytelseId.BP
-                type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe BP_BELOEP_TO_SOESKEN_JAN_23
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
@@ -138,12 +134,11 @@ internal class BeregningServiceTest {
         with(beregning) {
             beregningId shouldNotBe null
             behandlingId shouldBe behandling.id
+            type shouldBe Beregningstype.BP
             beregnetDato shouldNotBe null
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe DelytelseId.BP
-                type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
@@ -165,12 +160,11 @@ internal class BeregningServiceTest {
         with(beregning) {
             beregningId shouldNotBe null
             behandlingId shouldBe behandling.id
+            type shouldBe Beregningstype.BP
             beregnetDato shouldNotBe null
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe DelytelseId.BP
-                type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe 0
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null
@@ -191,12 +185,11 @@ internal class BeregningServiceTest {
         with(beregning) {
             beregningId shouldNotBe null
             behandlingId shouldBe behandling.id
+            type shouldBe Beregningstype.BP
             beregnetDato shouldNotBe null
             grunnlagMetadata shouldBe grunnlag.metadata
             beregningsperioder.size shouldBe 1
             with(beregningsperioder.first()) {
-                delytelsesId shouldBe DelytelseId.BP
-                type shouldBe Beregningstyper.GP
                 utbetaltBeloep shouldBe 0
                 datoFOM shouldBe behandling.virkningstidspunkt?.dato
                 datoTOM shouldBe null

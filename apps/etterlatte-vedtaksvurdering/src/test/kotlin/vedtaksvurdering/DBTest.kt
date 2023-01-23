@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
@@ -131,6 +132,7 @@ internal class DBTest {
         val beregningDTO = BeregningDTO(
             UUID.randomUUID(),
             uuid,
+            Beregningstype.BP,
             listOf(),
             LocalDateTime.now().toTidspunkt(
                 norskTidssone

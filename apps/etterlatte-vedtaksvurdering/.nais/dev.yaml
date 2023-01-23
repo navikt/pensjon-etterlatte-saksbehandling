@@ -25,6 +25,8 @@ spec:
   readiness:
     initialDelay: 5
     path: /isready
+  secureLogs:
+    enabled: true
   azure:
     application:
       enabled: true

@@ -9,6 +9,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.log
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -108,7 +109,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -137,7 +138,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vilkaarsvurdering basert paa behandling dersom en ikke finnes`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val nyBehandlingId = UUID.randomUUID()
             val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
@@ -159,7 +160,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
             val nyBehandlingId = UUID.randomUUID()
 
             coEvery { behandlingKlient.hentBehandling(nyBehandlingId, any()) } returns detaljertBehandling().apply {
@@ -178,7 +179,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -217,7 +218,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -286,7 +287,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -336,7 +337,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
             val resultat = VurdertVilkaarsvurderingResultatDto(
@@ -374,7 +375,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal ikke kunne endre eller slette vilkaar naar totalresultat er satt`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
             val resultat = VurdertVilkaarsvurderingResultatDto(
@@ -412,7 +413,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `faar 401 hvis spoerring ikke har access token`() {
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
             val response = client.get("/api/vilkaarsvurdering/$behandlingId")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
@@ -430,7 +431,7 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             coVerify(exactly = 1) {
@@ -450,7 +451,7 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val response = client.get("/api/vilkaarsvurdering/$behandlingId") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -471,7 +472,7 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             client.get("/api/vilkaarsvurdering/$behandlingId") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -491,7 +492,7 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -512,7 +513,7 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         testApplication {
-            application { restModule { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 

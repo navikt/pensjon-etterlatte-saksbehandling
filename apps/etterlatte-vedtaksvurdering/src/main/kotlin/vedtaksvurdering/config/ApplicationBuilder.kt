@@ -18,7 +18,11 @@ import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
+
+val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 class ApplicationBuilder {
     private val env = System.getenv()
@@ -29,6 +33,7 @@ class ApplicationBuilder {
         username = properties.dbUsername,
         password = properties.dbPassword
     )
+
     private fun getSaksbehandlere(): Map<String, String> {
         val saksbehandlereSecret = env["saksbehandlere"]!!
         return objectMapper.readValue(
@@ -36,6 +41,7 @@ class ApplicationBuilder {
             object : TypeReference<Map<String, String>>() {}
         )
     }
+
     private val vedtaksvurderingService = VedtaksvurderingService(
         repository = VedtaksvurderingRepository.using(dataSource),
         beregningKlient = BeregningKlientImpl(config, httpClient()),
@@ -48,7 +54,7 @@ class ApplicationBuilder {
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {
-                restModule {
+                restModule(sikkerLogg) {
                     vedtaksvurderingRoute(vedtaksvurderingService)
                 }
             }
@@ -73,7 +79,9 @@ class ApplicationBuilder {
 
     fun start() = rapidsConnection.start()
 
-    fun publiser(melding: String, key: UUID) { rapidsConnection.publish(message = melding, key = key.toString()) }
+    fun publiser(melding: String, key: UUID) {
+        rapidsConnection.publish(message = melding, key = key.toString())
+    }
 }
 
 private fun Map<String, String>.withConsumerGroupId() =

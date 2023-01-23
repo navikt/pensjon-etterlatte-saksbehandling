@@ -4,6 +4,7 @@ import no.nav.etterlatte.beregning.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.regler.BP_1967_DATO
 import no.nav.etterlatte.beregning.regler.BarnepensjonGrunnlag
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
@@ -31,12 +32,18 @@ val grunnbeloep: Regel<BarnepensjonGrunnlag, Grunnbeloep> = RegelMeta(
     regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP")
 ) velgNyesteGyldige historiskeGrunnbeloep
 
-private val antallSoeskenIKullet: Regel<BarnepensjonGrunnlag, Int> = finnFaktumIGrunnlag(
+private val soeskenIKullet: Regel<BarnepensjonGrunnlag, List<Foedselsnummer>> = finnFaktumIGrunnlag(
+    gjelderFra = BP_1967_DATO,
+    beskrivelse = "Søskenkull fra grunnlaget",
+    finnFaktum = BarnepensjonGrunnlag::soeskenKull,
+    finnFelt = { it }
+)
+
+private val antallSoeskenIKullet = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Finner antall søsken i kullet",
-    finnFaktum = BarnepensjonGrunnlag::soeskenKull,
-    finnFelt = { it.size }
-)
+    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ANTALL-SOESKEN")
+) benytter soeskenIKullet med { soesken -> soesken.size }
 
 val prosentsatsFoersteBarnKonstant = definerKonstant<BarnepensjonGrunnlag, BigDecimal>(
     gjelderFra = BP_1967_DATO,

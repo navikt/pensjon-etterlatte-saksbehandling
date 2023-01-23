@@ -10,8 +10,13 @@ import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.helse.rapids_rivers.RapidApplication
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
+
+val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 fun main() {
     val application = ApplicationBuilder()
@@ -30,7 +35,7 @@ class ApplicationBuilder {
     private val grunnlagService = RealGrunnlagService(opplysningDao, ::publiser, behandlingKlient)
 
     private val rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
-        .withKtorModule { apiModule { grunnlagRoute(grunnlagService) } }
+        .withKtorModule { restModule(sikkerLogg, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
         .build().apply {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)

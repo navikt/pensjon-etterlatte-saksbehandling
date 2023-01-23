@@ -6,11 +6,12 @@ import io.ktor.client.request.headers
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.log
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.apiModule
 import no.nav.etterlatte.libs.common.serialize
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -55,7 +56,7 @@ internal class GrunnlagRoutesKtTest {
     @Test
     fun `returnerer 401 uten gyldig token`() {
         testApplication {
-            application { apiModule { grunnlagRoute(grunnlagService) } }
+            application { restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
             val response = client.get("api/grunnlag/1")
 
             Assertions.assertEquals(HttpStatusCode.Unauthorized, response.status)
@@ -67,7 +68,7 @@ internal class GrunnlagRoutesKtTest {
         every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns null
 
         testApplication {
-            application { apiModule { grunnlagRoute(grunnlagService) } }
+            application { restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
             val response = client.get("api/grunnlag/1") {
                 headers {
                     append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -85,7 +86,7 @@ internal class GrunnlagRoutesKtTest {
         every { grunnlagService.hentOpplysningsgrunnlag(1) } returns testData
 
         testApplication {
-            application { apiModule { grunnlagRoute(grunnlagService) } }
+            application { restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
             val response = client.get("api/grunnlag/1") {
                 headers {
                     append(HttpHeaders.ContentType, ContentType.Application.Json.toString())

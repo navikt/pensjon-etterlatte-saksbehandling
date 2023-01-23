@@ -188,7 +188,7 @@
                 button.onclick = () => sendSoeknad(avdoed, gjenlevende, barn, soesken)
 
                 avdoedTableElement.innerHTML = avdoed
-                avdoedTableElement.style.width = '300px'
+                avdoedTableElement.style.width = '200px'
                 tableRow.appendChild(avdoedTableElement)
 
                 gjenlevendeTableElement.innerHTML = gjenlevende
@@ -200,7 +200,7 @@
                 tableRow.appendChild(barnTableElement)
 
                 antallSoeskenTableElement.innerHTML = soesken.length ?? '0'
-                antallSoeskenTableElement.style.width = '300px'
+                antallSoeskenTableElement.style.width = '120px'
                 tableRow.appendChild(antallSoeskenTableElement)
 
                 buttonTableElement.appendChild(button)

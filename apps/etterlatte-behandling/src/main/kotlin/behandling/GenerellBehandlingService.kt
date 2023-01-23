@@ -21,7 +21,13 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.Saksbehandler
+import no.nav.etterlatte.libs.sporingslogg.Decision
+import no.nav.etterlatte.libs.sporingslogg.HttpMethod
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import java.util.*
 
 interface GenerellBehandlingService {
@@ -47,7 +53,12 @@ interface GenerellBehandlingService {
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
     fun alleSakIderForSoekerMedFnr(fnr: String): List<Long>
     fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
-    suspend fun hentDetaljertBehandlingMedTilbehoer(behandlingId: UUID, accessToken: String): DetaljertBehandlingDto
+    suspend fun hentDetaljertBehandlingMedTilbehoer(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String
+    ): DetaljertBehandlingDto
+
     fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
 }
 
@@ -61,7 +72,8 @@ class RealGenerellBehandlingService(
     private val vedtakKlient: VedtakKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val sporingslogg: Sporingslogg
 ) : GenerellBehandlingService {
 
     override fun hentBehandlinger(): List<Behandling> {
@@ -123,8 +135,11 @@ class RealGenerellBehandlingService(
         return hentBehandling(behandlingId)?.toDetaljertBehandling()
     }
 
-    override suspend fun hentDetaljertBehandlingMedTilbehoer(behandlingId: UUID, accessToken: String):
-        DetaljertBehandlingDto {
+    override suspend fun hentDetaljertBehandlingMedTilbehoer(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String
+    ): DetaljertBehandlingDto {
         val detaljertBehandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
         val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
         val sakId = detaljertBehandling.sak
@@ -171,9 +186,25 @@ class RealGenerellBehandlingService(
                 familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
                 behandlingType = detaljertBehandling.behandlingType,
                 søker = soeker.await()?.opplysning
-            )
+            ).also {
+                gjenlevende.await()?.fnr?.let { loggRequest(saksbehandler, it) }
+                soeker.await()?.fnr?.let { loggRequest(saksbehandler, it) }
+            }
         }
     }
+
+    private fun loggRequest(saksbehandler: Saksbehandler, fnr: Foedselsnummer) =
+        sporingslogg.logg(
+            Sporingsrequest(
+                kallendeApplikasjon = "behandling",
+                oppdateringstype = HttpMethod.GET,
+                brukerId = saksbehandler.ident,
+                hvemBlirSlaattOpp = fnr.value,
+                endepunkt = "behandling",
+                resultat = Decision.Permit,
+                melding = "Hent behandling var vellykka"
+            )
+        )
 
     override fun registrerVedtakHendelse(
         behandlingId: UUID,

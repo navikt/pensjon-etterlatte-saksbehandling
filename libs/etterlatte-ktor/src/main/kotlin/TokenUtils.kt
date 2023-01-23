@@ -8,14 +8,15 @@ import io.ktor.server.auth.principal
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
-inline val PipelineContext<*, ApplicationCall>.saksbehandler: String
-    get() =
-        call.principal<TokenValidationContextPrincipal>().let {
-            val navIdent = it?.context?.getJwtToken("azure")
-                ?.jwtTokenClaims?.getStringClaim("NAVident")
-                ?: throw Exception("Navident is null in token, probably missing claim NAVident")
-            navIdent
-        }
+inline val PipelineContext<*, ApplicationCall>.saksbehandler: Saksbehandler
+    get() = hentSaksbehandler(call)
+
+fun hentSaksbehandler(call: ApplicationCall) = call.principal<TokenValidationContextPrincipal>().let {
+    val navIdent = it?.context?.getJwtToken("azure")
+        ?.jwtTokenClaims?.getStringClaim("NAVident")
+        ?: throw Exception("Navident is null in token, probably missing claim NAVident")
+    Saksbehandler(navIdent)
+}
 
 inline val PipelineContext<*, ApplicationCall>.accesstoken: String
     get() = call.request.parseAuthorizationHeader().let {
@@ -25,3 +26,9 @@ inline val PipelineContext<*, ApplicationCall>.accesstoken: String
             throw Exception("Missing authorization header")
         }
     }
+
+data class Saksbehandler(val ident: String)
+
+data class SaksbehandlerProvider(val saksbehandler: (call: ApplicationCall) -> Saksbehandler) {
+    fun invoke(call: ApplicationCall) = saksbehandler.invoke(call)
+}

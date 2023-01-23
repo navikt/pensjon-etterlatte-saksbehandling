@@ -10,8 +10,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.ktor.SaksbehandlerProvider
 
-fun Route.personApi(service: PersonService) {
+fun Route.personApi(service: PersonService, saksbehandlerProvider: SaksbehandlerProvider) {
     route("person") {
         val logger = application.log
 
@@ -19,7 +20,7 @@ fun Route.personApi(service: PersonService) {
             val hentPersonRequest = call.receive<HentPersonRequest>()
             logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
 
-            service.hentPerson(hentPersonRequest).let { call.respond(it) }
+            service.hentPerson(hentPersonRequest, saksbehandlerProvider.invoke(call)).let { call.respond(it) }
         }
 
         route("/v2") {
@@ -27,7 +28,8 @@ fun Route.personApi(service: PersonService) {
                 val hentPersonRequest = call.receive<HentPersonRequest>()
                 logger.info("Henter personopplysning med fnr=${hentPersonRequest.foedselsnummer}")
 
-                service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
+                service.hentOpplysningsperson(hentPersonRequest, saksbehandlerProvider.invoke(call))
+                    .let { call.respond(it) }
             }
         }
     }
@@ -39,7 +41,7 @@ fun Route.personApi(service: PersonService) {
             val hentPersonRequest = call.receive<HentPersonRequest>()
             logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
 
-            service.hentPerson(hentPersonRequest).let { call.respond(it) }
+            service.hentPerson(hentPersonRequest, saksbehandlerProvider.invoke(call)).let { call.respond(it) }
         }
     }
 
@@ -50,7 +52,7 @@ fun Route.personApi(service: PersonService) {
             val hentFolkeregisterIdentRequest = call.receive<HentFolkeregisterIdentRequest>()
             logger.info("Henter identer for ident=${hentFolkeregisterIdentRequest.ident}")
 
-            service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest).let {
+            service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest, saksbehandlerProvider.invoke(call)).let {
                 call.respond(it)
             }
         }

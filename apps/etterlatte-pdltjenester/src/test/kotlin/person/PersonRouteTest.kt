@@ -8,7 +8,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.* // ktlint-disable no-wildcard-imports
+import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.setBody
+import io.ktor.server.testing.testApplication
+import io.ktor.server.testing.withTestApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -21,6 +24,8 @@ import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.Saksbehandler
+import no.nav.etterlatte.libs.ktor.SaksbehandlerProvider
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.mockFolkeregisterident
 import no.nav.etterlatte.mockPerson
@@ -32,6 +37,7 @@ class PersonRouteTest {
 
     private val personService = mockk<PersonService>()
     private val securityContextMediator = spyk<SecurityContextMediatorStub>()
+    private val saksbehandler = Saksbehandler("A1234")
 
     @Test
     fun `skal returnere person`() {
@@ -40,15 +46,21 @@ class PersonRouteTest {
             rolle = PersonRolle.BARN
         )
 
-        coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().soeker
+        coEvery { personService.hentPerson(hentPersonRequest, any()) } returns GrunnlagTestData().soeker
 
-        withTestApplication({ module(securityContextMediator, personService) }) {
+        withTestApplication({
+            module(
+                securityContextMediator,
+                personService,
+                SaksbehandlerProvider { saksbehandler }
+            )
+        }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentPersonRequest.toJson())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                coVerify { personService.hentPerson(any()) }
+                coVerify { personService.hentPerson(any(), any()) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(personService)
             }
@@ -62,15 +74,21 @@ class PersonRouteTest {
             rolle = PersonRolle.BARN
         )
 
-        coEvery { personService.hentOpplysningsperson(hentPersonRequest) } returns mockPerson()
+        coEvery { personService.hentOpplysningsperson(hentPersonRequest, any()) } returns mockPerson()
 
-        withTestApplication({ module(securityContextMediator, personService) }) {
+        withTestApplication({
+            module(
+                securityContextMediator,
+                personService,
+                SaksbehandlerProvider { saksbehandler }
+            )
+        }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT_V2) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentPersonRequest.toJson())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                coVerify { personService.hentOpplysningsperson(any()) }
+                coVerify { personService.hentOpplysningsperson(any(), any()) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(personService)
             }
@@ -82,17 +100,25 @@ class PersonRouteTest {
         val hentFolkeregisterIdentRequest = HentFolkeregisterIdentRequest(
             ident = "2305469522806"
         )
-        coEvery { personService.hentFolkeregisterIdent(hentFolkeregisterIdentRequest) } returns mockFolkeregisterident(
+        coEvery {
+            personService.hentFolkeregisterIdent(hentFolkeregisterIdentRequest, any())
+        } returns mockFolkeregisterident(
             "70078749472"
         )
 
-        withTestApplication({ module(securityContextMediator, personService) }) {
+        withTestApplication({
+            module(
+                securityContextMediator,
+                personService,
+                SaksbehandlerProvider { saksbehandler }
+            )
+        }) {
             handleRequest(HttpMethod.Post, FOLKEREGISTERIDENT_ENDEPUNKT) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentFolkeregisterIdentRequest.toJson())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                coVerify { personService.hentFolkeregisterIdent(any()) }
+                coVerify { personService.hentFolkeregisterIdent(any(), any()) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(personService)
             }
@@ -106,16 +132,24 @@ class PersonRouteTest {
             rolle = PersonRolle.BARN
         )
 
-        coEvery { personService.hentPerson(hentPersonRequest) } throws PdlForesporselFeilet("Noe feilet")
+        coEvery {
+            personService.hentPerson(hentPersonRequest, any())
+        } throws PdlForesporselFeilet("Noe feilet")
 
-        withTestApplication({ module(securityContextMediator, personService) }) {
+        withTestApplication({
+            module(
+                securityContextMediator,
+                personService,
+                SaksbehandlerProvider { saksbehandler }
+            )
+        }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentPersonRequest.toJson())
             }.apply {
                 assertEquals(HttpStatusCode.InternalServerError, response.status())
                 assertEquals("En feil oppstod: Noe feilet", response.content)
-                coVerify { personService.hentPerson(any()) }
+                coVerify { personService.hentPerson(any(), any()) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(personService)
             }
@@ -128,13 +162,15 @@ class PersonRouteTest {
             ident = "2305469522806"
         )
 
-        coEvery { personService.hentFolkeregisterIdent(hentFolkeregisterIdentReq) } throws PdlForesporselFeilet(
+        coEvery {
+            personService.hentFolkeregisterIdent(hentFolkeregisterIdentReq, any())
+        } throws PdlForesporselFeilet(
             "Noe feilet"
         )
 
         testApplication {
             application {
-                module(securityContextMediator, personService)
+                module(securityContextMediator, personService, SaksbehandlerProvider { saksbehandler })
             }
             client.post(FOLKEREGISTERIDENT_ENDEPUNKT) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -142,7 +178,7 @@ class PersonRouteTest {
             }.apply {
                 assertEquals(HttpStatusCode.InternalServerError, status)
                 assertEquals("En feil oppstod: Noe feilet", bodyAsText())
-                coVerify { personService.hentFolkeregisterIdent(any()) }
+                coVerify { personService.hentFolkeregisterIdent(any(), any()) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(personService)
             }

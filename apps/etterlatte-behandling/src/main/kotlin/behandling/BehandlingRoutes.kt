@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.accesstoken
+import no.nav.etterlatte.libs.ktor.saksbehandler
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
 import java.time.LocalDate
@@ -58,7 +59,7 @@ internal fun Route.behandlingRoutes(
     route("/api/behandling/{behandlingsid}") {
         get {
             val detaljertBehandlingDTO =
-                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, accesstoken)
+                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, saksbehandler, accesstoken)
             call.respond<DetaljertBehandlingDto>(detaljertBehandlingDTO)
         }
 

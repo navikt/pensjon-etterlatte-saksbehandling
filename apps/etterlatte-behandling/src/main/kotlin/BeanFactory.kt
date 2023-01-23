@@ -51,6 +51,7 @@ import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.pdl.PdlService
 import no.nav.etterlatte.pdl.PdlServiceImpl
 import no.nav.etterlatte.sak.RealSakService
@@ -89,6 +90,7 @@ interface BeanFactory {
     fun beregningKlient(): BeregningKlient
     fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient
     fun behandlingsStatusService(): BehandlingStatusService
+    fun sporingslogg(): Sporingslogg
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -161,7 +163,8 @@ abstract class CommonFactory : BeanFactory {
             vedtakKlient(),
             grunnlagKlient(),
             beregningKlient(),
-            vilkaarsvurderingKlient()
+            vilkaarsvurderingKlient(),
+            sporingslogg()
         )
     }
 
@@ -191,6 +194,8 @@ abstract class CommonFactory : BeanFactory {
         periode = Duration.of(1, ChronoUnit.MINUTES),
         minutterGamleHendelser = 1L
     ).schedule()
+
+    override fun sporingslogg(): Sporingslogg = Sporingslogg()
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
@@ -257,7 +262,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-            Duration.of(1, ChronoUnit.MINUTES).toMillis()
+                Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

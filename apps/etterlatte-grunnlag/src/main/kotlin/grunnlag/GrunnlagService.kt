@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -34,7 +35,7 @@ interface GrunnlagService {
     suspend fun lagreSoeskenMedIBeregning(
         behandlingId: UUID,
         soeskenMedIBeregning: List<SoeskenMedIBeregning>,
-        saksbehandlerId: String,
+        saksbehandlerId: Saksbehandler,
         accessToken: String
     )
 }
@@ -85,13 +86,13 @@ class RealGrunnlagService(
     override suspend fun lagreSoeskenMedIBeregning(
         behandlingId: UUID,
         soeskenMedIBeregning: List<SoeskenMedIBeregning>,
-        saksbehandlerId: String,
+        saksbehandlerId: Saksbehandler,
         accessToken: String
     ) {
         val opplysning: List<Grunnlagsopplysning<JsonNode>> = listOf(
             lagOpplysning(
                 opplysningsType = Opplysningstype.SOESKEN_I_BEREGNINGEN,
-                kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
+                kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId.ident, Instant.now()),
                 opplysning = Beregningsgrunnlag(soeskenMedIBeregning).toJsonNode()
             )
         )

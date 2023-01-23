@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:etterlatte-sporingslogg"))
     implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(Ktor2.OkHttp)

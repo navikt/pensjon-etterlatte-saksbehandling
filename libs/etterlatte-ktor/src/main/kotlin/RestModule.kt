@@ -20,6 +20,7 @@ import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
@@ -31,7 +32,8 @@ import java.util.*
 
 fun Application.restModule(
     sikkerLogg: Logger,
-    route: Route.() -> Unit
+    routePrefix: String? = null,
+    routes: Route.() -> Unit
 ) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
@@ -65,7 +67,9 @@ fun Application.restModule(
     routing {
         healthApi()
         authenticate {
-            route()
+            route(routePrefix ?: "") {
+                routes()
+            }
         }
     }
 }

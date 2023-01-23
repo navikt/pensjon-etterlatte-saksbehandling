@@ -10,6 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.log
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
 import io.mockk.clearAllMocks
@@ -17,7 +18,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.apiModule
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -25,7 +26,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksbrevRouteTest {
@@ -57,7 +58,7 @@ internal class VedtaksbrevRouteTest {
         val token = accessToken
 
         testApplication {
-            application { apiModule { vedtaksbrevRoute(vedtaksbrevService) } }
+            application { restModule(this.log, routePrefix = "api") { vedtaksbrevRoute(vedtaksbrevService) } }
 
             val client = createClient {
                 install(ContentNegotiation) {
@@ -80,7 +81,7 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Endepunkt som ikke finnes`() {
         testApplication {
-            application { apiModule { vedtaksbrevRoute(vedtaksbrevService) } }
+            application { restModule(this.log, routePrefix = "api") { vedtaksbrevRoute(vedtaksbrevService) } }
 
             val response = client.get("/api/brev/finnesikke") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
@@ -95,7 +96,7 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Mangler auth header`() {
         testApplication {
-            application { apiModule { vedtaksbrevRoute(vedtaksbrevService) } }
+            application { restModule(this.log, routePrefix = "api") { vedtaksbrevRoute(vedtaksbrevService) } }
 
             val response = client.post("/api/brev/vedtak")
 

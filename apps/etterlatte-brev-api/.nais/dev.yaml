@@ -16,6 +16,8 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
+  secureLogs:
+    enabled: true
   gcp:
     sqlInstances:
       - type: POSTGRES_14

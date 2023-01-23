@@ -17,12 +17,14 @@ on:
     paths:
       - apps/etterlatte-brev-api/**
       - libs/common/**
+      - libs/etterlatte-ktor/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-brev-api/**
       - libs/common/**
+      - libs/etterlatte-ktor/**
 
 jobs:
   test:

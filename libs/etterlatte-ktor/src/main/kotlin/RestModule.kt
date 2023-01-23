@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.ktor
 
+import com.fasterxml.jackson.core.JacksonException
 import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -24,10 +25,12 @@ import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.security.token.support.v2.tokenValidationSupport
+import org.slf4j.Logger
 import org.slf4j.event.Level
 import java.util.*
 
 fun Application.restModule(
+    sikkerLogg: Logger,
     route: Route.() -> Unit
 ) {
     install(ContentNegotiation) {
@@ -45,7 +48,12 @@ fun Application.restModule(
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            call.application.log.error("En feil oppstod: ${cause.message}", cause)
+            if (cause.erDeserialiseringsException()) {
+                sikkerLogg.error("En feil har oppstått ved deserialisering", cause)
+                call.application.log.error("En feil har oppstått ved deserialisering. Se sikkerlogg for mer detaljer.")
+            } else {
+                call.application.log.error("En feil oppstod: ${cause.message}", cause)
+            }
             call.respond(HttpStatusCode.InternalServerError, "En intern feil har oppstått")
         }
     }
@@ -60,4 +68,12 @@ fun Application.restModule(
             route()
         }
     }
+}
+
+internal fun Throwable.erDeserialiseringsException(): Boolean {
+    if (this is JacksonException) {
+        return true
+    }
+
+    return this.cause?.erDeserialiseringsException() ?: false
 }

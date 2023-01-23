@@ -118,3 +118,9 @@ export interface Grunnlagsendringshendelse {
   gjelderPerson: string
   samsvarMellomPdlOgGrunnlag: SamsvarMellomGrunnlagOgPdl
 }
+
+export interface VedtakSammendrag {
+  id: string
+  behandlingId: string
+  datoAttestert?: string
+}

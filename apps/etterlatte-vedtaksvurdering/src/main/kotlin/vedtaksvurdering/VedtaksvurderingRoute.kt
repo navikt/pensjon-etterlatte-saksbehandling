@@ -45,6 +45,17 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
+        get("vedtak/sammendrag/{behandlingId}") {
+            withBehandlingId { behandlingId ->
+                val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendrag()
+                if (vedtaksresultat == null) {
+                    call.response.status(HttpStatusCode.NotFound)
+                } else {
+                    call.respond(vedtaksresultat)
+                }
+            }
+        }
+
         post("vedtak/upsert/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 val nyttVedtak = service.opprettEllerOppdaterVedtak(

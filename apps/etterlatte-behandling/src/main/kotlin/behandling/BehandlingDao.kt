@@ -171,7 +171,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
             .toLocalDateTime(),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
-        soeknadMottattDato = rs.getTimestamp("soekand_mottatt_dato").toLocalDateTime(),
+        soeknadMottattDato = rs.getTimestamp("soeknad_mottatt_dato").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -238,7 +238,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt, kommer_barnet_tilgode, vilkaar_utfall)
+                soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt, kommer_barnet_tilgode, vilkaar_utfall)
                  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )

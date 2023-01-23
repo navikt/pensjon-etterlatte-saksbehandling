@@ -48,7 +48,7 @@ class OppgaveDao(private val datasource: DataSource) {
         datasource.connection.use {
             val stmt = it.prepareStatement(
                 """
-                |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status, behandling_opprettet,
+                |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, status, behandling_opprettet,
                 |behandlingstype, soesken 
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE status IN ${
@@ -61,7 +61,7 @@ class OppgaveDao(private val datasource: DataSource) {
                 """.trimMargin()
             )
             return stmt.executeQuery().toList {
-                val mottattDato = getTimestamp("soekand_mottatt_dato")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
+                val mottattDato = getTimestamp("soeknad_mottatt_dato")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
                     ?: getTimestamp("behandling_opprettet")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
                     ?: throw IllegalStateException(
                         "Vi har en behandling som hverken har soekand mottatt dato eller behandling opprettet dato "

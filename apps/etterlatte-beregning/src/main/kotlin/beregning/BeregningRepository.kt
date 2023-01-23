@@ -95,7 +95,7 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
         ),
         trygdetid = int(BeregningsperiodeDatabaseColumns.Trygdetid.navn),
         regelResultat = stringOrNull(BeregningsperiodeDatabaseColumns.RegelResultat.navn)?.let {
-            objectMapper.readValue(it)
+            objectMapper.readTree(it)
         },
         regelVersjon = stringOrNull(BeregningsperiodeDatabaseColumns.RegelVersjon.navn)
     )

@@ -18,6 +18,8 @@ on:
       - apps/etterlatte-beregning/**
       - libs/common/**
       - libs/testdata/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
   pull_request:
     branches:
       - main
@@ -25,6 +27,8 @@ on:
       - apps/etterlatte-beregning/**
       - libs/common/**
       - libs/testdata/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
 
 jobs:
   test:

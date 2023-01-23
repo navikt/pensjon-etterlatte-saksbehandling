@@ -18,14 +18,9 @@ import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-interface BeregningRepository {
-    fun hent(behandlingId: UUID): Beregning?
-    fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning
-}
+class BeregningRepository(private val dataSource: DataSource) {
 
-class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRepository {
-
-    override fun hent(behandlingId: UUID): Beregning? = using(sessionOf(dataSource)) { session ->
+    fun hent(behandlingId: UUID): Beregning? = using(sessionOf(dataSource)) { session ->
         session.transaction { tx ->
             val beregningsperioder = queryOf(
                 statement = Queries.hentBeregning,
@@ -39,7 +34,7 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
         }
     }
 
-    override fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning {
+    fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning {
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 queryOf(
@@ -73,7 +68,10 @@ class BeregningRepositoryImpl(private val dataSource: DataSource) : BeregningRep
             "grunnbeloepMnd" to beregningsperiode.grunnbelopMnd,
             "grunnbeloep" to beregningsperiode.grunnbelop,
             "sakId" to beregning.grunnlagMetadata.sakId,
-            "grunnlagVersjon" to beregning.grunnlagMetadata.versjon
+            "grunnlagVersjon" to beregning.grunnlagMetadata.versjon,
+            "trygdetid" to beregningsperiode.trygdetid,
+            "regelResultat" to beregningsperiode.regelResultat?.toJson(),
+            "regelVersjon" to beregningsperiode.regelVersjon
         )
     }
 }
@@ -94,7 +92,12 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
         grunnlagMetadata = Metadata(
             sakId = long(BeregningsperiodeDatabaseColumns.SakId.navn),
             versjon = long(BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn)
-        )
+        ),
+        trygdetid = int(BeregningsperiodeDatabaseColumns.Trygdetid.navn),
+        regelResultat = stringOrNull(BeregningsperiodeDatabaseColumns.RegelResultat.navn)?.let {
+            objectMapper.readTree(it)
+        },
+        regelVersjon = stringOrNull(BeregningsperiodeDatabaseColumns.RegelVersjon.navn)
     )
 }
 
@@ -120,7 +123,9 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                 soeskenFlokk = it.soeskenFlokk,
                 grunnbelopMnd = it.grunnbelopMnd,
                 grunnbelop = it.grunnbelop,
-                trygdetid = 40 // TODO: Må fikses før vi tar imot saker som IKKE har 40 års trygdetid
+                trygdetid = it.trygdetid,
+                regelResultat = it.regelResultat,
+                regelVersjon = it.regelVersjon
             )
         }
 
@@ -139,22 +144,44 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
     GrunnbeloepMnd("grunnbeloepMnd"),
     Grunnbeloep("grunnbeloep"),
     SakId("sakId"),
-    GrunnlagVersjon("grunnlagVersjon")
+    GrunnlagVersjon("grunnlagVersjon"),
+    Trygdetid("trygdetid"),
+    RegelResultat("regelResultat"),
+    RegelVersjon("regelVersjon")
 }
 
 private object Queries {
     val hentBeregning = """
-        |SELECT * 
-        |FROM beregningsperiode WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
-    """.trimMargin()
+        SELECT * 
+        FROM beregningsperiode 
+        WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
+    """
 
     val lagreBeregningsperioder = """
-        |INSERT INTO beregningsperiode(${BeregningsperiodeDatabaseColumns.Id.navn}, ${BeregningsperiodeDatabaseColumns.BeregningId.navn}, ${BeregningsperiodeDatabaseColumns.BehandlingId.navn}, ${BeregningsperiodeDatabaseColumns.BeregnetDato.navn}, ${BeregningsperiodeDatabaseColumns.DatoFOM.navn}, ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, ${BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn}, ${BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn}, ${BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn}, ${BeregningsperiodeDatabaseColumns.Grunnbeloep.navn}, ${BeregningsperiodeDatabaseColumns.SakId.navn}, ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}) 
-        |VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT) 
-    """.trimMargin()
+        INSERT INTO beregningsperiode(
+            ${BeregningsperiodeDatabaseColumns.Id.navn}, 
+            ${BeregningsperiodeDatabaseColumns.BeregningId.navn}, 
+            ${BeregningsperiodeDatabaseColumns.BehandlingId.navn}, 
+            ${BeregningsperiodeDatabaseColumns.BeregnetDato.navn}, 
+            ${BeregningsperiodeDatabaseColumns.DatoFOM.navn}, 
+            ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, 
+            ${BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn}, 
+            ${BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn}, 
+            ${BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn}, 
+            ${BeregningsperiodeDatabaseColumns.Grunnbeloep.navn}, 
+            ${BeregningsperiodeDatabaseColumns.SakId.navn}, 
+            ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}, 
+            ${BeregningsperiodeDatabaseColumns.Trygdetid.navn}, 
+            ${BeregningsperiodeDatabaseColumns.RegelResultat.navn}, 
+            ${BeregningsperiodeDatabaseColumns.RegelVersjon.navn}) 
+        VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :datoFOM::TEXT, 
+            :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
+            :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :regelResultat::JSONB, 
+            :regelVersjon::TEXT) 
+    """
 
     val slettBeregning = """
-        |DELETE FROM beregningsperiode
-        |WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
-    """.trimMargin()
+        DELETE FROM beregningsperiode 
+        WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
+    """
 }

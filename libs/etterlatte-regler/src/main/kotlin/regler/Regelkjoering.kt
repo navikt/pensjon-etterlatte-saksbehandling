@@ -2,7 +2,11 @@ package no.nav.etterlatte.libs.regler
 
 import java.time.LocalDate
 
-data class PeriodisertResultat<S>(val periode: RegelPeriode, val resultat: SubsumsjonsNode<S>)
+data class PeriodisertResultat<S>(
+    val periode: RegelPeriode,
+    val resultat: SubsumsjonsNode<S>,
+    val reglerVersjon: String
+)
 
 sealed class RegelkjoeringResultat<S>(open val reglerVersjon: String) {
     data class Suksess<S>(
@@ -43,7 +47,13 @@ object Regelkjoering {
                 .associateWith { p -> regel.anvend(grunnlag, p) }
                 .let {
                     RegelkjoeringResultat.Suksess(
-                        periodiserteResultater = it.entries.map { (key, value) -> PeriodisertResultat(key, value) },
+                        periodiserteResultater = it.entries.map { (key, value) ->
+                            PeriodisertResultat(
+                                periode = key,
+                                resultat = value,
+                                reglerVersjon = reglerVersjon
+                            )
+                        },
                         reglerVersjon = reglerVersjon
                     )
                 }

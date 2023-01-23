@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -17,7 +18,10 @@ data class BeregningsperiodeDAO(
     val soeskenFlokk: List<String>?,
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
-    val grunnlagMetadata: Metadata
+    val grunnlagMetadata: Metadata,
+    val trygdetid: Int,
+    val regelResultat: JsonNode? = null,
+    val regelVersjon: String? = null
 )
 
 data class Beregning(

@@ -2,7 +2,7 @@ package no.nav.etterlatte.beregning.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import no.nav.etterlatte.beregning.BeregningRepositoryImpl
+import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
@@ -20,7 +20,7 @@ class ApplicationContext {
         password = properties.dbPassword
     )
     val beregningService = BeregningService(
-        beregningRepository = BeregningRepositoryImpl(dataSource),
+        beregningRepository = BeregningRepository(dataSource),
         vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
         grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
         behandlingKlient = BehandlingKlientImpl(config, httpClient())

@@ -67,6 +67,8 @@ internal class BeregningServiceTest {
                 grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                 soeskenFlokk shouldBe emptyList()
                 trygdetid shouldBe MAKS_TRYGDETID
+                regelResultat shouldNotBe null
+                regelVersjon shouldNotBe null
             }
         }
     }

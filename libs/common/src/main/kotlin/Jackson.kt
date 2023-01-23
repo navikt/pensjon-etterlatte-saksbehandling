@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -35,3 +36,4 @@ inline fun <reified T> deserialize(value: String): T = objectMapper.readValue(va
 
 fun Any.toJson(): String = objectMapper.writeValueAsString(this)
 fun Any.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
+fun Any.toObjectNode(): ObjectNode = objectMapper.valueToTree(this)

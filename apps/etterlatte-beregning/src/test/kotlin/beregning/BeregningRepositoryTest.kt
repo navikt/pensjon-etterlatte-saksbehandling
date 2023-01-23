@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.DelytelseId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.AfterAll
@@ -34,7 +35,7 @@ internal class BeregningRepositoryTest {
             postgreSQLContainer.password
         ).also { it.migrate() }
 
-        beregningRepository = BeregningRepositoryImpl(ds)
+        beregningRepository = BeregningRepository(ds)
     }
 
     @AfterAll
@@ -96,7 +97,9 @@ internal class BeregningRepositoryTest {
                     soeskenFlokk = listOf(FNR_1),
                     grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,
-                    trygdetid = 40
+                    trygdetid = 40,
+                    regelResultat = mapOf("regel" to "resultat").toObjectNode(),
+                    regelVersjon = "1"
                 )
             )
         )

@@ -69,7 +69,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         return response.mapBoth(
             success = { true },
             failure = {
-                logger.info("Behandling med id $behandlingId kan ikke beregnes")
+                logger.info("Behandling med id $behandlingId kan ikke beregnes, commit=$commit")
                 false
             }
         )

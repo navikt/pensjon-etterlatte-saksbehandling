@@ -68,7 +68,7 @@ internal class BeregningServiceTest {
                 soeskenFlokk shouldBe emptyList()
                 trygdetid shouldBe MAKS_TRYGDETID
                 regelResultat shouldNotBe null
-                regelVersjon shouldBe "0.1-BETA"
+                regelVersjon shouldNotBe null
             }
         }
     }

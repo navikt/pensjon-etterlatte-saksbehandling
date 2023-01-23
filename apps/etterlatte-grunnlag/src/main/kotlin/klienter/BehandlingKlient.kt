@@ -43,7 +43,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting av behandling ($behandlingId) fra grunnlag feilet.", e)
+            logger.error("Henting av behandling ($behandlingId) fra grunnlag feilet.")
             throw e
         }
     }

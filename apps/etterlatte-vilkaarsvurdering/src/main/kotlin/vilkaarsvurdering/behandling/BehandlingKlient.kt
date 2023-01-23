@@ -61,7 +61,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             when (it) {
                 is Success -> it.content
                 is Failure -> {
-                    logger.error("Klarte ikke hente ut behandling med id $behandlingId. ", it.lastError())
+                    logger.error("Klarte ikke hente ut behandling med id $behandlingId.")
                     throw it.exceptions.last()
                 }
             }
@@ -145,7 +145,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting av sakid ($sakId) fra vedtak feilet.", e)
+            logger.error("Henting av sakid ($sakId) fra vedtak feilet.")
             throw e
         }
     }

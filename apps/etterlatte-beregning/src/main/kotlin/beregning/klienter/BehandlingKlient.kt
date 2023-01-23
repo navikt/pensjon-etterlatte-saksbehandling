@@ -50,7 +50,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
-                    logger.error("Klarte ikke hente ut behandling med id $behandlingId. ", it.lastError())
+                    logger.error("Klarte ikke hente ut behandling med id $behandlingId.")
                     throw it.exceptions.last()
                 }
             }
@@ -69,7 +69,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         return response.mapBoth(
             success = { true },
             failure = {
-                logger.info("Behandling med id $behandlingId kan ikke beregnes", it.throwable)
+                logger.info("Behandling med id $behandlingId kan ikke beregnes")
                 false
             }
         )

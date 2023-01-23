@@ -41,7 +41,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                 ).response
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting av vilkårsvurdering ($behandlingId) fra vedtak feilet.", e)
+            logger.error("Henting av vilkårsvurdering ($behandlingId) fra vedtak feilet.")
             throw e
         }
     }

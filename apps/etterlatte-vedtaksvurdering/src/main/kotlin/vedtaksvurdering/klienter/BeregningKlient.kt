@@ -42,7 +42,7 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                 ).response
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting av beregning ($behandlingId) fra vedtak feilet.", e)
+            logger.error("Henting av beregning ($behandlingId) fra vedtak feilet.")
             throw e
         }
     }

@@ -49,7 +49,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
             when (it) {
                 is Success -> it.content
                 is Failure -> {
-                    logger.error("Klarte ikke hente ut grunnlag for sak med id $sakId. ", it.lastError())
+                    logger.error("Klarte ikke hente ut grunnlag for sak med id $sakId.")
                     throw it.exceptions.last()
                 }
             }

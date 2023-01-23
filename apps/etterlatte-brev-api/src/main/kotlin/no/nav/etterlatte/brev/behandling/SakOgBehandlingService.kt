@@ -8,12 +8,21 @@ class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
-    private val grunnbeloepKlient: GrunnbeloepKlient
+    private val grunnbeloepKlient: GrunnbeloepKlient,
+    private val saksbehandlere: Map<String, String>
 ) {
 
-    suspend fun hentBehandling(sakId: Long, behandlingId: String, accessToken: String): Behandling {
+    suspend fun hentBehandling(
+        sakId: Long,
+        behandlingId: String,
+        saksbehandler: String,
+        accessToken: String
+    ): Behandling {
         val vedtak = vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(sakId, accessToken)
+
+        val saksbehandlerEnhet = saksbehandlere[saksbehandler]
+            ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
 
         return Behandling(
             sakId = sakId,
@@ -24,7 +33,11 @@ class SakOgBehandlingService(
                 soeker = grunnlag.mapSoeker(),
                 avdoed = grunnlag.mapAvdoed()
             ),
-            vedtak = ForenkletVedtak(vedtak.vedtakId, vedtak.type, vedtak.vedtakFattet?.ansvarligEnhet ?: "0805"),
+            vedtak = ForenkletVedtak(
+                vedtak.vedtakId,
+                vedtak.type,
+                vedtak.vedtakFattet?.ansvarligEnhet ?: saksbehandlerEnhet
+            ),
             utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )
     }
@@ -54,3 +67,5 @@ class SakOgBehandlingService(
         )
     }
 }
+
+class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

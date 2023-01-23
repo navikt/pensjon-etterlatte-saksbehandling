@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -29,6 +30,7 @@ import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -50,7 +52,8 @@ class ApplicationBuilder {
         vedtakKlient,
         grunnlagKlient,
         beregningKlient,
-        grunnbeloepKlient
+        grunnbeloepKlient,
+        saksbehandlere = getSaksbehandlere()
     )
     private val norg2Klient = Norg2Klient(env["NORG2_URL"]!!, httpClient())
     private val datasourceBuilder = DataSourceBuilder(env)
@@ -85,6 +88,14 @@ class ApplicationBuilder {
 //                FerdigstillVedtaksbrev(this, vedtaksbrevService)
             }
 
+    private fun getSaksbehandlere(): Map<String, String> {
+        val saksbehandlereSecret = env["saksbehandlere"]!!
+        return objectMapper.readValue(
+            saksbehandlereSecret,
+            object : TypeReference<Map<String, String>>() {}
+        )
+    }
+    
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)
 
     fun start() = rapidsConnection.start()

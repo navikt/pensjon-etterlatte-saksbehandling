@@ -27,11 +27,11 @@ class VedtaksbrevService(
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
-    suspend fun oppdaterVedtaksbrev(sakId: Long, behandlingId: String, accessToken: String = ""): BrevID {
+    suspend fun oppdaterVedtaksbrev(sakId: Long, behandlingId: String, saksbehandler: String, accessToken: String = ""): BrevID {
         if (tilAttestering())
             throw Exception("Vedtaksbrev er allerede sendt til attestering. Kan derfor ikke endres.")
 
-        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, accessToken)
+        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, saksbehandler, accessToken)
         val nyttBrev = opprettEllerOppdater(behandling)
 
         val vedtaksbrev = db.hentBrevForBehandling(behandlingId)

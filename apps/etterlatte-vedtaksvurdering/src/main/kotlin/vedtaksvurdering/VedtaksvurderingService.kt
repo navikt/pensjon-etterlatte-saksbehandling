@@ -161,7 +161,7 @@ class VedtaksvurderingService(
             }
             if (it.vilkaarsvurdering == null) throw VedtakKanIkkeFattes(v)
             val saksbehandlerEnhet = saksbehandlere[saksbehandler]
-                ?: throw SaksbehandlerManglerEnhet("Saksbehandler $saksbehandler mangler enhet fra secret")
+                ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
 
             repository.fattVedtak(saksbehandler, saksbehandlerEnhet, behandlingId)
         }
@@ -189,7 +189,7 @@ class VedtaksvurderingService(
         }
 
         val saksbehandlerEnhet = saksbehandlere[saksbehandler]
-            ?: throw SaksbehandlerManglerEnhet("Saksbehandler $saksbehandler mangler enhet fra secret")
+            ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
 
         repository.attesterVedtak(
             saksbehandler,
@@ -296,7 +296,7 @@ class VedtaksvurderingService(
     }
 }
 
-class SaksbehandlerManglerEnhet(message: String) : Exception(message)
+class SaksbehandlerManglerEnhetException(message: String) : Exception(message)
 
 private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak) =
     JsonMessage.newMessage(mapOf(eventNameKey to vedtakhendelse.toString(), "vedtak" to vedtak)).toJson()

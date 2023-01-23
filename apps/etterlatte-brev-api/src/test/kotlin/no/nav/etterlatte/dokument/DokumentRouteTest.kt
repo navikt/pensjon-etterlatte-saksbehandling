@@ -4,6 +4,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.log
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
 import io.mockk.clearAllMocks
@@ -11,11 +12,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.apiModule
 import no.nav.etterlatte.brev.dokument.JournalpostClient
 import no.nav.etterlatte.brev.dokument.JournalpostResponse
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -52,7 +53,7 @@ internal class DokumentRouteTest {
         val fnr = "11223300000"
 
         testApplication {
-            application { apiModule { dokumentRoute(journalpostService) } }
+            application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
 
             val response = client.get("/api/dokumenter/$fnr") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -72,7 +73,7 @@ internal class DokumentRouteTest {
         val dokumentInfoId = "333"
 
         testApplication {
-            application { apiModule { dokumentRoute(journalpostService) } }
+            application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
 
             val response = client.get("/api/dokumenter/$journalpostId/$dokumentInfoId") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
@@ -87,7 +88,7 @@ internal class DokumentRouteTest {
     @Test
     fun `Endepunkt som ikke finnes`() {
         testApplication {
-            application { apiModule { dokumentRoute(journalpostService) } }
+            application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
 
             val response = client.get("/api/dokument/finnesikke") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")

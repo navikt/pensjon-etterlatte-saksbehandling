@@ -30,15 +30,12 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
                     accessToken
                 ).mapBoth(
                     success = { json -> json },
-                    failure = { errorMessage ->
-                        logger.error("Henting vedtak for en behandling feilet", errorMessage.throwable)
-                        null
-                    }
-                )?.response
+                    failure = { exception -> throw exception.throwable }
+                ).response
 
             return deserialize(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting  vedtak for en behandling feilet", e)
+            logger.error("Henting vedtak for en behandling ($behandlingId) feilet")
             throw e
         }
     }

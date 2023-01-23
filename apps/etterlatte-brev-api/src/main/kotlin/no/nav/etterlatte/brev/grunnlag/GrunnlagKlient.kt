@@ -28,15 +28,12 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                     accessToken
                 ).mapBoth(
                     success = { json -> json },
-                    failure = { errorMessage ->
-                        logger.error("Henting av grunnlag for sakId:$sakid feilet", errorMessage.throwable)
-                        null
-                    }
-                )?.response
+                    failure = { exception -> throw exception.throwable }
+                ).response
 
             return deserialize(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting av grunnlag for sakId:$sakid feilet", e)
+            logger.error("Henting av grunnlag for sakId:$sakid feilet")
             throw e
         }
     }

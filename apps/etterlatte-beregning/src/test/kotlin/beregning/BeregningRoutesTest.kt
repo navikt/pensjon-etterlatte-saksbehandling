@@ -10,6 +10,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.log
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
@@ -81,7 +82,7 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hent(any()) } returns null
 
         testApplication {
-            application { restModule { beregning(beregningService) } }
+            application { restModule(this.log) { beregning(beregningService) } }
 
             val response = client.get("/api/beregning/${randomUUID()}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -99,7 +100,7 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
 
         testApplication {
-            application { restModule { beregning(beregningService) } }
+            application { restModule(this.log) { beregning(beregningService) } }
 
             val response = client.get("/api/beregning/${beregning.behandlingId}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -128,7 +129,7 @@ internal class BeregningRoutesTest {
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
         testApplication {
-            application { restModule { beregning(beregningService) } }
+            application { restModule(this.log) { beregning(beregningService) } }
 
             val response = client.post("/api/beregning/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

@@ -29,18 +29,12 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
                     accessToken
                 ).mapBoth(
                     success = { json -> json },
-                    failure = { errorMessage ->
-                        logger.error(
-                            "Henting av beregning for behandling (behandlingId=$behandlingId) feilet",
-                            errorMessage.throwable
-                        )
-                        null
-                    }
-                )?.response
+                    failure = { error -> throw error.throwable }
+                ).response
 
             return deserialize(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting av beregning for behandling (behandlingId=$behandlingId) feilet", e)
+            logger.error("Henting av beregning for behandling (behandlingId=$behandlingId) feilet")
             throw e
         }
     }

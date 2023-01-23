@@ -32,6 +32,8 @@ spec:
     failureThreshold: 10
     periodSeconds: 5
     path: /isready
+  secureLogs:
+    enabled: true
   azure:
     application:
       enabled: true

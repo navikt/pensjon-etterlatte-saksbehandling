@@ -47,10 +47,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
-                    logger.error(
-                        "Klarte ikke hente ut vilkåårsvurdering for sak med id $behandlingId. ",
-                        it.lastError()
-                    )
+                    logger.error("Klarte ikke hente ut vilkåårsvurdering for sak med id $behandlingId.")
                     throw it.exceptions.last()
                 }
             }

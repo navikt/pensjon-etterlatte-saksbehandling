@@ -31,12 +31,16 @@ import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class ApplicationBuilder {
     private val config = ConfigFactory.load()
+    val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
@@ -71,7 +75,7 @@ class ApplicationBuilder {
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
-                apiModule {
+                restModule(sikkerLogg, routePrefix = "api") {
                     brevRoute(brevService, mottakerService)
                     vedtaksbrevRoute(vedtaksbrevService)
                     dokumentRoute(journalpostService)
@@ -95,7 +99,7 @@ class ApplicationBuilder {
             object : TypeReference<Map<String, String>>() {}
         )
     }
-    
+
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)
 
     fun start() = rapidsConnection.start()

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.ktor
 
+import com.fasterxml.jackson.databind.JsonMappingException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -10,6 +11,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.server.application.call
+import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -22,6 +24,8 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -57,7 +61,7 @@ class RestModuleTest {
     fun `skal sette opp to endepunkter med autentisering`() {
         testApplication {
             application {
-                restModule {
+                restModule(this.log) {
                     route1()
                     route2()
                 }
@@ -80,7 +84,7 @@ class RestModuleTest {
     fun `skal kunne lese og skrive json payload`() {
         testApplication {
             application {
-                restModule { route1() }
+                restModule(this.log) { route1() }
             }
 
             val testObjekt = TestObjektDto("test", 1)
@@ -101,7 +105,7 @@ class RestModuleTest {
     @Test
     fun `skal returnere internal server error og logge dersom noe feiler`() {
         testApplication {
-            application { restModule { route1() } }
+            application { restModule(this.log) { route1() } }
 
             val response = client.get("/test/fails") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -114,7 +118,7 @@ class RestModuleTest {
     @Test
     fun `skal svare paa helsesjekk uten autentisering`() {
         testApplication {
-            application { restModule { route1() } }
+            application { restModule(this.log) { route1() } }
 
             val response1 = client.get("/health/isalive")
             assertEquals(OK, response1.status)
@@ -122,6 +126,18 @@ class RestModuleTest {
             val response2 = client.get("/health/isready")
             assertEquals(OK, response2.status)
         }
+    }
+
+    @Test
+    fun `Skal finne deserialiseringsexceptions i nestede exceptions`() {
+        assertFalse(Exception("Hello").erDeserialiseringsException())
+        assertFalse(Exception("Hello", OutOfMemoryError()).erDeserialiseringsException())
+
+        val jacksonException = JsonMappingException("Error")
+        val wrappedException = java.lang.RuntimeException("Err", jacksonException)
+
+        assertTrue(jacksonException.erDeserialiseringsException())
+        assertTrue(wrappedException.erDeserialiseringsException())
     }
 
     private fun Route.route1() {

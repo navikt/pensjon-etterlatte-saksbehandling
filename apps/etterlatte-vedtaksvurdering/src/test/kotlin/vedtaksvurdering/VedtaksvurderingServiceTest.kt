@@ -111,7 +111,7 @@ internal class VedtaksvurderingServiceTest {
     }
 
     @Test
-    fun `hentDataForVedtak skal hente kun beregning hvis behandlingstypen er MANUELT_OPPHOER`() {
+    fun `hentDataForVedtak skal hente beregning og ikke vilkaaarsvurdering hvis behandlingstypen er MANUELT_OPPHOER`() {
         coEvery { behandlingMock.hentBehandling(any(), any()) } returns DetaljertBehandling(
             id = behandlingId,
             sak = 0,

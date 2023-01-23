@@ -92,14 +92,16 @@ const Beregningsgrunnlag = () => {
             <SoeskenContainer key={barn.foedselsnummer}>
               <Soesken person={barn} familieforhold={behandling.familieforhold!} />
               <Controller
-                name={`beregningsgrunnlag.${index}.skalBrukes`}
+                name={`beregningsgrunnlag.${index}`}
                 control={control}
                 render={(soesken) =>
                   behandles ? (
                     <RadioGroupRow
                       legend="Oppdras sammen"
-                      value={soesken.field.value ?? null}
-                      onChange={(value: boolean) => soesken.field.onChange(value)}
+                      value={soesken.field.value?.skalBrukes ?? null}
+                      onChange={(value: boolean) =>
+                        soesken.field.onChange({ foedselsnummer: barn.foedselsnummer, skalBrukes: value })
+                      }
                     >
                       <Radio value={true}>Ja</Radio>
                       <Radio value={false}>Nei</Radio>

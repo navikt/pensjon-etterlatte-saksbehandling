@@ -61,7 +61,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         query = "UPDATE vedtak SET datovirkfom = :datovirkfom, beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat WHERE behandlingId = :behandlingid", // ktlint-disable max-line-length
         params = mapOf(
             "datovirkfom" to Date.valueOf(virkningsDato),
-            "beregningsresultat" to objectMapper.writeValueAsString(beregningsresultat),
+            "beregningsresultat" to beregningsresultat?.let { objectMapper.writeValueAsString(it) },
             "vilkaarsresultat" to vilkaarsresultat?.let { objectMapper.writeValueAsString(it) },
             "behandlingid" to behandlingsId
         ),

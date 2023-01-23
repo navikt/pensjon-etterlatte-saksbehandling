@@ -31,7 +31,11 @@ const Beregningsgrunnlag = () => {
   const [beregningsgrunnlag, hentBeregningsgrunnlag] = useApiCall(hentSoeskenMedIBeregning)
   const [soeskenMedIBeregning, postSoeskenMedIBeregning] = useApiCall(lagreSoeskenMedIBeregning)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
-  const { control, handleSubmit, setValue } = useForm<{ beregningsgrunnlag: FormValues[] }>()
+  const { control, handleSubmit, setValue } = useForm<{ beregningsgrunnlag: FormValues[] }>({
+    defaultValues: {
+      beregningsgrunnlag: [],
+    },
+  })
 
   useEffect(() => {
     hentBeregningsgrunnlag(behandling.sak, (result) => {

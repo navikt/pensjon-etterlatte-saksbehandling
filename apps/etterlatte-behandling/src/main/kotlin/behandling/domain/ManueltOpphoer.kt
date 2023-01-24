@@ -69,11 +69,6 @@ data class ManueltOpphoer(
         }
 
         return hvisTilstandEr(listOf(BehandlingStatus.BEREGNET, BehandlingStatus.RETURNERT)) {
-            require(vilkaarUtfall != null)
-            if (status == BehandlingStatus.VILKAARSVURDERT) {
-                require(vilkaarUtfall == VilkaarsvurderingUtfall.IKKE_OPPFYLT)
-            }
-
             endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
         }
     }

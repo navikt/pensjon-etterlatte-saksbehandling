@@ -9,6 +9,6 @@ class VirkningstidspunktTestData {
 
     companion object {
         fun virkningstidsunkt(dato: YearMonth = YearMonth.now()) =
-            Virkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler("Z12345678", Instant.now()))
+            Virkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler("Z12345678", Instant.now()), "begrunnelse")
     }
 }

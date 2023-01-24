@@ -36,9 +36,15 @@ data class Foerstegangsbehandling(
         endreTilStatus(BehandlingStatus.OPPRETTET).copy(gyldighetsproeving = gyldighetsResultat)
     }
 
-    fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler) =
+    fun oppdaterVirkningstidspunkt(dato: YearMonth, kilde: Grunnlagsopplysning.Saksbehandler, begrunnelse: String) =
         hvisRedigerbar {
-            endreTilStatus(BehandlingStatus.OPPRETTET).copy(virkningstidspunkt = Virkningstidspunkt(dato, kilde))
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(
+                virkningstidspunkt = Virkningstidspunkt(
+                    dato,
+                    kilde,
+                    begrunnelse
+                )
+            )
         }
 
     fun oppdaterKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode): Foerstegangsbehandling = hvisRedigerbar {

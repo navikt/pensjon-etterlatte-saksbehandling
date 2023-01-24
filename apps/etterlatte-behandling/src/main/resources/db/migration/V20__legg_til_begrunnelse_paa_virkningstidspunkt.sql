@@ -1,0 +1,1 @@
+UPDATE behandling SET virkningstidspunkt = jsonb_set(virkningstidspunkt::jsonb, '{begrunnelse}', '""')

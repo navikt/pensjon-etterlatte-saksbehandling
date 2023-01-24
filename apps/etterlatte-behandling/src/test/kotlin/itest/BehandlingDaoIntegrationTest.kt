@@ -49,8 +49,8 @@ internal class BehandlingDaoIntegrationTest {
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
 
     private lateinit var dataSource: DataSource
-    lateinit var sakRepo: SakDao
-    lateinit var behandlingRepo: BehandlingDao
+    private lateinit var sakRepo: SakDao
+    private lateinit var behandlingRepo: BehandlingDao
 
     @BeforeAll
     fun beforeAll() {
@@ -159,7 +159,8 @@ internal class BehandlingDaoIntegrationTest {
                 virkDato,
                 Grunnlagsopplysning.Saksbehandler.create(
                     saksbehandlerToken
-                )
+                ),
+                "begrunnelse"
             )
         )
         val lagretBehandling = behandlingRepo.opprettManueltOpphoer(behandling)
@@ -289,7 +290,8 @@ internal class BehandlingDaoIntegrationTest {
                 YearMonth.of(2022, 8),
                 Grunnlagsopplysning.Saksbehandler.create(
                     saksbehandlerToken
-                )
+                ),
+                "begrunnelse"
             )
         ).also {
             behandlingRepo.opprettManueltOpphoer(it)
@@ -545,11 +547,11 @@ internal class BehandlingDaoIntegrationTest {
 
         val saksbehandler = Grunnlagsopplysning.Saksbehandler("navIdent", Instant.now())
         val nyDato = YearMonth.of(2021, 2)
-        behandling.oppdaterVirkningstidspunkt(nyDato, saksbehandler).let {
+        behandling.oppdaterVirkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse").let {
             behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.virkningstidspunkt!!)
         }
 
-        val expected = Virkningstidspunkt(nyDato, saksbehandler)
+        val expected = Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse")
         with(behandlingRepo.hentBehandling(behandling.id)) {
             val actual = (this as Foerstegangsbehandling).virkningstidspunkt
             assertEquals(expected, actual)
@@ -650,12 +652,12 @@ internal class BehandlingDaoIntegrationTest {
         val saksbehandler = Grunnlagsopplysning.Saksbehandler("saksbehandler01", Tidspunkt.now().instant)
 
         val kommerBarnetTilgode = KommerBarnetTilgode(JaNeiVetIkke.JA, "", saksbehandler)
-        val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler)
+        val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "")
         val gyldighetsResultat = GyldighetsResultat(VurderingsResultat.OPPFYLT, listOf(), LocalDateTime.now())
 
         foerstegangsbehandling
             .oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde)
+            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "")
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .let {

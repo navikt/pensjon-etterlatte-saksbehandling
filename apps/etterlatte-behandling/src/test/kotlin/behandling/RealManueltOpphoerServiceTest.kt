@@ -155,7 +155,8 @@ internal class RealManueltOpphoerServiceTest {
                         YearMonth.of(2022, 8),
                         Grunnlagsopplysning.Saksbehandler.create(
                             saksbehandlerToken
-                        )
+                        ),
+                        "begrunnelse"
                     )
                 ),
                 revurdering(
@@ -164,7 +165,8 @@ internal class RealManueltOpphoerServiceTest {
                     persongalleri = Persongalleri(soeker = brukerFnr),
                     virkningstidspunkt = Virkningstidspunkt(
                         YearMonth.of(2022, 10),
-                        Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken)
+                        Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken),
+                        "begrunnelse"
                     ),
                     revurderingAarsak = RevurderingAarsak.SOEKER_DOD
                 ),
@@ -174,7 +176,8 @@ internal class RealManueltOpphoerServiceTest {
                     persongalleri = Persongalleri(soeker = brukerFnr),
                     virkningstidspunkt = Virkningstidspunkt(
                         YearMonth.of(2022, 5),
-                        Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken)
+                        Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken),
+                        "begrunnelse"
                     ),
                     revurderingAarsak = RevurderingAarsak.SOEKER_DOD
                 )

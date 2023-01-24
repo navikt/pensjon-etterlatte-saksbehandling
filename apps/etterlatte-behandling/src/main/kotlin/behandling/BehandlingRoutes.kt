@@ -105,7 +105,12 @@ internal fun Route.behandlingRoutes(
 
             try {
                 val virkningstidspunkt =
-                    foerstegangsbehandlingService.lagreVirkningstidspunkt(behandlingsId, body.dato, navIdent)
+                    foerstegangsbehandlingService.lagreVirkningstidspunkt(
+                        behandlingsId,
+                        body.dato,
+                        navIdent,
+                        body.begrunnelse!!
+                    )
 
                 call.respondText(
                     contentType = ContentType.Application.Json,
@@ -339,7 +344,7 @@ data class LagretHendelser(
 
 data class ManueltOpphoerResponse(val behandlingId: String)
 
-data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String) {
+data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String, val begrunnelse: String?) {
     val dato: YearMonth = try {
         LocalDate.ofInstant(Instant.parse(_dato), norskTidssone).let {
             YearMonth.of(it.year, it.month)
@@ -348,7 +353,7 @@ data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: St
         throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
     }
 
-    fun isValid() = dato.year in (0..9999)
+    fun isValid() = dato.year in (0..9999) && begrunnelse != null
 }
 
 internal data class FastsettVirkningstidspunktResponse(

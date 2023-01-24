@@ -68,9 +68,13 @@ class FoerstegangsbehandlingAggregat(
             .also { behandlinger.lagreStatus(it) }
     }
 
-    fun lagreVirkningstidspunkt(yearMonth: YearMonth, ident: String): Virkningstidspunkt {
+    fun lagreVirkningstidspunkt(yearMonth: YearMonth, ident: String, begrunnelse: String): Virkningstidspunkt {
         lagretBehandling =
-            lagretBehandling.oppdaterVirkningstidspunkt(yearMonth, Grunnlagsopplysning.Saksbehandler.create(ident))
+            lagretBehandling.oppdaterVirkningstidspunkt(
+                yearMonth,
+                Grunnlagsopplysning.Saksbehandler.create(ident),
+                begrunnelse
+            )
                 .also { behandlinger.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!) }
                 .also { behandlinger.lagreStatus(it) }
 

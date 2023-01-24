@@ -163,7 +163,9 @@ class VedtaksvurderingService(
             if (it.type == VedtakType.INNVILGELSE) {
                 if (it.beregning == null) throw VedtakKanIkkeFattes(v)
             }
-            if (it.vilkaarsvurdering == null) throw VedtakKanIkkeFattes(v)
+            if (it.vilkaarsvurdering == null && it.behandling.type != BehandlingType.MANUELT_OPPHOER) {
+                throw VedtakKanIkkeFattes(v)
+            }
             val saksbehandlerEnhet = saksbehandlere[saksbehandler]
                 ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
 

@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 
 private const val NORGE = "NOR"
 
@@ -47,7 +48,9 @@ enum class FordelerKriterie(val forklaring: String) {
     GJENLEVENDE_HAR_IKKE_FORELDREANSVAR("Gjenlevende søker har ikke foreldreanvar"),
     GJENLEVENDE_HAR_ADRESSEBESKYTTELSE("Gjenlevende har adressebeskyttelse"),
 
-    INNSENDER_ER_IKKE_FORELDER("Søker er ikke markert som forelder i søknaden")
+    INNSENDER_ER_IKKE_FORELDER("Søker er ikke markert som forelder i søknaden"),
+
+    SOEKNAD_ER_IKKE_PAA_BOKMAAL("Søknaden er ikke sendt inn på bokmål")
 }
 
 class FordelerKriterier {
@@ -102,7 +105,11 @@ class FordelerKriterier {
         Kriterie(FordelerKriterie.GJENLEVENDE_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(gjenlevende) },
 
         // Innsender
-        Kriterie(FordelerKriterie.INNSENDER_ER_IKKE_FORELDER) { innsenderIkkeForelder(it) }
+        Kriterie(FordelerKriterie.INNSENDER_ER_IKKE_FORELDER) { innsenderIkkeForelder(it) },
+
+        Kriterie(FordelerKriterie.SOEKNAD_ER_IKKE_PAA_BOKMAAL) {
+            it.spraak != Spraak.NB
+        }
     )
 
     private fun ikkeForelderTilBarn(avdoed: Person, barn: Person): Boolean {

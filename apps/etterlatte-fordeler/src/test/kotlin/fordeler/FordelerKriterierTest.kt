@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.mockUgyldigAdresse
@@ -71,6 +72,48 @@ internal class FordelerKriterierTest {
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_FOR_GAMMELT))
+    }
+
+    @Test
+    fun `Skal godta bokmål som språk`() {
+        val barn = mockPerson(
+            foedselsaar = now().year - 15,
+            foedselsdato = now().minusYears(15)
+        )
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertFalse(fordelerResultat.forklaring.contains(FordelerKriterie.SOEKNAD_ER_IKKE_PAA_BOKMAAL))
+    }
+
+    @Test
+    fun `Skal ikke godta nynorsk som språk`() {
+        val barn = mockPerson(
+            foedselsaar = now().year - 15,
+            foedselsdato = now().minusYears(15)
+        )
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
+        val bp = BARNEPENSJON_SOKNAD.copy(spraak = Spraak.NN)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, bp)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.SOEKNAD_ER_IKKE_PAA_BOKMAAL))
+    }
+
+    @Test
+    fun `Skal ikke godta engelsk som språk`() {
+        val barn = mockPerson(
+            foedselsaar = now().year - 15,
+            foedselsdato = now().minusYears(15)
+        )
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
+        val bp = BARNEPENSJON_SOKNAD.copy(spraak = Spraak.EN)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, bp)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.SOEKNAD_ER_IKKE_PAA_BOKMAAL))
     }
 
     @Test

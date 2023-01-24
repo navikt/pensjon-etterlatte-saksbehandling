@@ -89,7 +89,7 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `Skal ikke godta engelsk som språk`() {
+    fun `Skal ikke godta nynorsk som språk`() {
         val barn = mockPerson(
             foedselsaar = now().year - 15,
             foedselsdato = now().minusYears(15)
@@ -103,7 +103,7 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `Skal ikke godta nynorsk som språk`() {
+    fun `Skal ikke godta engelsk som språk`() {
         val barn = mockPerson(
             foedselsaar = now().year - 15,
             foedselsdato = now().minusYears(15)

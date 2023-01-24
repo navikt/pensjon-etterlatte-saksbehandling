@@ -24,7 +24,13 @@ interface FoerstegangsbehandlingService {
     ): Foerstegangsbehandling
 
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
-    fun lagreVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt
+    fun lagreVirkningstidspunkt(
+        behandlingId: UUID,
+        dato: YearMonth,
+        ident: String,
+        begrunnelse: String
+    ): Virkningstidspunkt
+
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
     fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true, utfall: VilkaarsvurderingUtfall?)
@@ -74,9 +80,15 @@ class RealFoerstegangsbehandlingService(
         }
     }
 
-    override fun lagreVirkningstidspunkt(behandlingId: UUID, dato: YearMonth, ident: String): Virkningstidspunkt {
+    override fun lagreVirkningstidspunkt(
+        behandlingId: UUID,
+        dato: YearMonth,
+        ident: String,
+        begrunnelse: String
+    ): Virkningstidspunkt {
         return inTransaction {
-            foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId).lagreVirkningstidspunkt(dato, ident)
+            foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId)
+                .lagreVirkningstidspunkt(dato, ident, begrunnelse)
         }
     }
 
@@ -90,6 +102,7 @@ class RealFoerstegangsbehandlingService(
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
         hentFoerstegangsbehandling(behandlingId).tilOpprettet().lagreEndring(dryRun)
     }
+
     override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean, utfall: VilkaarsvurderingUtfall?) {
         val behandling = hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert(utfall)
 

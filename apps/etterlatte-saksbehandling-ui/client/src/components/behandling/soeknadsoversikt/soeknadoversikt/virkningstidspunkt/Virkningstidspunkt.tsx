@@ -1,8 +1,7 @@
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
-import { Alert, Button, Heading, Label } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Label, Textarea } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
-import { GyldighetIcon } from '~shared/icons/gyldigIcon'
 import { oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { Calender, Edit } from '@navikt/ds-icons'
 import { RedigerWrapper } from '../kommerBarnetTilgode/KommerBarnetTilGodeVurdering'
@@ -10,17 +9,19 @@ import { formaterStringDato, formaterStringTidspunkt } from '~utils/formattering
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {
-  Infoboks,
+  Beskrivelse,
+  InfoElement,
+  InfoWrapper,
   InfobokserWrapper,
-  SoeknadOversiktWrapper,
   Undertekst,
-  VurderingsContainer,
+  VurderingsContainerWrapper,
   VurderingsTitle,
 } from '../../styled'
 import { useAppDispatch } from '~store/Store'
+import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { addMonths } from 'date-fns'
+import { Soeknadsvurdering } from '../SoeknadsVurdering'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { IDetaljertBehandling, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
-import { addMonths } from "date-fns";
 
 export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
   return (
@@ -34,12 +35,11 @@ export const Info = ({ tekst, label }: { tekst: string; label: string }) => {
 }
 
 interface Props {
+  behandlingId: string
   redigerbar: boolean
-  behandling: IDetaljertBehandling
   virkningstidspunkt: Virkningstidspunkt | null
   avdoedDoedsdato: string | undefined
   soeknadMottattDato: string
-  behandlingId: string
 }
 
 const Virkningstidspunkt = (props: Props) => {
@@ -50,6 +50,8 @@ const Virkningstidspunkt = (props: Props) => {
     props.virkningstidspunkt ? new Date(props.virkningstidspunkt.dato) : null
   )
   const [virkningstidspunkt, fastsettVirkningstidspunktRequest] = useApiCall(fastsettVirkningstidspunkt)
+  const [begrunnelse, setBegrunnelse] = useState<string>(props.virkningstidspunkt?.begrunnelse ?? '')
+  const [begrunnelseError, setBegrunnelseError] = useState<string>()
 
   const datepickerRef: any = useRef(null)
   const toggleDatepicker = () => {
@@ -59,32 +61,36 @@ const Virkningstidspunkt = (props: Props) => {
 
   return (
     <>
-      <Heading size={'medium'} level={'2'}>
-        Virkningstidspunkt
-      </Heading>
-      <SoeknadOversiktWrapper>
-        <InfobokserWrapper>
-          <Infoboks>
-            Barnepensjon innvilges tidligst fra og med måneden etter dødsfall, og kan gis for opptil tre år før måneden
-            kravet ble satt fram
-          </Infoboks>
-          <Info label="Dødsdato" tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''} />
-          <Info label="Søknad mottatt" tekst={formaterStringDato(props.soeknadMottattDato)} />
-          <Info
-            label="Virkningstidspunkt"
-            tekst={props.virkningstidspunkt ? formaterStringDato(props.virkningstidspunkt.dato) : 'Ikke vurdert'}
-          />
-        </InfobokserWrapper>
+      <Soeknadsvurdering
+        tittel="Virkningstidspunkt"
+        vurderingsResultat={
+          props.virkningstidspunkt !== null ? VurderingsResultat.OPPFYLT : VurderingsResultat.IKKE_OPPFYLT
+        }
+        hjemler={[
+          { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12', tittel: 'Folketrygdeloven § 22-12 første ledd' },
+          { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-13', tittel: '§ 22-13 fjerde ledd' },
+        ]}
+        status={Boolean(formData) ? 'success' : 'warning'}
+      >
+        <div>
+          <Beskrivelse>
+            Barnepensjon innvilges som hovedregel fra og med måneden etter dødsfall, men kan gis for opptil tre år før
+            den måneden da kravet ble satt fram.
+          </Beskrivelse>
+          <InfobokserWrapper>
+            <InfoWrapper>
+              <Info label="Dødsdato" tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''} />
+              <Info label="Søknad mottatt" tekst={formaterStringDato(props.soeknadMottattDato)} />
+              <Info
+                label="Virkningstidspunkt"
+                tekst={props.virkningstidspunkt ? formaterStringDato(props.virkningstidspunkt.dato) : 'Ikke vurdert'}
+              />
+            </InfoWrapper>
+          </InfobokserWrapper>
+        </div>
 
-        <VurderingsContainer>
+        <VurderingsContainerWrapper>
           <div>
-            <GyldighetIcon
-              status={props.virkningstidspunkt !== null ? VurderingsResultat.OPPFYLT : VurderingsResultat.IKKE_OPPFYLT}
-              large
-            />
-          </div>
-          <div>
-            <VurderingsTitle title={'Virkningstidspunkt'} />
             <div>
               {rediger ? (
                 <>
@@ -116,14 +122,43 @@ const Virkningstidspunkt = (props: Props) => {
                     </KalenderIkon>
                   </Datovelger>
 
+                  <Textarea
+                    style={{ padding: '10px', marginBottom: '10px' }}
+                    label="Begrunnelse"
+                    hideLabel={false}
+                    placeholder="Forklar begrunnelsen"
+                    value={begrunnelse}
+                    onChange={(e) => {
+                      const oppdatertBegrunnelse = e.target.value
+
+                      setBegrunnelse(oppdatertBegrunnelse)
+                      oppdatertBegrunnelse.length > 10 && setBegrunnelseError(undefined)
+                    }}
+                    minRows={3}
+                    size="small"
+                    error={begrunnelseError ? begrunnelseError : false}
+                    autoComplete="off"
+                  />
+
                   <ButtonContainer>
                     <Button
                       onClick={() => {
                         if (!formData) return
-                        fastsettVirkningstidspunktRequest({ dato: formData, id: props.behandlingId }, (res) => {
-                          dispatch(oppdaterVirkningstidspunkt(res))
-                          setRediger(false)
-                        })
+
+                        const begrunnelseErr =
+                          begrunnelse.length < 11 ? 'Begrunnelsen må være minst 10 tegn' : undefined
+
+                        setBegrunnelseError(begrunnelseErr)
+
+                        if (begrunnelseErr === undefined) {
+                          fastsettVirkningstidspunktRequest(
+                            { dato: formData, id: props.behandlingId, begrunnelse: begrunnelse },
+                            (res) => {
+                              dispatch(oppdaterVirkningstidspunkt(res))
+                              setRediger(false)
+                            }
+                          )
+                        }
                       }}
                       loading={isPending(virkningstidspunkt)}
                       size="small"
@@ -143,27 +178,37 @@ const Virkningstidspunkt = (props: Props) => {
                 <div>
                   {props.virkningstidspunkt ? (
                     <>
+                      <VurderingsTitle title={'Virkningstidspunkt'} />
+
                       <Undertekst $gray>Manuelt av {props.virkningstidspunkt.kilde.ident}</Undertekst>
                       <Undertekst $gray spacing>
                         {`Sist endret ${formaterStringDato(
                           props.virkningstidspunkt.kilde.tidspunkt
                         )} kl.${formaterStringTidspunkt(props.virkningstidspunkt.kilde.tidspunkt)}`}
                       </Undertekst>
+
+                      <Heading size="xsmall" level={'3'}>
+                        Begrunnelse
+                      </Heading>
+                      <BodyShort size="small">{props.virkningstidspunkt.begrunnelse}</BodyShort>
+
+                      {props.redigerbar && (
+                        <RedigerWrapper onClick={() => setRediger(true)}>
+                          <Edit /> Rediger
+                        </RedigerWrapper>
+                      )}
                     </>
                   ) : (
-                    <Undertekst $gray>Ikke vurdert</Undertekst>
-                  )}
-                  {props.redigerbar && (
                     <RedigerWrapper onClick={() => setRediger(true)}>
-                      <Edit /> Rediger
+                      <Button variant="secondary">Legg til vurdering</Button>
                     </RedigerWrapper>
                   )}
                 </div>
               )}
             </div>
           </div>
-        </VurderingsContainer>
-      </SoeknadOversiktWrapper>
+        </VurderingsContainerWrapper>
+      </Soeknadsvurdering>
     </>
   )
 }
@@ -176,10 +221,6 @@ const ButtonContainer = styled.div`
   display: flex;
   gap: 8px;
   margin-top: 16px;
-`
-
-const InfoElement = styled.div`
-  margin: 0 8px;
 `
 
 const Datovelger = styled.div`

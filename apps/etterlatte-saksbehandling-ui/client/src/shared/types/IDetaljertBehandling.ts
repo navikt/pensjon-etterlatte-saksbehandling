@@ -81,6 +81,7 @@ export interface IVilkaarsproving {
 export interface Virkningstidspunkt {
   dato: string
   kilde: KildeSaksbehandler
+  begrunnelse: string
 }
 
 export enum VilkaarsType {

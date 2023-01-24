@@ -6,7 +6,7 @@ export const Innhold = styled.div`
 `
 
 export const SoeknadOversiktWrapper = styled.div`
-  padding: 1em 1em 1em 0em;
+  padding: 0em 1em 1em 0em;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -36,14 +36,13 @@ export const Infoboks = styled.div`
 `
 
 export const InfoWrapper = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-
-  > * {
-    width: 180px;
-  }
-
+  display: flex;
   flex-grow: 1;
+  flex-wrap: wrap;
+`
+
+export const InfoElement = styled.div`
+  min-width: 10em;
 `
 
 export const Undertekst = styled(BodyShort)<{ $gray: boolean }>`
@@ -131,4 +130,13 @@ export const DashedBorder = styled.div`
   width: 100%;
   padding: 1px;
   margin-bottom: 1em;
+`
+
+export const VurderingsContainerWrapper = styled(VurderingsContainer)`
+  padding-left: 20px;
+`
+
+export const Beskrivelse = styled.div`
+  margin: 10px 0;
+  max-width: 41em;
 `

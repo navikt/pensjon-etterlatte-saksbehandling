@@ -34,7 +34,6 @@ export const Soeknadsoversikt = () => {
           <>
             <OversiktKommerBarnetTilgode kommerBarnetTilgode={behandling.kommerBarnetTilgode} redigerbar={behandles} />
             <Virkningstidspunkt
-              behandling={behandling}
               redigerbar={behandles}
               virkningstidspunkt={behandling.virkningstidspunkt}
               avdoedDoedsdato={behandling.familieforhold?.avdoede?.opplysning?.doedsdato}

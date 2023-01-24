@@ -14,7 +14,6 @@ import { svarTilTotalResultat } from './utils'
 import { Delete } from '@navikt/ds-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterStringDato } from '~utils/formattering'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { ISvar } from '~shared/types/ISvar'
 
 type Props = {
@@ -72,10 +71,7 @@ export const Resultat: React.FC<Props> = ({
     setKommentar('')
   }
 
-  const status =
-    vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
-      ? VurderingsResultat.OPPFYLT
-      : VurderingsResultat.IKKE_OPPFYLT
+  const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'
 
   return (
     <>
@@ -89,7 +85,7 @@ export const Resultat: React.FC<Props> = ({
           {vilkaarsvurdering.resultat && (
             <ContentWrapper>
               <TekstWrapper>
-                <StatusIcon status={status} noLeftPadding /> {`${resultatTekst()}`}
+                <StatusIcon status={status} /> {`${resultatTekst()}`}
               </TekstWrapper>
               {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
                 <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(virkningstidspunktDato)}</BodyShort>

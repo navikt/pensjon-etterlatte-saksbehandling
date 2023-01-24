@@ -79,7 +79,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
+                Grunnlagsopplysning.Saksbehandler("ident", Instant.now()),
+                "begrunnelse"
             ),
             kommerBarnetTilgode = null,
             vilkaarUtfall = null
@@ -115,7 +116,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
+                Grunnlagsopplysning.Saksbehandler("ident", Instant.now()),
+                "begrunnelse"
             ),
             kommerBarnetTilgode = null,
             vilkaarUtfall = null

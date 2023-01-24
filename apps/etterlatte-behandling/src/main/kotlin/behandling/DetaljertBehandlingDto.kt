@@ -27,10 +27,10 @@ data class DetaljertBehandlingDto(
     val attestant: String?,
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: Virkningstidspunkt?,
-    val status: BehandlingStatus?,
+    val status: BehandlingStatus,
     val hendelser: List<LagretHendelse>?,
     val familieforhold: Familieforhold?,
-    val behandlingType: BehandlingType?,
+    val behandlingType: BehandlingType,
     val søker: Person?,
     val kommerBarnetTilgode: KommerBarnetTilgode?
 )

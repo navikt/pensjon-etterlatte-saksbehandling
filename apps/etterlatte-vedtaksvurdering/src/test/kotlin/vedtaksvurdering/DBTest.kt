@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -152,7 +153,7 @@ internal class DBTest {
             null,
             null,
             null,
-            null,
+            BehandlingStatus.OPPRETTET,
             BehandlingType.FØRSTEGANGSBEHANDLING,
             null,
             null

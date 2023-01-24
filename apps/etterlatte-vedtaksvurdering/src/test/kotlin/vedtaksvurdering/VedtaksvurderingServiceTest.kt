@@ -5,6 +5,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -126,7 +127,7 @@ internal class VedtaksvurderingServiceTest {
             avdoed = listOf(),
             soesken = listOf(),
             gyldighetsproeving = null,
-            status = null,
+            status = BehandlingStatus.OPPRETTET,
             behandlingType = BehandlingType.MANUELT_OPPHOER,
             virkningstidspunkt = null,
             kommerBarnetTilgode = null,

@@ -93,7 +93,7 @@ class VilkaarsvurderingService(
         val (behandling, grunnlag, sak) = hentDataForVilkaarsvurdering(behandlingId, accessToken)
 
         val sakType = sak.sakType
-        val behandlingType = requireNotNull(behandling.behandlingType)
+        val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt
             ?: throw VirkningstidspunktIkkeSattException("Virkningstidspunkt ikke satt for behandling $behandlingId")
 

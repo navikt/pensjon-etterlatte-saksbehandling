@@ -57,7 +57,7 @@ data class OppgaveListeDto(
 data class OppgaveDTO(
     val behandlingId: UUID,
     val sakId: Long,
-    val status: BehandlingStatus?,
+    val status: BehandlingStatus,
     val oppgaveStatus: OppgaveStatus?,
     val soeknadType: String,
     val behandlingType: BehandlingType,

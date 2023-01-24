@@ -96,7 +96,7 @@ class BeregningService(
         behandling: DetaljertBehandling,
         vilkaarsvurdering: VilkaarsvurderingDto
     ): Beregning {
-        val behandlingType = requireNotNull(behandling.behandlingType)
+        val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
         val beregningsgrunnlag = opprettBeregningsgrunnlag(requireNotNull(grunnlag.sak.hentSoeskenjustering()))
 

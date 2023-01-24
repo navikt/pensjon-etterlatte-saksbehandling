@@ -11,11 +11,8 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -53,10 +50,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     vilkaar.grunnlag?.forEach { grunnlag ->
                         lagreGrunnlag(vilkaarId, grunnlag, tx)
                     }
-                    delvilkaarRepository.lagreDelvilkaar(vilkaarId, vilkaar.hovedvilkaar, true, tx)
-                    vilkaar.unntaksvilkaar?.forEach { unntaksvilkaar ->
-                        delvilkaarRepository.lagreDelvilkaar(vilkaarId, unntaksvilkaar, false, tx)
-                    }
+                    delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
                 }
             }
         }.let { hentNonNull(vilkaarsvurdering.behandlingId) }
@@ -135,18 +129,13 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     query.map { row ->
                         val vilkaarId = row.uuid("id")
                         row.toVilkaar(
-                            hovedvilkaar = hentDelvilkaar(vilkaarId, true, session).first(),
-                            unntaksvilkaar = hentDelvilkaar(vilkaarId, false, session),
+                            hovedvilkaar = delvilkaarRepository.hentDelvilkaar(vilkaarId, true, session).first(),
+                            unntaksvilkaar = delvilkaarRepository.hentDelvilkaar(vilkaarId, false, session),
                             grunnlag = hentGrunnlag(vilkaarId, session)
                         )
                     }.asList
                 ).sortedBy { it.hovedvilkaar.type.rekkefoelge }
             }
-
-    private fun hentDelvilkaar(vilkaarId: UUID, hovedvilkaar: Boolean, session: Session): List<Delvilkaar> =
-        queryOf(Queries.hentDelvilkaar, mapOf("vilkaar_id" to vilkaarId, "hovedvilkaar" to hovedvilkaar))
-            .let { query -> session.run(query.map { row -> row.toDelvilkaar() }.asList) }
-            .sortedBy { it.type.rekkefoelge }
 
     private fun hentGrunnlag(vilkaarId: UUID, session: Session): List<Vilkaarsgrunnlag<JsonNode>> =
         queryOf(Queries.hentGrunnlag, mapOf("vilkaar_id" to vilkaarId))
@@ -235,20 +224,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             grunnlag = grunnlag
         )
 
-    private fun Row.toDelvilkaar() =
-        Delvilkaar(
-            type = VilkaarType.valueOf(string("vilkaar_type")),
-            tittel = string("tittel"),
-            beskrivelse = stringOrNull("beskrivelse"),
-            lovreferanse = Lovreferanse(
-                paragraf = string("paragraf"),
-                ledd = intOrNull("ledd"),
-                bokstav = stringOrNull("bokstav"),
-                lenke = stringOrNull("lenke")
-            ),
-            resultat = stringOrNull("resultat")?.let { Utfall.valueOf(it) }
-        )
-
     private fun Row.toGrunnlag(): Vilkaarsgrunnlag<JsonNode> =
         Vilkaarsgrunnlag(
             id = uuid("id"),
@@ -296,11 +271,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         const val hentVilkaar = """
             SELECT id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler FROM vilkaar 
             WHERE vilkaarsvurdering_id = :vilkaarsvurdering_id
-        """
-
-        const val hentDelvilkaar = """
-            SELECT vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, paragraf, ledd, bokstav, lenke, resultat 
-            FROM delvilkaar WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar = :hovedvilkaar
         """
 
         const val hentGrunnlag = """

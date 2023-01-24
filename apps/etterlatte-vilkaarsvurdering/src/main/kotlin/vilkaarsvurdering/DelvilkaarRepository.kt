@@ -1,9 +1,15 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import kotliquery.Row
+import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Unntaksvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import java.util.*
 
 internal class DelvilkaarRepository {
@@ -77,13 +83,16 @@ internal class DelvilkaarRepository {
         }
     }
 
-    internal fun lagreDelvilkaar(
+    private fun lagreDelvilkaar(
         vilkaarId: UUID,
         unntaksvilkaar: Unntaksvilkaar,
         hovedvilkaar: Boolean,
         tx: TransactionalSession
     ) = queryOf(
-        statement = lagreDelvilkaar,
+        statement = """
+            INSERT INTO delvilkaar(vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, paragraf, ledd, bokstav, lenke, resultat) 
+            VALUES(:vilkaar_id, :vilkaar_type, :hovedvilkaar, :tittel, :beskrivelse, :paragraf, :ledd, :bokstav, :lenke, :resultat)
+        """,
         paramMap = mapOf(
             "vilkaar_id" to vilkaarId,
             "vilkaar_type" to unntaksvilkaar.type.name,
@@ -98,10 +107,16 @@ internal class DelvilkaarRepository {
         )
     ).let { tx.run(it.asExecute) }
 
-    val lagreDelvilkaar = """
-            INSERT INTO delvilkaar(vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, paragraf, ledd, bokstav, lenke, resultat) 
-            VALUES(:vilkaar_id, :vilkaar_type, :hovedvilkaar, :tittel, :beskrivelse, :paragraf, :ledd, :bokstav, :lenke, :resultat)
-        """
+    internal fun hentDelvilkaar(vilkaarId: UUID, hovedvilkaar: Boolean, session: Session): List<Delvilkaar> =
+        queryOf(
+            """
+            SELECT vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, paragraf, ledd, bokstav, lenke, resultat 
+            FROM delvilkaar WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar = :hovedvilkaar
+        """,
+            mapOf("vilkaar_id" to vilkaarId, "hovedvilkaar" to hovedvilkaar)
+        )
+            .let { query -> session.run(query.map { row -> row.toDelvilkaar() }.asList) }
+            .sortedBy { it.type.rekkefoelge }
 
     internal fun slettDelvilkaarResultat(vilkaarId: UUID, tx: TransactionalSession) {
         queryOf(
@@ -113,5 +128,26 @@ internal class DelvilkaarRepository {
             mapOf("vilkaar_id" to vilkaarId)
         )
             .let { tx.run(it.asUpdate) }
+    }
+
+    private fun Row.toDelvilkaar() =
+        Delvilkaar(
+            type = VilkaarType.valueOf(string("vilkaar_type")),
+            tittel = string("tittel"),
+            beskrivelse = stringOrNull("beskrivelse"),
+            lovreferanse = Lovreferanse(
+                paragraf = string("paragraf"),
+                ledd = intOrNull("ledd"),
+                bokstav = stringOrNull("bokstav"),
+                lenke = stringOrNull("lenke")
+            ),
+            resultat = stringOrNull("resultat")?.let { Utfall.valueOf(it) }
+        )
+
+    internal fun opprettVilkaarsvurdering(vilkaarId: UUID, vilkaar: Vilkaar, tx: TransactionalSession) {
+        lagreDelvilkaar(vilkaarId, vilkaar.hovedvilkaar, true, tx)
+        vilkaar.unntaksvilkaar?.forEach { unntaksvilkaar ->
+            lagreDelvilkaar(vilkaarId, unntaksvilkaar, false, tx)
+        }
     }
 }

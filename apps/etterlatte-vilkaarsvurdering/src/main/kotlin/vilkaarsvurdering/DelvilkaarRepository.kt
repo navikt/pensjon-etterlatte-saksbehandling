@@ -14,6 +14,19 @@ import java.util.*
 
 internal class DelvilkaarRepository {
 
+    internal fun oppdaterDelvilkaar(vurdertVilkaar: VurdertVilkaar, tx: TransactionalSession) {
+        lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vurdertVilkaar.hovedvilkaar, tx)
+        settAndreOppfylteDelvilkaarSomIkkeOppfylt(vurdertVilkaar.vilkaarId, tx)
+        vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
+            lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
+        }
+        // Alle unntaksvilkår settes til IKKE_OPPFYLT hvis ikke hovedvilkår eller unntaksvilkår er oppfylt
+        // Dvs. vilkåret er ikke oppfylt og ingen av unntaka treffer
+        if (vurdertVilkaar.hovedvilkaarOgUnntaksvilkaarIkkeOppfylt()) {
+            settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(vurdertVilkaar, tx)
+        }
+    }
+
     private fun lagreDelvilkaarResultat(
         vilkaarId: UUID,
         vilkaarTypeOgUtfall: VilkaarTypeOgUtfall,
@@ -67,16 +80,10 @@ internal class DelvilkaarRepository {
         ).let { tx.run(it.asUpdate) }
     }
 
-    internal fun oppdaterDelvilkaar(vurdertVilkaar: VurdertVilkaar, tx: TransactionalSession) {
-        lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vurdertVilkaar.hovedvilkaar, tx)
-        settAndreOppfylteDelvilkaarSomIkkeOppfylt(vurdertVilkaar.vilkaarId, tx)
-        vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
-            lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
-        }
-        // Alle unntaksvilkår settes til IKKE_OPPFYLT hvis ikke hovedvilkår eller unntaksvilkår er oppfylt
-        // Dvs. vilkåret er ikke oppfylt og ingen av unntaka treffer
-        if (vurdertVilkaar.hovedvilkaarOgUnntaksvilkaarIkkeOppfylt()) {
-            settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(vurdertVilkaar, tx)
+    internal fun opprettVilkaarsvurdering(vilkaarId: UUID, vilkaar: Vilkaar, tx: TransactionalSession) {
+        lagreDelvilkaar(vilkaarId, vilkaar.hovedvilkaar, true, tx)
+        vilkaar.unntaksvilkaar?.forEach { unntaksvilkaar ->
+            lagreDelvilkaar(vilkaarId, unntaksvilkaar, false, tx)
         }
     }
 
@@ -140,11 +147,4 @@ internal class DelvilkaarRepository {
             ),
             resultat = stringOrNull("resultat")?.let { Utfall.valueOf(it) }
         )
-
-    internal fun opprettVilkaarsvurdering(vilkaarId: UUID, vilkaar: Vilkaar, tx: TransactionalSession) {
-        lagreDelvilkaar(vilkaarId, vilkaar.hovedvilkaar, true, tx)
-        vilkaar.unntaksvilkaar?.forEach { unntaksvilkaar ->
-            lagreDelvilkaar(vilkaarId, unntaksvilkaar, false, tx)
-        }
-    }
 }

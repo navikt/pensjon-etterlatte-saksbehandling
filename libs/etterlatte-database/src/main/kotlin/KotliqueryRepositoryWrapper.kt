@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.database
 
 import kotliquery.Row
 import kotliquery.Session
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -25,7 +26,12 @@ class KotliqueryRepositoryWrapper(private val datasource: DataSource) {
             }
         }
 
-    fun oppdater(query: String, params: Map<String, Any?>, loggtekst: String) =
+    fun oppdater(
+        query: String,
+        params: Map<String, Any?>,
+        loggtekst: String,
+        ekstra: ((tx: TransactionalSession) -> Unit)? = null
+    ) =
         using(sessionOf(datasource)) { session ->
             session.transaction { tx ->
                 queryOf(
@@ -34,6 +40,7 @@ class KotliqueryRepositoryWrapper(private val datasource: DataSource) {
                 )
                     .also { logger.info(loggtekst) }
                     .let { tx.run(it.asUpdate) }
+                ekstra?.invoke(tx)
             }
         }
 

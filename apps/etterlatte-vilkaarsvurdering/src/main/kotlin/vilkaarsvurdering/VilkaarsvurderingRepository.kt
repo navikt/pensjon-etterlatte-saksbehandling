@@ -21,12 +21,15 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import java.sql.Timestamp
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(private val ds: DataSource) {
+
+    private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(ds)
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->
@@ -95,31 +98,29 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
     ): Vilkaarsvurdering {
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = Queries.lagreVilkaarResultat,
-                    paramMap = mapOf(
-                        "id" to vurdertVilkaar.vilkaarId,
-                        "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
-                        "resultat_tidspunkt" to Timestamp.valueOf(vurdertVilkaar.vurdering.tidspunkt),
-                        "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
-                    )
-                ).let { tx.run(it.asUpdate) }
-
-                lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vurdertVilkaar.hovedvilkaar, tx)
-                settAndreOppfylteDelvilkaarSomIkkeOppfylt(vurdertVilkaar.vilkaarId, tx)
-                vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
-                    lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
-                } ?: run {
-                    settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(
-                        vurdertVilkaar,
-                        tx
-                    )
-                }
+        val oppdaterDelvilkaar = { tx: TransactionalSession ->
+            lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vurdertVilkaar.hovedvilkaar, tx)
+            settAndreOppfylteDelvilkaarSomIkkeOppfylt(vurdertVilkaar.vilkaarId, tx)
+            vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
+                lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
+            } ?: run {
+                settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(
+                    vurdertVilkaar,
+                    tx
+                )
             }
         }
-
+        repositoryWrapper.oppdater(
+            query = Queries.lagreVilkaarResultat,
+            params = mapOf(
+                "id" to vurdertVilkaar.vilkaarId,
+                "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
+                "resultat_tidspunkt" to Timestamp.valueOf(vurdertVilkaar.vurdering.tidspunkt),
+                "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
+            ),
+            loggtekst = "Lagrer vilkårresultat",
+            ekstra = oppdaterDelvilkaar
+        )
         return hentNonNull(behandlingId)
     }
 

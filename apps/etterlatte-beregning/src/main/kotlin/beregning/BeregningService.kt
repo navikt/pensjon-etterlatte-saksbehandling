@@ -13,8 +13,7 @@ import no.nav.etterlatte.beregning.regler.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.DelytelseId
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -152,8 +151,6 @@ class BeregningService(
                         }
 
                         Beregningsperiode(
-                            delytelsesId = DelytelseId.BP,
-                            type = Beregningstyper.GP,
                             datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
                             datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
                             utbetaltBeloep = periodisertResultat.resultat.verdi,
@@ -185,8 +182,6 @@ class BeregningService(
             grunnlag = grunnlag,
             beregningsperioder = listOf(
                 Beregningsperiode(
-                    delytelsesId = DelytelseId.BP,
-                    type = Beregningstyper.GP,
                     datoFOM = virkningstidspunkt,
                     datoTOM = null,
                     utbetaltBeloep = 0,
@@ -206,6 +201,7 @@ class BeregningService(
     ) = Beregning(
         beregningId = randomUUID(),
         behandlingId = behandling.id,
+        type = Beregningstype.BP,
         beregningsperioder = beregningsperioder,
         beregnetDato = Tidspunkt.now(),
         grunnlagMetadata = grunnlag.metadata

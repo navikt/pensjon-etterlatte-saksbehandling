@@ -28,8 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.DelytelseId
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -156,12 +155,11 @@ internal class BeregningRoutesTest {
         Beregning(
             beregningId = randomUUID(),
             behandlingId = behandlingId,
+            type = Beregningstype.BP,
             beregnetDato = Tidspunkt.now(),
             grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
             beregningsperioder = listOf(
                 Beregningsperiode(
-                    delytelsesId = DelytelseId.BP,
-                    type = Beregningstyper.GP,
                     datoFOM = datoFOM,
                     datoTOM = null,
                     utbetaltBeloep = 3000,

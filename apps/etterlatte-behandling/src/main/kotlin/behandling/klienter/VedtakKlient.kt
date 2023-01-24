@@ -5,10 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.Endringskode
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -77,9 +75,7 @@ data class Vedtak(
 
 data class BeregningsResultat(
     val id: UUID,
-    val type: Beregningstyper,
-    val endringskode: Endringskode,
-    val resultat: BeregningsResultatType,
+    val type: Beregningstype,
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: LocalDateTime,
     val grunnlagVersjon: Long = 0L

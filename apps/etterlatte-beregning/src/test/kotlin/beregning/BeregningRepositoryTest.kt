@@ -2,8 +2,7 @@ package no.nav.etterlatte.beregning
 
 import beregning.regler.FNR_1
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.DelytelseId
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -86,12 +85,11 @@ internal class BeregningRepositoryTest {
         Beregning(
             beregningId = randomUUID(),
             behandlingId = behandlingId,
+            type = Beregningstype.BP,
             beregnetDato = Tidspunkt.now(),
             grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
             beregningsperioder = listOf(
                 Beregningsperiode(
-                    delytelsesId = DelytelseId.BP,
-                    type = Beregningstyper.GP,
                     datoFOM = datoFOM,
                     datoTOM = null,
                     utbetaltBeloep = 3000,

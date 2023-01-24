@@ -6,8 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
-import no.nav.etterlatte.libs.common.beregning.DelytelseId
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -60,6 +59,7 @@ class BeregningRepository(private val dataSource: DataSource) {
             "id" to UUID.randomUUID(),
             "beregningId" to beregning.beregningId,
             "behandlingId" to beregning.behandlingId,
+            "type" to beregning.type.name,
             "beregnetDato" to beregning.beregnetDato.toTimestamp(),
             "datoFOM" to beregningsperiode.datoFOM.toString(),
             "datoTOM" to beregningsperiode.datoTOM?.toString(),
@@ -80,6 +80,7 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
     BeregningsperiodeDAO(
         beregningId = uuid(BeregningsperiodeDatabaseColumns.BeregningId.navn),
         behandlingId = uuid(BeregningsperiodeDatabaseColumns.BehandlingId.navn),
+        type = string(BeregningsperiodeDatabaseColumns.BeregningType.navn).let { Beregningstype.valueOf(it) },
         beregnetDato = sqlTimestamp(BeregningsperiodeDatabaseColumns.BeregnetDato.navn).toTidspunkt(),
         datoFOM = YearMonth.parse(string(BeregningsperiodeDatabaseColumns.DatoFOM.navn)),
         datoTOM = stringOrNull(BeregningsperiodeDatabaseColumns.DatoTOM.navn)?.let { YearMonth.parse(it) },
@@ -102,21 +103,32 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO = with(row) {
 }
 
 private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregning {
-    val basePeriode = beregningsperioder.first()
-    if (beregningsperioder.any { it.beregningId != basePeriode.beregningId }) throw IllegalStateException("Beregningen inneholder forskjellige beredningsIder ${basePeriode.beregningId} for behandling ${basePeriode.behandlingId}") // ktlint-disable argument-list-wrapping
-    if (beregningsperioder.any { it.behandlingId != basePeriode.behandlingId }) throw IllegalStateException("Beregningen inneholder forskjellige behandlingIder ${basePeriode.behandlingId} for beregning ${basePeriode.beregningId}") // ktlint-disable argument-list-wrapping
-    if (beregningsperioder.any { it.beregnetDato != basePeriode.beregnetDato }) throw IllegalStateException("Beregningen inneholder forskjellige beregnetDatoer ${basePeriode.beregnetDato} med behandlingId ${basePeriode.behandlingId} for beregning ${basePeriode.beregningId}") // ktlint-disable argument-list-wrapping
-    if (beregningsperioder.any { it.grunnlagMetadata.versjon != basePeriode.grunnlagMetadata.versjon }) throw IllegalStateException("Beregningen inneholder forskjellige grunnlagsversjoner ${basePeriode.grunnlagMetadata.versjon} med behandlingId ${basePeriode.behandlingId} for beregning ${basePeriode.beregningId}") // ktlint-disable argument-list-wrapping
+    val base = beregningsperioder.first().apply {
+        check(beregningsperioder.all { it.beregningId == beregningId }) {
+            "Beregningen inneholder forskjellige beregningsIder $beregningId for beregning $beregningId"
+        }
+        check(beregningsperioder.all { it.behandlingId == behandlingId }) {
+            "Beregningen inneholder forskjellige behandlingIder $behandlingId for beregning $beregningId"
+        }
+        check(beregningsperioder.all { it.type == type }) {
+            "Beregningen inneholder forskjellige typer $type for beregning $beregningId"
+        }
+        check(beregningsperioder.all { it.beregnetDato == beregnetDato }) {
+            "Beregningen inneholder forskjellige beregnetDatoer $beregnetDato for beregning $beregningId"
+        }
+        check(beregningsperioder.all { it.grunnlagMetadata == grunnlagMetadata }) {
+            "Beregningen inneholder forskjellige grunnlagMetadata $grunnlagMetadata for beregning $beregningId"
+        }
+    }
 
     return Beregning(
-        beregningId = basePeriode.beregningId,
-        behandlingId = basePeriode.behandlingId,
-        beregnetDato = basePeriode.beregnetDato,
-        grunnlagMetadata = basePeriode.grunnlagMetadata,
+        beregningId = base.beregningId,
+        behandlingId = base.behandlingId,
+        type = base.type,
+        beregnetDato = base.beregnetDato,
+        grunnlagMetadata = base.grunnlagMetadata,
         beregningsperioder = beregningsperioder.map {
             Beregningsperiode(
-                delytelsesId = DelytelseId.BP, // TODO sj: Dette feltet må mappes riktig
-                type = Beregningstyper.GP, // TODO sj: Dette feltet må mappes riktig
                 datoFOM = it.datoFOM,
                 datoTOM = it.datoTOM,
                 utbetaltBeloep = it.utbetaltBeloep,
@@ -136,6 +148,7 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
     Id("id"),
     BeregningId("beregningId"),
     BehandlingId("behandlingId"),
+    BeregningType("type"),
     BeregnetDato("beregnetDato"),
     DatoFOM("datoFOM"),
     DatoTOM("datoTOM"),
@@ -162,6 +175,7 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.Id.navn}, 
             ${BeregningsperiodeDatabaseColumns.BeregningId.navn}, 
             ${BeregningsperiodeDatabaseColumns.BehandlingId.navn}, 
+            ${BeregningsperiodeDatabaseColumns.BeregningType.navn}, 
             ${BeregningsperiodeDatabaseColumns.BeregnetDato.navn}, 
             ${BeregningsperiodeDatabaseColumns.DatoFOM.navn}, 
             ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, 
@@ -174,8 +188,8 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.Trygdetid.navn}, 
             ${BeregningsperiodeDatabaseColumns.RegelResultat.navn}, 
             ${BeregningsperiodeDatabaseColumns.RegelVersjon.navn}) 
-        VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :beregnetDato::TIMESTAMP, :datoFOM::TEXT, 
-            :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
+        VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :type::TEXT, :beregnetDato::TIMESTAMP, 
+            :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
             :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :regelResultat::JSONB, 
             :regelVersjon::TEXT) 
     """

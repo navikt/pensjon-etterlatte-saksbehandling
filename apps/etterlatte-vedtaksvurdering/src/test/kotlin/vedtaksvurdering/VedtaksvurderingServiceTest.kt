@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -85,6 +86,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { beregningMock.hentBeregning(behandlingId, accessToken) } returns BeregningDTO(
             UUID.randomUUID(),
             behandlingId,
+            Beregningstype.BP,
             emptyList(),
             Tidspunkt.now(),
             Metadata(1, 1)

@@ -112,21 +112,31 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
                     lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
                 } ?: run {
-                    // Alle unntaksvilkår settes til IKKE_OPPFYLT hvis ikke hovedvilkår eller unntaksvilkår er oppfylt
-                    if (vurdertVilkaar.hovedvilkaarOgUnntaksvilkaarIkkeOppfylt()) {
-                        queryOf(
-                            statement = Queries.lagreDelvilkaarResultatIngenOppfylt,
-                            paramMap = mapOf(
-                                "vilkaar_id" to vurdertVilkaar.vilkaarId,
-                                "resultat" to Utfall.IKKE_OPPFYLT.name
-                            )
-                        ).let { tx.run(it.asUpdate) }
-                    }
+                    settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(
+                        vurdertVilkaar,
+                        tx
+                    )
                 }
             }
         }
 
         return hentNonNull(behandlingId)
+    }
+
+    private fun settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(
+        vurdertVilkaar: VurdertVilkaar,
+        tx: TransactionalSession
+    ) {
+        // Alle unntaksvilkår settes til IKKE_OPPFYLT hvis ikke hovedvilkår eller unntaksvilkår er oppfylt
+        if (vurdertVilkaar.hovedvilkaarOgUnntaksvilkaarIkkeOppfylt()) {
+            queryOf(
+                statement = Queries.lagreDelvilkaarResultatIngenOppfylt,
+                paramMap = mapOf(
+                    "vilkaar_id" to vurdertVilkaar.vilkaarId,
+                    "resultat" to Utfall.IKKE_OPPFYLT.name
+                )
+            ).let { tx.run(it.asUpdate) }
+        }
     }
 
     private fun lagreDelvilkaarResultat(

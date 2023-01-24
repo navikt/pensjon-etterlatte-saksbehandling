@@ -1,5 +1,8 @@
 package no.nav.etterlatte.beregning
 
+import beregning.regler.FNR_1
+import beregning.regler.FNR_2
+import beregning.regler.MAKS_TRYGDETID
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -237,9 +240,5 @@ internal class BeregningServiceTest {
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23: Int = 3716
         const val BP_BELOEP_ETT_SOESKEN_JAN_23: Int = 3019
         const val BP_BELOEP_TO_SOESKEN_JAN_23: Int = 2787
-        const val MAKS_TRYGDETID: Int = 40
-
-        const val FNR_1 = "11057523044"
-        const val FNR_2 = "19040550081"
     }
 }

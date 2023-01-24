@@ -32,14 +32,14 @@ val grunnbeloep: Regel<BarnepensjonGrunnlag, Grunnbeloep> = RegelMeta(
     regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP")
 ) velgNyesteGyldige historiskeGrunnbeloep
 
-private val soeskenIKullet: Regel<BarnepensjonGrunnlag, List<Foedselsnummer>> = finnFaktumIGrunnlag(
+val soeskenIKullet: Regel<BarnepensjonGrunnlag, List<Foedselsnummer>> = finnFaktumIGrunnlag(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Søskenkull fra grunnlaget",
     finnFaktum = BarnepensjonGrunnlag::soeskenKull,
     finnFelt = { it }
 )
 
-private val antallSoeskenIKullet = RegelMeta(
+val antallSoeskenIKullet = RegelMeta(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Finner antall søsken i kullet",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ANTALL-SOESKEN")

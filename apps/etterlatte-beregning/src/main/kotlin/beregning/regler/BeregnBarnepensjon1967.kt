@@ -11,15 +11,12 @@ import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.time.LocalDate
 
 data class AvdoedForelder(val trygdetid: BigDecimal)
 data class BarnepensjonGrunnlag(
     val soeskenKull: FaktumNode<List<Foedselsnummer>>,
     val avdoedForelder: FaktumNode<AvdoedForelder>
 )
-
-val BP_1967_DATO: LocalDate = LocalDate.of(1967, 1, 1)
 
 val beregnBarnepensjon1967Regel = RegelMeta(
     gjelderFra = BP_1967_DATO,

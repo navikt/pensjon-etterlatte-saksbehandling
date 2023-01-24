@@ -1,5 +1,6 @@
 package beregning
 
+import beregning.regler.FNR_1
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -208,7 +209,5 @@ internal class BeregningRoutesTest {
     private companion object {
         const val ISSUER_ID = "azure"
         const val CLIENT_ID = "azure-id for saksbehandler"
-
-        const val FNR_1 = "11057523044"
     }
 }

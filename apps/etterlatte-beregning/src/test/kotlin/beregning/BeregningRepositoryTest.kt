@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import beregning.regler.FNR_1
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.DelytelseId
@@ -103,8 +104,4 @@ internal class BeregningRepositoryTest {
                 )
             )
         )
-
-    companion object {
-        const val FNR_1 = "11057523044"
-    }
 }

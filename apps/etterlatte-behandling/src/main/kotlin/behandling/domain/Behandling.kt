@@ -41,7 +41,7 @@ sealed class Behandling {
     val oppgaveStatus get() = OppgaveStatus.from(status)
 
     private val kanRedigeres: Boolean
-        get() = this.status.kanRedigeres()
+        get() = this.status.kanEndres()
 
     protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {
         if (kanRedigeres) {

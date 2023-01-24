@@ -230,6 +230,9 @@ internal class VilkaarsvurderingRepository2Test {
         resultatVilkaar.unntaksvilkaar!!
             .first { it.type == VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR }
             .resultat shouldBe Utfall.IKKE_OPPFYLT
+        resultatVilkaar.unntaksvilkaar!!
+            .filterNot { it.type == VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR }
+            .forEach { it.resultat shouldBe null }
     }
 
     companion object {

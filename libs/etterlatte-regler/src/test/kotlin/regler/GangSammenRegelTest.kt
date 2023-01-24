@@ -12,28 +12,28 @@ class GangSammenRegelTest {
     private val regel1 = definerKonstant<TestGrunnlag, BigDecimal>(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Tallet 2",
-        regelReferanse = toDoRegelReferanse,
+        regelReferanse = regelReferanse,
         verdi = 2.toBigDecimal()
     )
 
     private val regel2 = definerKonstant<TestGrunnlag, BigDecimal>(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Tallet 3",
-        regelReferanse = toDoRegelReferanse,
+        regelReferanse = regelReferanse,
         verdi = 3.toBigDecimal()
     )
 
     private val regel3 = definerKonstant<TestGrunnlag, BigDecimal>(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Tallet 4",
-        regelReferanse = toDoRegelReferanse,
+        regelReferanse = regelReferanse,
         verdi = 4.toBigDecimal()
     )
 
     private val regelSomMultiplisererTreVerdier = RegelMeta(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Regel som bruker resultatet av tre andre regler og multipliserer disse",
-        regelReferanse = toDoRegelReferanse
+        regelReferanse = regelReferanse
     ) multipliser (regel1 og regel2 og regel3)
 
     @Test

@@ -11,7 +11,7 @@ class KonstantRegelTest {
     private val regelSomReturnererKonstantVerdi = definerKonstant<TestGrunnlag, Int>(
         gjelderFra = GJELDER_FRA,
         beskrivelse = "Tallet 2",
-        regelReferanse = toDoRegelReferanse,
+        regelReferanse = regelReferanse,
         verdi = 2
     )
 

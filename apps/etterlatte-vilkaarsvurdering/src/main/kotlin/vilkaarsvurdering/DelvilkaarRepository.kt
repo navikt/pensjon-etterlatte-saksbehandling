@@ -16,7 +16,7 @@ internal class DelvilkaarRepository {
 
     internal fun oppdaterDelvilkaar(vurdertVilkaar: VurdertVilkaar, tx: TransactionalSession) {
         lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vurdertVilkaar.hovedvilkaar, tx)
-        settAndreOppfylteDelvilkaarSomIkkeOppfylt(vurdertVilkaar.vilkaarId, tx)
+        tilbakestillAlleUnntaksvilkaarTilNull(vurdertVilkaar.vilkaarId, tx)
         vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
             lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
         }
@@ -44,7 +44,7 @@ internal class DelvilkaarRepository {
         ).let { tx.run(it.asUpdate) }
     }
 
-    private fun settAndreOppfylteDelvilkaarSomIkkeOppfylt(
+    private fun tilbakestillAlleUnntaksvilkaarTilNull(
         vilkaarId: UUID,
         tx: TransactionalSession
     ) =
@@ -52,7 +52,7 @@ internal class DelvilkaarRepository {
             statement = """
             UPDATE delvilkaar
             SET resultat = null
-            WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true and resultat = :oppfylt_resultat
+            WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true and resultat is not null
         """,
             paramMap = mapOf(
                 "vilkaar_id" to vilkaarId,

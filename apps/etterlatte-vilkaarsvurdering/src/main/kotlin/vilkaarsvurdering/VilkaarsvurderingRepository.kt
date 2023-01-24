@@ -108,6 +108,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 ).let { tx.run(it.asUpdate) }
 
                 lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vurdertVilkaar.hovedvilkaar, tx)
+                settAndreOppfylteDelvilkaarSomIkkeOppfylt(vurdertVilkaar.vilkaarId, tx)
                 vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
                     lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
                 } ?: run {
@@ -156,6 +157,19 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     .let { tx.run(it.asUpdate) }
             }
         }.let { hentNonNull(behandlingId) }
+
+    private fun settAndreOppfylteDelvilkaarSomIkkeOppfylt(
+        vilkaarId: UUID,
+        tx: TransactionalSession
+    ) =
+        queryOf(
+            statement = Queries.settAndreOppfylteDelvilkaarSomIkkeOppfylt,
+            paramMap = mapOf(
+                "vilkaar_id" to vilkaarId,
+                "resultat" to Utfall.IKKE_OPPFYLT.name,
+                "oppfylt_resultat" to Utfall.OPPFYLT.name
+            )
+        ).let { tx.run(it.asUpdate) }
 
     private fun hentNonNull(behandlingId: UUID): Vilkaarsvurdering =
         hent(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
@@ -349,6 +363,12 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             UPDATE delvilkaar
             SET resultat = :resultat
             WHERE vilkaar_id = :vilkaar_id AND vilkaar_type = :vilkaar_type
+        """
+
+        const val settAndreOppfylteDelvilkaarSomIkkeOppfylt = """
+            UPDATE delvilkaar
+            SET resultat = :resultat
+            WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true and resultat = :oppfylt_resultat
         """
 
         const val lagreDelvilkaarResultatIngenOppfylt = """

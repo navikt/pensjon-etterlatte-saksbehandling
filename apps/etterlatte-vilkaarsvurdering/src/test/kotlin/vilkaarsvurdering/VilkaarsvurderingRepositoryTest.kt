@@ -185,6 +185,53 @@ internal class VilkaarsvurderingRepository2Test {
         }
     }
 
+    @Test
+    fun `når vi setter et ikke-oppfylt vedtak oppfylt, skal unntaket settes som ikke oppfylt`() {
+        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORUTGAAENDE_MEDLEMSKAP)
+        val vurdertVilkaarIkkeOppfylt = VurdertVilkaar(
+            vilkaarId = vilkaar?.id!!,
+            vurdering = VilkaarVurderingData(
+                kommentar = "En test",
+                tidspunkt = LocalDateTime.now(),
+                saksbehandler = "saksbehandler1"
+            ),
+            hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
+            unntaksvilkaar = VilkaarTypeOgUtfall(
+                VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR,
+                Utfall.OPPFYLT
+            )
+        )
+        vilkaarsvurderingRepository.lagreVilkaarResultat(
+            opprettetVilkaarsvurdering.behandlingId,
+            vurdertVilkaarIkkeOppfylt
+        )
+
+        val vurdertVilkaarOppfylt = VurdertVilkaar(
+            vilkaarId = vilkaar.id,
+            vurdering = VilkaarVurderingData(
+                kommentar = "En test",
+                tidspunkt = LocalDateTime.now(),
+                saksbehandler = "saksbehandler1"
+            ),
+            hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
+            unntaksvilkaar = null
+        )
+        vilkaarsvurderingRepository.lagreVilkaarResultat(
+            opprettetVilkaarsvurdering.behandlingId,
+            vurdertVilkaarOppfylt
+        )
+
+        val resultatVilkaar = vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
+            .vilkaar
+            .first { it.hovedvilkaar.type == VilkaarType.FORUTGAAENDE_MEDLEMSKAP }
+
+        resultatVilkaar.hovedvilkaar.resultat shouldBe Utfall.OPPFYLT
+        resultatVilkaar.unntaksvilkaar!!
+            .first { it.type == VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR }
+            .resultat shouldBe Utfall.IKKE_OPPFYLT
+    }
+
     companion object {
         val vilkaarsvurdering = Vilkaarsvurdering(
             behandlingId = UUID.randomUUID(),

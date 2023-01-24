@@ -54,20 +54,17 @@ internal class DelvilkaarRepository {
         vurdertVilkaar: VurdertVilkaar,
         tx: TransactionalSession
     ) {
-        // Alle unntaksvilkår settes til IKKE_OPPFYLT hvis ikke hovedvilkår eller unntaksvilkår er oppfylt
-        if (vurdertVilkaar.hovedvilkaarOgUnntaksvilkaarIkkeOppfylt()) {
-            queryOf(
-                statement = """
+        queryOf(
+            statement = """
             UPDATE delvilkaar
             SET resultat = :resultat
             WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true
         """,
-                paramMap = mapOf(
-                    "vilkaar_id" to vurdertVilkaar.vilkaarId,
-                    "resultat" to Utfall.IKKE_OPPFYLT.name
-                )
-            ).let { tx.run(it.asUpdate) }
-        }
+            paramMap = mapOf(
+                "vilkaar_id" to vurdertVilkaar.vilkaarId,
+                "resultat" to Utfall.IKKE_OPPFYLT.name
+            )
+        ).let { tx.run(it.asUpdate) }
     }
 
     internal fun oppdaterDelvilkaar(vurdertVilkaar: VurdertVilkaar, tx: TransactionalSession) {
@@ -75,11 +72,11 @@ internal class DelvilkaarRepository {
         settAndreOppfylteDelvilkaarSomIkkeOppfylt(vurdertVilkaar.vilkaarId, tx)
         vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
             lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
-        } ?: run {
-            settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(
-                vurdertVilkaar,
-                tx
-            )
+        }
+        // Alle unntaksvilkår settes til IKKE_OPPFYLT hvis ikke hovedvilkår eller unntaksvilkår er oppfylt
+        // Dvs. vilkåret er ikke oppfylt og ingen av unntaka treffer
+        if (vurdertVilkaar.hovedvilkaarOgUnntaksvilkaarIkkeOppfylt()) {
+            settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(vurdertVilkaar, tx)
         }
     }
 

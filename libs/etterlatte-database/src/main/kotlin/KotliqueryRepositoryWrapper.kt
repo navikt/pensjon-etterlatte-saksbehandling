@@ -40,7 +40,7 @@ class KotliqueryRepositoryWrapper(private val datasource: DataSource) {
                 )
                     .also { logger.info(loggtekst) }
                     .let { tx.run(it.asUpdate) }
-                ekstra?.invoke(tx)
+                    .also { ekstra?.invoke(tx) }
             }
         }
 

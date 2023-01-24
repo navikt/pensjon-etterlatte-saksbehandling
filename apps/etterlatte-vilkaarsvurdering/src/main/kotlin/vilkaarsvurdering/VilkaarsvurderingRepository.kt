@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Unntaksvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
@@ -30,6 +29,7 @@ import javax.sql.DataSource
 class VilkaarsvurderingRepository(private val ds: DataSource) {
 
     private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(ds)
+    private val delvilkaarRepository = DelvilkaarRepository()
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->
@@ -53,9 +53,9 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     vilkaar.grunnlag?.forEach { grunnlag ->
                         lagreGrunnlag(vilkaarId, grunnlag, tx)
                     }
-                    lagreDelvilkaar(vilkaarId, vilkaar.hovedvilkaar, true, tx)
+                    delvilkaarRepository.lagreDelvilkaar(vilkaarId, vilkaar.hovedvilkaar, true, tx)
                     vilkaar.unntaksvilkaar?.forEach { unntaksvilkaar ->
-                        lagreDelvilkaar(vilkaarId, unntaksvilkaar, false, tx)
+                        delvilkaarRepository.lagreDelvilkaar(vilkaarId, unntaksvilkaar, false, tx)
                     }
                 }
             }
@@ -98,18 +98,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
     ): Vilkaarsvurdering {
-        val oppdaterDelvilkaar = { tx: TransactionalSession ->
-            lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vurdertVilkaar.hovedvilkaar, tx)
-            settAndreOppfylteDelvilkaarSomIkkeOppfylt(vurdertVilkaar.vilkaarId, tx)
-            vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
-                lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
-            } ?: run {
-                settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(
-                    vurdertVilkaar,
-                    tx
-                )
-            }
-        }
         repositoryWrapper.oppdater(
             query = Queries.lagreVilkaarResultat,
             params = mapOf(
@@ -119,40 +107,9 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
             ),
             loggtekst = "Lagrer vilkårresultat",
-            ekstra = oppdaterDelvilkaar
+            ekstra = { delvilkaarRepository.oppdaterDelvilkaar(vurdertVilkaar, it) }
         )
         return hentNonNull(behandlingId)
-    }
-
-    private fun settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(
-        vurdertVilkaar: VurdertVilkaar,
-        tx: TransactionalSession
-    ) {
-        // Alle unntaksvilkår settes til IKKE_OPPFYLT hvis ikke hovedvilkår eller unntaksvilkår er oppfylt
-        if (vurdertVilkaar.hovedvilkaarOgUnntaksvilkaarIkkeOppfylt()) {
-            queryOf(
-                statement = Queries.lagreDelvilkaarResultatIngenOppfylt,
-                paramMap = mapOf(
-                    "vilkaar_id" to vurdertVilkaar.vilkaarId,
-                    "resultat" to Utfall.IKKE_OPPFYLT.name
-                )
-            ).let { tx.run(it.asUpdate) }
-        }
-    }
-
-    private fun lagreDelvilkaarResultat(
-        vilkaarId: UUID,
-        vilkaarTypeOgUtfall: VilkaarTypeOgUtfall,
-        tx: TransactionalSession
-    ) {
-        queryOf(
-            statement = Queries.lagreDelvilkaarResultat,
-            paramMap = mapOf(
-                "vilkaar_id" to vilkaarId,
-                "vilkaar_type" to vilkaarTypeOgUtfall.type.name,
-                "resultat" to vilkaarTypeOgUtfall.resultat.name
-            )
-        ).let { tx.run(it.asUpdate) }
     }
 
     fun slettVilkaarResultat(
@@ -164,23 +121,9 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 queryOf(Queries.slettVilkaarResultat, mapOf("id" to vilkaarId))
                     .let { tx.run(it.asUpdate) }
 
-                queryOf(Queries.slettDelvilkaarResultat, mapOf("vilkaar_id" to vilkaarId))
-                    .let { tx.run(it.asUpdate) }
+                delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
             }
         }.let { hentNonNull(behandlingId) }
-
-    private fun settAndreOppfylteDelvilkaarSomIkkeOppfylt(
-        vilkaarId: UUID,
-        tx: TransactionalSession
-    ) =
-        queryOf(
-            statement = Queries.settAndreOppfylteDelvilkaarSomIkkeOppfylt,
-            paramMap = mapOf(
-                "vilkaar_id" to vilkaarId,
-                "resultat" to Utfall.IKKE_OPPFYLT.name,
-                "oppfylt_resultat" to Utfall.OPPFYLT.name
-            )
-        ).let { tx.run(it.asUpdate) }
 
     private fun hentNonNull(behandlingId: UUID): Vilkaarsvurdering =
         hent(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
@@ -240,27 +183,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
 
         return vilkaar.id
     }
-
-    private fun lagreDelvilkaar(
-        vilkaarId: UUID,
-        unntaksvilkaar: Unntaksvilkaar,
-        hovedvilkaar: Boolean,
-        tx: TransactionalSession
-    ) = queryOf(
-        statement = Queries.lagreDelvilkaar,
-        paramMap = mapOf(
-            "vilkaar_id" to vilkaarId,
-            "vilkaar_type" to unntaksvilkaar.type.name,
-            "hovedvilkaar" to hovedvilkaar,
-            "tittel" to unntaksvilkaar.tittel,
-            "beskrivelse" to unntaksvilkaar.beskrivelse,
-            "paragraf" to unntaksvilkaar.lovreferanse.paragraf,
-            "ledd" to unntaksvilkaar.lovreferanse.ledd,
-            "bokstav" to unntaksvilkaar.lovreferanse.paragraf,
-            "lenke" to unntaksvilkaar.lovreferanse.lenke,
-            "resultat" to unntaksvilkaar.resultat?.name
-        )
-    ).let { tx.run(it.asExecute) }
 
     private fun lagreGrunnlag(
         vilkaarId: UUID,
@@ -346,11 +268,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             VALUES(:id, :vilkaarsvurdering_id, :resultat_kommentar, :resultat_tidspunkt, :resultat_saksbehandler) 
         """
 
-        const val lagreDelvilkaar = """
-            INSERT INTO delvilkaar(vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, paragraf, ledd, bokstav, lenke, resultat) 
-            VALUES(:vilkaar_id, :vilkaar_type, :hovedvilkaar, :tittel, :beskrivelse, :paragraf, :ledd, :bokstav, :lenke, :resultat)
-        """
-
         const val lagreGrunnlag = """
             INSERT INTO grunnlag(vilkaar_id, grunnlag_id, opplysning_type, kilde, opplysning) 
             VALUES(:vilkaar_id, :grunnlag_id, :opplysning_type, :kilde::JSONB, :opplysning::JSONB)
@@ -368,24 +285,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             SET resultat_kommentar = :resultat_kommentar, resultat_tidspunkt = :resultat_tidspunkt, 
                 resultat_saksbehandler = :resultat_saksbehandler   
             WHERE id = :id
-        """
-
-        const val lagreDelvilkaarResultat = """
-            UPDATE delvilkaar
-            SET resultat = :resultat
-            WHERE vilkaar_id = :vilkaar_id AND vilkaar_type = :vilkaar_type
-        """
-
-        const val settAndreOppfylteDelvilkaarSomIkkeOppfylt = """
-            UPDATE delvilkaar
-            SET resultat = :resultat
-            WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true and resultat = :oppfylt_resultat
-        """
-
-        const val lagreDelvilkaarResultatIngenOppfylt = """
-            UPDATE delvilkaar
-            SET resultat = :resultat
-            WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true
         """
 
         const val hentVilkaarsvurdering = """
@@ -419,12 +318,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             UPDATE vilkaar
             SET resultat_kommentar = null, resultat_tidspunkt = null, resultat_saksbehandler = null   
             WHERE id = :id
-        """
-
-        const val slettDelvilkaarResultat = """
-            UPDATE delvilkaar
-            SET resultat = null
-            WHERE vilkaar_id = :vilkaar_id
         """
     }
 }

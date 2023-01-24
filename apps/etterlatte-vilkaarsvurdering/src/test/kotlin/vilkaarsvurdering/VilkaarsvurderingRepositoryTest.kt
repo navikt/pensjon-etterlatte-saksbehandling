@@ -186,7 +186,7 @@ internal class VilkaarsvurderingRepository2Test {
     }
 
     @Test
-    fun `når vi setter et ikke-oppfylt vedtak oppfylt, skal unntaket settes som ikke oppfylt`() {
+    fun `når vi setter et ikke-oppfylt vilkaar oppfylt, skal resultatet fjernes fra alle unntakene`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORUTGAAENDE_MEDLEMSKAP)
         val vurdertVilkaarIkkeOppfylt = VurdertVilkaar(
@@ -227,12 +227,7 @@ internal class VilkaarsvurderingRepository2Test {
             .first { it.hovedvilkaar.type == VilkaarType.FORUTGAAENDE_MEDLEMSKAP }
 
         resultatVilkaar.hovedvilkaar.resultat shouldBe Utfall.OPPFYLT
-        resultatVilkaar.unntaksvilkaar!!
-            .first { it.type == VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR }
-            .resultat shouldBe Utfall.IKKE_OPPFYLT
-        resultatVilkaar.unntaksvilkaar!!
-            .filterNot { it.type == VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR }
-            .forEach { it.resultat shouldBe null }
+        resultatVilkaar.unntaksvilkaar!!.forEach { it.resultat shouldBe null }
     }
 
     companion object {

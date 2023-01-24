@@ -20,8 +20,6 @@ internal class DelvilkaarRepository {
         vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
             lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
         }
-        // Alle unntaksvilkår settes til IKKE_OPPFYLT hvis ikke hovedvilkår eller unntaksvilkår er oppfylt
-        // Dvs. vilkåret er ikke oppfylt og ingen av unntaka treffer
         if (vurdertVilkaar.hovedvilkaarOgUnntaksvilkaarIkkeOppfylt()) {
             settAlleUnntaksvilkaarSomIkkeOppfyltHvisVilkaaretIkkeErOppfyltOgIngenUnntakTreffer(vurdertVilkaar, tx)
         }
@@ -53,12 +51,11 @@ internal class DelvilkaarRepository {
         queryOf(
             statement = """
             UPDATE delvilkaar
-            SET resultat = :resultat
+            SET resultat = null
             WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true and resultat = :oppfylt_resultat
         """,
             paramMap = mapOf(
                 "vilkaar_id" to vilkaarId,
-                "resultat" to Utfall.IKKE_OPPFYLT.name,
                 "oppfylt_resultat" to Utfall.OPPFYLT.name
             )
         ).let { tx.run(it.asUpdate) }

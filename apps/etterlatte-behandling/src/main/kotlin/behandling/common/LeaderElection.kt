@@ -19,6 +19,7 @@ open class LeaderElection(
         val leader = runBlocking {
             httpClient.get("http://$electorPath/").bodyAsText().let(objectMapper::readTree).get("name").asText()
         }
+        println("trigg bygg")
         val amLeader = leader == me
         logger.info("Current pod: $me. Leader: $leader. Current pod is leader: $amLeader")
         return amLeader

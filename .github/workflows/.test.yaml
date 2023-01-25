@@ -3,9 +3,6 @@ name: .build-backend.yaml
 on:
   workflow_call:
 
-env:
-  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
 jobs:
   test:
     name: Verify pull request
@@ -23,5 +20,7 @@ jobs:
         uses: snyk/actions/setup@master
       - name: Test dependencies with Snyk
         run: snyk monitor --org=etterlatte
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Gradle test and build
         run: ./gradlew :apps:${{ github.workflow }}:test --stacktrace

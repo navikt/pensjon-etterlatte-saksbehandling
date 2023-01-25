@@ -19,7 +19,7 @@ jobs:
       - name: Install Snyk CLI
         uses: snyk/actions/setup@master
       - name: Test dependencies with Snyk
-        run: snyk test --org=etterlatte --sub-project=apps/etterlatte-brev-api
+        run: snyk test --org=etterlatte --sub-project=../apps/etterlatte-brev-api
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Gradle test and build

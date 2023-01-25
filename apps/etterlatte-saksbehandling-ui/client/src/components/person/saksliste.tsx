@@ -69,7 +69,7 @@ export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendra
                 {erFerdigBehandlet(behandling.status) ? resultatTekst(behandling) : ''}
               </Table.DataCell>
               <Table.DataCell key={i}>
-                <Link href={`/behandling/${behandling.id}/soeknadsoversikt`}>Gå til behandling</Link>
+                <Link href={`/behandling/${behandling.id}/soeknadsoversikt`}>Vis behandling</Link>
               </Table.DataCell>
             </Table.Row>
           ))}

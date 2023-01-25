@@ -7,8 +7,7 @@ import java.time.YearMonth
 import java.util.*
 
 enum class Beregningstype {
-    BP,
-    GP // TODO fjernes - må være her for å være bakoverkompatibel med eksisterende vedtak
+    BP
 }
 
 data class BeregningDTO(

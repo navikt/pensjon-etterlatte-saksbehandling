@@ -18,8 +18,8 @@ jobs:
           cache: gradle
       - name: Install Snyk CLI
         uses: snyk/actions/setup@master
-      - name: Monitor dependencies with Snyk
-        run: snyk monitor --org=etterlatte
+      - name: Test dependencies with Snyk
+        run: snyk test --org=etterlatte
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Gradle test and build

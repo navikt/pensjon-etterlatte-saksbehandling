@@ -25,14 +25,14 @@ interface SoeknadsVurderingProps {
   hjemler: HjemmelLenkeProps[]
   vurderingsResultat: VurderingsResultat | null
   children: ReactNode
-  status: StatusIconProps
+  status: StatusIconProps | null
 }
 
 export const Soeknadsvurdering = (props: SoeknadsVurderingProps) => {
   return (
     <VurderingWrapper>
       <HeadingMedIkon>
-        <StatusIcon status={props.status} /> {props.tittel}
+        {props.status && <StatusIcon status={props.status} />} {props.tittel}
       </HeadingMedIkon>
 
       <HjemmelWrapper>

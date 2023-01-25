@@ -18,6 +18,7 @@ import { hentSoeskenMedIBeregning, lagreSoeskenMedIBeregning } from '~shared/api
 import { SoeskenMedIBeregning } from '~shared/types/Grunnlagsopplysning'
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
+import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 
 interface FormValues {
   foedselsnummer: string
@@ -76,6 +77,32 @@ const Beregningsgrunnlag = () => {
               {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt.dato) : 'ukjent dato'}
             </strong>
           </BodyShort>
+        </HeadingWrapper>
+      </ContentHeader>
+      <TrygdetidWrapper>
+        <Soeknadsvurdering
+          tittel={'Trygdetid'}
+          hjemler={[
+            { tittel: '§ 3-5 Trygdetid ved beregning av ytelser', lenke: 'https://lovdata.no/lov/1997-02-28-19/§3-5' },
+          ]}
+          vurderingsResultat={null}
+          status={null}
+        >
+          <TrygdetidInfo>
+            <p>
+              Trygdetiden er minst 40 år som følge av faktisk trygdetid og fremtidig trygdetid. Faktisk trygdetid er den
+              tiden fra avdøde fylte 16 til personen døde. Fremtidig trygdetid er tiden fra dødsfallet til året avdøde
+              hadde blitt 66 år. Saksbehandler bekrefter at følgende stemmer for denne behandlingen ved å gå videre til
+              beregning:
+            </p>
+            <p>
+              Trygdetid: <strong>40 år</strong>
+            </p>
+          </TrygdetidInfo>
+        </Soeknadsvurdering>
+      </TrygdetidWrapper>
+      <ContentHeader>
+        <HeadingWrapper>
           <Heading level="2" size="medium">
             Søskenjustering
           </Heading>
@@ -160,7 +187,17 @@ const RadioGroupRow = styled(RadioGroup)`
   }
 `
 const FamilieforholdWrapper = styled.form`
-  padding: 0em 5em;
+  padding: 0em 6em;
+`
+
+const TrygdetidWrapper = styled.form`
+  padding: 0em 4em;
+  max-width: 56em;
+`
+
+const TrygdetidInfo = styled.form`
+  display: flex;
+  flex-direction: column;
 `
 
 export default Beregningsgrunnlag

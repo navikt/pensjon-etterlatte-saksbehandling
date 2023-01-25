@@ -11,22 +11,22 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Unntaksvilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import java.sql.Timestamp
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(private val ds: DataSource) {
+
+    private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(ds)
+    private val delvilkaarRepository = DelvilkaarRepository()
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->
@@ -50,10 +50,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     vilkaar.grunnlag?.forEach { grunnlag ->
                         lagreGrunnlag(vilkaarId, grunnlag, tx)
                     }
-                    lagreDelvilkaar(vilkaarId, vilkaar.hovedvilkaar, true, tx)
-                    vilkaar.unntaksvilkaar?.forEach { unntaksvilkaar ->
-                        lagreDelvilkaar(vilkaarId, unntaksvilkaar, false, tx)
-                    }
+                    delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
                 }
             }
         }.let { hentNonNull(vilkaarsvurdering.behandlingId) }
@@ -95,52 +92,18 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
     ): Vilkaarsvurdering {
-        using(sessionOf(ds)) { session ->
-            session.transaction { tx ->
-                queryOf(
-                    statement = Queries.lagreVilkaarResultat,
-                    paramMap = mapOf(
-                        "id" to vurdertVilkaar.vilkaarId,
-                        "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
-                        "resultat_tidspunkt" to Timestamp.valueOf(vurdertVilkaar.vurdering.tidspunkt),
-                        "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
-                    )
-                ).let { tx.run(it.asUpdate) }
-
-                lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vurdertVilkaar.hovedvilkaar, tx)
-                vurdertVilkaar.unntaksvilkaar?.let { vilkaar ->
-                    lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vilkaar, tx)
-                } ?: run {
-                    // Alle unntaksvilkår settes til IKKE_OPPFYLT hvis ikke hovedvilkår eller unntaksvilkår er oppfylt
-                    if (vurdertVilkaar.hovedvilkaarOgUnntaksvilkaarIkkeOppfylt()) {
-                        queryOf(
-                            statement = Queries.lagreDelvilkaarResultatIngenOppfylt,
-                            paramMap = mapOf(
-                                "vilkaar_id" to vurdertVilkaar.vilkaarId,
-                                "resultat" to Utfall.IKKE_OPPFYLT.name
-                            )
-                        ).let { tx.run(it.asUpdate) }
-                    }
-                }
-            }
-        }
-
+        repositoryWrapper.oppdater(
+            query = Queries.lagreVilkaarResultat,
+            params = mapOf(
+                "id" to vurdertVilkaar.vilkaarId,
+                "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
+                "resultat_tidspunkt" to Timestamp.valueOf(vurdertVilkaar.vurdering.tidspunkt),
+                "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
+            ),
+            loggtekst = "Lagrer vilkårresultat",
+            ekstra = { delvilkaarRepository.oppdaterDelvilkaar(vurdertVilkaar, it) }
+        )
         return hentNonNull(behandlingId)
-    }
-
-    private fun lagreDelvilkaarResultat(
-        vilkaarId: UUID,
-        vilkaarTypeOgUtfall: VilkaarTypeOgUtfall,
-        tx: TransactionalSession
-    ) {
-        queryOf(
-            statement = Queries.lagreDelvilkaarResultat,
-            paramMap = mapOf(
-                "vilkaar_id" to vilkaarId,
-                "vilkaar_type" to vilkaarTypeOgUtfall.type.name,
-                "resultat" to vilkaarTypeOgUtfall.resultat.name
-            )
-        ).let { tx.run(it.asUpdate) }
     }
 
     fun slettVilkaarResultat(
@@ -152,8 +115,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 queryOf(Queries.slettVilkaarResultat, mapOf("id" to vilkaarId))
                     .let { tx.run(it.asUpdate) }
 
-                queryOf(Queries.slettDelvilkaarResultat, mapOf("vilkaar_id" to vilkaarId))
-                    .let { tx.run(it.asUpdate) }
+                delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
             }
         }.let { hentNonNull(behandlingId) }
 
@@ -167,18 +129,13 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     query.map { row ->
                         val vilkaarId = row.uuid("id")
                         row.toVilkaar(
-                            hovedvilkaar = hentDelvilkaar(vilkaarId, true, session).first(),
-                            unntaksvilkaar = hentDelvilkaar(vilkaarId, false, session),
+                            hovedvilkaar = delvilkaarRepository.hentDelvilkaar(vilkaarId, true, session).first(),
+                            unntaksvilkaar = delvilkaarRepository.hentDelvilkaar(vilkaarId, false, session),
                             grunnlag = hentGrunnlag(vilkaarId, session)
                         )
                     }.asList
                 ).sortedBy { it.hovedvilkaar.type.rekkefoelge }
             }
-
-    private fun hentDelvilkaar(vilkaarId: UUID, hovedvilkaar: Boolean, session: Session): List<Delvilkaar> =
-        queryOf(Queries.hentDelvilkaar, mapOf("vilkaar_id" to vilkaarId, "hovedvilkaar" to hovedvilkaar))
-            .let { query -> session.run(query.map { row -> row.toDelvilkaar() }.asList) }
-            .sortedBy { it.type.rekkefoelge }
 
     private fun hentGrunnlag(vilkaarId: UUID, session: Session): List<Vilkaarsgrunnlag<JsonNode>> =
         queryOf(Queries.hentGrunnlag, mapOf("vilkaar_id" to vilkaarId))
@@ -215,27 +172,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
 
         return vilkaar.id
     }
-
-    private fun lagreDelvilkaar(
-        vilkaarId: UUID,
-        unntaksvilkaar: Unntaksvilkaar,
-        hovedvilkaar: Boolean,
-        tx: TransactionalSession
-    ) = queryOf(
-        statement = Queries.lagreDelvilkaar,
-        paramMap = mapOf(
-            "vilkaar_id" to vilkaarId,
-            "vilkaar_type" to unntaksvilkaar.type.name,
-            "hovedvilkaar" to hovedvilkaar,
-            "tittel" to unntaksvilkaar.tittel,
-            "beskrivelse" to unntaksvilkaar.beskrivelse,
-            "paragraf" to unntaksvilkaar.lovreferanse.paragraf,
-            "ledd" to unntaksvilkaar.lovreferanse.ledd,
-            "bokstav" to unntaksvilkaar.lovreferanse.paragraf,
-            "lenke" to unntaksvilkaar.lovreferanse.lenke,
-            "resultat" to unntaksvilkaar.resultat?.name
-        )
-    ).let { tx.run(it.asExecute) }
 
     private fun lagreGrunnlag(
         vilkaarId: UUID,
@@ -288,20 +224,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             grunnlag = grunnlag
         )
 
-    private fun Row.toDelvilkaar() =
-        Delvilkaar(
-            type = VilkaarType.valueOf(string("vilkaar_type")),
-            tittel = string("tittel"),
-            beskrivelse = stringOrNull("beskrivelse"),
-            lovreferanse = Lovreferanse(
-                paragraf = string("paragraf"),
-                ledd = intOrNull("ledd"),
-                bokstav = stringOrNull("bokstav"),
-                lenke = stringOrNull("lenke")
-            ),
-            resultat = stringOrNull("resultat")?.let { Utfall.valueOf(it) }
-        )
-
     private fun Row.toGrunnlag(): Vilkaarsgrunnlag<JsonNode> =
         Vilkaarsgrunnlag(
             id = uuid("id"),
@@ -319,11 +241,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         const val lagreVilkaar = """
             INSERT INTO vilkaar(id, vilkaarsvurdering_id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler) 
             VALUES(:id, :vilkaarsvurdering_id, :resultat_kommentar, :resultat_tidspunkt, :resultat_saksbehandler) 
-        """
-
-        const val lagreDelvilkaar = """
-            INSERT INTO delvilkaar(vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, paragraf, ledd, bokstav, lenke, resultat) 
-            VALUES(:vilkaar_id, :vilkaar_type, :hovedvilkaar, :tittel, :beskrivelse, :paragraf, :ledd, :bokstav, :lenke, :resultat)
         """
 
         const val lagreGrunnlag = """
@@ -345,18 +262,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             WHERE id = :id
         """
 
-        const val lagreDelvilkaarResultat = """
-            UPDATE delvilkaar
-            SET resultat = :resultat
-            WHERE vilkaar_id = :vilkaar_id AND vilkaar_type = :vilkaar_type
-        """
-
-        const val lagreDelvilkaarResultatIngenOppfylt = """
-            UPDATE delvilkaar
-            SET resultat = :resultat
-            WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar != true
-        """
-
         const val hentVilkaarsvurdering = """
             SELECT id, behandling_id, virkningstidspunkt, grunnlag_versjon, resultat_utfall, 
                 resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler 
@@ -366,11 +271,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         const val hentVilkaar = """
             SELECT id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler FROM vilkaar 
             WHERE vilkaarsvurdering_id = :vilkaarsvurdering_id
-        """
-
-        const val hentDelvilkaar = """
-            SELECT vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, paragraf, ledd, bokstav, lenke, resultat 
-            FROM delvilkaar WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar = :hovedvilkaar
         """
 
         const val hentGrunnlag = """
@@ -388,12 +288,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             UPDATE vilkaar
             SET resultat_kommentar = null, resultat_tidspunkt = null, resultat_saksbehandler = null   
             WHERE id = :id
-        """
-
-        const val slettDelvilkaarResultat = """
-            UPDATE delvilkaar
-            SET resultat = null
-            WHERE vilkaar_id = :vilkaar_id
         """
     }
 }

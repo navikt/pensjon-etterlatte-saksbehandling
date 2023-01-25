@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.database
 
 import kotliquery.Row
 import kotliquery.Session
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -15,28 +16,40 @@ class KotliqueryRepositoryWrapper(private val datasource: DataSource) {
 
     fun opprett(query: String, params: Map<String, Any?>, loggtekst: String) =
         using(sessionOf(datasource)) { session ->
-            queryOf(
-                statement = query,
-                paramMap = params
-            )
-                .also { logger.info(loggtekst) }
-                .let { session.run(it.asExecute) }
+            session.transaction { tx ->
+                queryOf(
+                    statement = query,
+                    paramMap = params
+                )
+                    .also { logger.info(loggtekst) }
+                    .let { tx.run(it.asExecute) }
+            }
         }
 
-    fun oppdater(query: String, params: Map<String, Any?>, loggtekst: String) =
+    fun oppdater(
+        query: String,
+        params: Map<String, Any?>,
+        loggtekst: String,
+        ekstra: ((tx: TransactionalSession) -> Unit)? = null
+    ) =
         using(sessionOf(datasource)) { session ->
-            queryOf(
-                statement = query,
-                paramMap = params
-            )
-                .also { logger.info(loggtekst) }
-                .let { session.run(it.asUpdate) }
+            session.transaction { tx ->
+                queryOf(
+                    statement = query,
+                    paramMap = params
+                )
+                    .also { logger.info(loggtekst) }
+                    .let { tx.run(it.asUpdate) }
+                    .also { ekstra?.invoke(tx) }
+            }
         }
 
     fun opprettFlere(query: String, params: List<Map<String, Serializable?>>, loggtekst: String) =
         using(sessionOf(datasource)) { session ->
-            logger.info(loggtekst)
-            session.batchPreparedNamedStatement(query, params)
+            session.transaction { tx ->
+                logger.info(loggtekst)
+                tx.batchPreparedNamedStatement(query, params)
+            }
         }
 
     fun <T> hentMedKotliquery(

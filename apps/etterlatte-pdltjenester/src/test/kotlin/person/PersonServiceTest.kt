@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.ktor.Saksbehandler
-import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.mockResponse
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlFolkeregisterIdentResponse
@@ -31,7 +30,7 @@ internal class PersonServiceTest {
 
     private val pdlKlient = mockk<PdlKlient>()
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
-    private val personService = PersonService(pdlKlient, ppsKlient, Sporingslogg())
+    private val personService = PersonService(pdlKlient, ppsKlient)
     private val saksbehandler = Saksbehandler("A1234")
 
     @BeforeEach
@@ -63,7 +62,7 @@ internal class PersonServiceTest {
     @Test
     fun `skal mappe avdoed med barnekull`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED), saksbehandler)
+            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED))
         }
 
         val expectedBarnFnr = listOf("70078749472", "06067018735")
@@ -78,8 +77,7 @@ internal class PersonServiceTest {
     fun `skal mappe person som inkluderer familierelasjon (foreldre)`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN),
-                saksbehandler
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
             )
         }
 
@@ -95,8 +93,7 @@ internal class PersonServiceTest {
     fun `skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN),
-                saksbehandler
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
             )
         }
 
@@ -113,8 +110,7 @@ internal class PersonServiceTest {
     fun `skal mappe person som inkluderer familierelasjon (barn)`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN),
-                saksbehandler
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
             )
         }
 
@@ -130,8 +126,7 @@ internal class PersonServiceTest {
     fun `Hent utland med innflytting mappes korrekt`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN),
-                saksbehandler
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
             )
         }
 
@@ -144,8 +139,7 @@ internal class PersonServiceTest {
     fun `Hent utland med utflytting mappes korrekt`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN),
-                saksbehandler
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
             )
         }
 
@@ -160,7 +154,7 @@ internal class PersonServiceTest {
 
         assertThrows<PdlForesporselFeilet> {
             runBlocking {
-                personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN), saksbehandler)
+                personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
             }
         }
     }
@@ -171,7 +165,7 @@ internal class PersonServiceTest {
 
         runBlocking {
             assertThrows<PdlFantIkkePerson> {
-                personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN), saksbehandler)
+                personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN))
             }
         }
     }
@@ -181,8 +175,7 @@ internal class PersonServiceTest {
         val personIdentResponse =
             runBlocking {
                 personService.hentFolkeregisterIdent(
-                    HentFolkeregisterIdentRequest("2305469522806"),
-                    saksbehandler
+                    HentFolkeregisterIdentRequest("2305469522806")
                 )
             }
         val expectedFolkeregisterIdent = "70078749472"
@@ -194,7 +187,7 @@ internal class PersonServiceTest {
         coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
         runBlocking {
             assertThrows<PdlFantIkkePerson> {
-                personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest("1234"), saksbehandler)
+                personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest("1234"))
             }
         }
     }

@@ -6,11 +6,6 @@ import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.ktor.Saksbehandler
-import no.nav.etterlatte.libs.sporingslogg.Decision
-import no.nav.etterlatte.libs.sporingslogg.HttpMethod
-import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlResponseError
@@ -22,23 +17,15 @@ class PdlFantIkkePerson(message: String) : RuntimeException(message)
 
 class PersonService(
     private val pdlKlient: PdlKlient,
-    private val ppsKlient: ParallelleSannheterKlient,
-    private val sporingslogg: Sporingslogg
+    private val ppsKlient: ParallelleSannheterKlient
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
-    suspend fun hentPerson(hentPersonRequest: HentPersonRequest, saksbehandler: Saksbehandler): Person {
+    suspend fun hentPerson(hentPersonRequest: HentPersonRequest): Person {
         logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")
 
         return pdlKlient.hentPerson(hentPersonRequest.foedselsnummer, hentPersonRequest.rolle).let {
             if (it.data?.hentPerson == null) {
-                sporingslogg.logg(
-                    feilendeRequest(
-                        ident = hentPersonRequest.foedselsnummer.value,
-                        bruker = saksbehandler,
-                        endepunkt = "person"
-                    )
-                )
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
                     throw PdlFantIkkePerson("Fant ikke personen ${hentPersonRequest.foedselsnummer}")
@@ -48,13 +35,6 @@ class PersonService(
                     )
                 }
             } else {
-                sporingslogg.logg(
-                    vellykkaRequest(
-                        ident = hentPersonRequest.foedselsnummer.value,
-                        bruker = saksbehandler,
-                        endepunkt = "person"
-                    )
-                )
                 PersonMapper.mapPerson(
                     ppsKlient = ppsKlient,
                     pdlKlient = pdlKlient,
@@ -66,38 +46,11 @@ class PersonService(
         }
     }
 
-    private fun vellykkaRequest(ident: String, bruker: Saksbehandler, endepunkt: String) = Sporingsrequest(
-        kallendeApplikasjon = "pdltjenester",
-        oppdateringstype = HttpMethod.GET,
-        brukerId = bruker.ident,
-        hvemBlirSlaattOpp = ident,
-        endepunkt = "/$endepunkt",
-        resultat = Decision.Permit,
-        melding = "Hent $endepunkt var vellykka"
-    )
-
-    private fun feilendeRequest(ident: String, bruker: Saksbehandler, endepunkt: String) = Sporingsrequest(
-        kallendeApplikasjon = "api",
-        oppdateringstype = HttpMethod.GET,
-        brukerId = bruker.ident,
-        hvemBlirSlaattOpp = ident,
-        endepunkt = "/$endepunkt",
-        resultat = Decision.Deny,
-        melding = "Hent $endepunkt feilet"
-    )
-
-    suspend fun hentOpplysningsperson(hentPersonRequest: HentPersonRequest, saksbehandler: Saksbehandler): PersonDTO {
+    suspend fun hentOpplysningsperson(hentPersonRequest: HentPersonRequest): PersonDTO {
         logger.info("Henter opplysninger for person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")
 
         return pdlKlient.hentPerson(hentPersonRequest.foedselsnummer, hentPersonRequest.rolle).let {
             if (it.data?.hentPerson == null) {
-                sporingslogg.logg(
-                    feilendeRequest(
-                        ident = hentPersonRequest.foedselsnummer.value,
-                        bruker = saksbehandler,
-                        endepunkt = "opplysningsperson"
-                    )
-                )
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
                     throw PdlFantIkkePerson("Fant ikke personen ${hentPersonRequest.foedselsnummer}")
@@ -107,13 +60,6 @@ class PersonService(
                     )
                 }
             } else {
-                sporingslogg.logg(
-                    vellykkaRequest(
-                        ident = hentPersonRequest.foedselsnummer.value,
-                        bruker = saksbehandler,
-                        endepunkt = "opplysningsperson"
-                    )
-                )
                 PersonMapper.mapOpplysningsperson(
                     ppsKlient = ppsKlient,
                     pdlKlient = pdlKlient,
@@ -126,20 +72,12 @@ class PersonService(
     }
 
     suspend fun hentFolkeregisterIdent(
-        hentFolkeregisterIdentRequest: HentFolkeregisterIdentRequest,
-        saksbehandler: Saksbehandler
+        hentFolkeregisterIdentRequest: HentFolkeregisterIdentRequest
     ): FolkeregisterIdent {
         logger.info("Henter folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} fra PDL")
 
         return pdlKlient.hentFolkeregisterIdent(hentFolkeregisterIdentRequest.ident).let {
             if (it.data?.hentIdenter == null) {
-                sporingslogg.logg(
-                    feilendeRequest(
-                        ident = hentFolkeregisterIdentRequest.ident,
-                        bruker = saksbehandler,
-                        endepunkt = "folkeregisterIdent"
-                    )
-                )
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
                     throw PdlFantIkkePerson("Fant ikke personen ${hentFolkeregisterIdentRequest.ident}")

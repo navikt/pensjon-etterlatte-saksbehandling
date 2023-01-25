@@ -10,10 +10,10 @@ data class BehandlingListe(val behandlinger: List<BehandlingSammendrag>)
 data class BehandlingSammendrag(
     val id: UUID,
     val sak: Long,
-    val status: BehandlingStatus?,
+    val status: BehandlingStatus,
     val soeknadMottattDato: LocalDateTime?,
     val behandlingOpprettet: LocalDateTime?,
-    val behandlingType: BehandlingType?,
+    val behandlingType: BehandlingType,
     val aarsak: String?,
     val virkningstidspunkt: Virkningstidspunkt?,
     val vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?
@@ -31,8 +31,8 @@ data class DetaljertBehandling(
     val avdoed: List<String>?,
     val soesken: List<String>?,
     val gyldighetsproeving: GyldighetsResultat?,
-    val status: BehandlingStatus?,
-    val behandlingType: BehandlingType?,
+    val status: BehandlingStatus,
+    val behandlingType: BehandlingType,
     val virkningstidspunkt: Virkningstidspunkt?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak? = null

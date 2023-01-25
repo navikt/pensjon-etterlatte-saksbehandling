@@ -2,31 +2,21 @@ import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import { ErrorMessage, Label } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
+import { oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { Calender } from '@navikt/ds-icons'
 import { formaterStringDato } from '~utils/formattering'
+import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Beskrivelse, InfoElement, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
+import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
 import { useAppDispatch } from '~store/Store'
 import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { addMonths } from 'date-fns'
 import { Soeknadsvurdering } from '../SoeknadsVurdering'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
-import { oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
+import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
+import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
-
-const Info = ({ tekst, label }: { tekst: string; label: string }) => {
-  return (
-    <InfoElement>
-      <Label size="small" as={'p'}>
-        {label}
-      </Label>
-      <div>{tekst}</div>
-    </InfoElement>
-  )
-}
 
 interface Props {
   behandlingId: string

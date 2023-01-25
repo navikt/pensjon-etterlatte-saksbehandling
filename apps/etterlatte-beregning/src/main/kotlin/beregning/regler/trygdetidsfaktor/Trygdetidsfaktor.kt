@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning.regler.trygdetidsfaktor
 import no.nav.etterlatte.beregning.regler.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.BP_1967_DATO
 import no.nav.etterlatte.beregning.regler.BarnepensjonGrunnlag
+import no.nav.etterlatte.beregning.regler.DESIMALER_DELBEREGNING
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
@@ -33,5 +34,5 @@ val trygdetidsFaktor = RegelMeta(
     beskrivelse = "Finn trygdetidsfaktor",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-TRYGDETIDSFAKTOR")
 ) benytter maksTrygdetid og trygdetidRegel med { maksTrygdetid, trygdetid ->
-    minOf(trygdetid, maksTrygdetid) / maksTrygdetid
+    minOf(trygdetid, maksTrygdetid).divide(maksTrygdetid).setScale(DESIMALER_DELBEREGNING)
 }

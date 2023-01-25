@@ -23,7 +23,7 @@ val beregnBarnepensjon1967Regel = RegelMeta(
     beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID")
 ) benytter barnepensjonSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
-    (sats * trygdetidsfaktor)
+    sats.multiply(trygdetidsfaktor).setScale(DESIMALER_DELBEREGNING)
 }
 
 val kroneavrundetBarnepensjonRegel = RegelMeta(
@@ -31,5 +31,5 @@ val kroneavrundetBarnepensjonRegel = RegelMeta(
     beskrivelse = "Gjør en kroneavrunding av barnepensjonen",
     regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING")
 ) benytter beregnBarnepensjon1967Regel med { beregnetBarnepensjon ->
-    beregnetBarnepensjon.setScale(0, RoundingMode.HALF_UP).toInt()
+    beregnetBarnepensjon.setScale(DESIMALER_RESULTAT, RoundingMode.HALF_UP).toInt()
 }

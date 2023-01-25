@@ -3,6 +3,7 @@ package beregning.regler.trygdetidsfaktor
 import beregning.regler.REGEL_PERIODE
 import beregning.regler.barnepensjonGrunnlag
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.beregning.regler.DESIMALER_DELBEREGNING
 import no.nav.etterlatte.beregning.regler.trygdetidsfaktor.maksTrygdetid
 import no.nav.etterlatte.beregning.regler.trygdetidsfaktor.trygdetidRegel
 import no.nav.etterlatte.beregning.regler.trygdetidsfaktor.trygdetidsFaktor
@@ -29,13 +30,13 @@ internal class TrygdetidsfaktorTest {
     fun `trygdetidsFaktor skal returnere 1 naar trygdetid er 40 aar`() {
         val resultat = trygdetidsFaktor.anvend(barnepensjonGrunnlag(), REGEL_PERIODE)
 
-        resultat.verdi shouldBe BigDecimal(1)
+        resultat.verdi shouldBe BigDecimal(1).setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test
     fun `trygdetidsFaktor skal returnere 0,5 naar trygdetid er 20 aar`() {
         val resultat = trygdetidsFaktor.anvend(barnepensjonGrunnlag(trygdeTid = 20.0.toBigDecimal()), REGEL_PERIODE)
 
-        resultat.verdi shouldBe BigDecimal(0.5)
+        resultat.verdi shouldBe BigDecimal(0.5).setScale(DESIMALER_DELBEREGNING)
     }
 }

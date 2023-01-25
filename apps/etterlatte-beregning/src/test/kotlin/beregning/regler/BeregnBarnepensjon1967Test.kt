@@ -1,6 +1,7 @@
 package beregning.regler
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.beregning.regler.DESIMALER_DELBEREGNING
 import no.nav.etterlatte.beregning.regler.beregnBarnepensjon1967Regel
 import no.nav.etterlatte.beregning.regler.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -16,7 +17,7 @@ internal class BeregnBarnepensjon1967Test {
             periode = RegelPeriode(fraDato = LocalDate.now())
         )
 
-        resultat.verdi shouldBe 3716.00.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 3716.00.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -26,7 +27,7 @@ internal class BeregnBarnepensjon1967Test {
             periode = RegelPeriode(fraDato = LocalDate.now())
         )
 
-        resultat.verdi shouldBe 3019.25.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 3019.25.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -36,7 +37,7 @@ internal class BeregnBarnepensjon1967Test {
             periode = RegelPeriode(fraDato = LocalDate.now())
         )
 
-        resultat.verdi shouldBe 2787.00.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 2787.00.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -46,7 +47,7 @@ internal class BeregnBarnepensjon1967Test {
             periode = RegelPeriode(fraDato = LocalDate.now())
         )
 
-        resultat.verdi shouldBe 2670.88.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 2670.875.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test

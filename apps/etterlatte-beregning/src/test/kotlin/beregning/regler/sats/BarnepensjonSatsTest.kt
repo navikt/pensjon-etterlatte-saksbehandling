@@ -8,6 +8,7 @@ import beregning.regler.barnepensjonGrunnlag
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.beregning.regler.DESIMALER_DELBEREGNING
 import no.nav.etterlatte.beregning.regler.sats.antallSoeskenIKullet
 import no.nav.etterlatte.beregning.regler.sats.barnepensjonSatsRegel
 import no.nav.etterlatte.beregning.regler.sats.belopForEtterfoelgendeBarn
@@ -97,7 +98,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 3716.0.toBigDecimal()
+        resultat.verdi shouldBe 3716.0.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -107,7 +108,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 2322.50.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 2322.50.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -117,7 +118,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 3716.00.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 3716.00.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -127,7 +128,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 3019.25.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 3019.25.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -137,7 +138,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 2787.00.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 2787.00.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -147,7 +148,6 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        // TODO her har vi egentlig 2670.875 - hvordan bør avrunding gjøres?
-        resultat.verdi shouldBe 2670.88.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 2670.875.toBigDecimal().setScale(DESIMALER_DELBEREGNING)
     }
 }

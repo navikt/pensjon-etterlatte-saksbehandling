@@ -75,11 +75,11 @@ export const useBehandlingRoutes = () => {
 const hentAktuelleRoutes = (behandling: IDetaljertBehandling) => {
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
+      const soeknadRoutes = behandlingRoutes.filter((route) => route.path !== 'opphoeroversikt')
       if (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT) {
-        return behandlingRoutes.filter((route) => route.path !== 'beregne' && route.path !== 'beregningsgrunnlag')
+        return soeknadRoutes.filter((route) => route.path !== 'beregne' && route.path !== 'beregningsgrunnlag')
       }
-
-      return behandlingRoutes
+      return soeknadRoutes
     case IBehandlingsType.REVURDERING:
       return behandlingRoutes.filter((route) => route.erRevurderingRoute)
     case IBehandlingsType.MANUELT_OPPHOER:

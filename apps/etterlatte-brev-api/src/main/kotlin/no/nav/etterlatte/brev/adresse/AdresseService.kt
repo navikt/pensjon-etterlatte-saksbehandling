@@ -34,4 +34,9 @@ class AdresseService(
             telefon = telefon
         )
     }
+
+    suspend fun hentEnhet(navEnhetNr: String): String {
+        val enhet = norg2Klient.hentEnhet(navEnhetNr)
+        return enhet.navn ?: "NAV"
+    }
 }

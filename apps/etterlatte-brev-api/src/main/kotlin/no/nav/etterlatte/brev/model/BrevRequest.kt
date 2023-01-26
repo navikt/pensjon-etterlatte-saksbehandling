@@ -51,8 +51,8 @@ data class Avsender(
 )
 
 data class Attestant(
-    val navn: String = "Attest Attestant",
-    val kontor: String = "Nav pensjon og familie Ålesund"
+    val navn: String = "-",
+    val kontor: String = "-"
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

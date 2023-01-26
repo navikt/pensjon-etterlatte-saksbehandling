@@ -35,7 +35,10 @@ class SakOgBehandlingService(
             vedtak = ForenkletVedtak(
                 vedtak.vedtakId,
                 vedtak.type,
-                vedtak.vedtakFattet?.ansvarligEnhet ?: saksbehandlerEnhet
+                vedtak.vedtakFattet?.ansvarligEnhet ?: saksbehandlerEnhet,
+                vedtak.vedtakFattet?.ansvarligSaksbehandler ?: "-",
+                vedtak.attestasjon?.attesterendeEnhet ?: saksbehandlerEnhet,
+                vedtak.attestasjon?.attestant ?: "-"
             ),
             utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )

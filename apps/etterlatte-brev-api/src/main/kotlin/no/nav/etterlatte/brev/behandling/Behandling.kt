@@ -33,7 +33,10 @@ data class Behandling(
 data class ForenkletVedtak(
     val id: Long,
     val type: VedtakType,
-    val enhet: String
+    val saksbehandlerEnhet: String,
+    val saksbehandlerIdent: String,
+    val attestantEnhet: String,
+    val attestantIdent: String
 )
 
 data class Utbetalingsinfo(

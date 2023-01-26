@@ -12,12 +12,18 @@ data class InnvilgetBrevRequest(
     val aktuelleParagrafer: List<String>,
     override val spraak: Spraak,
     override val avsender: Avsender,
-    override val mottaker: Mottaker
+    override val mottaker: Mottaker,
+    override val attestant: Attestant
 ) : BrevRequest() {
     override fun templateName(): String = "innvilget"
 
     companion object {
-        fun fraVedtak(behandling: Behandling, avsender: Avsender, mottaker: Mottaker): InnvilgetBrevRequest =
+        fun fraVedtak(
+            behandling: Behandling,
+            avsender: Avsender,
+            mottaker: Mottaker,
+            attestant: Attestant
+        ): InnvilgetBrevRequest =
             InnvilgetBrevRequest(
                 saksnummer = behandling.sakId.toString(),
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
@@ -26,7 +32,8 @@ data class InnvilgetBrevRequest(
                 aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår? Nødvendig?
                 spraak = behandling.spraak,
                 mottaker = mottaker,
-                avsender = avsender
+                avsender = avsender,
+                attestant = attestant
             )
     }
 }

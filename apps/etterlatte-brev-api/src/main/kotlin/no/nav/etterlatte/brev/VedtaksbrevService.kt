@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
@@ -88,11 +89,12 @@ class VedtaksbrevService(
         val enhet = behandling.vedtak.enhet
         val avsender = adresseService.hentAvsenderEnhet(enhet)
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
+        val attestant = Attestant()
 
         val vedtakType = behandling.vedtak.type
 
         val brevRequest = when (vedtakType) {
-            VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker)
+            VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
             VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(behandling, avsender, mottaker)
             else -> throw Exception("Vedtakstype er ikke støttet: $vedtakType")
         }

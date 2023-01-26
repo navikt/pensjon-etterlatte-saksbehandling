@@ -95,7 +95,7 @@ class VedtaksbrevService(
 
         val brevRequest = when (vedtakType) {
             VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
-            VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(behandling, avsender, mottaker)
+            VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
             else -> throw Exception("Vedtakstype er ikke støttet: $vedtakType")
         }
 

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.regler
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import java.math.BigDecimal
 import java.time.LocalDate
 
 data class RegelPeriode(val fraDato: LocalDate, val tilDato: LocalDate? = null) {
@@ -160,34 +159,6 @@ open class VelgNyesteGyldigRegel<G, S>(
     private fun <G, S> List<Regel<G, S>>.nyesteGyldigeRegel(periode: RegelPeriode) = this
         .filter { regel -> regel.gjelderFra <= periode.fraDato }
         .maxByOrNull { it.gjelderFra }
-}
-
-open class GangSammenRegel<G>(
-    override val gjelderFra: LocalDate,
-    override val beskrivelse: String,
-    override val regelReferanse: RegelReferanse,
-    @JsonIgnore
-    val regler: List<Regel<G, BigDecimal>>
-) : Regel<G, BigDecimal>(
-    gjelderFra = gjelderFra,
-    beskrivelse = beskrivelse,
-    regelReferanse = regelReferanse
-) {
-    override fun accept(visitor: RegelVisitor) {
-        visitor.visit(this)
-        regler.forEach { regel -> regel.accept(visitor) }
-    }
-
-    override fun anvendRegel(grunnlag: G, periode: RegelPeriode): SubsumsjonsNode<BigDecimal> {
-        val noder = regler.map { it.anvend(grunnlag, periode) }
-        val verdi = noder.map { r -> r.verdi }.reduce { acc, i -> acc * i }
-
-        return SubsumsjonsNode(
-            verdi = verdi,
-            regel = this,
-            noder = noder
-        )
-    }
 }
 
 open class FinnFaktumIGrunnlagRegel<G, T, F : FaktumNode<T>, S>(

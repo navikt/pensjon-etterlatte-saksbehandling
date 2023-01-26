@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.regler
 
-import java.math.BigDecimal
 import java.time.LocalDate
 
 data class RegelMeta(
@@ -69,18 +68,6 @@ private fun <G, S> velgNyesteRegel(
     regler = regler
 )
 
-private fun <G> gangSammenRegler(
-    gjelderFra: LocalDate,
-    beskrivelse: String,
-    regelReferanse: RegelReferanse,
-    regler: List<Regel<G, BigDecimal>>
-): Regel<G, BigDecimal> = GangSammenRegel(
-    gjelderFra = gjelderFra,
-    beskrivelse = beskrivelse,
-    regelReferanse = regelReferanse,
-    regler = regler
-)
-
 fun <G, T, F : FaktumNode<T>, S> finnFaktumIGrunnlag(
     gjelderFra: LocalDate,
     beskrivelse: String,
@@ -106,13 +93,6 @@ fun <G, S> definerKonstant(
 )
 
 infix fun <G, S> RegelMeta.benytter(regel1: Regel<G, S>) = this to regel1
-
-infix fun <G> RegelMeta.multipliser(regler: List<Regel<G, BigDecimal>>) = gangSammenRegler(
-    gjelderFra = gjelderFra,
-    beskrivelse = beskrivelse,
-    regelReferanse = regelReferanse,
-    regler = regler
-)
 
 infix fun <G, S> RegelMeta.velgNyesteGyldige(regler: List<Regel<G, S>>) = velgNyesteRegel(
     gjelderFra = gjelderFra,

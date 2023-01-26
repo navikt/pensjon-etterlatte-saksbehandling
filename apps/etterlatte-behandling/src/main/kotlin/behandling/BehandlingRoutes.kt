@@ -33,7 +33,9 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -60,7 +62,7 @@ internal fun Route.behandlingRoutes(
         get {
             val detaljertBehandlingDTO =
                 generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, saksbehandler, accesstoken)
-            call.respond<DetaljertBehandlingDto>(detaljertBehandlingDTO)
+            call.respond(detaljertBehandlingDTO)
         }
 
         post("/kommerbarnettilgode") {
@@ -104,13 +106,12 @@ internal fun Route.behandlingRoutes(
             }
 
             try {
-                val virkningstidspunkt =
-                    foerstegangsbehandlingService.lagreVirkningstidspunkt(
-                        behandlingsId,
-                        body.dato,
-                        navIdent,
-                        body.begrunnelse!!
-                    )
+                val virkningstidspunkt = foerstegangsbehandlingService.lagreVirkningstidspunkt(
+                    behandlingsId,
+                    body.dato,
+                    navIdent,
+                    body.begrunnelse!!
+                )
 
                 call.respondText(
                     contentType = ContentType.Application.Json,
@@ -144,11 +145,30 @@ internal fun Route.behandlingRoutes(
 
         route("/{behandlingsid}") {
             get {
-                generellBehandlingService.hentDetaljertBehandling(behandlingsId)
-                    ?.let { detaljertBehandling ->
-                        call.respond(detaljertBehandling)
-                        logger.info("Henter detaljert for behandling: $behandlingsId")
-                    } ?: call.respond(HttpStatusCode.NotFound)
+                logger.info("Henter detaljert behandling for behandling med id=$behandlingsId")
+                when (val behandling = generellBehandlingService.hentDetaljertBehandling(behandlingsId)) {
+                    is DetaljertBehandling -> call.respond(behandling)
+                    else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingsId")
+                }
+            }
+
+            route("/manueltopphoer") {
+                get {
+                    logger.info("Henter manuelt opphør oppsummering for manuelt opphør med id=$behandlingsId")
+                    when (val opphoer = manueltOpphoerService.hentManueltOpphoerMedAndreBehandlinger(behandlingsId)) {
+                        null -> call.respond(
+                            HttpStatusCode.NotFound,
+                            "Fant ikke manuelt opphør med id=$behandlingsId"
+                        )
+
+                        else -> {
+                            val (opphoer, andre) = opphoer
+                            call.respond(
+                                opphoer.toManueltOpphoerOppsummmering(andre.map { it.toDetaljertBehandling() })
+                            )
+                        }
+                    }
+                }
             }
 
             route("/hendelser") {
@@ -321,14 +341,40 @@ internal fun Route.behandlingRoutes(
     }
 }
 
+data class ManueltOpphoerOppsummeringDto(
+    val id: UUID,
+    val virkningstidspunkt: Virkningstidspunkt?,
+    val persongalleri: Persongalleri,
+    val opphoerAarsaker: List<ManueltOpphoerAarsak>,
+    val fritekstAarsak: String?,
+    val andreBehandlinger: List<DetaljertBehandling>
+)
+
+private fun ManueltOpphoer.toManueltOpphoerOppsummmering(
+    andreBehandlinger: List<DetaljertBehandling>
+): ManueltOpphoerOppsummeringDto =
+    ManueltOpphoerOppsummeringDto(
+        id = this.id,
+        virkningstidspunkt = this.virkningstidspunkt,
+        persongalleri = this.persongalleri,
+        opphoerAarsaker = this.opphoerAarsaker,
+        fritekstAarsak = this.fritekstAarsak,
+        andreBehandlinger = andreBehandlinger
+    )
+
 inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
     get() = call.parameters["behandlingsid"]?.let { UUID.fromString(it) } ?: throw NullPointerException(
         "BehandlingsId er ikke i path params"
     )
 
-inline val PipelineContext<*, ApplicationCall>.sakId get() = requireNotNull(call.parameters["sakid"]).toLong()
-fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
-    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()
+inline val PipelineContext<*, ApplicationCall>.sakId
+    get() = call.parameters["sakid"]?.toLong() ?: throw NullPointerException(
+        "sakid er ikke i path params"
+    )
+
+fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() =
+    call.principal<TokenValidationContextPrincipal>()?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")
+        ?.toString()
 
 data class VedtakHendelse(
     val vedtakId: Long,

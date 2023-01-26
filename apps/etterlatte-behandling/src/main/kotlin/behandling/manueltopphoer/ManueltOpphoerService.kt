@@ -39,6 +39,8 @@ interface ManueltOpphoerService {
     )
 
     fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer?
+
+    fun hentManueltOpphoerMedAndreBehandlinger(behandling: UUID): Pair<ManueltOpphoer, List<Behandling>>?
 }
 
 class RealManueltOpphoerService(
@@ -53,6 +55,15 @@ class RealManueltOpphoerService(
 
     override fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer? =
         inTransaction { behandlinger.hentBehandling(behandling, BehandlingType.MANUELT_OPPHOER) as ManueltOpphoer? }
+
+    override fun hentManueltOpphoerMedAndreBehandlinger(behandling: UUID): Pair<ManueltOpphoer, List<Behandling>>? =
+        inTransaction {
+            val opphoer = behandlinger.hentBehandling(behandling, BehandlingType.MANUELT_OPPHOER) as ManueltOpphoer?
+                ?: return@inTransaction null
+            val andreBehandlinger = behandlinger.alleBehandlingerISak(opphoer.sak)
+                .filter { it.id != behandling && it.status == BehandlingStatus.IVERKSATT }
+            opphoer to andreBehandlinger
+        }
 
     override fun opprettManueltOpphoer(
         opphoerRequest: ManueltOpphoerRequest
@@ -132,6 +143,7 @@ class RealManueltOpphoerService(
     private fun List<Behandling>.`siste ikke-avbrutte behandling`(): Behandling? =
         this.sortedByDescending { it.behandlingOpprettet }
             .firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
+
     private fun List<Behandling>.tidligsteIverksatteVirkningstidspunkt(): Virkningstidspunkt? =
         this.filter { it.status == BehandlingStatus.IVERKSATT }
             .mapNotNull { it.virkningstidspunkt }

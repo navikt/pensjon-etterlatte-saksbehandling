@@ -24,6 +24,7 @@ export const StegMeny = () => {
 
   const oppfylt = behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT
   const vurdert = !!behandling.vilkårsprøving?.resultat && klarForVidereBehandling
+  console.log('beregning', harBeregning, behandling.beregning)
 
   return (
     <StegMenyWrapper role="navigation">
@@ -32,32 +33,48 @@ export const StegMeny = () => {
           <li>
             <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
           </li>
-          <Separator aria-hidden={"true"} />
+          <Separator aria-hidden={'true'} />
         </>
       )}
-      <li className={classNames({ disabled: !klarForVidereBehandling || !gyldighet })}>
-        <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
-      </li>
-      <Separator aria-hidden={"true"} />
+      {behandling.behandlingType === IBehandlingsType.MANUELT_OPPHOER && (
+        <>
+          <li>
+            <NavLink to="opphoeroversikt">Opphør</NavLink>
+          </li>
+          <Separator aria-hidden={'true'} />
+        </>
+      )}
+      {behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
+        <>
+          <li className={classNames({ disabled: !klarForVidereBehandling || !gyldighet })}>
+            <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
+          </li>
+          <Separator aria-hidden={'true'} />
+        </>
+      )}
       {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
         <>
           <li className={classNames({ disabled: !gyldighet || !vilkaar })}>
             <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
           </li>
-          <Separator aria-hidden={"true"} />
+          <Separator aria-hidden={'true'} />
         </>
       )}
       <li className={classNames({ disabled: !gyldighet || !vilkaar || !harBeregning })}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
-      <Separator aria-hidden={"true"} />
-      <li
-        className={classNames({
-          disabled: !vurdert || (oppfylt && !harBeregning),
-        })}
-      >
-        <NavLink to="brev">Vedtaksbrev</NavLink>
-      </li>
+      {behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
+        <>
+          <Separator aria-hidden={'true'} />
+          <li
+            className={classNames({
+              disabled: !vurdert || (oppfylt && !harBeregning),
+            })}
+          >
+            <NavLink to="brev">Vedtaksbrev</NavLink>
+          </li>
+        </>
+      )}
     </StegMenyWrapper>
   )
 }
@@ -84,6 +101,7 @@ const StegMenyWrapper = styled.ul`
       &:hover {
         text-decoration: underline;
       }
+
       &.active {
         color: #262626;
       }
@@ -93,8 +111,10 @@ const StegMenyWrapper = styled.ul`
       border-left: 8px solid #0067c5;
     }
   }
+
   .disabled {
     cursor: not-allowed;
+
     a {
       color: #b0b0b0;
       text-decoration: none;

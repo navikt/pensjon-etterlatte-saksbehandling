@@ -8,13 +8,25 @@ import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljert
 import { useAppSelector } from '~store/Store'
 import { Vedtaksbrev } from './vedtaksbrev/Vedtaksbrev'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 
 const behandlingRoutes = [
-  { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false },
-  { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering />, erRevurderingRoute: true },
-  { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag />, erRevurderingRoute: false },
-  { path: 'beregne', element: <Beregne />, erRevurderingRoute: true },
-  { path: 'brev', element: <Vedtaksbrev />, erRevurderingRoute: true },
+  { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false, erManueltOpphoerRoute: false },
+  {
+    path: 'opphoeroversikt',
+    element: <ManueltOpphoerOversikt />,
+    erRevurderingRoute: false,
+    erManueltOpphoerRoute: true,
+  },
+  { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering />, erRevurderingRoute: true, erManueltOpphoerRoute: false },
+  {
+    path: 'beregningsgrunnlag',
+    element: <Beregningsgrunnlag />,
+    erRevurderingRoute: false,
+    erManueltOpphoerRoute: false,
+  },
+  { path: 'beregne', element: <Beregne />, erRevurderingRoute: true, erManueltOpphoerRoute: true },
+  { path: 'brev', element: <Vedtaksbrev />, erRevurderingRoute: true, erManueltOpphoerRoute: false },
 ] as const
 
 function useRouteNavigation() {
@@ -69,7 +81,8 @@ const hentAktuelleRoutes = (behandling: IDetaljertBehandling) => {
 
       return behandlingRoutes
     case IBehandlingsType.REVURDERING:
-    case IBehandlingsType.MANUELT_OPPHOER:
       return behandlingRoutes.filter((route) => route.erRevurderingRoute)
+    case IBehandlingsType.MANUELT_OPPHOER:
+      return behandlingRoutes.filter((route) => route.erManueltOpphoerRoute)
   }
 }

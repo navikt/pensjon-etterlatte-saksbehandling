@@ -1,5 +1,6 @@
 import { IDetaljertBehandling, IKommerBarnetTilgode, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
+import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
   return apiClient.get(`/personer/${fnr}/behandlinger`)
@@ -23,6 +24,12 @@ export const fastsettVirkningstidspunkt = async (args: {
   begrunnelse: string
 }): Promise<ApiResponse<Virkningstidspunkt>> => {
   return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, { dato: args.dato, begrunnelse: args.begrunnelse })
+}
+
+export const hentManueltOpphoerDetaljer = async (
+  behandlingId: string
+): Promise<ApiResponse<ManueltOpphoerDetaljer>> => {
+  return apiClient.get(`/behandling/${behandlingId}/manueltopphoer`)
 }
 
 export const fattVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {

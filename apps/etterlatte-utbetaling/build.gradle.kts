@@ -25,9 +25,9 @@ dependencies {
     implementation(project(":libs:common"))
 
     implementation(Database.HikariCP)
-    implementation("org.flywaydb:flyway-core:8.5.11")
-    implementation("org.postgresql:postgresql:42.3.3")
-    implementation("com.github.seratch:kotliquery:1.7.0")
+    implementation(Database.FlywayDB)
+    implementation(Database.Postgresql)
+    implementation(Database.KotliQuery)
 
     testImplementation(Ktor2.ClientMock)
     testImplementation(MockK.MockK)

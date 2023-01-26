@@ -5,17 +5,19 @@ import { formaterStringDato } from '~utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
 import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { Sammendrag } from './Sammendrag'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
-import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
-import styled from 'styled-components'
-import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/behandling'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import styled from 'styled-components'
+import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
+import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
 
 export const Beregne = () => {
   const { next } = useBehandlingRoutes()
@@ -23,6 +25,7 @@ export const Beregne = () => {
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
+  const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
 
   useEffect(() => {
     hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
@@ -32,10 +35,17 @@ export const Beregne = () => {
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
   const behandles = hentBehandlesFraStatus(behandling?.status)
-  const vedtaksresultat = useVedtaksResultat()
+  const vedtaksresultat =
+    behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
 
   const opprettEllerOppdaterVedtak = () => {
-    oppdaterVedtakRequest(behandling.id, () => next())
+    oppdaterVedtakRequest(behandling.id, () => {
+      if (behandling.behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
+        setVisAttesteringsmodal(true)
+      } else {
+        next()
+      }
+    })
   }
 
   const soeker = behandling.søker
@@ -56,22 +66,29 @@ export const Beregne = () => {
             Vilkårsresultat: <strong>{formaterVedtaksResultat(vedtaksresultat, virkningstidspunkt)}</strong>
           </div>
         </InfoWrapper>
-        {isPendingOrInitial(beregning) ? (
-          <Spinner visible label="Laster" />
-        ) : isSuccess(beregning) ? (
-          <Sammendrag beregning={behandling.beregning!!} soeker={soeker} soesken={soesken} />
-        ) : isFailure(beregning) ? (
-          <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
-        ) : (
-          <ApiErrorAlert>Noe uventet har skjedd</ApiErrorAlert>
+        {mapApiResult(
+          beregning,
+          () => (
+            <Spinner visible label="Laster" />
+          ),
+          () => (
+            <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
+          ),
+          (beregning) => (
+            <Sammendrag beregning={beregning} soeker={soeker} soesken={soesken} />
+          )
         )}
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>
           {isFailure(vedtak) && <ErrorMessage>Vedtaksoppdatering feilet</ErrorMessage>}
-          <Button loading={isPending(vedtak)} variant="primary" size="medium" onClick={opprettEllerOppdaterVedtak}>
-            Gå videre til brev
-          </Button>
+          {visAttesteringsmodal ? (
+            <SendTilAttesteringModal />
+          ) : (
+            <Button loading={isPending(vedtak)} variant="primary" size="medium" onClick={opprettEllerOppdaterVedtak}>
+              {behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? 'Gå videre til brev' : 'Fatt vedtak'}
+            </Button>
+          )}
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />
@@ -83,6 +100,7 @@ export const Beregne = () => {
 const InfoWrapper = styled.div`
   margin-top: 1em;
   max-width: 500px;
+
   .text {
     margin: 1em 0 5em 0;
   }

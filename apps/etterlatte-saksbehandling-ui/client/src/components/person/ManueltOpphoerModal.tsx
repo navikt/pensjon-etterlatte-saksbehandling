@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { sendInnManueltOpphoer } from '~shared/api/manueltOpphoer'
 
 export const OPPHOERSGRUNNER = [
+  'SOEKER_DOED',
   'UTFLYTTING_FRA_NORGE',
   'SOESKEN_DOED',
   'GJENLEVENDE_FORELDER_DOED',
@@ -19,6 +20,7 @@ export const OPPHOERSGRUNNER = [
 export type Opphoersgrunn = typeof OPPHOERSGRUNNER[number]
 
 export const OVERSETTELSER_OPPHOERSGRUNNER: Record<Opphoersgrunn, string> = {
+  SOEKER_DOED: 'Dødsfall søker',
   GJENLEVENDE_FORELDER_DOED: 'Dødsfall gjenlevende forelder',
   SOESKEN_DOED: 'Dødsfall søsken',
   UTFLYTTING_FRA_NORGE: 'Utflytting fra Norge',

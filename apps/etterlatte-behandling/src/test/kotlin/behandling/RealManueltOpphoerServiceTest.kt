@@ -27,6 +27,7 @@ import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
@@ -235,5 +236,64 @@ internal class RealManueltOpphoerServiceTest {
 
         assertNull(returnertManueltOpphoer)
         verify(exactly = 0) { behandlingerMock.opprettManueltOpphoer(any()) }
+    }
+
+    @Test
+    fun `hentManueltOpphoerOgAlleIverksatteBehandlingerISak svarer med null hvis ingen manuelt opphør med id finnes`() {
+        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelserMock = mockk<HendelseDao>()
+        val behandlingerMock = mockk<BehandlingDao> {
+            every { hentBehandling(any(), BehandlingType.MANUELT_OPPHOER) } returns null
+            every { alleBehandlingerISak(any()) } returns listOf()
+        }
+        val service = RealManueltOpphoerService(
+            behandlingerMock,
+            hendelsesKanal,
+            hendelserMock
+        )
+        assertNull(service.hentManueltOpphoer(UUID.randomUUID()))
+    }
+
+    @Test
+    fun `hentManueltOpphoerOgAlleIverksatteBehandlingerISak tar også med andre iverksatte behandlinger på saken`() {
+        val manueltOpphoerId = UUID.randomUUID()
+        val sakId = 1L
+        val soeker = "12312312312"
+        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelserMock = mockk<HendelseDao>()
+        val opphoer = manueltOpphoer(
+            sak = sakId,
+            behandlingId = manueltOpphoerId,
+            persongalleri = Persongalleri(
+                soeker = soeker,
+                innsender = null,
+                soesken = listOf(),
+                avdoed = listOf(),
+                gjenlevende = listOf()
+            ),
+            opphoerAarsaker = listOf(ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED)
+        )
+        val behandlingerMock = mockk<BehandlingDao> {
+            every { hentBehandling(manueltOpphoerId, BehandlingType.MANUELT_OPPHOER) } returns opphoer
+            every { alleBehandlingerISak(sakId) } returns listOf(
+                opphoer,
+                foerstegangsbehandling(sak = sakId, status = BehandlingStatus.BEREGNET),
+                foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT),
+                foerstegangsbehandling(sak = sakId, status = BehandlingStatus.AVBRUTT),
+                foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT)
+            )
+        }
+        val service = RealManueltOpphoerService(
+            behandlingerMock,
+            hendelsesKanal,
+            hendelserMock
+        )
+        val (hentetOpphoer, andreBehandlinger) = service.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(
+            manueltOpphoerId
+        )!!
+
+        assertEquals(hentetOpphoer, opphoer)
+        assertEquals(andreBehandlinger.size, 2)
+        assertTrue(andreBehandlinger.all { it.status == BehandlingStatus.IVERKSATT })
     }
 }

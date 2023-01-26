@@ -1,8 +1,15 @@
-import { BodyShort, Button, Heading } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Heading } from '@navikt/ds-react'
 import { Delete, Edit } from '@navikt/ds-icons'
 import React, { ReactElement, useState } from 'react'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
+import { VilkaarVurdertInformasjon } from '~components/behandling/vilkaarsvurdering/Vurdering'
+import { formaterDatoMedTidspunkt } from '~utils/formattering'
+
+interface Vurdering {
+  saksbehandler: string
+  tidspunkt: Date
+}
 
 interface Props {
   tittel: string
@@ -10,7 +17,8 @@ interface Props {
   kommentar?: string
   defaultRediger?: boolean
   redigerbar: boolean
-  slett: (onSuccess?: () => void) => void
+  vurdering: Vurdering | null
+  slett?: (onSuccess?: () => void) => void
   children: ReactElement
   lagreklikk: (onSuccess?: () => void) => void
   avbrytklikk: (onSuccess?: () => void) => void
@@ -28,6 +36,14 @@ export const VurderingsboksWrapper = (props: Props) => {
             <Heading size="small" level={'2'}>
               {props.tittel}
             </Heading>
+            {props.vurdering && (
+              <VilkaarVurdertInformasjon>
+                <Detail>Manuelt av {props.vurdering.saksbehandler}</Detail>
+                <Detail>
+                  Sist endret {props.vurdering.tidspunkt ? formaterDatoMedTidspunkt(props.vurdering.tidspunkt) : '-'}
+                </Detail>
+              </VilkaarVurdertInformasjon>
+            )}
             {props.subtittelKomponent ?? <></>}
             {props.kommentar && (
               <Kommentar>
@@ -45,21 +61,23 @@ export const VurderingsboksWrapper = (props: Props) => {
                 <Edit aria-hidden={'true'} />
                 <span className={'text'}> Rediger</span>
               </RedigerWrapper>
-              <RedigerWrapper
-                onClick={async () => {
-                  new Promise(() => {
-                    setLagrer(true)
-                    props.slett(() => setLagrer(false))
-                  })
-                }}
-              >
-                {lagrer ? (
-                  <Spinner visible={true} label={''} margin={'0'} variant={'interaction'} />
-                ) : (
-                  <Delete aria-hidden={'true'} />
-                )}
-                <span className={'text'}> Slett</span>
-              </RedigerWrapper>
+              {props.slett && (
+                <RedigerWrapper
+                  onClick={async () => {
+                    new Promise(() => {
+                      setLagrer(true)
+                      props.slett?.(() => setLagrer(false))
+                    })
+                  }}
+                >
+                  {lagrer ? (
+                    <Spinner visible label={''} margin={'0'} variant={'interaction'} />
+                  ) : (
+                    <Delete aria-hidden={'true'} />
+                  )}
+                  <span className={'text'}> Slett</span>
+                </RedigerWrapper>
+              )}
             </>
           )}
         </>

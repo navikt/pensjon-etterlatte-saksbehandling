@@ -189,10 +189,12 @@ class ApplicationTest {
 
                 val expected = FastsettVirkningstidspunktResponse(
                     YearMonth.of(2022, 2),
-                    Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Instant.now())
+                    Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Instant.now()),
+                    "En begrunnelse"
                 )
                 assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)
                 assertEquals(expected.kilde.ident, it.body<FastsettVirkningstidspunktResponse>().kilde.ident)
+                assertEquals(expected.begrunnelse, it.body<FastsettVirkningstidspunktResponse>().begrunnelse)
             }
 
             client.post("/api/behandling/$behandlingId/kommerbarnettilgode") {

@@ -1,0 +1,114 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-behandling
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - "https://etterlatte-behandling.dev.intern.nav.no"
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_12
+        tier: db-custom-1-3840
+        collation: nb_NO.UTF8
+        cascadingDelete: false
+        name: etterlatte-sakogbehandlinger
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
+        maintenance:
+          day: 7
+          hour: 2
+        databases:
+          - name: sakogbehandlinger
+            envVarPrefix: DB
+  startup:
+    initialDelay: 7
+    failureThreshold: 10
+    periodSeconds: 5
+    path: /internal/started
+  liveness:
+    initialDelay: 5
+    path: /internal/isalive
+  readiness:
+    initialDelay: 5
+    path: /internal/isready
+  leaderElection: true
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      claims:
+        groups:
+          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # Tror dette er 0000-GA-PENSJON_ATTESTERING
+          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
+        extra:
+          - NAVident
+  kafka:
+    pool: nav-dev
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: GRUNNLAG_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
+    - name: PDL_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: HENDELSE_JOB_FREKVENS
+      value: "1"
+    - name: HENDELSE_MINUTTER_GAMLE_HENDELSER
+      value: "1"
+    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
+      value: ce96a301-13db-4409-b277-5b27f464d08b
+    - name: ETTERLATTE_GRUNNLAG_URL
+      value: http://etterlatte-grunnlag/api
+    - name: ETTERLATTE_VEDTAK_CLIENT_ID
+      value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
+    - name: ETTERLATTE_VEDTAK_URL
+      value: http://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_BEREGNING_CLIENT_ID
+      value: b07cf335-11fb-4efa-bd46-11f51afd5052
+    - name: ETTERLATTE_BEREGNING_URL
+      value: http://etterlatte-beregning
+    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
+      value: f4cf400f-8ef9-406f-baf1-8218f8f7edac
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-vilkaar
+        - application: etterlatte-pdltjenester
+        - application: etterlatte-grunnlag
+        - application: etterlatte-beregning
+        - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-vedtaksvurdering
+    inbound:
+      rules:
+        - application: etterlatte-beregning
+        - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-gyldig-soeknad
+        - application: etterlatte-oppdater-behandling
+        - application: etterlatte-statistikk
+        - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-opplysninger-fra-soeknad
+          permissions:
+            roles:
+              - "kan-sette-kilde"
+        - application: etterlatte-opplysninger-fra-pdl
+          permissions:
+            roles:
+              - "kan-sette-kilde"
+        - application: etterlatte-grunnlag

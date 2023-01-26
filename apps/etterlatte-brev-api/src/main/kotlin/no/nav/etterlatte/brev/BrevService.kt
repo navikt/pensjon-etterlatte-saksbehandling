@@ -46,7 +46,7 @@ class BrevService(
             else -> throw Exception("Ingen brevmottaker spesifisert")
         }
 
-        val avsender = adresseService.hentAvsenderEnhet(enhet)
+        val avsender = adresseService.hentAvsenderEnhet(enhet, "")
 
         val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker, Attestant())
 

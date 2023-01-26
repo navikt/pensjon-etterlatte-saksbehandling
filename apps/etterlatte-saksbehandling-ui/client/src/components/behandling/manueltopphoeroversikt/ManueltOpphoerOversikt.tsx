@@ -28,7 +28,7 @@ export interface ManueltOpphoerDetaljer {
   persongalleri: Persongalleri
   opphoerAarsaker: Opphoersgrunn[]
   fritekstAarsak?: string
-  andreBehandlinger: Partial<IDetaljertBehandling>[]
+  andreBehandlinger: IDetaljertBehandling[]
 }
 
 const useManueltOpphoerDetaljer = (behandlingId?: string) => {

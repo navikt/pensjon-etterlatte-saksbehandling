@@ -12,7 +12,7 @@ class AdresseService(
             Mottaker.fraRegoppslag(it)
         }
 
-    suspend fun hentAvsenderEnhet(navEnhetNr: String): Avsender {
+    suspend fun hentAvsenderEnhet(navEnhetNr: String, ident: String): Avsender {
         val enhet = norg2Klient.hentEnhet(navEnhetNr)
 
         // TODO: Hva gjør vi dersom postadresse mangler?
@@ -31,7 +31,8 @@ class AdresseService(
             kontor = kontor,
             adresse = adresse,
             postnummer = postnr,
-            telefon = telefon
+            telefon = telefon,
+            saksbehandler = ident
         )
     }
 

@@ -407,12 +407,14 @@ data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: St
 
 internal data class FastsettVirkningstidspunktResponse(
     val dato: YearMonth,
-    val kilde: Grunnlagsopplysning.Saksbehandler
+    val kilde: Grunnlagsopplysning.Saksbehandler,
+    val begrunnelse: String
 ) {
     companion object {
         fun from(virkningstidspunkt: Virkningstidspunkt) = FastsettVirkningstidspunktResponse(
             virkningstidspunkt.dato,
-            virkningstidspunkt.kilde
+            virkningstidspunkt.kilde,
+            virkningstidspunkt.begrunnelse
         )
     }
 }

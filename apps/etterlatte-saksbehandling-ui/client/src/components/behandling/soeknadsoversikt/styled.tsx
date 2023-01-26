@@ -134,6 +134,7 @@ export const DashedBorder = styled.div`
 
 export const VurderingsContainerWrapper = styled(VurderingsContainer)`
   padding-left: 20px;
+  width: 10em;
 `
 
 export const Beskrivelse = styled.div`

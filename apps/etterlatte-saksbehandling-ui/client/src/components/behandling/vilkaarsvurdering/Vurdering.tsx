@@ -1,4 +1,4 @@
-import { BodyShort, Button, Detail, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import {
   IVilkaarsvurdering,
@@ -9,7 +9,6 @@ import {
 } from '~shared/api/vilkaarsvurdering'
 import styled from 'styled-components'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { formaterDatoMedTidspunkt } from '~utils/formattering'
 import { useApiCall } from '~shared/hooks/useApiCall'
 
 const MIN_KOMMENTAR_LENGDE = 1
@@ -139,13 +138,6 @@ export const Vurdering = ({
           tittel={overskrift()}
           subtittelKomponent={
             <>
-              <VilkaarVurdertInformasjon>
-                <Detail>Manuelt av {vilkaar.vurdering?.saksbehandler}</Detail>
-                <Detail>
-                  Sist endret{' '}
-                  {vilkaar.vurdering?.tidspunkt ? formaterDatoMedTidspunkt(vilkaar.vurdering?.tidspunkt) : '-'}
-                </Detail>
-              </VilkaarVurdertInformasjon>
               {oppfyltUnntaksvilkaar?.tittel && (
                 <VilkaarVurdertInformasjon>
                   <Heading size="xsmall" level={'3'}>
@@ -155,6 +147,11 @@ export const Vurdering = ({
                 </VilkaarVurdertInformasjon>
               )}
             </>
+          }
+          vurdering={
+            vilkaar.vurdering
+              ? { saksbehandler: vilkaar.vurdering.saksbehandler, tidspunkt: vilkaar.vurdering.tidspunkt }
+              : null
           }
           kommentar={vilkaarutkast?.kommentar}
           defaultRediger={aktivVurdering}

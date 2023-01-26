@@ -1,96 +1,121 @@
 import { Undertekst, VurderingsTitle } from '../../styled'
 import styled from 'styled-components'
 import { useState } from 'react'
-import { EndreVurdering } from './EndreVurdering'
-import { formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
-import { Edit } from '@navikt/ds-icons'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { Button } from '@navikt/ds-react'
+import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { lagreBegrunnelseKommerBarnetTilgode } from '~shared/api/behandling'
+import { oppdaterKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
+import { useAppDispatch, useAppSelector } from '~store/Store'
+import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerBarnetTilgode,
   redigerbar,
+  setVurder,
 }: {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   redigerbar: boolean
+  setVurder: (visVurderingKnapp: boolean) => void
 }) => {
-  const [redigeringsModus, setRedigeringsModus] = useState(false)
+  const behandlingId = useAppSelector((state) => state.behandlingReducer.behandling.id)
+  const dispatch = useAppDispatch()
 
-  const tittel =
-    kommerBarnetTilgode?.svar === JaNei.JA
-      ? 'Sannsynlig pensjonen kommer barnet til gode'
-      : kommerBarnetTilgode?.svar === JaNei.NEI
-      ? 'Ikke sannsynlig pensjonen kommer barnet til gode'
-      : 'Usikkert om pensjonen kommer barnet til gode'
+  const [svar, setSvar] = useState<JaNei | undefined>(kommerBarnetTilgode?.svar)
+  const [radioError, setRadioError] = useState<string>('')
+  const [begrunnelse, setBegrunnelse] = useState<string>(kommerBarnetTilgode?.begrunnelse || '')
+  const [begrunnelseError, setBegrunnelseError] = useState<string>('')
+  const [, setKommerBarnetTilGode, resetToInitial] = useApiCall(lagreBegrunnelseKommerBarnetTilgode)
+
+  const lagre = (onSuccess?: () => void) => {
+    !svar ? setRadioError('Du må velge et svar') : setRadioError('')
+    const harBegrunnelse = begrunnelse.trim().length > 0
+    harBegrunnelse ? setBegrunnelseError('') : setBegrunnelseError('Begrunnelsen må fylles ut')
+
+    if (svar !== undefined && harBegrunnelse)
+      setKommerBarnetTilGode({ behandlingId, begrunnelse, svar }, (response) => {
+        dispatch(oppdaterKommerBarnetTilgode(response))
+        onSuccess?.()
+      })
+  }
+
+  const reset = (onSuccess?: () => void) => {
+    resetToInitial()
+    setSvar(kommerBarnetTilgode?.svar)
+    setRadioError('')
+    setBegrunnelseError('')
+    setBegrunnelse(kommerBarnetTilgode?.begrunnelse || '')
+    setVurder(kommerBarnetTilgode !== null)
+    onSuccess?.()
+  }
 
   return (
-    <>
-      {redigeringsModus ? (
-        <EndreVurdering
-          kommerBarnetTilgode={kommerBarnetTilgode}
-          setRedigeringsModusFalse={() => setRedigeringsModus(false)}
-        />
-      ) : (
-        <div>
-          {kommerBarnetTilgode?.kilde ? (
-            <>
-              <VurderingsTitle title={tittel} />
-              <Undertekst $gray>{`Manuelt av ${kommerBarnetTilgode.kilde.ident}`}</Undertekst>
-              <Undertekst $gray spacing>{`Sist endret ${formaterStringDato(
-                kommerBarnetTilgode.kilde.tidspunkt
-              )} kl.${formaterStringTidspunkt(kommerBarnetTilgode.kilde.tidspunkt)}`}</Undertekst>
-
-              <Undertekst spacing>
-                Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
-              </Undertekst>
-              {kommerBarnetTilgode?.svar && <div>{JaNeiRec[kommerBarnetTilgode.svar]}</div>}
-              {kommerBarnetTilgode?.begrunnelse && (
-                <BegrunnelseWrapper>
-                  <Bold>Begrunnelse</Bold>
-                  <div>{kommerBarnetTilgode.begrunnelse}</div>
-                </BegrunnelseWrapper>
-              )}
-              {redigerbar && (
-                <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
-                  <Edit /> Rediger
-                </RedigerWrapper>
-              )}
-            </>
-          ) : (
-            <RedigerWrapper>
-              <Button variant="secondary" onClick={() => setRedigeringsModus(true)}>
-                Legg til vurdering
-              </Button>
-            </RedigerWrapper>
+    <VurderingsboksWrapper
+      tittel={''}
+      subtittelKomponent={
+        <>
+          <BodyShort spacing>Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?</BodyShort>
+          {kommerBarnetTilgode?.svar && (
+            <Label as={'p'} spacing size="small">
+              {JaNeiRec[kommerBarnetTilgode.svar]}
+            </Label>
           )}
-        </div>
-      )}
-    </>
+        </>
+      }
+      redigerbar={redigerbar}
+      vurdering={
+        kommerBarnetTilgode?.kilde
+          ? {
+              saksbehandler: kommerBarnetTilgode?.kilde.ident,
+              tidspunkt: new Date(kommerBarnetTilgode?.kilde.tidspunkt),
+            }
+          : null
+      }
+      lagreklikk={lagre}
+      avbrytklikk={reset}
+      kommentar={kommerBarnetTilgode?.begrunnelse}
+      defaultRediger={kommerBarnetTilgode === null}
+    >
+      <div>
+        <VurderingsTitle title={'Trenger avklaring'} />
+        <Undertekst gray={false}>
+          Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
+        </Undertekst>
+        <RadioGroupWrapper>
+          <RadioGroup
+            legend=""
+            size="small"
+            className="radioGroup"
+            onChange={(event) => {
+              setSvar(JaNei[event as JaNei])
+              setRadioError('')
+            }}
+            value={svar || ''}
+            error={radioError ? radioError : false}
+          >
+            <div className="flex">
+              <Radio value={JaNei.JA}>Ja</Radio>
+              <Radio value={JaNei.NEI}>Nei</Radio>
+            </div>
+          </RadioGroup>
+        </RadioGroupWrapper>
+        <SoeknadsoversiktTextArea
+          value={begrunnelse}
+          onChange={(e) => {
+            const oppdatertBegrunnelse = e.target.value
+            setBegrunnelse(oppdatertBegrunnelse)
+            oppdatertBegrunnelse.trim().length > 0 && setBegrunnelseError('')
+          }}
+          error={begrunnelseError ? begrunnelseError : false}
+        />
+      </div>
+    </VurderingsboksWrapper>
   )
 }
 
-// TODO ai: Trekk ut
-export const RedigerWrapper = styled.div`
-  display: inline-flex;
-  cursor: pointer;
-  color: #0056b4;
-  margin-top: 10px;
-
-  .text {
-    margin-left: 0.3em;
-  }
-
-  &:hover {
-    text-decoration-line: underline;
-  }
-`
-
-const Bold = styled.div`
-  font-weight: bold;
-`
-
-export const RadioGroupWrapper = styled.div`
+const RadioGroupWrapper = styled.div`
   margin-top: 0.5em;
   margin-bottom: 1em;
 
@@ -98,10 +123,4 @@ export const RadioGroupWrapper = styled.div`
     display: flex;
     gap: 20px;
   }
-`
-const BegrunnelseWrapper = styled.div`
-  background-color: ${'#EFECF4'};
-  padding: 0.1em 0.5em;
-  border-radius: 4px;
-  margin: 0.9em 0.9em 0.9em 0;
 `

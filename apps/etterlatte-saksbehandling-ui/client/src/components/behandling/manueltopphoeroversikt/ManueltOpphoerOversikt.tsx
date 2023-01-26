@@ -16,6 +16,7 @@ import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formatte
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
+import { lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
 
 interface Persongalleri {
   soeker: string
@@ -57,6 +58,7 @@ export const ManueltOpphoerOversikt = () => {
     setLoadingBeregning(true)
     setFeilmelding('')
     try {
+      await lagreSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning: [] })
       await opprettEllerEndreBeregning(behandling.id)
       behandlingRoutes.next()
     } catch (e) {

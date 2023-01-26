@@ -56,9 +56,9 @@ export const KommerBarnetTilGodeVurdering = ({
       tittel={''}
       subtittelKomponent={
         <>
-          <BodyShort spacing>Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?</BodyShort>
+          <BodyShort spacing>Vurderer du det som sannsynlig at pensjonen kommer barnet tilgode?</BodyShort>
           {kommerBarnetTilgode?.svar && (
-            <Label as={'p'} spacing size="small">
+            <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[kommerBarnetTilgode.svar]}
             </Label>
           )}

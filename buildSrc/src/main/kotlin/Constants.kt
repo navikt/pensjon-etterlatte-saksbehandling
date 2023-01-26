@@ -49,7 +49,7 @@ object Kafka {
 }
 
 object Jackson {
-    private const val version = "2.13.3"
+    private const val version = "2.13.5"
 
     const val DatatypeJsr310 = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$version"
     const val DatatypeJdk8 = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$version"
@@ -90,7 +90,7 @@ object Kotest {
 object Database {
     const val HikariCP = "com.zaxxer:HikariCP:5.0.0"
     const val FlywayDB = "org.flywaydb:flyway-core:8.5.13"
-    const val Postgresql = "org.postgresql:postgresql:42.2.25"
+    const val Postgresql = "org.postgresql:postgresql:42.3.3"
     const val KotliQuery = "com.github.seratch:kotliquery:1.7.0"
 }
 

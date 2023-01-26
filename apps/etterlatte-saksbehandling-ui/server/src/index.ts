@@ -44,6 +44,7 @@ if (isDev) {
       '/api/behandling/:behandlingsid/avbryt',
       '/api/behandling/:behandlingsid/kommerbarnettilgode',
       '/api/behandling/:behandlingsid/virkningstidspunkt',
+      '/api/behandling/:behandlingsid/manueltopphoer',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url!!)

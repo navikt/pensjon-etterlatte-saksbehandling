@@ -10,7 +10,7 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { Opphoersgrunn, OVERSETTELSER_OPPHOERSGRUNNER } from '~components/person/ManueltOpphoerModal'
 import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
-import { fold3, useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { IDetaljertBehandling, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
@@ -19,7 +19,7 @@ import differenceInYears from 'date-fns/differenceInYears'
 
 interface Persongalleri {
   soeker: string
-  avdoed?: string
+  avdoed?: string[]
 }
 
 export interface ManueltOpphoerDetaljer {
@@ -94,7 +94,7 @@ export const ManueltOpphoerOversikt = () => {
           ) : (
             <p>Kunne ikke hente ut detaljer om søker</p>
           )}
-          {fold3(
+          {mapApiResult(
             manueltOpphoerDetaljer,
             () => (
               <Spinner visible label="Henter detaljer om det manuelle opphøret" />

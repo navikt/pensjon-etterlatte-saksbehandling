@@ -12,7 +12,7 @@ import Spinner from '~shared/Spinner'
 import { Sammendrag } from './Sammendrag'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
-import { fold3, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/behandling'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
@@ -66,7 +66,7 @@ export const Beregne = () => {
             Vilkårsresultat: <strong>{formaterVedtaksResultat(vedtaksresultat, virkningstidspunkt)}</strong>
           </div>
         </InfoWrapper>
-        {fold3(
+        {mapApiResult(
           beregning,
           () => (
             <Spinner visible label="Laster" />

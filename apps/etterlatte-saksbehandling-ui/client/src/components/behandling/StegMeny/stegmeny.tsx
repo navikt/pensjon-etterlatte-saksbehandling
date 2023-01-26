@@ -24,7 +24,6 @@ export const StegMeny = () => {
 
   const oppfylt = behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT
   const vurdert = !!behandling.vilkårsprøving?.resultat && klarForVidereBehandling
-  console.log('beregning', harBeregning, behandling.beregning)
 
   return (
     <StegMenyWrapper role="navigation">

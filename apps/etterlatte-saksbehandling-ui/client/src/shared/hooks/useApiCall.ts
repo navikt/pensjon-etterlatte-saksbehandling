@@ -56,29 +56,7 @@ const error = <A = never>(error: ApiError): Result<A> => ({
   error,
 })
 
-export const fold = <T, R>(
-  result: Result<T>,
-  mapInitial: (_: Initial) => R,
-  mapPending: (_: Pending) => R,
-  mapError: (_: ApiError) => R,
-  mapSuccess: (_: T) => R
-): R => {
-  if (isInitial(result)) {
-    return mapInitial(result)
-  }
-  if (isPending(result)) {
-    return mapPending(result)
-  }
-  if (isFailure(result)) {
-    return mapError(result.error)
-  }
-  if (isSuccess(result)) {
-    return mapSuccess(result.data)
-  }
-  throw new Error(`Unknown state of result: ${JSON.stringify(result)}`)
-}
-
-export const fold3 = <T, R>(
+export const mapApiResult = <T, R>(
   result: Result<T>,
   mapInitialOrPending: (_: Initial | Pending) => R,
   mapError: (_: ApiError) => R,

@@ -40,7 +40,7 @@ interface ManueltOpphoerService {
 
     fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer?
 
-    fun hentManueltOpphoerMedAndreBehandlinger(behandling: UUID): Pair<ManueltOpphoer, List<Behandling>>?
+    fun hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandling: UUID): Pair<ManueltOpphoer, List<Behandling>>?
 }
 
 class RealManueltOpphoerService(
@@ -56,7 +56,9 @@ class RealManueltOpphoerService(
     override fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer? =
         inTransaction { behandlinger.hentBehandling(behandling, BehandlingType.MANUELT_OPPHOER) as ManueltOpphoer? }
 
-    override fun hentManueltOpphoerMedAndreBehandlinger(behandling: UUID): Pair<ManueltOpphoer, List<Behandling>>? =
+    override fun hentManueltOpphoerOgAlleIverksatteBehandlingerISak(
+        behandling: UUID
+    ): Pair<ManueltOpphoer, List<Behandling>>? =
         inTransaction {
             val opphoer = behandlinger.hentBehandling(behandling, BehandlingType.MANUELT_OPPHOER) as ManueltOpphoer?
                 ?: return@inTransaction null

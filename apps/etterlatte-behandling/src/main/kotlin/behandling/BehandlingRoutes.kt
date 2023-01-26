@@ -155,7 +155,10 @@ internal fun Route.behandlingRoutes(
             route("/manueltopphoer") {
                 get {
                     logger.info("Henter manuelt opphør oppsummering for manuelt opphør med id=$behandlingsId")
-                    when (val opphoer = manueltOpphoerService.hentManueltOpphoerMedAndreBehandlinger(behandlingsId)) {
+                    when (
+                        val opphoer =
+                            manueltOpphoerService.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingsId)
+                    ) {
                         null -> call.respond(
                             HttpStatusCode.NotFound,
                             "Fant ikke manuelt opphør med id=$behandlingsId"

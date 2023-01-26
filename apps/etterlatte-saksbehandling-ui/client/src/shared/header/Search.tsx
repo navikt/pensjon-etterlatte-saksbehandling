@@ -2,68 +2,34 @@ import styled from 'styled-components'
 import { Loader, Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getPerson } from '../api/person'
-import { ErrorColored } from '@navikt/ds-icons'
-import { InformationColored } from '@navikt/ds-icons'
-import { People } from '@navikt/ds-icons'
-import { IPersonResult } from '~components/person/typer'
-import { ApiResponse } from '../api/apiClient'
+import { getPerson, INVALID_FNR } from '../api/person'
+import { ErrorColored, InformationColored, People } from '@navikt/ds-icons'
+import { isFailure, isSuccess, isPending, useApiCall } from '~shared/hooks/useApiCall'
 
 export const Search = () => {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')
-  const [searchResult, setSearchResult] = useState<IPersonResult | undefined>(undefined)
-  const [error, setError] = useState<IPersonResult | undefined>(undefined)
-  const [laster, setLaster] = useState<boolean>(false)
-  const regBokstaver = /[a-zA-Z]/g
   const [feilInput, setFeilInput] = useState(false)
+  const [personStatus, hentPerson, reset] = useApiCall(getPerson)
 
-  function search() {
-    setSearchResult(undefined)
-    setError(undefined)
-    if (ugyldigInput()) {
-      setFeilInput(true)
-    } else {
-      setLaster(true)
-      setFeilInput(false)
-      getPerson(searchInput).then((result: ApiResponse<IPersonResult>) => {
-        setLaster(false)
-        if (result.status === 'ok') {
-          setSearchResult(result?.data)
-        } else {
-          setError(result?.error)
-        }
-      })
-    }
-  }
+  const ugyldigInput = INVALID_FNR(searchInput)
 
-  function ugyldigInput(): boolean {
-    return regBokstaver.test(searchInput) || searchInput.length !== 11
-  }
+  const soekEtterPerson = () => (ugyldigInput ? setFeilInput(true) : hentPerson(searchInput))
+  const onEnter = (e: any) => e.key === 'Enter' && soekEtterPerson()
 
   useEffect(() => {
-    ;(async () => {
-      setSearchResult(undefined)
-      setError(undefined)
-      if (searchInput.length === 0) {
-        setFeilInput(false)
-      } else if (feilInput && ugyldigInput()) {
-        setFeilInput(true)
-      } else {
-        setFeilInput(false)
-      }
-    })()
+    if (searchInput.length === 0) {
+      setFeilInput(false)
+    } else if (feilInput && ugyldigInput) {
+      setFeilInput(true)
+    } else {
+      setFeilInput(false)
+    }
   }, [searchInput])
 
   const goToPerson = () => {
     navigate(`/person/${searchInput}`)
-    setSearchResult(undefined)
-  }
-
-  const onEnter = (e: any) => {
-    if (e.key === 'Enter') {
-      search()
-    }
+    reset()
   }
 
   return (
@@ -76,10 +42,10 @@ export const Search = () => {
         onKeyUp={onEnter}
         autoComplete="off"
       >
-        <SearchField.Button onClick={search} />
+        <SearchField.Button onClick={soekEtterPerson} />
       </SearchField>
 
-      {laster && (
+      {isPending(personStatus) && (
         <Dropdown>
           <SpinnerContent>
             <Loader />
@@ -99,26 +65,28 @@ export const Search = () => {
         </Dropdown>
       )}
 
-      {searchResult && !feilInput && (
+      {isSuccess(personStatus) && !feilInput && (
         <Dropdown>
           <span className="icon">
             <People />
           </span>
           <SearchResult link={true} onClick={goToPerson}>
             <div className="text">
-              {searchResult.fornavn} {searchResult.etternavn}
+              {personStatus.data.fornavn} {personStatus.data.etternavn}
             </div>
           </SearchResult>
         </Dropdown>
       )}
 
-      {error && (
+      {isFailure(personStatus) && (
         <Dropdown error={true}>
           <span className="icon">
             <ErrorColored />
           </span>
           <SearchResult>
-            <div className="text">{JSON.stringify(error)}</div>
+            <div className="text">
+              {personStatus.error.statusCode === 404 ? 'Fant ingen data i Doffen' : 'En feil har skjedd'}
+            </div>
           </SearchResult>
         </Dropdown>
       )}

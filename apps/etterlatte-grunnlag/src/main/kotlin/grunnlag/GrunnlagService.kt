@@ -3,9 +3,11 @@ package no.nav.etterlatte.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
@@ -23,6 +25,7 @@ import java.util.*
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
+    fun hentOpplysningstypeNavnFraFnr(fnr: Foedselsnummer, navIdent: String): NavnOpplysningDTO?
     fun lagreNyeSaksopplysninger(sak: Long, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
     fun lagreNyePersonopplysninger(sak: Long, fnr: Foedselsnummer, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
     fun hentOpplysningsgrunnlag(sak: Long): Grunnlag?
@@ -131,6 +134,20 @@ class RealGrunnlagService(
         return opplysningDao.finnNyesteGrunnlag(sak, opplysningstype)?.opplysning
     }
 
+    override fun hentOpplysningstypeNavnFraFnr(fnr: Foedselsnummer, navIdent: String): NavnOpplysningDTO? {
+        logger.info("Saksbehandler $navIdent gjorde et oppslag på $fnr")
+        val opplysning = opplysningDao.finnNyesteOpplysningPaaFnr(fnr, Opplysningstype.NAVN)?.let {
+            val navn: Navn = deserialize(it.opplysning.opplysning.toString())
+            NavnOpplysningDTO(
+                sakId = it.sakId,
+                fornavn = navn.fornavn,
+                etternavn = navn.etternavn,
+                foedselsnummer = fnr.value
+            )
+        }
+        return opplysning
+    }
+
     override fun lagreNyePersonopplysninger(
         sak: Long,
         fnr: Foedselsnummer,
@@ -164,3 +181,10 @@ class RealGrunnlagService(
         }
     }
 }
+
+data class NavnOpplysningDTO(
+    val sakId: Long,
+    val fornavn: String,
+    val etternavn: String,
+    val foedselsnummer: String
+)

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.beregning
 
-import beregning.regler.FNR_1
+import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt

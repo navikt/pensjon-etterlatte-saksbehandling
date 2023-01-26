@@ -1,13 +1,15 @@
 package beregning.regler.sats
 
-import beregning.regler.FNR_1
-import beregning.regler.FNR_2
-import beregning.regler.FNR_3
-import beregning.regler.REGEL_PERIODE
-import beregning.regler.barnepensjonGrunnlag
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.beregning.regler.Beregningstall
+import no.nav.etterlatte.beregning.regler.Beregningstall.Companion.DESIMALER_DELBEREGNING
+import no.nav.etterlatte.beregning.regler.FNR_1
+import no.nav.etterlatte.beregning.regler.FNR_2
+import no.nav.etterlatte.beregning.regler.FNR_3
+import no.nav.etterlatte.beregning.regler.REGEL_PERIODE
+import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.sats.antallSoeskenIKullet
 import no.nav.etterlatte.beregning.regler.sats.barnepensjonSatsRegel
 import no.nav.etterlatte.beregning.regler.sats.belopForEtterfoelgendeBarn
@@ -17,6 +19,7 @@ import no.nav.etterlatte.beregning.regler.sats.historiskeGrunnbeloep
 import no.nav.etterlatte.beregning.regler.sats.prosentsatsEtterfoelgendeBarnKonstant
 import no.nav.etterlatte.beregning.regler.sats.prosentsatsFoersteBarnKonstant
 import no.nav.etterlatte.beregning.regler.sats.soeskenIKullet
+import no.nav.etterlatte.beregning.regler.toBeregningstall
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -77,7 +80,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 0.40.toBigDecimal()
+        resultat.verdi shouldBe Beregningstall(0.40)
     }
 
     @Test
@@ -87,7 +90,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 0.25.toBigDecimal()
+        resultat.verdi shouldBe Beregningstall(0.25)
     }
 
     @Test
@@ -97,7 +100,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 3716.0.toBigDecimal()
+        resultat.verdi shouldBe 3716.00.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -107,7 +110,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 2322.50.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 2322.50.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -117,7 +120,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 3716.00.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 3716.00.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -127,7 +130,7 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 3019.25.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 3019.25.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
@@ -137,17 +140,16 @@ internal class BarnepensjonSatsTest {
             periode = REGEL_PERIODE
         )
 
-        resultat.verdi shouldBe 2787.00.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 2787.00.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
-    fun `barnepensjonSatsRegel skal returnere 2670,88 kroner ved 3 soesken`() {
+    fun `barnepensjonSatsRegel skal returnere 2670,887 kroner ved 3 soesken`() {
         val resultat = barnepensjonSatsRegel.anvend(
             grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2, FNR_3)),
             periode = REGEL_PERIODE
         )
 
-        // TODO her har vi egentlig 2670.875 - hvordan bør avrunding gjøres?
-        resultat.verdi shouldBe 2670.88.toBigDecimal().setScale(2)
+        resultat.verdi shouldBe 2670.875.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 }

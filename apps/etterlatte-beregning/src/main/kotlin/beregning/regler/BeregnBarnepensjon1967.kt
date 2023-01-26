@@ -9,10 +9,8 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
-import java.math.BigDecimal
-import java.math.RoundingMode
 
-data class AvdoedForelder(val trygdetid: BigDecimal)
+data class AvdoedForelder(val trygdetid: Beregningstall)
 data class BarnepensjonGrunnlag(
     val soeskenKull: FaktumNode<List<Foedselsnummer>>,
     val avdoedForelder: FaktumNode<AvdoedForelder>
@@ -23,7 +21,7 @@ val beregnBarnepensjon1967Regel = RegelMeta(
     beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
     regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID")
 ) benytter barnepensjonSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
-    (sats * trygdetidsfaktor)
+    sats.multiply(trygdetidsfaktor)
 }
 
 val kroneavrundetBarnepensjonRegel = RegelMeta(
@@ -31,5 +29,5 @@ val kroneavrundetBarnepensjonRegel = RegelMeta(
     beskrivelse = "Gjør en kroneavrunding av barnepensjonen",
     regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING")
 ) benytter beregnBarnepensjon1967Regel med { beregnetBarnepensjon ->
-    beregnetBarnepensjon.setScale(0, RoundingMode.HALF_UP).toInt()
+    beregnetBarnepensjon.round(decimals = 0).toInteger()
 }

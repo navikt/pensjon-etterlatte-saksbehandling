@@ -18,21 +18,3 @@ jobs:
           cache: gradle
       - name: Gradle test and build
         run: ./gradlew :apps:${{ github.workflow }}:test --stacktrace
-  snyk:
-    name: Snyk
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    - name: Setup Java v17.x
-      uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 17.x
-        cache: gradle
-    - name: Install Snyk CLI
-      uses: snyk/actions/setup@master
-    - name: Test dependencies with Snyk
-      run: snyk monitor --file=apps/${{ github.workflow }}/build.gradle.kts --org=etterlatte
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

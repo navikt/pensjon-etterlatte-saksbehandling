@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
-import { ErrorMessage, Label, Textarea } from '@navikt/ds-react'
+import { ErrorMessage, Label } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
 import { Calender } from '@navikt/ds-icons'
 import { formaterStringDato } from '~utils/formattering'
@@ -15,6 +15,7 @@ import { VurderingsboksWrapper } from '~components/vurderingsboks/Vurderingsboks
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
+import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
 
 const Info = ({ tekst, label }: { tekst: string; label: string }) => {
   return (
@@ -44,7 +45,7 @@ const Virkningstidspunkt = (props: Props) => {
   )
   const [, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
   const [begrunnelse, setBegrunnelse] = useState<string>(props.virkningstidspunkt?.begrunnelse ?? '')
-  const [errorTekst, setErrorTekst] = useState<string>()
+  const [errorTekst, setErrorTekst] = useState<string>('')
 
   const datepickerRef: any = useRef(null)
   const toggleDatepicker = () => {
@@ -57,8 +58,8 @@ const Virkningstidspunkt = (props: Props) => {
     if (!formData) {
       return setErrorTekst('Du må velge dato')
     }
-    if (begrunnelse.length < 10) {
-      return setErrorTekst('Begrunnelsen må være minst 10 tegn.')
+    if (begrunnelse.trim().length === 0) {
+      return setErrorTekst('Begrunnelsen må fylles ut')
     }
 
     fastsettVirkningstidspunktRequest({ id: props.behandlingId, dato: formData, begrunnelse: begrunnelse }, (res) => {
@@ -155,17 +156,7 @@ const Virkningstidspunkt = (props: Props) => {
                   </KalenderIkon>
                 </Datovelger>
 
-                <Textarea
-                  style={{ padding: '10px', marginBottom: '10px' }}
-                  label="Begrunnelse"
-                  hideLabel={false}
-                  placeholder="Forklar begrunnelsen"
-                  value={begrunnelse}
-                  onChange={(e) => setBegrunnelse(e.target.value)}
-                  minRows={3}
-                  size="small"
-                  autoComplete="off"
-                />
+                <SoeknadsoversiktTextArea value={begrunnelse} onChange={(e) => setBegrunnelse(e.target.value)} />
                 {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
               </>
             </VurderingsboksWrapper>

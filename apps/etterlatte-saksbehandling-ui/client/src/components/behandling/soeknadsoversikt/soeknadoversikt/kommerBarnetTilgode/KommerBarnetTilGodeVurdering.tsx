@@ -3,12 +3,13 @@ import styled from 'styled-components'
 import { useState } from 'react'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { BodyShort, Label, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBegrunnelseKommerBarnetTilgode } from '~shared/api/behandling'
 import { oppdaterKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
+import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerBarnetTilgode,
@@ -23,16 +24,17 @@ export const KommerBarnetTilGodeVurdering = ({
   const dispatch = useAppDispatch()
 
   const [svar, setSvar] = useState<JaNei | undefined>(kommerBarnetTilgode?.svar)
-  const [radioError, setRadioError] = useState<string>()
+  const [radioError, setRadioError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(kommerBarnetTilgode?.begrunnelse || '')
-  const [begrunnelseError, setBegrunnelseError] = useState<string>()
+  const [begrunnelseError, setBegrunnelseError] = useState<string>('')
   const [, setKommerBarnetTilGode, resetToInitial] = useApiCall(lagreBegrunnelseKommerBarnetTilgode)
 
   const lagre = (onSuccess?: () => void) => {
-    !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
-    begrunnelse.length < 10 ? setBegrunnelseError('Begrunnelsen må være minst 10 tegn') : setBegrunnelseError(undefined)
+    !svar ? setRadioError('Du må velge et svar') : setRadioError('')
+    const harBegrunnelse = begrunnelse.trim().length > 0
+    harBegrunnelse ? setBegrunnelseError('') : setBegrunnelseError('Begrunnelsen må fylles ut')
 
-    if (radioError === undefined && begrunnelseError === undefined && svar !== undefined)
+    if (svar !== undefined && harBegrunnelse)
       setKommerBarnetTilGode({ behandlingId, begrunnelse, svar }, (response) => {
         dispatch(oppdaterKommerBarnetTilgode(response))
         onSuccess?.()
@@ -88,7 +90,7 @@ export const KommerBarnetTilGodeVurdering = ({
             className="radioGroup"
             onChange={(event) => {
               setSvar(JaNei[event as JaNei])
-              setRadioError(undefined)
+              setRadioError('')
             }}
             value={svar || ''}
             error={radioError ? radioError : false}
@@ -99,20 +101,14 @@ export const KommerBarnetTilGodeVurdering = ({
             </div>
           </RadioGroup>
         </RadioGroupWrapper>
-        <Textarea
-          style={{ padding: '10px', marginBottom: '10px' }}
-          label="Begrunnelse"
-          hideLabel={false}
-          placeholder="Forklar begrunnelsen"
+        <SoeknadsoversiktTextArea
           value={begrunnelse}
           onChange={(e) => {
-            setBegrunnelse(e.target.value)
-            begrunnelse.length > 10 && setBegrunnelseError(undefined)
+            const oppdatertBegrunnelse = e.target.value
+            setBegrunnelse(oppdatertBegrunnelse)
+            oppdatertBegrunnelse.trim().length > 0 && setBegrunnelseError('')
           }}
-          minRows={3}
-          size="small"
           error={begrunnelseError ? begrunnelseError : false}
-          autoComplete="off"
         />
       </div>
     </VurderingsboksWrapper>

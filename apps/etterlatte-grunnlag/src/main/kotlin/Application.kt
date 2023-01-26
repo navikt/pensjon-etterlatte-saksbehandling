@@ -11,6 +11,7 @@ import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,7 +33,7 @@ class ApplicationBuilder {
     private val config: Config = ConfigFactory.load()
     private val opplysningDao = OpplysningDao(ds.dataSource)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    private val grunnlagService = RealGrunnlagService(opplysningDao, ::publiser, behandlingKlient)
+    private val grunnlagService = RealGrunnlagService(opplysningDao, ::publiser, behandlingKlient, Sporingslogg())
 
     private val rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
         .withKtorModule { restModule(sikkerLogg, routePrefix = "api") { grunnlagRoute(grunnlagService) } }

@@ -18,6 +18,10 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.Saksbehandler
+import no.nav.etterlatte.libs.sporingslogg.Decision
+import no.nav.etterlatte.libs.sporingslogg.HttpMethod
+import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -46,7 +50,8 @@ interface GrunnlagService {
 class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
     private val sendToRapid: (String, UUID) -> Unit,
-    private val behandlingKlient: BehandlingKlient
+    private val behandlingKlient: BehandlingKlient,
+    private val sporingslogg: Sporingslogg
 ) : GrunnlagService {
 
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
@@ -135,7 +140,6 @@ class RealGrunnlagService(
     }
 
     override fun hentOpplysningstypeNavnFraFnr(fnr: Foedselsnummer, navIdent: String): NavnOpplysningDTO? {
-        logger.info("Saksbehandler $navIdent gjorde et oppslag på $fnr")
         val opplysning = opplysningDao.finnNyesteOpplysningPaaFnr(fnr, Opplysningstype.NAVN)?.let {
             val navn: Navn = deserialize(it.opplysning.opplysning.toString())
             NavnOpplysningDTO(
@@ -144,6 +148,10 @@ class RealGrunnlagService(
                 etternavn = navn.etternavn,
                 foedselsnummer = fnr.value
             )
+        }
+        when (opplysning) {
+            null -> sporingslogg.logg(feilendeRequest(ident = fnr.value, navIdent = navIdent))
+            else -> sporingslogg.logg(vellykkaRequest(ident = fnr.value, navIdent = navIdent))
         }
         return opplysning
     }
@@ -180,6 +188,26 @@ class RealGrunnlagService(
             }
         }
     }
+
+    private fun vellykkaRequest(ident: String, navIdent: String) = Sporingsrequest(
+        kallendeApplikasjon = "grunnlag",
+        oppdateringstype = HttpMethod.POST,
+        brukerId = navIdent,
+        hvemBlirSlaattOpp = ident,
+        endepunkt = "/person",
+        resultat = Decision.Permit,
+        melding = "Hent person var vellykka"
+    )
+
+    private fun feilendeRequest(ident: String, navIdent: String) = Sporingsrequest(
+        kallendeApplikasjon = "grunnlag",
+        oppdateringstype = HttpMethod.POST,
+        brukerId = navIdent,
+        hvemBlirSlaattOpp = ident,
+        endepunkt = "/person",
+        resultat = Decision.Deny,
+        melding = "Hent person feilet"
+    )
 }
 
 data class NavnOpplysningDTO(

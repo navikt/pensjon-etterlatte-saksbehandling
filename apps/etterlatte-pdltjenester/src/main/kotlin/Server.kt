@@ -21,7 +21,7 @@ import io.ktor.server.routing.routing
 import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.ktortokenexchange.installAuthUsing
-import no.nav.etterlatte.ktortokenexchange.secureRoutUsing
+import no.nav.etterlatte.ktortokenexchange.secureRouteUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
@@ -88,7 +88,7 @@ fun io.ktor.server.application.Application.module(
 
     routing {
         healthApi()
-        secureRoutUsing(securityContextMediator) {
+        secureRouteUsing(securityContextMediator) {
             personApi(personService)
         }
     }

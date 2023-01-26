@@ -60,7 +60,10 @@ class TokenSupportSecurityContextMediator(private val configuration: Application
             withContext(
                 Dispatchers.Default + ThreadBoundSecCtx.asContextElement(
                     value = TokenSecurityContext(
-                        call.principal<TokenValidationContextPrincipal>()?.context!!
+                        call.principal<TokenValidationContextPrincipal>()?.context
+                            ?: throw TokenManglerIKontekstException(
+                                "Finner ingen tokens for principal, mangler azure ad token info"
+                            )
                     )
                 )
             ) {
@@ -91,3 +94,5 @@ class TokenSupportSecurityContextMediator(private val configuration: Application
         }
     }
 }
+
+class TokenManglerIKontekstException(message: String) : Exception(message)

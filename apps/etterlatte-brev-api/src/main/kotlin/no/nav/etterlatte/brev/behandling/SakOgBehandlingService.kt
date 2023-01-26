@@ -31,12 +31,12 @@ class SakOgBehandlingService(
             if (vedtak.vedtakFattet != null) (
                 vedtak.attestasjon?.attesterendeEnhet
                     ?: saksbehandlerEnhet
-                ) else ""
+                ) else null
         val attestantIdent =
             if (vedtak.vedtakFattet != null) (
                 vedtak.attestasjon?.attestant
                     ?: innloggetSaksbehandlerIdent
-                ) else ""
+                ) else null
 
         return Behandling(
             sakId = sakId,

@@ -88,10 +88,10 @@ class VedtaksbrevService(
     private suspend fun opprettEllerOppdater(behandling: Behandling): UlagretBrev {
         val saksbehandlerEnhet = behandling.vedtak.saksbehandlerEnhet
         val saksbehandlerIdent = behandling.vedtak.saksbehandlerIdent
-        val attestantEnhet = behandling.vedtak.attestantEnhet
+        val attestantEnhet = behandling.vedtak.attestantEnhet?.let { adresseService.hentEnhet(it) }
         val avsender = adresseService.hentAvsenderEnhet(saksbehandlerEnhet, saksbehandlerIdent)
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
-        val attestant = Attestant(behandling.vedtak.attestantIdent, adresseService.hentEnhet(attestantEnhet))
+        val attestant = Attestant(behandling.vedtak.attestantIdent ?: "", attestantEnhet ?: "")
 
         val vedtakType = behandling.vedtak.type
 

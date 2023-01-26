@@ -32,7 +32,12 @@ export const Soeknadsoversikt = () => {
         <OversiktGyldigFramsatt gyldigFramsatt={behandling.gyldighetsprøving} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
-            <OversiktKommerBarnetTilgode kommerBarnetTilgode={behandling.kommerBarnetTilgode} redigerbar={behandles} />
+            <OversiktKommerBarnetTilgode
+              kommerBarnetTilgode={behandling.kommerBarnetTilgode}
+              redigerbar={behandles}
+              søker={behandling.søker}
+              forelder={behandling.familieforhold?.gjenlevende.opplysning}
+            />
             <Virkningstidspunkt
               redigerbar={behandles}
               virkningstidspunkt={behandling.virkningstidspunkt}

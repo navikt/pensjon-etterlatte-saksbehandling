@@ -7,7 +7,7 @@ import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useEffect, useState } from 'react'
 import { hentVedtakSammendrag } from '~shared/api/vedtak'
 
-const colonner = ['Reg.dato', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']
+const colonner = ['Reg. dato', 'Type', 'Årsak', 'Status', 'Virkningstidspunkt', 'Vedtaksdato', 'Resultat', '']
 
 const VedtaksDato = (props: { behandlingsId: string }) => {
   const [vedtak, setVedtak] = useState<VedtakSammendrag | undefined>(undefined)

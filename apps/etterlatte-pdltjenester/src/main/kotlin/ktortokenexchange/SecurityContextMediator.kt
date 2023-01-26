@@ -30,7 +30,7 @@ private fun Config.getStringSafely(path: String): String? {
     return if (hasPath(path)) getString(path) else null
 }
 
-fun Route.secureRoutUsing(ctx: SecurityContextMediator, route: Route.() -> Unit) {
+fun Route.secureRouteUsing(ctx: SecurityContextMediator, route: Route.() -> Unit) {
     ctx.secureRoute(this, route)
 }
 fun Application.installAuthUsing(ctx: SecurityContextMediator) {

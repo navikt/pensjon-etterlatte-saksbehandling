@@ -1,6 +1,5 @@
-package beregning
+package no.nav.etterlatte.beregning
 
-import beregning.regler.FNR_1
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -16,14 +15,10 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.beregning.Beregning
-import no.nav.etterlatte.beregning.BeregningRepository
-import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.beregning.BeregningServiceTest
-import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO

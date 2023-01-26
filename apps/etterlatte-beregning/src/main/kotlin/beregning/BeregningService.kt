@@ -8,6 +8,7 @@ import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.BarnepensjonGrunnlag
+import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -157,7 +158,7 @@ class BeregningService(
                             soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
                             grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                             grunnbelop = grunnbeloep.grunnbeloep,
-                            trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt(),
+                            trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInteger(),
                             regelResultat = objectMapper.valueToTree(periodisertResultat),
                             regelVersjon = periodisertResultat.reglerVersjon
                         )
@@ -188,7 +189,7 @@ class BeregningService(
                     soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
                     grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                     grunnbelop = grunnbeloep.grunnbeloep,
-                    trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInt()
+                    trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInteger()
                 )
             )
         )
@@ -216,7 +217,7 @@ class BeregningService(
             beskrivelse = "Søsken i kullet"
         ),
         avdoedForelder = FaktumNode(
-            verdi = AvdoedForelder(FASTSATT_TRYGDETID_PILOT.toBigDecimal()),
+            verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_PILOT)),
             kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Instant.now(), "1"),
             beskrivelse = "Trygdetid avdøed forelder"
         )

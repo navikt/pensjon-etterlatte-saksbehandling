@@ -12,7 +12,7 @@ spec:
     - "https://etterlatte-behandling.dev.intern.nav.no"
   gcp:
     sqlInstances:
-      - type: POSTGRES_12
+      - type: POSTGRES_14
         tier: db-custom-1-3840
         collation: nb_NO.UTF8
         cascadingDelete: false
@@ -52,18 +52,18 @@ spec:
         extra:
           - NAVident
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   replicas:
     cpuThresholdPercentage: 90
     max: 1
     min: 1
   env:
     - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
     - name: GRUNNLAG_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
+      value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: PDL_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+      value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: HENDELSE_JOB_FREKVENS
       value: "1"
     - name: HENDELSE_MINUTTER_GAMLE_HENDELSER

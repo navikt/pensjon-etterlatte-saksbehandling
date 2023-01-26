@@ -28,7 +28,7 @@ jobs:
       - name: Install Snyk CLI
         uses: snyk/actions/setup@master
       - name: Monitor dependencies with Snyk
-        run: snyk monitor --org=etterlatte
+        run: snyk monitor --file=apps/${{ github.workflow }}/build.gradle.kts --org=etterlatte
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Inject slug/short variables

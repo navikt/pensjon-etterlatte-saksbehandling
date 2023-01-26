@@ -48,6 +48,12 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}/client
         run: |
           CI=true yarn test
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+      - name: Test dependencies with Snyk
+        run: snyk monitor --file=apps/${{ github.workflow }}/package.json --org=etterlatte
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   build-and-publish:
     if: github.event_name != 'pull_request'
@@ -71,6 +77,12 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}/client
         run: |
           CI=true yarn test
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+      - name: Test dependencies with Snyk
+        run: snyk monitor --file=apps/${{ github.workflow }}/package.json --org=etterlatte
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -91,22 +103,3 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml
-
-  snyk:
-    name: Snyk
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Setup Java v17.x
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17.x
-          cache: gradle
-      - name: Install Snyk CLI
-        uses: snyk/actions/setup@master
-      - name: Test dependencies with Snyk
-        run: snyk monitor --file=apps/${{ github.workflow }}/package.json --org=etterlatte
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

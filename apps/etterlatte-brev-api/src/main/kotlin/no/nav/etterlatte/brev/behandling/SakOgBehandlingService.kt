@@ -36,9 +36,9 @@ class SakOgBehandlingService(
                 vedtak.vedtakId,
                 vedtak.type,
                 vedtak.vedtakFattet?.ansvarligEnhet ?: saksbehandlerEnhet,
-                vedtak.vedtakFattet?.ansvarligSaksbehandler ?: "-",
+                vedtak.vedtakFattet?.ansvarligSaksbehandler ?: saksbehandler,
                 vedtak.attestasjon?.attesterendeEnhet ?: saksbehandlerEnhet,
-                vedtak.attestasjon?.attestant ?: "-"
+                vedtak.attestasjon?.attestant ?: saksbehandler
             ),
             utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )

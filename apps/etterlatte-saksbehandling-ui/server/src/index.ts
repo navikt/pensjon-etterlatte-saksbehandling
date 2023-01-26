@@ -40,23 +40,7 @@ if (isDev) {
   )
 
   app.use(
-    [
-      '/api/behandling/:behandlingsid/avbryt',
-      '/api/behandling/:behandlingsid/kommerbarnettilgode',
-      '/api/behandling/:behandlingsid/virkningstidspunkt',
-    ],
-    tokenMiddleware(ApiConfig.behandling.scope),
-    proxy(ApiConfig.behandling.url!!)
-  )
-
-  app.use(
-    '/api/behandling/:behandlingsid',
-    tokenMiddleware(ApiConfig.behandling.scope),
-    proxy(ApiConfig.behandling.url!!)
-  )
-
-  app.use(
-    '/api/behandlinger/:sakid/manueltopphoer',
+    ['/api/behandling', '/api/behandlinger/:sakid/manueltopphoer', '/api/oppgaver', '/api/personer'],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url!!)
   )
@@ -64,14 +48,6 @@ if (isDev) {
   app.use('/api/grunnlag', tokenMiddleware(ApiConfig.grunnlag.scope), proxy(ApiConfig.grunnlag.url!!))
 
   app.use('/api/person', tokenMiddleware(ApiConfig.pdltjenester.scope), proxy(ApiConfig.pdltjenester.url!!))
-
-  app.use(
-    ['/api/personer/:fnr/behandlinger', '/api/personer/:fnr/grunnlagsendringshendelser'],
-    tokenMiddleware(ApiConfig.behandling.scope),
-    proxy(ApiConfig.behandling.url!!)
-  )
-
-  app.use('/api/oppgaver', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url!!))
 
   app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url!!))
 

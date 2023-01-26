@@ -14,14 +14,29 @@ class SakOgBehandlingService(
     suspend fun hentBehandling(
         sakId: Long,
         behandlingId: String,
-        saksbehandler: String,
+        innloggetSaksbehandlerIdent: String,
         accessToken: String
     ): Behandling {
         val vedtak = vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(sakId, accessToken)
 
-        val saksbehandlerEnhet = saksbehandlere[saksbehandler]
-            ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
+        val innloggetSaksbehandlerEnhet = saksbehandlere[innloggetSaksbehandlerIdent]
+            ?: throw SaksbehandlerManglerEnhetException(
+                "Saksbehandler $innloggetSaksbehandlerIdent mangler enhet fra secret"
+            )
+
+        val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet
+        val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
+        val attestantEnhet =
+            if (vedtak.vedtakFattet != null) (
+                vedtak.attestasjon?.attesterendeEnhet
+                    ?: saksbehandlerEnhet
+                ) else ""
+        val attestantIdent =
+            if (vedtak.vedtakFattet != null) (
+                vedtak.attestasjon?.attestant
+                    ?: innloggetSaksbehandlerIdent
+                ) else ""
 
         return Behandling(
             sakId = sakId,
@@ -35,10 +50,10 @@ class SakOgBehandlingService(
             vedtak = ForenkletVedtak(
                 vedtak.vedtakId,
                 vedtak.type,
-                vedtak.vedtakFattet?.ansvarligEnhet ?: saksbehandlerEnhet,
-                vedtak.vedtakFattet?.ansvarligSaksbehandler ?: saksbehandler,
-                vedtak.attestasjon?.attesterendeEnhet ?: saksbehandlerEnhet,
-                vedtak.attestasjon?.attestant ?: saksbehandler
+                saksbehandlerEnhet,
+                saksbehandlerIdent,
+                attestantEnhet,
+                attestantIdent
             ),
             utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )

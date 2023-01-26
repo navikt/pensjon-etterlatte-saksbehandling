@@ -58,7 +58,7 @@ internal class RapidTest {
         dsb.migrate()
         opplysningRepo = OpplysningDao(dsb.dataSource)
 
-        grunnlagService = RealGrunnlagService(opplysningRepo, sendToRapid, behandlingKlient)
+        grunnlagService = RealGrunnlagService(opplysningRepo, sendToRapid, behandlingKlient, mockk())
         inspector = TestRapid().apply {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)

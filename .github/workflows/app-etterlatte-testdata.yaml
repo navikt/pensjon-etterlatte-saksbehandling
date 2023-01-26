@@ -17,6 +17,7 @@ jobs:
   test:
     if: github.event_name == 'pull_request'
     uses: ./.github/workflows/.test.yaml
+    secrets: inherit
 
   build:
     if: github.event_name != 'pull_request'

@@ -2,7 +2,7 @@ object NavFelles {
     const val RapidAndRiversKtor2 = "com.github.navikt:rapids-and-rivers:2022061809451655538329.d6deccc62862"
     const val TokenClientCore = "no.nav.security:token-client-core:2.1.2"
     const val TokenValidationKtor2 = "no.nav.security:token-validation-ktor-v2:2.1.2"
-    const val MockOauth2Server = "no.nav.security:mock-oauth2-server:0.5.4"
+    const val MockOauth2Server = "no.nav.security:mock-oauth2-server:0.5.7"
 }
 
 object Cache {
@@ -15,7 +15,7 @@ object Kotlinx {
 }
 
 object Ktor2 {
-    private const val version = "2.0.3"
+    private const val version = "2.2.2"
 
     const val OkHttp = "io.ktor:ktor-client-okhttp:$version"
     const val ClientCore = "io.ktor:ktor-client-core:$version"
@@ -49,7 +49,7 @@ object Kafka {
 }
 
 object Jackson {
-    private const val version = "2.13.3"
+    private const val version = "2.13.5"
 
     const val DatatypeJsr310 = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$version"
     const val DatatypeJdk8 = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$version"
@@ -90,7 +90,7 @@ object Kotest {
 object Database {
     const val HikariCP = "com.zaxxer:HikariCP:5.0.0"
     const val FlywayDB = "org.flywaydb:flyway-core:8.5.13"
-    const val Postgresql = "org.postgresql:postgresql:42.2.25"
+    const val Postgresql = "org.postgresql:postgresql:42.3.8"
     const val KotliQuery = "com.github.seratch:kotliquery:1.7.0"
 }
 

@@ -25,7 +25,7 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
 
   mock-oauth2-server:
-    image: 'ghcr.io/navikt/mock-oauth2-server:0.5.4'
+    image: 'ghcr.io/navikt/mock-oauth2-server:0.5.7'
     ports:
       - "8082:8082"
     hostname: localhost

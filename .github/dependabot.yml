@@ -12,7 +12,6 @@ updates:
     directory: "/"
     schedule:
       interval: daily
-      time: "04:00"
     open-pull-requests-limit: 10
     registries:
       - etterlatte-libs
@@ -21,4 +20,3 @@ updates:
     schedule:
       interval: weekly
       day: "sunday"
-      time: "04:00"

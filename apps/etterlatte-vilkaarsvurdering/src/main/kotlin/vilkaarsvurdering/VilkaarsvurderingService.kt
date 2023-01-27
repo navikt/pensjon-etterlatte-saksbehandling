@@ -44,7 +44,14 @@ class VilkaarsvurderingService(
         accessToken: String,
         resultat: VilkaarsvurderingResultat
     ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, accessToken) {
-        val vilkaarsvurdering = vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
+        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, accessToken).let {
+            it.virkningstidspunkt?.dato?.atDay(1)
+        } ?: throw IllegalStateException("Virkningstidspunkt må være satt for å sette en vurdering")
+        val vilkaarsvurdering = vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+            behandlingId = behandlingId,
+            virkningstidspunkt = virkningstidspunkt,
+            resultat = resultat
+        )
         val utfall = vilkaarsvurdering.resultat?.utfall ?: throw IllegalStateException("Utfall kan ikke vaere null")
         behandlingKlient.commitVilkaarsvurdering(behandlingId, accessToken, utfall)
         vilkaarsvurdering

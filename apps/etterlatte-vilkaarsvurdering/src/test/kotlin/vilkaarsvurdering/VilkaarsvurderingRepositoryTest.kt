@@ -91,7 +91,7 @@ internal class VilkaarsvurderingRepository2Test {
                 vilkaarsvurderingResultat
             )
 
-        oppdatertVilkaarsvurdering.virkningstidspunkt shouldBe YearMonth.from(nyttVirkningstidspunkt)
+        oppdatertVilkaarsvurdering.virkningstidspunkt shouldBe nyttVirkningstidspunkt
         with(oppdatertVilkaarsvurdering.resultat!!) {
             utfall shouldBe vilkaarsvurderingResultat.utfall
             kommentar shouldBe vilkaarsvurderingResultat.kommentar

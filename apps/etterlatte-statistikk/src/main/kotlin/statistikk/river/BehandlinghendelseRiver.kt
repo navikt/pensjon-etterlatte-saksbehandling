@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -39,6 +40,7 @@ class BehandlinghendelseRiver(
             validate { it.requireKey("behandling.status") }
             validate { it.requireKey("behandling.type") }
             validate { it.requireKey("behandling.persongalleri") }
+            validate { it.interestedIn(tekniskTidKey) }
             correlationId()
         }.register(this)
     }

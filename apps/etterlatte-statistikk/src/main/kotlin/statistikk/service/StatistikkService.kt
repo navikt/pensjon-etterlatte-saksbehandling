@@ -19,7 +19,6 @@ import no.nav.etterlatte.statistikk.sak.BehandlingResultat
 import no.nav.etterlatte.statistikk.sak.SakRad
 import no.nav.etterlatte.statistikk.sak.SakUtland
 import no.nav.etterlatte.statistikk.sak.SoeknadFormat
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -139,7 +138,7 @@ class StatistikkService(
             vedtak.behandling.id,
             vedtak.sak.id,
             vedtak.sak.id,
-            Instant.from(tekniskTid),
+            tekniskTid.toTidspunkt(ZoneOffset.UTC).instant,
             vedtak.sak.sakType.toString(),
             "",
             vedtak.vedtakFattet!!.ansvarligSaksbehandler,

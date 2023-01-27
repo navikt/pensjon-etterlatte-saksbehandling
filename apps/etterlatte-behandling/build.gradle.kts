@@ -26,7 +26,7 @@ dependencies {
     implementation(Ktor2.Auth)
     implementation(Ktor2.StatusPages)
     implementation(Ktor2.CallLogging)
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.14")
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
 
     implementation(Micrometer.Prometheus)
     implementation(Jackson.DatatypeJsr310)

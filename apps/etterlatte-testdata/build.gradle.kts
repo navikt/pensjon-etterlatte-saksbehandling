@@ -36,7 +36,7 @@ dependencies {
     implementation(Jackson.Core)
     implementation(Jackson.Databind)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation(Jupiter.Root)
     testImplementation(MockK.MockK)
     testImplementation(Kotest.AssertionsCore)
 }

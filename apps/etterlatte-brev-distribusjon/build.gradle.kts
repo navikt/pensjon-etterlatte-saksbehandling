@@ -13,8 +13,8 @@ dependencies {
 
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:common"))
-    implementation("org.junit.jupiter:junit-jupiter:5.8.1")
 
+    testImplementation(Jupiter.Root)
     testImplementation(Ktor2.ClientMock)
     testImplementation(MockK.MockK)
     testImplementation(Kotest.AssertionsCore)

@@ -10,7 +10,7 @@ dependencies {
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.Jackson)
 
-    implementation("org.jetbrains:annotations:13.0")
+    implementation("org.jetbrains:annotations:24.0.0")
 
     implementation("com.ibm.mq:com.ibm.mq.allclient:9.2.5.0")
     implementation("org.messaginghub:pooled-jms:2.0.5")

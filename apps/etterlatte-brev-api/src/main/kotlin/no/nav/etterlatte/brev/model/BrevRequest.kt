@@ -80,3 +80,11 @@ data class RegoppslagResponseDTO(
         BOSTEDSADRESSE, OPPHOLDSADRESSE, KONTAKTADRESSE, DELTBOSTED, KONTAKTINFORMASJONFORDØDSBO, ENHETPOSTADRESSE, ENHETFORRETNINGSADRESSE
     }
 }
+
+data class SaksbehandlerInfo(
+    val ident: String,
+    val navn: String,
+    val fornavn: String,
+    val etternavn: String,
+    val epost: String
+)

@@ -23,6 +23,7 @@ import no.nav.etterlatte.brev.db.DataSourceBuilder
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -50,6 +51,7 @@ class ApplicationBuilder {
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env["ETTERLATTE_PDFGEN_URL"]!!)
     private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
     private val regoppslagKlient = RegoppslagKlient(proxyClient(), env["ETTERLATTE_PROXY_URL"]!!)
+    private val navansattKlient = NavansattKlient(proxyClient(), env["ETTERLATTE_PROXY_URL"]!!)
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())
@@ -73,7 +75,15 @@ class ApplicationBuilder {
 
     private val brevService = BrevService(db, pdfGenerator, adresseService)
     private val vedtaksbrevService =
-        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
+
+        VedtaksbrevService(
+            db,
+            pdfGenerator,
+            sakOgBehandlingService,
+            adresseService,
+            dokarkivService,
+            navansattKlient
+        )
 
     private val journalpostService = SafClient(httpClient(), env["SAF_BASE_URL"]!!, env["SAF_SCOPE"]!!)
 

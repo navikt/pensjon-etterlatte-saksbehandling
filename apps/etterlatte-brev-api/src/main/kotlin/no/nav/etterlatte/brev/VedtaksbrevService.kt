@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
+import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.journalpost.DokarkivServiceImpl
 import no.nav.etterlatte.libs.common.brev.model.Adresse
@@ -30,7 +31,8 @@ class VedtaksbrevService(
     private val pdfGenerator: PdfGeneratorKlient,
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
-    private val dokarkivService: DokarkivServiceImpl
+    private val dokarkivService: DokarkivServiceImpl,
+    private val navansattKlient: NavansattKlient
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -88,8 +90,9 @@ class VedtaksbrevService(
     private suspend fun opprettEllerOppdater(behandling: Behandling): UlagretBrev {
         val saksbehandlerEnhet = behandling.vedtak.saksbehandlerEnhet
         val saksbehandlerIdent = behandling.vedtak.saksbehandlerIdent
+        val saksbehandlerInfo = navansattKlient.HentSaksbehandlerInfo(saksbehandlerIdent)
         val attestantEnhet = behandling.vedtak.attestantEnhet?.let { adresseService.hentEnhet(it) }
-        val avsender = adresseService.hentAvsenderEnhet(saksbehandlerEnhet, saksbehandlerIdent)
+        val avsender = adresseService.hentAvsenderEnhet(saksbehandlerEnhet, saksbehandlerInfo.navn)
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
         val attestant = Attestant(behandling.vedtak.attestantIdent ?: "", attestantEnhet ?: "")
 

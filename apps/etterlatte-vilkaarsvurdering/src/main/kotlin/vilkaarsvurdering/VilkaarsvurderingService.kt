@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
-import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
-import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -46,14 +46,14 @@ class VilkaarsvurderingService(
     ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, accessToken) {
         val vilkaarsvurdering = vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(behandlingId, resultat)
         val utfall = vilkaarsvurdering.resultat?.utfall ?: throw IllegalStateException("Utfall kan ikke vaere null")
-        behandlingKlient.commitVilkaarsvurdering(behandlingId, accessToken, utfall)
+        behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, accessToken, utfall)
         vilkaarsvurdering
     }
 
     suspend fun slettTotalVurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
-        if (behandlingKlient.opprett(behandlingId, accessToken, false)) {
+        if (behandlingKlient.settBehandlingStatusOpprettet(behandlingId, accessToken, false)) {
             val vilkaarsvurdering = vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
-            behandlingKlient.opprett(behandlingId, accessToken, true)
+            behandlingKlient.settBehandlingStatusOpprettet(behandlingId, accessToken, true)
 
             return vilkaarsvurdering
         }
@@ -68,8 +68,7 @@ class VilkaarsvurderingService(
     ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, accessToken) {
         if (vilkaarsvurderingRepository.hent(behandlingId)?.resultat != null) {
             throw VilkaarsvurderingTilstandException(
-                "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering " +
-                    "som har et resultat"
+                "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering som har et resultat"
             )
         }
         vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
@@ -132,7 +131,7 @@ class VilkaarsvurderingService(
         accessToken: String,
         block: suspend () -> Vilkaarsvurdering
     ): Vilkaarsvurdering {
-        val kanVilkaarsvurdere = behandlingKlient.testVilkaarsvurderingState(behandlingId, accessToken)
+        val kanVilkaarsvurdere = behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(behandlingId, accessToken)
 
         if (!kanVilkaarsvurdere) {
             throw BehandlingstilstandException

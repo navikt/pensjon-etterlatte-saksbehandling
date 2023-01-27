@@ -16,10 +16,10 @@ data class Resource(
 }
 
 data class ThrowableErrorMessage(
-    val message: String,
+    override val message: String,
     val throwable: Throwable,
     val downstreamStatusCode: HttpStatusCode? = null
-)
+) : Exception(message, throwable)
 
 class HttpStatusRuntimeException(val downstreamStatusCode: HttpStatusCode, override val message: String) :
     RuntimeException(message)

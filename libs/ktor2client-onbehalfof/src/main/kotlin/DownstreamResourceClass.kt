@@ -88,7 +88,7 @@ class DownstreamResourceClient(
                     Ok(result.body())
                 },
                 onFailure = { error ->
-                    logger.error("received error from downstream api: get", error)
+                    logger.debug("received error from downstream api: get", error)
                     error.toErr(resource.url)
                 }
             )
@@ -119,7 +119,7 @@ class DownstreamResourceClient(
                     }
                 },
                 onFailure = { error ->
-                    logger.error("received error from downstream api: post", error)
+                    logger.debug("received error from downstream api: post", error)
                     error.toErr(resource.url)
                 }
             )
@@ -145,7 +145,7 @@ class DownstreamResourceClient(
                     Ok(result.body())
                 },
                 onFailure = { error ->
-                    logger.error("received error from downstream api: delete", error)
+                    logger.debug("received error from downstream api: delete", error)
                     error.toErr(resource.url)
                 }
             )

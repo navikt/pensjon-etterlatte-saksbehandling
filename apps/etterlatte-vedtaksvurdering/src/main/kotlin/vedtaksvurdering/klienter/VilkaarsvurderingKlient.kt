@@ -16,6 +16,9 @@ interface VilkaarsvurderingKlient {
     suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingDto
 }
 
+class VilkaarsvurderingKlientException(override val message: String, override val cause: Throwable) :
+    Exception(message, cause)
+
 class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : VilkaarsvurderingKlient {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingKlientImpl::class.java)
     private val azureAdClient = AzureAdClient(config)
@@ -25,9 +28,9 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
 
     override suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingDto {
-        logger.info("Henter vilkaarsvurdering med behandlingid $behandlingId")
+        logger.info("Henter vilkaarsvurdering med behandlingid=$behandlingId")
         try {
-            val json = downstreamResourceClient
+            return downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
@@ -36,13 +39,14 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-            return objectMapper.readValue(json.toString())
+                    success = { json -> json.response.let { objectMapper.readValue(json.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
         } catch (e: Exception) {
-            logger.error("Henting av vilkårsvurdering ($behandlingId) fra vedtak feilet.")
-            throw e
+            throw VilkaarsvurderingKlientException(
+                "Henting av vilkårsvurdering for behandling med behandlingId=$behandlingId fra vedtak feilet",
+                e
+            )
         }
     }
 }

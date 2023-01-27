@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
@@ -57,6 +58,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
 
     fun lagreVilkaarsvurderingResultat(
         behandlingId: UUID,
+        virkningstidspunkt: LocalDate,
         resultat: VilkaarsvurderingResultat
     ): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
@@ -66,6 +68,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 statement = Queries.lagreVilkaarsvurderingResultat,
                 paramMap = mapOf(
                     "id" to vilkaarsvurdering.id,
+                    "virkningstidspunkt" to virkningstidspunkt,
                     "resultat_utfall" to resultat.utfall.name,
                     "resultat_kommentar" to resultat.kommentar,
                     "resultat_tidspunkt" to Timestamp.valueOf(resultat.tidspunkt),
@@ -250,8 +253,11 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
 
         const val lagreVilkaarsvurderingResultat = """
             UPDATE vilkaarsvurdering
-            SET resultat_utfall = :resultat_utfall, resultat_kommentar = :resultat_kommentar, 
-                resultat_tidspunkt = :resultat_tidspunkt, resultat_saksbehandler = :resultat_saksbehandler 
+            SET virkningstidspunkt = :virkningstidspunkt, 
+                resultat_utfall = :resultat_utfall, 
+                resultat_kommentar = :resultat_kommentar, 
+                resultat_tidspunkt = :resultat_tidspunkt, 
+                resultat_saksbehandler = :resultat_saksbehandler 
             WHERE id = :id
         """
 

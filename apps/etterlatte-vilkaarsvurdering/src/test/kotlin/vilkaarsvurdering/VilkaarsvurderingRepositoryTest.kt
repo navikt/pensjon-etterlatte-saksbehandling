@@ -21,6 +21,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
@@ -79,15 +80,18 @@ internal class VilkaarsvurderingRepository2Test {
     }
 
     @Test
-    fun `skal sette resultat paa vilkaarsvurdering`() {
+    fun `skal oppdatere virkningstidspunkt og sette resultat paa vilkaarsvurdering`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val nyttVirkningstidspunkt = opprettetVilkaarsvurdering.virkningstidspunkt.minusYears(1)
 
         val oppdatertVilkaarsvurdering =
             vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
                 opprettetVilkaarsvurdering.behandlingId,
+                nyttVirkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat
             )
 
+        oppdatertVilkaarsvurdering.virkningstidspunkt shouldBe YearMonth.from(nyttVirkningstidspunkt)
         with(oppdatertVilkaarsvurdering.resultat!!) {
             utfall shouldBe vilkaarsvurderingResultat.utfall
             kommentar shouldBe vilkaarsvurderingResultat.kommentar
@@ -102,6 +106,7 @@ internal class VilkaarsvurderingRepository2Test {
 
         vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
             opprettetVilkaarsvurdering.behandlingId,
+            vilkaarsvurdering.virkningstidspunkt.atDay(1),
             vilkaarsvurderingResultat
         )
         val oppdatertVilkaarsvurdering =

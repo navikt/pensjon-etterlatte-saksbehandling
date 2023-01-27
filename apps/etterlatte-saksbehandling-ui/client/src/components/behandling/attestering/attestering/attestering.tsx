@@ -9,7 +9,7 @@ type Props = {
 }
 
 export const Attestering: React.FC<Props> = ({ setBeslutning, beslutning }) => {
-  const { currentRoute } = useBehandlingRoutes()
+  const { lastPage } = useBehandlingRoutes()
 
   return (
     <AttesteringWrapper>
@@ -18,7 +18,7 @@ export const Attestering: React.FC<Props> = ({ setBeslutning, beslutning }) => {
       </div>
       <TextWrapper>
         Beslutning
-        {currentRoute === 'brev' ? (
+        {lastPage ? (
           <Beslutningsvalg beslutning={beslutning} setBeslutning={setBeslutning} />
         ) : (
           <>

@@ -1,6 +1,6 @@
 rootProject.name = "pensjon-etterlatte-saksbehandling"
 plugins {
-    kotlin("jvm") version "1.7.0" apply false
+    kotlin("jvm") version "1.8.0" apply false
 }
 include(
     "apps:etterlatte-fordeler",

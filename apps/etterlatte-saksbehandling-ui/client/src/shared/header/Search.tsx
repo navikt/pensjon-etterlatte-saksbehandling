@@ -18,6 +18,7 @@ export const Search = () => {
   const onEnter = (e: any) => e.key === 'Enter' && soekEtterPerson()
 
   useEffect(() => {
+    reset()
     if (searchInput.length === 0) {
       setFeilInput(false)
     } else if (feilInput && ugyldigInput) {

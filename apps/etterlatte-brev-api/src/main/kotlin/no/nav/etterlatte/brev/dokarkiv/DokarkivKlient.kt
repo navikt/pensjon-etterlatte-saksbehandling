@@ -14,11 +14,10 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
-import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 
-class JournalpostKlient(private val client: HttpClient, private val url: String) {
-    private val logger = LoggerFactory.getLogger(JournalpostKlient::class.java)
+class DokarkivKlient(private val client: HttpClient, private val url: String) {
+    private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
     suspend fun opprettJournalpost(request: JournalpostRequest, ferdigstill: Boolean): JournalpostResponse = try {
         client.post("$url?forsoekFerdigstill=$ferdigstill") {

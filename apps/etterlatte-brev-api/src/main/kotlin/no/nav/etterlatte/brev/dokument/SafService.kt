@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.dokument
 
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 
-interface JournalpostService {
+interface SafService {
     suspend fun hentDokumenter(fnr: String, idType: BrukerIdType, accessToken: String): JournalpostResponse
 
     suspend fun hentDokumentPDF(

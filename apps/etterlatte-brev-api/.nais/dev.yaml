@@ -50,6 +50,14 @@ spec:
       value: https://saf.dev-fss-pub.nais.io
     - name: SAF_SCOPE
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
+    - name: DOKARKIV_URL
+      value: https://dokarkiv.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
+    - name: DOKARKIV_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
+    - name: DOKDIST_URL
+      value: https://dokdistfordeling-q1.dev-fss-pub.nais.io/rest/v1
+    - name: DOKDIST_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: ETTERLATTE_PROXY_URL
@@ -81,8 +89,9 @@ spec:
         - application: etterlatte-beregning
       external:
         - host: saf.dev-fss-pub.nais.io
+        - host: dokarkiv.dev-fss-pub.nais.io
+        - host: dokdistfordeling-q1.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-brev-distribusjon

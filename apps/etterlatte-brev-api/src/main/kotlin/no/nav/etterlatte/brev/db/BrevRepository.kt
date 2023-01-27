@@ -146,14 +146,14 @@ class BrevRepository private constructor(private val ds: DataSource) {
             .executeUpdate() > 0
     }
 
-    fun oppdaterStatus(id: BrevID, status: Status, payload: String? = null) = connection.use {
+    fun oppdaterStatus(id: BrevID, status: Status, payload: String? = null): Boolean = connection.use {
         it.prepareStatement(OPPDATER_STATUS_QUERY)
             .apply {
                 setLong(1, id)
                 setString(2, status.name)
                 setString(3, payload ?: "{}")
             }
-            .executeUpdate()
+            .executeUpdate() > 0
     }
 
     fun slett(id: BrevID): Boolean = connection.use {

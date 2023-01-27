@@ -18,13 +18,16 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import org.slf4j.MDC
-import java.util.*
+import java.util.UUID
 
-class JournalpostClient(
+/*
+* SAF (Sak- og Arkiv Facade)
+*/
+class SafClient(
     private val httpClient: HttpClient,
     private val baseUrl: String,
     private val safScope: String
-) : JournalpostService {
+) : SafService {
 
     private val configLocation: String? = null
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()

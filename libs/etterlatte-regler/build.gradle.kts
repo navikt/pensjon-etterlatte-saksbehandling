@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm")
 }
 
-version = "0.1-BETA"
+version = "1.0"
 
 repositories {
     maven("https://jitpack.io")

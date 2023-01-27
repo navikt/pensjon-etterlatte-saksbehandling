@@ -9,21 +9,22 @@ import java.time.LocalDate
 internal class VisitorTest {
     private object TestGrunnlag
 
-    private val regel1 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_1, "Tallet 1", toDoRegelReferanse, 1)
-    private val regel2 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_2, "Tallet 2", toDoRegelReferanse, 2)
-    private val regel3 = definerKonstant<TestGrunnlag, Long>(GJELDER_FRA_2, "Tallet 3", toDoRegelReferanse, 3)
-    private val regel4 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_3, "Tallet 4", toDoRegelReferanse, 4)
+    private val regel1 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_1, "Tallet 1", regelReferanse, 1)
+    private val regel2 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_2, "Tallet 2", regelReferanse, 2)
+    private val regel3 = definerKonstant<TestGrunnlag, Long>(GJELDER_FRA_2, "Tallet 3", regelReferanse, 3)
+    private val regel4 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_3, "Tallet 4", regelReferanse, 4)
+
     private val regelSomBrukerVerdienFraTreAndreRegler = RegelMeta(
         gjelderFra = GJELDER_FRA_3,
         beskrivelse = "Regel som bruker resultatet av tre andre regler",
-        regelReferanse = toDoRegelReferanse
+        regelReferanse = regelReferanse
     ) benytter regel1 og regel2 og regel3 med { verdi1, verdi2, verdi3 ->
         verdi1 + verdi2 + verdi3
     }
     private val regelSomKombinererToRegler = RegelMeta(
         gjelderFra = GJELDER_FRA_3,
         beskrivelse = "Regel som kombinerer to regler",
-        regelReferanse = toDoRegelReferanse
+        regelReferanse = regelReferanse
     ) benytter regelSomBrukerVerdienFraTreAndreRegler og regel4 med { verdi1, verdi2 ->
         verdi1 + verdi2
     }
@@ -64,7 +65,7 @@ internal class VisitorTest {
         val velgNyesteGyldigeRegler = RegelMeta(
             gjelderFra = GJELDER_FRA_3,
             beskrivelse = "Regel som velger nyeste regel",
-            regelReferanse = toDoRegelReferanse
+            regelReferanse = regelReferanse
         ) velgNyesteGyldige (regel1 og regel2)
 
         velgNyesteGyldigeRegler.finnUgyldigePerioder(RegelPeriode(GJELDER_FRA_1.minusMonths(1))) shouldHaveSize 1

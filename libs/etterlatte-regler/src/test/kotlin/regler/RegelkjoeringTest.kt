@@ -51,7 +51,7 @@ internal class RegelkjoeringTest {
     private val velgNyesteGyldigeRegel = RegelMeta(
         gjelderFra = gjelderFra1900,
         beskrivelse = "Finner testverdi for rett virkningstidspunkt",
-        regelReferanse = toDoRegelReferanse
+        regelReferanse = regelReferanse
     ) velgNyesteGyldige (regel2021 og regel2022 og regel2023)
 
     @Test

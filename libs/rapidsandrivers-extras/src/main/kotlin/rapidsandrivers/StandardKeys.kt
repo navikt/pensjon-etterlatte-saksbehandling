@@ -6,6 +6,7 @@ import no.nav.helse.rapids_rivers.River
 const val eventNameKey = "@event_name"
 const val behovNameKey = "@behov"
 const val correlationIdKey = "@correlation_id"
+const val tekniskTidKey = "teknisk_tid"
 
 fun River.eventName(eventName: String) {
     validate { it.demandValue(eventNameKey, eventName) }

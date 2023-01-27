@@ -56,7 +56,7 @@ internal class VedtakhendelserRiverTest {
     @Test
     fun `Når statistikk blir registrert sendes en kvittering ut på river`() {
         every {
-            statistikkService.registrerStatistikkForVedtak(any(), any())
+            statistikkService.registrerStatistikkForVedtak(any(), any(), any())
         } returns (null to mockStoenadRad)
         val inspector = testRapid.apply { sendTestMessage(melding) }.inspektør
 
@@ -70,7 +70,7 @@ internal class VedtakhendelserRiverTest {
     @Test
     fun `Hvis ingen statistikk blir registrert sendes det ikke ut en kvittering`() {
         every {
-            statistikkService.registrerStatistikkForVedtak(any(), any())
+            statistikkService.registrerStatistikkForVedtak(any(), any(), any())
         } returns (null to null)
         val inspector = testRapid.apply { sendTestMessage(melding) }.inspektør
 

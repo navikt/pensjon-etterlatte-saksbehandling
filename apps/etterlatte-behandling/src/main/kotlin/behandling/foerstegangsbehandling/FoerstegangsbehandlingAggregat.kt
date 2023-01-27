@@ -59,7 +59,7 @@ class FoerstegangsbehandlingAggregat(
     var lagretBehandling: Foerstegangsbehandling =
         requireNotNull(behandlinger.hentBehandling(id, BehandlingType.FØRSTEGANGSBEHANDLING) as Foerstegangsbehandling)
 
-    fun lagreGyldighetprøving(gyldighetsproeving: GyldighetsResultat) {
+    fun lagreGyldighetproeving(gyldighetsproeving: GyldighetsResultat) {
         lagretBehandling = lagretBehandling.oppdaterGyldighetsproeving(gyldighetsproeving)
             .also {
                 behandlinger.lagreGyldighetsproving(it)

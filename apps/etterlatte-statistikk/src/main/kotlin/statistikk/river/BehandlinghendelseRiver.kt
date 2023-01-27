@@ -15,7 +15,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class BehandlinghendelseRiver(
     rapidsConnection: RapidsConnection,
@@ -48,7 +48,8 @@ class BehandlinghendelseRiver(
             try {
                 val behandling: Behandling = objectMapper.treeToValue(packet["behandling"])
                 val hendelse: BehandlingHendelse = enumValueOf(packet[eventNameKey].textValue().split(":")[1])
-                service.registrerStatistikkForBehandlinghendelse(behandling, hendelse)
+                val tekniskTid = parseTekniskTid(packet, logger)
+                service.registrerStatistikkForBehandlinghendelse(behandling, hendelse, tekniskTid)
                     ?.also {
                         context.publish(
                             objectMapper.writeValueAsString(

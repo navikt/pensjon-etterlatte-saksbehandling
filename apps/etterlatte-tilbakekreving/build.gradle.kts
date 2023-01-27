@@ -37,7 +37,7 @@ dependencies {
 
     implementation(project(":libs:common"))
 
-    implementation("com.zaxxer:HikariCP:3.4.5")
+    implementation("com.zaxxer:HikariCP:5.0.1")
     implementation(Database.FlywayDB)
     implementation(Database.Postgresql)
     implementation(Database.KotliQuery)

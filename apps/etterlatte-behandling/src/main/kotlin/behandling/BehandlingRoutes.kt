@@ -85,6 +85,28 @@ internal fun Route.behandlingRoutes(
             }
         }
 
+        route("/manueltopphoer") {
+            get {
+                logger.info("Henter manuelt opphør oppsummering for manuelt opphør med id=$behandlingsId")
+                when (
+                    val opphoerOgBehandlinger =
+                        manueltOpphoerService.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingsId)
+                ) {
+                    null -> call.respond(
+                        HttpStatusCode.NotFound,
+                        "Fant ikke manuelt opphør med id=$behandlingsId"
+                    )
+
+                    else -> {
+                        val (opphoer, andre) = opphoerOgBehandlinger
+                        call.respond(
+                            opphoer.toManueltOpphoerOppsummmering(andre.map { it.toDetaljertBehandling() })
+                        )
+                    }
+                }
+            }
+        }
+
         post("/avbryt") {
             val navIdent = navIdentFraToken() ?: return@post call.respond(
                 HttpStatusCode.Unauthorized,
@@ -149,28 +171,6 @@ internal fun Route.behandlingRoutes(
                 when (val behandling = generellBehandlingService.hentDetaljertBehandling(behandlingsId)) {
                     is DetaljertBehandling -> call.respond(behandling)
                     else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingsId")
-                }
-            }
-
-            route("/manueltopphoer") {
-                get {
-                    logger.info("Henter manuelt opphør oppsummering for manuelt opphør med id=$behandlingsId")
-                    when (
-                        val opphoer =
-                            manueltOpphoerService.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingsId)
-                    ) {
-                        null -> call.respond(
-                            HttpStatusCode.NotFound,
-                            "Fant ikke manuelt opphør med id=$behandlingsId"
-                        )
-
-                        else -> {
-                            val (opphoer, andre) = opphoer
-                            call.respond(
-                                opphoer.toManueltOpphoerOppsummmering(andre.map { it.toDetaljertBehandling() })
-                            )
-                        }
-                    }
                 }
             }
 

@@ -225,22 +225,6 @@
     "saksId": 3,
     "grunnlag": [
       {
-        "id": "b217ba39-3863-4ce1-8b44-50b915a4c7ff",
-        "kilde": {
-          "navn": "pdl",
-          "tidspunktForInnhenting": "2022-06-28T12:01:04.226350546Z",
-          "registersReferanse": null,
-          "type": "pdl"
-        },
-        "opplysningType": "PENSJON_UFORE_V1",
-        "meta": {},
-        "opplysning": {
-          "mottattUforetrygd": [],
-          "mottattAlderspensjon": []
-        },
-        "attestering": null
-      },
-      {
         "id": "cf21dc75-e2aa-4920-a45d-4fb49764c6aa",
         "kilde": {
           "navn": "pdl",
@@ -655,22 +639,6 @@
   "@grunnlag": {
     "saksId": 3,
     "grunnlag": [
-      {
-        "id": "b217ba39-3863-4ce1-8b44-50b915a4c7ff",
-        "kilde": {
-          "navn": "pdl",
-          "tidspunktForInnhenting": "2022-06-28T12:01:04.226350546Z",
-          "registersReferanse": null,
-          "type": "pdl"
-        },
-        "opplysningType": "PENSJON_UFORE_V1",
-        "meta": {},
-        "opplysning": {
-          "mottattUforetrygd": [],
-          "mottattAlderspensjon": []
-        },
-        "attestering": null
-      },
       {
         "id": "cf21dc75-e2aa-4920-a45d-4fb49764c6aa",
         "kilde": {

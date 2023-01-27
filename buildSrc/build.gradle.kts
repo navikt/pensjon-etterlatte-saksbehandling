@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
-    id("ca.cutterslade.analyze") version "1.8.1" apply true
+    id("ca.cutterslade.analyze") version "1.9.0" apply true
 }
 
 group = "no.nav.etterlatte"

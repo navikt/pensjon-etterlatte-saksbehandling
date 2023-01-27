@@ -22,7 +22,7 @@ dependencies {
     api(Ktor2.AuthJwt)
 
     api("com.natpryce:konfig:1.6.10.0")
-    api("com.michael-bull.kotlin-result:kotlin-result:1.1.14")
+    api("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
     api(Cache.Caffeine)
 
     testImplementation(Kotlinx.CoroutinesTest)

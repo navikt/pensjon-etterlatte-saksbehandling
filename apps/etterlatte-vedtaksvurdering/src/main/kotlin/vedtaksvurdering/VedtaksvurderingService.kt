@@ -4,6 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
@@ -18,6 +19,7 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.time.LocalDateTime
 import java.util.*
 import no.nav.etterlatte.vedtaksvurdering.Vedtak as VedtakEntity
 
@@ -171,9 +173,9 @@ class VedtaksvurderingService(
 
             repository.fattVedtak(saksbehandler, saksbehandlerEnhet, behandlingId)
         }
-
+        val fattetTid = LocalDateTime.now()
         val fattetVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-        val statistikkmelding = lagStatistikkMelding(KafkaHendelseType.FATTET, fattetVedtak)
+        val statistikkmelding = lagStatistikkMelding(KafkaHendelseType.FATTET, fattetVedtak, fattetTid)
         sendToRapid(statistikkmelding, behandlingId)
         behandlingKlient.fattVedtak(behandlingId, accessToken, true)
 
@@ -205,8 +207,8 @@ class VedtaksvurderingService(
             utbetalingsperioderFraVedtak(vedtak)
         )
         val attestertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-
-        val message = lagStatistikkMelding(KafkaHendelseType.ATTESTERT, attestertVedtak)
+        val attestertTid = LocalDateTime.now()
+        val message = lagStatistikkMelding(KafkaHendelseType.ATTESTERT, attestertVedtak, attestertTid)
         sendToRapid(message, behandlingId)
         behandlingKlient.attester(behandlingId, accessToken, true)
 
@@ -228,7 +230,10 @@ class VedtaksvurderingService(
         }
         repository.underkjennVedtak(behandlingId)
         behandlingKlient.underkjenn(behandlingId, accessToken, true)
-
+        val underkjentVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
+        val underkjentTid = LocalDateTime.now()
+        val message = lagStatistikkMelding(KafkaHendelseType.UNDERKJENT, underkjentVedtak, underkjentTid)
+        sendToRapid(message, behandlingId)
         return repository.hentVedtak(behandlingId)!!
     }
 
@@ -304,8 +309,14 @@ class VedtaksvurderingService(
 
 class SaksbehandlerManglerEnhetException(message: String) : Exception(message)
 
-private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak) =
-    JsonMessage.newMessage(mapOf(eventNameKey to vedtakhendelse.toString(), "vedtak" to vedtak)).toJson()
+private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak, tekniskTid: LocalDateTime) =
+    JsonMessage.newMessage(
+        mapOf(
+            eventNameKey to vedtakhendelse.toString(),
+            "vedtak" to vedtak,
+            tekniskTidKey to tekniskTid
+        )
+    ).toJson()
 
 data class VedtakHendelse(
     val vedtakId: Long,

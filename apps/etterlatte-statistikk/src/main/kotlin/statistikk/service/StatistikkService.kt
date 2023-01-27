@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
@@ -21,6 +20,7 @@ import no.nav.etterlatte.statistikk.sak.SakRad
 import no.nav.etterlatte.statistikk.sak.SakUtland
 import no.nav.etterlatte.statistikk.sak.SoeknadFormat
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
@@ -30,40 +30,35 @@ class StatistikkService(
     private val behandlingClient: BehandlingClient
 ) {
 
-    fun registrerStatistikkForVedtak(vedtak: Vedtak, vedtakHendelse: VedtakHendelse): Pair<SakRad?, StoenadRad?> {
-        val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakHendelse)
+    fun registrerStatistikkForVedtak(
+        vedtak: Vedtak,
+        vedtakHendelse: VedtakHendelse,
+        tekniskTid: LocalDateTime
+    ): Pair<SakRad?, StoenadRad?> {
+        val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakHendelse, tekniskTid)
         if (vedtakHendelse == VedtakHendelse.ATTESTERT) {
             val stoenadRad = when (vedtak.type) {
-                VedtakType.INNVILGELSE -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak))
+                VedtakType.INNVILGELSE -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
                 VedtakType.AVSLAG -> null
-                VedtakType.ENDRING -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak))
-                VedtakType.OPPHOER -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak))
+                VedtakType.ENDRING -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
+                VedtakType.OPPHOER -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
             }
             return sakRad to stoenadRad
         }
         return sakRad to null
     }
 
-    private fun registrerSakStatistikkForVedtak(vedtak: Vedtak, hendelse: VedtakHendelse): SakRad? {
-        return vedtakshendelseTilSakRad(vedtak, hendelse).let { sakRad ->
+    private fun registrerSakStatistikkForVedtak(
+        vedtak: Vedtak,
+        hendelse: VedtakHendelse,
+        tekniskTid: LocalDateTime
+    ): SakRad? {
+        return vedtakshendelseTilSakRad(vedtak, hendelse, tekniskTid).let { sakRad ->
             sakRepository.lagreRad(sakRad)
         }
     }
 
-    private fun behandlingResultatFraVedtak(
-        vedtak: Vedtak,
-        detaljertBehandling: DetaljertBehandling
-    ): BehandlingResultat? {
-        if (vedtak.vedtakFattet != null) {
-            return BehandlingResultat.VEDTAK
-        }
-        if (detaljertBehandling.status == BehandlingStatus.AVBRUTT) {
-            return BehandlingResultat.AVBRUTT
-        }
-        return null
-    }
-
-    private fun vedtakshendelseTilSakRad(vedtak: Vedtak, hendelse: VedtakHendelse): SakRad {
+    private fun vedtakshendelseTilSakRad(vedtak: Vedtak, hendelse: VedtakHendelse, tekniskTid: LocalDateTime): SakRad {
         val detaljertBehandling = hentDetaljertBehandling(vedtak.behandling.id)
         val mottattTid = detaljertBehandling.soeknadMottattDato ?: detaljertBehandling.behandlingOpprettet
 
@@ -73,11 +68,11 @@ class StatistikkService(
             sakId = vedtak.sak.id,
             mottattTidspunkt = mottattTid.toTidspunkt(ZoneOffset.UTC),
             registrertTidspunkt = detaljertBehandling.behandlingOpprettet.toTidspunkt(ZoneOffset.UTC),
-            ferdigbehandletTidspunkt = vedtak.vedtakFattet?.tidspunkt?.toTidspunkt(),
-            vedtakTidspunkt = vedtak.vedtakFattet?.tidspunkt?.toTidspunkt(),
+            ferdigbehandletTidspunkt = vedtak.attestasjon?.tidspunkt?.toTidspunkt(),
+            vedtakTidspunkt = vedtak.attestasjon?.tidspunkt?.toTidspunkt(),
             behandlingType = vedtak.behandling.type,
             behandlingStatus = hendelse.name,
-            behandlingResultat = behandlingResultatFraVedtak(vedtak, detaljertBehandling),
+            behandlingResultat = behandlingResultatFraVedtak(vedtak, hendelse, detaljertBehandling),
             resultatBegrunnelse = null,
             behandlingMetode = BehandlingMetode.MANUELL,
             soeknadFormat = SoeknadFormat.DIGITAL,
@@ -89,7 +84,7 @@ class StatistikkService(
                     20
                 )
             },
-            tekniskTid = detaljertBehandling.sistEndret.toTidspunkt(ZoneOffset.UTC),
+            tekniskTid = tekniskTid.toTidspunkt(ZoneOffset.UTC),
             sakYtelse = vedtak.sak.sakType.name,
             vedtakLoependeFom = vedtak.virk.fom.atDay(1),
             vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
@@ -97,16 +92,20 @@ class StatistikkService(
             ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet,
             sakUtland = SakUtland.NASJONAL
         )
-        if (hendelse == VedtakHendelse.IVERKSATT || hendelse == VedtakHendelse.ATTESTERT) {
-            return fellesRad.copy(
-                behandlingResultat = behandlingResultatFraVedtak(vedtak)
-            )
-        }
-
         return fellesRad
     }
 
-    private fun behandlingResultatFraVedtak(vedtak: Vedtak): BehandlingResultat? {
+    private fun behandlingResultatFraVedtak(
+        vedtak: Vedtak,
+        vedtakHendelse: VedtakHendelse,
+        detaljertBehandling: DetaljertBehandling
+    ): BehandlingResultat? {
+        if (detaljertBehandling.status == BehandlingStatus.AVBRUTT) {
+            return BehandlingResultat.AVBRUTT
+        }
+        if (vedtakHendelse !in listOf(VedtakHendelse.ATTESTERT, VedtakHendelse.IVERKSATT)) {
+            return null
+        }
         return when (vedtak.pensjonTilUtbetaling?.any { it.type == UtbetalingsperiodeType.OPPHOER }) {
             true -> BehandlingResultat.OPPHOER
             false -> BehandlingResultat.VEDTAK
@@ -126,7 +125,7 @@ class StatistikkService(
         behandlingClient.hentSak(sakId)
     }
 
-    private fun vedtakTilStoenadsrad(vedtak: Vedtak): StoenadRad {
+    private fun vedtakTilStoenadsrad(vedtak: Vedtak, tekniskTid: LocalDateTime): StoenadRad {
         val persongalleri = hentPersongalleri(behandlingId = vedtak.behandling.id)
         return StoenadRad(
             -1,
@@ -140,7 +139,7 @@ class StatistikkService(
             vedtak.behandling.id,
             vedtak.sak.id,
             vedtak.sak.id,
-            Instant.now(),
+            Instant.from(tekniskTid),
             vedtak.sak.sakType.toString(),
             "",
             vedtak.vedtakFattet!!.ansvarligSaksbehandler,
@@ -150,14 +149,18 @@ class StatistikkService(
         )
     }
 
-    private fun behandlingTilSakRad(behandling: Behandling, behandlingHendelse: BehandlingHendelse): SakRad {
+    private fun behandlingTilSakRad(
+        behandling: Behandling,
+        behandlingHendelse: BehandlingHendelse,
+        tekniskTid: LocalDateTime
+    ): SakRad {
         val sak = hentSak(behandling.sak)
         val fellesRad = SakRad(
             id = -1,
             behandlingId = behandling.id,
             sakId = behandling.sak,
-            mottattTidspunkt = Tidspunkt(instant = behandling.behandlingOpprettet.toInstant(ZoneOffset.UTC)),
-            registrertTidspunkt = Tidspunkt(instant = behandling.behandlingOpprettet.toInstant(ZoneOffset.UTC)),
+            mottattTidspunkt = behandling.behandlingOpprettet.toTidspunkt(ZoneOffset.UTC),
+            registrertTidspunkt = behandling.behandlingOpprettet.toTidspunkt(ZoneOffset.UTC),
             ferdigbehandletTidspunkt = null,
             vedtakTidspunkt = null,
             behandlingType = behandling.type,
@@ -169,7 +172,7 @@ class StatistikkService(
             ansvarligBeslutter = null,
             aktorId = behandling.persongalleri.soeker,
             datoFoersteUtbetaling = null,
-            tekniskTid = Tidspunkt(instant = behandling.sistEndret.toInstant(ZoneOffset.UTC)),
+            tekniskTid = tekniskTid.toTidspunkt(ZoneOffset.UTC),
             sakYtelse = sak.sakType.name,
             vedtakLoependeFom = null,
             vedtakLoependeTom = null,
@@ -180,15 +183,19 @@ class StatistikkService(
         )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(
-                ferdigbehandletTidspunkt = Tidspunkt(instant = behandling.sistEndret.toInstant(ZoneOffset.UTC)),
+                ferdigbehandletTidspunkt = behandling.sistEndret.toTidspunkt(ZoneOffset.UTC),
                 behandlingResultat = BehandlingResultat.AVBRUTT
             )
         }
         return fellesRad
     }
 
-    fun registrerStatistikkForBehandlinghendelse(behandling: Behandling, hendelse: BehandlingHendelse): SakRad? {
-        return sakRepository.lagreRad(behandlingTilSakRad(behandling, hendelse))
+    fun registrerStatistikkForBehandlinghendelse(
+        behandling: Behandling,
+        hendelse: BehandlingHendelse,
+        tekniskTid: LocalDateTime
+    ): SakRad? {
+        return sakRepository.lagreRad(behandlingTilSakRad(behandling, hendelse, tekniskTid))
     }
 }
 

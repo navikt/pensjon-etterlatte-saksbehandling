@@ -1,73 +1,51 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { getPerson } from '~shared/api/person'
+import { getPerson, INVALID_FNR } from '~shared/api/person'
 import { StatusBar, StatusBarTheme } from '~shared/statusbar/Statusbar'
 import { Container } from '~shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
-import { Dokumenter, IPersonResult } from './typer'
 import Spinner from '~shared/Spinner'
-
-const testDokumenter: Dokumenter = {
-  brev: [
-    {
-      dato: 'Mock 13.05.2021',
-      tittel: 'Mock Innvilgelsesbrev barnepensjon',
-      link: 'link',
-      status: 'Mock Sendt ut',
-    },
-    {
-      dato: 'Mock 09.05.2021',
-      tittel: 'Mock Søknad barnepensjon - førstegangsbehandling',
-      link: 'link',
-      status: 'Mock Motatt',
-    },
-  ],
-}
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { BodyShort, Label } from '@navikt/ds-react'
 
 export const Person = () => {
-  const [personData, setPersonData] = useState<IPersonResult | undefined>(undefined)
-  const [lastet, setLastet] = useState<boolean>(false)
-  const [error, setError] = useState<IPersonResult>()
+  const [personStatus, hentPerson] = useApiCall(getPerson)
 
   const match = useParams<{ fnr: string }>()
 
   useEffect(() => {
-    const getPersonAsync = async (fnr: string) => {
-      const response = await getPerson(fnr)
-
-      if (response.status === 'ok') {
-        setPersonData(response?.data)
-      } else {
-        setError(response?.error)
-      }
-
-      setLastet(true)
-    }
-
     if (match.fnr) {
-      getPersonAsync(match.fnr)
+      hentPerson(match.fnr)
     }
   }, [])
 
-  if (error && personData === undefined) {
+  const personInfo = isSuccess(personStatus)
+    ? {
+        navn: personStatus.data.fornavn + ' ' + personStatus.data.etternavn,
+        fnr: personStatus.data.foedselsnummer,
+        type: 'Etterlatt',
+      }
+    : null
+
+  if (isFailure(personStatus)) {
     return (
       <Container>
-        <div>{JSON.stringify(error)}</div>
+        <BodyShort>
+          {INVALID_FNR(match.fnr) ? 'Fødselsnummeret i URLen er ugyldig' : JSON.stringify(personStatus)}
+        </BodyShort>
       </Container>
     )
   }
 
-  const navn = personData?.fornavn + ' ' + personData?.etternavn
-  const personInfo = personData ? { navn: navn, fnr: personData?.foedselsnummer, type: 'Etterlatt' } : null
-
   return (
     <>
+      {match.fnr === null && <Label>Kan ikke hente fødselsnummer fra URL</Label>}
       {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo} />}
-      <Spinner visible={!lastet} label={'Laster'} />
-      {lastet && (
+      {isPending(personStatus) && <Spinner visible={true} label={'Laster'} />}
+      {isSuccess(personStatus) && (
         <Container>
           <Tabs>
             <Tlist>
@@ -75,10 +53,10 @@ export const Person = () => {
               <TabElement>Dokumentoversikt</TabElement>
             </Tlist>
             <TabPanel>
-              <Saksoversikt fnr={match.fnr} />
+              <Saksoversikt fnr={personStatus.data.foedselsnummer} />
             </TabPanel>
             <TabPanel>
-              <Dokumentoversikt {...testDokumenter} fnr={match.fnr} />
+              <Dokumentoversikt fnr={personStatus.data.foedselsnummer} />
             </TabPanel>
           </Tabs>
         </Container>

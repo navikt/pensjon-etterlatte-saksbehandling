@@ -38,7 +38,7 @@ internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
-    private val grunnlagService = RealGrunnlagService(opplysningerMock, sendToRapid, behandlingKlient)
+    private val grunnlagService = RealGrunnlagService(opplysningerMock, sendToRapid, behandlingKlient, mockk())
 
     private val testData = GrunnlagTestData()
 

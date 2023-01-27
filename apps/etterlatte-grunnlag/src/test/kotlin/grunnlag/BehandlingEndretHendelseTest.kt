@@ -24,7 +24,7 @@ internal class BehandlingEndretHendelseTest {
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     private val inspector = TestRapid().apply {
-        BehandlingEndretHendlese(this, RealGrunnlagService(opplysningerMock, sendToRapid, behandlingKlient))
+        BehandlingEndretHendlese(this, RealGrunnlagService(opplysningerMock, sendToRapid, behandlingKlient, mockk()))
     }
 
     @BeforeEach

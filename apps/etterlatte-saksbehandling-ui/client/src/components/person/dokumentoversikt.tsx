@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { hentDokumenter } from '~shared/api/dokument'
 import { Journalpost } from '../behandling/types'
 
-export const Dokumentoversikt = (props: any) => {
+export const Dokumentoversikt = (props: { fnr: string }) => {
   const [dokumenter, setDokumenter] = useState<Journalpost[]>([])
   const [error, setError] = useState(false)
   const [dokumenterHentet, setDokumenterHentet] = useState(false)

@@ -9,6 +9,7 @@ import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
 import Spinner from '~shared/Spinner'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { BodyShort, Label } from '@navikt/ds-react'
 
 export const Person = () => {
   const [personStatus, hentPerson] = useApiCall(getPerson)
@@ -32,14 +33,16 @@ export const Person = () => {
   if (isFailure(personStatus)) {
     return (
       <Container>
-        <div>{INVALID_FNR(match.fnr) ? 'Fødselsnummeret i URLen er ugyldig' : JSON.stringify(personStatus)}</div>
+        <BodyShort>
+          {INVALID_FNR(match.fnr) ? 'Fødselsnummeret i URLen er ugyldig' : JSON.stringify(personStatus)}
+        </BodyShort>
       </Container>
     )
   }
 
   return (
     <>
-      {match.fnr === null && <label>Kan ikke hente fødselsnummer fra URL</label>}
+      {match.fnr === null && <Label>Kan ikke hente fødselsnummer fra URL</Label>}
       {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo} />}
       {isPending(personStatus) && <Spinner visible={true} label={'Laster'} />}
       {isSuccess(personStatus) && (

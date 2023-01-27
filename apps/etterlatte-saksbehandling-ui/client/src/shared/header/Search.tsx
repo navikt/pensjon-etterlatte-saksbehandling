@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Loader, Search as SearchField } from '@navikt/ds-react'
+import { BodyShort, Loader, Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPerson, INVALID_FNR } from '../api/person'
@@ -60,7 +60,7 @@ export const Search = () => {
             <InformationColored />
           </span>
           <SearchResult>
-            <div className="text">Tast inn gyldig fødselsnummer</div>
+            <BodyShort className="text">Tast inn gyldig fødselsnummer</BodyShort>
           </SearchResult>
         </Dropdown>
       )}
@@ -71,9 +71,9 @@ export const Search = () => {
             <People />
           </span>
           <SearchResult link={true} onClick={goToPerson}>
-            <div className="text">
+            <BodyShort className="text">
               {personStatus.data.fornavn} {personStatus.data.etternavn}
-            </div>
+            </BodyShort>
           </SearchResult>
         </Dropdown>
       )}
@@ -84,9 +84,9 @@ export const Search = () => {
             <ErrorColored />
           </span>
           <SearchResult>
-            <div className="text">
+            <BodyShort className="text">
               {personStatus.error.statusCode === 404 ? 'Fant ingen data i Doffen' : 'En feil har skjedd'}
-            </div>
+            </BodyShort>
           </SearchResult>
         </Dropdown>
       )}

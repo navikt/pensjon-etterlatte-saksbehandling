@@ -50,5 +50,5 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:1.17.6")
     testImplementation("com.github.tomakehurst:wiremock:2.33.2")
     testImplementation("org.testcontainers:junit-jupiter:1.17.6")
-    testImplementation("org.testcontainers:postgresql:1.16.0")
+    testImplementation("org.testcontainers:postgresql:1.17.6")
 }

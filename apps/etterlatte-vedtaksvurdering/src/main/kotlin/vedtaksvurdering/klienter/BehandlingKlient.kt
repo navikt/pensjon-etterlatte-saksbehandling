@@ -107,7 +107,6 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     failure = { throwableErrorMessage -> throw throwableErrorMessage }
                 )
         } catch (e: Exception) {
-            logger.error("Henting av sakid ($sakId) fra vedtak feilet.")
             throw BehandlingKlientException("Henting av sak med sakId=$sakId feilet")
         }
     }

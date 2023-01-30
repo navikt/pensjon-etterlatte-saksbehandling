@@ -1,7 +1,7 @@
 object NavFelles {
-    const val RapidAndRiversKtor2 = "com.github.navikt:rapids-and-rivers:2022122313141671797650.f806f770805a"
-    const val TokenClientCore = "no.nav.security:token-client-core:3.0.2"
-    const val TokenValidationKtor2 = "no.nav.security:token-validation-ktor-v2:3.0.2"
+    const val RapidAndRiversKtor2 = "com.github.navikt:rapids-and-rivers:2022061809451655538329.d6deccc62862"
+    const val TokenClientCore = "no.nav.security:token-client-core:2.1.2"
+    const val TokenValidationKtor2 = "no.nav.security:token-validation-ktor-v2:2.1.2"
     const val MockOauth2Server = "no.nav.security:mock-oauth2-server:0.5.7"
 }
 
@@ -15,7 +15,7 @@ object Kotlinx {
 }
 
 object Ktor2 {
-    private const val version = "2.2.2"
+    private const val version = "2.0.3"
 
     const val OkHttp = "io.ktor:ktor-client-okhttp:$version"
     const val ClientCore = "io.ktor:ktor-client-core:$version"
@@ -45,7 +45,7 @@ object Kafka {
     const val Clients = "org.apache.kafka:kafka-clients:3.1.1"
     const val Avro = "org.apache.avro:avro:1.11.0"
     const val AvroSerializer = "io.confluent:kafka-avro-serializer:7.1.1"
-    const val EmbeddedEnv = "no.nav:kafka-embedded-env:3.2.1"
+    const val EmbeddedEnv = "no.nav:kafka-embedded-env:3.1.6"
 }
 
 object Jackson {
@@ -70,20 +70,16 @@ object Jupiter {
 
 object Logging {
     const val Slf4jApi = "org.slf4j:slf4j-api:1.7.30"
-    const val LogbackClassic = "ch.qos.logback:logback-classic:1.4.5"
+    const val LogbackClassic = "ch.qos.logback:logback-classic:1.2.3"
     const val LogstashLogbackEncoder = "net.logstash.logback:logstash-logback-encoder:6.6"
 }
 
 object Micrometer {
-    const val Prometheus = "io.micrometer:micrometer-registry-prometheus:1.10.3"
+    const val Prometheus = "io.micrometer:micrometer-registry-prometheus:1.5.5"
 }
 
 object MockK {
     const val MockK = "io.mockk:mockk:1.12.0"
-}
-
-object Wiremock {
-    const val Wiremock = "com.github.tomakehurst:wiremock-jre8:2.35.0"
 }
 
 object Kotest {

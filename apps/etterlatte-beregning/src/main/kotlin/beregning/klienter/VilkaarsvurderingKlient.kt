@@ -42,7 +42,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage.throwable }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
                 )
         }.let {
             when (it) {

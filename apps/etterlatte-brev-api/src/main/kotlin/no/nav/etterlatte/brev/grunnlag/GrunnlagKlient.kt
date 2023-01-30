@@ -31,7 +31,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                 accessToken
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },
-                failure = { exception -> throw exception.throwable }
+                failure = { throwableErrorMessage -> throw throwableErrorMessage }
             )
         } catch (e: Exception) {
             throw GrunnlagKlientException("Henting av grunnlag for sak med sakId=$sakid feilet", e)

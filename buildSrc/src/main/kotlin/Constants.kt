@@ -1,5 +1,5 @@
 object NavFelles {
-    const val RapidAndRiversKtor2 = "com.github.navikt:rapids-and-rivers:2022061809451655538329.d6deccc62862"
+    const val RapidAndRiversKtor2 = "com.github.navikt:rapids-and-rivers:2022122313141671797650.f806f770805a"
     const val TokenClientCore = "no.nav.security:token-client-core:3.0.2"
     const val TokenValidationKtor2 = "no.nav.security:token-validation-ktor-v2:3.0.2"
     const val MockOauth2Server = "no.nav.security:mock-oauth2-server:0.5.7"
@@ -75,7 +75,7 @@ object Logging {
 }
 
 object Micrometer {
-    const val Prometheus = "io.micrometer:micrometer-registry-prometheus:1.5.5"
+    const val Prometheus = "io.micrometer:micrometer-registry-prometheus:1.10.3"
 }
 
 object MockK {

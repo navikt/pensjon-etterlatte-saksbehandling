@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
+import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 
@@ -236,6 +237,43 @@ internal class RealManueltOpphoerServiceTest {
 
         assertNull(returnertManueltOpphoer)
         verify(exactly = 0) { behandlingerMock.opprettManueltOpphoer(any()) }
+    }
+
+    @Test
+    fun `skal ikke kunne opphøre en sak som ikke har noen iverksatte behandlinger`() {
+        val sak = 1L
+        val manueltOpphoerRequest = ManueltOpphoerRequest(
+            sak = sak,
+            opphoerAarsaker = listOf(
+                ManueltOpphoerAarsak.SOESKEN_DOED,
+                ManueltOpphoerAarsak.SOEKER_DOED
+            ),
+            fritekstAarsak = null
+        )
+        val behandlingerMock = mockk<BehandlingDao> {
+            every { alleBehandlingerISak(sak) } returns listOf(
+                foerstegangsbehandling(
+                    sak = sak,
+                    status = BehandlingStatus.FATTET_VEDTAK,
+                    virkningstidspunkt = Virkningstidspunkt(
+                        dato = YearMonth.of(2020, 8),
+                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Instant.now()),
+                        begrunnelse = "dab on the haters"
+                    )
+                )
+            )
+        }
+
+        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelserMock = mockk<HendelseDao>()
+        val service = RealManueltOpphoerService(
+            behandlingerMock,
+            hendelsesKanal,
+            hendelserMock
+        )
+
+        val opphoer = service.opprettManueltOpphoer(manueltOpphoerRequest)
+        assertNull(opphoer)
     }
 
     @Test

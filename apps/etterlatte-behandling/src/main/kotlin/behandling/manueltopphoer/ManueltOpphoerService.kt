@@ -73,6 +73,15 @@ class RealManueltOpphoerService(
         return inTransaction {
             val alleBehandlingerISak = behandlinger.alleBehandlingerISak(opphoerRequest.sak)
             val forrigeBehandling = alleBehandlingerISak.`siste ikke-avbrutte behandling`()
+            val virkningstidspunkt = alleBehandlingerISak.tidligsteIverksatteVirkningstidspunkt()
+
+            if (virkningstidspunkt == null) {
+                logger.warn(
+                    "Saken med id=${opphoerRequest.sak} har ikke noe tidligste iverksatt virkningstidspunkt, " +
+                        "så det er ingenting å opphøre."
+                )
+                return@inTransaction null
+            }
 
             when (forrigeBehandling) {
                 is Foerstegangsbehandling -> ManueltOpphoer(
@@ -80,7 +89,7 @@ class RealManueltOpphoerService(
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak,
-                    virkningstidspunkt = forrigeBehandling.virkningstidspunkt
+                    virkningstidspunkt = virkningstidspunkt
                 )
 
                 is Revurdering -> ManueltOpphoer(
@@ -88,18 +97,18 @@ class RealManueltOpphoerService(
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak,
-                    virkningstidspunkt = alleBehandlingerISak.tidligsteIverksatteVirkningstidspunkt()
+                    virkningstidspunkt = virkningstidspunkt
                 )
 
                 is ManueltOpphoer -> {
-                    logger.error("Kan ikke manuelt opphoere et manuelt opphoer.")
+                    logger.error("Kan ikke manuelt opphøre et manuelt opphør.")
                     null
                 }
 
                 else -> {
                     logger.error(
                         "En forrige ikke-avbrutt behandling for sak ${opphoerRequest.sak} eksisterer ikke eller " +
-                            "er av en type som gjør at manuelt opphoer ikke kan opprettes: " +
+                            "er av en type som gjør at manuelt opphør ikke kan opprettes: " +
                             "${forrigeBehandling?.javaClass?.kotlin}"
                     )
                     null
@@ -113,7 +122,7 @@ class RealManueltOpphoerService(
             runBlocking {
                 behandlingHendelser.send(lagretManueltOpphoer.id to BehandlingHendelseType.OPPRETTET)
             }
-            logger.info("Manuelt opphoer med id=${lagretManueltOpphoer.id} er opprettet.")
+            logger.info("Manuelt opphør med id=${lagretManueltOpphoer.id} er opprettet.")
         }
     }
 

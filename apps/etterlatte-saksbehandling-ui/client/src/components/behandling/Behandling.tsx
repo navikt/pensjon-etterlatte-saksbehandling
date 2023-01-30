@@ -10,7 +10,8 @@ import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny/SideMeny'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { ErrorMessage } from '@navikt/ds-react'
+import { Alert } from '@navikt/ds-react'
+import styled from 'styled-components'
 
 export const Behandling = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -57,7 +58,12 @@ export const Behandling = () => {
           <SideMeny />
         </GridContainer>
       )}
-      {isFailure(hentBehandlingStatus) && <ErrorMessage>Kunne ikke hente behandling</ErrorMessage>}
+      {isFailure(hentBehandlingStatus) && <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>}
     </>
   )
 }
+
+const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
+  margin: 2rem auto;
+  max-width: fit-content;
+`

@@ -80,7 +80,7 @@ internal class VedtaksbrevServiceTest {
         } returns Avsender("Porsgrunn", "adresse", "postnr", "telefon")
         coEvery { adresseService.hentMottakerAdresse(any()) } returns opprettMottaker()
         coEvery { pdfGenerator.genererPdf(any()) } returns "".toByteArray()
-        coEvery { navansattKlient.HentSaksbehandlerInfo(any()) } returns SaksbehandlerInfo(
+        coEvery { navansattKlient.hentSaksbehandlerInfo(any()) } returns SaksbehandlerInfo(
             ident,
             "Sak Saksbehandler",
             "Sak",
@@ -100,7 +100,7 @@ internal class VedtaksbrevServiceTest {
         coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, "Sak Saksbehandler") }
         coVerify(exactly = 1) { adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr) }
         coVerify(exactly = 1) { adresseService.hentEnhet(PORSGRUNN) }
-        coVerify(exactly = 1) { navansattKlient.HentSaksbehandlerInfo(ident) }
+        coVerify(exactly = 1) { navansattKlient.hentSaksbehandlerInfo(ident) }
 
         verify { dokarkivService wasNot Called }
     }
@@ -122,7 +122,7 @@ internal class VedtaksbrevServiceTest {
         } returns Avsender("Porsgrunn", "adresse", "postnr", "telefon")
         coEvery { adresseService.hentMottakerAdresse(any()) } returns opprettMottaker()
         coEvery { pdfGenerator.genererPdf(any()) } returns "".toByteArray()
-        coEvery { navansattKlient.HentSaksbehandlerInfo(any()) } returns SaksbehandlerInfo(
+        coEvery { navansattKlient.hentSaksbehandlerInfo(any()) } returns SaksbehandlerInfo(
             ident,
             "Sak Saksbehandler",
             "Sak",
@@ -144,7 +144,7 @@ internal class VedtaksbrevServiceTest {
         coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, "Sak Saksbehandler") }
         coVerify(exactly = 1) { adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr) }
         coVerify(exactly = 1) { adresseService.hentEnhet(PORSGRUNN) }
-        coVerify(exactly = 1) { navansattKlient.HentSaksbehandlerInfo(ident) }
+        coVerify(exactly = 1) { navansattKlient.hentSaksbehandlerInfo(ident) }
 
         verify { dokarkivService wasNot Called }
     }

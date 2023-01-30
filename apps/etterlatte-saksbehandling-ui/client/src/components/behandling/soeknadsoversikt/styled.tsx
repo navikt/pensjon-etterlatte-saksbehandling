@@ -17,7 +17,6 @@ export const InfobokserWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: top;
-  flex-grow: 1;
   flex-wrap: wrap;
   gap: 20px;
   padding-right: 20px;
@@ -37,12 +36,12 @@ export const Infoboks = styled.div`
 
 export const InfoWrapper = styled.div`
   display: flex;
-  flex-grow: 1;
   flex-wrap: wrap;
+  gap: 20px;
 `
 
 export const InfoElement = styled.div`
-  min-width: 10em;
+  width: 15em;
 `
 
 export const Undertekst = styled(BodyShort)<{ $gray: boolean }>`

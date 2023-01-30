@@ -100,7 +100,7 @@ internal class VedtaksbrevServiceTest {
         coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, "Sak Saksbehandler") }
         coVerify(exactly = 1) { adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr) }
         coVerify(exactly = 1) { adresseService.hentEnhet(PORSGRUNN) }
-        coVerify(exactly = 1) { navansattKlient.hentSaksbehandlerInfo(ident) }
+        coVerify(exactly = 2) { navansattKlient.hentSaksbehandlerInfo(ident) }
 
         verify { dokarkivService wasNot Called }
     }
@@ -144,7 +144,7 @@ internal class VedtaksbrevServiceTest {
         coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, "Sak Saksbehandler") }
         coVerify(exactly = 1) { adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr) }
         coVerify(exactly = 1) { adresseService.hentEnhet(PORSGRUNN) }
-        coVerify(exactly = 1) { navansattKlient.hentSaksbehandlerInfo(ident) }
+        coVerify(exactly = 2) { navansattKlient.hentSaksbehandlerInfo(ident) }
 
         verify { dokarkivService wasNot Called }
     }

@@ -95,7 +95,15 @@ internal class RealManueltOpphoerServiceTest {
 
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
-                foerstegangsbehandling(sak = sak)
+                foerstegangsbehandling(
+                    sak = sak,
+                    virkningstidspunkt = Virkningstidspunkt(
+                        dato = YearMonth.of(2022, 8),
+                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Instant.now()),
+                        begrunnelse = ""
+                    ),
+                    status = BehandlingStatus.IVERKSATT
+                )
             )
             every { opprettManueltOpphoer(capture(opprettBehandling_slot)) } returns manueltOpphoer(
                 sak = manueltOpphoerRequest.sak,
@@ -124,6 +132,7 @@ internal class RealManueltOpphoerServiceTest {
             { assertEquals(manueltOpphoerRequest.sak, opprettBehandling_slot.captured.sak) },
             { assertEquals(manueltOpphoerRequest.opphoerAarsaker, opprettBehandling_slot.captured.opphoerAarsaker) },
             { assertEquals(manueltOpphoerRequest.fritekstAarsak, opprettBehandling_slot.captured.fritekstAarsak) },
+            { assertEquals(opprettBehandling_slot.captured.virkningstidspunkt?.dato, YearMonth.of(2022, 8)) },
             { assertEquals(BehandlingType.MANUELT_OPPHOER, opprettBehandling_slot.captured.type) },
             { assertEquals(manueltOpphoerRequest.sak, opprettBehandling_slot.captured.sak) },
             { assertEquals(behandlingId, hendelse_slot.captured.first) },

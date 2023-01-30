@@ -45,7 +45,7 @@ const initialState: IBehandlingReducer = { behandling: detaljertBehandlingInitia
 
 export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(addBehandling, (state, action) => {
-    state.behandling = { ...action.payload, vilkårsprøving: undefined } // TODO sj: Denne skal kun lagre Behandlingsdata i fremtiden
+    state.behandling = { ...action.payload, vilkårsprøving: undefined }
     state.behandling.behandlingType = action.payload.behandlingType ?? IBehandlingsType.FØRSTEGANGSBEHANDLING // Default til behandlingstype hvis null
   })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {

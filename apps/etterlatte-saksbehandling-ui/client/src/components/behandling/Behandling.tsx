@@ -10,8 +10,7 @@ import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny/SideMeny'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { Alert } from '@navikt/ds-react'
-import styled from 'styled-components'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Behandling = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -62,8 +61,3 @@ export const Behandling = () => {
     </>
   )
 }
-
-const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
-  margin: 2rem auto;
-  max-width: fit-content;
-`

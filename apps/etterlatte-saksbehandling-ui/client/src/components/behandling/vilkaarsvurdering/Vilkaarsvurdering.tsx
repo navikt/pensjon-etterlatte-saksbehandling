@@ -12,6 +12,7 @@ import { Heading } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Vilkaarsvurdering = () => {
   const location = useLocation()
@@ -65,12 +66,13 @@ export const Vilkaarsvurdering = () => {
         </>
       )}
       {isPending(vilkaarsvurderingStatus) && <Spinner visible={true} label={'Henter vilkårsvurdering'} />}
-      {isFailure(vilkaarsvurderingStatus) &&
-        (vilkaarsvurderingStatus.error.statusCode === 412 ? (
-          <p>Virkningstidspunkt må avklares før vilkårsvurdering kan starte</p>
-        ) : (
-          <p>En feil har oppstått</p>
-        ))}
+      {isFailure(vilkaarsvurderingStatus) && (
+        <ApiErrorAlert>
+          {vilkaarsvurderingStatus.error.statusCode === 412
+            ? 'Virkningstidspunkt og kommer søker tilgode må avklares før vilkårsvurdering kan starte'
+            : 'En feil har oppstått'}
+        </ApiErrorAlert>
+      )}
     </Content>
   )
 }

@@ -25,8 +25,13 @@ interface Props {
 }
 
 export const VurderingsboksWrapper = (props: Props) => {
-  const [rediger, setRediger] = useState<null | boolean>(props.defaultRediger ?? false)
+  const [rediger, setRediger] = useState<boolean>(props.defaultRediger ?? false)
   const [lagrer, setLagrer] = useState(false)
+
+  const reset = () => {
+    setRediger(false)
+    setLagrer(false)
+  }
 
   return (
     <div>
@@ -63,11 +68,11 @@ export const VurderingsboksWrapper = (props: Props) => {
               </RedigerWrapper>
               {props.slett && (
                 <RedigerWrapper
-                  onClick={async () => {
-                    new Promise(() => {
+                  onClick={() => {
+                    new Promise((resolve) => {
                       setLagrer(true)
-                      props.slett?.(() => setLagrer(false))
-                    })
+                      resolve(props.slett?.(() => setLagrer(false)))
+                    }).catch(reset)
                   }}
                 >
                   {lagrer ? (
@@ -90,11 +95,9 @@ export const VurderingsboksWrapper = (props: Props) => {
               loading={lagrer}
               variant={'primary'}
               size={'small'}
-              onClick={async () => {
+              onClick={() => {
                 setLagrer(true)
-                new Promise((resolve) => resolve(props.lagreklikk(() => setRediger(false)))).finally(() =>
-                  setLagrer(false)
-                )
+                new Promise((resolve) => resolve(props.lagreklikk(reset))).catch(reset)
               }}
             >
               Lagre
@@ -136,6 +139,7 @@ const Oppsummering = styled.div`
 `
 
 const VurderingKnapper = styled.div`
+  display: flex;
   button {
     margin-top: 10px;
     margin-right: 10px;

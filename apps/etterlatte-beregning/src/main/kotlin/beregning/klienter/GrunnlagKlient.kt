@@ -17,6 +17,8 @@ interface GrunnlagKlient {
     suspend fun hentGrunnlag(sakId: Long, accessToken: String): Grunnlag
 }
 
+class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+
 class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlient {
     private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
 
@@ -27,10 +29,10 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
     override suspend fun hentGrunnlag(sakId: Long, accessToken: String): Grunnlag {
-        logger.info("Henter grunnlag med for sak med id = $sakId")
+        logger.info("Henter grunnlag for sak med sakId = $sakId")
 
         return retry<Grunnlag> {
-            val json = downstreamResourceClient
+            downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
@@ -39,17 +41,17 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            objectMapper.readValue(json.toString())
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
-                    logger.error("Klarte ikke hente ut grunnlag for sak med id $sakId.")
-                    throw it.exceptions.last()
+                    throw GrunnlagKlientException(
+                        "Klarte ikke hente grunnlag for sak med sakId=$sakId",
+                        it.exceptions.last()
+                    )
                 }
             }
         }

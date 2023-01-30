@@ -18,6 +18,9 @@ interface VilkaarsvurderingKlient {
     suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingDto
 }
 
+class VilkaarsvurderingKlientException(override val message: String, override val cause: Throwable) :
+    Exception(message, cause)
+
 class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : VilkaarsvurderingKlient {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingKlientImpl::class.java)
     private val azureAdClient = AzureAdClient(config)
@@ -29,7 +32,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
     override suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingDto {
         logger.info("Henter vilkaarsvurdering med behandlingid $behandlingId")
         return retry<VilkaarsvurderingDto> {
-            val json = downstreamResourceClient
+            downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
@@ -38,17 +41,17 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            objectMapper.readValue(json.toString())
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
-                    logger.error("Klarte ikke hente ut vilkåårsvurdering for sak med id $behandlingId.")
-                    throw it.exceptions.last()
+                    throw VilkaarsvurderingKlientException(
+                        "Klarte ikke hente vilkåårsvurdering for behandling med behandlingId=$behandlingId",
+                        it.exceptions.last()
+                    )
                 }
             }
         }

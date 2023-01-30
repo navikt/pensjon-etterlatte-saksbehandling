@@ -21,6 +21,8 @@ interface GrunnlagKlient {
     ): Grunnlagsopplysning<Person>?
 }
 
+class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+
 class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlient {
     private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
 
@@ -36,9 +38,9 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
         accessToken: String
     ): Grunnlagsopplysning<Person>? {
         try {
-            logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med id $sakId.")
+            logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med sakId=$sakId")
 
-            val json = downstreamResourceClient
+            return downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
@@ -47,14 +49,14 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            return objectMapper.readValue(json.toString())
+                    success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse }
+                )
         } catch (e: Exception) {
-            logger.error("Henting av opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.", e)
-            throw e
+            throw GrunnlagKlientException(
+                "Henting av opplysning ($opplysningsType) fra grunnlag for sak med sakId=$sakId feilet",
+                e
+            )
         }
     }
 }

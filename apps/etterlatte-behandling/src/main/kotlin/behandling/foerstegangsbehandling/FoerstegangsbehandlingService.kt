@@ -76,7 +76,7 @@ class RealFoerstegangsbehandlingService(
     override fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat) {
         inTransaction {
             foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
-                .lagreGyldighetprøving(gyldighetsproeving)
+                .lagreGyldighetproeving(gyldighetsproeving)
         }
     }
 

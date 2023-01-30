@@ -26,7 +26,7 @@ dependencies {
     api(Cache.Caffeine)
 
     testImplementation(Kotlinx.CoroutinesTest)
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.2")
+    testImplementation(Wiremock.Wiremock)
     testImplementation(Jupiter.Engine)
     testImplementation(Jupiter.Api)
     testImplementation(Ktor2.ClientMock)

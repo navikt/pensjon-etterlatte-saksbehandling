@@ -2,9 +2,8 @@ import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
 import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
-import { svarTilVurderingsstatus } from '../../utils'
+import { svarTilStatusIcon, svarTilVurderingsstatus } from '../../utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { JaNei } from '~shared/types/ISvar'
 import { Soeknadsvurdering } from '../SoeknadsVurdering'
 import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
@@ -46,7 +45,7 @@ export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, redigerbar, s
         { lenke: 'https://lovdata.no/lov/2010-03-26-9/§9', tittel: 'Vergemålsloven § 9, § 16 og § 19' },
         { lenke: 'https://lovdata.no/lov/1981-04-08-7/§30', tittel: 'Barneloven § 30 og § 38' },
       ]}
-      status={kommerBarnetTilgode?.svar === JaNei.JA ? 'success' : 'warning'}
+      status={svarTilStatusIcon(kommerBarnetTilgode?.svar)}
     >
       <div>
         <Beskrivelse>

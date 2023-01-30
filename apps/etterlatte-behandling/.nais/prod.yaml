@@ -51,15 +51,18 @@ spec:
           - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
         extra:
           - NAVident
-  kafka:
-    pool: nav-prod
+  #kafka:
+    #pool: nav-prod
   replicas:
     cpuThresholdPercentage: 90
     max: 1
     min: 1
   env:
-    - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.etterlatteytelser
+   # - name: KAFKA_RAPID_TOPIC
+   #   value: etterlatte.etterlatteytelser
+  #  - name: KAFKA_RESET_POLICY
+      #sette tilbake til none senere
+  #    value: latest
     - name: GRUNNLAG_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: PDL_AZURE_SCOPE

@@ -17,10 +17,6 @@ enum class Opplysningstype {
     SPRAAK,
     SOEKNADSTYPE_V1,
 
-    PENSJON_UFORE_V1, // Todo: brukes ikke lenger?
-
-    SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
-
     /* Grunnlag v2 */
     NAVN,
     FOEDSELSNUMMER,
@@ -43,7 +39,6 @@ enum class Opplysningstype {
     UTENLANDSOPPHOLD, // Bruks kun idag for informasjon fra søknaden
     UTENLANDSADRESSE,
     INNTEKT,
-    MEDLEMSKAPSPERIODE,
     ARBEIDSFORHOLD,
 
     SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering

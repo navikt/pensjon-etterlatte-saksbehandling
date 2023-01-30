@@ -1,0 +1,83 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-beregning
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - "https://etterlatte-beregning.nav.no"
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  secureLogs:
+    enabled: true
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      claims:
+        extra:
+          - NAVident
+  kafka:
+    pool: nav-prod
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        tier: db-custom-1-3840
+        collation: nb_NO.UTF8
+        cascadingDelete: false
+        name: etterlatte-beregning
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
+        maintenance:
+          day: 7
+          hour: 2
+        databases:
+          - name: beregning
+            envVarPrefix: DB
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.etterlatteytelser
+    - name: KAFKA_RESET_POLICY
+      #sette tilbake til none senere
+      value: latest
+    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
+      value: f4cf400f-8ef9-406f-baf1-8218f8f7edac
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_GRUNNLAG_URL
+      value: http://etterlatte-grunnlag
+    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
+      value: ce96a301-13db-4409-b277-5b27f464d08b
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-grunnlag
+        - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-behandling
+    inbound:
+      rules:
+        - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-brev-api
+        - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-behandling

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.behandling
+package no.nav.etterlatte.brev.vedtak
 
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -9,6 +9,9 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
+
+class VedtakvurderingKlientException(override val message: String, override val cause: Throwable) :
+    Exception(message, cause)
 
 class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
 
@@ -22,21 +25,20 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
 
     suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak {
         try {
-            logger.info("Henter vedtaksvurdering (behandlingId: $behandlingId)")
+            logger.info("Henter vedtaksvurdering behandling med behandlingId=$behandlingId")
 
-            val json =
-                downstreamResourceClient.get(
-                    Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/fellesvedtak"),
-                    accessToken
-                ).mapBoth(
-                    success = { json -> json },
-                    failure = { exception -> throw exception.throwable }
-                ).response
-
-            return deserialize(json.toString())
+            return downstreamResourceClient.get(
+                Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/fellesvedtak"),
+                accessToken
+            ).mapBoth(
+                success = { resource -> resource.response.let { deserialize(it.toString()) } },
+                failure = { errorResponse -> throw errorResponse }
+            )
         } catch (e: Exception) {
-            logger.error("Henting vedtak for en behandling ($behandlingId) feilet")
-            throw e
+            throw VedtakvurderingKlientException(
+                "Henting vedtak for behandling med behandlingId=$behandlingId feilet",
+                e
+            )
         }
     }
 }

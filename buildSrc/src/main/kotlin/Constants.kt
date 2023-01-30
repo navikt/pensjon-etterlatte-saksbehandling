@@ -1,7 +1,7 @@
 object NavFelles {
     const val RapidAndRiversKtor2 = "com.github.navikt:rapids-and-rivers:2022061809451655538329.d6deccc62862"
-    const val TokenClientCore = "no.nav.security:token-client-core:2.1.2"
-    const val TokenValidationKtor2 = "no.nav.security:token-validation-ktor-v2:2.1.2"
+    const val TokenClientCore = "no.nav.security:token-client-core:3.0.2"
+    const val TokenValidationKtor2 = "no.nav.security:token-validation-ktor-v2:3.0.2"
     const val MockOauth2Server = "no.nav.security:mock-oauth2-server:0.5.7"
 }
 
@@ -45,7 +45,7 @@ object Kafka {
     const val Clients = "org.apache.kafka:kafka-clients:3.1.1"
     const val Avro = "org.apache.avro:avro:1.11.0"
     const val AvroSerializer = "io.confluent:kafka-avro-serializer:7.1.1"
-    const val EmbeddedEnv = "no.nav:kafka-embedded-env:3.1.6"
+    const val EmbeddedEnv = "no.nav:kafka-embedded-env:3.2.1"
 }
 
 object Jackson {
@@ -60,11 +60,12 @@ object Jackson {
 }
 
 object Jupiter {
-    private const val version = "5.8.2"
+    private const val version = "5.9.2"
 
     const val Api = "org.junit.jupiter:junit-jupiter-api:$version"
     const val Params = "org.junit.jupiter:junit-jupiter-params:$version"
     const val Engine = "org.junit.jupiter:junit-jupiter-engine:$version"
+    const val Root = "org.junit.jupiter:junit-jupiter:$version"
 }
 
 object Logging {
@@ -79,6 +80,10 @@ object Micrometer {
 
 object MockK {
     const val MockK = "io.mockk:mockk:1.12.0"
+}
+
+object Wiremock {
+    const val Wiremock = "com.github.tomakehurst:wiremock-jre8:2.35.0"
 }
 
 object Kotest {

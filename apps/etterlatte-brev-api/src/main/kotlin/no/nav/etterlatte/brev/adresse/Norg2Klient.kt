@@ -43,8 +43,7 @@ class Norg2Klient(
                 throw Exception(err.message)
             }
         } catch (e: Exception) {
-            logger.error("Feil ved uthenting av enhet $enhet: ", e)
-            throw e
+            throw Exception("Feil ved uthenting av enhet $enhet", e)
         }
     }
 

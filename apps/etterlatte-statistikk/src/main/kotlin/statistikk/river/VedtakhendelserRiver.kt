@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
@@ -11,6 +12,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class VedtakhendelserRiver(
@@ -25,11 +27,12 @@ class VedtakhendelserRiver(
         KafkaHendelseType.IVERKSATT.toString()
     )
 
-    val logger = LoggerFactory.getLogger(this::class.java)
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
     init {
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, vedtakshendelser) }
             validate { it.requireKey("vedtak") }
+            validate { it.interestedIn(tekniskTidKey) }
             correlationId()
         }.register(this)
     }
@@ -38,7 +41,12 @@ class VedtakhendelserRiver(
         withLogContext(packet.correlationId) {
             try {
                 val vedtakshendelse = enumValueOf<VedtakHendelse>(packet[eventNameKey].textValue().split(":")[1])
-                service.registrerStatistikkForVedtak(objectMapper.treeToValue(packet["vedtak"]), vedtakshendelse)
+                val tekniskTid = parseTekniskTid(packet, logger)
+                service.registrerStatistikkForVedtak(
+                    objectMapper.treeToValue(packet["vedtak"]),
+                    vedtakshendelse,
+                    tekniskTid
+                )
                     .also { (sakRad, stoenadRad) ->
                         if (sakRad == null && stoenadRad == null) {
                             logger.info(

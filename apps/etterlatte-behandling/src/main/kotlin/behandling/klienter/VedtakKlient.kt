@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -21,6 +22,8 @@ interface VedtakKlient {
     suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak?
 }
 
+class VedtakKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+
 class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     private val logger = LoggerFactory.getLogger(VedtakKlient::class.java)
 
@@ -31,25 +34,24 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     private val resourceUrl = config.getString("vedtak.resource.url")
 
     override suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak? {
-        logger.info("Henter vedtak for en behandling")
+        logger.info("Henter vedtak for behandling med behandlingId=$behandlingId")
 
         try {
-            val json =
-                downstreamResourceClient.get(
-                    Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/vedtak"),
-                    accessToken
-                ).mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage ->
-                        logger.warn("Henting  vedtak for en behandling feilet", throwableErrorMessage)
+            return downstreamResourceClient.get(
+                resource = Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/vedtak"),
+                accessToken = accessToken
+            ).mapBoth(
+                success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
+                failure = { errorResponse ->
+                    if (errorResponse.downstreamStatusCode == HttpStatusCode.NotFound) {
                         null
+                    } else {
+                        throw errorResponse
                     }
-                )?.response
-            return json?.let { objectMapper.readValue(json.toString()) }
-                ?: run { null }
+                }
+            )
         } catch (e: Exception) {
-            logger.error("Henting  vedtak for en behandling feilet", e)
-            throw e
+            throw VedtakKlientException("Henting av vedtak for behandling med behandlingId=$behandlingId feilet", e)
         }
     }
 }

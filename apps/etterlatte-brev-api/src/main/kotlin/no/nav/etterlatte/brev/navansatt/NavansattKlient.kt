@@ -16,7 +16,7 @@ class NavansattKlient(
     private val logger = LoggerFactory.getLogger(NavansattKlient::class.java)
 
     suspend fun hentSaksbehandlerInfo(ident: String): SaksbehandlerInfo = try {
-        logger.info("Henter navn på saksbehandler")
+        logger.info("Henter informasjon om saksbehandler")
         client.get("$url/navansatt/$ident") {
             header("x_correlation_id", getXCorrelationId())
             header("Nav_Call_Id", getXCorrelationId())

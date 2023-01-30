@@ -91,10 +91,13 @@ class VedtaksbrevService(
         val saksbehandlerEnhet = behandling.vedtak.saksbehandlerEnhet
         val saksbehandlerIdent = behandling.vedtak.saksbehandlerIdent
         val saksbehandlerInfo = navansattKlient.hentSaksbehandlerInfo(saksbehandlerIdent)
+
         val attestantEnhet = behandling.vedtak.attestantEnhet?.let { adresseService.hentEnhet(it) }
+        val attestantInfo = behandling.vedtak.attestantIdent?.let { navansattKlient.hentSaksbehandlerInfo(it) }
+        val attestant = Attestant(attestantInfo?.navn ?: "", attestantEnhet ?: "")
+
         val avsender = adresseService.hentAvsenderEnhet(saksbehandlerEnhet, saksbehandlerInfo.navn)
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
-        val attestant = Attestant(behandling.vedtak.attestantIdent ?: "", attestantEnhet ?: "")
 
         val vedtakType = behandling.vedtak.type
 

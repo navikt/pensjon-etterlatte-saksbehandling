@@ -30,7 +30,7 @@ class SakOgBehandlingService(
         val attestantEnhet =
             if (vedtak.vedtakFattet != null) (
                 vedtak.attestasjon?.attesterendeEnhet
-                    ?: saksbehandlerEnhet
+                    ?: innloggetSaksbehandlerEnhet
                 ) else null
         val attestantIdent =
             if (vedtak.vedtakFattet != null) (

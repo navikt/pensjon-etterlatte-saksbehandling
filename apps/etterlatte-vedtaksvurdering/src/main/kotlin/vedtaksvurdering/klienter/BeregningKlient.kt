@@ -16,6 +16,9 @@ interface BeregningKlient {
     suspend fun hentBeregning(behandlingId: UUID, accessToken: String): BeregningDTO
 }
 
+class BeregningKlientException(override val message: String, override val cause: Throwable) :
+    Exception(message, cause)
+
 class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKlient {
     private val logger = LoggerFactory.getLogger(BeregningKlient::class.java)
 
@@ -26,9 +29,9 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
     private val resourceUrl = config.getString("beregning.resource.url")
 
     override suspend fun hentBeregning(behandlingId: UUID, accessToken: String): BeregningDTO {
-        logger.info("Henter beregning for behandling med id = $behandlingId")
+        logger.info("Henter beregning for behandling med behandlingId=$behandlingId")
         try {
-            val json = downstreamResourceClient
+            return downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
@@ -37,13 +40,14 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-            return objectMapper.readValue(json.toString())
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
         } catch (e: Exception) {
-            logger.error("Henting av beregning ($behandlingId) fra vedtak feilet.")
-            throw e
+            throw BeregningKlientException(
+                "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
+                e
+            )
         }
     }
 }

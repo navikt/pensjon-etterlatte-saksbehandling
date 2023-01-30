@@ -56,7 +56,7 @@ internal class Norg2KlientTest {
                 klient.hentEnhet(UKJENT)
                 fail()
             } catch (e: Exception) {
-                e.message shouldContain "Enheten med nummeret '1234' eksisterer ikke"
+                e.cause?.message shouldContain "Enheten med nummeret '1234' eksisterer ikke"
             }
         }
     }

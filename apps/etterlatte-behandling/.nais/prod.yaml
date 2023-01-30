@@ -47,22 +47,22 @@ spec:
       tenant: nav.no
       claims:
         groups:
-          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # Tror dette er 0000-GA-PENSJON_ATTESTERING
-          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
+          - id: 11053fd7-e674-4552-9a88-f9fcedfa70b3 # Tror dette er 0000-GA-PENSJON_ATTESTERING
+          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # 0000-GA-PENSJON_SAKSBEHANDLER
         extra:
           - NAVident
-  #kafka:
-    #pool: nav-prod
+  kafka:
+    pool: nav-prod
   replicas:
     cpuThresholdPercentage: 90
     max: 1
     min: 1
   env:
-   # - name: KAFKA_RAPID_TOPIC
-   #   value: etterlatte.etterlatteytelser
-  #  - name: KAFKA_RESET_POLICY
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.etterlatteytelser
+    - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
-  #    value: latest
+      value: latest
     - name: GRUNNLAG_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: PDL_AZURE_SCOPE
@@ -72,19 +72,19 @@ spec:
     - name: HENDELSE_MINUTTER_GAMLE_HENDELSER
       value: "1"
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
-      value: ce96a301-13db-4409-b277-5b27f464d08b
+      value: prod-gcp.etterlatte.etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag/api
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
-      value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
+      value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
-      value: b07cf335-11fb-4efa-bd46-11f51afd5052
+      value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: f4cf400f-8ef9-406f-baf1-8218f8f7edac
+      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VILKAARSVURDERING_URL
       value: http://etterlatte-vilkaarsvurdering
   accessPolicy:

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.beregning.BeregningKlient
-import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 
@@ -9,7 +8,6 @@ class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
-    private val grunnbeloepKlient: GrunnbeloepKlient,
     private val saksbehandlere: Map<String, String>
 ) {
 
@@ -45,7 +43,6 @@ class SakOgBehandlingService(
 
     private suspend fun finnUtbetalingsinfo(behandlingId: String, accessToken: String): Utbetalingsinfo {
         val beregning = beregningKlient.hentBeregning(behandlingId, accessToken)
-        val grunnbeloep = grunnbeloepKlient.hentGrunnbeloep()
 
         val beregningsperioder = beregning.beregningsperioder.map {
             Beregningsperiode(
@@ -62,7 +59,6 @@ class SakOgBehandlingService(
             .any { !it.soeskenFlokk.isNullOrEmpty() }
 
         return Utbetalingsinfo(
-            grunnbeloep.grunnbeloep,
             soeskenjustering,
             beregningsperioder
         )

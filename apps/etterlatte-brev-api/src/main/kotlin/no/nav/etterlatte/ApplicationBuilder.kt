@@ -23,7 +23,6 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.db.DataSourceBuilder
 import no.nav.etterlatte.brev.dokument.JournalpostClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
-import no.nav.etterlatte.brev.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
@@ -51,12 +50,10 @@ class ApplicationBuilder {
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())
-    private val grunnbeloepKlient = GrunnbeloepKlient(httpClient())
     private val sakOgBehandlingService = SakOgBehandlingService(
         vedtakKlient,
         grunnlagKlient,
         beregningKlient,
-        grunnbeloepKlient,
         saksbehandlere = getSaksbehandlere()
     )
     private val norg2Klient = Norg2Klient(env["NORG2_URL"]!!, httpClient())

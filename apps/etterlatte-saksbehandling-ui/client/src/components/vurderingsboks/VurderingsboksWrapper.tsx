@@ -118,7 +118,7 @@ const RedigerWrapper = styled.div`
 
   .text {
     margin-left: 0.3em;
-    font-size: 0.7em;
+    font-size: 1rem;
     font-weight: normal;
   }
 

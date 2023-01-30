@@ -47,12 +47,12 @@ data class Avsender(
     val adresse: String,
     val postnummer: String,
     val telefon: String,
-    val saksbehandler: String = "Sak Saksbehandler"
+    val saksbehandler: String
 )
 
 data class Attestant(
-    val navn: String = "-",
-    val kontor: String = "-"
+    val navn: String,
+    val kontor: String
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

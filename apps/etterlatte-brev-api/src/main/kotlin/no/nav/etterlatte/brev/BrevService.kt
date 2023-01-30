@@ -48,7 +48,7 @@ class BrevService(
 
         val avsender = adresseService.hentAvsenderEnhet(enhet, "")
 
-        val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker, Attestant())
+        val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker, Attestant("", ""))
 
         return BrevInnhold(mal.tittel, Spraak.NB.toString(), pdfGenerator.genererPdf(request))
     }

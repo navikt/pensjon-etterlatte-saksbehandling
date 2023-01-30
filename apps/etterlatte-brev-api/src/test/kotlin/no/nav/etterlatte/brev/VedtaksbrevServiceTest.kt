@@ -49,6 +49,7 @@ internal class VedtaksbrevServiceTest {
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val navansattKlient = mockk<NavansattKlient>()
     private val ident = "Z1234"
+    private val saksbehandlerNavn = "Sak Saksbehandler"
 
     private val vedtaksbrevService =
         VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient)
@@ -77,12 +78,12 @@ internal class VedtaksbrevServiceTest {
         coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any(), any()) } returns behandling
         coEvery {
             adresseService.hentAvsenderEnhet(any(), any())
-        } returns Avsender("Porsgrunn", "adresse", "postnr", "telefon")
+        } returns Avsender("Porsgrunn", "adresse", "postnr", "telefon", saksbehandlerNavn)
         coEvery { adresseService.hentMottakerAdresse(any()) } returns opprettMottaker()
         coEvery { pdfGenerator.genererPdf(any()) } returns "".toByteArray()
         coEvery { navansattKlient.hentSaksbehandlerInfo(any()) } returns SaksbehandlerInfo(
             ident,
-            "Sak Saksbehandler",
+            saksbehandlerNavn,
             "Sak",
             "Saksbehandler",
             "sak@nav.no"
@@ -97,7 +98,7 @@ internal class VedtaksbrevServiceTest {
         verify(exactly = 1) { db.hentBrevForBehandling(any()) }
         coVerify(exactly = 1) { pdfGenerator.genererPdf(any<InnvilgetBrevRequest>()) }
         coVerify(exactly = 1) { sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any(), any()) }
-        coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, "Sak Saksbehandler") }
+        coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, saksbehandlerNavn) }
         coVerify(exactly = 1) { adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr) }
         coVerify(exactly = 1) { adresseService.hentEnhet(PORSGRUNN) }
         coVerify(exactly = 2) { navansattKlient.hentSaksbehandlerInfo(ident) }
@@ -119,12 +120,12 @@ internal class VedtaksbrevServiceTest {
         coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any(), any()) } returns behandling
         coEvery {
             adresseService.hentAvsenderEnhet(any(), any())
-        } returns Avsender("Porsgrunn", "adresse", "postnr", "telefon")
+        } returns Avsender("Porsgrunn", "adresse", "postnr", "telefon", saksbehandlerNavn)
         coEvery { adresseService.hentMottakerAdresse(any()) } returns opprettMottaker()
         coEvery { pdfGenerator.genererPdf(any()) } returns "".toByteArray()
         coEvery { navansattKlient.hentSaksbehandlerInfo(any()) } returns SaksbehandlerInfo(
             ident,
-            "Sak Saksbehandler",
+            saksbehandlerNavn,
             "Sak",
             "Saksbehandler",
             "sak@nav.no"
@@ -141,7 +142,7 @@ internal class VedtaksbrevServiceTest {
         verify(exactly = 1) { db.hentBrevForBehandling(any()) }
         coVerify(exactly = 1) { pdfGenerator.genererPdf(any<InnvilgetBrevRequest>()) }
         coVerify(exactly = 1) { sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any(), any()) }
-        coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, "Sak Saksbehandler") }
+        coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, saksbehandlerNavn) }
         coVerify(exactly = 1) { adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr) }
         coVerify(exactly = 1) { adresseService.hentEnhet(PORSGRUNN) }
         coVerify(exactly = 2) { navansattKlient.hentSaksbehandlerInfo(ident) }

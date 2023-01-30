@@ -93,8 +93,11 @@ export const Vurdering = ({
     )
   }
 
-  const slettVurderingAvVilkaar = () =>
-    postSlettVurdering({ behandlingId: behandlingId, type: vilkaar.id }, (data) => oppdaterVilkaar(data))
+  const slettVurderingAvVilkaar = (onSuccess?: () => void) =>
+    postSlettVurdering({ behandlingId: behandlingId, type: vilkaar.id }, (data) => {
+      oppdaterVilkaar(data)
+      onSuccess?.()
+    })
 
   const reset = (onSuccess?: () => void) => {
     setAktivVurdering(false)
@@ -156,7 +159,7 @@ export const Vurdering = ({
           kommentar={vilkaarutkast?.kommentar}
           defaultRediger={aktivVurdering}
           redigerbar={redigerbar}
-          slett={slettVurderingAvVilkaar}
+          slett={(callback) => slettVurderingAvVilkaar(callback)}
           lagreklikk={(callback) => (valider(vilkaarutkast) ? vilkaarVurdert(vilkaarutkast, callback) : {})}
           avbrytklikk={reset}
         >

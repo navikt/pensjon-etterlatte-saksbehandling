@@ -19,6 +19,7 @@ export const Vilkaarsvurdering = () => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const behandlingstatus = useAppSelector((state) => state.behandlingReducer.behandling.status)
+  const vilkaarsvurdering = useAppSelector((state) => state.behandlingReducer.behandling.vilkårsprøving)
   const behandles = hentBehandlesFraStatus(behandlingstatus)
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
 
@@ -42,23 +43,23 @@ export const Vilkaarsvurdering = () => {
         </HeadingWrapper>
       </ContentHeader>
 
-      {behandlingId && isSuccess(vilkaarsvurderingStatus) && vilkaarsvurderingStatus.data.virkningstidspunkt && (
+      {behandlingId && isSuccess(vilkaarsvurderingStatus) && vilkaarsvurdering && (
         <>
           <VilkaarBorderTop />
-          {vilkaarsvurderingStatus.data.vilkaar.map((value, index) => (
+          {vilkaarsvurdering.vilkaar.map((value, index) => (
             <ManueltVilkaar
               key={index}
               vilkaar={value}
               oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
               behandlingId={behandlingId}
-              redigerbar={behandles && !vilkaarsvurderingStatus.data?.resultat}
+              redigerbar={behandles && !vilkaarsvurdering.resultat}
             />
           ))}
-          {vilkaarsvurderingStatus.data.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
+          {vilkaarsvurdering.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
 
           <Resultat
-            virkningstidspunktDato={vilkaarsvurderingStatus.data.virkningstidspunkt}
-            vilkaarsvurdering={vilkaarsvurderingStatus.data}
+            virkningstidspunktDato={vilkaarsvurdering.virkningstidspunkt}
+            vilkaarsvurdering={vilkaarsvurdering}
             oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
             behandlingId={behandlingId}
             redigerbar={behandles}

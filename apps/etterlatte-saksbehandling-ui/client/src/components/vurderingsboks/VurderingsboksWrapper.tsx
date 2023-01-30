@@ -69,10 +69,8 @@ export const VurderingsboksWrapper = (props: Props) => {
               {props.slett && (
                 <RedigerWrapper
                   onClick={() => {
-                    new Promise((resolve) => {
-                      setLagrer(true)
-                      resolve(props.slett?.(() => setLagrer(false)))
-                    }).catch(reset)
+                    setLagrer(true)
+                    new Promise((resolve) => resolve(props.slett?.(reset))).catch(reset)
                   }}
                 >
                   {lagrer ? (

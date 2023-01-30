@@ -143,8 +143,8 @@ class App(private val beanFactory: BeanFactory) {
         embeddedServer(
             CIO,
             applicationEngineEnvironment {
-                modules.add { module(beanFactory) }
                 modules.add { sikkerhetsModul() }
+                modules.add { module(beanFactory) }
                 connector { port = 8080 }
             }
         ).start(true)

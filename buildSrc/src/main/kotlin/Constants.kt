@@ -83,7 +83,7 @@ object MockK {
 }
 
 object Wiremock {
-    const val Wiremock = "com.github.tomakehurst:wiremock:2.35.0"
+    const val Wiremock = "com.github.tomakehurst:wiremock-jre8:2.35.0"
 }
 
 object Kotest {

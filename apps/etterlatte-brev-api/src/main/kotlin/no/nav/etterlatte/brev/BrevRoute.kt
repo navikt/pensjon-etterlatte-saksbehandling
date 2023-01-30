@@ -109,10 +109,10 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService) {
         delete("{brevId}") {
             val brevId = call.parameters["brevId"]!!
 
-            val brev = service.slettBrev(brevId.toLong())
+            val slettetOK = service.slettBrev(brevId.toLong())
 
-            if (brev) {
-                call.respond("OK")
+            if (slettetOK) {
+                call.respond(HttpStatusCode.OK)
             } else {
                 call.respond(HttpStatusCode.BadRequest)
             }
@@ -121,9 +121,13 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService) {
         post("{brevId}/ferdigstill") {
             val brevId = call.parameters["brevId"]!!
 
-            val brev = service.ferdigstillBrev(brevId.toLong())
+            val ferdigstiltOK = service.ferdigstillBrev(brevId.toLong())
 
-            call.respond(brev)
+            if (ferdigstiltOK) {
+                call.respond(HttpStatusCode.OK)
+            } else {
+                call.respond(HttpStatusCode.BadRequest)
+            }
         }
     }
 }

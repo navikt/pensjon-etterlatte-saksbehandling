@@ -10,7 +10,6 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.brev.BrevService
-import no.nav.etterlatte.brev.DistribusjonService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.MottakerService
@@ -21,12 +20,16 @@ import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.db.DataSourceBuilder
-import no.nav.etterlatte.brev.dokument.JournalpostClient
+import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
+import no.nav.etterlatte.distribusjon.DistribusjonKlient
+import no.nav.etterlatte.distribusjon.DistribusjonServiceImpl
+import no.nav.etterlatte.journalpost.DokarkivKlient
+import no.nav.etterlatte.journalpost.DokarkivServiceImpl
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -61,13 +64,18 @@ class ApplicationBuilder {
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
 
     private val adresseService = AdresseService(norg2Klient, regoppslagKlient)
-    private val distribusjonService = DistribusjonService(::sendToRapid)
 
-    private val brevService = BrevService(db, pdfGenerator, adresseService, distribusjonService)
+    private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE"), requireNotNull(env["DOKARKIV_URL"]))
+    private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
+
+    private val distribusjonKlient = DistribusjonKlient(httpClient("DOKDIST_SCOPE"), requireNotNull(env["DOKDIST_URL"]))
+    private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
+
+    private val brevService = BrevService(db, pdfGenerator, adresseService)
     private val vedtaksbrevService =
-        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, distribusjonService)
+        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
 
-    private val journalpostService = JournalpostClient(httpClient(), env["SAF_BASE_URL"]!!, env["SAF_SCOPE"]!!)
+    private val journalpostService = SafClient(httpClient(), env["SAF_BASE_URL"]!!, env["SAF_SCOPE"]!!)
 
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
@@ -85,8 +93,8 @@ class ApplicationBuilder {
                         datasourceBuilder.migrate()
                     }
                 })
-                OppdaterDistribusjonStatus(this, db)
-//                FerdigstillVedtaksbrev(this, vedtaksbrevService)
+                JournalfoerVedtaksbrev(this, vedtaksbrevService)
+                DistribuerBrev(this, distribusjonService, brevService)
             }
 
     private fun getSaksbehandlere(): Map<String, String> {
@@ -101,10 +109,18 @@ class ApplicationBuilder {
 
     fun start() = rapidsConnection.start()
 
-    private fun httpClient() = HttpClient(OkHttp) {
+    private fun httpClient(scope: String? = null) = HttpClient(OkHttp) {
         expectSuccess = true
         install(ContentNegotiation) {
             jackson()
+        }
+        if (scope != null) {
+            install(Auth) {
+                clientCredential {
+                    config = env.toMutableMap()
+                        .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
+                }
+            }
         }
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())

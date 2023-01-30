@@ -11,15 +11,13 @@ import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import org.slf4j.LoggerFactory
 import no.nav.etterlatte.brev.model.Mottaker as BrevMottaker
 
 class BrevService(
     private val db: BrevRepository,
     private val pdfGenerator: PdfGeneratorKlient,
-    private val adresseService: AdresseService,
-    private val distribusjonService: DistribusjonService
+    private val adresseService: AdresseService
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
 
@@ -58,21 +56,22 @@ class BrevService(
         return db.opprettBrev(UlagretBrev(behandlingId, brevInnhold.mal, mottaker, false, brevInnhold.data))
     }
 
-    suspend fun ferdigstillBrev(id: BrevID): Brev {
-        val brev: Brev = db.hentBrev(id)
+    fun ferdigstillBrev(id: BrevID): Boolean {
+        logger.info("Ferdigstiller brev (id=$id)")
 
-        if (brev.erVedtaksbrev) {
-            throw RuntimeException("Vedtaksbrev skal ikke ferdigstilles manuelt!")
+        val brev = db.hentBrev(id)
+        if (brev.status == Status.FERDIGSTILT) {
+            logger.warn("Brev med id=$id er allerede markert som ferdigstilt. Avbryter ferdigstilling!")
+            return true
         }
 
-        return ferdigstill(brev, TODO())
+        return db.oppdaterStatus(id, Status.FERDIGSTILT)
+            .also {
+                if (it) {
+                    logger.info("Brev status er satt til ${Status.FERDIGSTILT}")
+                } else {
+                    logger.error("Kunne ikke sette brev status til ${Status.FERDIGSTILT}")
+                }
+            }
     }
-
-    private fun ferdigstill(brev: Brev, vedtak: Vedtak): Brev {
-        distribusjonService.distribuerBrev(brev, vedtak)
-        db.oppdaterStatus(brev.id, Status.FERDIGSTILT)
-
-        return brev
-    }
-
 }

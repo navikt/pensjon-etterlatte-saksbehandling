@@ -158,7 +158,6 @@ internal class VedtaksbrevServiceTest {
         ),
         ForenkletVedtak(1, VedtakType.INNVILGELSE, PORSGRUNN),
         Utbetalingsinfo(
-            120000,
             false,
             listOf(Beregningsperiode(LocalDate.now(), LocalDate.now().plusYears(4), 120000, 1, 5000, 40))
         )

@@ -45,7 +45,7 @@ object Kafka {
     const val Clients = "org.apache.kafka:kafka-clients:3.1.1"
     const val Avro = "org.apache.avro:avro:1.11.0"
     const val AvroSerializer = "io.confluent:kafka-avro-serializer:7.1.1"
-    const val EmbeddedEnv = "no.nav:kafka-embedded-env:3.2.1"
+    const val EmbeddedEnv = "no.nav:kafka-embedded-env:3.1.6"
 }
 
 object Jackson {
@@ -80,10 +80,6 @@ object Micrometer {
 
 object MockK {
     const val MockK = "io.mockk:mockk:1.12.0"
-}
-
-object Wiremock {
-    const val Wiremock = "com.github.tomakehurst:wiremock-jre8:2.35.0"
 }
 
 object Kotest {

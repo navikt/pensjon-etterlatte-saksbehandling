@@ -60,6 +60,8 @@ spec:
       value: https://dokdistfordeling-q1.dev-fss-pub.nais.io/rest/v1
     - name: DOKDIST_SCOPE
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
+    - name: NAVANSATT_URL
+      value: https://navansatt.dev-fss-pub.nais.io
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: ETTERLATTE_PROXY_URL

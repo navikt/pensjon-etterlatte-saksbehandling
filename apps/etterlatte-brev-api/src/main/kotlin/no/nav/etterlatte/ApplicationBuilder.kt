@@ -51,7 +51,7 @@ class ApplicationBuilder {
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env["ETTERLATTE_PDFGEN_URL"]!!)
     private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
     private val regoppslagKlient = RegoppslagKlient(proxyClient(), env["ETTERLATTE_PROXY_URL"]!!)
-    private val navansattKlient = NavansattKlient(proxyClient(), env["ETTERLATTE_PROXY_URL"]!!)
+    private val navansattKlient = NavansattKlient(proxyClient(), env["NAVANSATT_URL"]!!)
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())

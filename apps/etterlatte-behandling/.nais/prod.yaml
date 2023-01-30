@@ -44,7 +44,7 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: trygdeetaten.no
+      tenant: nav.no
       claims:
         groups:
           - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # Tror dette er 0000-GA-PENSJON_ATTESTERING

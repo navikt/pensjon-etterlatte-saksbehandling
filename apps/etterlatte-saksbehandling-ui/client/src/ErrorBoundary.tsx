@@ -1,6 +1,10 @@
 import React, { ErrorInfo } from 'react'
 import { logger } from '~utils/logger'
 import ErrorStackParser from 'error-stack-parser'
+import styled from 'styled-components'
+import { Alert } from '@navikt/ds-react'
+import { Link } from 'react-router-dom'
+
 type Props = {
   children: JSX.Element
 }
@@ -37,10 +41,28 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
 
   render() {
     if (this.state.hasError) {
-      return <div>En feil har oppstått og blitt logget.</div>
+      return (
+        <div>
+          <ApiErrorAlert>En feil har oppstått og blitt logget.</ApiErrorAlert>
+          <HjemLink to="/" onClick={() => this.setState({ hasError: false })}>
+            Gå til hovedskjermen
+          </HjemLink>
+        </div>
+      )
     }
     return this.props.children
   }
 }
 
 export default ErrorBoundary
+
+export const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
+  margin: 2rem auto;
+  max-width: fit-content;
+`
+
+const HjemLink = styled(Link)`
+  margin: 2rem auto;
+  max-width: fit-content;
+  display: block;
+`

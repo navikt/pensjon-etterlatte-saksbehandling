@@ -8,6 +8,7 @@ import { Person } from '~components/person/Person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import nb from 'date-fns/locale/nb'
 import { registerLocale } from 'react-datepicker'
+import ErrorBoundary from '~ErrorBoundary'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -19,13 +20,15 @@ function App() {
         <div className="app">
           <BrowserRouter basename="/">
             <HeaderWrapper />
-            <Routes>
-              <Route path="/" element={<Oppgavebenken />} />
-              <Route path="/oppgavebenken" element={<Oppgavebenken />} />
-              <Route path="/person/:fnr" element={<Person />} />
-              <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<Oppgavebenken />} />
+                <Route path="/oppgavebenken" element={<Oppgavebenken />} />
+                <Route path="/person/:fnr" element={<Person />} />
+                <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </ErrorBoundary>
           </BrowserRouter>
         </div>
       )}

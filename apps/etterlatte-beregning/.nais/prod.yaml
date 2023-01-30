@@ -25,7 +25,7 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: trygdeetaten.no
+      tenant: nav.no
       claims:
         extra:
           - NAVident
@@ -57,17 +57,17 @@ spec:
       #sette tilbake til none senere
       value: latest
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: f4cf400f-8ef9-406f-baf1-8218f8f7edac
+      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VILKAARSVURDERING_URL
       value: http://etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
-      value: ce96a301-13db-4409-b277-5b27f464d08b
+      value: prod-gcp.etterlatte.etterlatte-grunnlag
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
-      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
+      value: prod-gcp.etterlatte.etterlatte-behandling
   accessPolicy:
     outbound:
       rules:

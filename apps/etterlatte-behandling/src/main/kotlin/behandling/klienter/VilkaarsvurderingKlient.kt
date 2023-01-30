@@ -46,7 +46,11 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                         if (errorResponse.downstreamStatusCode == HttpStatusCode.NotFound) {
                             null
                         } else {
-                            throw errorResponse
+                            logger.error(
+                                "Henting av vilkaarsvurdering for behandling med behandlingId=$behandlingId feilet",
+                                errorResponse
+                            )
+                            null
                         }
                     }
                 )

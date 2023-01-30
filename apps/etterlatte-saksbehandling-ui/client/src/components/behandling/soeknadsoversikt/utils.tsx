@@ -1,3 +1,4 @@
+import { StatusIconProps } from '~shared/icons/statusIcon'
 import { JaNei } from '~shared/types/ISvar'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
@@ -80,5 +81,16 @@ export const svarTilVurderingsstatus = (svar: JaNei) => {
       return VurderingsResultat.OPPFYLT
     case JaNei.NEI:
       return VurderingsResultat.IKKE_OPPFYLT
+  }
+}
+
+export const svarTilStatusIcon = (svar: JaNei | undefined): StatusIconProps => {
+  switch (svar) {
+    case JaNei.JA:
+      return 'success'
+    case JaNei.NEI:
+      return 'error'
+    default:
+      return 'warning'
   }
 }

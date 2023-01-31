@@ -22,6 +22,6 @@ class NavansattKlient(
             header("Nav_Call_Id", getXCorrelationId())
         }.body()
     } catch (exception: Exception) {
-        throw AdresseException("Feil i kall mot navansatt", exception)
+        throw AdresseException("Feil i kall mot navansatt med ident: $ident", exception)
     }
 }

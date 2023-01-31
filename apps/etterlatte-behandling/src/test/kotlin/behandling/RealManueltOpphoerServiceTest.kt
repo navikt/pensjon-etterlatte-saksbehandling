@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
+import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 
@@ -94,7 +95,15 @@ internal class RealManueltOpphoerServiceTest {
 
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
-                foerstegangsbehandling(sak = sak)
+                foerstegangsbehandling(
+                    sak = sak,
+                    virkningstidspunkt = Virkningstidspunkt(
+                        dato = YearMonth.of(2022, 8),
+                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Instant.now()),
+                        begrunnelse = ""
+                    ),
+                    status = BehandlingStatus.IVERKSATT
+                )
             )
             every { opprettManueltOpphoer(capture(opprettBehandling_slot)) } returns manueltOpphoer(
                 sak = manueltOpphoerRequest.sak,
@@ -123,6 +132,7 @@ internal class RealManueltOpphoerServiceTest {
             { assertEquals(manueltOpphoerRequest.sak, opprettBehandling_slot.captured.sak) },
             { assertEquals(manueltOpphoerRequest.opphoerAarsaker, opprettBehandling_slot.captured.opphoerAarsaker) },
             { assertEquals(manueltOpphoerRequest.fritekstAarsak, opprettBehandling_slot.captured.fritekstAarsak) },
+            { assertEquals(opprettBehandling_slot.captured.virkningstidspunkt?.dato, YearMonth.of(2022, 8)) },
             { assertEquals(BehandlingType.MANUELT_OPPHOER, opprettBehandling_slot.captured.type) },
             { assertEquals(manueltOpphoerRequest.sak, opprettBehandling_slot.captured.sak) },
             { assertEquals(behandlingId, hendelse_slot.captured.first) },
@@ -236,6 +246,43 @@ internal class RealManueltOpphoerServiceTest {
 
         assertNull(returnertManueltOpphoer)
         verify(exactly = 0) { behandlingerMock.opprettManueltOpphoer(any()) }
+    }
+
+    @Test
+    fun `skal ikke kunne opphøre en sak som ikke har noen iverksatte behandlinger`() {
+        val sak = 1L
+        val manueltOpphoerRequest = ManueltOpphoerRequest(
+            sak = sak,
+            opphoerAarsaker = listOf(
+                ManueltOpphoerAarsak.SOESKEN_DOED,
+                ManueltOpphoerAarsak.SOEKER_DOED
+            ),
+            fritekstAarsak = null
+        )
+        val behandlingerMock = mockk<BehandlingDao> {
+            every { alleBehandlingerISak(sak) } returns listOf(
+                foerstegangsbehandling(
+                    sak = sak,
+                    status = BehandlingStatus.FATTET_VEDTAK,
+                    virkningstidspunkt = Virkningstidspunkt(
+                        dato = YearMonth.of(2020, 8),
+                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Instant.now()),
+                        begrunnelse = "dab on the haters"
+                    )
+                )
+            )
+        }
+
+        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelserMock = mockk<HendelseDao>()
+        val service = RealManueltOpphoerService(
+            behandlingerMock,
+            hendelsesKanal,
+            hendelserMock
+        )
+
+        val opphoer = service.opprettManueltOpphoer(manueltOpphoerRequest)
+        assertNull(opphoer)
     }
 
     @Test

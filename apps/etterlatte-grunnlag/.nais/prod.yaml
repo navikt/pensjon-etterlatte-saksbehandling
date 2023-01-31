@@ -62,6 +62,8 @@ spec:
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
+    - name: KAFKA_RESET_POLICY
+      value: latest
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID

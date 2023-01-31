@@ -1,13 +1,13 @@
 import { Undertekst, VurderingsTitle } from '../../styled'
 import styled from 'styled-components'
 import { useState } from 'react'
-import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBegrunnelseKommerBarnetTilgode } from '~shared/api/behandling'
-import { oppdaterKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus, oppdaterKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
 
@@ -37,6 +37,7 @@ export const KommerBarnetTilGodeVurdering = ({
     if (svar !== undefined && harBegrunnelse)
       setKommerBarnetTilGode({ behandlingId, begrunnelse, svar }, (response) => {
         dispatch(oppdaterKommerBarnetTilgode(response))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()
       })
   }

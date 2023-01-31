@@ -7,14 +7,14 @@ import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useEffect, useState } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
-import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { Sammendrag } from './Sammendrag'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
-import { mapApiResult, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/behandling'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
@@ -22,13 +22,16 @@ import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendT
 export const Beregne = () => {
   const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const beregningFraState = behandling.beregning
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
 
   useEffect(() => {
-    hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
+    if (!beregningFraState) {
+      hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
+    }
   }, [])
 
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
@@ -40,6 +43,7 @@ export const Beregne = () => {
 
   const opprettEllerOppdaterVedtak = () => {
     oppdaterVedtakRequest(behandling.id, () => {
+      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
       if (behandling.behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
         setVisAttesteringsmodal(true)
       } else {
@@ -66,18 +70,9 @@ export const Beregne = () => {
             Vilkårsresultat: <strong>{formaterVedtaksResultat(vedtaksresultat, virkningstidspunkt)}</strong>
           </div>
         </InfoWrapper>
-        {mapApiResult(
-          beregning,
-          () => (
-            <Spinner visible label="Laster" />
-          ),
-          () => (
-            <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
-          ),
-          (beregning) => (
-            <Sammendrag beregning={beregning} soeker={soeker} soesken={soesken} />
-          )
-        )}
+        {!beregningFraState && !isFailure(beregning) && <Spinner visible label="Laster" />}
+        {isFailure(beregning) && <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>}
+        {beregningFraState && <Sammendrag beregning={beregningFraState} soeker={soeker} soesken={soesken} />}
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>

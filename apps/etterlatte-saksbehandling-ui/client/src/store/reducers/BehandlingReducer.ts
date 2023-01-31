@@ -34,6 +34,7 @@ export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('beha
 export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering>('behandling/update_vilkaarsvurdering')
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
+export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
@@ -45,7 +46,7 @@ const initialState: IBehandlingReducer = { behandling: detaljertBehandlingInitia
 
 export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(addBehandling, (state, action) => {
-    state.behandling = { ...action.payload, vilkårsprøving: undefined }
+    state.behandling = { ...action.payload, vilkårsprøving: undefined, beregning: undefined }
     state.behandling.behandlingType = action.payload.behandlingType ?? IBehandlingsType.FØRSTEGANGSBEHANDLING // Default til behandlingstype hvis null
   })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
@@ -62,6 +63,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterBeregning, (state, action) => {
     state.behandling.beregning = action.payload
+  })
+  builder.addCase(oppdaterBehandlingsstatus, (state, action) => {
+    state.behandling.status = action.payload
   })
   builder.addCase(resetBeregning, (state) => {
     state.behandling.beregning = detaljertBehandlingInitialState.beregning

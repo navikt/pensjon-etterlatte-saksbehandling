@@ -11,7 +11,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { formaterStringDato } from '~utils/formattering'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppSelector } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentSoeskenMedIBeregning, lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
@@ -19,6 +19,8 @@ import { SoeskenMedIBeregning } from '~shared/types/Grunnlagsopplysning'
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
+import { oppdaterBehandlingsstatus, resetBeregning } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 interface FormValues {
   foedselsnummer: string
@@ -29,6 +31,7 @@ const Beregningsgrunnlag = () => {
   const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
+  const dispatch = useAppDispatch()
   const [beregningsgrunnlag, hentBeregningsgrunnlag] = useApiCall(hentSoeskenMedIBeregning)
   const [soeskenMedIBeregning, postSoeskenMedIBeregning] = useApiCall(lagreSoeskenMedIBeregning)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
@@ -53,10 +56,15 @@ const Beregningsgrunnlag = () => {
       (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
     ) ?? []
 
-  const onSubmit = (beregningsgrunnlag: SoeskenMedIBeregning[]) =>
+  const onSubmit = (beregningsgrunnlag: SoeskenMedIBeregning[]) => {
+    dispatch(resetBeregning())
     postSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning: beregningsgrunnlag }, () =>
-      postOpprettEllerEndreBeregning(behandling.id, () => next())
+      postOpprettEllerEndreBeregning(behandling.id, () => {
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+        next()
+      })
     )
+  }
 
   const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
 
@@ -148,15 +156,16 @@ const Beregningsgrunnlag = () => {
             </SoeskenContainer>
           ))}
       </FamilieforholdWrapper>
-      {behandles ? (
-        <BehandlingHandlingKnapper>
-          <Button variant="primary" size="medium" form="form">
-            Beregne og fatte vedtak {(isPending(soeskenMedIBeregning) || isPending(endreBeregning)) && <Loader />}
-          </Button>
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+      {visSoeskenjustering &&
+        (behandles ? (
+          <BehandlingHandlingKnapper>
+            <Button variant="primary" size="medium" form="form">
+              Beregne og fatte vedtak {(isPending(soeskenMedIBeregning) || isPending(endreBeregning)) && <Loader />}
+            </Button>
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        ))}
     </Content>
   )
 }

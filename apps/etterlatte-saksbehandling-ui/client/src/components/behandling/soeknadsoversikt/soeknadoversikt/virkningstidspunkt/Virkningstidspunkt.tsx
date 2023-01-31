@@ -17,12 +17,14 @@ import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
+import { KildePdl } from '~shared/types/kilde'
 
 interface Props {
   behandlingId: string
   redigerbar: boolean
   virkningstidspunkt: Virkningstidspunkt | null
   avdoedDoedsdato: string | undefined
+  avdoedDoedsdatoKilde: KildePdl | undefined
   soeknadMottattDato: string
 }
 
@@ -36,6 +38,12 @@ const Virkningstidspunkt = (props: Props) => {
   const [, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
   const [begrunnelse, setBegrunnelse] = useState<string>(props.virkningstidspunkt?.begrunnelse ?? '')
   const [errorTekst, setErrorTekst] = useState<string>('')
+
+  const avdoedDoedsdatoKilde = props.avdoedDoedsdatoKilde
+    ? props.avdoedDoedsdatoKilde.navn.toUpperCase() +
+      ': ' +
+      formaterStringDato(props.avdoedDoedsdatoKilde.tidspunktForInnhenting)
+    : undefined
 
   const datepickerRef: any = useRef(null)
   const toggleDatepicker = () => {
@@ -87,7 +95,11 @@ const Virkningstidspunkt = (props: Props) => {
           </Beskrivelse>
           <InfobokserWrapper>
             <InfoWrapper>
-              <Info label="Dødsdato" tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''} />
+              <Info
+                label="Dødsdato"
+                tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''}
+                undertekst={avdoedDoedsdatoKilde}
+              />
               <Info label="Søknad mottatt" tekst={formaterStringDato(props.soeknadMottattDato)} />
               <Info
                 label="Virkningstidspunkt"

@@ -42,6 +42,7 @@ export const Soeknadsoversikt = () => {
               redigerbar={behandles}
               virkningstidspunkt={behandling.virkningstidspunkt}
               avdoedDoedsdato={behandling.familieforhold?.avdoede?.opplysning?.doedsdato}
+              avdoedDoedsdatoKilde={behandling.familieforhold?.avdoede?.kilde}
               soeknadMottattDato={behandling.soeknadMottattDato}
               behandlingId={behandling.id}
             />

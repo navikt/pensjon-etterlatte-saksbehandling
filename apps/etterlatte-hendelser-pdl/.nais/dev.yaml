@@ -22,7 +22,7 @@ spec:
     application:
       enabled: true
   envFrom:
-    - secret: etterlatte-secrets
+    - secret: barnepensjon-secrets
   replicas:
     cpuThresholdPercentage: 90
     max: 1

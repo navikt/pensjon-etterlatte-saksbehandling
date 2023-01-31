@@ -31,6 +31,9 @@ interface BehandlingKlient {
     suspend fun underkjenn(behandlingId: UUID, accessToken: String, commit: Boolean = false): Boolean
 }
 
+class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
+    Exception(message, cause)
+
 class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingKlient {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
 
@@ -41,9 +44,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private val resourceUrl = config.getString("behandling.resource.url")
 
     override suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling {
-        logger.info("Henter behandling med id $behandlingId")
+        logger.info("Henter behandling med behandlingId=$behandlingId")
         try {
-            val json = downstreamResourceClient
+            return downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
@@ -52,14 +55,11 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            return objectMapper.readValue(json.toString())
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
         } catch (e: Exception) {
-            logger.error("Henting av behandling ($behandlingId) fra vedtak feilet.")
-            throw e
+            throw BehandlingKlientException("Henting av behandling med behandlingId=$behandlingId feilet", e)
         }
     }
 
@@ -69,7 +69,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         behandlingId: UUID,
         accessToken: String
     ) {
-        logger.info("Poster hendelse $hendelse om vedtak ${vedtakHendelse.vedtakId}")
+        logger.info("Poster hendelse $hendelse om vedtak med vedtakId=${vedtakHendelse.vedtakId}")
         try {
             downstreamResourceClient
                 .post(
@@ -80,22 +80,21 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     accessToken = accessToken,
                     postBody = vedtakHendelse
                 ).mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-        } catch (exception: Exception) {
-            logger.error(
-                "Posting av vedtakhendelse ${vedtakHendelse.vedtakId} med behandlingId $behandlingId feilet.",
-                exception
+                    success = { resource -> resource.response },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException(
+                "Posting av hendelse $hendelse med for vedtakId=${vedtakHendelse.vedtakId} feilet",
+                e
             )
-            throw exception
         }
     }
 
     override suspend fun hentSak(sakId: Long, accessToken: String): Sak {
-        logger.info("Henter sak med id $sakId")
+        logger.info("Henter sak med sakId=$sakId")
         try {
-            val json = downstreamResourceClient
+            return downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
@@ -104,14 +103,11 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            return objectMapper.readValue(json.toString())
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
         } catch (e: Exception) {
-            logger.error("Henting av sakid ($sakId) fra vedtak feilet.")
-            throw e
+            throw BehandlingKlientException("Henting av sak med sakId=$sakId feilet")
         }
     }
 
@@ -133,12 +129,13 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         commit: Boolean,
         status: BehandlingStatus
     ): Boolean {
-        logger.info("Sjekker hvis behandling med id $behandlingId kan settes til status ${status.name}")
+        logger.info("Setter behandling med behandlingId=$behandlingId til status ${status.name} (commit=$commit)")
+
         val statusnavn = when (status) {
             BehandlingStatus.FATTET_VEDTAK -> "fatteVedtak"
             BehandlingStatus.ATTESTERT -> "attester"
             BehandlingStatus.RETURNERT -> "returner"
-            else -> throw RuntimeException("Feilet i kall mot behandling. Forventet ikke status ${status.name}")
+            else -> throw BehandlingKlientException("Ugyldig status ${status.name}")
         }
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/$statusnavn")
 
@@ -150,7 +147,10 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         return response.mapBoth(
             success = { true },
             failure = {
-                logger.error("Det skjedde en feil ved statussjekk mot behandling med id $behandlingId", it.throwable)
+                logger.info(
+                    "Kan ikke sette status=$status i behandling med behandlingId=$behandlingId (commit=$commit)",
+                    it.throwable
+                )
                 false
             }
         )

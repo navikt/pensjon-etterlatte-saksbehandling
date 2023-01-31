@@ -19,6 +19,8 @@ interface BehandlingKlient {
     suspend fun beregn(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean
 }
 
+class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+
 class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingKlient {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
 
@@ -29,10 +31,10 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private val resourceUrl = config.getString("behandling.resource.url")
 
     override suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling {
-        logger.info("Henter behandling med id $behandlingId")
+        logger.info("Henter behandling med behandlingId=$behandlingId")
 
         return retry<DetaljertBehandling> {
-            val json = downstreamResourceClient
+            downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
@@ -41,24 +43,24 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            objectMapper.readValue(json.toString())
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
-                    logger.error("Klarte ikke hente ut behandling med id $behandlingId.")
-                    throw it.exceptions.last()
+                    throw BehandlingKlientException(
+                        "Klarte ikke hente behandling med behandlingId=$behandlingId",
+                        it.exceptions.last()
+                    )
                 }
             }
         }
     }
 
     override suspend fun beregn(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean {
-        logger.info("Sjekker hvis behandling med id $behandlingId kan beregnes")
+        logger.info("Sjekker om behandling med behandlingId=$behandlingId kan beregnes")
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/beregn")
 
         val response = when (commit) {

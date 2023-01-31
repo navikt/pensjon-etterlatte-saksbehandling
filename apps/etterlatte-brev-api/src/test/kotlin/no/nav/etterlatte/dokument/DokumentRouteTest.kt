@@ -12,8 +12,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.brev.dokument.JournalpostClient
 import no.nav.etterlatte.brev.dokument.JournalpostResponse
+import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.ktor.restModule
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DokumentRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private val journalpostService = mockk<JournalpostClient>()
+    private val journalpostService = mockk<SafClient>()
 
     @BeforeAll
     fun before() {

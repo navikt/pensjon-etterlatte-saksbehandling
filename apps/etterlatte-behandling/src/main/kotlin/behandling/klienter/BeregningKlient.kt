@@ -4,17 +4,20 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 interface BeregningKlient {
     suspend fun hentBeregning(behandlingId: UUID, accessToken: String): BeregningDTO?
 }
+
+class BeregningKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
 
 class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKlient {
     private val logger = LoggerFactory.getLogger(BeregningKlient::class.java)
@@ -26,9 +29,9 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
     private val resourceUrl = config.getString("beregning.resource.url")
 
     override suspend fun hentBeregning(behandlingId: UUID, accessToken: String): BeregningDTO? {
-        logger.info("Henter beregning for behandling med id = $behandlingId")
+        logger.info("Henter beregning for behandling med behandlingId=$behandlingId")
         try {
-            val json = downstreamResourceClient
+            return downstreamResourceClient
                 .get(
                     resource = Resource(
                         clientId = clientId,
@@ -37,17 +40,20 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage ->
-                        logger.warn("Henting av beregning for en behandling feilet", throwableErrorMessage)
-                        null
+                    success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse ->
+                        if (errorResponse.downstreamStatusCode == HttpStatusCode.NotFound) {
+                            null
+                        } else {
+                            throw errorResponse
+                        }
                     }
-                )?.response
-            return json?.let { objectMapper.readValue(json.toString()) }
-                ?: run { null }
+                )
         } catch (e: Exception) {
-            logger.error("Henting av behandling ($behandlingId) fra beregning feilet.", e)
-            throw e
+            throw BeregningKlientException(
+                "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
+                e
+            )
         }
     }
 }

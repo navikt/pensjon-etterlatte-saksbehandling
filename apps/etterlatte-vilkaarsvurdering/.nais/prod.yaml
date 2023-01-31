@@ -1,0 +1,79 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-vilkaarsvurdering
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - "https://etterlatte-vilkaarsvurdering.intern.nav.no"
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  secureLogs:
+    enabled: true
+  prometheus:
+    enabled: true
+    path: /metrics
+  strategy:
+    type: Recreate
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        tier: db-custom-1-3840
+        collation: nb_NO.UTF8
+        cascadingDelete: false
+        name: etterlatte-vilkaarsvurdering
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
+        maintenance:
+          day: 7
+          hour: 2
+        databases:
+          - name: vilkaarsvurdering
+            envVarPrefix: DB
+  kafka:
+    pool: nav-prod
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+      claims:
+        extra:
+          - NAVident
+
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-behandling
+    - name: ETTERLATTE_GRUNNLAG_URL
+      value: http://etterlatte-grunnlag/api
+    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-grunnlag
+  accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-beregning
+        - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-behandling
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+        - application: etterlatte-grunnlag

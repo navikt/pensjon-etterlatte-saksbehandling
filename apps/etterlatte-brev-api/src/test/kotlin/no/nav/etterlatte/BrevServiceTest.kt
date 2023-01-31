@@ -7,10 +7,10 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService
-import no.nav.etterlatte.brev.DistribusjonService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.distribusjon.DistribusjonService
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.Status
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,8 +27,7 @@ internal class BrevServiceTest {
     private val service = BrevService(
         mockkDb,
         mockPdfGen,
-        adresseService,
-        distribusjonsService
+        adresseService
     )
 
     @Test

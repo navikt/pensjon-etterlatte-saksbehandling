@@ -41,9 +41,6 @@ Tjeneste som holder styr på behandlinger.
 [etterlatte-brev-api](apps/etterlatte-brev-api) \
 Ktor og Rapid app for å håndtere generering av brev, brevmaler og sende videre til distribusjon.
 
-[etterlatte-brev-distribusjon](apps/etterlatte-brev-distribusjon) \
-Rapid app for å distribuere brev. Håndterer journalføring og distribusjon.
-
 [etterlatte-brreg](apps/etterlatte-brreg) \
 App med API for å hente data fra enhetsregisteret.
 

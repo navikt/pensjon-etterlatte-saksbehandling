@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
@@ -9,6 +9,8 @@ import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny/SideMeny'
 import { useAppDispatch, useAppSelector } from '~store/Store'
+import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Behandling = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -16,26 +18,18 @@ export const Behandling = () => {
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
   const behandlingId = behandling.id
-  const [isLoading, setIsLoading] = useState<boolean>(behandlingId === '')
+  const [hentBehandlingStatus, hentBehandlingCall] = useApiCall(hentBehandling)
 
   useEffect(() => {
     const behandlingIdFraURL = match?.params.behandlingId
     if (!behandlingIdFraURL) return
 
     if (behandlingIdFraURL !== behandlingId) {
-      fetchBehandling(behandlingIdFraURL)
-    }
-
-    async function fetchBehandling(behandlingId: string) {
-      setIsLoading(true)
-      const response = await hentBehandling(behandlingId)
-
-      if (response.status === 'ok') {
-        dispatch(addBehandling(response.data))
-      } else {
-        dispatch(resetBehandling())
-      }
-      setIsLoading(false)
+      hentBehandlingCall(
+        behandlingIdFraURL,
+        (res) => dispatch(addBehandling(res)),
+        () => dispatch(resetBehandling())
+      )
     }
   }, [match?.params.behandlingId, behandlingId])
 
@@ -47,22 +41,23 @@ export const Behandling = () => {
   return (
     <>
       {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />}
-      {!isLoading && <StegMeny />}
+      {!isPendingOrInitial(hentBehandlingStatus) && <StegMeny />}
 
-      <Spinner visible={isLoading} label="Laster" />
-      {!isLoading && (
+      <Spinner visible={isPendingOrInitial(hentBehandlingStatus)} label="Laster" />
+      {isSuccess(hentBehandlingStatus) && (
         <GridContainer>
           <MainContent>
             <Routes>
-              {behandlingRoutes.map((route) => {
-                return <Route key={route.path} path={route.path} element={route.element} />
-              })}
+              {behandlingRoutes.map((route) => (
+                <Route key={route.path} path={route.path} element={route.element} />
+              ))}
               <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
             </Routes>
           </MainContent>
           <SideMeny />
         </GridContainer>
       )}
+      {isFailure(hentBehandlingStatus) && <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>}
     </>
   )
 }

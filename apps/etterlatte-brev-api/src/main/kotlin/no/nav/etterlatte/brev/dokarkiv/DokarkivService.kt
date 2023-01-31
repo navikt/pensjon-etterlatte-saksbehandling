@@ -1,7 +1,7 @@
 package no.nav.etterlatte.journalpost
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
@@ -13,26 +13,26 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.journalpost.Sak
 import no.nav.etterlatte.libs.common.journalpost.Sakstype
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.Base64
 
-interface JournalpostService {
+interface DokarkivService {
     fun journalfoer(melding: DistribusjonMelding): JournalpostResponse
 }
 
-class JournalpostServiceImpl(
-    private val client: JournalpostKlient,
-    private val brevService: BrevService
-) : JournalpostService {
-    private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
+class DokarkivServiceImpl(
+    private val client: DokarkivKlient,
+    private val db: BrevRepository
+) : DokarkivService {
+    private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
     override fun journalfoer(melding: DistribusjonMelding): JournalpostResponse = runBlocking {
         logger.info("Oppretter journalpost for brev med id=${melding.brevId}")
 
-        val brevDokument = brevService.hentBrevInnhold(melding.brevId)
-        logger.info("Oppretter journalpost med brevinnhold", brevDokument)
+        val innhold = db.hentBrevInnhold(melding.brevId)
+        logger.info("Oppretter journalpost med brevinnhold", innhold)
 
-        val request = mapTilJournalpostRequest(melding, brevDokument)
-        logger.info("Oppretter journalpost med request", brevDokument)
+        val request = mapTilJournalpostRequest(melding, innhold.data)
+        logger.info("Oppretter journalpost med request", innhold)
 
         client.opprettJournalpost(request, true)
     }

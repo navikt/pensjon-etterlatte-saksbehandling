@@ -10,6 +10,8 @@ import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
 
+class BeregningKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+
 class BeregningKlient(config: Config, httpClient: HttpClient) {
     private val logger = LoggerFactory.getLogger(BeregningKlient::class.java)
 
@@ -23,19 +25,18 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
         try {
             logger.info("Henter beregning (behandlingId: $behandlingId)")
 
-            val json =
-                downstreamResourceClient.get(
-                    Resource(clientId, "$resourceUrl/api/beregning/$behandlingId"),
-                    accessToken
-                ).mapBoth(
-                    success = { json -> json },
-                    failure = { error -> throw error.throwable }
-                ).response
-
-            return deserialize(json.toString())
+            return downstreamResourceClient.get(
+                Resource(clientId, "$resourceUrl/api/beregning/$behandlingId"),
+                accessToken
+            ).mapBoth(
+                success = { resource -> deserialize(resource.response.toString()) },
+                failure = { errorResponse -> throw errorResponse }
+            )
         } catch (e: Exception) {
-            logger.error("Henting av beregning for behandling (behandlingId=$behandlingId) feilet")
-            throw e
+            throw BeregningKlientException(
+                "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
+                e
+            )
         }
     }
 }

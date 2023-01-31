@@ -15,7 +15,7 @@ object Kotlinx {
 }
 
 object Ktor2 {
-    private const val version = "2.2.2"
+    private const val version = "2.0.3"
 
     const val OkHttp = "io.ktor:ktor-client-okhttp:$version"
     const val ClientCore = "io.ktor:ktor-client-core:$version"
@@ -60,11 +60,12 @@ object Jackson {
 }
 
 object Jupiter {
-    private const val version = "5.8.2"
+    private const val version = "5.9.2"
 
     const val Api = "org.junit.jupiter:junit-jupiter-api:$version"
     const val Params = "org.junit.jupiter:junit-jupiter-params:$version"
     const val Engine = "org.junit.jupiter:junit-jupiter-engine:$version"
+    const val Root = "org.junit.jupiter:junit-jupiter:$version"
 }
 
 object Logging {

@@ -3,18 +3,19 @@ import styled from 'styled-components'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../handlinger/vilkaarsvurderingKnapper'
 import {
+  IVilkaarsvurdering,
   lagreTotalVurdering,
   slettTotalVurdering,
-  IVilkaarsvurdering,
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarBorder, VilkaarWrapper } from './styled'
-import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
 import { Delete } from '@navikt/ds-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterStringDato } from '~utils/formattering'
 import { ISvar } from '~shared/types/ISvar'
+import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 
 type Props = {
   virkningstidspunktDato: string
@@ -34,17 +35,16 @@ export const Resultat: React.FC<Props> = ({
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
+  const [totalVurderingStatus, lagreTotalVurderingCall] = useApiCall(lagreTotalVurdering)
+  const [slettVurderingStatus, slettTotalVurderingCall] = useApiCall(slettTotalVurdering)
 
   const alleVilkaarErVurdert = !vilkaarsvurdering.vilkaar.some((vilkaar) => !vilkaar.vurdering)
 
-  const slettVilkaarsvurderingResultat = () => {
-    slettTotalVurdering(behandlingId).then((response) => {
-      if (response.status == 'ok') {
-        oppdaterVilkaar(response.data)
-        reset()
-      }
+  const slettVilkaarsvurderingResultat = () =>
+    slettTotalVurderingCall(behandlingId, (res) => {
+      oppdaterVilkaar(res)
+      reset()
     })
-  }
 
   const lagreVilkaarsvurderingResultat = () => {
     !(svar && [ISvar.JA, ISvar.NEI].includes(svar))
@@ -52,11 +52,9 @@ export const Resultat: React.FC<Props> = ({
       : setRadioError(undefined)
 
     if (radioError === undefined && svar !== undefined) {
-      lagreTotalVurdering(behandlingId, svarTilTotalResultat(svar), kommentar).then((response) => {
-        if (response.status == 'ok') {
-          oppdaterVilkaar(response.data)
-        }
-      })
+      lagreTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) =>
+        oppdaterVilkaar(res)
+      )
     }
   }
 
@@ -100,7 +98,7 @@ export const Resultat: React.FC<Props> = ({
               )}
               {redigerbar && (
                 <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
-                  <Delete aria-hidden={'true'} />
+                  {isPending(slettVurderingStatus) ? <Loader variant="interaction" /> : <Delete aria-hidden={'true'} />}
                   <span className={'text'}>Slett vurdering</span>
                 </SlettWrapper>
               )}
@@ -141,7 +139,12 @@ export const Resultat: React.FC<Props> = ({
                 size="medium"
                 autoComplete="off"
               />
-              <Button variant={'primary'} size={'small'} onClick={lagreVilkaarsvurderingResultat}>
+              <Button
+                variant={'primary'}
+                size={'small'}
+                onClick={lagreVilkaarsvurderingResultat}
+                loading={isPending(totalVurderingStatus)}
+              >
                 Lagre
               </Button>
             </>

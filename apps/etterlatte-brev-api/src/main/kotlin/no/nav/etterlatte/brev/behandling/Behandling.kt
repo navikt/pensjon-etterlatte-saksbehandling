@@ -37,7 +37,6 @@ data class ForenkletVedtak(
 )
 
 data class Utbetalingsinfo(
-    val grunnbeloep: Int,
     val soeskenjustering: Boolean,
     val beregningsperioder: List<Beregningsperiode>
 )

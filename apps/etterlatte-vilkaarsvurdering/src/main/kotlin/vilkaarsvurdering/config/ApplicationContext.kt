@@ -6,8 +6,8 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
-import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlientImpl
-import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlientImpl
+import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientImpl
 
 class ApplicationContext {
     private val config: Config = ConfigFactory.load()

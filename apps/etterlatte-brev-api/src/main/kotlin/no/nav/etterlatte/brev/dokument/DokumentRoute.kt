@@ -9,7 +9,7 @@ import no.nav.etterlatte.brev.getAccessToken
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import org.slf4j.LoggerFactory
 
-fun Route.dokumentRoute(journalpostService: JournalpostService) {
+fun Route.dokumentRoute(safService: SafService) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.dokument.DokumentRoute")
 
     route("dokumenter") {
@@ -22,7 +22,7 @@ fun Route.dokumentRoute(journalpostService: JournalpostService) {
             }
 
             val fnr = call.parameters["fnr"]!!
-            val innhold = journalpostService.hentDokumenter(fnr, BrukerIdType.FNR, accessToken)
+            val innhold = safService.hentDokumenter(fnr, BrukerIdType.FNR, accessToken)
 
             call.respond(innhold)
         }
@@ -37,7 +37,7 @@ fun Route.dokumentRoute(journalpostService: JournalpostService) {
 
             val journalpostId = call.parameters["journalpostId"]!!
             val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-            val innhold = journalpostService.hentDokumentPDF(journalpostId, dokumentInfoId, accessToken)
+            val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, accessToken)
 
             call.respond(innhold)
         }

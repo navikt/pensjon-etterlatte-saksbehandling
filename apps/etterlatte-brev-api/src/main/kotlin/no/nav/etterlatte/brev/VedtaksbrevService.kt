@@ -7,13 +7,19 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.journalpost.DokarkivServiceImpl
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevID
+import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
+import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
+import no.nav.etterlatte.libs.common.journalpost.Bruker
+import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
@@ -23,19 +29,25 @@ class VedtaksbrevService(
     private val pdfGenerator: PdfGeneratorKlient,
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
-    private val distribusjonService: DistribusjonService
+    private val dokarkivService: DokarkivServiceImpl
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
-    suspend fun oppdaterVedtaksbrev(sakId: Long, behandlingId: String, saksbehandler: String, accessToken: String = ""): BrevID {
-        if (tilAttestering())
-            throw Exception("Vedtaksbrev er allerede sendt til attestering. Kan derfor ikke endres.")
+    suspend fun oppdaterVedtaksbrev(
+        sakId: Long,
+        behandlingId: String,
+        saksbehandler: String,
+        accessToken: String = ""
+    ): BrevID {
+        val vedtaksbrev = db.hentBrevForBehandling(behandlingId)
+            .find { it.erVedtaksbrev }
+
+        if (vedtaksbrev?.status != null && vedtaksbrev.status !in listOf(Status.OPPRETTET, Status.OPPDATERT)) {
+            throw IllegalArgumentException("Vedtaksbrev status er ${vedtaksbrev.status}. Kan derfor ikke endres.")
+        }
 
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, saksbehandler, accessToken)
         val nyttBrev = opprettEllerOppdater(behandling)
-
-        val vedtaksbrev = db.hentBrevForBehandling(behandlingId)
-            .find { it.erVedtaksbrev }
 
         return if (vedtaksbrev == null) {
             db.opprettBrev(nyttBrev).id
@@ -45,30 +57,31 @@ class VedtaksbrevService(
         }
     }
 
-    fun sendTilDistribusjon(vedtak: Vedtak): BrevID {
+    fun journalfoerVedtaksbrev(vedtak: Vedtak): Pair<Brev, JournalpostResponse> {
         val vedtaksbrev = db.hentBrevForBehandling(vedtak.behandling.id.toString())
-            .find { it.erVedtaksbrev }
+            .single { it.erVedtaksbrev }
 
-        requireNotNull(vedtaksbrev) {
-            "Klarte ikke finne vedtaksbrev for attestert vedtak med behandlingsId '${vedtak.behandling.id}'"
+        if (vedtaksbrev.status != Status.FERDIGSTILT) {
+            throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
 
-        return ferdigstill(vedtaksbrev, vedtak)
-    }
+        val melding = DistribusjonMelding(
+            behandlingId = vedtaksbrev.behandlingId,
+            distribusjonType = if (vedtaksbrev.erVedtaksbrev) DistribusjonsType.VEDTAK else DistribusjonsType.VIKTIG,
+            brevId = vedtaksbrev.id,
+            mottaker = vedtaksbrev.mottaker,
+            bruker = Bruker(vedtak.sak.ident),
+            tittel = vedtaksbrev.tittel,
+            brevKode = "XX.YY-ZZ",
+            journalfoerendeEnhet = vedtak.vedtakFattet!!.ansvarligEnhet
+        )
 
-    private fun tilAttestering(): Boolean {
-        // TODO: Legge til status for sak til ATTESTERING
+        val response = dokarkivService.journalfoer(melding)
 
-        return false
-    }
+        db.oppdaterStatus(vedtaksbrev.id, Status.JOURNALFOERT, response.toJson())
+            .also { logger.info("Brev med id=${vedtaksbrev.id} markert som ferdigstilt") }
 
-    private fun ferdigstill(brev: Brev, vedtak: Vedtak): BrevID {
-        distribusjonService.distribuerBrev(brev, vedtak)
-
-        db.oppdaterStatus(brev.id, Status.FERDIGSTILT)
-            .also { logger.info("Brev med id=${brev.id} markert som ferdigstilt") }
-
-        return brev.id
+        return vedtaksbrev to response
     }
 
     private suspend fun opprettEllerOppdater(behandling: Behandling): UlagretBrev {
@@ -81,7 +94,7 @@ class VedtaksbrevService(
         val brevRequest = when (vedtakType) {
             VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker)
             VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(behandling, avsender, mottaker)
-            else -> throw Exception("Vedtakstype er ikke støttet: ${vedtakType}")
+            else -> throw Exception("Vedtakstype er ikke støttet: $vedtakType")
         }
 
         val pdf = pdfGenerator.genererPdf(brevRequest)
@@ -104,5 +117,4 @@ class VedtaksbrevService(
             pdf
         )
     }
-
 }

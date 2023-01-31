@@ -26,8 +26,8 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.vilkaarsvurdering.behandling.BehandlingKlient
-import no.nav.etterlatte.vilkaarsvurdering.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -66,7 +66,7 @@ internal class VilkaarsvurderingServiceTest {
         ).also { it.migrate() }
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns true
+        coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk<DetaljertBehandling>().apply {
             every { id } returns UUID.randomUUID()
             every { sak } returns 1L
@@ -238,7 +238,7 @@ internal class VilkaarsvurderingServiceTest {
     @Test
     fun `skal ikke lagre hvis status-sjekk mot behandling feiler`() {
         val vilkaarsvurdering = runBlocking { opprettVilkaarsvurdering() }
-        coEvery { behandlingKlient.testVilkaarsvurderingState(any(), any()) } returns false
+        coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns false
 
         val vurdering = vilkaarsVurderingData()
         val vurdertVilkaar = VurdertVilkaar(

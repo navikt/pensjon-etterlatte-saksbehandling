@@ -5,6 +5,8 @@ metadata:
   namespace: etterlatte
   labels:
     team: etterlatte
+  annotations:
+    reloader.stakater.com/match: "true"
 spec:
   image: {{ image }}
   port: 8080

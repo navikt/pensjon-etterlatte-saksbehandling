@@ -11,11 +11,23 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - "https://etterlatte-vedtaksvurdering.dev.intern.nav.no"
+    - "https://etterlatte-vedtaksvurdering.intern.nav.no"
   gcp:
     sqlInstances:
       - type: POSTGRES_14
+        tier: db-custom-1-3840
+        collation: nb_NO.UTF8
+        cascadingDelete: false
         name: etterlatte-vedtaksvurdering
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
+        maintenance:
+          day: 7
+          hour: 2
         databases:
           - name: vedtaksvurdering
             envVarPrefix: DB
@@ -32,7 +44,7 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: trygdeetaten.no
+      tenant: nav.no
       claims:
         extra:
           - NAVident
@@ -44,19 +56,19 @@ spec:
     min: 1
   env:
     - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
-      value: b07cf335-11fb-4efa-bd46-11f51afd5052
+      value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: f4cf400f-8ef9-406f-baf1-8218f8f7edac
+      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VILKAARSVURDERING_URL
       value: http://etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
-      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
+      value: prod-gcp.etterlatte.etterlatte-behandling
     - name: BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
 

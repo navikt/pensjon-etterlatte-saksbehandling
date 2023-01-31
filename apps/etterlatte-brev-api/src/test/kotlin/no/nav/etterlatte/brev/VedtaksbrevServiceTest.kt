@@ -10,11 +10,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.behandling.Attestant
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.Persongalleri
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
+import no.nav.etterlatte.brev.behandling.Saksbehandler
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Avdoed
@@ -181,7 +183,7 @@ internal class VedtaksbrevServiceTest {
             Soeker("GRØNN KOPP", "12345"),
             Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1))
         ),
-        ForenkletVedtak(1, VedtakType.INNVILGELSE, PORSGRUNN, ident, PORSGRUNN, ident),
+        ForenkletVedtak(1, VedtakType.INNVILGELSE, Saksbehandler(ident, PORSGRUNN), Attestant(ident, PORSGRUNN)),
         Utbetalingsinfo(
             false,
             listOf(Beregningsperiode(LocalDate.now(), LocalDate.now().plusYears(4), 120000, 1, 5000, 40))

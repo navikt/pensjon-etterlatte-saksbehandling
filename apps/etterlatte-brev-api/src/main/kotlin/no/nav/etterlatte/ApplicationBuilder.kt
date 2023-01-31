@@ -75,7 +75,6 @@ class ApplicationBuilder {
 
     private val brevService = BrevService(db, pdfGenerator, adresseService)
     private val vedtaksbrevService =
-
         VedtaksbrevService(
             db,
             pdfGenerator,

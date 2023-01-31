@@ -9,7 +9,7 @@ abstract class BrevRequest {
     abstract val spraak: Spraak
     abstract val avsender: Avsender
     abstract val mottaker: Mottaker
-    abstract val attestant: Attestant
+    abstract val attestant: Attestant?
     val utsendingsDato = LocalDate.now()
     abstract fun templateName(): String
 }

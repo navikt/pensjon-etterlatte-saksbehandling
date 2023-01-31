@@ -88,15 +88,19 @@ class VedtaksbrevService(
     }
 
     private suspend fun opprettEllerOppdater(behandling: Behandling): UlagretBrev {
-        val saksbehandlerEnhet = behandling.vedtak.saksbehandlerEnhet
-        val saksbehandlerIdent = behandling.vedtak.saksbehandlerIdent
-        val saksbehandlerInfo = navansattKlient.hentSaksbehandlerInfo(saksbehandlerIdent)
+        val saksbehandler = behandling.vedtak.saksbehandler
+        val saksbehandlerInfo = navansattKlient.hentSaksbehandlerInfo(saksbehandler.ident)
+        val attestant = behandling.vedtak.attestant?.let {
+            Attestant(
+                navansattKlient.hentSaksbehandlerInfo(it.ident).navn,
+                adresseService.hentEnhet(it.enhet)
+            )
+        }
 
-        val attestantEnhet = behandling.vedtak.attestantEnhet?.let { adresseService.hentEnhet(it) }
-        val attestantInfo = behandling.vedtak.attestantIdent?.let { navansattKlient.hentSaksbehandlerInfo(it) }
-        val attestant = Attestant(attestantInfo?.navn ?: "", attestantEnhet ?: "")
-
-        val avsender = adresseService.hentAvsenderEnhet(saksbehandlerEnhet, saksbehandlerInfo.navn)
+        val avsender = adresseService.hentAvsenderEnhet(
+            saksbehandler.enhet,
+            saksbehandlerInfo.navn
+        )
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
 
         val vedtakType = behandling.vedtak.type

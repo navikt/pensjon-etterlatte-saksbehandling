@@ -27,16 +27,14 @@ class SakOgBehandlingService(
 
         val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
-        val attestantEnhet =
-            if (vedtak.vedtakFattet != null) (
+        val attestant = if (vedtak.vedtakFattet != null) (
+            Attestant(
+                vedtak.attestasjon?.attestant
+                    ?: innloggetSaksbehandlerIdent,
                 vedtak.attestasjon?.attesterendeEnhet
                     ?: innloggetSaksbehandlerEnhet
-                ) else null
-        val attestantIdent =
-            if (vedtak.vedtakFattet != null) (
-                vedtak.attestasjon?.attestant
-                    ?: innloggetSaksbehandlerIdent
-                ) else null
+            )
+            ) else null
 
         return Behandling(
             sakId = sakId,
@@ -50,11 +48,13 @@ class SakOgBehandlingService(
             vedtak = ForenkletVedtak(
                 vedtak.vedtakId,
                 vedtak.type,
-                saksbehandlerEnhet,
-                saksbehandlerIdent,
-                attestantEnhet,
-                attestantIdent
+                Saksbehandler(
+                    saksbehandlerIdent,
+                    saksbehandlerEnhet
+                ),
+                attestant
             ),
+
             utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )
     }

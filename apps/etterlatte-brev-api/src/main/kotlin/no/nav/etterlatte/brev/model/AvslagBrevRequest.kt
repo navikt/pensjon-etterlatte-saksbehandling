@@ -11,7 +11,7 @@ data class AvslagBrevRequest(
     override val spraak: Spraak,
     override val avsender: Avsender,
     override val mottaker: Mottaker,
-    override val attestant: Attestant
+    override val attestant: Attestant?
 ) : BrevRequest() {
     override fun templateName(): String = "avslag"
 
@@ -20,7 +20,7 @@ data class AvslagBrevRequest(
             behandling: Behandling,
             avsender: Avsender,
             mottaker: Mottaker,
-            attestant: Attestant
+            attestant: Attestant?
         ): AvslagBrevRequest =
             AvslagBrevRequest(
                 saksnummer = behandling.sakId.toString(),

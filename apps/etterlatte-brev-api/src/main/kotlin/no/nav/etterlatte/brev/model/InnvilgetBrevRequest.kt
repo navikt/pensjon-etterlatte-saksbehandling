@@ -13,7 +13,7 @@ data class InnvilgetBrevRequest(
     override val spraak: Spraak,
     override val avsender: Avsender,
     override val mottaker: Mottaker,
-    override val attestant: Attestant
+    override val attestant: Attestant?
 ) : BrevRequest() {
     override fun templateName(): String = "innvilget"
 
@@ -22,7 +22,7 @@ data class InnvilgetBrevRequest(
             behandling: Behandling,
             avsender: Avsender,
             mottaker: Mottaker,
-            attestant: Attestant
+            attestant: Attestant?
         ): InnvilgetBrevRequest =
             InnvilgetBrevRequest(
                 saksnummer = behandling.sakId.toString(),

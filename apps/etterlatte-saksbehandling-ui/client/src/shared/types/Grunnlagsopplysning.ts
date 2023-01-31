@@ -1,6 +1,6 @@
-export interface Grunnlagsopplysning<T> {
+export interface Grunnlagsopplysning<T, K> {
   id: string
-  kilde: string
+  kilde: K
   opplysningsType: string
   opplysning: T
 }

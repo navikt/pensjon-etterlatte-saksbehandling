@@ -8,29 +8,36 @@ import { Soeknadsvurdering } from '../SoeknadsVurdering'
 import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { useState } from 'react'
+import { Grunnlagsopplysning } from '~shared/types/Grunnlagsopplysning'
+import { KildePdl } from '~shared/types/kilde'
+import { formaterStringDato } from '~utils/formattering'
 
 interface AdresseProps {
   label: string
   adresse: string
+  kilde?: string
 }
 
 const AdresseKort = (props: AdresseProps) => (
   <InfoWrapper>
-    <Info label={props.label} tekst={props.adresse} />
+    <Info label={props.label} tekst={props.adresse} undertekst={props.kilde} />
   </InfoWrapper>
 )
 
 interface Props {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   søker: IPdlPerson | undefined
-  forelder: IPdlPerson | undefined
+  forelder: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
   redigerbar: boolean
 }
 
 export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, redigerbar, søker, forelder }: Props) => {
   const [vurder, setVurder] = useState(kommerBarnetTilgode !== null)
   const bostedsadresse = søker?.bostedsadresse?.find((adresse) => adresse.aktiv === true)
-  const foreldersadresse = forelder?.bostedsadresse?.find((adresse) => adresse.aktiv === true)
+  const foreldersadresse = forelder?.opplysning?.bostedsadresse?.find((adresse) => adresse.aktiv === true)
+  const forelderKilde = forelder?.kilde
+    ? forelder?.kilde.navn.toUpperCase() + ': ' + formaterStringDato(forelder?.kilde.tidspunktForInnhenting)
+    : undefined
 
   return (
     <Soeknadsvurdering
@@ -53,8 +60,12 @@ export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, redigerbar, s
         </Beskrivelse>
 
         <InfobokserWrapper>
-          {bostedsadresse && <AdresseKort label="Barnets adresse" adresse={bostedsadresse.adresseLinje1} />}
-          {foreldersadresse && <AdresseKort label="Forelders adresse" adresse={foreldersadresse.adresseLinje1} />}
+          {bostedsadresse && (
+            <AdresseKort label="Barnets adresse" adresse={bostedsadresse.adresseLinje1} kilde={bostedsadresse?.kilde} />
+          )}
+          {foreldersadresse && (
+            <AdresseKort label="Forelders adresse" adresse={foreldersadresse.adresseLinje1} kilde={forelderKilde} />
+          )}
         </InfobokserWrapper>
       </div>
 

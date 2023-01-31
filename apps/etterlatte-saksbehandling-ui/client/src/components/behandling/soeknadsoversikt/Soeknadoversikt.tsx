@@ -36,7 +36,7 @@ export const Soeknadsoversikt = () => {
               kommerBarnetTilgode={behandling.kommerBarnetTilgode}
               redigerbar={behandles}
               søker={behandling.søker}
-              forelder={behandling.familieforhold?.gjenlevende.opplysning}
+              forelder={behandling.familieforhold?.gjenlevende}
             />
             <Virkningstidspunkt
               redigerbar={behandles}

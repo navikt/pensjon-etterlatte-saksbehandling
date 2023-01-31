@@ -18,14 +18,14 @@ export const slettVurdering = async (args: {
 export const slettTotalVurdering = async (behandlingId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.delete(`/vilkaarsvurdering/resultat/${behandlingId}`)
 
-export const lagreTotalVurdering = async (
-  behandlingId: string,
-  resultat: VilkaarsvurderingResultat,
+export const lagreTotalVurdering = async (args: {
+  behandlingId: string
+  resultat: VilkaarsvurderingResultat
   kommentar: string
-): Promise<ApiResponse<IVilkaarsvurdering>> =>
-  apiClient.post(`/vilkaarsvurdering/resultat/${behandlingId}`, {
-    resultat: resultat,
-    kommentar: kommentar,
+}): Promise<ApiResponse<IVilkaarsvurdering>> =>
+  apiClient.post(`/vilkaarsvurdering/resultat/${args.behandlingId}`, {
+    resultat: args.resultat,
+    kommentar: args.kommentar,
   })
 
 export interface IVilkaarsvurdering {

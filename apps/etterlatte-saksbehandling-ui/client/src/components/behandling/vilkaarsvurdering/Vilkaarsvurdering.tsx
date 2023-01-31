@@ -1,52 +1,27 @@
 import { Content, ContentHeader } from '~shared/styled'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { hentVilkaarsvurdering, IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
+import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
 import { VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
-import { RequestStatus } from './utils'
 import Spinner from '~shared/Spinner'
 import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { Heading } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Vilkaarsvurdering = () => {
   const location = useLocation()
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
-  const [vilkaarsvurdering, setVilkaarsvurdering] = useState<IVilkaarsvurdering | undefined>(undefined)
-  const [status, setStatus] = useState<RequestStatus>(RequestStatus.notStarted)
   const behandlingstatus = useAppSelector((state) => state.behandlingReducer.behandling.status)
+  const vilkaarsvurdering = useAppSelector((state) => state.behandlingReducer.behandling.vilkårsprøving)
   const behandles = hentBehandlesFraStatus(behandlingstatus)
-
-  const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering: IVilkaarsvurdering) => {
-    setVilkaarsvurdering(oppdatertVilkaarsvurdering)
-    if (oppdatertVilkaarsvurdering.resultat) {
-      dispatch(updateVilkaarsvurdering(oppdatertVilkaarsvurdering))
-    }
-  }
-
-  const hentVilkaarsvurderingLocal = () => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-    setStatus(RequestStatus.isloading)
-    hentVilkaarsvurdering(behandlingId)
-      .then((response) => {
-        if (response.status == 'ok') {
-          setStatus(RequestStatus.ok)
-          oppdaterVilkaarsvurdering(response.data)
-        } else if (response.statusCode == 412) {
-          setStatus(RequestStatus.preconditionFailed)
-        } else {
-          setStatus(RequestStatus.error)
-        }
-      })
-      .catch(() => {
-        setStatus(RequestStatus.error)
-      })
-  }
+  const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
 
   useEffect(() => {
     const hash = location.hash.slice(1)
@@ -54,7 +29,8 @@ export const Vilkaarsvurdering = () => {
   }, [location.hash])
 
   useEffect(() => {
-    hentVilkaarsvurderingLocal()
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
+    fetchVilkaarsvurdering(behandlingId, (vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering)))
   }, [behandlingId])
 
   return (
@@ -67,33 +43,36 @@ export const Vilkaarsvurdering = () => {
         </HeadingWrapper>
       </ContentHeader>
 
-      {behandlingId && status === RequestStatus.ok && vilkaarsvurdering?.virkningstidspunkt && (
+      {behandlingId && isSuccess(vilkaarsvurderingStatus) && vilkaarsvurdering && (
         <>
           <VilkaarBorderTop />
           {vilkaarsvurdering.vilkaar.map((value, index) => (
             <ManueltVilkaar
               key={index}
               vilkaar={value}
-              oppdaterVilkaar={oppdaterVilkaarsvurdering}
+              oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
               behandlingId={behandlingId}
-              redigerbar={behandles && !vilkaarsvurdering?.resultat}
+              redigerbar={behandles && !vilkaarsvurdering.resultat}
             />
           ))}
+          {vilkaarsvurdering.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
 
           <Resultat
             virkningstidspunktDato={vilkaarsvurdering.virkningstidspunkt}
             vilkaarsvurdering={vilkaarsvurdering}
-            oppdaterVilkaar={oppdaterVilkaarsvurdering}
+            oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
             behandlingId={behandlingId}
             redigerbar={behandles}
           />
         </>
       )}
-      {vilkaarsvurdering?.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
-      {status === RequestStatus.isloading && <Spinner visible={true} label={'Henter vilkårsvurdering'} />}
-      {status === RequestStatus.error && <p>En feil har oppstått</p>}
-      {status === RequestStatus.preconditionFailed && (
-        <p>Virkningstidspunkt må avklares før vilkårsvurdering kan starte</p>
+      {isPending(vilkaarsvurderingStatus) && <Spinner visible={true} label={'Henter vilkårsvurdering'} />}
+      {isFailure(vilkaarsvurderingStatus) && (
+        <ApiErrorAlert>
+          {vilkaarsvurderingStatus.error.statusCode === 412
+            ? 'Virkningstidspunkt og kommer søker tilgode må avklares før vilkårsvurdering kan starte'
+            : 'En feil har oppstått'}
+        </ApiErrorAlert>
       )}
     </Content>
   )

@@ -1,5 +1,9 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
+import jakarta.jms.ExceptionListener
+import jakarta.jms.Message
+import jakarta.jms.MessageListener
+import jakarta.jms.Session
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -19,10 +23,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
-import javax.jms.ExceptionListener
-import javax.jms.Message
-import javax.jms.MessageListener
-import javax.jms.Session
 
 class KvitteringMottaker(
     private val rapidsConnection: RapidsConnection,

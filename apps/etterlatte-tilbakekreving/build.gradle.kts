@@ -28,7 +28,7 @@ dependencies {
 
     implementation("org.jetbrains:annotations:24.0.0")
 
-    implementation("com.ibm.mq:com.ibm.mq.allclient:9.2.5.0")
+    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.3.1.0")
     implementation("org.messaginghub:pooled-jms:3.1.0")
     implementation("com.github.navikt.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:2589.e85bf84")
 

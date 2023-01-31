@@ -2,7 +2,7 @@ import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
 import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
-import { svarTilStatusIcon, svarTilVurderingsstatus } from '../../utils'
+import { formaterKildePdl, svarTilStatusIcon, svarTilVurderingsstatus } from '../../utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Soeknadsvurdering } from '../SoeknadsVurdering'
 import { Info } from '../../Info'
@@ -10,7 +10,6 @@ import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/
 import { useState } from 'react'
 import { Grunnlagsopplysning } from '~shared/types/Grunnlagsopplysning'
 import { KildePdl } from '~shared/types/kilde'
-import { formaterStringDato } from '~utils/formattering'
 
 interface AdresseProps {
   label: string
@@ -35,9 +34,6 @@ export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, redigerbar, s
   const [vurder, setVurder] = useState(kommerBarnetTilgode !== null)
   const bostedsadresse = søker?.bostedsadresse?.find((adresse) => adresse.aktiv === true)
   const foreldersadresse = forelder?.opplysning?.bostedsadresse?.find((adresse) => adresse.aktiv === true)
-  const forelderKilde = forelder?.kilde
-    ? forelder?.kilde.navn.toUpperCase() + ': ' + formaterStringDato(forelder?.kilde.tidspunktForInnhenting)
-    : undefined
 
   return (
     <Soeknadsvurdering
@@ -64,7 +60,11 @@ export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, redigerbar, s
             <AdresseKort label="Barnets adresse" adresse={bostedsadresse.adresseLinje1} kilde={bostedsadresse?.kilde} />
           )}
           {foreldersadresse && (
-            <AdresseKort label="Forelders adresse" adresse={foreldersadresse.adresseLinje1} kilde={forelderKilde} />
+            <AdresseKort
+              label="Forelders adresse"
+              adresse={foreldersadresse.adresseLinje1}
+              kilde={formaterKildePdl(forelder?.kilde)}
+            />
           )}
         </InfobokserWrapper>
       </div>

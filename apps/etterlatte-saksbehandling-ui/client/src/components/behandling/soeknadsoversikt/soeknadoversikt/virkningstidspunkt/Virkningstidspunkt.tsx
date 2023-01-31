@@ -17,12 +17,15 @@ import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
+import { KildePdl } from '~shared/types/kilde'
+import { formaterKildePdl } from '../../utils'
 
 interface Props {
   behandlingId: string
   redigerbar: boolean
   virkningstidspunkt: Virkningstidspunkt | null
   avdoedDoedsdato: string | undefined
+  avdoedDoedsdatoKilde: KildePdl | undefined
   soeknadMottattDato: string
 }
 
@@ -87,7 +90,11 @@ const Virkningstidspunkt = (props: Props) => {
           </Beskrivelse>
           <InfobokserWrapper>
             <InfoWrapper>
-              <Info label="Dødsdato" tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''} />
+              <Info
+                label="Dødsdato"
+                tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''}
+                undertekst={formaterKildePdl(props.avdoedDoedsdatoKilde)}
+              />
               <Info label="Søknad mottatt" tekst={formaterStringDato(props.soeknadMottattDato)} />
               <Info
                 label="Virkningstidspunkt"

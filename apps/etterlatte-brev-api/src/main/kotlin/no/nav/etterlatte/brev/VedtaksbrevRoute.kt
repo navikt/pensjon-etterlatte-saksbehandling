@@ -7,6 +7,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.saksbehandler
 import org.slf4j.LoggerFactory
 
@@ -24,14 +25,14 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
         }
 
         post("attestert/{behandlingId}") {
-            val behandlingId = call.parameters["behandlingId"]!!
+            withBehandlingId { behandlingId ->
+                val ferdigstiltOK = service.ferdigstillVedtaksbrev(behandlingId.toString())
 
-            val ferdigstiltOK = service.ferdigstillVedtaksbrev(behandlingId)
-
-            if (ferdigstiltOK) {
-                call.respond(HttpStatusCode.OK)
-            } else {
-                call.respond(HttpStatusCode.InternalServerError)
+                if (ferdigstiltOK) {
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
             }
         }
     }

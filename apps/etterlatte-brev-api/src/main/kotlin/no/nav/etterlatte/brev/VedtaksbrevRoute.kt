@@ -1,11 +1,13 @@
 package no.nav.etterlatte.brev
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.saksbehandler
 import org.slf4j.LoggerFactory
 
@@ -20,6 +22,18 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
             val brev = service.oppdaterVedtaksbrev(sakId, behandlingId, saksbehandler.ident, getAccessToken(call))
 
             call.respond(brev)
+        }
+
+        post("attestert/{behandlingId}") {
+            withBehandlingId { behandlingId ->
+                val ferdigstiltOK = service.ferdigstillVedtaksbrev(behandlingId.toString())
+
+                if (ferdigstiltOK) {
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
         }
     }
 }

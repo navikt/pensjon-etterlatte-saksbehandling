@@ -42,8 +42,7 @@ class VedtaksbrevService(
         saksbehandler: String,
         accessToken: String = ""
     ): BrevID {
-        val vedtaksbrev = db.hentBrevForBehandling(behandlingId)
-            .find { it.erVedtaksbrev }
+        val vedtaksbrev = hentVedtaksbrev(behandlingId)
 
         if (vedtaksbrev?.status != null && vedtaksbrev.status !in listOf(Status.OPPRETTET, Status.OPPDATERT)) {
             throw IllegalArgumentException("Vedtaksbrev status er ${vedtaksbrev.status}. Kan derfor ikke endres.")
@@ -60,9 +59,26 @@ class VedtaksbrevService(
         }
     }
 
+    fun ferdigstillVedtaksbrev(behandlingId: String): Boolean {
+        logger.info("Ferdigstiller vedtaksbrev for behandlingId=$behandlingId")
+
+        val vedtaksbrev = hentVedtaksbrev(behandlingId)
+            ?: throw IllegalArgumentException("Vedtaksbrev ikke funnet. Avbryter ferdigstilling/attestering.")
+
+        return if (vedtaksbrev.status in listOf(Status.OPPRETTET, Status.OPPDATERT)) {
+            db.oppdaterStatus(vedtaksbrev.id, Status.FERDIGSTILT)
+        } else if (vedtaksbrev.status == Status.FERDIGSTILT) {
+            true // Ignorer hvis brev allerede er ferdigstilt
+        } else {
+            throw IllegalArgumentException("Kan ikke ferdigstille vedtaksbrev med status ${vedtaksbrev.status}")
+        }
+    }
+
     fun journalfoerVedtaksbrev(vedtak: Vedtak): Pair<Brev, JournalpostResponse> {
-        val vedtaksbrev = db.hentBrevForBehandling(vedtak.behandling.id.toString())
-            .single { it.erVedtaksbrev }
+        val behandlingId = vedtak.behandling.id.toString()
+
+        val vedtaksbrev = hentVedtaksbrev(behandlingId)
+            ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
 
         if (vedtaksbrev.status != Status.FERDIGSTILT) {
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
@@ -127,8 +143,11 @@ class VedtaksbrevService(
                     // TODO: skrive om objekter
                 )
             ),
-            true,
+            erVedtaksbrev = true,
             pdf
         )
     }
+
+    private fun hentVedtaksbrev(behandlingId: String): Brev? =
+        db.hentBrevForBehandling(behandlingId).find { it.erVedtaksbrev }
 }

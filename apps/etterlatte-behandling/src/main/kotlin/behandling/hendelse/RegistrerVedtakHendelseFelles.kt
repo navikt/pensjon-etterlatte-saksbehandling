@@ -18,11 +18,11 @@ fun registrerVedtakHendelseFelles(
     behandlingDao: BehandlingDao
 ) {
     if (hendelse.kreverSaksbehandler()) {
-        requireNotNull(saksbehandler)
+        requireNotNullWithMessage(saksbehandler, "Vedtakshendelsen krever en saksbehandler")
     }
     if (hendelse.erUnderkjent()) {
-        requireNotNull(kommentar)
-        requireNotNull(begrunnelse)
+        requireNotNullWithMessage(kommentar, "Underkjent vedtak må ha en kommentar")
+        requireNotNullWithMessage(begrunnelse, "Underkjent vedtak må ha en begrunnelse")
     }
 
     hendelser.vedtakHendelse(
@@ -38,6 +38,14 @@ fun registrerVedtakHendelseFelles(
 
     if (hendelse.erIverksatt()) {
         behandlingDao.lagreStatus(lagretBehandling.id, BehandlingStatus.IVERKSATT, LocalDateTime.now())
+    }
+}
+
+fun requireNotNullWithMessage(value: Any?, message: String): Any {
+    if (value == null) {
+        throw NullPointerException(message)
+    } else {
+        return value
     }
 }
 

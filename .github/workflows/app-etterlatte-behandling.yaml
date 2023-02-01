@@ -25,6 +25,7 @@ on:
       - apps/etterlatte-behandling/**
       - libs/common/**
       - libs/etterlatte-ktor/**
+      - buildSrc/src/main/kotlin/**
 
 jobs:
   test:

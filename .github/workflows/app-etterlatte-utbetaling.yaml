@@ -16,11 +16,13 @@ on:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
+      - libs/common/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
+      - libs/common/**
 
 jobs:
   test:

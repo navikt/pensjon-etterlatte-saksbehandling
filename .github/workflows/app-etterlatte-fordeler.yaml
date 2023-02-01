@@ -16,11 +16,15 @@ on:
       - main
     paths:
       - apps/etterlatte-fordeler/**
+      - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-fordeler/**
+      - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
 
 jobs:
   test:

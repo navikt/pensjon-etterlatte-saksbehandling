@@ -19,13 +19,17 @@ on:
       - libs/common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-ktor/**
   pull_request:
     branches:
       - main
     paths:
-      - apps/etterlatte-gyldig-soeknad/**
+      - apps/etterlatte-grunnlag/**
       - libs/common/**
       - libs/testdata/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-ktor/**
 
 jobs:

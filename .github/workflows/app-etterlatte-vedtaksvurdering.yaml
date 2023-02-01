@@ -19,6 +19,9 @@ on:
       - libs/common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
+      - libs/ktor2client-onbehalfof/**
+      - libs/ktor2client-auth-clientcredentials/**
   pull_request:
     branches:
       - main
@@ -27,6 +30,9 @@ on:
       - libs/common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
+      - libs/ktor2client-onbehalfof/**
+      - libs/ktor2client-auth-clientcredentials/**
 jobs:
   test:
     if: github.event_name == 'pull_request'

@@ -18,6 +18,8 @@ on:
       - apps/etterlatte-brev-api/**
       - libs/common/**
       - libs/etterlatte-ktor/**
+      - libs/ktor2client-onbehalfof/**
+      - libs/ktor2client-auth-clientcredentials/**
   pull_request:
     branches:
       - main
@@ -25,6 +27,8 @@ on:
       - apps/etterlatte-brev-api/**
       - libs/common/**
       - libs/etterlatte-ktor/**
+      - libs/ktor2client-onbehalfof/**
+      - libs/ktor2client-auth-clientcredentials/**
 
 jobs:
   test:

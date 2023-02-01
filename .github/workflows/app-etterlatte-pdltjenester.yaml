@@ -16,12 +16,18 @@ on:
       - main
     paths:
       - apps/etterlatte-pdltjenester/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-ktor/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-pdltjenester/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-ktor/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
 
 jobs:

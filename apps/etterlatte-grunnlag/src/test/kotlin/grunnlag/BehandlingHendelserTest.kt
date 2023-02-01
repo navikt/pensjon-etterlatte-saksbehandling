@@ -12,7 +12,7 @@ class BehandlingHendelserTest {
     private val inspector = TestRapid().apply { BehandlingHendelser(this) }
 
     @Test
-    fun `skal lese melding om behandling opprettet og lage opplysningsbehov`() {
+    fun `skal lese melding om behandling gyldig fremsatt og lage opplysningsbehov`() {
         val melding = behandlingOpprettetMelding()
         val inspector = inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
@@ -30,7 +30,7 @@ class BehandlingHendelserTest {
 
     private fun behandlingOpprettetMelding() = JsonMessage.newMessage(
         mapOf(
-            eventNameKey to "BEHANDLING:OPPRETTET",
+            eventNameKey to "BEHANDLING:GYLDIG_FREMSATT",
             "sakId" to 1,
             "persongalleri" to GrunnlagTestData().hentPersonGalleri()
         )

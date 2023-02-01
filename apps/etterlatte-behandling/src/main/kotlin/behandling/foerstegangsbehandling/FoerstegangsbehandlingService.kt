@@ -23,7 +23,7 @@ interface FoerstegangsbehandlingService {
         mottattDato: String
     ): Foerstegangsbehandling
 
-    fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
+    fun lagreGyldighetsproeving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun lagreVirkningstidspunkt(
         behandlingId: UUID,
         dato: YearMonth,
@@ -73,10 +73,15 @@ class RealFoerstegangsbehandlingService(
         }.serialiserbarUtgave()
     }
 
-    override fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat) {
+    override fun lagreGyldighetsproeving(behandling: UUID, gyldighetsproeving: GyldighetsResultat) {
         inTransaction {
-            foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
-                .lagreGyldighetproeving(gyldighetsproeving)
+            val foerstegangsbehandlingAggregat = foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
+            foerstegangsbehandlingAggregat.lagreGyldighetproeving(gyldighetsproeving)
+            foerstegangsbehandlingAggregat
+        }.also {
+            runBlocking {
+                behandlingHendelser.send(it.lagretBehandling.id to BehandlingHendelseType.GYLDIG_FREMSATT)
+            }
         }
     }
 

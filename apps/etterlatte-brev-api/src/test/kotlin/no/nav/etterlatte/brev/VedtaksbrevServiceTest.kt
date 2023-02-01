@@ -33,13 +33,19 @@ import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.util.UUID
 
 internal class VedtaksbrevServiceTest {
@@ -172,6 +178,85 @@ internal class VedtaksbrevServiceTest {
         }
 
         verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
+    }
+
+    @ParameterizedTest
+    @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"])
+    fun `Ferdigstille vedtaksbrev med gyldig status`(status: Status) {
+        every { db.hentBrevForBehandling(any()) } returns listOf(
+            Brev(1, BEHANDLING_ID, "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), false),
+            Brev(2, BEHANDLING_ID, "tittel", status, Mottaker(STOR_SNERK), true),
+            Brev(3, BEHANDLING_ID, "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), false)
+        )
+        every { db.oppdaterStatus(any(), any()) } returns true
+
+        runBlocking {
+            val ferdigstiltOK = vedtaksbrevService.ferdigstillVedtaksbrev(BEHANDLING_ID)
+
+            assertTrue(ferdigstiltOK)
+        }
+
+        verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
+        verify(exactly = 1) { db.oppdaterStatus(2, Status.FERDIGSTILT) }
+
+        verify {
+            listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient) wasNot Called
+        }
+    }
+
+    @Test
+    fun `Vedtaksbrev er allerede ferdigstilt`() {
+        every { db.hentBrevForBehandling(any()) } returns listOf(
+            Brev(1, BEHANDLING_ID, "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), false),
+            Brev(2, BEHANDLING_ID, "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), true),
+            Brev(3, BEHANDLING_ID, "tittel", Status.JOURNALFOERT, Mottaker(STOR_SNERK), false)
+        )
+
+        runBlocking {
+            val ferdigstiltOK = vedtaksbrevService.ferdigstillVedtaksbrev(BEHANDLING_ID)
+
+            assertTrue(ferdigstiltOK)
+        }
+
+        verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
+        verify(exactly = 0) { db.oppdaterStatus(any(), any()) }
+
+        verify {
+            listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient) wasNot Called
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        Status::class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = ["OPPRETTET", "OPPDATERT", "FERDIGSTILT", "JOURNALFOERT"]
+    )
+    fun `Ferdigstille vedtaksbrev`(status: Status) {
+        every { db.hentBrevForBehandling(any()) } returns listOf(
+            Brev(1, BEHANDLING_ID, "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), false),
+            Brev(2, BEHANDLING_ID, "tittel", status, Mottaker(STOR_SNERK), true),
+            Brev(3, BEHANDLING_ID, "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), false)
+        )
+
+        runBlocking {
+            assertThrows<IllegalArgumentException> {
+                vedtaksbrevService.ferdigstillVedtaksbrev(BEHANDLING_ID)
+            }
+        }
+
+        verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
+        verify(exactly = 0) { db.oppdaterStatus(any(), any()) }
+
+        verify {
+            listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient) wasNot Called
+        }
+    }
+
+    private fun opprettVedtak() = mockk<Vedtak> {
+        every { behandling.id } returns UUID.fromString(BEHANDLING_ID)
+        every { sak.ident } returns "ident"
+        every { vedtakFattet } returns VedtakFattet("Z12345", "ansvarlig enhet", ZonedDateTime.now())
     }
 
     private fun opprettBehandling() = Behandling(

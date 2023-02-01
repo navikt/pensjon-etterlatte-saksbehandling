@@ -25,7 +25,12 @@ on:
       - apps/etterlatte-behandling/**
       - libs/common/**
       - libs/etterlatte-ktor/**
-      - buildSrc/src/main/kotlin/**
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/Micrometer.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/NavFelles.kt
 
 jobs:
   test:

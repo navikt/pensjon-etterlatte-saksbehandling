@@ -16,11 +16,21 @@ on:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
+      - buildSrc/src/main/kotlin/Database.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/TestContainer.kt
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
+      - buildSrc/src/main/kotlin/Database.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/TestContainer.kt
 
 jobs:
   test:

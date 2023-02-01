@@ -25,6 +25,14 @@ on:
       - apps/etterlatte-brev-api/**
       - libs/common/**
       - libs/etterlatte-ktor/**
+      - buildSrc/src/main/kotlin/Cache.kt
+      - buildSrc/src/main/kotlin/Database.kt
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/Micrometer.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/NavFelles.kt
+      - buildSrc/src/main/kotlin/TestContainer.kt
 
 jobs:
   test:

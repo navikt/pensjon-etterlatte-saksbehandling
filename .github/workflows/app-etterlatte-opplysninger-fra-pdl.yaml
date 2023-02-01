@@ -17,12 +17,20 @@ on:
     paths:
       - apps/etterlatte-opplysninger-fra-pdl/**
       - libs/testdata/**
+      - buildSrc/src/main/kotlin/Jupiter.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-pdl/**
       - libs/testdata/**
+      - buildSrc/src/main/kotlin/Jupiter.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
 
 jobs:
   test:

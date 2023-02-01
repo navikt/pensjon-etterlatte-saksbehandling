@@ -3,6 +3,9 @@
 Tjeneste som håndterer oversettelse av vedtak til utbetalinger mot økonomi, samt sjekker at det er samsvar mellom våre
 utbetalinger og utbetalingene iverksatt av økonomi.
 
+## Oppsett mot oppdrag
+En beskrivelse for dette finnes på confluence: https://confluence.adeo.no/display/TE/Koble+opp+mot+Oppdrag+med+MQ
+
 ## Konsepter
 
 ### Iverksetting

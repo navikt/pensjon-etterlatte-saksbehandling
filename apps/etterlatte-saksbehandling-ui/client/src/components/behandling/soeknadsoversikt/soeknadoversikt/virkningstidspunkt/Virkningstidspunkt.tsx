@@ -2,14 +2,14 @@ import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import { ErrorMessage, Label } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
-import { oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { Calender } from '@navikt/ds-icons'
 import { formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
 import { useAppDispatch } from '~store/Store'
-import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { addMonths } from 'date-fns'
 import { Soeknadsvurdering } from '../SoeknadsVurdering'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
@@ -57,6 +57,7 @@ const Virkningstidspunkt = (props: Props) => {
 
     fastsettVirkningstidspunktRequest({ id: props.behandlingId, dato: formData, begrunnelse: begrunnelse }, (res) => {
       dispatch(oppdaterVirkningstidspunkt(res))
+      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
       onSuccess?.()
     })
   }

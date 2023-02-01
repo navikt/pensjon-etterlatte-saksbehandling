@@ -1,8 +1,12 @@
-import { it, describe, expect } from 'vitest'
-import { hentAdresserEtterDoedsdato, hentKriterierMedOpplysning } from '~components/behandling/felles/utils'
+import { describe, expect, it } from 'vitest'
+import {
+  hentAdresserEtterDoedsdato,
+  hentKriterierMedOpplysning,
+  kanGaaTilStatus,
+} from '~components/behandling/felles/utils'
 import { IAdresse } from '~shared/types/IAdresse'
-import { IVilkaarsproving, VilkaarsType } from '~shared/types/IDetaljertBehandling'
-import { Kriterietype, KriterieOpplysningsType } from '~shared/types/Kriterie'
+import { IBehandlingStatus, IVilkaarsproving, VilkaarsType } from '~shared/types/IDetaljertBehandling'
+import { KriterieOpplysningsType, Kriterietype } from '~shared/types/Kriterie'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 const adresserMock: IAdresse[] = [
@@ -129,5 +133,30 @@ describe('Behandling-felles-utils', () => {
       KriterieOpplysningsType.DOEDSDATO
     )
     expect(vilkaarResult?.kriterieOpplysningsType).toBe(KriterieOpplysningsType.DOEDSDATO)
+  })
+})
+
+describe('kanGaaTilStatus', () => {
+  it('Skal kunne gå til seg selv', () => {
+    const gyldigeSteg = kanGaaTilStatus(IBehandlingStatus.OPPRETTET)
+    expect(gyldigeSteg).toMatchObject([IBehandlingStatus.OPPRETTET])
+  })
+  it('Skal få tilbake en liste med statuser man kan navigere til', () => {
+    const gyldigeSteg = kanGaaTilStatus(IBehandlingStatus.BEREGNET)
+    expect(gyldigeSteg).toMatchObject([
+      IBehandlingStatus.OPPRETTET,
+      IBehandlingStatus.VILKAARSVURDERT,
+      IBehandlingStatus.BEREGNET,
+    ])
+  })
+  it('Skal returnere alle steg om statusen ikke finnes i rekkefølge-lista', () => {
+    const gyldigeSteg = kanGaaTilStatus(IBehandlingStatus.IVERKSATT)
+    expect(gyldigeSteg).toMatchObject([
+      IBehandlingStatus.OPPRETTET,
+      IBehandlingStatus.VILKAARSVURDERT,
+      IBehandlingStatus.BEREGNET,
+      IBehandlingStatus.FATTET_VEDTAK,
+      IBehandlingStatus.ATTESTERT,
+    ])
   })
 })

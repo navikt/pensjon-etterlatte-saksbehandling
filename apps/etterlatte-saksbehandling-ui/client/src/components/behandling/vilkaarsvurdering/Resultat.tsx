@@ -16,6 +16,9 @@ import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterStringDato } from '~utils/formattering'
 import { ISvar } from '~shared/types/ISvar'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useAppDispatch } from '~store/Store'
+import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 type Props = {
   virkningstidspunktDato: string
@@ -35,6 +38,7 @@ export const Resultat: React.FC<Props> = ({
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
+  const dispatch = useAppDispatch()
   const [totalVurderingStatus, lagreTotalVurderingCall] = useApiCall(lagreTotalVurdering)
   const [slettVurderingStatus, slettTotalVurderingCall] = useApiCall(slettTotalVurdering)
 
@@ -52,9 +56,10 @@ export const Resultat: React.FC<Props> = ({
       : setRadioError(undefined)
 
     if (radioError === undefined && svar !== undefined) {
-      lagreTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) =>
+      lagreTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) => {
         oppdaterVilkaar(res)
-      )
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
+      })
     }
   }
 

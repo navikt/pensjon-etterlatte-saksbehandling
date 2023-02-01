@@ -27,17 +27,11 @@ class SakOgBehandlingService(
 
         val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
-        val attestant = if (vedtak.vedtakFattet != null) {
-            (
-                Attestant(
-                    vedtak.attestasjon?.attestant
-                        ?: innloggetSaksbehandlerIdent,
-                    vedtak.attestasjon?.attesterendeEnhet
-                        ?: innloggetSaksbehandlerEnhet
-                )
-                )
-        } else {
-            null
+        val attestant = vedtak.vedtakFattet?.let {
+            Attestant(
+                vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
+                vedtak.attestasjon?.attesterendeEnhet ?: innloggetSaksbehandlerEnhet
+            )
         }
 
         return Behandling(

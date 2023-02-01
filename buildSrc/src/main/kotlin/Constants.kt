@@ -79,7 +79,7 @@ object Micrometer {
 }
 
 object MockK {
-    const val MockK = "io.mockk:mockk:1.13.0"
+    const val MockK = "io.mockk:mockk:1.13.1"
 }
 
 object Kotest {

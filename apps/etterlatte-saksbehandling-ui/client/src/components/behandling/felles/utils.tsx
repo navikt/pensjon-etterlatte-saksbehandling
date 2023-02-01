@@ -22,7 +22,9 @@ export const kanGaaTilStatus = (status: IBehandlingStatus) => {
     IBehandlingStatus.FATTET_VEDTAK,
     IBehandlingStatus.ATTESTERT,
   ]
-  return rekkefoelge.slice(0, Math.min(rekkefoelge.findIndex((s) => s === status) + 1, rekkefoelge.length))
+  const statusEksisterer = rekkefoelge.includes(status)
+  const index = statusEksisterer ? rekkefoelge.findIndex((s) => s === status) + 1 : rekkefoelge.length
+  return rekkefoelge.slice(0, index)
 }
 
 export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {

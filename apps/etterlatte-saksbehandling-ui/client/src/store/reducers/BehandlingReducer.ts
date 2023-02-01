@@ -9,7 +9,7 @@ import {
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 
-export const detaljertBehandlingInitialState: IDetaljertBehandling = {
+export const detaljertBehandlingInitialState: IBehandlingReducer = {
   id: '',
   sak: 0,
   status: IBehandlingStatus.OPPRETTET, //test
@@ -19,7 +19,6 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   gyldighetsprøving: undefined,
   kommerBarnetTilgode: null,
   beregning: undefined,
-  fastsatt: false,
   soeknadMottattDato: '',
   virkningstidspunkt: null,
   hendelser: [],
@@ -39,14 +38,15 @@ export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
 
-export interface IBehandlingReducer {
-  behandling: IDetaljertBehandling
+export interface IBehandlingReducer extends IDetaljertBehandling {
+  beregning?: Beregning
+  vilkårsprøving?: IVilkaarsvurdering
 }
-const initialState: IBehandlingReducer = { behandling: detaljertBehandlingInitialState }
+const initialState: { behandling: IBehandlingReducer } = { behandling: detaljertBehandlingInitialState }
 
 export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(addBehandling, (state, action) => {
-    state.behandling = { ...action.payload, vilkårsprøving: undefined, beregning: undefined }
+    state.behandling = action.payload
     state.behandling.behandlingType = action.payload.behandlingType ?? IBehandlingsType.FØRSTEGANGSBEHANDLING // Default til behandlingstype hvis null
   })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {

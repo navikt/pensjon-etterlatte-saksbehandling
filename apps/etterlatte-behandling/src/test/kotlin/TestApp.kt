@@ -9,14 +9,10 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.common.LeaderElection
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.BeregningKlientTest
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingTest
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -87,14 +83,6 @@ class LocalAppBeanFactory(val jdbcUrl: String) : CommonFactory() {
 
     override fun grunnlagKlient(): GrunnlagKlient {
         return GrunnlagKlientTest()
-    }
-
-    override fun beregningKlient(): BeregningKlient {
-        return BeregningKlientTest()
-    }
-
-    override fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient {
-        return VilkaarsvurderingTest()
     }
 
     override fun leaderElection() = LeaderElection(

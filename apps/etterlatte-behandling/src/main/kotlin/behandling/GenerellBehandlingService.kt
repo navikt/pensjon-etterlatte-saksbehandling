@@ -10,10 +10,8 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
@@ -71,8 +69,6 @@ class RealGenerellBehandlingService(
     private val manueltOpphoerService: ManueltOpphoerService,
     private val vedtakKlient: VedtakKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val beregningKlient: BeregningKlient,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val sporingslogg: Sporingslogg
 ) : GenerellBehandlingService {
 
@@ -158,24 +154,13 @@ class RealGenerellBehandlingService(
             val soeker = async {
                 grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, accessToken)
             }
-            val beregning = async {
-                beregningKlient.hentBeregning(UUID.fromString(behandlingId.toString()), accessToken)
-            }
-            val vilkaarsvurdering = async {
-                vilkaarsvurderingKlient.hentVilkaarsvurdering(
-                    behandlingId,
-                    accessToken
-                )
-            }
+
             DetaljertBehandlingDto(
                 id = detaljertBehandling.id,
                 sak = detaljertBehandling.sak,
                 gyldighetsprøving = detaljertBehandling.gyldighetsproeving,
                 kommerBarnetTilgode = detaljertBehandling.kommerBarnetTilgode,
-                vilkårsprøving = vilkaarsvurdering.await(),
-                beregning = beregning.await(),
                 saksbehandlerId = vedtak.await()?.saksbehandlerId,
-                fastsatt = vedtak.await()?.vedtakFattet,
                 datoFattet = vedtak.await()?.datoFattet,
                 datoattestert = vedtak.await()?.datoattestert,
                 attestant = vedtak.await()?.attestant,

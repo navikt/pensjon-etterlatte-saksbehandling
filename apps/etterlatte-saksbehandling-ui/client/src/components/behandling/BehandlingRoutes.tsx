@@ -4,11 +4,12 @@ import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt/Soeknadoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag/Beregningsgrunnlag'
-import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { useAppSelector } from '~store/Store'
 import { Vedtaksbrev } from './vedtaksbrev/Vedtaksbrev'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
 const behandlingRoutes = [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false, erManueltOpphoerRoute: false },
@@ -72,7 +73,7 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-const hentAktuelleRoutes = (behandling: IDetaljertBehandling) => {
+const hentAktuelleRoutes = (behandling: IBehandlingReducer) => {
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       const soeknadRoutes = behandlingRoutes.filter((route) => route.path !== 'opphoeroversikt')

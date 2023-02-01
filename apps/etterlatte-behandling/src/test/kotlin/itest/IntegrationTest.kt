@@ -30,14 +30,10 @@ import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.BeregningKlientTest
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingTest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -481,14 +477,6 @@ class TestBeanFactory(
 
     override fun grunnlagKlient(): GrunnlagKlient {
         return GrunnlagKlientTest()
-    }
-
-    override fun beregningKlient(): BeregningKlient {
-        return BeregningKlientTest()
-    }
-
-    override fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient {
-        return VilkaarsvurderingTest()
     }
 
     override fun pdlHttpClient(): HttpClient = HttpClient(MockEngine) {

@@ -1,5 +1,3 @@
-import { IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import { Beregning } from '~shared/types/Beregning'
 import { IHendelse } from '~shared/types/IHendelse'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeSaksbehandler } from '~shared/types/kilde'
@@ -13,10 +11,7 @@ export interface IDetaljertBehandling {
   sak: number
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
-  vilkårsprøving?: IVilkaarsvurdering
-  beregning?: Beregning
   saksbehandlerId?: string
-  fastsatt: boolean
   datoFattet?: string //kommer som Instant fra backend
   datoAttestert?: string //kommer som Instant fra backend
   attestant?: string

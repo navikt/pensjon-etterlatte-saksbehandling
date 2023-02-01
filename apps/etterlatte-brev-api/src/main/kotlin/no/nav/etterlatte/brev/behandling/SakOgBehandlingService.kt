@@ -27,14 +27,18 @@ class SakOgBehandlingService(
 
         val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
-        val attestant = if (vedtak.vedtakFattet != null) (
-            Attestant(
-                vedtak.attestasjon?.attestant
-                    ?: innloggetSaksbehandlerIdent,
-                vedtak.attestasjon?.attesterendeEnhet
-                    ?: innloggetSaksbehandlerEnhet
-            )
-            ) else null
+        val attestant = if (vedtak.vedtakFattet != null) {
+            (
+                Attestant(
+                    vedtak.attestasjon?.attestant
+                        ?: innloggetSaksbehandlerIdent,
+                    vedtak.attestasjon?.attesterendeEnhet
+                        ?: innloggetSaksbehandlerEnhet
+                )
+                )
+        } else {
+            null
+        }
 
         return Behandling(
             sakId = sakId,
@@ -66,7 +70,7 @@ class SakOgBehandlingService(
             Beregningsperiode(
                 datoFOM = it.datoFOM.atDay(1),
                 datoTOM = it.datoTOM?.atEndOfMonth(),
-                grunnbeloep = it.grunnbelopMnd,
+                grunnbeloep = it.grunnbelop,
                 antallBarn = (it.soeskenFlokk?.size ?: 0) + 1,
                 utbetaltBeloep = it.utbetaltBeloep,
                 trygdetid = it.trygdetid

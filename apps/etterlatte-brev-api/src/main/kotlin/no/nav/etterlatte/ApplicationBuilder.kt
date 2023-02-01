@@ -138,7 +138,7 @@ class ApplicationBuilder {
 
     private fun proxyClient() = HttpClient(OkHttp) {
         expectSuccess = true
-        println("trigg bygg")
+
         val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.proxy")
         val env = mutableMapOf(
             "AZURE_APP_CLIENT_ID" to inntektsConfig.getString("clientId"),

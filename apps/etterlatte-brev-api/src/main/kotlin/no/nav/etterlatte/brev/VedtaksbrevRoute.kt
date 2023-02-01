@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -20,6 +21,18 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
             val brev = service.oppdaterVedtaksbrev(sakId, behandlingId, saksbehandler.ident, getAccessToken(call))
 
             call.respond(brev)
+        }
+
+        post("attestert/{behandlingId}") {
+            val behandlingId = call.parameters["behandlingId"]!!
+
+            val ferdigstiltOK = service.ferdigstillVedtaksbrev(behandlingId)
+
+            if (ferdigstiltOK) {
+                call.respond(HttpStatusCode.OK)
+            } else {
+                call.respond(HttpStatusCode.InternalServerError)
+            }
         }
     }
 }

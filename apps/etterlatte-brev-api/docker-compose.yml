@@ -4,7 +4,7 @@ services:
     container_name: etterlatte-brev
     image: postgres
     ports:
-      - '5432:5432'
+      - '5435:5432'
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
 

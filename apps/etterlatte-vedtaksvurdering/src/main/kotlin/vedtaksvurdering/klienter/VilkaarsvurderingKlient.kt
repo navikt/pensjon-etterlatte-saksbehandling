@@ -39,7 +39,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                     accessToken = accessToken
                 )
                 .mapBoth(
-                    success = { json -> json.response.let { objectMapper.readValue(json.toString()) } },
+                    success = { json -> json.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage }
                 )
         } catch (e: Exception) {

@@ -19,7 +19,6 @@ on:
       - libs/common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**
-      - buildSrc/**
   pull_request:
     branches:
       - main

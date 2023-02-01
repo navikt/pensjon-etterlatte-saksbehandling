@@ -16,7 +16,6 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-soeknad/**
-      - buildSrc/**
   pull_request:
     branches:
       - main

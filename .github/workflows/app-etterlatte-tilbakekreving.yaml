@@ -16,7 +16,6 @@ on:
       - main
     paths:
       - apps/etterlatte-tilbakekreving/**
-      - buildSrc/**
   pull_request:
     branches:
       - main

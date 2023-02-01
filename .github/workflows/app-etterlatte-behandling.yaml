@@ -25,7 +25,6 @@ on:
       - apps/etterlatte-behandling/**
       - libs/common/**
       - libs/etterlatte-ktor/**
-      - buildSrc/**
 
 jobs:
   test:

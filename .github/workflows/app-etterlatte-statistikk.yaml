@@ -17,7 +17,6 @@ on:
     paths:
       - apps/etterlatte-statistikk/**
       - libs/common/**
-      - buildSrc/**
   pull_request:
     branches:
       - main

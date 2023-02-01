@@ -91,3 +91,17 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml
+
+
+  deploy-to-prod-gcp:
+    name: Deploy to prod-gcp
+    if: ${{ github.event.inputs.deploy-prod == 'true' }} # Tvinge manuell prod deploy inntil videre
+    needs: deploy-to-dev-gcp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: apps/${{ env.APP_NAME }}/.nais/prod.yaml

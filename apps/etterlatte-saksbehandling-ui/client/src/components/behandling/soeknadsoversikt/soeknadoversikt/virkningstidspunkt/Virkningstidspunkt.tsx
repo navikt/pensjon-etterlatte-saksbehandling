@@ -2,14 +2,14 @@ import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import { ErrorMessage, Label } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
-import { oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { Calender } from '@navikt/ds-icons'
 import { formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
 import { useAppDispatch } from '~store/Store'
-import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { addMonths } from 'date-fns'
 import { Soeknadsvurdering } from '../SoeknadsVurdering'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
@@ -17,12 +17,15 @@ import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
+import { KildePdl } from '~shared/types/kilde'
+import { formaterKildePdl } from '../../utils'
 
 interface Props {
   behandlingId: string
   redigerbar: boolean
   virkningstidspunkt: Virkningstidspunkt | null
   avdoedDoedsdato: string | undefined
+  avdoedDoedsdatoKilde: KildePdl | undefined
   soeknadMottattDato: string
 }
 
@@ -54,6 +57,7 @@ const Virkningstidspunkt = (props: Props) => {
 
     fastsettVirkningstidspunktRequest({ id: props.behandlingId, dato: formData, begrunnelse: begrunnelse }, (res) => {
       dispatch(oppdaterVirkningstidspunkt(res))
+      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
       onSuccess?.()
     })
   }
@@ -82,12 +86,16 @@ const Virkningstidspunkt = (props: Props) => {
       >
         <div>
           <Beskrivelse>
-            Barnepensjon innvilges som hovedregel fra og med måneden etter dødsfall, men kan gis for opptil tre år før
-            den måneden da kravet ble satt fram.
+            Barnepensjon kan tidligst innvilges fra og med måneden etter dødsfallet og den kan gis for opptil tre år før
+            søknaden er mottatt.
           </Beskrivelse>
           <InfobokserWrapper>
             <InfoWrapper>
-              <Info label="Dødsdato" tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''} />
+              <Info
+                label="Dødsdato"
+                tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''}
+                undertekst={formaterKildePdl(props.avdoedDoedsdatoKilde)}
+              />
               <Info label="Søknad mottatt" tekst={formaterStringDato(props.soeknadMottattDato)} />
               <Info
                 label="Virkningstidspunkt"

@@ -1,0 +1,82 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-grunnlag
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - https://etterlatte-grunnlag.intern.nav.no
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        tier: db-custom-1-3840
+        collation: nb_NO.UTF8
+        cascadingDelete: false
+        name: etterlatte-grunnlag
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
+        maintenance:
+          day: 7
+          hour: 2
+        databases:
+          - name: grunnlag
+            envVarPrefix: DB
+  #startup:
+  #  initialDelay: 7
+  #  failureThreshold: 10
+  #  periodSeconds: 5
+  #  path: /started
+  liveness:
+    initialDelay: 7
+    failureThreshold: 10
+    periodSeconds: 5
+    path: /isalive
+  readiness:
+    initialDelay: 7
+    failureThreshold: 10
+    periodSeconds: 5
+    path: /isready
+  secureLogs:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+      claims:
+        extra:
+          - NAVident
+  kafka:
+    pool: nav-prod
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.etterlatteytelser
+    - name: KAFKA_RESET_POLICY
+      value: latest
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-behandling
+  accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-brev-api
+        - application: etterlatte-beregning
+        - application: etterlatte-behandling
+        - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-saksbehandling-ui-lokal
+    outbound:
+      rules:
+        - application: etterlatte-behandling

@@ -1,5 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { Grunnlagsopplysning, Soeskenjusteringsgrunnlag } from '~shared/types/Grunnlagsopplysning'
+import { KildePdl } from '~shared/types/kilde'
 
 export const lagreSoeskenMedIBeregning = async (args: {
   behandlingsId: string
@@ -12,6 +13,6 @@ export const lagreSoeskenMedIBeregning = async (args: {
 
 export const hentSoeskenMedIBeregning = async (
   sakId: number
-): Promise<ApiResponse<Grunnlagsopplysning<Soeskenjusteringsgrunnlag>>> => {
+): Promise<ApiResponse<Grunnlagsopplysning<Soeskenjusteringsgrunnlag, KildePdl>>> => {
   return apiClient.get(`/grunnlag/${sakId}/SOESKEN_I_BEREGNINGEN`)
 }

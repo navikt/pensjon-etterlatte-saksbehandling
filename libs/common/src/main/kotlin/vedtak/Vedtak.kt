@@ -68,7 +68,7 @@ enum class UtbetalingsperiodeType {
 
 data class Attestasjon(
     val attestant: String,
-    val attesterendeEnhet: String, // aktuell?
+    val attesterendeEnhet: String,
     val tidspunkt: ZonedDateTime
 )
 

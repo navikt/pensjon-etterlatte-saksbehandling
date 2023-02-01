@@ -33,8 +33,16 @@ data class Behandling(
 data class ForenkletVedtak(
     val id: Long,
     val type: VedtakType,
+    val saksbehandler: Saksbehandler,
+    val attestant: Attestant?
+)
+
+data class Saksbehandler(
+    val ident: String,
     val enhet: String
 )
+
+typealias Attestant = Saksbehandler
 
 data class Utbetalingsinfo(
     val soeskenjustering: Boolean,

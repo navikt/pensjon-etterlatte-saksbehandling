@@ -14,6 +14,19 @@ export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: stri
   return adresser?.filter((adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), new Date(doedsdato)))
 }
 
+export const kanGaaTilStatus = (status: IBehandlingStatus) => {
+  const rekkefoelge = [
+    IBehandlingStatus.OPPRETTET,
+    IBehandlingStatus.VILKAARSVURDERT,
+    IBehandlingStatus.BEREGNET,
+    IBehandlingStatus.FATTET_VEDTAK,
+    IBehandlingStatus.ATTESTERT,
+  ]
+  const statusEksisterer = rekkefoelge.includes(status)
+  const index = statusEksisterer ? rekkefoelge.findIndex((s) => s === status) + 1 : rekkefoelge.length
+  return rekkefoelge.slice(0, index)
+}
+
 export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
   return (
     status === IBehandlingStatus.OPPRETTET ||

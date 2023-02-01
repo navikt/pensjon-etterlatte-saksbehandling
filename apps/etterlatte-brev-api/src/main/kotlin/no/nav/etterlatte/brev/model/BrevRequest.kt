@@ -9,6 +9,7 @@ abstract class BrevRequest {
     abstract val spraak: Spraak
     abstract val avsender: Avsender
     abstract val mottaker: Mottaker
+    abstract val attestant: Attestant?
     val utsendingsDato = LocalDate.now()
     abstract fun templateName(): String
 }
@@ -45,7 +46,13 @@ data class Avsender(
     val kontor: String,
     val adresse: String,
     val postnummer: String,
-    val telefon: String
+    val telefon: String,
+    val saksbehandler: String
+)
+
+data class Attestant(
+    val navn: String,
+    val kontor: String
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -73,3 +80,11 @@ data class RegoppslagResponseDTO(
         BOSTEDSADRESSE, OPPHOLDSADRESSE, KONTAKTADRESSE, DELTBOSTED, KONTAKTINFORMASJONFORDØDSBO, ENHETPOSTADRESSE, ENHETFORRETNINGSADRESSE
     }
 }
+
+data class SaksbehandlerInfo(
+    val ident: String,
+    val navn: String,
+    val fornavn: String,
+    val etternavn: String,
+    val epost: String
+)

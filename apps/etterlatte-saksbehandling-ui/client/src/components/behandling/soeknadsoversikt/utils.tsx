@@ -1,6 +1,8 @@
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { JaNei } from '~shared/types/ISvar'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
+import { KildePdl } from '~shared/types/kilde'
+import { formaterStringDato } from '~utils/formattering'
 
 export function hentGyldighetsTekst(
   innsenderErForelder: VurderingsResultat | undefined,
@@ -93,4 +95,8 @@ export const svarTilStatusIcon = (svar: JaNei | undefined): StatusIconProps => {
     default:
       return 'warning'
   }
+}
+
+export const formaterKildePdl = (kilde?: KildePdl) => {
+  return kilde ? kilde.navn.toUpperCase() + ': ' + formaterStringDato(kilde.tidspunktForInnhenting) : undefined
 }

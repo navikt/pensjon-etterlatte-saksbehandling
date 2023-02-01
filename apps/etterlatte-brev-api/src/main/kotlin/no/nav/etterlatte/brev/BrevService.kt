@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.AnnetBrevRequest
+import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevID
@@ -45,9 +46,9 @@ class BrevService(
             else -> throw Exception("Ingen brevmottaker spesifisert")
         }
 
-        val avsender = adresseService.hentAvsenderEnhet(enhet)
+        val avsender = adresseService.hentAvsenderEnhet(enhet, "")
 
-        val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker)
+        val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker, Attestant("", ""))
 
         return BrevInnhold(mal.tittel, Spraak.NB.toString(), pdfGenerator.genererPdf(request))
     }

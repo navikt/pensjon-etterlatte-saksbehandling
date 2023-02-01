@@ -14,14 +14,27 @@ class SakOgBehandlingService(
     suspend fun hentBehandling(
         sakId: Long,
         behandlingId: String,
-        saksbehandler: String,
+        innloggetSaksbehandlerIdent: String,
         accessToken: String
     ): Behandling {
         val vedtak = vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(sakId, accessToken)
 
-        val saksbehandlerEnhet = saksbehandlere[saksbehandler]
-            ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
+        val innloggetSaksbehandlerEnhet = saksbehandlere[innloggetSaksbehandlerIdent]
+            ?: throw SaksbehandlerManglerEnhetException(
+                "Saksbehandler $innloggetSaksbehandlerIdent mangler enhet fra secret"
+            )
+
+        val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet
+        val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
+        val attestant = if (vedtak.vedtakFattet != null) (
+            Attestant(
+                vedtak.attestasjon?.attestant
+                    ?: innloggetSaksbehandlerIdent,
+                vedtak.attestasjon?.attesterendeEnhet
+                    ?: innloggetSaksbehandlerEnhet
+            )
+            ) else null
 
         return Behandling(
             sakId = sakId,
@@ -35,8 +48,13 @@ class SakOgBehandlingService(
             vedtak = ForenkletVedtak(
                 vedtak.vedtakId,
                 vedtak.type,
-                vedtak.vedtakFattet?.ansvarligEnhet ?: saksbehandlerEnhet
+                Saksbehandler(
+                    saksbehandlerIdent,
+                    saksbehandlerEnhet
+                ),
+                attestant
             ),
+
             utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
         )
     }

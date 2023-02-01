@@ -3,31 +3,18 @@ import { NavLink } from 'react-router-dom'
 import classNames from 'classnames'
 import { Next } from '@navikt/ds-icons'
 import { useAppSelector } from '~store/Store'
-import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { behandlingErUtfylt } from '~components/behandling/felles/utils'
-import { JaNei } from '~shared/types/ISvar'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { kanGaaTilStatus } from '~components/behandling/felles/utils'
 
 export const StegMeny = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
-
-  const klarForVidereBehandling = behandlingErUtfylt(behandling) && behandling.kommerBarnetTilgode?.svar === JaNei.JA
-  const gyldighet =
-    behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
-    behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
-  const vilkaar =
-    behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
-    (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT && klarForVidereBehandling)
-
-  const harBeregning = !!behandling.beregning
-
-  const oppfylt = behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT
-  const vurdert = !!behandling.vilkårsprøving?.resultat && klarForVidereBehandling
+  const behandlingType = behandling.behandlingType
+  const behandlingstatus = behandling.status
+  const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(behandlingstatus).includes(steg)
 
   return (
     <StegMenyWrapper role="navigation">
-      {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
         <>
           <li>
             <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
@@ -35,7 +22,7 @@ export const StegMeny = () => {
           <Separator aria-hidden={'true'} />
         </>
       )}
-      {behandling.behandlingType === IBehandlingsType.MANUELT_OPPHOER && (
+      {behandlingType === IBehandlingsType.MANUELT_OPPHOER && (
         <>
           <li>
             <NavLink to="opphoeroversikt">Opphør</NavLink>
@@ -43,31 +30,31 @@ export const StegMeny = () => {
           <Separator aria-hidden={'true'} />
         </>
       )}
-      {behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
+      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
         <>
-          <li className={classNames({ disabled: !klarForVidereBehandling || !gyldighet })}>
+          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.VILKAARSVURDERT) })}>
             <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
           </li>
           <Separator aria-hidden={'true'} />
         </>
       )}
-      {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
         <>
-          <li className={classNames({ disabled: !gyldighet || !vilkaar })}>
+          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
             <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
           </li>
           <Separator aria-hidden={'true'} />
         </>
       )}
-      <li className={classNames({ disabled: !gyldighet || !vilkaar || !harBeregning })}>
+      <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
-      {behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
+      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
         <>
           <Separator aria-hidden={'true'} />
           <li
             className={classNames({
-              disabled: !vurdert || (oppfylt && !harBeregning),
+              disabled: stegErDisabled(IBehandlingStatus.FATTET_VEDTAK),
             })}
           >
             <NavLink to="brev">Vedtaksbrev</NavLink>

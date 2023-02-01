@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 import java.time.OffsetDateTime
 
 data class FordelerEvent(
+    val soeknadId: Long,
     val soeknad: Barnepensjon,
     val hendelseGyldigTil: OffsetDateTime
 )
@@ -45,6 +46,7 @@ internal class Fordeler(
             validate { it.requireKey("@adressebeskyttelse") }
             validate { it.requireKey("@fnr_soeker") }
             validate { it.rejectKey("@dokarkivRetur") }
+            validate { it.rejectKey(FordelerFordelt.soeknadFordeltKey) }
             correlationId()
         }.register(this)
     }
@@ -57,12 +59,13 @@ internal class Fordeler(
                 when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
                     is GyldigForBehandling -> {
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling")
-                        context.publish(packet.leggPaaFordeltStatus().toJson())
+                        context.publish(packet.leggPaaFordeltStatus(true).toJson())
                         fordelerMetricLogger.logMetricFordelt()
                     }
 
                     is FordelerResultat.IkkeGyldigForBehandling -> {
                         logger.info("Avbrutt fordeling: ${resultat.ikkeOppfylteKriterier}")
+                        context.publish(packet.leggPaaFordeltStatus(false).toJson())
                         fordelerMetricLogger.logMetricIkkeFordelt(resultat)
                     }
 
@@ -85,16 +88,16 @@ internal class Fordeler(
 
     private fun JsonMessage.toFordelerEvent() =
         FordelerEvent(
+            soeknadId = soeknadId(),
             soeknad = get(SoeknadInnsendt.skjemaInfoKey).toJson().let(objectMapper::readValue),
             hendelseGyldigTil = get(SoeknadInnsendt.hendelseGyldigTilKey).textValue().let(OffsetDateTime::parse)
         )
 
-    private fun JsonMessage.leggPaaFordeltStatus(): JsonMessage {
-        this[FordelerFordelt.soeknadFordeltKey] = true
-        eventName = FordelerFordelt.eventName
+    private fun JsonMessage.leggPaaFordeltStatus(fordelt: Boolean): JsonMessage {
+        this[FordelerFordelt.soeknadFordeltKey] = fordelt
         correlationId = getCorrelationId()
         return this
     }
 
-    private fun JsonMessage.soeknadId(): Int = get(SoeknadInnsendt.lagretSoeknadIdKey).intValue()
+    private fun JsonMessage.soeknadId(): Long = get(SoeknadInnsendt.lagretSoeknadIdKey).longValue()
 }

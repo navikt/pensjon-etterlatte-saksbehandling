@@ -10,10 +10,13 @@ import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.fordeler.Fordeler
 import no.nav.etterlatte.fordeler.FordelerKriterier
+import no.nav.etterlatte.fordeler.FordelerRepository
 import no.nav.etterlatte.fordeler.FordelerService
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -27,14 +30,24 @@ fun main() {
     val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }
+    val dataSource = DataSourceBuilder.createDataSource(env).apply { migrate() }
 
     RapidApplication.create(env)
         .also {
             Fordeler(
                 rapidsConnection = it,
-                fordelerService = FordelerService(FordelerKriterier(), pdlTjenesterKlient(env))
+                fordelerService = FordelerService(
+                    FordelerKriterier(),
+                    pdlTjenesterKlient(env),
+                    FordelerRepository(dataSource),
+                    maxFordelingTilDoffen = env.longFeature("FEATURE_MAX_FORDELING_TIL_DOFFEN")
+                )
             )
         }.start()
+}
+
+fun Map<String, String>.longFeature(featureName: String, default: Long = 0): Long {
+    return (this[featureName]?.toLong() ?: default).takeIf { it > -1 } ?: Long.MAX_VALUE
 }
 
 private fun pdlTjenesterKlient(env: MutableMap<String, String>) = PdlTjenesterKlient(

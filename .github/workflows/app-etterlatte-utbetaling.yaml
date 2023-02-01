@@ -16,6 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
+      - buildSrc/**
   pull_request:
     branches:
       - main

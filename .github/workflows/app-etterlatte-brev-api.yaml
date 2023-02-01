@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-brev-api/**
       - libs/common/**
       - libs/etterlatte-ktor/**
+      - buildSrc/**
   pull_request:
     branches:
       - main

@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-opplysninger-fra-pdl/**
       - libs/testdata/**
+      - buildSrc/**
   pull_request:
     branches:
       - main

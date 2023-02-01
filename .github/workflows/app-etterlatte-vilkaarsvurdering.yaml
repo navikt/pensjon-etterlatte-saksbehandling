@@ -21,6 +21,7 @@ on:
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
       - libs/testdata/**
+      - buildSrc/**
   pull_request:
     branches:
       - main

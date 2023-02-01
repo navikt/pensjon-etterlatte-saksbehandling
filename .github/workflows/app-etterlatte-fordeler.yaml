@@ -16,6 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-fordeler/**
+      - buildSrc/**
   pull_request:
     branches:
       - main

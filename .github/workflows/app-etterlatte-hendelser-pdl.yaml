@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-hendelser-pdl/**
       - libs/common/**
+      - buildSrc/**
   pull_request:
     branches:
       - main

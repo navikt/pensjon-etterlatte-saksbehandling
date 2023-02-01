@@ -20,6 +20,7 @@ on:
       - libs/testdata/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - buildSrc/**
   pull_request:
     branches:
       - main

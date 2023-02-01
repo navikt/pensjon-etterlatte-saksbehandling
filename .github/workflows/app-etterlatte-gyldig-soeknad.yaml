@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-gyldig-soeknad/**
       - libs/common/**
+      - buildSrc/**
   pull_request:
     branches:
       - main

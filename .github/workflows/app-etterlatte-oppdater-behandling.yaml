@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-oppdater-behandling/**
       - libs/common/**
+      - buildSrc/**
   pull_request:
     branches:
       - main

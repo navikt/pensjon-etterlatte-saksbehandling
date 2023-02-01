@@ -110,10 +110,7 @@ internal class VilkaarsvurderingServiceTest {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         val vilkaarsvurdering = runBlocking {
-            service.hentEllerOpprettVilkaarsvurdering(
-                uuid,
-                accesstoken
-            )
+            service.opprettVilkaarsvurdering(uuid, accesstoken)
         }
 
         vilkaarsvurdering shouldNotBe null
@@ -251,7 +248,7 @@ internal class VilkaarsvurderingServiceTest {
             assertThrows<IllegalStateException> {
                 service.oppdaterVurderingPaaVilkaar(uuid, accesstoken, vurdertVilkaar)
             }
-            val actual = service.hentEllerOpprettVilkaarsvurdering(uuid, accesstoken)
+            val actual = service.hentVilkaarsvurdering(uuid)
             actual shouldBe vilkaarsvurdering
         }
     }
@@ -270,10 +267,7 @@ internal class VilkaarsvurderingServiceTest {
         }
 
         val vilkaarsvurdering = runBlocking {
-            service.hentEllerOpprettVilkaarsvurdering(
-                uuid,
-                accesstoken
-            )
+            service.opprettVilkaarsvurdering(uuid, accesstoken)
         }
 
         vilkaarsvurdering shouldNotBe null
@@ -286,10 +280,7 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering {
-        return service.hentEllerOpprettVilkaarsvurdering(
-            uuid,
-            accesstoken
-        )
+        return service.opprettVilkaarsvurdering(uuid, accesstoken)
     }
 
     private fun vilkaarsVurderingData() =

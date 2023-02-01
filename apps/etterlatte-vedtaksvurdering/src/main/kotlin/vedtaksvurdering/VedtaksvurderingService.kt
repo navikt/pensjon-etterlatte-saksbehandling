@@ -291,20 +291,6 @@ class VedtaksvurderingService(
             .filterNotNull()
             .sortedBy { it.periode.fom }
     }
-
-    suspend fun postTilVedtakhendelse(
-        behandlingId: UUID,
-        accessToken: String,
-        hendelse: HendelseType,
-        vedtakhendelse: VedtakHendelse
-    ) {
-        behandlingKlient.postVedtakHendelse(
-            vedtakHendelse = vedtakhendelse,
-            hendelse = hendelse,
-            behandlingId = behandlingId,
-            accessToken = accessToken
-        )
-    }
 }
 
 class SaksbehandlerManglerEnhetException(message: String) : Exception(message)

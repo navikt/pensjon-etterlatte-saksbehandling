@@ -76,7 +76,6 @@ export const Resultat: React.FC<Props> = ({
 
   const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'
   const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
-  console.log(virkningstidspunktDato, vilkaarsvurdering.virkningstidspunkt)
   return (
     <>
       <VilkaarWrapper>

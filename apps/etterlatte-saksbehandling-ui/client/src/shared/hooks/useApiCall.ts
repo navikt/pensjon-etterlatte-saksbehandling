@@ -17,7 +17,7 @@ export function useApiCall<T, U>(
           onSuccess?.(res.data)
         } else {
           setApiResult(error(res))
-          onError?.(res.error)
+          onError?.(res)
         }
       }
     },

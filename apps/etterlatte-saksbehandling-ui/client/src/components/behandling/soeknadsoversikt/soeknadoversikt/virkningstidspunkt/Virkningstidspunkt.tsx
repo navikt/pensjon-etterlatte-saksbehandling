@@ -57,12 +57,17 @@ const Virkningstidspunkt = (props: Props) => {
 
     const harVirkningstidspunktEndretSeg = props.virkningstidspunkt?.dato !== formaterDatoTilYearMonth(formData)
     if (harVirkningstidspunktEndretSeg) {
-      fastsettVirkningstidspunktRequest({ id: props.behandlingId, dato: formData, begrunnelse: begrunnelse }, (res) => {
-        dispatch(oppdaterVirkningstidspunkt(res))
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
-      })
+      return fastsettVirkningstidspunktRequest(
+        { id: props.behandlingId, dato: formData, begrunnelse: begrunnelse },
+        (res) => {
+          dispatch(oppdaterVirkningstidspunkt(res))
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
+          onSuccess?.()
+        }
+      )
+    } else {
+      onSuccess?.()
     }
-    onSuccess?.()
   }
 
   const reset = (onSuccess?: () => void) => {

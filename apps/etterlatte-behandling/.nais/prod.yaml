@@ -79,22 +79,12 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_BEREGNING_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-beregning
-    - name: ETTERLATTE_BEREGNING_URL
-      value: http://etterlatte-beregning
-    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
-    - name: ETTERLATTE_VILKAARSVURDERING_URL
-      value: http://etterlatte-vilkaarsvurdering
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
-        - application: etterlatte-beregning
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
     inbound:
       rules:

@@ -5,6 +5,9 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:common"))
+
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ClientCore)
     implementation(Ktor2.ClientLoggingJvm)
@@ -20,14 +23,13 @@ dependencies {
     implementation(Kafka.Avro)
     implementation(Kafka.AvroSerializer)
     implementation(Logging.LogbackClassic)
+
     testImplementation(Jupiter.Api)
     testImplementation(Kafka.EmbeddedEnv)
     testImplementation(Jupiter.Engine)
     testImplementation(Ktor2.ServerTests)
     testImplementation(MockK.MockK)
     testImplementation(Ktor2.ClientMock)
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
-    implementation(project(":libs:common"))
 }
 
 tasks.named("compileKotlin").configure { dependsOn(":apps:etterlatte-hendelser-pdl:generateAvroJava") }

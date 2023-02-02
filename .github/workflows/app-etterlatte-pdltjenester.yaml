@@ -16,13 +16,31 @@ on:
       - main
     paths:
       - apps/etterlatte-pdltjenester/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-ktor/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/Micrometer.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/NavFelles.kt
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-pdltjenester/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-ktor/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/Micrometer.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/NavFelles.kt
 
 jobs:
   test:

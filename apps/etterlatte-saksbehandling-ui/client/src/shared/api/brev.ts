@@ -32,6 +32,9 @@ export const opprettEllerOppdaterBrevForVedtak = async (
   behandlingId: string
 ): Promise<ApiResponse<any>> => apiClient.post(`/brev/vedtak`, { sakId, behandlingId })
 
+export const attesterVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<any>> =>
+  apiClient.post(`/brev/attestert/${behandlingId}`, {})
+
 export const ferdigstillBrev = async (brevId: string): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/${brevId}/ferdigstill`, {})
 

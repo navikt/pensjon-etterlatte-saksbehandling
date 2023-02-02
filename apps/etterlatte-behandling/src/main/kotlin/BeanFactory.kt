@@ -24,14 +24,10 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
@@ -87,8 +83,6 @@ interface BeanFactory {
     fun grunnlagClient(): GrunnlagClient
     fun vedtakKlient(): VedtakKlient
     fun grunnlagKlient(): GrunnlagKlient
-    fun beregningKlient(): BeregningKlient
-    fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient
     fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
 }
@@ -162,8 +156,6 @@ abstract class CommonFactory : BeanFactory {
             manueltOpphoerService(),
             vedtakKlient(),
             grunnlagKlient(),
-            beregningKlient(),
-            vilkaarsvurderingKlient(),
             sporingslogg()
         )
     }
@@ -249,14 +241,6 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
 
     override fun grunnlagKlient(): GrunnlagKlient {
         return GrunnlagKlientImpl(config, httpClient())
-    }
-
-    override fun beregningKlient(): BeregningKlient {
-        return BeregningKlientImpl(config, httpClient())
-    }
-
-    override fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient {
-        return VilkaarsvurderingKlientImpl(config, httpClient())
     }
 
     override fun grunnlagsendringshendelseJob(): Timer {

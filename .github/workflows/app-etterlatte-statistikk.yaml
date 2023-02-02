@@ -17,12 +17,22 @@ on:
     paths:
       - apps/etterlatte-statistikk/**
       - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-statistikk/**
       - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
 
 jobs:
   test:

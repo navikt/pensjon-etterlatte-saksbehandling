@@ -71,8 +71,6 @@ class RealGenerellBehandlingServiceTest {
             manueltOpphoerMock,
             mockk(),
             mockk(),
-            mockk(),
-            mockk(),
             mockk()
         )
 
@@ -104,8 +102,6 @@ class RealGenerellBehandlingServiceTest {
             manueltOpphoerMock,
             mockk(),
             mockk(),
-            mockk(),
-            mockk(),
             mockk()
         )
         val behandlingtype = sut.hentBehandlingstype(id)
@@ -130,8 +126,6 @@ class RealGenerellBehandlingServiceTest {
             RevurderingFactory(behandlingerMock, hendelserMock),
             hendelserMock,
             manueltOpphoerMock,
-            mockk(),
-            mockk(),
             mockk(),
             mockk(),
             mockk()
@@ -274,8 +268,6 @@ class RealGenerellBehandlingServiceTest {
         ),
         hendelser = hendelseDao,
         manueltOpphoerService = manueltOpphoerService,
-        mockk(),
-        mockk(),
         mockk(),
         mockk(),
         mockk()

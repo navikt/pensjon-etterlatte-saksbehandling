@@ -5,9 +5,10 @@ plugins {
 }
 
 dependencies {
-    implementation(Ktor2.OkHttp)
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:common"))
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
+
+    implementation(Ktor2.OkHttp)
     implementation(Ktor2.ClientCore)
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.ClientCioJvm)

@@ -65,22 +65,12 @@ spec:
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_BEREGNING_CLIENT_ID
-      value: b07cf335-11fb-4efa-bd46-11f51afd5052
-    - name: ETTERLATTE_BEREGNING_URL
-      value: http://etterlatte-beregning
-    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: f4cf400f-8ef9-406f-baf1-8218f8f7edac
-    - name: ETTERLATTE_VILKAARSVURDERING_URL
-      value: http://etterlatte-vilkaarsvurdering
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
-        - application: etterlatte-beregning
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
     inbound:
       rules:

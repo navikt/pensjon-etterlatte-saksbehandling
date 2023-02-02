@@ -1,3 +1,3 @@
 object MockK {
-    const val MockK = "io.mockk:mockk:1.13.1"
+    const val MockK = "io.mockk:mockk:1.13.4"
 }

@@ -9,6 +9,9 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
+import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlientImpl
+import no.nav.etterlatte.grunnlagsendring.klienter.hentDoedsdato
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -21,8 +24,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import no.nav.etterlatte.pdl.PdlKlientImpl
-import no.nav.etterlatte.pdl.hentDoedsdato
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -84,7 +85,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
         val pdlService = mockk<PdlKlientImpl>()
-        val grunnlagClient = mockk<GrunnlagClient>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -139,7 +140,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { alleSakIderForSoekerMedFnr(fnr) } returns listOf(1L)
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val grunnlagClient = mockk<GrunnlagClient>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
         val pdlService = mockk<PdlKlientImpl>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
@@ -217,7 +218,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
         val pdlService = mockk<PdlKlientImpl>()
-        val grunnlagClient = mockk<GrunnlagClient>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -292,7 +293,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
         val pdlService = mockk<PdlKlientImpl>()
-        val grunnlagClient = mockk<GrunnlagClient>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -366,7 +367,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
         val pdlService = mockk<PdlKlientImpl>()
-        val grunnlagClient = mockk<GrunnlagClient>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -462,7 +463,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
         }
 
-        val grunnlagClient = mockk<GrunnlagClientImpl> {
+        val grunnlagClient = mockk<GrunnlagKlient> {
             coEvery { hentGrunnlag(any()) } returns null
         }
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(

@@ -33,12 +33,11 @@ import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.LeaderElection
-import no.nav.etterlatte.grunnlagsendring.GrunnlagClient
-import no.nav.etterlatte.grunnlagsendring.GrunnlagClientImpl
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlient
+import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlientImpl
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -49,8 +48,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.pdl.PdlKlient
-import no.nav.etterlatte.pdl.PdlKlientImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
@@ -78,13 +75,13 @@ interface BeanFactory {
     fun foerstegangsbehandlingFactory(): FoerstegangsbehandlingFactory
     fun revurderingFactory(): RevurderingFactory
     fun pdlHttpClient(): HttpClient
-    fun pdlService(): PdlKlient
+    fun pdlKlient(): PdlKlient
     fun leaderElection(): LeaderElection
     fun grunnlagsendringshendelseJob(): Timer
     fun grunnlagHttpClient(): HttpClient
-    fun grunnlagClient(): GrunnlagClient
-    fun vedtakKlient(): VedtakKlient
     fun grunnlagKlient(): GrunnlagKlient
+    fun grunnlagKlientClientCredentials(): no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
+    fun vedtakKlient(): VedtakKlient
     fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
 }
@@ -168,16 +165,17 @@ abstract class CommonFactory : BeanFactory {
     override fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao { databaseContext().activeTx() }
 
-    override fun pdlService() = PdlKlientImpl(pdlHttpClient(), "http://etterlatte-pdltjenester")
+    override fun pdlKlient() = PdlKlientImpl(pdlHttpClient(), "http://etterlatte-pdltjenester")
 
-    override fun grunnlagClient() = GrunnlagClientImpl(grunnlagHttpClient())
+    override fun grunnlagKlientClientCredentials() =
+        no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl(grunnlagHttpClient())
 
     override fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             grunnlagsendringshendelseDao(),
             generellBehandlingService(),
-            pdlService(),
-            grunnlagClient()
+            pdlKlient(),
+            grunnlagKlientClientCredentials()
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(

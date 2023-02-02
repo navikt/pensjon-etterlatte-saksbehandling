@@ -45,7 +45,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
         post("/{behandlingId}/opprett") {
             withBehandlingId { behandlingId ->
                 try {
-                    logger.info("Henter vilkårsvurdering for $behandlingId")
+                    logger.info("Oppretter vilkårsvurdering for $behandlingId")
                     val vilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, accesstoken)
 
                     call.respond(vilkaarsvurdering.toDto())

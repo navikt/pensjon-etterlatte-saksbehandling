@@ -2,13 +2,13 @@ package no.nav.etterlatte.grunnlagsendring
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.database.singleOrNull
-import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.toList
 import org.postgresql.util.PGobject
 import java.sql.Connection
 import java.sql.PreparedStatement

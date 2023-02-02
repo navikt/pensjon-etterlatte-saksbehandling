@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.pdl.PdlService
+import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.hentAnsvarligeForeldre
 import no.nav.etterlatte.pdl.hentBarn
 import no.nav.etterlatte.pdl.hentDoedsdato
@@ -29,7 +29,7 @@ import java.util.*
 class GrunnlagsendringshendelseService(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val generellBehandlingService: GenerellBehandlingService,
-    private val pdlService: PdlService,
+    private val pdlKlient: PdlKlient,
     private val grunnlagClient: GrunnlagClient
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -124,7 +124,7 @@ class GrunnlagsendringshendelseService(
         hendelse: Grunnlagsendringshendelse
     ) {
         val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle()
-        val pdlData = pdlService.hentPdlModell(hendelse.gjelderPerson, personRolle)
+        val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle)
         val grunnlag = runBlocking {
             grunnlagClient.hentGrunnlag(hendelse.sakId)
         }

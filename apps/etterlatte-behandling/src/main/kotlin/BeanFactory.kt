@@ -19,7 +19,6 @@ import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelser
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.RealGenerellBehandlingService
-import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
@@ -33,12 +32,13 @@ import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
-import no.nav.etterlatte.database.DataSourceBuilder
+import no.nav.etterlatte.common.LeaderElection
 import no.nav.etterlatte.grunnlagsendring.GrunnlagClient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagClientImpl
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlient
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -46,10 +46,11 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.pdl.PdlService
-import no.nav.etterlatte.pdl.PdlServiceImpl
+import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.pdl.PdlKlientImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
@@ -58,9 +59,10 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.*
+import javax.sql.DataSource
 
 interface BeanFactory {
-    fun datasourceBuilder(): DataSourceBuilder
+    fun dataSource(): DataSource
     fun sakService(): SakService
     fun foerstegangsbehandlingService(): FoerstegangsbehandlingService
     fun revurderingService(): RevurderingService
@@ -76,7 +78,7 @@ interface BeanFactory {
     fun foerstegangsbehandlingFactory(): FoerstegangsbehandlingFactory
     fun revurderingFactory(): RevurderingFactory
     fun pdlHttpClient(): HttpClient
-    fun pdlService(): PdlService
+    fun pdlService(): PdlKlient
     fun leaderElection(): LeaderElection
     fun grunnlagsendringshendelseJob(): Timer
     fun grunnlagHttpClient(): HttpClient
@@ -92,7 +94,7 @@ abstract class CommonFactory : BeanFactory {
         BehandlingsHendelser(
             rapid(),
             behandlingDao(),
-            datasourceBuilder().dataSource,
+            dataSource(),
             sakService()
         )
     }
@@ -166,7 +168,7 @@ abstract class CommonFactory : BeanFactory {
     override fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao { databaseContext().activeTx() }
 
-    override fun pdlService() = PdlServiceImpl(pdlHttpClient(), "http://etterlatte-pdltjenester")
+    override fun pdlService() = PdlKlientImpl(pdlHttpClient(), "http://etterlatte-pdltjenester")
 
     override fun grunnlagClient() = GrunnlagClientImpl(grunnlagHttpClient())
 
@@ -179,7 +181,7 @@ abstract class CommonFactory : BeanFactory {
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(
-        datasource = datasourceBuilder().dataSource,
+        datasource = dataSource(),
         grunnlagsendringshendelseService = grunnlagsendringshendelseService(),
         leaderElection = leaderElection(),
         initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
@@ -192,8 +194,8 @@ abstract class CommonFactory : BeanFactory {
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val datasourceBuilder: DataSourceBuilder by lazy { DataSourceBuilder(env) }
-    override fun datasourceBuilder() = datasourceBuilder
+
+    override fun dataSource() = DataSourceBuilder.createDataSource(env)
 
     override fun rapid(): KafkaProdusent<String, String> {
         return kafkaConfig().standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
@@ -252,7 +254,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "
         )
         return GrunnlagsendringshendelseJob(
-            datasource = datasourceBuilder().dataSource,
+            datasource = dataSource(),
             grunnlagsendringshendelseService = grunnlagsendringshendelseService(),
             leaderElection = leaderElection(),
             initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),

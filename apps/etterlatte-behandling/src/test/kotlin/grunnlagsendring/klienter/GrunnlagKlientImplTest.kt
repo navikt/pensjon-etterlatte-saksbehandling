@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grunnlagsendring
+package no.nav.etterlatte.grunnlagsendring.klienter
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
@@ -17,14 +17,14 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class GrunnlagClientImplTest {
+internal class GrunnlagKlientImplTest {
 
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
     @Test
     fun `skal hente grunnlag`() {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val klient = GrunnlagClientImpl(mockHttpClient(grunnlag))
+        val klient = GrunnlagKlientImpl(mockHttpClient(grunnlag))
         val hentetGrunnlag = runBlocking {
             klient.hentGrunnlag(1)
         }

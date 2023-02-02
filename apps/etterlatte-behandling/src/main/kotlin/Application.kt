@@ -37,16 +37,16 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
-import no.nav.etterlatte.database.DatabaseContext
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.helsesjekk.isReady
 import no.nav.etterlatte.libs.helsesjekk.setReady
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
@@ -72,7 +72,7 @@ fun Application.sikkerhetsModul() {
 }
 
 fun Application.module(beanFactory: BeanFactory) {
-    val ds = beanFactory.datasourceBuilder().apply {
+    val dataSource = beanFactory.dataSource().apply {
         migrate()
     }
 
@@ -103,7 +103,7 @@ fun Application.module(beanFactory: BeanFactory) {
     routing {
         naisprobes()
         authenticate {
-            attachContekst(ds.dataSource)
+            attachContekst(dataSource)
             sakRoutes(beanFactory.sakService(), generellBehandlingService, grunnlagsendringshendelseService)
             behandlingRoutes(
                 generellBehandlingService,
@@ -113,7 +113,7 @@ fun Application.module(beanFactory: BeanFactory) {
             )
             behandlingsstatusRoutes(beanFactory.behandlingsStatusService(), generellBehandlingService)
             route("api") {
-                oppgaveRoutes(OppgaveDao(ds.dataSource))
+                oppgaveRoutes(OppgaveDao(dataSource))
             }
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService)
         }
@@ -125,7 +125,7 @@ private fun Route.attachContekst(ds: DataSource) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
             Context(
-                decideUser(call.principal<TokenValidationContextPrincipal>()!!),
+                decideUser(call.principal()!!),
                 DatabaseContext(ds)
             )
         withContext(

@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-helsesjekk"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-sporingslogg"))
     implementation(project(":libs:rapidsandrivers-extras"))
 

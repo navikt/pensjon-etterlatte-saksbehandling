@@ -18,6 +18,9 @@ on:
       - apps/etterlatte-oppdater-behandling/**
       - libs/common/**
       - libs/ktor2client-auth-clientcredentials/**
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
   pull_request:
     branches:
       - main
@@ -25,6 +28,9 @@ on:
       - apps/etterlatte-oppdater-behandling/**
       - libs/common/**
       - libs/ktor2client-auth-clientcredentials/**
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
 
 jobs:
   test:

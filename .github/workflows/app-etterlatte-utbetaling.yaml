@@ -17,12 +17,24 @@ on:
     paths:
       - apps/etterlatte-utbetaling/**
       - libs/common/**
+      - buildSrc/src/main/kotlin/Database.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/TestContainer.kt
+      - buildSrc/src/main/kotlin/WireMock.kt
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
       - libs/common/**
+      - buildSrc/src/main/kotlin/Database.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/TestContainer.kt
+      - buildSrc/src/main/kotlin/WireMock.kt
 
 jobs:
   test:

@@ -16,11 +16,25 @@ on:
       - main
     paths:
       - apps/etterlatte-tilbakekreving/**
+      - buildSrc/src/main/kotlin/Database.kt
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/NavFelles.kt
+      - buildSrc/src/main/kotlin/WireMock.kt
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-tilbakekreving/**
+      - buildSrc/src/main/kotlin/Database.kt
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Kotlinx.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/NavFelles.kt
+      - buildSrc/src/main/kotlin/WireMock.kt
 
 jobs:
   test:

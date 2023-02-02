@@ -41,6 +41,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.isReady
 import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.database.migrate

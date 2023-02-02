@@ -16,6 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-soeknad/**
+      - libs/common/**
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/MockK.kt
   pull_request:
@@ -23,6 +24,7 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-soeknad/**
+      - libs/common/**
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/MockK.kt
 

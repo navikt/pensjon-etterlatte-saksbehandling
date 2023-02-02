@@ -16,6 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
+      - libs/common/**
       - buildSrc/src/main/kotlin/Database.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt
@@ -26,6 +27,7 @@ on:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
+      - libs/common/**
       - buildSrc/src/main/kotlin/Database.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt

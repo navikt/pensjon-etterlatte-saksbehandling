@@ -19,6 +19,9 @@ on:
       - libs/common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
+      - libs/ktor2client-onbehalfof/**
+      - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Database.kt
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
@@ -34,6 +37,9 @@ on:
       - libs/common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
+      - libs/ktor2client-onbehalfof/**
+      - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Database.kt
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt

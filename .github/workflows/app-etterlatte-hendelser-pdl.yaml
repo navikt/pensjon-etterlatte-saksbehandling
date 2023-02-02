@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-hendelser-pdl/**
       - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Jupiter.kt
       - buildSrc/src/main/kotlin/Kafka.kt
@@ -30,6 +31,7 @@ on:
     paths:
       - apps/etterlatte-hendelser-pdl/**
       - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Jupiter.kt
       - buildSrc/src/main/kotlin/Kafka.kt

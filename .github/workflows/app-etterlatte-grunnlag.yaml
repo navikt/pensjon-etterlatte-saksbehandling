@@ -19,6 +19,8 @@ on:
       - libs/common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-ktor/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt
@@ -28,9 +30,11 @@ on:
     branches:
       - main
     paths:
-      - apps/etterlatte-gyldig-soeknad/**
+      - apps/etterlatte-grunnlag/**
       - libs/common/**
       - libs/testdata/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-ktor/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt

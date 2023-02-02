@@ -16,6 +16,8 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-inntektskomponenten/**
+      - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - buildSrc/src/main/kotlin/Jupiter.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
@@ -26,6 +28,8 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-inntektskomponenten/**
+      - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - buildSrc/src/main/kotlin/Jupiter.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt

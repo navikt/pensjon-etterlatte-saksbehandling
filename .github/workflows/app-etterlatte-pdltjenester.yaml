@@ -16,6 +16,9 @@ on:
       - main
     paths:
       - apps/etterlatte-pdltjenester/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-ktor/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
@@ -28,6 +31,9 @@ on:
       - main
     paths:
       - apps/etterlatte-pdltjenester/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-ktor/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt

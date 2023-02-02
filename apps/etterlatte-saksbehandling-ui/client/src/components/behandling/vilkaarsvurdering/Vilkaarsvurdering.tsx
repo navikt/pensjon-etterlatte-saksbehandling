@@ -1,7 +1,7 @@
 import { Content, ContentHeader } from '~shared/styled'
 import React, { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
+import { hentVilkaarsvurdering, opprettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
 import { VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
@@ -11,8 +11,9 @@ import { useAppDispatch, useAppSelector } from '~store/Store'
 import { Heading } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiError } from '~shared/api/apiClient'
 
 export const Vilkaarsvurdering = () => {
   const location = useLocation()
@@ -22,6 +23,7 @@ export const Vilkaarsvurdering = () => {
   const vilkaarsvurdering = useAppSelector((state) => state.behandlingReducer.behandling.vilkårsprøving)
   const behandles = hentBehandlesFraStatus(behandlingstatus)
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
+  const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)
 
   useEffect(() => {
     const hash = location.hash.slice(1)
@@ -30,8 +32,20 @@ export const Vilkaarsvurdering = () => {
 
   useEffect(() => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
-    fetchVilkaarsvurdering(behandlingId, (vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering)))
+    fetchVilkaarsvurdering(
+      behandlingId,
+      (vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering)),
+      (error) => opprettHvisDenIkkeFinnes(error)
+    )
   }, [behandlingId])
+
+  const opprettHvisDenIkkeFinnes = (error: ApiError) => {
+    if (error.statusCode === 404) {
+      opprettNyVilkaarsvurdering(behandlingId!!, (vilkaarsvurdering) =>
+        dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
+      )
+    }
+  }
 
   return (
     <Content>
@@ -43,7 +57,7 @@ export const Vilkaarsvurdering = () => {
         </HeadingWrapper>
       </ContentHeader>
 
-      {behandlingId && isSuccess(vilkaarsvurderingStatus) && vilkaarsvurdering && (
+      {behandlingId && vilkaarsvurdering && (
         <>
           <VilkaarBorderTop />
           {vilkaarsvurdering.vilkaar.map((value, index) => (
@@ -67,9 +81,13 @@ export const Vilkaarsvurdering = () => {
         </>
       )}
       {isPending(vilkaarsvurderingStatus) && <Spinner visible={true} label={'Henter vilkårsvurdering'} />}
-      {isFailure(vilkaarsvurderingStatus) && (
+      {isPending(opprettNyVilkaarsvurderingStatus) && <Spinner visible={true} label={'Oppretter vilkårsvurdering'} />}
+      {isFailure(vilkaarsvurderingStatus) && isInitial(opprettNyVilkaarsvurderingStatus) && (
+        <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
+      )}
+      {isFailure(opprettNyVilkaarsvurderingStatus) && (
         <ApiErrorAlert>
-          {vilkaarsvurderingStatus.error.statusCode === 412
+          {opprettNyVilkaarsvurderingStatus.error.statusCode === 412
             ? 'Virkningstidspunkt og kommer søker tilgode må avklares før vilkårsvurdering kan starte'
             : 'En feil har oppstått'}
         </ApiErrorAlert>

@@ -81,10 +81,10 @@ internal class BehandlingsstatusRoutesTest {
 
         testApplication {
             application {
-                module(beanFactory)
                 install(Authentication) {
                     tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
                 }
+                module(beanFactory)
             }
 
             val response = client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
@@ -114,10 +114,10 @@ internal class BehandlingsstatusRoutesTest {
 
         testApplication {
             application {
-                module(beanFactory)
                 install(Authentication) {
                     tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
                 }
+                module(beanFactory)
             }
 
             val response = client.get("/behandlinger/$behandlingId/vilkaarsvurder") {

@@ -1,3 +1,3 @@
 object Micrometer {
-    const val Prometheus = "io.micrometer:micrometer-registry-prometheus:1.5.5"
+    const val Prometheus = "io.micrometer:micrometer-registry-prometheus:1.10.3"
 }

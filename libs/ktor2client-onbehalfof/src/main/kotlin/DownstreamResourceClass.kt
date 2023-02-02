@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.ktorobo
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
@@ -24,7 +23,6 @@ class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
     private val httpClient: HttpClient = defaultHttpClient
 ) {
-
     suspend fun get(
         resource: Resource,
         accessToken: String
@@ -87,12 +85,7 @@ class DownstreamResourceClient(
             }
             .fold(
                 onSuccess = { result ->
-                    val body = if (!result.harContentType(ContentType.Application.Json)) {
-                        JsonNodeFactory.instance.objectNode()
-                    } else {
-                        result.body()
-                    }
-                    Ok(body)
+                    Ok(result.body())
                 },
                 onFailure = { error ->
                     error.toErr(resource.url)

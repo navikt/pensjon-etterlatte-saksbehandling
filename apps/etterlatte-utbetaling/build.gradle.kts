@@ -5,6 +5,8 @@ plugins {
     id("com.faire.gradle.analyze") version "1.0.9"
 }
 dependencies {
+    implementation(project(":libs:common"))
+
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ClientCore)
     implementation(Ktor2.ClientContentNegotiation)
@@ -22,8 +24,6 @@ dependencies {
     implementation("javax.xml.bind:jaxb-api:2.3.1")
     implementation("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-    implementation(project(":libs:common"))
-
     implementation(Database.HikariCP)
     implementation(Database.FlywayDB)
     implementation(Database.Postgresql)
@@ -33,8 +33,7 @@ dependencies {
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
 
-    testImplementation("org.testcontainers:testcontainers:1.17.6")
-    testImplementation("com.github.tomakehurst:wiremock:2.33.2")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.6")
+    testImplementation(WireMock.WireMock)
+    testImplementation(TestContainer.Jupiter)
     testImplementation(TestContainer.Postgresql)
 }

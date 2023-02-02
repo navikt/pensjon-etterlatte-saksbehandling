@@ -16,12 +16,16 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-pdl/**
+      - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-pdl/**
+      - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
 
 jobs:

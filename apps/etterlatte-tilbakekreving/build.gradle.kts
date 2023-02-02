@@ -3,7 +3,7 @@ plugins {
     id("com.faire.gradle.analyze") version "1.0.9"
 }
 dependencies {
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:common"))
 
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)
@@ -35,9 +35,7 @@ dependencies {
     implementation("javax.xml.bind:jaxb-api:2.3.1")
     implementation("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-    implementation(project(":libs:common"))
-
-    implementation("com.zaxxer:HikariCP:3.4.5")
+    implementation(Database.HikariCP)
     implementation(Database.FlywayDB)
     implementation(Database.Postgresql)
     implementation(Database.KotliQuery)
@@ -47,8 +45,7 @@ dependencies {
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
 
-    testImplementation("org.testcontainers:testcontainers:1.17.6")
-    testImplementation("com.github.tomakehurst:wiremock:2.33.2")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.6")
-    testImplementation("org.testcontainers:postgresql:1.17.6")
+    testImplementation(WireMock.WireMock)
+    testImplementation(TestContainer.Jupiter)
+    testImplementation(TestContainer.Postgresql)
 }

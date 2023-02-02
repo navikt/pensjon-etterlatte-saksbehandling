@@ -7,11 +7,13 @@ on:
       - main
     paths:
       - apps/etterlatte-testdata/**
+      - libs/ktor2client-onbehalfof/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-testdata/**
+      - libs/ktor2client-onbehalfof/**
 
 jobs:
   test:

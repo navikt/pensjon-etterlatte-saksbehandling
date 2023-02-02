@@ -82,6 +82,10 @@ object MockK {
     const val MockK = "io.mockk:mockk:1.12.0"
 }
 
+object WireMock {
+    const val WireMock = "com.github.tomakehurst:wiremock:2.33.2"
+}
+
 object Kotest {
     private const val version = "4.6.3"
 

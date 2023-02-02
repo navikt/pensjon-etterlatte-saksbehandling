@@ -17,12 +17,14 @@ on:
     paths:
       - apps/etterlatte-gyldig-soeknad/**
       - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-gyldig-soeknad/**
       - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
 
 jobs:
   test:

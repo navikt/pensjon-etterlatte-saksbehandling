@@ -17,18 +17,22 @@ on:
     paths:
       - apps/etterlatte-beregning/**
       - libs/common/**
-      - libs/testdata/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-regler/**
+      - libs/ktor2client-onbehalfof/**
+      - libs/testdata/**
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-beregning/**
       - libs/common/**
-      - libs/testdata/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-regler/**
+      - libs/ktor2client-onbehalfof/**
+      - libs/testdata/**
 
 jobs:
   test:

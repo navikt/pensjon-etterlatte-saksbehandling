@@ -160,13 +160,14 @@ export const Resultat: React.FC<Props> = ({
         </VilkaarsvurderingContent>
       </VilkaarWrapper>
 
-      <VilkaarBorder />
-
       {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
         <WarningAlert>
-          Virkningstidspunktet er endret. Vennligst slett vilkårsvurderingen og behandle på nytt.
+          Virkningstidspunktet er endret og vilkårene må da vurderes på nytt. For å starte ny vurdering må du slette
+          nåværende vilkårsvurdering
         </WarningAlert>
       )}
+
+      <VilkaarBorder />
 
       <BehandlingHandlingKnapper>
         {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && <VilkaarsVurderingKnapper />}
@@ -232,7 +233,6 @@ const ContentWrapper = styled.div`
 `
 
 const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
-  margin-left: 4em;
-  margin-top: 2em;
+  margin: 2em 4em 0 4em;
   max-width: fit-content;
 `

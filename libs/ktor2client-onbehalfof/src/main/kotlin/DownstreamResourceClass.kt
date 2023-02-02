@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.ktorobo
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
@@ -11,10 +12,12 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.contentType
+import io.ktor.utils.io.ByteReadChannel
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
@@ -23,6 +26,7 @@ class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
     private val httpClient: HttpClient = defaultHttpClient
 ) {
+
     suspend fun get(
         resource: Resource,
         accessToken: String
@@ -85,7 +89,14 @@ class DownstreamResourceClient(
             }
             .fold(
                 onSuccess = { result ->
-                    Ok(result.body())
+                    val body = if (result is ByteReadChannel) {
+                        logger.info("Mottok content-type: ${result.contentType()} for ByteReadChannel")
+                        logger.info("Resultatet: ${result.bodyAsText()}")
+                        JsonNodeFactory.instance.objectNode()
+                    } else {
+                        result.body()
+                    }
+                    Ok(body)
                 },
                 onFailure = { error ->
                     error.toErr(resource.url)

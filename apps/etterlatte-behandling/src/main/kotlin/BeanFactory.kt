@@ -75,7 +75,6 @@ interface BeanFactory {
     fun foerstegangsbehandlingFactory(): FoerstegangsbehandlingFactory
     fun revurderingFactory(): RevurderingFactory
     fun pdlHttpClient(): HttpClient
-    fun pdlService(): PdlKlient
     fun pdlKlient(): PdlKlient
     fun leaderElection(): LeaderElection
     fun grunnlagsendringshendelseJob(): Timer

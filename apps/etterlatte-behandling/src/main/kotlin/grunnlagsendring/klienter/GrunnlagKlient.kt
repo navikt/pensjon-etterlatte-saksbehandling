@@ -12,7 +12,8 @@ interface GrunnlagKlient {
     suspend fun hentGrunnlag(sakId: Long): Grunnlag?
 }
 
-class GrunnlagKlientImpl(private val grunnlagHttpClient: HttpClient) : GrunnlagKlient {
+class GrunnlagKlientImpl(private val grunnlagHttpClient: HttpClient) :
+    GrunnlagKlient {
 
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
         return grunnlagHttpClient.get("grunnlag/$sakId") {

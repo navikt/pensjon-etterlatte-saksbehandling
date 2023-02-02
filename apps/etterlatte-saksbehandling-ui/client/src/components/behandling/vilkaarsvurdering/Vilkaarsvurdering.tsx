@@ -18,9 +18,9 @@ export const Vilkaarsvurdering = () => {
   const location = useLocation()
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
-  const behandlingstatus = useAppSelector((state) => state.behandlingReducer.behandling.status)
-  const vilkaarsvurdering = useAppSelector((state) => state.behandlingReducer.behandling.vilkårsprøving)
-  const behandles = hentBehandlesFraStatus(behandlingstatus)
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const vilkaarsvurdering = behandling.vilkårsprøving
+  const behandles = hentBehandlesFraStatus(behandling.status)
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export const Vilkaarsvurdering = () => {
           {vilkaarsvurdering.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
 
           <Resultat
-            virkningstidspunktDato={vilkaarsvurdering.virkningstidspunkt}
+            virkningstidspunktDato={behandling.virkningstidspunkt?.dato}
             vilkaarsvurdering={vilkaarsvurdering}
             oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
             behandlingId={behandlingId}

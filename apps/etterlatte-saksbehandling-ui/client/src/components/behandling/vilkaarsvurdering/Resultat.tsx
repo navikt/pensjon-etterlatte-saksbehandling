@@ -9,7 +9,7 @@ import {
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarBorder, VilkaarWrapper } from './styled'
-import { BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
 import { Delete } from '@navikt/ds-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
@@ -21,7 +21,7 @@ import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 type Props = {
-  virkningstidspunktDato: string
+  virkningstidspunktDato: string | undefined
   vilkaarsvurdering: IVilkaarsvurdering
   oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string
@@ -75,7 +75,8 @@ export const Resultat: React.FC<Props> = ({
   }
 
   const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'
-
+  const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
+  console.log(virkningstidspunktDato, vilkaarsvurdering.virkningstidspunkt)
   return (
     <>
       <VilkaarWrapper>
@@ -91,7 +92,9 @@ export const Resultat: React.FC<Props> = ({
                 <StatusIcon status={status} /> {`${resultatTekst()}`}
               </TekstWrapper>
               {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
-                <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(virkningstidspunktDato)}</BodyShort>
+                <BodyShort>
+                  Barnepensjon er innvilget f.o.m {formaterStringDato(vilkaarsvurdering.virkningstidspunkt)}
+                </BodyShort>
               )}
               {vilkaarsvurdering?.resultat?.kommentar && (
                 <Kommentar>
@@ -158,8 +161,15 @@ export const Resultat: React.FC<Props> = ({
       </VilkaarWrapper>
 
       <VilkaarBorder />
+
+      {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
+        <WarningAlert>
+          Virkningstidspunktet er endret. Vennligst slett vilkårsvurderingen og behandle på nytt.
+        </WarningAlert>
+      )}
+
       <BehandlingHandlingKnapper>
-        {vilkaarsvurdering.resultat && <VilkaarsVurderingKnapper />}
+        {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && <VilkaarsVurderingKnapper />}
       </BehandlingHandlingKnapper>
     </>
   )
@@ -219,4 +229,10 @@ const HeadingWrapper = styled.div`
 
 const ContentWrapper = styled.div`
   color: var(--navds-global-color-gray-700);
+`
+
+const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
+  margin-left: 4em;
+  margin-top: 2em;
+  max-width: fit-content;
 `

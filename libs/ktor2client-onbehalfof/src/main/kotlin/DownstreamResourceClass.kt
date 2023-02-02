@@ -12,7 +12,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
@@ -88,13 +87,7 @@ class DownstreamResourceClient(
             }
             .fold(
                 onSuccess = { result ->
-                    println(
-                        "Content-type: ${result.contentType()}, type: ${result.javaClass}," +
-                            "tekst: ${result.bodyAsText()}"
-                    )
                     val body = if (!result.harContentType(ContentType.Application.Json)) {
-                        logger.info("Mottok content-type: ${result.contentType()} for ByteReadChannel")
-                        logger.info("Resultatet: ${result.bodyAsText()}")
                         JsonNodeFactory.instance.objectNode()
                     } else {
                         result.body()

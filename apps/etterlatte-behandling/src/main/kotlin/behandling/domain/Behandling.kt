@@ -98,7 +98,7 @@ sealed class Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
     }
 
-    private class BehandlingStoetterIkkeStatusEndringException constructor(
+    class BehandlingStoetterIkkeStatusEndringException constructor(
         behandlingStatus: BehandlingStatus,
         message: String = "Behandlingen støtter ikke statusendringen til status $behandlingStatus"
     ) : Exception(message)

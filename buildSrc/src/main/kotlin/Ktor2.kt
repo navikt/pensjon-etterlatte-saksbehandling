@@ -1,5 +1,5 @@
 object Ktor2 {
-    private const val version = "2.0.3"
+    private const val version = "2.2.2"
 
     const val OkHttp = "io.ktor:ktor-client-okhttp:$version"
     const val ClientCore = "io.ktor:ktor-client-core:$version"

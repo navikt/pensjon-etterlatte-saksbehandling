@@ -1,3 +1,3 @@
 object WireMock {
-    const val WireMock = "com.github.tomakehurst:wiremock:2.33.2"
+    const val WireMock = "com.github.tomakehurst:wiremock-jre8:2.35.0"
 }

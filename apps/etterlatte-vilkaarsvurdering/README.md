@@ -28,11 +28,6 @@ HTTP_PORT=8087;
 ```
 ./get-secret.sh apps/etterlatte-vilkaarsvurdering
 ```
-Hvis du er avhengig av å kjøre opp vilkårsvurdering lokalt mot andre avhengigehter i DEV, som behandling og grunnlag,
-må du hente disse hemmelighetene fra vilkårsvurdering i DEV:
-```
-kubectl get secret $(kubectl describe deployment etterlatte-vilkaarsvurdering |grep -m1  azure-etterlatte-vilkaarsvurdering |sed "s/^[ \t]*//"  |sed 's/ .*//') -o json | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' > .env.dev-gcp
-```
 2. Kjør opp en proxy mot postgres i dev: `nais postgres proxy etterlatte-vilkaarsvurdering`, eller kjør opp en lokal 
    instans med `docker-compose up -d`.
 3. Kopier inn følgende environment variabler i IntelliJ:

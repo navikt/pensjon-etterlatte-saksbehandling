@@ -35,7 +35,7 @@ export const KommerBarnetTilGodeVurdering = ({
     harBegrunnelse ? setBegrunnelseError('') : setBegrunnelseError('Begrunnelsen må fylles ut')
 
     if (svar !== undefined && harBegrunnelse)
-      setKommerBarnetTilGode({ behandlingId, begrunnelse, svar }, (response) => {
+      return setKommerBarnetTilGode({ behandlingId, begrunnelse, svar }, (response) => {
         dispatch(oppdaterKommerBarnetTilgode(response))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()

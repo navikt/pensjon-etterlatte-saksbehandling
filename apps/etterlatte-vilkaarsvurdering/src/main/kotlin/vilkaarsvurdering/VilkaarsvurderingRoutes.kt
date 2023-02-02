@@ -27,10 +27,27 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
         get("/{behandlingId}") {
             withBehandlingId { behandlingId ->
+                logger.info("Henter vilkårsvurdering for $behandlingId")
+                val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
+
+                if (vilkaarsvurdering != null) {
+                    call.respond(vilkaarsvurdering.toDto())
+                } else {
+                    logger.info("Fant ingen vilkårsvurdering for behandling ($behandlingId)")
+                    call.respond(
+                        status = HttpStatusCode.NotFound,
+                        message = "Det finnes ingen vilkårsvurdering for denne behandlingen"
+                    )
+                }
+            }
+        }
+
+        post("/{behandlingId}/opprett") {
+            withBehandlingId { behandlingId ->
                 try {
-                    logger.info("Henter vilkårsvurdering for $behandlingId")
-                    val vilkaarsvurdering =
-                        vilkaarsvurderingService.hentEllerOpprettVilkaarsvurdering(behandlingId, accesstoken)
+                    logger.info("Oppretter vilkårsvurdering for $behandlingId")
+                    val vilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, accesstoken)
+
                     call.respond(vilkaarsvurdering.toDto())
                 } catch (e: VirkningstidspunktIkkeSattException) {
                     logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")

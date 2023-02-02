@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -14,71 +15,95 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
     route("/behandlinger/{behandlingsid}") {
         get("/opprett") {
             /* Kalles kun av vilkårsvurdering når total-vurdering slettes */
-            behandlingsstatusService.settOpprettet(behandlingsId)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settOpprettet(behandlingsId)
+            }
         }
         post("/opprett") {
             /* Kalles kun av vilkårsvurdering når total-vurdering slettes */
-            behandlingsstatusService.settOpprettet(behandlingsId, false)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settOpprettet(behandlingsId, false)
+            }
         }
 
         get("/vilkaarsvurder") {
-            behandlingsstatusService.settVilkaarsvurdert(behandlingsId, true, null)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settVilkaarsvurdert(behandlingsId, true, null)
+            }
         }
         post("/vilkaarsvurder") {
             val body = call.receive<TilVilkaarsvurderingJson>()
 
-            behandlingsstatusService.settVilkaarsvurdert(behandlingsId, false, body.utfall)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settVilkaarsvurdert(behandlingsId, false, body.utfall)
+            }
         }
 
         get("/beregn") {
-            behandlingsstatusService.settBeregnet(behandlingsId)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settBeregnet(behandlingsId)
+            }
         }
 
         post("/beregn") {
-            behandlingsstatusService.settBeregnet(behandlingsId, false)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settBeregnet(behandlingsId, false)
+            }
         }
 
         get("/fatteVedtak") {
-            behandlingsstatusService.settFattetVedtak(behandlingsId)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settFattetVedtak(behandlingsId)
+            }
         }
         post("/fatteVedtak") {
-            behandlingsstatusService.settFattetVedtak(behandlingsId, false)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settFattetVedtak(behandlingsId, false)
+            }
         }
         get("/returner") {
-            behandlingsstatusService.settReturnert(behandlingsId)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settReturnert(behandlingsId)
+            }
         }
         post("/returner") {
-            behandlingsstatusService.settReturnert(behandlingsId, false)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settReturnert(behandlingsId, false)
+            }
         }
 
         get("/attester") {
-            behandlingsstatusService.settAttestert(behandlingsId)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settAttestert(behandlingsId)
+            }
         }
         post("/attester") {
-            behandlingsstatusService.settAttestert(behandlingsId, false)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settAttestert(behandlingsId, false)
+            }
         }
 
         get("/iverksett") {
-            behandlingsstatusService.settIverksatt(behandlingsId)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settIverksatt(behandlingsId)
+            }
         }
         post("/iverksett") {
-            behandlingsstatusService.settIverksatt(behandlingsId, false)
-            call.respond(HttpStatusCode.OK, "true")
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settIverksatt(behandlingsId, false)
+            }
         }
     }
+}
+
+data class OperasjonGyldig(val gyldig: Boolean)
+
+private suspend fun haandterStatusEndring(call: ApplicationCall, proevStatusEndring: () -> Unit) {
+    runCatching(proevStatusEndring)
+        .fold(
+            onSuccess = { call.respond(HttpStatusCode.OK, OperasjonGyldig(true)) },
+            onFailure = { call.respond(HttpStatusCode.Conflict, it.message ?: "Statussjekk feilet") }
+        )
 }
 
 internal data class TilVilkaarsvurderingJson(val utfall: VilkaarsvurderingUtfall)

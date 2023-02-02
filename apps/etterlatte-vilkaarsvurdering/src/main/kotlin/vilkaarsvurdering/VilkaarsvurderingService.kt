@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
@@ -25,19 +26,8 @@ class VilkaarsvurderingService(
 ) {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingService::class.java)
 
-    suspend fun hentEllerOpprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
-        val vilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)
-
-        return if (vilkaarsvurdering != null) {
-            logger.info("Vilkårsvurdering finnes for behandling $behandlingId")
-            vilkaarsvurdering
-        } else {
-            tilstandssjekkFoerKjoering(behandlingId, accessToken) {
-                logger.info("Ny vilkårsvurdering opprettes for behandling $behandlingId")
-                opprettVilkaarsvurdering(behandlingId, accessToken)
-            }
-        }
-    }
+    fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? =
+        vilkaarsvurderingRepository.hent(behandlingId)
 
     suspend fun oppdaterTotalVurdering(
         behandlingId: UUID,
@@ -95,42 +85,56 @@ class VilkaarsvurderingService(
         vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
     }
 
-    private suspend fun opprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
-        val (behandling, grunnlag, sak) = hentDataForVilkaarsvurdering(behandlingId, accessToken)
+    suspend fun opprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering =
+        tilstandssjekkFoerKjoering(behandlingId, accessToken) {
+            vilkaarsvurderingRepository.hent(behandlingId)?.let {
+                throw IllegalArgumentException("Vilkårsvurdering finnes allerede for behandling $behandlingId")
+            }
 
-        val sakType = sak.sakType
-        val behandlingType = behandling.behandlingType
-        val virkningstidspunkt = behandling.virkningstidspunkt
-            ?: throw VirkningstidspunktIkkeSattException("Virkningstidspunkt ikke satt for behandling $behandlingId")
+            val (behandling, grunnlag, sak) = hentDataForVilkaarsvurdering(behandlingId, accessToken)
+            val virkningstidspunkt = behandling.virkningstidspunkt
+                ?: throw VirkningstidspunktIkkeSattException(
+                    "Virkningstidspunkt ikke satt for behandling $behandlingId"
+                )
 
-        logger.info("Oppretter vilkårsvurdering med sakType $sakType og behandlingType $behandlingType")
+            logger.info(
+                "Oppretter vilkårsvurdering for behandling ($behandlingId) med sakType ${sak.sakType} og " +
+                    "behandlingType ${behandling.behandlingType}"
+            )
 
-        val vilkaar = when (sakType) {
-            SakType.BARNEPENSJON ->
-                when (behandlingType) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING ->
-                        BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
+            val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, sak, grunnlag, virkningstidspunkt)
 
-                    BehandlingType.REVURDERING ->
-                        mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak))
-
-                    else -> throw IllegalArgumentException(
-                        "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
-                    )
-                }
-
-            SakType.OMSTILLINGSSTOENAD ->
-                throw IllegalArgumentException("Støtter ikke vilkårsvurdering for sakType=$sakType")
+            vilkaarsvurderingRepository.opprettVilkaarsvurdering(
+                Vilkaarsvurdering(
+                    behandlingId = behandlingId,
+                    vilkaar = vilkaar,
+                    virkningstidspunkt = virkningstidspunkt.dato,
+                    grunnlagVersjon = grunnlag.metadata.versjon
+                )
+            )
         }
 
-        return vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-            Vilkaarsvurdering(
-                behandlingId = behandlingId,
-                vilkaar = vilkaar,
-                virkningstidspunkt = virkningstidspunkt.dato,
-                grunnlagVersjon = grunnlag.metadata.versjon
-            )
-        )
+    private fun finnVilkaarForNyVilkaarsvurdering(
+        behandling: DetaljertBehandling,
+        sak: Sak,
+        grunnlag: Grunnlag,
+        virkningstidspunkt: Virkningstidspunkt
+    ) = when (sak.sakType) {
+        SakType.BARNEPENSJON ->
+            when (behandling.behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING ->
+                    BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
+
+                BehandlingType.REVURDERING ->
+                    mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak))
+
+                else -> throw IllegalArgumentException(
+                    "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
+                )
+            }
+
+        SakType.OMSTILLINGSSTOENAD ->
+            throw IllegalArgumentException("Støtter ikke vilkårsvurdering for sakType=${sak.sakType}")
     }
 
     private suspend fun tilstandssjekkFoerKjoering(

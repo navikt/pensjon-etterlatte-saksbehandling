@@ -7,7 +7,7 @@ export const SoeknadsoversiktTextArea = styled(Textarea).attrs({
   placeholder: 'Forklar begrunnelsen',
   minRows: 3,
   size: 'small',
-  autocomplete: 'off',
+  autoComplete: 'off',
 })`
   margin-bottom: 10px;
 `

@@ -35,7 +35,7 @@ class Server(private val context: ApplicationContext) {
 
     fun run() = with(context) {
         dataSource.migrate()
-        engine.start(true)
         setReady()
+        engine.start(true)
     }
 }

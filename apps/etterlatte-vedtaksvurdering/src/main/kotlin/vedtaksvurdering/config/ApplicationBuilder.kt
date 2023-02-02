@@ -78,7 +78,7 @@ class ApplicationBuilder {
                 )
             }
 
-    fun start() = rapidsConnection.start().also { setReady() }
+    fun start() = setReady().also { rapidsConnection.start() }
 
     fun publiser(melding: String, key: UUID) {
         rapidsConnection.publish(message = melding, key = key.toString())

@@ -47,7 +47,7 @@ class Server(applicationContext: ApplicationContext) {
         }
     )
 
-    fun run() = engine.start(true).also { setReady() }
+    fun run() = setReady().also { engine.start(true) }
 }
 
 fun io.ktor.server.application.Application.module(

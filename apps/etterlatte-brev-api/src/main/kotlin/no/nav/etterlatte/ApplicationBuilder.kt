@@ -117,7 +117,7 @@ class ApplicationBuilder {
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)
 
-    fun start() = rapidsConnection.start().also { setReady() }
+    fun start() = setReady().also { rapidsConnection.start() }
 
     private fun httpClient(scope: String? = null) = HttpClient(OkHttp) {
         expectSuccess = true

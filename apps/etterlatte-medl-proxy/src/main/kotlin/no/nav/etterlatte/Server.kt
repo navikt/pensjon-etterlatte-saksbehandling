@@ -76,5 +76,5 @@ class Server(context: ApplicationContext) {
         }
     )
 
-    fun run() = engine.start(true).also { setReady() }
+    fun run() = setReady().also { engine.start(true) }
 }

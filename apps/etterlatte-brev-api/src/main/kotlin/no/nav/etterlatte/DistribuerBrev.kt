@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -60,7 +61,7 @@ internal class DistribuerBrev(
     }
 
     private fun JsonMessage.mottakerAdresse(): Adresse? = try {
-        objectMapper.readValue(this["mottakerAdresse"].asText())
+        objectMapper.readValue(this["mottakerAdresse"].toJson())
     } catch (ex: Exception) {
         logger.error("Klarte ikke parse mottaker sin adresse:", ex)
         throw ex

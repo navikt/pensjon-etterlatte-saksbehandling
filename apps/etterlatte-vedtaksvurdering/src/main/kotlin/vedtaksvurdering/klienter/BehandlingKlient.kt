@@ -11,20 +11,12 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.vedtaksvurdering.HendelseType
-import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
     suspend fun hentSak(sakId: Long, accessToken: String): Sak
-    suspend fun postVedtakHendelse(
-        vedtakHendelse: VedtakHendelse,
-        hendelse: HendelseType,
-        behandlingId: UUID,
-        accessToken: String
-    )
 
     suspend fun fattVedtak(behandlingId: UUID, accessToken: String, commit: Boolean = false): Boolean
     suspend fun attester(behandlingId: UUID, accessToken: String, commit: Boolean = false): Boolean
@@ -60,34 +52,6 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Henting av behandling med behandlingId=$behandlingId feilet", e)
-        }
-    }
-
-    override suspend fun postVedtakHendelse(
-        vedtakHendelse: VedtakHendelse,
-        hendelse: HendelseType,
-        behandlingId: UUID,
-        accessToken: String
-    ) {
-        logger.info("Poster hendelse $hendelse om vedtak med vedtakId=${vedtakHendelse.vedtakId}")
-        try {
-            downstreamResourceClient
-                .post(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/behandlinger/$behandlingId/hendelser/vedtak/$hendelse"
-                    ),
-                    accessToken = accessToken,
-                    postBody = vedtakHendelse
-                ).mapBoth(
-                    success = { resource -> resource.response },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
-                )
-        } catch (e: Exception) {
-            throw BehandlingKlientException(
-                "Posting av hendelse $hendelse med for vedtakId=${vedtakHendelse.vedtakId} feilet",
-                e
-            )
         }
     }
 

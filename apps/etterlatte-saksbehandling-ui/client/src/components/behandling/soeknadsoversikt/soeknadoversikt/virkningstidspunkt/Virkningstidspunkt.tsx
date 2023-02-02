@@ -4,7 +4,7 @@ import { ErrorMessage, Label } from '@navikt/ds-react'
 import { useRef, useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { Calender } from '@navikt/ds-icons'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
@@ -55,11 +55,14 @@ const Virkningstidspunkt = (props: Props) => {
       return setErrorTekst('Begrunnelsen må fylles ut')
     }
 
-    fastsettVirkningstidspunktRequest({ id: props.behandlingId, dato: formData, begrunnelse: begrunnelse }, (res) => {
-      dispatch(oppdaterVirkningstidspunkt(res))
-      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
-      onSuccess?.()
-    })
+    const harVirkningstidspunktEndretSeg = props.virkningstidspunkt?.dato !== formaterDatoTilYearMonth(formData)
+    if (harVirkningstidspunktEndretSeg) {
+      fastsettVirkningstidspunktRequest({ id: props.behandlingId, dato: formData, begrunnelse: begrunnelse }, (res) => {
+        dispatch(oppdaterVirkningstidspunkt(res))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
+      })
+    }
+    onSuccess?.()
   }
 
   const reset = (onSuccess?: () => void) => {

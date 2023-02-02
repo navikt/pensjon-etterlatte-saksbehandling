@@ -96,10 +96,12 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
     }
 }
 
+data class OperasjonGyldig(val gyldig: Boolean)
+
 private suspend fun haandterStatusEndring(call: ApplicationCall, proevStatusEndring: () -> Unit) {
     runCatching(proevStatusEndring)
         .fold(
-            onSuccess = { call.respond(HttpStatusCode.OK, "true") },
+            onSuccess = { call.respond(HttpStatusCode.OK, OperasjonGyldig(true)) },
             onFailure = { call.respond(HttpStatusCode.Conflict, it.message ?: "Statussjekk feilet") }
         )
 }

@@ -23,6 +23,37 @@ DB_PASSWORD=postgres;
 HTTP_PORT=8087;
 ```
 
+## Kjøre med auth mot dev-gcp
+1. Kjør scriptet `get-secret.sh` fra prosjektets [rotmappe](../..).
+```
+./get-secret.sh apps/etterlatte-vilkaarsvurdering
+```
+Hvis du er avhengig av å kjøre opp vilkårsvurdering lokalt mot andre avhengigehter i DEV, som behandling og grunnlag,
+må du hente disse hemmelighetene fra vilkårsvurdering i DEV:
+```
+kubectl get secret azure-etterlatte-vilkaarsvurdering-<SETT_INN_ID> -o json | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' > .env.dev-gcp
+```
+2. Kjør opp en proxy mot postgres i dev: `nais postgres proxy etterlatte-vilkaarsvurdering`, eller kjør opp en lokal 
+   instans med `docker-compose up -d`.
+3. Kopier inn følgende environment variabler i IntelliJ:
+```
+DB_JDBC_URL=jdbc:postgresql://localhost:5432/vilkaarsvurdering?user=FORNAVN.ETTERNAVN@nav.no;
+DB_PASSWORD=postgres;
+DB_USERNAME=postgres;
+ETTERLATTE_BEHANDLING_CLIENT_ID=59967ac8-009c-492e-a618-e5a0f6b3e4e4;
+ETTERLATTE_BEHANDLING_URL=https://etterlatte-behandling.dev.intern.nav.no;
+ETTERLATTE_GRUNNLAG_CLIENT_ID=ce96a301-13db-4409-b277-5b27f464d08b;
+ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.dev.intern.nav.no/api;
+HTTP_PORT=8087
+```
+4. Om du skal kjøre med frontend og wonderwall må du også kjøre (fra rotmappe):
+`./get-secret.sh apps/etterlatte-saksbehandling-ui`
+og legge til følgende linjer nederst i `.env.dev-gcp` fila til saksbehandling-ui.
+```
+VILKAARSVURDERING_API_URL=http://host.docker.internal:8087
+VILKAARSVURDERING_API_SCOPE=<VILKAARSVURDERING_CLIENT_ID> // Se .env.dev-gcp fila du opprettet i steg 1.
+```
+
 ### Teste mot REST-endepunkter
 
 #### Hente token

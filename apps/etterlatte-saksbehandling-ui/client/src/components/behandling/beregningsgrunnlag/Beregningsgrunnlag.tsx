@@ -21,6 +21,7 @@ import { IPdlPerson } from '~shared/types/Person'
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 import { oppdaterBehandlingsstatus, resetBeregning } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface FormValues {
   foedselsnummer: string
@@ -166,6 +167,10 @@ const Beregningsgrunnlag = () => {
             </SoeskenContainer>
           ))}
       </FamilieforholdWrapper>
+
+      {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
+      {isFailure(soeskenMedIBeregning) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+
       {visSoeskenjustering &&
         (behandles ? (
           <BehandlingHandlingKnapper>

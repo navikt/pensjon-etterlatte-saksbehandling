@@ -17,7 +17,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.contentType
-import io.ktor.utils.io.ByteReadChannel
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
@@ -89,7 +88,11 @@ class DownstreamResourceClient(
             }
             .fold(
                 onSuccess = { result ->
-                    val body = if (result is ByteReadChannel) {
+                    println(
+                        "Content-type: ${result.contentType()}, type: ${result.javaClass}," +
+                            "tekst: ${result.bodyAsText()}"
+                    )
+                    val body = if (!result.harContentType(ContentType.Application.Json)) {
                         logger.info("Mottok content-type: ${result.contentType()} for ByteReadChannel")
                         logger.info("Resultatet: ${result.bodyAsText()}")
                         JsonNodeFactory.instance.objectNode()

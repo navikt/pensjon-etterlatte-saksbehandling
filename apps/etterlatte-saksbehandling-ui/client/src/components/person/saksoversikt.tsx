@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Saksliste } from './saksliste'
 import styled from 'styled-components'
-import { GrunnlagsendringsListe, Grunnlagsendringshendelse, IBehandlingListe, IBehandlingsammendrag } from './typer'
+import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe, IBehandlingsammendrag } from './typer'
 import { INasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
 import { Heading, Tag } from '@navikt/ds-react'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
@@ -12,6 +12,7 @@ import { formaterEnumTilLesbarString } from '~utils/formattering'
 import { hentBehandlingerForPerson, hentGrunnlagsendringshendelserForPerson } from '~shared/api/behandling'
 import { Container } from '~shared/styled'
 import Spinner from '~shared/Spinner'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -77,6 +78,15 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
     )
   }
 
+  const iverksatteBehandlinger = behandlingliste.filter(
+    (behandling) => behandling.status === IBehandlingStatus.IVERKSATT
+  )
+  const harIngenUavbrutteManuelleOpphoer = behandlingliste.every(
+    (behandling) =>
+      behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER || behandling.status === IBehandlingStatus.AVBRUTT
+  )
+  const kanOppretteManueltOpphoer = iverksatteBehandlinger.length > 0 && harIngenUavbrutteManuelleOpphoer
+
   return (
     <>
       <Spinner visible={!lastetBehandlingliste || !lastetGrunnlagshendelser} label={'Laster'} />
@@ -98,7 +108,9 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                 <>
                   {sakId !== undefined ? (
                     <EkstraHandlinger>
-                      <ManueltOpphoerModal sakId={sakId} />
+                      {kanOppretteManueltOpphoer && (
+                        <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
+                      )}
                     </EkstraHandlinger>
                   ) : null}
                   <div className="behandlinger">
@@ -134,6 +146,7 @@ const EkstraHandlinger = styled.div`
 export const IconButton = styled.div`
   padding-top: 1em;
   color: #000000;
+
   :hover {
     cursor: pointer;
   }
@@ -144,6 +157,7 @@ export const SaksoversiktWrapper = styled.div`
   max-width: 100%;
 
   margin: 3em 1em;
+
   .behandlinger {
     margin-top: 5em;
   }

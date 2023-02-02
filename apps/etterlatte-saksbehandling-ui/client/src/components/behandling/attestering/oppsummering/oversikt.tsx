@@ -1,7 +1,12 @@
 import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { formaterEnumTilLesbarString, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
+import {
+  formaterBehandlingstype,
+  formaterEnumTilLesbarString,
+  formaterStringDato,
+  formaterStringTidspunkt,
+} from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 import { Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
@@ -28,7 +33,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
   return (
     <BehandlingsinfoContainer>
-      <Overskrift>{formaterEnumTilLesbarString(behandlingsInfo?.type ?? '')}</Overskrift>
+      <Overskrift>{formaterBehandlingstype(behandlingsInfo?.type)}</Overskrift>
       <UnderOverskrift>{hentStatus()}</UnderOverskrift>
       {fattetDato && <Tekst>{fattetDato}</Tekst>}
       <TagList>

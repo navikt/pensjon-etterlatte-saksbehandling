@@ -4,6 +4,8 @@ import { Button, Checkbox, CheckboxGroup, Heading, Modal, TextField } from '@nav
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { sendInnManueltOpphoer } from '~shared/api/manueltOpphoer'
+import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering'
+import { IBehandlingsammendrag } from '~components/person/typer'
 
 export const OPPHOERSGRUNNER = [
   'SOEKER_DOED',
@@ -31,7 +33,13 @@ export const OVERSETTELSER_OPPHOERSGRUNNER: Record<Opphoersgrunn, string> = {
   ANNET: 'Annet',
 }
 
-export const ManueltOpphoerModal = ({ sakId }: { sakId: number }) => {
+export const ManueltOpphoerModal = ({
+  sakId,
+  iverksatteBehandlinger,
+}: {
+  sakId: number
+  iverksatteBehandlinger: IBehandlingsammendrag[]
+}) => {
   const [open, setOpen] = useState(false)
   const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
   const [selectedGrunner, setSelectedGrunner] = useState<Opphoersgrunn[]>([])
@@ -80,9 +88,16 @@ export const ManueltOpphoerModal = ({ sakId }: { sakId: number }) => {
         <Modal.Content>
           <ModalSpacing>
             <Heading size="large">Manuelt opphør</Heading>
-            <p>Hvis du annullerer vil utbetalinger fjernes fra oppdragssystemet og du må behandle saken i PeSys</p>
-            <p>Følgende utbetalinger annulleres:</p>
-            <p>TODO</p>
+            <p>Hvis du annullerer vil utbetalinger fjernes fra oppdragssystemet og du må behandle saken i Pesys</p>
+            <p>Utbetalinger fra følgende behandlinger annulleres:</p>
+            <OppsummeringListe>
+              {iverksatteBehandlinger.map((behandling) => (
+                <li key={behandling.id}>
+                  {formaterBehandlingstype(behandling.behandlingType)} med virkningstidspunkt{' '}
+                  {formaterStringDato(behandling.virkningstidspunkt!.dato)}
+                </li>
+              ))}
+            </OppsummeringListe>
             <form onSubmit={onSubmit}>
               <GrunnerTilAnnuleringForm
                 erAnnetValgt={erAnnetValgt}
@@ -108,7 +123,7 @@ export const ManueltOpphoerModal = ({ sakId }: { sakId: number }) => {
 }
 
 const Feilmelding = styled.p`
-  color: var(--navds-semantic-color-feedback-danger-text);
+  color: var(--navds-error-message-color-text);
 `
 
 const FormKnapper = styled.div`
@@ -160,4 +175,8 @@ const FormWrapper = styled.div`
   display: flex;
   gap: 1rem;
   flex-direction: column;
+`
+
+const OppsummeringListe = styled.ul`
+  margin: 0 0 2em 2em;
 `

@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export const capitalize = (s?: string) => {
   if (!s) return ''
@@ -19,3 +20,16 @@ export const formaterTidspunkt = (dato: Date) => format(dato, 'HH:mm').toString(
 export const formaterStringTidspunkt = (dato: string) => format(new Date(dato), 'HH:mm').toString()
 
 export const formaterDatoMedTidspunkt = (dato: Date) => format(new Date(dato), 'dd.MM.yyyy HH:mm').toString()
+
+export const formaterBehandlingstype = (behandlingstype?: IBehandlingsType): string => {
+  switch (behandlingstype) {
+    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
+      return 'Førstegangsbehandling'
+    case IBehandlingsType.REVURDERING:
+      return 'Revurdering'
+    case IBehandlingsType.MANUELT_OPPHOER:
+      return 'Manuelt opphør'
+    default:
+      return 'Behandling'
+  }
+}

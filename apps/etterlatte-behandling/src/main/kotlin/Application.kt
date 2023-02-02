@@ -30,6 +30,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import isReady
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.delay
@@ -47,6 +48,7 @@ import no.nav.etterlatte.sak.sakRoutes
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
+import setReady
 import java.util.*
 import javax.sql.DataSource
 
@@ -149,6 +151,7 @@ class App(private val beanFactory: BeanFactory) {
             }
         ).start(true)
         beanFactory.behandlingHendelser().nyHendelse.close()
+        setReady()
     }
 }
 
@@ -162,7 +165,7 @@ fun Route.naisprobes() {
             call.respondText { "OK" }
         }
         get("isready") {
-            call.respondText { "OK" }
+            call.respond(isReady())
         }
         get("started") {
             call.respondText { "OK" }

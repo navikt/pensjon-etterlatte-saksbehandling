@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import setReady
 import java.util.*
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
@@ -46,5 +47,5 @@ class ApplicationBuilder {
     private fun publiser(melding: String, key: UUID) {
         rapidsConnection.publish(message = melding, key = key.toString())
     }
-    fun start() = rapidsConnection.start()
+    fun start() = rapidsConnection.start().also { setReady() }
 }

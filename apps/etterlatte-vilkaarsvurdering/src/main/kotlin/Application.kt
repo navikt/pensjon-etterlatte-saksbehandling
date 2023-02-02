@@ -10,6 +10,7 @@ import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import setReady
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -35,5 +36,6 @@ class Server(private val context: ApplicationContext) {
     fun run() = with(context) {
         dataSource.migrate()
         engine.start(true)
+        setReady()
     }
 }

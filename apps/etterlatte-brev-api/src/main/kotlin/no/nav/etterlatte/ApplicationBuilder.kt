@@ -40,6 +40,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import setReady
 
 class ApplicationBuilder {
     private val config = ConfigFactory.load()
@@ -116,7 +117,7 @@ class ApplicationBuilder {
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)
 
-    fun start() = rapidsConnection.start()
+    fun start() = rapidsConnection.start().also { setReady() }
 
     private fun httpClient(scope: String? = null) = HttpClient(OkHttp) {
         expectSuccess = true

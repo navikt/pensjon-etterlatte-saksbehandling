@@ -29,6 +29,7 @@ import no.nav.etterlatte.person.PdlFantIkkePerson
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.person.personApi
 import org.slf4j.event.Level
+import setReady
 import java.util.*
 
 class Server(applicationContext: ApplicationContext) {
@@ -46,7 +47,7 @@ class Server(applicationContext: ApplicationContext) {
         }
     )
 
-    fun run() = engine.start(true)
+    fun run() = engine.start(true).also { setReady() }
 }
 
 fun io.ktor.server.application.Application.module(

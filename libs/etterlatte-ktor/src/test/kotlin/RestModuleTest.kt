@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import setReady
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RestModuleTest {
@@ -118,7 +119,7 @@ class RestModuleTest {
     @Test
     fun `skal svare paa helsesjekk uten autentisering`() {
         testApplication {
-            application { restModule(this.log) { route1() } }
+            application { restModule(this.log) { route1() } }.also { setReady() }
 
             val response1 = client.get("/health/isalive")
             assertEquals(OK, response1.status)

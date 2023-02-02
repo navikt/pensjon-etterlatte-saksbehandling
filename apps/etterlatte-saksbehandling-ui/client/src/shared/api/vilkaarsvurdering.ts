@@ -4,6 +4,9 @@ import { apiClient, ApiResponse } from './apiClient'
 export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.get<IVilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}`)
 
+export const opprettVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
+  apiClient.post<IVilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}/opprett`, {})
+
 export const vurderVilkaar = async (args: {
   behandlingId: string
   request: VurderVilkaarRequest

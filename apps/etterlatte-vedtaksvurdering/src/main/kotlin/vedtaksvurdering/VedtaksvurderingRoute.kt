@@ -91,7 +91,12 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
         post("vedtak/underkjenn/{behandlingId}") {
             val behandlingId = UUID.fromString(call.parameters["behandlingId"])
             val begrunnelse = call.receive<UnderkjennVedtakClientRequest>()
-            val underkjentVedtak = service.underkjennVedtak(behandlingId, accesstoken)
+            val underkjentVedtak = service.underkjennVedtak(
+                behandlingId,
+                accesstoken,
+                saksbehandler,
+                begrunnelse
+            )
 
             call.respond(underkjentVedtak)
         }

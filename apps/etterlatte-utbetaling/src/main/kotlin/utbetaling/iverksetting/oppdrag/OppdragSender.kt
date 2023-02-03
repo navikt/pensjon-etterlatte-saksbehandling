@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
-import com.ibm.mq.jms.MQQueue
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
@@ -22,7 +21,7 @@ class OppdragSender(
             val producer = session.createProducer(session.createQueue(queue))
             val oppdragXml = OppdragJaxb.toXml(oppdrag)
             val message = session.createTextMessage(oppdragXml).apply {
-                jmsReplyTo = MQQueue(replyQueue)
+                jmsReplyTo = session.createQueue(replyQueue)
             }
             producer.send(message)
             logger.info("Utbetaling overført til Oppdrag")

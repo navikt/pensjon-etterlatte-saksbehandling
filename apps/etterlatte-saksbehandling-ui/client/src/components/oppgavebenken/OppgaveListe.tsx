@@ -1,24 +1,13 @@
 /* eslint-disable react/jsx-key */
 import React, { useEffect } from 'react'
 import 'react-table'
-import {
-  Column,
-  ColumnInstance,
-  IdType,
-  Row,
-  useFilters,
-  useGlobalFilter,
-  usePagination,
-  useSortBy,
-  useTable,
-} from 'react-table'
+import { Column, ColumnInstance, useFilters, useGlobalFilter, usePagination, useSortBy, useTable } from 'react-table'
 import { FilterPar, IOppgave, StatusFilter, statusFilter } from './typer/oppgavebenken'
 import { ariaSortMap, FeltSortOrder } from './typer/oppgavefelter'
 import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import { Heading, Pagination } from '@navikt/ds-react'
-import { globalFilterFunction, tildeltFilterFunction } from './filtere/oppgaveListeFiltere'
-import { useAppSelector } from '~store/Store'
+import { globalFilterFunction } from './filtere/oppgaveListeFiltere'
 
 type Props = {
   columns: ReadonlyArray<Column<IOppgave>>
@@ -28,16 +17,7 @@ type Props = {
 }
 
 const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filterPar }) => {
-  const saksbehandlerNavn = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.navn)
-
-  const filterTypes = React.useMemo(
-    () => ({
-      globalFilter: globalFilterFunction,
-      tildeltFilter: (rows: Row<IOppgave>[], columnIds: IdType<IOppgave>[], filterValue: string) =>
-        tildeltFilterFunction(rows, columnIds, filterValue, saksbehandlerNavn),
-    }),
-    [globalFilterValue, filterPar]
-  )
+  const filterTypes = React.useMemo(() => ({ globalFilter: globalFilterFunction }), [globalFilterValue, filterPar])
 
   const {
     getTableProps,

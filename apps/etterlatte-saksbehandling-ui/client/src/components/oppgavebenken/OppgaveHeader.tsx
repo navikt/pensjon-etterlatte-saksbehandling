@@ -6,7 +6,6 @@ import 'react-datepicker/dist/react-datepicker.css'
 import '~index.css'
 import { GlobalFilter } from './filtere/GlobalFilter'
 import ColumnFilters from './filtere/ColumnFilters'
-import { useAppSelector } from '~store/Store'
 
 type Props = {
   oppgaveFelter: IOppgaveFelter
@@ -17,7 +16,6 @@ type Props = {
 
 const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGlobalFilter, henterOppgaver }) => {
   const [resetGlobalInput, setResetGlobalInput] = useState<boolean>(false)
-  const saksbehandlerNavn = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.navn)
 
   return (
     <>
@@ -37,7 +35,7 @@ const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGl
         <Button
           size={'small'}
           onClick={() => {
-            setOppgaveFelter(initialOppgaveFelter(saksbehandlerNavn))
+            setOppgaveFelter(initialOppgaveFelter())
             setResetGlobalInput(true)
           }}
           variant={'secondary'}

@@ -193,7 +193,7 @@ abstract class CommonFactory : BeanFactory {
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun dataSource() = DataSourceBuilder.createDataSource(env)
+    override fun dataSource() = DataSourceBuilder.createDataSource(env, maxPoolSize = 30) // TODO virker høyt?
 
     override fun rapid(): KafkaProdusent<String, String> {
         return kafkaConfig().standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
@@ -246,7 +246,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-                Duration.of(1, ChronoUnit.MINUTES).toMillis()
+            Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

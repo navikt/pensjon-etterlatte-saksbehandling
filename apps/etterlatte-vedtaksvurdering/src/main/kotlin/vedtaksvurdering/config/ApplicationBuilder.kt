@@ -26,6 +26,10 @@ import java.util.*
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 class ApplicationBuilder {
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-vedtaksvurdering oppstart")
+    }
+
     private val env = System.getenv()
     private val config: Config = ConfigFactory.load()
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)

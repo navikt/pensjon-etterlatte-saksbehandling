@@ -1,8 +1,8 @@
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
-import { formaterDato, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
+import { formaterBehandlingstype, formaterDato, formaterStringDato } from '~utils/formattering'
 import { useAppSelector } from '~store/Store'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
-import { VedtakResultat, useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
+import { useVedtaksResultat, VedtakResultat } from '~components/behandling/useVedtaksResultat'
 
 function innvilgelsestekst(vedtaksresultat: VedtakResultat): string {
   switch (vedtaksresultat) {
@@ -36,7 +36,7 @@ export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInf
   return (
     <>
       <Wrapper innvilget={true}>
-        <Overskrift>{formaterEnumTilLesbarString(behandlingsInfo.type)}</Overskrift>
+        <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
         <Resultat vedtaksresultat={vedtaksResultat} />
         <div className="flex">
           <div>

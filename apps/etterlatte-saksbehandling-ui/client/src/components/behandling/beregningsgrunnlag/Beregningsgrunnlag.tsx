@@ -159,7 +159,7 @@ const Beregningsgrunnlag = () => {
                   ) : (
                     <OppdrasSammenLes>
                       <strong>Oppdras sammen</strong>
-                      <label>{soesken.field.value ? 'Ja' : 'Nei'}</label>
+                      <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
                     </OppdrasSammenLes>
                   )
                 }

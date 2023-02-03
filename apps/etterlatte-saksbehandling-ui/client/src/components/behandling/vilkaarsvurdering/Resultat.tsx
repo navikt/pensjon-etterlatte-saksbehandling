@@ -47,6 +47,7 @@ export const Resultat: React.FC<Props> = ({
   const slettVilkaarsvurderingResultat = () =>
     slettTotalVurderingCall(behandlingId, (res) => {
       oppdaterVilkaar(res)
+      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
       reset()
     })
 

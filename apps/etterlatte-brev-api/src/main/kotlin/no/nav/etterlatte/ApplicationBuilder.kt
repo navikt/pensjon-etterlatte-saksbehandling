@@ -46,6 +46,10 @@ class ApplicationBuilder {
     private val config = ConfigFactory.load()
     val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-brev-api oppstart")
+    }
+
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }

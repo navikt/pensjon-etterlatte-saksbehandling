@@ -19,6 +19,10 @@ fun main() {
 }
 
 class Server(private val context: ApplicationContext) {
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-beregning oppstart")
+    }
+
     private val engine = with(context) {
         embeddedServer(
             factory = CIO,

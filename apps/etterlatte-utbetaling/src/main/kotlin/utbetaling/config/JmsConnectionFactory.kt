@@ -1,11 +1,11 @@
 package no.nav.etterlatte.utbetaling.config
 
 import com.ibm.mq.MQC
-import com.ibm.mq.jms.MQConnectionFactory
-import com.ibm.msg.client.jms.JmsConstants
-import com.ibm.msg.client.wmq.WMQConstants
+import com.ibm.mq.jakarta.jms.MQConnectionFactory
+import com.ibm.msg.client.jakarta.jms.JmsConstants
+import com.ibm.msg.client.jakarta.wmq.WMQConstants
+import jakarta.jms.Connection
 import org.messaginghub.pooled.jms.JmsPoolConnectionFactory
-import javax.jms.Connection
 
 private const val UTF_8_WITH_PUA = 1208
 

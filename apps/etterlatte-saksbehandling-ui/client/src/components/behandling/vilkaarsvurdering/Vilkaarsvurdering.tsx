@@ -32,11 +32,13 @@ export const Vilkaarsvurdering = () => {
 
   useEffect(() => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
-    fetchVilkaarsvurdering(
-      behandlingId,
-      (vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering)),
-      (error) => opprettHvisDenIkkeFinnes(error)
-    )
+    if (!vilkaarsvurdering) {
+      fetchVilkaarsvurdering(
+        behandlingId,
+        (vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering)),
+        (error) => opprettHvisDenIkkeFinnes(error)
+      )
+    }
   }, [behandlingId])
 
   const opprettHvisDenIkkeFinnes = (error: ApiError) => {

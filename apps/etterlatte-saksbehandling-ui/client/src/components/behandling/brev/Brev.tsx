@@ -11,7 +11,7 @@ import { ferdigstillBrev, hentBrevForBehandling, Mottaker, slettBrev } from '~sh
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import { Journalpost } from '../types'
-import { formaterDato, formaterEnumTilLesbarString } from '~utils/formattering'
+import { formaterBehandlingstype, formaterDato, formaterEnumTilLesbarString } from '~utils/formattering'
 import InnkommendeBrevModal from './innkommende-brev-modal'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
@@ -19,7 +19,7 @@ import LastOppBrev from './nytt-brev/last-opp'
 import { useAppSelector } from '~store/Store'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import { hentDokumenter } from '~shared/api/dokument'
-import { tagColors, TagList } from "~shared/Tags";
+import { tagColors, TagList } from '~shared/Tags'
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -140,7 +140,7 @@ export const Brev = () => {
             <TagList>
               <li>
                 <Tag variant={tagColors[behandlingType]} size={'small'}>
-                  {formaterEnumTilLesbarString(behandlingType)}
+                  {formaterBehandlingstype(behandlingType)}
                 </Tag>
               </li>
               <li>

@@ -25,6 +25,10 @@ fun main() {
 }
 
 class ApplicationBuilder {
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-grunnlag oppstart")
+    }
+
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }

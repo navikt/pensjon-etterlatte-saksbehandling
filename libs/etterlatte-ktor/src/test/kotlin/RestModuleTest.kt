@@ -21,6 +21,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,7 +30,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import setReady
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RestModuleTest {

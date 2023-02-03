@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
@@ -20,7 +21,6 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import setReady
 import java.util.*
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")

@@ -25,11 +25,11 @@ import no.nav.etterlatte.ktortokenexchange.secureRouteUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.person.PdlFantIkkePerson
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.person.personApi
 import org.slf4j.event.Level
-import setReady
 import java.util.*
 
 class Server(applicationContext: ApplicationContext) {

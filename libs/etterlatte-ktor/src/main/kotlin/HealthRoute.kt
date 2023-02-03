@@ -6,7 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import isReady
+import no.nav.etterlatte.libs.helsesjekk.isReady
 
 fun Route.healthApi() {
     route("health") {

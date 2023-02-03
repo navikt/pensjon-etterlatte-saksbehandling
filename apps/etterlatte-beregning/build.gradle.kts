@@ -6,6 +6,7 @@ plugins {
 dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:etterlatte-regler"))
+    implementation(project(":libs:etterlatte-helsesjekk"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:ktor2client-onbehalfof"))

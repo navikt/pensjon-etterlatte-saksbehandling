@@ -22,8 +22,8 @@ import no.nav.etterlatte.enhetsregister.enhetsregApi
 import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import org.slf4j.event.Level
-import setReady
 import java.util.*
 
 class Server(context: ApplicationContext) {

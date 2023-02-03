@@ -14,6 +14,8 @@ export const formaterEnumTilLesbarString = (string: string): string => {
 export const formaterDato = (dato: Date) => format(dato, 'dd.MM.yyyy').toString()
 
 export const formaterStringDato = (dato: string) => format(new Date(dato), 'dd.MM.yyyy').toString()
+export const formaterKanskjeStringDato = (fallback = 'Ukjent dato', dato?: string): string =>
+  dato ? formaterStringDato(dato) : fallback
 
 export const formaterTidspunkt = (dato: Date) => format(dato, 'HH:mm').toString()
 
@@ -21,7 +23,7 @@ export const formaterStringTidspunkt = (dato: string) => format(new Date(dato), 
 
 export const formaterDatoMedTidspunkt = (dato: Date) => format(new Date(dato), 'dd.MM.yyyy HH:mm').toString()
 
-export const formaterBehandlingstype = (behandlingstype?: IBehandlingsType): string => {
+export const formaterBehandlingstype = (behandlingstype: IBehandlingsType): string => {
   switch (behandlingstype) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return 'Førstegangsbehandling'
@@ -29,7 +31,5 @@ export const formaterBehandlingstype = (behandlingstype?: IBehandlingsType): str
       return 'Revurdering'
     case IBehandlingsType.MANUELT_OPPHOER:
       return 'Manuelt opphør'
-    default:
-      return 'Behandling'
   }
 }

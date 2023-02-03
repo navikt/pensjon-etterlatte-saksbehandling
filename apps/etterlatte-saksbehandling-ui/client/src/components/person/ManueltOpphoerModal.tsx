@@ -4,7 +4,7 @@ import { Button, Checkbox, CheckboxGroup, Heading, Modal, TextField } from '@nav
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { sendInnManueltOpphoer } from '~shared/api/manueltOpphoer'
-import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering'
+import { formaterBehandlingstype, formaterKanskjeStringDato } from '~utils/formattering'
 import { IBehandlingsammendrag } from '~components/person/typer'
 
 export const OPPHOERSGRUNNER = [
@@ -94,7 +94,7 @@ export const ManueltOpphoerModal = ({
               {iverksatteBehandlinger.map((behandling) => (
                 <li key={behandling.id}>
                   {formaterBehandlingstype(behandling.behandlingType)} med virkningstidspunkt{' '}
-                  {formaterStringDato(behandling.virkningstidspunkt!.dato)}
+                  {formaterKanskjeStringDato(behandling.virkningstidspunkt?.dato)}
                 </li>
               ))}
             </OppsummeringListe>

@@ -12,7 +12,7 @@ import { formaterEnumTilLesbarString } from '~utils/formattering'
 import { hentBehandlingerForPerson, hentGrunnlagsendringshendelserForPerson } from '~shared/api/behandling'
 import { Container } from '~shared/styled'
 import Spinner from '~shared/Spinner'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { harIngenUavbrutteManuelleOpphoer, kunIverksatteBehandlinger } from '~components/behandling/felles/utils'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -78,14 +78,9 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
     )
   }
 
-  const iverksatteBehandlinger = behandlingliste.filter(
-    (behandling) => behandling.status === IBehandlingStatus.IVERKSATT
-  )
-  const harIngenUavbrutteManuelleOpphoer = behandlingliste.every(
-    (behandling) =>
-      behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER || behandling.status === IBehandlingStatus.AVBRUTT
-  )
-  const kanOppretteManueltOpphoer = iverksatteBehandlinger.length > 0 && harIngenUavbrutteManuelleOpphoer
+  const iverksatteBehandlinger = kunIverksatteBehandlinger(behandlingliste)
+  const kanOppretteManueltOpphoer =
+    iverksatteBehandlinger.length > 0 && harIngenUavbrutteManuelleOpphoer(behandlingliste)
 
   return (
     <>

@@ -7,13 +7,10 @@ import {
   SamsvarMellomGrunnlagOgPdl,
   UtlandSamsvar,
 } from '../typer'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterKanskjeStringDato, formaterStringDato } from '~utils/formattering'
 import { Heading } from '@navikt/ds-react'
 import { teksterForGrunnlagshendelser, teksterForSaksrolle } from '~components/person/grunnlagshendelser/tekster'
 import { HendelseMetaItem, HendelseMetaWrapper, HendelseSammenligning, HendelseWrapper } from './styled'
-
-const formaterKanskjeStringDato = (fallback = 'Ukjent dato', dato?: string): string =>
-  dato ? formaterStringDato(dato) : fallback
 
 const VisDoedsdatoSamsvar = (props: { data: DoedsdatoSamsvar }) => {
   return (

@@ -173,16 +173,6 @@ internal fun Route.behandlingRoutes(
                 }
             }
 
-            route("/hendelser") {
-                route("/vedtak") {
-                    get { // TODO: feil api path? hendelser/behandling?
-                        call.respond(
-                            LagretHendelser(generellBehandlingService.hentHendelserIBehandling(behandlingsId))
-                        )
-                    }
-                }
-            }
-
             post("/gyldigfremsatt") {
                 val body = call.receive<GyldighetsResultat>()
                 foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)

@@ -41,6 +41,8 @@ import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.helsesjekk.isReady
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
@@ -149,6 +151,7 @@ class App(private val beanFactory: BeanFactory) {
             }
         ).start(true)
         beanFactory.behandlingHendelser().nyHendelse.close()
+        setReady()
     }
 }
 
@@ -162,7 +165,7 @@ fun Route.naisprobes() {
             call.respondText { "OK" }
         }
         get("isready") {
-            call.respondText { "OK" }
+            call.respond(isReady())
         }
         get("started") {
             call.respondText { "OK" }

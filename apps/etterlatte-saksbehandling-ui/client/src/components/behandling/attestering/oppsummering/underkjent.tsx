@@ -1,22 +1,22 @@
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useAppSelector } from '~store/Store'
-import { formaterEnumTilLesbarString, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
+import { formaterBehandlingstype, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 
-export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
+export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.ident)
-  const underkjentSiste = behandlingsInfo?.underkjentLogg?.slice(-1)[0]
-  const fattetSiste = behandlingsInfo?.fattetLogg?.slice(-1)[0]
+  const underkjentSiste = behandlingsInfo.underkjentLogg?.slice(-1)[0]
+  const fattetSiste = behandlingsInfo.fattetLogg?.slice(-1)[0]
 
-  const erReturnert = behandlingsInfo?.status === IBehandlingStatus.RETURNERT
+  const erReturnert = behandlingsInfo.status === IBehandlingStatus.RETURNERT
   const saksbehandler = fattetSiste?.ident
   const attestant = erReturnert ? underkjentSiste?.ident : innloggetId
 
   return (
     <>
       <Wrapper innvilget={false}>
-        <Overskrift>{formaterEnumTilLesbarString(behandlingsInfo?.type ?? '')}</Overskrift>
+        <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
         <UnderOverskrift innvilget={false}>Underkjent</UnderOverskrift>
         {underkjentSiste && (
           <Tekst>

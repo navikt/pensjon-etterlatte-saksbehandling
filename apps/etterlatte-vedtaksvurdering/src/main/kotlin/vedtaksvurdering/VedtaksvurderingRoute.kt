@@ -10,8 +10,6 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
@@ -70,13 +68,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
         post("vedtak/attester/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 val attestert = service.attesterVedtak(behandlingId, saksbehandler.ident, accesstoken)
-                val vedtakHendelse = VedtakHendelse(
-                    vedtakId = attestert.vedtakId,
-                    inntruffet = attestert.attestasjon?.tidspunkt?.toTidspunkt()!!,
-                    saksbehandler = attestert.attestasjon?.attestant!!
-                )
 
-                service.postTilVedtakhendelse(behandlingId, accesstoken, HendelseType.ATTESTERT, vedtakHendelse)
                 call.respond(attestert)
             }
         }
@@ -92,12 +84,6 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             withBehandlingId { behandlingId ->
                 val fattetVedtak = service.fattVedtak(behandlingId, saksbehandler.ident, accesstoken)
 
-                val vedtakHendelse = VedtakHendelse(
-                    vedtakId = fattetVedtak.vedtakId,
-                    inntruffet = fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
-                    saksbehandler = fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
-                )
-                service.postTilVedtakhendelse(behandlingId, accesstoken, HendelseType.FATTET, vedtakHendelse)
                 call.respond(fattetVedtak)
             }
         }
@@ -105,17 +91,13 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
         post("vedtak/underkjenn/{behandlingId}") {
             val behandlingId = UUID.fromString(call.parameters["behandlingId"])
             val begrunnelse = call.receive<UnderkjennVedtakClientRequest>()
-            val underkjentVedtak = service.underkjennVedtak(behandlingId, accesstoken)
-
-            val vedtakHendelse = VedtakHendelse(
-                vedtakId = underkjentVedtak.id,
-                inntruffet = Tidspunkt.now(),
-                saksbehandler = saksbehandler.ident,
-                kommentar = begrunnelse.kommentar,
-                valgtBegrunnelse = begrunnelse.valgtBegrunnelse
+            val underkjentVedtak = service.underkjennVedtak(
+                behandlingId,
+                accesstoken,
+                saksbehandler,
+                begrunnelse
             )
 
-            service.postTilVedtakhendelse(behandlingId, accesstoken, HendelseType.UNDERKJENT, vedtakHendelse)
             call.respond(underkjentVedtak)
         }
     }

@@ -1,6 +1,10 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.jms.ExceptionListener
+import jakarta.jms.Message
+import jakarta.jms.MessageListener
+import jakarta.jms.Session
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
@@ -9,10 +13,6 @@ import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import javax.jms.ExceptionListener
-import javax.jms.Message
-import javax.jms.MessageListener
-import javax.jms.Session
 import kotlin.system.exitProcess
 
 data class TilbakekrevingEvent(

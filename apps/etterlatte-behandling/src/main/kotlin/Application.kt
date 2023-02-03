@@ -109,7 +109,7 @@ fun Application.module(beanFactory: BeanFactory) {
                 beanFactory.revurderingService(),
                 beanFactory.manueltOpphoerService()
             )
-            behandlingsstatusRoutes(beanFactory.behandlingsStatusService())
+            behandlingsstatusRoutes(beanFactory.behandlingsStatusService(), generellBehandlingService)
             route("api") {
                 oppgaveRoutes(OppgaveDao(ds.dataSource))
             }
@@ -143,8 +143,8 @@ class App(private val beanFactory: BeanFactory) {
         embeddedServer(
             CIO,
             applicationEngineEnvironment {
-                modules.add { module(beanFactory) }
                 modules.add { sikkerhetsModul() }
+                modules.add { module(beanFactory) }
                 connector { port = 8080 }
             }
         ).start(true)

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -106,8 +107,8 @@ class StatussjekkTest {
         }
 
         coVerifyOrder {
-            behandling.fattVedtak(behandlingId, accessToken, false)
-            behandling.fattVedtak(behandlingId, accessToken, true)
+            behandling.fattVedtak(behandlingId, accessToken)
+            behandling.fattVedtak(behandlingId, accessToken, any())
         }
     }
 
@@ -127,13 +128,12 @@ class StatussjekkTest {
         vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
 
         runBlocking {
-            assertThrows<Exception> {
+            assertThrows<KanIkkeEndreFattetVedtak> {
                 vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, accessToken)
             }
         }
 
-        coVerify { behandling.fattVedtak(behandlingId, accessToken, false) }
-        coVerify(exactly = 0) { behandling.fattVedtak(behandlingId, accessToken, true) }
+        coVerify(exactly = 1) { behandling.fattVedtak(behandlingId, accessToken) }
     }
 
     @Test
@@ -156,8 +156,8 @@ class StatussjekkTest {
         }
 
         coVerifyOrder {
-            behandling.attester(behandlingId, accessToken, false)
-            behandling.attester(behandlingId, accessToken, true)
+            behandling.attester(behandlingId, accessToken)
+            behandling.attester(behandlingId, accessToken, any())
         }
     }
 
@@ -176,13 +176,12 @@ class StatussjekkTest {
         opprettVedtak()
 
         runBlocking {
-            assertThrows<Exception> {
+            assertThrows<VedtakKanIkkeAttesteresFoerDetFattes> {
                 vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, accessToken)
             }
         }
 
-        coVerify { behandling.attester(behandlingId, accessToken, false) }
-        coVerify(exactly = 0) { behandling.attester(behandlingId, accessToken, true) }
+        coVerify(exactly = 1) { behandling.attester(behandlingId, accessToken, any()) }
     }
 
     @Test
@@ -201,12 +200,17 @@ class StatussjekkTest {
         vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
 
         runBlocking {
-            vedtaksvurderingService.underkjennVedtak(behandlingId, accessToken)
+            vedtaksvurderingService.underkjennVedtak(
+                behandlingId,
+                accessToken,
+                Saksbehandler("saksbehandler"),
+                UnderkjennVedtakClientRequest("kommentar", "begrunnelse")
+            )
         }
 
         coVerifyOrder {
-            behandling.underkjenn(behandlingId, accessToken, false)
-            behandling.underkjenn(behandlingId, accessToken, true)
+            behandling.underkjenn(behandlingId, accessToken)
+            behandling.underkjenn(behandlingId, accessToken, any())
         }
     }
 
@@ -221,16 +225,20 @@ class StatussjekkTest {
             sendToRapid,
             saksbehandlereSecret
         )
-        coEvery { behandling.underkjenn(any(), any(), any()) } returns true
+        coEvery { behandling.underkjenn(any(), any()) } returns false
         opprettVedtak()
 
         runBlocking {
-            assertThrows<Exception> {
-                vedtaksvurderingService.underkjennVedtak(behandlingId, accessToken)
+            assertThrows<BehandlingstilstandException> {
+                vedtaksvurderingService.underkjennVedtak(
+                    behandlingId,
+                    accessToken,
+                    Saksbehandler(saksbehandler),
+                    UnderkjennVedtakClientRequest("kommentar", "begrunnelse")
+                )
             }
         }
 
-        coVerify { behandling.underkjenn(behandlingId, accessToken, false) }
-        coVerify(exactly = 0) { behandling.underkjenn(behandlingId, accessToken, true) }
+        coVerify(exactly = 1) { behandling.underkjenn(behandlingId, accessToken, any()) }
     }
 }

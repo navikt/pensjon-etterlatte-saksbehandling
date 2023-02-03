@@ -1,6 +1,6 @@
 import { BodyShort, Button, Heading, Loader, Radio, RadioGroup } from '@navikt/ds-react'
 import { Content, ContentHeader } from '~shared/styled'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { Barn } from '../soeknadsoversikt/familieforhold/personer/Barn'
 import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
@@ -21,6 +21,7 @@ import { IPdlPerson } from '~shared/types/Person'
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 import { oppdaterBehandlingsstatus, resetBeregning } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface FormValues {
   foedselsnummer: string
@@ -31,6 +32,7 @@ const Beregningsgrunnlag = () => {
   const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
+  const [ikkeValgtOppdrasSammenPaaAlle, setIkkeValgtOppdrasSammenPaaAlleFeil] = useState(false)
   const dispatch = useAppDispatch()
   const [beregningsgrunnlag, hentBeregningsgrunnlag] = useApiCall(hentSoeskenMedIBeregning)
   const [soeskenMedIBeregning, postSoeskenMedIBeregning] = useApiCall(lagreSoeskenMedIBeregning)
@@ -118,10 +120,13 @@ const Beregningsgrunnlag = () => {
       </ContentHeader>
       <FamilieforholdWrapper
         id="form"
-        onSubmit={handleSubmit(
-          ({ beregningsgrunnlag }) =>
-            validerSoeskenjustering(soesken, beregningsgrunnlag) && onSubmit(beregningsgrunnlag)
-        )}
+        onSubmit={handleSubmit(({ beregningsgrunnlag }) => {
+          if (validerSoeskenjustering(soesken, beregningsgrunnlag)) {
+            onSubmit(beregningsgrunnlag)
+          } else {
+            setIkkeValgtOppdrasSammenPaaAlleFeil(true)
+          }
+        })}
       >
         {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
         <Border />
@@ -138,9 +143,15 @@ const Beregningsgrunnlag = () => {
                     <RadioGroupRow
                       legend="Oppdras sammen"
                       value={soesken.field.value?.skalBrukes ?? null}
-                      onChange={(value: boolean) =>
-                        soesken.field.onChange({ foedselsnummer: barn.foedselsnummer, skalBrukes: value })
+                      error={
+                        soesken.field.value?.skalBrukes === undefined && ikkeValgtOppdrasSammenPaaAlle
+                          ? 'Du må velge ja/nei på alle søsken'
+                          : ''
                       }
+                      onChange={(value: boolean) => {
+                        soesken.field.onChange({ foedselsnummer: barn.foedselsnummer, skalBrukes: value })
+                        setIkkeValgtOppdrasSammenPaaAlleFeil(false)
+                      }}
                     >
                       <Radio value={true}>Ja</Radio>
                       <Radio value={false}>Nei</Radio>
@@ -148,7 +159,7 @@ const Beregningsgrunnlag = () => {
                   ) : (
                     <OppdrasSammenLes>
                       <strong>Oppdras sammen</strong>
-                      <label>{soesken.field.value ? 'Ja' : 'Nei'}</label>
+                      <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
                     </OppdrasSammenLes>
                   )
                 }
@@ -156,6 +167,10 @@ const Beregningsgrunnlag = () => {
             </SoeskenContainer>
           ))}
       </FamilieforholdWrapper>
+
+      {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
+      {isFailure(soeskenMedIBeregning) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+
       {visSoeskenjustering &&
         (behandles ? (
           <BehandlingHandlingKnapper>
@@ -171,7 +186,7 @@ const Beregningsgrunnlag = () => {
 }
 
 const validerSoeskenjustering = (soesken: IPdlPerson[], justering: FormValues[]): justering is SoeskenMedIBeregning[] =>
-  soesken.length === justering.length && justering.every((barn) => barn.skalBrukes !== undefined)
+  soesken.length === justering.length && justering.every((barn) => barn?.skalBrukes !== undefined)
 
 const OppdrasSammenLes = styled.div`
   display: flex;

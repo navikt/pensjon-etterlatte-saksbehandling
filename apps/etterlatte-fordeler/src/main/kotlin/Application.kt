@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory
 val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
 
 fun main() {
+    sikkerLogg.info("SikkerLogg: etterlatte-fordeler oppstart")
+
     val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }

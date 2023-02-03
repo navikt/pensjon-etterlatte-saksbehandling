@@ -18,6 +18,13 @@ on:
       - apps/etterlatte-hendelser-pdl/**
       - libs/common/**
       - libs/ktor2client-auth-clientcredentials/**
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Jupiter.kt
+      - buildSrc/src/main/kotlin/Kafka.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/Logging.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/NavFelles.kt
   pull_request:
     branches:
       - main
@@ -25,6 +32,13 @@ on:
       - apps/etterlatte-hendelser-pdl/**
       - libs/common/**
       - libs/ktor2client-auth-clientcredentials/**
+      - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/Jupiter.kt
+      - buildSrc/src/main/kotlin/Kafka.kt
+      - buildSrc/src/main/kotlin/Ktor2.kt
+      - buildSrc/src/main/kotlin/Logging.kt
+      - buildSrc/src/main/kotlin/MockK.kt
+      - buildSrc/src/main/kotlin/NavFelles.kt
 
 jobs:
   test:

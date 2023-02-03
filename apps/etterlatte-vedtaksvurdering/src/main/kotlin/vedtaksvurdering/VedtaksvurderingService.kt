@@ -6,6 +6,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -15,6 +17,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -93,7 +96,7 @@ class VedtaksvurderingService(
                 behandling.sak,
                 behandling.soeker!!,
                 sak.sakType,
-                behandling.behandlingType!!,
+                behandling.behandlingType,
                 virk,
                 beregning,
                 vilkaarsvurdering
@@ -173,11 +176,18 @@ class VedtaksvurderingService(
 
             repository.fattVedtak(saksbehandler, saksbehandlerEnhet, behandlingId)
         }
-        val fattetTid = LocalDateTime.now()
+
         val fattetVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
+        val vedtakHendelse = VedtakHendelse(
+            vedtakId = fattetVedtak.vedtakId,
+            inntruffet = fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
+            saksbehandler = fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
+        )
+        behandlingKlient.fattVedtak(behandlingId, accessToken, vedtakHendelse)
+
+        val fattetTid = fattetVedtak.vedtakFattet?.tidspunkt?.toLocalDateTime()!!
         val statistikkmelding = lagStatistikkMelding(KafkaHendelseType.FATTET, fattetVedtak, fattetTid)
         sendToRapid(statistikkmelding, behandlingId)
-        behandlingKlient.fattVedtak(behandlingId, accessToken, true)
 
         return fattetVedtak
     }
@@ -207,10 +217,15 @@ class VedtaksvurderingService(
             utbetalingsperioderFraVedtak(vedtak)
         )
         val attestertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-        val attestertTid = LocalDateTime.now()
+        val vedtakHendelse = VedtakHendelse(
+            vedtakId = attestertVedtak.vedtakId,
+            inntruffet = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!,
+            saksbehandler = attestertVedtak.attestasjon?.attestant!!
+        )
+        behandlingKlient.attester(behandlingId, accessToken, vedtakHendelse)
+        val attestertTid = attestertVedtak.attestasjon?.tidspunkt?.toLocalDateTime()!!
         val message = lagStatistikkMelding(KafkaHendelseType.ATTESTERT, attestertVedtak, attestertTid)
         sendToRapid(message, behandlingId)
-        behandlingKlient.attester(behandlingId, accessToken, true)
 
         return attestertVedtak
     }
@@ -219,7 +234,12 @@ class VedtaksvurderingService(
         if (!b) throw function()
     }
 
-    suspend fun underkjennVedtak(behandlingId: UUID, accessToken: String): VedtakEntity {
+    suspend fun underkjennVedtak(
+        behandlingId: UUID,
+        accessToken: String,
+        saksbehandler: Saksbehandler,
+        begrunnelse: UnderkjennVedtakClientRequest
+    ): VedtakEntity {
         if (!behandlingKlient.underkjenn(behandlingId, accessToken)) {
             throw BehandlingstilstandException
         }
@@ -229,9 +249,17 @@ class VedtaksvurderingService(
             require(it.attestant == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
         }
         repository.underkjennVedtak(behandlingId)
-        behandlingKlient.underkjenn(behandlingId, accessToken, true)
         val underkjentVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
         val underkjentTid = LocalDateTime.now()
+        val vedtakHendelse = VedtakHendelse(
+            vedtakId = underkjentVedtak.vedtakId,
+            inntruffet = underkjentTid.toNorskTidspunkt(),
+            saksbehandler = saksbehandler.ident,
+            kommentar = begrunnelse.kommentar,
+            valgtBegrunnelse = begrunnelse.valgtBegrunnelse
+        )
+
+        behandlingKlient.underkjenn(behandlingId, accessToken, vedtakHendelse)
         val message = lagStatistikkMelding(KafkaHendelseType.UNDERKJENT, underkjentVedtak, underkjentTid)
         sendToRapid(message, behandlingId)
         return repository.hentVedtak(behandlingId)!!
@@ -290,20 +318,6 @@ class VedtaksvurderingService(
         return (perioderFraBeregning + manglendePerioderMellomBeregninger + manglendeStart + manglendeSlutt)
             .filterNotNull()
             .sortedBy { it.periode.fom }
-    }
-
-    suspend fun postTilVedtakhendelse(
-        behandlingId: UUID,
-        accessToken: String,
-        hendelse: HendelseType,
-        vedtakhendelse: VedtakHendelse
-    ) {
-        behandlingKlient.postVedtakHendelse(
-            vedtakHendelse = vedtakhendelse,
-            hendelse = hendelse,
-            behandlingId = behandlingId,
-            accessToken = accessToken
-        )
     }
 }
 

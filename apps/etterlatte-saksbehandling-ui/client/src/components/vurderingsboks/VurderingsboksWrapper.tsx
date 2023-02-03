@@ -28,11 +28,6 @@ export const VurderingsboksWrapper = (props: Props) => {
   const [rediger, setRediger] = useState<boolean>(props.defaultRediger ?? false)
   const [lagrer, setLagrer] = useState(false)
 
-  const reset = () => {
-    setRediger(false)
-    setLagrer(false)
-  }
-
   return (
     <div>
       {!rediger && (
@@ -68,9 +63,11 @@ export const VurderingsboksWrapper = (props: Props) => {
               </RedigerWrapper>
               {props.slett && (
                 <RedigerWrapper
-                  onClick={() => {
-                    setLagrer(true)
-                    new Promise((resolve) => resolve(props.slett?.(reset))).catch(reset)
+                  onClick={async () => {
+                    new Promise(() => {
+                      setLagrer(true)
+                      props.slett?.(() => setLagrer(false))
+                    })
                   }}
                 >
                   {lagrer ? (
@@ -93,9 +90,11 @@ export const VurderingsboksWrapper = (props: Props) => {
               loading={lagrer}
               variant={'primary'}
               size={'small'}
-              onClick={() => {
+              onClick={async () => {
                 setLagrer(true)
-                new Promise((resolve) => resolve(props.lagreklikk(reset))).catch(reset)
+                new Promise((resolve) => resolve(props.lagreklikk(() => setRediger(false)))).finally(() =>
+                  setLagrer(false)
+                )
               }}
             >
               Lagre

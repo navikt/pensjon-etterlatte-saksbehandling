@@ -1,6 +1,6 @@
-import { Table, Link } from '@navikt/ds-react'
+import { Link, Table } from '@navikt/ds-react'
 import { AarsaksTyper, IBehandlingsammendrag, VedtakSammendrag } from './typer'
-import { formaterStringDato, formaterEnumTilLesbarString } from '~utils/formattering'
+import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
@@ -53,7 +53,7 @@ export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendra
                 {formaterStringDato(behandling.behandlingOpprettet)}
               </Table.DataCell>
               <Table.DataCell key={`data${behandling.behandlingType}`}>
-                {formaterEnumTilLesbarString(behandling.behandlingType)}
+                {formaterBehandlingstype(behandling.behandlingType)}
               </Table.DataCell>
               <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarsak(behandling.aarsak)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.status}`}>

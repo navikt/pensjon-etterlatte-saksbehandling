@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -111,7 +112,14 @@ internal class DBTest {
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
 
-        runBlocking { vedtaksvurderingService.underkjennVedtak(uuid, accessToken) }
+        runBlocking {
+            vedtaksvurderingService.underkjennVedtak(
+                uuid,
+                accessToken,
+                Saksbehandler("saksbehandler"),
+                UnderkjennVedtakClientRequest("kommentar", "begrunnelse")
+            )
+        }
         val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 

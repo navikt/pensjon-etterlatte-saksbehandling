@@ -33,7 +33,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
   return (
     <BehandlingsinfoContainer>
-      <Overskrift>{formaterBehandlingstype(behandlingsInfo?.type)}</Overskrift>
+      <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
       <UnderOverskrift>{hentStatus()}</UnderOverskrift>
       {fattetDato && <Tekst>{fattetDato}</Tekst>}
       <TagList>

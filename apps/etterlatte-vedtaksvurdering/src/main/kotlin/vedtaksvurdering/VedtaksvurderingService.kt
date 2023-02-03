@@ -96,7 +96,7 @@ class VedtaksvurderingService(
                 behandling.sak,
                 behandling.soeker!!,
                 sak.sakType,
-                behandling.behandlingType!!,
+                behandling.behandlingType,
                 virk,
                 beregning,
                 vilkaarsvurdering
@@ -183,7 +183,7 @@ class VedtaksvurderingService(
             inntruffet = fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
             saksbehandler = fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
         )
-        behandlingKlient.fattVedtak(behandlingId, accessToken, true, vedtakHendelse)
+        behandlingKlient.fattVedtak(behandlingId, accessToken, vedtakHendelse)
 
         val fattetTid = fattetVedtak.vedtakFattet?.tidspunkt?.toLocalDateTime()!!
         val statistikkmelding = lagStatistikkMelding(KafkaHendelseType.FATTET, fattetVedtak, fattetTid)
@@ -222,7 +222,7 @@ class VedtaksvurderingService(
             inntruffet = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!,
             saksbehandler = attestertVedtak.attestasjon?.attestant!!
         )
-        behandlingKlient.attester(behandlingId, accessToken, true, vedtakHendelse)
+        behandlingKlient.attester(behandlingId, accessToken, vedtakHendelse)
         val attestertTid = attestertVedtak.attestasjon?.tidspunkt?.toLocalDateTime()!!
         val message = lagStatistikkMelding(KafkaHendelseType.ATTESTERT, attestertVedtak, attestertTid)
         sendToRapid(message, behandlingId)
@@ -259,7 +259,7 @@ class VedtaksvurderingService(
             valgtBegrunnelse = begrunnelse.valgtBegrunnelse
         )
 
-        behandlingKlient.underkjenn(behandlingId, accessToken, true, vedtakHendelse)
+        behandlingKlient.underkjenn(behandlingId, accessToken, vedtakHendelse)
         val message = lagStatistikkMelding(KafkaHendelseType.UNDERKJENT, underkjentVedtak, underkjentTid)
         sendToRapid(message, behandlingId)
         return repository.hentVedtak(behandlingId)!!

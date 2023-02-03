@@ -91,7 +91,7 @@ class StatussjekkTest {
     @Test
     fun `skal sjekke og oppdatere behandlingsstatus naar man fatter vedtak`() {
         val behandling = mockk<BehandlingKlient>()
-        coEvery { behandling.fattVedtak(any(), any(), any(), any()) } returns true
+        coEvery { behandling.fattVedtak(any(), any(), any()) } returns true
         val vedtaksvurderingService = VedtaksvurderingService(
             vedtakRepo,
             beregning,
@@ -107,8 +107,8 @@ class StatussjekkTest {
         }
 
         coVerifyOrder {
-            behandling.fattVedtak(behandlingId, accessToken, false)
-            behandling.fattVedtak(behandlingId, accessToken, true, any())
+            behandling.fattVedtak(behandlingId, accessToken)
+            behandling.fattVedtak(behandlingId, accessToken, any())
         }
     }
 
@@ -128,19 +128,18 @@ class StatussjekkTest {
         vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
 
         runBlocking {
-            assertThrows<Exception> {
+            assertThrows<KanIkkeEndreFattetVedtak> {
                 vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, accessToken)
             }
         }
 
-        coVerify { behandling.fattVedtak(behandlingId, accessToken, false) }
-        coVerify(exactly = 0) { behandling.fattVedtak(behandlingId, accessToken, true) }
+        coVerify(exactly = 1) { behandling.fattVedtak(behandlingId, accessToken) }
     }
 
     @Test
     fun `skal sjekke og oppdatere behandlingsstatus naar man attesterer`() {
         val behandling = mockk<BehandlingKlient>()
-        coEvery { behandling.attester(any(), any(), any(), any()) } returns true
+        coEvery { behandling.attester(any(), any(), any()) } returns true
         val vedtaksvurderingService = VedtaksvurderingService(
             vedtakRepo,
             beregning,
@@ -157,8 +156,8 @@ class StatussjekkTest {
         }
 
         coVerifyOrder {
-            behandling.attester(behandlingId, accessToken, false)
-            behandling.attester(behandlingId, accessToken, true, any())
+            behandling.attester(behandlingId, accessToken)
+            behandling.attester(behandlingId, accessToken, any())
         }
     }
 
@@ -177,19 +176,18 @@ class StatussjekkTest {
         opprettVedtak()
 
         runBlocking {
-            assertThrows<Exception> {
+            assertThrows<VedtakKanIkkeAttesteresFoerDetFattes> {
                 vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, accessToken)
             }
         }
 
-        coVerify { behandling.attester(behandlingId, accessToken, false) }
-        coVerify(exactly = 0) { behandling.attester(behandlingId, accessToken, true) }
+        coVerify(exactly = 1) { behandling.attester(behandlingId, accessToken, any()) }
     }
 
     @Test
     fun `skal sjekke og oppdatere behandlingsstatus naar man underkjenner`() {
         val behandling = mockk<BehandlingKlient>()
-        coEvery { behandling.underkjenn(any(), any(), any(), any()) } returns true
+        coEvery { behandling.underkjenn(any(), any(), any()) } returns true
         val vedtaksvurderingService = VedtaksvurderingService(
             vedtakRepo,
             beregning,
@@ -211,8 +209,8 @@ class StatussjekkTest {
         }
 
         coVerifyOrder {
-            behandling.underkjenn(behandlingId, accessToken, false)
-            behandling.underkjenn(behandlingId, accessToken, true, any())
+            behandling.underkjenn(behandlingId, accessToken)
+            behandling.underkjenn(behandlingId, accessToken, any())
         }
     }
 
@@ -227,11 +225,11 @@ class StatussjekkTest {
             sendToRapid,
             saksbehandlereSecret
         )
-        coEvery { behandling.underkjenn(any(), any(), any()) } returns true
+        coEvery { behandling.underkjenn(any(), any()) } returns false
         opprettVedtak()
 
         runBlocking {
-            assertThrows<Exception> {
+            assertThrows<BehandlingstilstandException> {
                 vedtaksvurderingService.underkjennVedtak(
                     behandlingId,
                     accessToken,
@@ -241,7 +239,6 @@ class StatussjekkTest {
             }
         }
 
-        coVerify { behandling.underkjenn(behandlingId, accessToken, false) }
-        coVerify(exactly = 0) { behandling.underkjenn(behandlingId, accessToken, true) }
+        coVerify(exactly = 1) { behandling.underkjenn(behandlingId, accessToken, any()) }
     }
 }

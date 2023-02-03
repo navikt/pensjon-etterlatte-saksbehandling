@@ -412,10 +412,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@navikt/ds-css-internal@^2.0.10":
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-2.0.10.tgz#fb4ba9f7a008fbdddf691e62953673a9ae9b588d"
-  integrity sha512-sayw3arPH0fphiMls2UOHmFETVAhO74slaGQnJu62vKrgmoQ/ep+ANN6Y2vxPYPGXcucGe3F/l4vwrmsrzuqBg==
+"@navikt/ds-css-internal@^2.0.11":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-2.1.1.tgz#b05e868d961d3170d30326b277a8c52ddff3fc19"
+  integrity sha512-o80DMlRE/102DCKjZrfYzb4QzyW7oRVbl8tPROcUZ+bSL5ziVXOwj2fbceXrUIeWyF6536RSuM1mLlcHL10sEw==
 
 "@navikt/ds-css@^2.0.10":
   version "2.0.10"

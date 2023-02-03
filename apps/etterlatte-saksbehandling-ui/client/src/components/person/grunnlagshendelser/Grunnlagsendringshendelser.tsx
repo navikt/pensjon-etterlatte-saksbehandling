@@ -7,7 +7,11 @@ import {
   SamsvarMellomGrunnlagOgPdl,
   UtlandSamsvar,
 } from '../typer'
-import { formaterKanskjeStringDato, formaterStringDato } from '~utils/formattering'
+import {
+  formaterKanskjeStringDato,
+  formaterKanskjeStringDatoMedFallback,
+  formaterStringDato,
+} from '~utils/formattering'
 import { Heading } from '@navikt/ds-react'
 import { teksterForGrunnlagshendelser, teksterForSaksrolle } from '~components/person/grunnlagshendelser/tekster'
 import { HendelseMetaItem, HendelseMetaWrapper, HendelseSammenligning, HendelseWrapper } from './styled'
@@ -16,9 +20,9 @@ const VisDoedsdatoSamsvar = (props: { data: DoedsdatoSamsvar }) => {
   return (
     <HendelseSammenligning>
       <dt>Dødsdato i grunnlag</dt>
-      <dd>{formaterKanskjeStringDato('Ingen', props.data.fraGrunnlag)}</dd>
+      <dd>{formaterKanskjeStringDatoMedFallback('Ingen', props.data.fraGrunnlag)}</dd>
       <dt>Dødsdato i PDL</dt>
-      <dd>{formaterKanskjeStringDato('Ingen', props.data.fraPdl)}</dd>
+      <dd>{formaterKanskjeStringDatoMedFallback('Ingen', props.data.fraPdl)}</dd>
     </HendelseSammenligning>
   )
 }

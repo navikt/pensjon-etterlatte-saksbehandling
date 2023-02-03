@@ -1,7 +1,13 @@
 import { isAfter } from 'date-fns'
 import { IAdresse } from '~shared/types/IAdresse'
-import { IBehandlingStatus, IDetaljertBehandling, IVilkaarsproving } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  IDetaljertBehandling,
+  IVilkaarsproving,
+} from '~shared/types/IDetaljertBehandling'
 import { IKriterie, IKriterieOpplysning, KriterieOpplysningsType, Kriterietype } from '~shared/types/Kriterie'
+import { IBehandlingsammendrag } from '~components/person/typer'
 
 export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
   return Boolean(behandling.gyldighetsprøving && behandling.kommerBarnetTilgode && behandling.virkningstidspunkt)
@@ -59,3 +65,12 @@ export const hentKriterierMedOpplysning = (
     console.error(e)
   }
 }
+
+export const harIngenUavbrutteManuelleOpphoer = (behandlingliste: IBehandlingsammendrag[]): boolean =>
+  behandlingliste.every(
+    (behandling) =>
+      behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER || behandling.status === IBehandlingStatus.AVBRUTT
+  )
+
+export const kunIverksatteBehandlinger = (behandlingliste: IBehandlingsammendrag[]): IBehandlingsammendrag[] =>
+  behandlingliste.filter((behandling) => behandling.status === IBehandlingStatus.IVERKSATT)

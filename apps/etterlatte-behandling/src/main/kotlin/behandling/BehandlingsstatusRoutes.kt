@@ -9,9 +9,13 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 
-internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingStatusService) {
+internal fun Route.behandlingsstatusRoutes(
+    behandlingsstatusService: BehandlingStatusService,
+    generellBehandlingService: GenerellBehandlingService
+) {
     route("/behandlinger/{behandlingsid}") {
         get("/opprett") {
             /* Kalles kun av vilkårsvurdering når total-vurdering slettes */
@@ -60,6 +64,16 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             haandterStatusEndring(call) {
                 behandlingsstatusService.settFattetVedtak(behandlingsId, false)
             }
+            val vedtakHendelse = call.receive<VedtakHendelse>()
+            generellBehandlingService.registrerVedtakHendelse(
+                behandlingsId,
+                vedtakHendelse.vedtakId,
+                HendelseType.FATTET,
+                vedtakHendelse.inntruffet,
+                vedtakHendelse.saksbehandler,
+                vedtakHendelse.kommentar,
+                vedtakHendelse.valgtBegrunnelse
+            )
         }
         get("/returner") {
             haandterStatusEndring(call) {
@@ -70,6 +84,16 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             haandterStatusEndring(call) {
                 behandlingsstatusService.settReturnert(behandlingsId, false)
             }
+            val vedtakHendelse = call.receive<VedtakHendelse>()
+            generellBehandlingService.registrerVedtakHendelse(
+                behandlingsId,
+                vedtakHendelse.vedtakId,
+                HendelseType.UNDERKJENT,
+                vedtakHendelse.inntruffet,
+                vedtakHendelse.saksbehandler,
+                vedtakHendelse.kommentar,
+                vedtakHendelse.valgtBegrunnelse
+            )
         }
 
         get("/attester") {
@@ -81,6 +105,16 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             haandterStatusEndring(call) {
                 behandlingsstatusService.settAttestert(behandlingsId, false)
             }
+            val vedtakHendelse = call.receive<VedtakHendelse>()
+            generellBehandlingService.registrerVedtakHendelse(
+                behandlingsId,
+                vedtakHendelse.vedtakId,
+                HendelseType.ATTESTERT,
+                vedtakHendelse.inntruffet,
+                vedtakHendelse.saksbehandler,
+                vedtakHendelse.kommentar,
+                vedtakHendelse.valgtBegrunnelse
+            )
         }
 
         get("/iverksett") {

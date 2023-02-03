@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -18,9 +19,24 @@ interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
     suspend fun hentSak(sakId: Long, accessToken: String): Sak
 
-    suspend fun fattVedtak(behandlingId: UUID, accessToken: String, commit: Boolean = false): Boolean
-    suspend fun attester(behandlingId: UUID, accessToken: String, commit: Boolean = false): Boolean
-    suspend fun underkjenn(behandlingId: UUID, accessToken: String, commit: Boolean = false): Boolean
+    suspend fun fattVedtak(
+        behandlingId: UUID,
+        accessToken: String,
+        commit: Boolean = false,
+        vedtakHendelse: VedtakHendelse? = null
+    ): Boolean
+    suspend fun attester(
+        behandlingId: UUID,
+        accessToken: String,
+        commit: Boolean = false,
+        vedtakHendelse: VedtakHendelse? = null
+    ): Boolean
+    suspend fun underkjenn(
+        behandlingId: UUID,
+        accessToken: String,
+        commit: Boolean = false,
+        vedtakHendelse: VedtakHendelse? = null
+    ): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
@@ -75,23 +91,45 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun fattVedtak(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean {
-        return statussjekkForBehandling(behandlingId, accessToken, commit, BehandlingStatus.FATTET_VEDTAK)
+    override suspend fun fattVedtak(
+        behandlingId: UUID,
+        accessToken: String,
+        commit: Boolean,
+        vedtakHendelse: VedtakHendelse?
+    ): Boolean {
+        return statussjekkForBehandling(
+            behandlingId,
+            accessToken,
+            commit,
+            BehandlingStatus.FATTET_VEDTAK,
+            vedtakHendelse
+        )
     }
 
-    override suspend fun attester(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean {
-        return statussjekkForBehandling(behandlingId, accessToken, commit, BehandlingStatus.ATTESTERT)
+    override suspend fun attester(
+        behandlingId: UUID,
+        accessToken: String,
+        commit: Boolean,
+        vedtakHendelse: VedtakHendelse?
+    ): Boolean {
+        return statussjekkForBehandling(behandlingId, accessToken, commit, BehandlingStatus.ATTESTERT, vedtakHendelse)
     }
 
-    override suspend fun underkjenn(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean {
-        return statussjekkForBehandling(behandlingId, accessToken, commit, BehandlingStatus.RETURNERT)
+    override suspend fun underkjenn(
+        behandlingId: UUID,
+        accessToken: String,
+        commit: Boolean,
+        vedtakHendelse: VedtakHendelse?
+    ): Boolean {
+        return statussjekkForBehandling(behandlingId, accessToken, commit, BehandlingStatus.RETURNERT, vedtakHendelse)
     }
 
     private suspend fun statussjekkForBehandling(
         behandlingId: UUID,
         accessToken: String,
         commit: Boolean,
-        status: BehandlingStatus
+        status: BehandlingStatus,
+        vedtakHendelse: VedtakHendelse?
     ): Boolean {
         logger.info("Setter behandling med behandlingId=$behandlingId til status ${status.name} (commit=$commit)")
 
@@ -104,7 +142,11 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/$statusnavn")
 
         val response = when (commit) {
-            true -> downstreamResourceClient.post(resource = resource, accessToken = accessToken, postBody = "{}")
+            true -> downstreamResourceClient.post(
+                resource = resource,
+                accessToken = accessToken,
+                postBody = vedtakHendelse!!
+            )
             false -> downstreamResourceClient.get(resource = resource, accessToken = accessToken)
         }
 

@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -145,9 +146,9 @@ internal class VedtaksbrevServiceTest {
             coEvery { adresseService.hentEnhet(any()) } returns ""
 
             runBlocking {
-                val brevID = vedtaksbrevService.oppdaterVedtaksbrev(SAK_ID, BEHANDLING_ID, "saksbehandler", "token")
+                val brev = vedtaksbrevService.oppdaterVedtaksbrev(SAK_ID, BEHANDLING_ID, "saksbehandler", "token")
 
-                Assertions.assertEquals(2, brevID)
+                assertNotNull(brev)
             }
 
             verify(exactly = 1) { db.oppdaterBrev(2, any()) }
@@ -163,7 +164,7 @@ internal class VedtaksbrevServiceTest {
         }
 
         @Test
-        fun `Ferdigstilt vedtaksbrev skal kaste exception ved endringsforsøk`() {
+        fun `Ferdigstilt vedtaksbrev skal returnere uendret brev`() {
             every { db.hentBrevForBehandling(any()) } returns listOf(
                 Brev(
                     1,
@@ -176,12 +177,12 @@ internal class VedtaksbrevServiceTest {
             )
 
             runBlocking {
-                assertThrows<IllegalArgumentException> {
-                    vedtaksbrevService.oppdaterVedtaksbrev(123, BEHANDLING_ID, "saksbehandler", "token")
-                }
+                vedtaksbrevService.oppdaterVedtaksbrev(123, BEHANDLING_ID, "saksbehandler", "token")
             }
 
             verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
+            verify(exactly = 0) { db.oppdaterBrev(any(), any()) }
+            verify(exactly = 0) { db.opprettBrev(any()) }
         }
     }
 

@@ -96,7 +96,7 @@ export const Vedtaksbrev = () => {
       const brevResponse = await opprettEllerOppdaterBrevForVedtak(sak, behandlingId!!)
 
       if (brevResponse.status === 'ok') {
-        setVedtaksbrevId(brevResponse.data)
+        setVedtaksbrevId(brevResponse.data.id)
       } else {
         setError(brevResponse.error)
         setLoading(false)

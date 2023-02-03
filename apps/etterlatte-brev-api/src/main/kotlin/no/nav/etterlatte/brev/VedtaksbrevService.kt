@@ -12,7 +12,6 @@ import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
-import no.nav.etterlatte.libs.common.brev.model.BrevID
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
@@ -38,21 +37,25 @@ class VedtaksbrevService(
         behandlingId: String,
         saksbehandler: String,
         accessToken: String = ""
-    ): BrevID {
+    ): Brev {
         val vedtaksbrev = hentVedtaksbrev(behandlingId)
 
         if (vedtaksbrev?.status != null && vedtaksbrev.status !in listOf(Status.OPPRETTET, Status.OPPDATERT)) {
-            throw IllegalArgumentException("Vedtaksbrev status er ${vedtaksbrev.status}. Kan derfor ikke endres.")
+            logger.info(
+                "Vedtaksbrev har status ${vedtaksbrev.status} og kan ikke endres. Returnerer lagret brev for visning."
+            )
+
+            return vedtaksbrev
         }
 
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, saksbehandler, accessToken)
         val nyttBrev = opprettEllerOppdater(behandling)
 
         return if (vedtaksbrev == null) {
-            db.opprettBrev(nyttBrev).id
+            db.opprettBrev(nyttBrev)
         } else {
             db.oppdaterBrev(vedtaksbrev.id, nyttBrev)
-            vedtaksbrev.id
+            vedtaksbrev
         }
     }
 

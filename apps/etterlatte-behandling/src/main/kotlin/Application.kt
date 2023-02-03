@@ -149,9 +149,8 @@ class App(private val beanFactory: BeanFactory) {
                 modules.add { module(beanFactory) }
                 connector { port = 8080 }
             }
-        ).start(true)
+        ).apply { setReady() }.start(true)
         beanFactory.behandlingHendelser().nyHendelse.close()
-        setReady()
     }
 }
 

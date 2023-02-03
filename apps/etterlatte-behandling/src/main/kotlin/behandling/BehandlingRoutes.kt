@@ -24,7 +24,6 @@ import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
-import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -176,24 +175,10 @@ internal fun Route.behandlingRoutes(
 
             route("/hendelser") {
                 route("/vedtak") {
-                    get {
+                    get { // TODO: feil api path? hendelser/behandling?
                         call.respond(
                             LagretHendelser(generellBehandlingService.hentHendelserIBehandling(behandlingsId))
                         )
-                    }
-
-                    post("/{hendelse}") {
-                        val body = call.receive<VedtakHendelse>()
-                        generellBehandlingService.registrerVedtakHendelse(
-                            behandlingsId,
-                            body.vedtakId,
-                            requireNotNull(call.parameters["hendelse"]).let { HendelseType.valueOf(it) },
-                            body.inntruffet,
-                            body.saksbehandler,
-                            body.kommentar,
-                            body.valgtBegrunnelse
-                        )
-                        call.respond(HttpStatusCode.OK)
                     }
                 }
             }

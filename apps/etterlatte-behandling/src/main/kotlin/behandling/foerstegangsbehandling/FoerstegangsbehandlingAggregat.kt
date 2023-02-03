@@ -95,8 +95,7 @@ class FoerstegangsbehandlingAggregat(
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
-        begrunnelse: String?,
-        behandlingDao: BehandlingDao
+        begrunnelse: String?
     ) {
         registrerVedtakHendelseFelles(
             vedtakId = vedtakId,
@@ -106,8 +105,7 @@ class FoerstegangsbehandlingAggregat(
             kommentar = kommentar,
             begrunnelse = begrunnelse,
             lagretBehandling = lagretBehandling,
-            hendelser = hendelser,
-            behandlingDao = behandlingDao
+            hendelser = hendelser
         )
     }
 }

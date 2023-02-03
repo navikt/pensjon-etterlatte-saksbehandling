@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
@@ -39,12 +38,8 @@ interface GenerellBehandlingService {
     fun grunnlagISakEndret(sak: Long)
     fun registrerVedtakHendelse(
         behandlingId: UUID,
-        vedtakId: Long,
-        hendelse: HendelseType,
-        inntruffet: Tidspunkt,
-        saksbehandler: String?,
-        kommentar: String?,
-        begrunnelse: String?
+        vedtakHendelse: VedtakHendelse,
+        hendelseType: HendelseType
     )
 
     fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse>
@@ -193,52 +188,43 @@ class RealGenerellBehandlingService(
 
     override fun registrerVedtakHendelse(
         behandlingId: UUID,
-        vedtakId: Long,
-        hendelse: HendelseType,
-        inntruffet: Tidspunkt,
-        saksbehandler: String?,
-        kommentar: String?,
-        begrunnelse: String?
+        vedtakHendelse: VedtakHendelse,
+        hendelseType: HendelseType
     ) {
-        inTransaction {
-            behandlinger.hentBehandlingType(behandlingId)?.let {
-                when (it) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                        foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId).registrerVedtakHendelse(
-                            vedtakId,
-                            hendelse,
-                            inntruffet,
-                            saksbehandler,
-                            kommentar,
-                            begrunnelse,
-                            behandlinger
-                        )
-                    }
+        behandlinger.hentBehandlingType(behandlingId)?.let {
+            when (it) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId).registrerVedtakHendelse(
+                        vedtakHendelse.vedtakId,
+                        hendelseType,
+                        vedtakHendelse.inntruffet,
+                        vedtakHendelse.saksbehandler,
+                        vedtakHendelse.kommentar,
+                        vedtakHendelse.valgtBegrunnelse
+                    )
+                }
 
-                    BehandlingType.REVURDERING -> {
-                        revurderingFactory.hentRevurdering(behandlingId).registrerVedtakHendelse(
-                            vedtakId,
-                            hendelse,
-                            inntruffet,
-                            saksbehandler,
-                            kommentar,
-                            begrunnelse,
-                            behandlinger
-                        )
-                    }
+                BehandlingType.REVURDERING -> {
+                    revurderingFactory.hentRevurdering(behandlingId).registrerVedtakHendelse(
+                        vedtakHendelse.vedtakId,
+                        hendelseType,
+                        vedtakHendelse.inntruffet,
+                        vedtakHendelse.saksbehandler,
+                        vedtakHendelse.kommentar,
+                        vedtakHendelse.valgtBegrunnelse
+                    )
+                }
 
-                    BehandlingType.MANUELT_OPPHOER -> {
-                        manueltOpphoerService.registrerVedtakHendelse(
-                            behandlingId,
-                            vedtakId,
-                            hendelse,
-                            inntruffet,
-                            saksbehandler,
-                            kommentar,
-                            begrunnelse,
-                            behandlinger
-                        )
-                    }
+                BehandlingType.MANUELT_OPPHOER -> {
+                    manueltOpphoerService.registrerVedtakHendelse(
+                        behandlingId,
+                        vedtakHendelse.vedtakId,
+                        hendelseType,
+                        vedtakHendelse.inntruffet,
+                        vedtakHendelse.saksbehandler,
+                        vedtakHendelse.kommentar,
+                        vedtakHendelse.valgtBegrunnelse
+                    )
                 }
             }
         }

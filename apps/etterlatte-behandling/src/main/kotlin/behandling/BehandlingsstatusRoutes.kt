@@ -9,12 +9,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 
 internal fun Route.behandlingsstatusRoutes(
-    behandlingsstatusService: BehandlingStatusService,
-    generellBehandlingService: GenerellBehandlingService
+    behandlingsstatusService: BehandlingStatusService
 ) {
     route("/behandlinger/{behandlingsid}") {
         get("/opprett") {
@@ -57,74 +55,43 @@ internal fun Route.behandlingsstatusRoutes(
 
         get("/fatteVedtak") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settFattetVedtak(behandlingsId)
+                behandlingsstatusService.sjekkOmKanFatteVedtak(behandlingsId)
             }
         }
         post("/fatteVedtak") {
-            haandterStatusEndring(call) {
-                behandlingsstatusService.settFattetVedtak(behandlingsId, false)
-            }
             val vedtakHendelse = call.receive<VedtakHendelse>()
-            generellBehandlingService.registrerVedtakHendelse(
-                behandlingsId,
-                vedtakHendelse.vedtakId,
-                HendelseType.FATTET,
-                vedtakHendelse.inntruffet,
-                vedtakHendelse.saksbehandler,
-                vedtakHendelse.kommentar,
-                vedtakHendelse.valgtBegrunnelse
-            )
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settFattetVedtak(behandlingsId, vedtakHendelse)
+            }
         }
         get("/returner") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settReturnert(behandlingsId)
+                behandlingsstatusService.sjekkOmKanReturnereVedtak(behandlingsId)
             }
         }
         post("/returner") {
-            haandterStatusEndring(call) {
-                behandlingsstatusService.settReturnert(behandlingsId, false)
-            }
             val vedtakHendelse = call.receive<VedtakHendelse>()
-            generellBehandlingService.registrerVedtakHendelse(
-                behandlingsId,
-                vedtakHendelse.vedtakId,
-                HendelseType.UNDERKJENT,
-                vedtakHendelse.inntruffet,
-                vedtakHendelse.saksbehandler,
-                vedtakHendelse.kommentar,
-                vedtakHendelse.valgtBegrunnelse
-            )
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settReturnertVedtak(behandlingsId, vedtakHendelse)
+            }
         }
 
         get("/attester") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settAttestert(behandlingsId)
+                behandlingsstatusService.sjekkOmKanAttestere(behandlingsId)
             }
         }
         post("/attester") {
-            haandterStatusEndring(call) {
-                behandlingsstatusService.settAttestert(behandlingsId, false)
-            }
             val vedtakHendelse = call.receive<VedtakHendelse>()
-            generellBehandlingService.registrerVedtakHendelse(
-                behandlingsId,
-                vedtakHendelse.vedtakId,
-                HendelseType.ATTESTERT,
-                vedtakHendelse.inntruffet,
-                vedtakHendelse.saksbehandler,
-                vedtakHendelse.kommentar,
-                vedtakHendelse.valgtBegrunnelse
-            )
+            haandterStatusEndring(call) {
+                behandlingsstatusService.settAttestertVedtak(behandlingsId, vedtakHendelse)
+            }
         }
 
-        get("/iverksett") {
-            haandterStatusEndring(call) {
-                behandlingsstatusService.settIverksatt(behandlingsId)
-            }
-        }
         post("/iverksett") {
+            val vedtakHendelse = call.receive<VedtakHendelse>()
             haandterStatusEndring(call) {
-                behandlingsstatusService.settIverksatt(behandlingsId, false)
+                behandlingsstatusService.settIverksattVedtak(behandlingsId, vedtakHendelse)
             }
         }
     }

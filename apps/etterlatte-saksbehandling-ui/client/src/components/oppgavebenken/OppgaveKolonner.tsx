@@ -10,7 +10,6 @@ import {
 } from './typer/oppgavebenken'
 import { format } from 'date-fns'
 import { Tag } from '@navikt/ds-react'
-import SaksbehandlerTildelKnapp from './handlinger/SaksbehandlerTildelKnapp'
 import HandlingerKnapp from './handlinger/HandlingerKnapp'
 import BrukeroversiktLenke from './handlinger/BrukeroversiktKnapp'
 import { tagColors } from '~shared/Tags'
@@ -79,14 +78,6 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
       return (
         <span>{oppgaveStatus ? statusFilter[oppgaveStatus as StatusFilter]?.navn ?? oppgaveStatus : 'Ukjent'}</span>
       )
-    },
-  },
-  {
-    Header: 'Saksbehandler',
-    accessor: 'saksbehandler',
-    filter: 'tildeltFilter',
-    Cell: ({ value: saksbehandler }) => {
-      return <SaksbehandlerTildelKnapp value={saksbehandler} />
     },
   },
   {

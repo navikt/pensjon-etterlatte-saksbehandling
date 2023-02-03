@@ -17,7 +17,7 @@ on:
     paths:
       - apps/etterlatte-medl-proxy/**
       - libs/common/**
-      - libs/etterlatte-ktor/**
+      - libs/etterlatte-helsesjekk/**
       - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Ktor2.kt
       - buildSrc/src/main/kotlin/MockK.kt
@@ -28,7 +28,7 @@ on:
     paths:
       - apps/etterlatte-medl-proxy/**
       - libs/common/**
-      - libs/etterlatte-ktor/**
+      - libs/etterlatte-helsesjekk/**
       - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Ktor2.kt
       - buildSrc/src/main/kotlin/MockK.kt

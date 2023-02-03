@@ -2,7 +2,7 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.brev.BrevService
-import no.nav.etterlatte.distribusjon.DistribusjonService
+import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.distribusjon.BestillingsID

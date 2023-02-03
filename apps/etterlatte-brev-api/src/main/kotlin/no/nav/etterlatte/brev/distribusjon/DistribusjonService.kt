@@ -1,4 +1,4 @@
-package no.nav.etterlatte.distribusjon
+package no.nav.etterlatte.brev.distribusjon
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -36,7 +36,7 @@ class DistribusjonServiceImpl(
             bestillendeFagsystem = "EY",
             distribusjonstype = type,
             distribusjonstidspunkt = tidspunkt,
-            dokumentProdApp = "etterlate-brev-api"
+            dokumentProdApp = "etterlatte-brev-api"
         )
 
         klient.distribuerJournalpost(request)

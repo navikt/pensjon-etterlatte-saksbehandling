@@ -1,4 +1,4 @@
-package no.nav.etterlatte.distribusjon
+package no.nav.etterlatte.brev.distribusjon
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

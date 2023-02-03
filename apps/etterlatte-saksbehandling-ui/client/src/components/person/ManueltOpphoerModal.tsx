@@ -70,7 +70,7 @@ export const ManueltOpphoerModal = ({
 
     setLoading(true)
     const kjenteAarsaker = selectedGrunner.filter((grunn) => grunn !== 'ANNET')
-    const res = await sendInnManueltOpphoer(sakId!, kjenteAarsaker, grunn)
+    const res = await sendInnManueltOpphoer(sakId, kjenteAarsaker, grunn)
     if (res.status === 'ok') {
       navigate(`/behandling/${res.data.behandlingId}/`)
     } else {

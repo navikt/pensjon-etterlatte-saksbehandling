@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
 import no.nav.etterlatte.grunnlagsinformasjonForelderBarnRelasjonHendelse
@@ -11,6 +10,8 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.samsvarMellomPdlOgGrunnlagDoed
@@ -47,10 +48,11 @@ internal class GrunnlagsendringshendelseDaoTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        val dsb = DataSourceBuilder(mapOf("DB_JDBC_URL" to postgreSQLContainer.jdbcUrl))
-        dataSource = dsb.dataSource
-
-        dsb.migrate()
+        dataSource = DataSourceBuilder.createDataSource(
+            jdbcUrl = postgreSQLContainer.jdbcUrl,
+            username = postgreSQLContainer.username,
+            password = postgreSQLContainer.password
+        ).apply { migrate() }
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }

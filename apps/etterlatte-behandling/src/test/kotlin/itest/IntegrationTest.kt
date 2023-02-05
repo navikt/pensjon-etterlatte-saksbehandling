@@ -28,14 +28,13 @@ import no.nav.etterlatte.behandling.KommerBarnetTilgodeJson
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
-import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.database.DataSourceBuilder
+import no.nav.etterlatte.common.LeaderElection
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
@@ -60,6 +59,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.module
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
@@ -74,6 +74,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import javax.sql.DataSource
 
 class ApplicationTest {
     @Test
@@ -85,7 +86,11 @@ class ApplicationTest {
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
         var behandlingOpprettet: UUID? = null
-        val beans = TestBeanFactory(postgreSQLContainer.jdbcUrl)
+        val beans = TestBeanFactory(
+            jdbcUrl = postgreSQLContainer.jdbcUrl,
+            username = postgreSQLContainer.username,
+            password = postgreSQLContainer.password
+        )
 
         testApplication {
             val client = createClient {
@@ -204,7 +209,7 @@ class ApplicationTest {
             client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
                 addAuthSaksbehandler()
             }.also {
-                beans.datasourceBuilder().dataSource.connection.use {
+                beans.dataSource().connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.OPPRETTET, actual.status)
                 }
@@ -217,7 +222,7 @@ class ApplicationTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(TilVilkaarsvurderingJson(VilkaarsvurderingUtfall.OPPFYLT))
             }.also {
-                beans.datasourceBuilder().dataSource.connection.use {
+                beans.dataSource().connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
                 }
@@ -228,7 +233,7 @@ class ApplicationTest {
             client.post("/behandlinger/$behandlingId/beregn") {
                 addAuthSaksbehandler()
             }.also {
-                beans.datasourceBuilder().dataSource.connection.use {
+                beans.dataSource().connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.BEREGNET, actual.status)
                 }
@@ -239,7 +244,7 @@ class ApplicationTest {
             client.post("/behandlinger/$behandlingId/fatteVedtak") {
                 addAuthSaksbehandler()
             }.also {
-                beans.datasourceBuilder().dataSource.connection.use {
+                beans.dataSource().connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
                 }
@@ -260,7 +265,7 @@ class ApplicationTest {
             client.post("/behandlinger/$behandlingId/attester") {
                 addAuthSaksbehandler()
             }.also {
-                beans.datasourceBuilder().dataSource.connection.use {
+                beans.dataSource().connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.ATTESTERT, actual.status)
                 }
@@ -436,7 +441,7 @@ class ApplicationTest {
             objectMapper.readTree(rapid.publiserteMeldinger.last().verdi)["@event_name"].textValue()
         )
 
-        beans.datasourceBuilder().dataSource.connection.use {
+        beans.dataSource().connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
         }
 
@@ -464,11 +469,15 @@ fun HttpRequestBuilder.addAuthServiceBruker() {
 }
 
 class TestBeanFactory(
-    private val jdbcUrl: String
+    private val jdbcUrl: String,
+    private val username: String,
+    private val password: String
 ) : CommonFactory() {
 
     val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
-    override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
+    override fun dataSource(): DataSource =
+        DataSourceBuilder.createDataSource(jdbcUrl, username, password)
+
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
 
     override fun vedtakKlient(): VedtakKlient {

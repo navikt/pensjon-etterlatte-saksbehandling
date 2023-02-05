@@ -14,10 +14,14 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.runs
+import io.mockk.unmockkStatic
 import no.nav.etterlatte.BeanFactory
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.module
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.v2.tokenValidationSupport
@@ -27,27 +31,12 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.*
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingsstatusRoutesTest {
 
-    private val beanFactory: BeanFactory = mockk() {
-        every { generellBehandlingService() } returns mockk()
-        every { sakService() } returns mockk()
-        every { revurderingService() } returns mockk()
-        every { manueltOpphoerService() } returns mockk()
-        every { behandlingHendelser() } returns mockk()
-        every { behandlingHendelser().start() } returns mockk()
-        every { foerstegangsbehandlingService() } returns mockk()
-        every { grunnlagsendringshendelseService() } returns mockk()
-        every { datasourceBuilder().dataSource } returns mockk()
-        every { datasourceBuilder().migrate() } returns mockk()
-
-        every { behandlingsStatusService() } returns mockk {
-            every { settVilkaarsvurdert(any(), any(), any()) } just runs
-        }
-    }
-
+    private val beanFactory: BeanFactory = mockk(relaxed = true)
     private val server = MockOAuth2Server()
 
     private val token: String by lazy {
@@ -66,11 +55,16 @@ internal class BehandlingsstatusRoutesTest {
         server.start()
         System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
         System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
+
+        mockkStatic("${DataSourceBuilder.javaClass.canonicalName}Kt")
+        every { any<DataSource>().migrate() } returns mockk()
     }
 
     @AfterAll
     fun after() {
         server.shutdown()
+
+        unmockkStatic("${DataSourceBuilder.javaClass.canonicalName}Kt")
     }
 
     @Test

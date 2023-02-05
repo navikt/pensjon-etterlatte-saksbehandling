@@ -193,7 +193,8 @@ abstract class CommonFactory : BeanFactory {
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun dataSource() = DataSourceBuilder.createDataSource(env)
+    private val dataSource: DataSource by lazy { DataSourceBuilder.createDataSource(env) }
+    override fun dataSource() = dataSource
 
     override fun rapid(): KafkaProdusent<String, String> {
         return kafkaConfig().standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))

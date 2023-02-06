@@ -30,7 +30,7 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
     }
 }
 
-class Saksbehandler(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
+class Saksbehandler(identifiedBy: TokenValidationContext, val env: Map<String, String>) : ExternalUser(identifiedBy) {
     init {
         println("""Groups: ${identifiedBy.getJwtToken("azure").jwtTokenClaims.getAsList("groups")}""")
     }
@@ -41,13 +41,13 @@ class Saksbehandler(identifiedBy: TokenValidationContext) : ExternalUser(identif
     fun harRolleSaksbehandler(): Boolean {
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
             "groups",
-            "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
+            env["AZUREAD_SAKSBEHANDLER_CLAIM"]
         )
     }
     fun harRolleAttestant(): Boolean {
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
             "groups",
-            "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
+            env["AZUREAD_ATTESTANT_CLAIM"]
         )
     }
 }
@@ -58,14 +58,14 @@ class Kunde(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
     }
 }
 
-fun decideUser(principal: TokenValidationContextPrincipal): ExternalUser {
+fun decideUser(principal: TokenValidationContextPrincipal, env: Map<String, String>): ExternalUser {
     return if (principal.context.issuers.contains("tokenx")) {
         Kunde(principal.context)
     } else if (principal.context.issuers.contains("azure")) {
         if (principal.context.getJwtToken("azure").jwtTokenClaims.let { it.getStringClaim("oid") == it.subject }) {
             SystemUser(principal.context)
         } else {
-            Saksbehandler(principal.context)
+            Saksbehandler(principal.context, env)
         }
     } else {
         throw IllegalStateException("no token from preapproved issuers")

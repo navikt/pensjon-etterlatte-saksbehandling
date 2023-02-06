@@ -32,6 +32,27 @@ fun main() {
     Server(EnvBasedBeanFactory(System.getenv())).run()
 }
 
+class Server(private val beanFactory: BeanFactory) {
+    private val engine = embeddedServer(
+        factory = CIO,
+        environment = applicationEngineEnvironment {
+            module { module(beanFactory) }
+            connector { port = 8080 }
+        }
+    )
+
+    fun run() = with(beanFactory) {
+        dataSource().migrate()
+
+        val behandlingHendelser = behandlingHendelser()
+        grunnlagsendringshendelseJob()
+        behandlingHendelser.start()
+
+        setReady().also { engine.start(true) }
+        behandlingHendelser.nyHendelse.close()
+    }
+}
+
 fun Application.module(beanFactory: BeanFactory) {
     with(beanFactory) {
         val generellBehandlingService = generellBehandlingService()
@@ -57,32 +78,14 @@ fun Application.module(beanFactory: BeanFactory) {
     }
 }
 
-class Server(private val beanFactory: BeanFactory) {
-    private val engine = embeddedServer(
-        factory = CIO,
-        environment = applicationEngineEnvironment {
-            module { module(beanFactory) }
-            connector { port = 8080 }
-        }
-    )
-
-    fun run() = with(beanFactory) {
-        dataSource().migrate()
-
-        val behandlingHendelser = behandlingHendelser()
-        grunnlagsendringshendelseJob()
-        behandlingHendelser.start()
-
-        setReady().also { engine.start(true) }
-        behandlingHendelser.nyHendelse.close()
-    }
-}
-
 private fun Route.attachContekst(ds: DataSource) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
             Context(
-                AppUser = decideUser(call.principal() ?: throw Exception("Ingen bruker funnet i jwt token")),
+                AppUser = decideUser(
+                    call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
+                    System.getenv()
+                ),
                 databasecontxt = DatabaseContext(ds)
             )
         withContext(

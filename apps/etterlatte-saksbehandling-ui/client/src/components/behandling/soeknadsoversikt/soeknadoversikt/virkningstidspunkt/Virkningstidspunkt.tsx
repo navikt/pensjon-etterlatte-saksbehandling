@@ -55,7 +55,9 @@ const Virkningstidspunkt = (props: Props) => {
       return setErrorTekst('Begrunnelsen må fylles ut')
     }
 
-    const harVirkningstidspunktEndretSeg = props.virkningstidspunkt?.dato !== formaterDatoTilYearMonth(formData)
+    const harVirkningstidspunktEndretSeg =
+      props.virkningstidspunkt?.dato !== formaterDatoTilYearMonth(formData) ||
+      props.virkningstidspunkt?.begrunnelse !== begrunnelse
     if (harVirkningstidspunktEndretSeg) {
       return fastsettVirkningstidspunktRequest(
         { id: props.behandlingId, dato: formData, begrunnelse: begrunnelse },

@@ -24,7 +24,6 @@ import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
-import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -171,30 +170,6 @@ internal fun Route.behandlingRoutes(
                 when (val behandling = generellBehandlingService.hentDetaljertBehandling(behandlingsId)) {
                     is DetaljertBehandling -> call.respond(behandling)
                     else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingsId")
-                }
-            }
-
-            route("/hendelser") {
-                route("/vedtak") {
-                    get {
-                        call.respond(
-                            LagretHendelser(generellBehandlingService.hentHendelserIBehandling(behandlingsId))
-                        )
-                    }
-
-                    post("/{hendelse}") {
-                        val body = call.receive<VedtakHendelse>()
-                        generellBehandlingService.registrerVedtakHendelse(
-                            behandlingsId,
-                            body.vedtakId,
-                            requireNotNull(call.parameters["hendelse"]).let { HendelseType.valueOf(it) },
-                            body.inntruffet,
-                            body.saksbehandler,
-                            body.kommentar,
-                            body.valgtBegrunnelse
-                        )
-                        call.respond(HttpStatusCode.OK)
-                    }
                 }
             }
 

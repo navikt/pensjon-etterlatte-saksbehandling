@@ -34,8 +34,7 @@ interface ManueltOpphoerService {
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
-        begrunnelse: String?,
-        behandlingDao: BehandlingDao
+        begrunnelse: String?
     )
 
     fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer?
@@ -133,8 +132,7 @@ class RealManueltOpphoerService(
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
-        begrunnelse: String?,
-        behandlingDao: BehandlingDao
+        begrunnelse: String?
     ) {
         hentManueltOpphoer(behandling)?.let { manueltOpphoer ->
             registrerVedtakHendelseFelles(
@@ -145,8 +143,7 @@ class RealManueltOpphoerService(
                 kommentar = kommentar,
                 begrunnelse = begrunnelse,
                 lagretBehandling = manueltOpphoer,
-                hendelser = hendelser,
-                behandlingDao = behandlingDao
+                hendelser = hendelser
             )
         }
     }

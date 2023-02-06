@@ -42,6 +42,8 @@ data class Saksbehandler(
 typealias Attestant = Saksbehandler
 
 data class Utbetalingsinfo(
+    val beloep: Int,
+    val virkningsdato: LocalDate,
     val soeskenjustering: Boolean,
     val beregningsperioder: List<Beregningsperiode>
 )

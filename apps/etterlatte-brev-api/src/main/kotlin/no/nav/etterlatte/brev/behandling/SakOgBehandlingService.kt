@@ -3,6 +3,8 @@ package no.nav.etterlatte.brev.behandling
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.libs.common.vedtak.Periode
+import java.time.LocalDate
 
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -20,8 +22,8 @@ class SakOgBehandlingService(
         val vedtak = vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken)
         val grunnlag = grunnlagKlient.hentGrunnlag(sakId, accessToken)
 
-        val innloggetSaksbehandlerEnhet = saksbehandlere[innloggetSaksbehandlerIdent]
-            ?: throw SaksbehandlerManglerEnhetException(
+        val innloggetSaksbehandlerEnhet =
+            saksbehandlere[innloggetSaksbehandlerIdent] ?: throw SaksbehandlerManglerEnhetException(
                 "Saksbehandler $innloggetSaksbehandlerIdent mangler enhet fra secret"
             )
 
@@ -52,13 +54,14 @@ class SakOgBehandlingService(
                 ),
                 attestant
             ),
-
-            utbetalingsinfo = finnUtbetalingsinfo(behandlingId, accessToken)
+            utbetalingsinfo = finnUtbetalingsinfo(behandlingId, vedtak.virk, accessToken)
         )
     }
 
-    private suspend fun finnUtbetalingsinfo(behandlingId: String, accessToken: String): Utbetalingsinfo {
+    private suspend fun finnUtbetalingsinfo(behandlingId: String, virk: Periode, accessToken: String): Utbetalingsinfo {
         val beregning = beregningKlient.hentBeregning(behandlingId, accessToken)
+
+        val virkningstidspunkt = virk.fom.atDay(1)
 
         val beregningsperioder = beregning.beregningsperioder.map {
             Beregningsperiode(
@@ -71,10 +74,16 @@ class SakOgBehandlingService(
             )
         }
 
-        val soeskenjustering = beregning.beregningsperioder
-            .any { !it.soeskenFlokk.isNullOrEmpty() }
+        val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
+
+        val today = LocalDate.now()
+
+        val beloep =
+            beregningsperioder.find { it.datoFOM.isBefore(today) && it.datoTOM?.isAfter(today) ?: true }?.utbetaltBeloep!! // ktlint-disable max-line-length
 
         return Utbetalingsinfo(
+            beloep,
+            virkningstidspunkt,
             soeskenjustering,
             beregningsperioder
         )

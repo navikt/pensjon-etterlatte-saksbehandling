@@ -186,7 +186,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
 
     override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> {
         val attestantClaim = env["AZUREAD_ATTESTANT_GROUPID"] ?: throw NullPointerException("Mangler attestant claim")
-        val saksbehandlerClaim = env["AZUREAD_ATTESTANT_GROUPID"]
+        val saksbehandlerClaim = env["AZUREAD_SAKSBEHANDLER_GROUPID"]
             ?: throw NullPointerException("Mangler saksbehandler claim")
         return mapOf(
             "AZUREAD_ATTESTANT_GROUPID" to attestantClaim,

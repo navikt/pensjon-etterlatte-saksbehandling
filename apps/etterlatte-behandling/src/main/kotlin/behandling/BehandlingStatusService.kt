@@ -52,7 +52,7 @@ class BehandlingStatusServiceImpl constructor(
     }
 
     override fun sjekkOmKanFatteVedtak(behandlingId: UUID) {
-        hentBehandling(behandlingId).tilFattetVedtak().lagreEndring(true)
+        hentBehandling(behandlingId).tilFattetVedtak()
     }
 
     override fun settFattetVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse) {
@@ -64,7 +64,7 @@ class BehandlingStatusServiceImpl constructor(
     }
 
     override fun sjekkOmKanAttestere(behandlingId: UUID) {
-        hentBehandling(behandlingId).tilAttestert().lagreEndring(true)
+        hentBehandling(behandlingId).tilAttestert()
     }
 
     override fun settAttestertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse) {
@@ -76,7 +76,7 @@ class BehandlingStatusServiceImpl constructor(
     }
 
     override fun sjekkOmKanReturnereVedtak(behandlingId: UUID) {
-        hentBehandling(behandlingId).tilReturnert().lagreEndring(true)
+        hentBehandling(behandlingId).tilReturnert()
     }
 
     override fun settReturnertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse) {

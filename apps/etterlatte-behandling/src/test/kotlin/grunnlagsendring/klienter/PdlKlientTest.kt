@@ -1,4 +1,4 @@
-package no.nav.etterlatte.pdl
+package no.nav.etterlatte.grunnlagsendring.klienter
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
@@ -23,14 +23,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class PdlServiceTest {
+internal class PdlKlientTest {
 
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
     @Test
     fun `hent pdlModell skal returnere en Person`() {
         val klient = mockHttpClient(mockPerson())
-        val pdlService = PdlServiceImpl(klient, "url")
+        val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle)
@@ -41,7 +41,7 @@ internal class PdlServiceTest {
     @Test
     fun `skal hente doedsdato`() {
         val klient = mockHttpClient(mockPerson())
-        val pdlService = PdlServiceImpl(klient, "url")
+        val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentDoedsdato()
@@ -53,7 +53,7 @@ internal class PdlServiceTest {
         val familierelasjon = FamilieRelasjon(ansvarligeForeldre = listOf(STOR_SNERK), barn = null, foreldre = null)
         val mockperson = mockPerson(familieRelasjon = familierelasjon)
         val klient = mockHttpClient(mockperson)
-        val pdlService = PdlServiceImpl(klient, "url")
+        val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentAnsvarligeForeldre()
@@ -65,7 +65,7 @@ internal class PdlServiceTest {
         val familierelasjon = FamilieRelasjon(barn = listOf(STOR_SNERK), ansvarligeForeldre = null, foreldre = null)
         val mockperson = mockPerson(familieRelasjon = familierelasjon)
         val klient = mockHttpClient(mockperson)
-        val pdlService = PdlServiceImpl(klient, "url")
+        val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentBarn()
@@ -85,7 +85,7 @@ internal class PdlServiceTest {
         )
         val mockperson = mockPerson(utland = utland)
         val klient = mockHttpClient(mockperson)
-        val pdlService = PdlServiceImpl(klient, "url")
+        val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentUtland()

@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":libs:common"))
+    implementation(project(":libs:etterlatte-helsesjekk"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
 
     implementation(Ktor2.Auth)

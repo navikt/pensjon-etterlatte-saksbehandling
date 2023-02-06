@@ -1,4 +1,4 @@
-package no.nav.etterlatte.pdl
+package no.nav.etterlatte.grunnlagsendring.klienter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -16,17 +16,17 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-interface PdlService {
+interface PdlKlient {
     fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): PersonDTO
 }
 
-class PdlServiceImpl(
+class PdlKlientImpl(
     private val pdl_app: HttpClient,
     private val url: String
-) : PdlService {
+) : PdlKlient {
 
     companion object {
-        val logger: Logger = LoggerFactory.getLogger(PdlServiceImpl::class.java)
+        val logger: Logger = LoggerFactory.getLogger(PdlKlientImpl::class.java)
     }
 
     override fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): PersonDTO {

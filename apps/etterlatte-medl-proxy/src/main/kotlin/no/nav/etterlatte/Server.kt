@@ -25,10 +25,11 @@ import io.ktor.server.routing.routing
 import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.medl.medlemsregisterApi
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
-import java.util.UUID
+import java.util.*
 
 class Server(context: ApplicationContext) {
     private val engine = embeddedServer(
@@ -75,5 +76,5 @@ class Server(context: ApplicationContext) {
         }
     )
 
-    fun run() = engine.start(true)
+    fun run() = setReady().also { engine.start(true) }
 }

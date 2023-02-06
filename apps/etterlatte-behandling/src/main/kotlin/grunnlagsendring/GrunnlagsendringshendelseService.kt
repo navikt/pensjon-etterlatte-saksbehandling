@@ -3,6 +3,12 @@ package no.nav.etterlatte.grunnlagsendring
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
+import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlient
+import no.nav.etterlatte.grunnlagsendring.klienter.hentAnsvarligeForeldre
+import no.nav.etterlatte.grunnlagsendring.klienter.hentBarn
+import no.nav.etterlatte.grunnlagsendring.klienter.hentDoedsdato
+import no.nav.etterlatte.grunnlagsendring.klienter.hentUtland
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -17,11 +23,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.pdl.PdlService
-import no.nav.etterlatte.pdl.hentAnsvarligeForeldre
-import no.nav.etterlatte.pdl.hentBarn
-import no.nav.etterlatte.pdl.hentDoedsdato
-import no.nav.etterlatte.pdl.hentUtland
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -29,8 +30,8 @@ import java.util.*
 class GrunnlagsendringshendelseService(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val generellBehandlingService: GenerellBehandlingService,
-    private val pdlService: PdlService,
-    private val grunnlagClient: GrunnlagClient
+    private val pdlKlient: PdlKlient,
+    private val grunnlagKlient: GrunnlagKlient
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -124,9 +125,9 @@ class GrunnlagsendringshendelseService(
         hendelse: Grunnlagsendringshendelse
     ) {
         val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle()
-        val pdlData = pdlService.hentPdlModell(hendelse.gjelderPerson, personRolle)
+        val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle)
         val grunnlag = runBlocking {
-            grunnlagClient.hentGrunnlag(hendelse.sakId)
+            grunnlagKlient.hentGrunnlag(hendelse.sakId)
         }
         val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag)
         if (!samsvarMellomPdlOgGrunnlag.samsvar) {

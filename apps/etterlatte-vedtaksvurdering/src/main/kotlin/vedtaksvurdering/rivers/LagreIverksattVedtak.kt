@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
-import no.nav.etterlatte.vedtaksvurdering.HendelseType
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -39,7 +38,7 @@ internal class LagreIverksattVedtak(
 
     fun postTilBehandling(behandlingId: UUID, vedtakId: Long) = runBlocking {
         behandlingHttpClient.post(
-            "http://etterlatte-behandling/behandlinger/$behandlingId/hendelser/vedtak/${HendelseType.IVERKSATT}"
+            "http://etterlatte-behandling/behandlinger/$behandlingId/iverksett"
         ) {
             contentType(ContentType.Application.Json)
             setBody(

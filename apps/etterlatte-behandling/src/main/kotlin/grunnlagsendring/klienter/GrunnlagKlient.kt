@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grunnlagsendring
+package no.nav.etterlatte.grunnlagsendring.klienter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -7,15 +7,16 @@ import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 
-interface GrunnlagClient {
+interface GrunnlagKlient {
 
     suspend fun hentGrunnlag(sakId: Long): Grunnlag?
 }
 
-class GrunnlagClientImpl(private val grunnlagHttpClient: HttpClient) : GrunnlagClient {
+class GrunnlagKlientImpl(private val grunnlagHttpClient: HttpClient, private val url: String) :
+    GrunnlagKlient {
 
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
-        return grunnlagHttpClient.get("grunnlag/$sakId") {
+        return grunnlagHttpClient.get("$url/api/grunnlag/$sakId") {
             accept(ContentType.Application.Json)
         }.body()
     }

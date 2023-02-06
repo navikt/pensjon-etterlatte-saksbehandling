@@ -21,6 +21,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -118,7 +119,7 @@ class RestModuleTest {
     @Test
     fun `skal svare paa helsesjekk uten autentisering`() {
         testApplication {
-            application { restModule(this.log) { route1() } }
+            application { restModule(this.log) { route1() } }.also { setReady() }
 
             val response1 = client.get("/health/isalive")
             assertEquals(OK, response1.status)

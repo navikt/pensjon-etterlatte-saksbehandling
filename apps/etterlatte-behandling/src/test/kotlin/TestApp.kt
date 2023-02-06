@@ -8,17 +8,18 @@ import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
-import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
-import no.nav.etterlatte.database.DataSourceBuilder
+import no.nav.etterlatte.common.LeaderElection
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.DataSourceBuilder
 import org.testcontainers.containers.PostgreSQLContainer
+import javax.sql.DataSource
 
 fun main() {
     /*
@@ -32,12 +33,18 @@ fun main() {
     postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
     postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-    appFromBeanfactory(LocalAppBeanFactory(postgreSQLContainer.jdbcUrl)).run()
+    Server(
+        LocalAppBeanFactory(
+            jdbcUrl = postgreSQLContainer.jdbcUrl,
+            username = postgreSQLContainer.username,
+            password = postgreSQLContainer.password
+        )
+    ).run()
     postgreSQLContainer.stop()
 }
 
-class LocalAppBeanFactory(val jdbcUrl: String) : CommonFactory() {
-    override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
+class LocalAppBeanFactory(val jdbcUrl: String, val username: String, val password: String) : CommonFactory() {
+    override fun dataSource(): DataSource = DataSourceBuilder.createDataSource(jdbcUrl, username, password)
     override fun rapid(): KafkaProdusent<String, String> {
         return object : KafkaProdusent<String, String> {
             override fun publiser(noekkel: String, verdi: String, headers: Map<String, ByteArray>): Pair<Int, Long> {

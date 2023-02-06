@@ -35,10 +35,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Setup Node 16
+      - name: Setup Node 18
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
       - name: Install
         working-directory: apps/${{ env.APP_NAME }}
         run: |
@@ -56,10 +56,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Setup Node 16
+      - name: Setup Node 18
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
       - name: Install and build

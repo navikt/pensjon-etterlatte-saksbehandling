@@ -6,6 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.helsesjekk.isReady
 
 fun Route.healthApi() {
     route("internal") {
@@ -14,7 +15,7 @@ fun Route.healthApi() {
         }
 
         get("isready") {
-            call.respond(HttpStatusCode.OK)
+            call.respond(isReady())
         }
     }
 }

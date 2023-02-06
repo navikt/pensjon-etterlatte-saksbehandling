@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-beregning/**
       - libs/common/**
+      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**
@@ -36,6 +37,7 @@ on:
     paths:
       - apps/etterlatte-beregning/**
       - libs/common/**
+      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-regler/**

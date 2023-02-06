@@ -6,7 +6,7 @@ updates:
       interval: "daily"
     open-pull-requests-limit: 10
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/apps/etterlatte-saksbehandling-ui/"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10

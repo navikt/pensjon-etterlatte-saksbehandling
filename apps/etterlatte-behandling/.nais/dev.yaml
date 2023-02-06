@@ -22,13 +22,13 @@ spec:
     initialDelay: 7
     failureThreshold: 10
     periodSeconds: 5
-    path: /internal/started
+    path: /health/started
   liveness:
     initialDelay: 5
-    path: /internal/isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /internal/isready
+    path: /health/isready
   leaderElection: true
   azure:
     application:

@@ -24,6 +24,7 @@ data class OppdragForKonsistensavstemming(
     val sakId: SakId,
     val sakType: Saktype,
     val fnr: Foedselsnummer,
+    val saksbehandlerEnhet: String,
     val utbetalingslinjer: List<OppdragslinjeForKonsistensavstemming>
 )
 

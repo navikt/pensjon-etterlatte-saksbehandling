@@ -18,7 +18,6 @@ object OppdragDefaults {
     val oppdragsenhet =
         OppdragsEnhet120().apply {
             typeEnhet = "BOS"
-            enhet = "4819"
             datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()
         }
     const val AKSJONSKODE_OPPDATER = "1"

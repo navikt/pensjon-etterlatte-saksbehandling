@@ -23,7 +23,7 @@ object OppdragMapper {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = OppdragDefaults.AKSJONSKODE_OPPDATER
             kodeEndring = if (foerstegangsbehandling) "NY" else "ENDR"
-            kodeFagomraade = "BARNEPE" // TODO: bruk saktype fra utbetaling.
+            kodeFagomraade = "BARNEPE"
             fagsystemId = utbetaling.sakId.value.toString()
             utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
             oppdragGjelderId = utbetaling.stoenadsmottaker.value
@@ -39,7 +39,7 @@ object OppdragMapper {
             oppdragsEnhet120.add(
                 OppdragsEnhet120().apply {
                     typeEnhet = OppdragDefaults.oppdragsenhet.typeEnhet
-                    enhet = OppdragDefaults.oppdragsenhet.enhet
+                    enhet = utbetaling.saksbehandlerEnhet
                     datoEnhetFom = OppdragDefaults.oppdragsenhet.datoEnhetFom
                 }
             )

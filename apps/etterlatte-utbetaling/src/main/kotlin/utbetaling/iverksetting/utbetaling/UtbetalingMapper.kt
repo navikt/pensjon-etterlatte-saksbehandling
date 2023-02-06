@@ -39,6 +39,7 @@ class UtbetalingMapper(
         avstemmingsnoekkel = opprettet,
         stoenadsmottaker = Foedselsnummer(vedtak.sak.ident),
         saksbehandler = NavIdent(vedtak.vedtakFattet.ansvarligSaksbehandler),
+        saksbehandlerEnhet = vedtak.vedtakFattet.ansvarligEnhet,
         attestant = NavIdent(vedtak.attestasjon.attestant),
         vedtak = vedtak,
         utbetalingslinjer = utbetalingslinjer(vedtak.sak.sakType),

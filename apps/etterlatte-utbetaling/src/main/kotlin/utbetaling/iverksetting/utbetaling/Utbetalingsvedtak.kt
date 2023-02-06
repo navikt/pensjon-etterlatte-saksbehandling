@@ -30,8 +30,14 @@ data class Utbetalingsvedtak(
                         type = it.type.toUtbetalingsperiodeType()
                     )
                 },
-                vedtakFattet = VedtakFattet(vedtak.vedtakFattet!!.ansvarligSaksbehandler),
-                attestasjon = Attestasjon(vedtak.attestasjon!!.attestant)
+                vedtakFattet = vedtak.vedtakFattet?.let {
+                    VedtakFattet(
+                        ansvarligSaksbehandler = it.ansvarligSaksbehandler,
+                        ansvarligEnhet = it.ansvarligEnhet
+                    )
+                } ?: throw Exception("Mangler saksbehandler og enhet på vedtak"),
+                attestasjon = vedtak.attestasjon?.let { Attestasjon(it.attestant) }
+                    ?: throw Exception("Mangler attestant på vedtak")
             )
     }
 }
@@ -50,7 +56,9 @@ enum class Saktype {
     }
 }
 
-data class Attestasjon(val attestant: String)
+data class Attestasjon(
+    val attestant: String
+)
 
 data class Utbetalingsperiode(
     val id: Long,
@@ -59,7 +67,11 @@ data class Utbetalingsperiode(
     val type: UtbetalingsperiodeType
 )
 
-data class VedtakFattet(val ansvarligSaksbehandler: String)
+data class VedtakFattet(
+    val ansvarligSaksbehandler: String,
+    val ansvarligEnhet: String
+)
+
 data class Periode(
     val fom: YearMonth,
     val tom: YearMonth?

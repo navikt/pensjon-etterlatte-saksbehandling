@@ -94,7 +94,7 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
         oppdragsenhetListe.addAll(
             listOf(OppdragDefaults.oppdragsenhet).map {
                 Enhet().apply {
-                    this.enhet = it.enhet
+                    this.enhet = saksbehandlerEnhet
                     this.enhetType = it.typeEnhet
                     this.enhetFom = it.datoEnhetFom.toXMLFormat()
                 }

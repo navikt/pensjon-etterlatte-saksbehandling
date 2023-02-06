@@ -70,7 +70,8 @@ fun utbetalingsvedtak(
 
     ),
     vedtakFattet = VedtakFattet(
-        ansvarligSaksbehandler = "12345678"
+        ansvarligSaksbehandler = "12345678",
+        ansvarligEnhet = "4819"
     ),
     attestasjon = Attestasjon(
         attestant = "87654321"
@@ -154,6 +155,7 @@ fun utbetaling(
         avstemmingsnoekkel = avstemmingsnoekkel,
         stoenadsmottaker = Foedselsnummer("12345678903"),
         saksbehandler = NavIdent("12345678"),
+        saksbehandlerEnhet = "4819",
         attestant = NavIdent("87654321"),
         utbetalingslinjer = utbetalingslinjer,
         kvittering = kvittering,
@@ -225,11 +227,13 @@ fun oppdragForKonsistensavstemming(
     sakId: Long = 1,
     sakType: Saktype = Saktype.BARNEPENSJON,
     fnr: String = "123456",
+    saksbehandlerEnhet: String = "123",
     oppdragslinjeForKonsistensavstemming: List<OppdragslinjeForKonsistensavstemming>
 ) = OppdragForKonsistensavstemming(
     sakId = SakId(sakId),
     sakType = sakType,
     fnr = Foedselsnummer(fnr),
+    saksbehandlerEnhet = saksbehandlerEnhet,
     utbetalingslinjer = oppdragslinjeForKonsistensavstemming
 )
 

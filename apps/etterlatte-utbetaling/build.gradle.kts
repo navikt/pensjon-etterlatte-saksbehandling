@@ -21,8 +21,8 @@ dependencies {
     )
     implementation("com.github.navikt.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:1.4201aa")
 
-    implementation("javax.xml.bind:jaxb-api:2.3.1")
-    implementation("org.glassfish.jaxb:jaxb-runtime:4.0.1")
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:2.3.3")
+    implementation("org.glassfish.jaxb:jaxb-runtime:2.3.7")
 
     implementation(Database.HikariCP)
     implementation(Database.FlywayDB)

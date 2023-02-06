@@ -1,6 +1,5 @@
-package no.nav.etterlatte.itest
+package no.nav.etterlatte.behandling
 
-import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -28,6 +27,7 @@ import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.saksbehandlerToken
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -24,7 +24,7 @@ internal class GrunnlagKlientImplTest {
     @Test
     fun `skal hente grunnlag`() {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val klient = GrunnlagKlientImpl(mockHttpClient(grunnlag))
+        val klient = GrunnlagKlientImpl(mockHttpClient(grunnlag), "")
         val hentetGrunnlag = runBlocking {
             klient.hentGrunnlag(1)
         }
@@ -36,7 +36,7 @@ internal class GrunnlagKlientImplTest {
             engine {
                 addHandler { request ->
                     when (request.url.fullPath) {
-                        "/grunnlag/1" -> respond(
+                        "/api/grunnlag/1" -> respond(
                             grunnlagResponse.toJson(),
                             HttpStatusCode.OK,
                             defaultHeaders

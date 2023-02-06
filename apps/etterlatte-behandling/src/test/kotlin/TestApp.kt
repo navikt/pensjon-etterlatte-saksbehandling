@@ -33,7 +33,7 @@ fun main() {
     postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
     postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-    appFromBeanfactory(
+    Server(
         LocalAppBeanFactory(
             jdbcUrl = postgreSQLContainer.jdbcUrl,
             username = postgreSQLContainer.username,

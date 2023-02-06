@@ -9,6 +9,9 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
+import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlientImpl
+import no.nav.etterlatte.grunnlagsendring.klienter.hentDoedsdato
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -21,8 +24,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import no.nav.etterlatte.pdl.PdlServiceImpl
-import no.nav.etterlatte.pdl.hentDoedsdato
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -83,8 +84,8 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { alleSakIderForSoekerMedFnr(fnr) } returns listOf(1L)
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val pdlService = mockk<PdlServiceImpl>()
-        val grunnlagClient = mockk<GrunnlagClient>()
+        val pdlService = mockk<PdlKlientImpl>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -139,8 +140,8 @@ internal class GrunnlagsendringshendelseServiceTest {
             every { alleSakIderForSoekerMedFnr(fnr) } returns listOf(1L)
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val grunnlagClient = mockk<GrunnlagClient>()
-        val pdlService = mockk<PdlServiceImpl>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
+        val pdlService = mockk<PdlKlientImpl>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -216,8 +217,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val pdlService = mockk<PdlServiceImpl>()
-        val grunnlagClient = mockk<GrunnlagClient>()
+        val pdlService = mockk<PdlKlientImpl>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -291,8 +292,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val pdlService = mockk<PdlServiceImpl>()
-        val grunnlagClient = mockk<GrunnlagClient>()
+        val pdlService = mockk<PdlKlientImpl>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -365,8 +366,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
         }
-        val pdlService = mockk<PdlServiceImpl>()
-        val grunnlagClient = mockk<GrunnlagClient>()
+        val pdlService = mockk<PdlKlientImpl>()
+        val grunnlagClient = mockk<GrunnlagKlient>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
@@ -446,7 +447,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             } returns Unit
         }
         val mockPdlModel = mockk<PersonDTO>()
-        val pdlService = mockk<PdlServiceImpl> {
+        val pdlService = mockk<PdlKlientImpl> {
             every { hentPdlModell(avdoedFnr, personRolle) } returns mockPdlModel
         }
         every { mockPdlModel.hentDoedsdato() } returns doedsdato
@@ -462,7 +463,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
         }
 
-        val grunnlagClient = mockk<GrunnlagClientImpl> {
+        val grunnlagClient = mockk<GrunnlagKlient> {
             coEvery { hentGrunnlag(any()) } returns null
         }
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(

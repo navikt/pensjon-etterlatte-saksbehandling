@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-brreg/**
       - libs/common/**
+      - libs/etterlatte-helsesjekk/**
       - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt
@@ -28,6 +29,7 @@ on:
     paths:
       - apps/etterlatte-brreg/**
       - libs/common/**
+      - libs/etterlatte-helsesjekk/**
       - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt

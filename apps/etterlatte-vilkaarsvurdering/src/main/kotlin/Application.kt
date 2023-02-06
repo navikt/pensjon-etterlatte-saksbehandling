@@ -5,6 +5,7 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
@@ -18,6 +19,10 @@ fun main() {
 }
 
 class Server(private val context: ApplicationContext) {
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-vilkaarsvurdering oppstart")
+    }
+
     private val engine = with(context) {
         embeddedServer(
             factory = CIO,
@@ -34,6 +39,7 @@ class Server(private val context: ApplicationContext) {
 
     fun run() = with(context) {
         dataSource.migrate()
+        setReady()
         engine.start(true)
     }
 }

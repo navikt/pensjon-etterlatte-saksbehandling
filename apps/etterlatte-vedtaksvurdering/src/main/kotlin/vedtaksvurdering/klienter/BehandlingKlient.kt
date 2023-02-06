@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -18,9 +19,21 @@ interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
     suspend fun hentSak(sakId: Long, accessToken: String): Sak
 
-    suspend fun fattVedtak(behandlingId: UUID, accessToken: String, commit: Boolean = false): Boolean
-    suspend fun attester(behandlingId: UUID, accessToken: String, commit: Boolean = false): Boolean
-    suspend fun underkjenn(behandlingId: UUID, accessToken: String, commit: Boolean = false): Boolean
+    suspend fun fattVedtak(
+        behandlingId: UUID,
+        accessToken: String,
+        vedtakHendelse: VedtakHendelse? = null
+    ): Boolean
+    suspend fun attester(
+        behandlingId: UUID,
+        accessToken: String,
+        vedtakHendelse: VedtakHendelse? = null
+    ): Boolean
+    suspend fun underkjenn(
+        behandlingId: UUID,
+        accessToken: String,
+        vedtakHendelse: VedtakHendelse? = null
+    ): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
@@ -75,48 +88,100 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun fattVedtak(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean {
-        return statussjekkForBehandling(behandlingId, accessToken, commit, BehandlingStatus.FATTET_VEDTAK)
+    override suspend fun fattVedtak(
+        behandlingId: UUID,
+        accessToken: String,
+        vedtakHendelse: VedtakHendelse?
+    ): Boolean {
+        return if (vedtakHendelse == null) {
+            statussjekkForBehandling(behandlingId, accessToken, BehandlingStatus.FATTET_VEDTAK)
+        } else {
+            commitStatussjekkForBehandling(behandlingId, accessToken, BehandlingStatus.FATTET_VEDTAK, vedtakHendelse)
+        }
     }
 
-    override suspend fun attester(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean {
-        return statussjekkForBehandling(behandlingId, accessToken, commit, BehandlingStatus.ATTESTERT)
+    override suspend fun attester(
+        behandlingId: UUID,
+        accessToken: String,
+        vedtakHendelse: VedtakHendelse?
+    ): Boolean {
+        return if (vedtakHendelse == null) {
+            statussjekkForBehandling(behandlingId, accessToken, BehandlingStatus.ATTESTERT)
+        } else {
+            commitStatussjekkForBehandling(behandlingId, accessToken, BehandlingStatus.ATTESTERT, vedtakHendelse)
+        }
     }
 
-    override suspend fun underkjenn(behandlingId: UUID, accessToken: String, commit: Boolean): Boolean {
-        return statussjekkForBehandling(behandlingId, accessToken, commit, BehandlingStatus.RETURNERT)
+    override suspend fun underkjenn(
+        behandlingId: UUID,
+        accessToken: String,
+        vedtakHendelse: VedtakHendelse?
+    ): Boolean {
+        return if (vedtakHendelse == null) {
+            statussjekkForBehandling(behandlingId, accessToken, BehandlingStatus.RETURNERT)
+        } else {
+            commitStatussjekkForBehandling(behandlingId, accessToken, BehandlingStatus.RETURNERT, vedtakHendelse)
+        }
     }
 
     private suspend fun statussjekkForBehandling(
         behandlingId: UUID,
         accessToken: String,
-        commit: Boolean,
         status: BehandlingStatus
     ): Boolean {
-        logger.info("Setter behandling med behandlingId=$behandlingId til status ${status.name} (commit=$commit)")
+        logger.info("Sjekker behandling med behandlingId=$behandlingId til status ${status.name} (commit=false)")
 
-        val statusnavn = when (status) {
-            BehandlingStatus.FATTET_VEDTAK -> "fatteVedtak"
-            BehandlingStatus.ATTESTERT -> "attester"
-            BehandlingStatus.RETURNERT -> "returner"
-            else -> throw BehandlingKlientException("Ugyldig status ${status.name}")
-        }
+        val statusnavn = getStatusNavn(status)
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/$statusnavn")
 
-        val response = when (commit) {
-            true -> downstreamResourceClient.post(resource = resource, accessToken = accessToken, postBody = "{}")
-            false -> downstreamResourceClient.get(resource = resource, accessToken = accessToken)
-        }
+        val response = downstreamResourceClient.get(resource = resource, accessToken = accessToken)
 
         return response.mapBoth(
             success = { true },
             failure = {
                 logger.info(
-                    "Kan ikke sette status=$status i behandling med behandlingId=$behandlingId (commit=$commit)",
+                    "Kan ikke sjekke status=$status i behandling med behandlingId=$behandlingId (commit=false)",
                     it.throwable
                 )
                 false
             }
         )
     }
+
+    private suspend fun commitStatussjekkForBehandling(
+        behandlingId: UUID,
+        accessToken: String,
+        status: BehandlingStatus,
+        vedtakHendelse: VedtakHendelse
+    ): Boolean {
+        logger.info("Setter behandling med behandlingId=$behandlingId til status ${status.name} (commit=true)")
+
+        val statusnavn = getStatusNavn(status)
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/$statusnavn")
+
+        val response = downstreamResourceClient.post(
+            resource = resource,
+            accessToken = accessToken,
+            postBody = vedtakHendelse
+        )
+
+        return response.mapBoth(
+            success = { true },
+            failure = {
+                logger.info(
+                    "Kan ikke sette status=$status i behandling med behandlingId=$behandlingId (commit=true)",
+                    it.throwable
+                )
+                false
+            }
+        )
+    }
+
+    private fun getStatusNavn(status: BehandlingStatus) =
+        when (status) {
+            BehandlingStatus.FATTET_VEDTAK -> "fatteVedtak"
+            BehandlingStatus.ATTESTERT -> "attester"
+            BehandlingStatus.RETURNERT -> "returner"
+            else -> throw BehandlingKlientException("Ugyldig status ${status.name}")
+        }
 }

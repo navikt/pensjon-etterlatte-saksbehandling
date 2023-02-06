@@ -12,7 +12,7 @@ import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { IDetaljertBehandling, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
-import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
+import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering'
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
@@ -78,7 +78,7 @@ export const ManueltOpphoerOversikt = () => {
           </Heading>
           <Infoboks>
             Det har kommet inn nye endringer på saken som gjør at den ikke kan behandles i Doffen. Saken må opprettes
-            manuelt i PeSys og deretter opphøres i nytt system. Se rutiner for å opprette sak i PeSys
+            manuelt i Pesys og deretter opphøres i nytt system. Se rutiner for å opprette sak i Pesys
           </Infoboks>
         </SectionSpacing>
         <SectionSpacing>
@@ -125,7 +125,7 @@ export const ManueltOpphoerOversikt = () => {
                 <OppsummeringListe>
                   {manueltOpphoerDetaljer.andreBehandlinger.map((behandling) => (
                     <li key={behandling.id}>
-                      {formaterEnumTilLesbarString(behandling.behandlingType ?? '')} med virkningstidspunkt{' '}
+                      {formaterBehandlingstype(behandling.behandlingType)} med virkningstidspunkt{' '}
                       {formaterStringDato(behandling.virkningstidspunkt!.dato)}
                     </li>
                   ))}

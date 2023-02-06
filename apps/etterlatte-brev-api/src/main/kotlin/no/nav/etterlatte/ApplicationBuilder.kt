@@ -34,6 +34,7 @@ import no.nav.etterlatte.journalpost.DokarkivServiceImpl
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -44,6 +45,10 @@ import org.slf4j.LoggerFactory
 class ApplicationBuilder {
     private val config = ConfigFactory.load()
     val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-brev-api oppstart")
+    }
 
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
@@ -116,7 +121,7 @@ class ApplicationBuilder {
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)
 
-    fun start() = rapidsConnection.start()
+    fun start() = setReady().also { rapidsConnection.start() }
 
     private fun httpClient(scope: String? = null) = HttpClient(OkHttp) {
         expectSuccess = true

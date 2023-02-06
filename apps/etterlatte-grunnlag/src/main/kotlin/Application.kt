@@ -9,6 +9,7 @@ import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
@@ -25,6 +26,10 @@ fun main() {
 }
 
 class ApplicationBuilder {
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-grunnlag oppstart")
+    }
+
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }
@@ -46,5 +51,5 @@ class ApplicationBuilder {
     private fun publiser(melding: String, key: UUID) {
         rapidsConnection.publish(message = melding, key = key.toString())
     }
-    fun start() = rapidsConnection.start()
+    fun start() = setReady().also { rapidsConnection.start() }
 }

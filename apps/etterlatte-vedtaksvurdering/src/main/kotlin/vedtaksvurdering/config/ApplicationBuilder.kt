@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
@@ -25,6 +26,10 @@ import java.util.*
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 class ApplicationBuilder {
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-vedtaksvurdering oppstart")
+    }
+
     private val env = System.getenv()
     private val config: Config = ConfigFactory.load()
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
@@ -77,7 +82,7 @@ class ApplicationBuilder {
                 )
             }
 
-    fun start() = rapidsConnection.start()
+    fun start() = setReady().also { rapidsConnection.start() }
 
     fun publiser(melding: String, key: UUID) {
         rapidsConnection.publish(message = melding, key = key.toString())

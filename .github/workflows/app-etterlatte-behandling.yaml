@@ -17,7 +17,9 @@ on:
     paths:
       - apps/etterlatte-behandling/**
       - libs/common/**
+      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
       - libs/etterlatte-sporingslogg/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
@@ -34,7 +36,9 @@ on:
     paths:
       - apps/etterlatte-behandling/**
       - libs/common/**
+      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
       - libs/etterlatte-sporingslogg/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**

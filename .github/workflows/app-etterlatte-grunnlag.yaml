@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-grunnlag/**
       - libs/common/**
       - libs/testdata/**
+      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-ktor/**
@@ -33,6 +34,7 @@ on:
       - apps/etterlatte-grunnlag/**
       - libs/common/**
       - libs/testdata/**
+      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-ktor/**

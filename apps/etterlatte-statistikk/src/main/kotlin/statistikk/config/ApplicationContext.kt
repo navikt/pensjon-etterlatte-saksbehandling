@@ -12,10 +12,11 @@ import io.ktor.client.request.header
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.etterlatte.statistikk.clients.BehandlingClient
 import no.nav.etterlatte.statistikk.clients.BehandlingClientImpl
-import no.nav.etterlatte.statistikk.database.DataSourceBuilder
 import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
 import no.nav.etterlatte.statistikk.database.StatistikkRepository
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
@@ -23,6 +24,7 @@ import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import javax.sql.DataSource
 
 class ApplicationContext {
     private val env = System.getenv()
@@ -45,13 +47,13 @@ class ApplicationContext {
     }
 
     private val statistikkRepository: StatistikkRepository by lazy {
-        StatistikkRepository(datasourceBuilder.dataSource)
+        StatistikkRepository(datasource)
     }
 
     private val sakstatistikkRepository: SakstatistikkRepository by lazy {
-        SakstatistikkRepository(datasourceBuilder.dataSource)
+        SakstatistikkRepository(datasource)
     }
-    private val datasourceBuilder: DataSourceBuilder by lazy { DataSourceBuilder(env).also { it.migrate() } }
+    private val datasource: DataSource by lazy { DataSourceBuilder.createDataSource(env).also { it.migrate() } }
 
     private val httpClient: HttpClient by lazy {
         HttpClient(OkHttp) {

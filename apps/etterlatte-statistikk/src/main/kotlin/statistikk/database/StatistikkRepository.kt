@@ -1,10 +1,10 @@
 package no.nav.etterlatte.statistikk.database
 
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.database.toList
 import org.postgresql.util.PGobject
 import java.sql.Date
 import java.sql.PreparedStatement
-import java.sql.ResultSet
 import java.sql.Statement
 import java.sql.Timestamp
 import java.time.Instant
@@ -132,13 +132,3 @@ data class StoenadRad(
     val vedtakLoependeFom: LocalDate,
     val vedtakLoependeTom: LocalDate?
 )
-
-fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
-    return generateSequence {
-        if (next()) {
-            block()
-        } else {
-            null
-        }
-    }.toList()
-}

@@ -10,10 +10,6 @@ import no.nav.etterlatte.libs.helsesjekk.isReady
 
 fun Route.healthApi() {
     route("health") {
-        get("started") {
-            call.respond(HttpStatusCode.OK)
-        }
-
         get("isalive") {
             call.respond(HttpStatusCode.OK)
         }

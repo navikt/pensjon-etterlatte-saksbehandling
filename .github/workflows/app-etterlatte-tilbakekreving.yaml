@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-tilbakekreving/**
       - buildSrc/src/main/kotlin/Database.kt
       - buildSrc/src/main/kotlin/Jackson.kt
+      - buildSrc/src/main/kotlin/JakartaBind.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt
       - buildSrc/src/main/kotlin/MockK.kt

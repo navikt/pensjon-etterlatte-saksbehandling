@@ -422,18 +422,22 @@ class ApplicationTest {
         kotlin.runCatching { sleep(2000) }
         assertNotNull(behandlingOpprettet)
         val rapid = beans.rapidSingleton
-        assertEquals(4, rapid.publiserteMeldinger.size)
+        assertEquals(5, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue()
         )
         assertEquals(
-            "BEHANDLING:OPPRETTET",
+            "BEHANDLING:GYLDIG_FREMSATT",
             objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
         )
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue()
+        )
+        assertEquals(
+            "BEHANDLING:OPPRETTET",
+            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue()
 
         )
         assertEquals(

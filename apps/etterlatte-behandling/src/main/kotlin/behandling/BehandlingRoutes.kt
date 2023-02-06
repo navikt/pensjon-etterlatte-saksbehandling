@@ -200,7 +200,7 @@ internal fun Route.behandlingRoutes(
 
             post("/gyldigfremsatt") {
                 val body = call.receive<GyldighetsResultat>()
-                foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)
+                foerstegangsbehandlingService.lagreGyldighetsproeving(behandlingsId, body)
                 call.respond(HttpStatusCode.OK)
             }
         }

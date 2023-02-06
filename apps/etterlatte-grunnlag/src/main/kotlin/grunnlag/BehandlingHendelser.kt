@@ -17,7 +17,7 @@ class BehandlingHendelser(
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
-            eventName("BEHANDLING:OPPRETTET")
+            eventName("BEHANDLING:GYLDIG_FREMSATT")
             correlationId()
             validate { it.requireKey("persongalleri") }
             validate { it.requireKey("sakId") }
@@ -27,6 +27,7 @@ class BehandlingHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             // TODO dette må jeg gjøre smartere, ellers må Persongalleri restruktureres
+
             context.publish(
                 JsonMessage.newMessage(
                     mapOf(

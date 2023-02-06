@@ -13,7 +13,7 @@ import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
-import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentSoeskenMedIBeregning, lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
 import { SoeskenMedIBeregning } from '~shared/types/Grunnlagsopplysning'
 import Spinner from '~shared/Spinner'
@@ -50,7 +50,7 @@ const Beregningsgrunnlag = () => {
   }, [])
 
   if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
-    return <div style={{ color: 'red' }}>Familieforhold kan ikke hentes ut</div>
+    return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
   }
 
   const soesken: IPdlPerson[] =
@@ -69,9 +69,6 @@ const Beregningsgrunnlag = () => {
   }
 
   const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
-
-  const visSoeskenjustering =
-    isSuccess(beregningsgrunnlag) || (isFailure(beregningsgrunnlag) && beregningsgrunnlag.error.statusCode === 404)
 
   return (
     <Content>
@@ -130,48 +127,59 @@ const Beregningsgrunnlag = () => {
       >
         {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
         <Border />
-        <Spinner visible={isPendingOrInitial(beregningsgrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
-        {visSoeskenjustering &&
-          soesken.map((barn, index) => (
-            <SoeskenContainer key={barn.foedselsnummer}>
-              <Soesken person={barn} familieforhold={behandling.familieforhold!} />
-              <Controller
-                name={`beregningsgrunnlag.${index}`}
-                control={control}
-                render={(soesken) =>
-                  behandles ? (
-                    <RadioGroupRow
-                      legend="Oppdras sammen"
-                      value={soesken.field.value?.skalBrukes ?? null}
-                      error={
-                        soesken.field.value?.skalBrukes === undefined && ikkeValgtOppdrasSammenPaaAlle
-                          ? 'Du må velge ja/nei på alle søsken'
-                          : ''
-                      }
-                      onChange={(value: boolean) => {
-                        soesken.field.onChange({ foedselsnummer: barn.foedselsnummer, skalBrukes: value })
-                        setIkkeValgtOppdrasSammenPaaAlleFeil(false)
-                      }}
-                    >
-                      <Radio value={true}>Ja</Radio>
-                      <Radio value={false}>Nei</Radio>
-                    </RadioGroupRow>
-                  ) : (
-                    <OppdrasSammenLes>
-                      <strong>Oppdras sammen</strong>
-                      <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
-                    </OppdrasSammenLes>
-                  )
-                }
-              />
-            </SoeskenContainer>
-          ))}
+        {mapApiResult(
+          beregningsgrunnlag,
+          () => (
+            <Spinner visible={true} label={'Henter beregningsgrunnlag for søsken'} />
+          ),
+          () => (
+            <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>
+          ),
+          () => (
+            <>
+              {soesken.map((barn, index) => (
+                <SoeskenContainer key={barn.foedselsnummer}>
+                  <Soesken person={barn} familieforhold={behandling.familieforhold!} />
+                  <Controller
+                    name={`beregningsgrunnlag.${index}`}
+                    control={control}
+                    render={(soesken) =>
+                      behandles ? (
+                        <RadioGroupRow
+                          legend="Oppdras sammen"
+                          value={soesken.field.value?.skalBrukes ?? null}
+                          error={
+                            soesken.field.value?.skalBrukes === undefined && ikkeValgtOppdrasSammenPaaAlle
+                              ? 'Du må velge ja/nei på alle søsken'
+                              : ''
+                          }
+                          onChange={(value: boolean) => {
+                            soesken.field.onChange({ foedselsnummer: barn.foedselsnummer, skalBrukes: value })
+                            setIkkeValgtOppdrasSammenPaaAlleFeil(false)
+                          }}
+                        >
+                          <Radio value={true}>Ja</Radio>
+                          <Radio value={false}>Nei</Radio>
+                        </RadioGroupRow>
+                      ) : (
+                        <OppdrasSammenLes>
+                          <strong>Oppdras sammen</strong>
+                          <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
+                        </OppdrasSammenLes>
+                      )
+                    }
+                  />
+                </SoeskenContainer>
+              ))}
+            </>
+          )
+        )}
       </FamilieforholdWrapper>
 
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(soeskenMedIBeregning) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
 
-      {visSoeskenjustering &&
+      {isSuccess(beregningsgrunnlag) &&
         (behandles ? (
           <BehandlingHandlingKnapper>
             <Button variant="primary" size="medium" form="form">

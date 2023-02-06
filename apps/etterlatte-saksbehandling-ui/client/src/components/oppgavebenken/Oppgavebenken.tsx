@@ -15,6 +15,7 @@ import { kolonner } from './OppgaveKolonner'
 import { initialOppgaveFelter, IOppgaveFelter } from './typer/oppgavefelter'
 import { hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
+import { isSuccess, isPending, useApiCall } from '~shared/hooks/useApiCall'
 
 const OppgavebenkContainer = styled.div`
   max-width: 60em;
@@ -22,9 +23,7 @@ const OppgavebenkContainer = styled.div`
 `
 
 const Oppgavebenken = () => {
-  const [lasterOppgaver, setLasterOppgaver] = useState(true)
-  const [toggleHentOppgaver, setToggleHentOppgaver] = useState(false)
-  const [oppgaver, setOppgaver] = useState<ReadonlyArray<IOppgave>>([])
+  const [oppgaver, fetchOppgaver] = useApiCall(hentOppgaver)
   const [oppgaveFelter, setOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter())
   const [globalFilter, setGlobalFilter] = useState<string | undefined>('')
   const [filterPar, setFilterPar] = useState<Array<FilterPar>>([])
@@ -44,21 +43,9 @@ const Oppgavebenken = () => {
   }
 
   useEffect(() => {
-    const lastOppgaver = async () => {
-      const response = await hentOppgaver()
+    fetchOppgaver({})
+  }, [])
 
-      if (response.status === 'ok') {
-        setOppgaver(response.data.oppgaver.map(mapOppgaveResponse))
-      }
-
-      setLasterOppgaver(false)
-    }
-
-    setLasterOppgaver(true)
-    lastOppgaver()
-  }, [toggleHentOppgaver])
-
-  const data: ReadonlyArray<IOppgave> = React.useMemo(() => oppgaver, [oppgaver])
   const columns: ReadonlyArray<Column<IOppgave>> = React.useMemo(() => kolonner, [])
 
   return (
@@ -68,33 +55,35 @@ const Oppgavebenken = () => {
           oppgaveFelter={oppgaveFelter}
           setOppgaveFelter={setOppgaveFelter}
           setGlobalFilter={setGlobalFilter}
-          henterOppgaver={() => setToggleHentOppgaver(!toggleHentOppgaver)}
+          henterOppgaver={() => fetchOppgaver({})}
         />
-        <Spinner visible={lasterOppgaver} label={'Laster oppgaver'} />
-        {!lasterOppgaver && (
-          <OppgaveListe columns={columns} data={data} globalFilterValue={globalFilter} filterPar={filterPar} />
+        <Spinner visible={isPending(oppgaver)} label={'Laster oppgaver'} />
+        {isSuccess(oppgaver) && (
+          <OppgaveListe
+            columns={columns}
+            data={oppgaver.data.oppgaver.map(mapOppgaveResponse)}
+            globalFilterValue={globalFilter}
+            filterPar={filterPar}
+          />
         )}
       </>
     </OppgavebenkContainer>
   )
 }
 
-function mapOppgaveResponse(data: OppgaveDTO): IOppgave {
-  const oppgave: IOppgave = {
-    sakId: data.sakId,
-    behandlingId: data.behandlingId,
-    regdato: new Date(data.regdato),
-    soeknadType: data.soeknadType.toUpperCase() as SoeknadTypeFilter,
-    behandlingType: data.behandlingType.toUpperCase() as BehandlingTypeFilter,
-    fristdato: new Date(data.fristdato),
-    fnr: data.fnr,
-    beskrivelse: data.beskrivelse,
-    oppgaveStatus: data.oppgaveStatus.toUpperCase() as StatusFilter,
-    saksbehandler: data.saksbehandler,
-    handling: data.handling.toUpperCase() as Handlinger,
-    antallSoesken: data.antallSoesken,
-  }
-  return oppgave
-}
+const mapOppgaveResponse = (data: OppgaveDTO): IOppgave => ({
+  sakId: data.sakId,
+  behandlingId: data.behandlingId,
+  regdato: new Date(data.regdato),
+  soeknadType: data.soeknadType.toUpperCase() as SoeknadTypeFilter,
+  behandlingType: data.behandlingType.toUpperCase() as BehandlingTypeFilter,
+  fristdato: new Date(data.fristdato),
+  fnr: data.fnr,
+  beskrivelse: data.beskrivelse,
+  oppgaveStatus: data.oppgaveStatus.toUpperCase() as StatusFilter,
+  saksbehandler: data.saksbehandler,
+  handling: data.handling.toUpperCase() as Handlinger,
+  antallSoesken: data.antallSoesken,
+})
 
 export default Oppgavebenken

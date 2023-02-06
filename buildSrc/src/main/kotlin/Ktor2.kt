@@ -17,6 +17,7 @@ object Ktor2 {
     const val ServerHtmlBuilder = "io.ktor:ktor-server-html-builder:$version"
     const val Jackson = "io.ktor:ktor-serialization-jackson:$version"
     const val CallLogging = "io.ktor:ktor-server-call-logging:$version"
+    const val CallId = "io.ktor:ktor-server-call-id:$version"
     const val StatusPages = "io.ktor:ktor-server-status-pages:$version"
     const val MetricsMicrometer = "io.ktor:ktor-server-metrics-micrometer:$version"
     const val Mustache = "io.ktor:ktor-server-mustache:$version"

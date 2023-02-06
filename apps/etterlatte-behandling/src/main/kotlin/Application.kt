@@ -59,7 +59,7 @@ fun Application.module(beanFactory: BeanFactory) {
         val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
 
         restModule(sikkerLogg) {
-            attachContekst(dataSource())
+            attachContekst(dataSource(), beanFactory)
             sakRoutes(
                 sakService = sakService(),
                 generellBehandlingService = generellBehandlingService,
@@ -78,13 +78,13 @@ fun Application.module(beanFactory: BeanFactory) {
     }
 }
 
-private fun Route.attachContekst(ds: DataSource) {
+private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
             Context(
                 AppUser = decideUser(
                     call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
-                    System.getenv()
+                    beanFactory.getSaksbehandlerClaims()
                 ),
                 databasecontxt = DatabaseContext(ds)
             )

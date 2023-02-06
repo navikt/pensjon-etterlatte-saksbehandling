@@ -97,7 +97,9 @@ class ApplicationTest {
         beanFactory = TestBeanFactory(
             jdbcUrl = postgreSQLContainer.jdbcUrl,
             username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
+            password = postgreSQLContainer.password,
+            azureAdAttestantClaim = azureAdAttestantClaim,
+            azureAdSaksbehandlerClaim = azureAdSaksbehandlerClaim
         ).apply { dataSource().migrate() }
 
         beanFactory.behandlingHendelser().start()
@@ -470,14 +472,22 @@ class ApplicationTest {
         )
     }
 
+    private val azureAdAttestantClaim: String by lazy {
+        "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e"
+    }
+
+    private val azureAdSaksbehandlerClaim: String by lazy {
+        "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
+    }
+
     private val tokenAttestant: String by lazy {
         issueToken(
             mapOf(
                 "navn" to "John Doe",
                 "NAVident" to "Saksbehandler01",
                 "groups" to listOf(
-                    "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e", // TODO er egentlig disse gruppene riktig?
-                    "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
+                    azureAdAttestantClaim,
+                    azureAdSaksbehandlerClaim
                 )
             )
         )
@@ -508,8 +518,15 @@ class ApplicationTest {
 class TestBeanFactory(
     private val jdbcUrl: String,
     private val username: String,
-    private val password: String
+    private val password: String,
+    private val azureAdSaksbehandlerClaim: String,
+    private val azureAdAttestantClaim: String
 ) : CommonFactory() {
+    override fun getSaksbehandlerClaims(): Map<String, String> =
+        mapOf(
+            "AZUREAD_ATTESTANT_CLAIM" to azureAdAttestantClaim,
+            "AZUREAD_SAKSBEHANDLER_CLAIM" to azureAdSaksbehandlerClaim
+        )
 
     val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
     override fun dataSource(): DataSource =

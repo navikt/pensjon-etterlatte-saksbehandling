@@ -71,6 +71,7 @@ interface BeanFactory {
     fun vedtakKlient(): VedtakKlient
     fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
+    fun getSaksbehandlerClaims(): Map<String, String>
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -183,6 +184,16 @@ abstract class CommonFactory : BeanFactory {
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    override fun getSaksbehandlerClaims(): Map<String, String> {
+        val attestantClaim = env["AZUREAD_ATTESTANT_CLAIM"] ?: throw NullPointerException("Mangler attestant claim")
+        val saksbehandlerClaim = env["AZUREAD_ATTESTANT_CLAIM"]
+            ?: throw NullPointerException("Mangler saksbehandler claim")
+        return mapOf(
+            "AZUREAD_ATTESTANT_CLAIM" to attestantClaim,
+            "AZUREAD_SAKSBEHANDLER_CLAIM" to saksbehandlerClaim
+        )
+    }
+
     private val dataSource: DataSource by lazy { DataSourceBuilder.createDataSource(env) }
     override fun dataSource() = dataSource
 
@@ -220,7 +231,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-            Duration.of(1, ChronoUnit.MINUTES).toMillis()
+                Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

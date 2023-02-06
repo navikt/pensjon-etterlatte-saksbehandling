@@ -172,7 +172,7 @@ abstract class CommonFactory : BeanFactory {
         datasource = dataSource(),
         grunnlagsendringshendelseService = grunnlagsendringshendelseService(),
         leaderElection = leaderElection(),
-        initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
+        initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
         periode = Duration.of(1, ChronoUnit.MINUTES),
         minutterGamleHendelser = 1L
     ).schedule()

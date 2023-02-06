@@ -72,7 +72,7 @@ class Server(private val beanFactory: BeanFactory) {
         grunnlagsendringshendelseJob()
         behandlingHendelser.start()
 
-        engine.start(true)
+        setReady().also { engine.start(true) }
         behandlingHendelser.nyHendelse.close()
     }
 }

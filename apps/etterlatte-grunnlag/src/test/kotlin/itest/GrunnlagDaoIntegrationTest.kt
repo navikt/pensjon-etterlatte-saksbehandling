@@ -3,7 +3,6 @@ package no.nav.etterlatte.itest
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import lagGrunnlagsopplysning
-import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -11,13 +10,14 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.A
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOESKEN_I_BEREGNINGEN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
@@ -33,6 +33,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.*
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagDaoIntegrationTest {
@@ -40,7 +41,7 @@ internal class GrunnlagDaoIntegrationTest {
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
     private lateinit var opplysningRepo: OpplysningDao
-    private lateinit var dsb: DataSourceBuilder
+    private lateinit var dataSource: DataSource
 
     @BeforeAll
     fun beforeAll() {
@@ -48,9 +49,14 @@ internal class GrunnlagDaoIntegrationTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dsb = DataSourceBuilder(mapOf("DB_JDBC_URL" to postgreSQLContainer.jdbcUrl))
-        dsb.migrate()
-        opplysningRepo = OpplysningDao(dsb.dataSource)
+        dataSource = DataSourceBuilder.createDataSource(
+            jdbcUrl = postgreSQLContainer.jdbcUrl,
+            username = postgreSQLContainer.username,
+            password = postgreSQLContainer.password
+        )
+        dataSource.migrate()
+
+        opplysningRepo = OpplysningDao(dataSource)
     }
 
     @AfterAll
@@ -60,7 +66,7 @@ internal class GrunnlagDaoIntegrationTest {
 
     @AfterEach
     fun afterEach() {
-        dsb.dataSource.connection.prepareStatement(""" TRUNCATE grunnlagshendelse""").execute()
+        dataSource.connection.prepareStatement(""" TRUNCATE grunnlagshendelse""").execute()
     }
 
     @Test

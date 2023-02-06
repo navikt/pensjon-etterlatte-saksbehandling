@@ -5,7 +5,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.BrevService
-import no.nav.etterlatte.distribusjon.DistribusjonServiceImpl
+import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType

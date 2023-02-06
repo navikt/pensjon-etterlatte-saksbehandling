@@ -4,21 +4,17 @@ import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.journalpost.DokarkivServiceImpl
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
-import no.nav.etterlatte.libs.common.brev.model.BrevID
-import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
-import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
-import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
@@ -41,21 +37,25 @@ class VedtaksbrevService(
         behandlingId: String,
         saksbehandler: String,
         accessToken: String = ""
-    ): BrevID {
+    ): Brev {
         val vedtaksbrev = hentVedtaksbrev(behandlingId)
 
         if (vedtaksbrev?.status != null && vedtaksbrev.status !in listOf(Status.OPPRETTET, Status.OPPDATERT)) {
-            throw IllegalArgumentException("Vedtaksbrev status er ${vedtaksbrev.status}. Kan derfor ikke endres.")
+            logger.info(
+                "Vedtaksbrev har status ${vedtaksbrev.status} og kan ikke endres. Returnerer lagret brev for visning."
+            )
+
+            return vedtaksbrev
         }
 
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, saksbehandler, accessToken)
         val nyttBrev = opprettEllerOppdater(behandling)
 
         return if (vedtaksbrev == null) {
-            db.opprettBrev(nyttBrev).id
+            db.opprettBrev(nyttBrev)
         } else {
             db.oppdaterBrev(vedtaksbrev.id, nyttBrev)
-            vedtaksbrev.id
+            vedtaksbrev
         }
     }
 
@@ -84,18 +84,7 @@ class VedtaksbrevService(
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
 
-        val melding = DistribusjonMelding(
-            behandlingId = vedtaksbrev.behandlingId,
-            distribusjonType = if (vedtaksbrev.erVedtaksbrev) DistribusjonsType.VEDTAK else DistribusjonsType.VIKTIG,
-            brevId = vedtaksbrev.id,
-            mottaker = vedtaksbrev.mottaker,
-            bruker = Bruker(vedtak.sak.ident),
-            tittel = vedtaksbrev.tittel,
-            brevKode = "XX.YY-ZZ",
-            journalfoerendeEnhet = vedtak.vedtakFattet!!.ansvarligEnhet
-        )
-
-        val response = dokarkivService.journalfoer(melding)
+        val response = dokarkivService.journalfoer(vedtaksbrev, vedtak)
 
         db.oppdaterStatus(vedtaksbrev.id, Status.JOURNALFOERT, response.toJson())
             .also { logger.info("Brev med id=${vedtaksbrev.id} markert som ferdigstilt") }

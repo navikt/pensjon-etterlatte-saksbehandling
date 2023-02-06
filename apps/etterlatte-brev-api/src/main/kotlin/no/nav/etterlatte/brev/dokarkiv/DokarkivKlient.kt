@@ -1,4 +1,4 @@
-package no.nav.etterlatte.journalpost
+package no.nav.etterlatte.brev.dokarkiv
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

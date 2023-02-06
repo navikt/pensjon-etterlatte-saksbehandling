@@ -40,9 +40,15 @@ object DataSourceBuilder {
     }
 }
 
-fun DataSource.migrate(): MigrateResult =
+fun DataSource.migrate(gcp: Boolean = true): MigrateResult =
     Flyway.configure()
         .dataSource(this)
+        .apply {
+            // Kjør GCP-spesifikke migrasjoner kun hvis vi er i GCP
+            if (gcp) {
+                locations("db/migration", "db/gcp")
+            }
+        }
         .load()
         .migrate()
 

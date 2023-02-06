@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.database
 
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
+import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.sak.BehandlingMetode
 import no.nav.etterlatte.statistikk.sak.BehandlingResultat
 import no.nav.etterlatte.statistikk.sak.SakRad

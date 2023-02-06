@@ -2,7 +2,8 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.statistikk.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
 import no.nav.etterlatte.statistikk.database.StatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRad
@@ -36,10 +37,13 @@ internal class DBTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        val dsb = DataSourceBuilder(mapOf("DB_JDBC_URL" to postgreSQLContainer.jdbcUrl))
-        dataSource = dsb.dataSource
+        dataSource = DataSourceBuilder.createDataSource(
+            jdbcUrl = postgreSQLContainer.jdbcUrl,
+            username = postgreSQLContainer.username,
+            password = postgreSQLContainer.password
+        )
 
-        dsb.migrate()
+        dataSource.migrate(gcp = false)
     }
 
     @AfterAll

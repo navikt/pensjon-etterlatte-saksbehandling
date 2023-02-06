@@ -1,29 +1,30 @@
 import { Button, Modal, Heading, BodyShort } from '@navikt/ds-react'
 import { useState } from 'react'
 import { handlinger } from './typer'
-import { fattVedtak } from '~shared/api/behandling'
-import { useMatch } from 'react-router'
-import { useNavigate } from 'react-router-dom'
-import { ButtonWrapper } from "~shared/modal/modal";
+import { fattVedtak as fattVedtakApi } from '~shared/api/behandling'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ButtonWrapper } from '~shared/modal/modal'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const SendTilAttesteringModal: React.FC = () => {
   const navigate = useNavigate()
 
   const [isOpen, setIsOpen] = useState(false)
-  const match = useMatch('/behandling/:behandlingId/*')
+  const { behandlingId } = useParams()
+
+  const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakApi)
 
   const goToOppgavebenken = () => {
     navigate('/')
   }
 
   const send = () => {
-    if (!match?.params.behandlingId) throw new Error('Mangler behandlingsid')
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
 
-    fattVedtak(match.params.behandlingId).then((response) => {
-      if (response.status === 'ok') {
-        setIsOpen(false)
-        goToOppgavebenken()
-      }
+    fattVedtak(behandlingId, () => {
+      setIsOpen(false)
+      goToOppgavebenken()
     })
   }
 
@@ -38,7 +39,7 @@ export const SendTilAttesteringModal: React.FC = () => {
           setIsOpen(false)
         }}
         aria-labelledby="modal-heading"
-        className={"padding-modal"}
+        className={'padding-modal'}
       >
         <Modal.Content>
           <Heading spacing level="1" id="modal-heading" size="medium">
@@ -56,14 +57,19 @@ export const SendTilAttesteringModal: React.FC = () => {
             >
               {handlinger.ATTESTERING_MODAL.NEI.navn}
             </Button>
-            <Button variant="primary" size="medium" className="button" onClick={send}>
+            <Button
+              loading={isPending(fattVedtakStatus)}
+              variant="primary"
+              size="medium"
+              className="button"
+              onClick={send}
+            >
               {handlinger.ATTESTERING_MODAL.JA.navn}
             </Button>
           </ButtonWrapper>
+          {isFailure(fattVedtakStatus) && <ApiErrorAlert>En feil skjedde under attestering av vedtaket.</ApiErrorAlert>}
         </Modal.Content>
       </Modal>
     </>
   )
 }
-
-

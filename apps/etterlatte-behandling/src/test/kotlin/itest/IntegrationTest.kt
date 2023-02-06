@@ -243,6 +243,8 @@ class ApplicationTest {
 
             client.post("/behandlinger/$behandlingId/fatteVedtak") {
                 addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
             }.also {
                 beans.dataSource().connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
@@ -264,6 +266,8 @@ class ApplicationTest {
 
             client.post("/behandlinger/$behandlingId/attester") {
                 addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
             }.also {
                 beans.dataSource().connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
@@ -273,7 +277,7 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/behandlinger/$behandlingId/hendelser/vedtak/IVERKSATT") {
+            client.post("/behandlinger/$behandlingId/iverksett") {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -367,23 +371,6 @@ class ApplicationTest {
                 val result = it.body<DetaljertBehandling>()
                 assertEquals(sak.id, result.sak)
                 assertEquals(BehandlingType.MANUELT_OPPHOER, result.behandlingType)
-            }
-
-            client.post("/behandlinger/${manueltOpphoer.behandlingId}/hendelser/vedtak/FATTET") {
-                addAuthSaksbehandler()
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    VedtakHendelse(
-                        13L,
-                        "Saksbehandler",
-                        Tidspunkt.now(),
-                        null,
-                        null
-                    )
-                )
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger/foerstegangsbehandling") {

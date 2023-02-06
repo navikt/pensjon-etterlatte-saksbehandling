@@ -121,7 +121,7 @@ abstract class CommonFactory : BeanFactory {
     override fun sakService(): SakService = RealSakService(sakDao())
 
     override fun behandlingsStatusService(): BehandlingStatusService {
-        return BehandlingStatusServiceImpl(behandlingDao())
+        return BehandlingStatusServiceImpl(behandlingDao(), generellBehandlingService())
     }
 
     override fun foerstegangsbehandlingService(): FoerstegangsbehandlingService =

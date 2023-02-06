@@ -16,6 +16,8 @@ import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import javax.sql.DataSource
 
@@ -160,26 +162,6 @@ class BrevRepository private constructor(private val ds: DataSource) {
         it.prepareStatement("DELETE FROM brev WHERE id = ?")
             .apply { setLong(1, id) }
             .executeUpdate() > 0
-    }
-
-    private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
-        return if (next()) {
-            block().also {
-                require(!next()) { "Skal være unik" }
-            }
-        } else {
-            null
-        }
-    }
-
-    private fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
-        return generateSequence {
-            if (next()) {
-                block()
-            } else {
-                null
-            }
-        }.toList()
     }
 
     private fun ResultSet.mapTilBrev() = Brev(

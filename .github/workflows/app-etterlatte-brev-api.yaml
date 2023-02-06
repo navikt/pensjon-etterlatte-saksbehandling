@@ -19,6 +19,7 @@ on:
       - libs/common/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Cache.kt
@@ -37,6 +38,7 @@ on:
       - libs/common/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
       - buildSrc/src/main/kotlin/Cache.kt

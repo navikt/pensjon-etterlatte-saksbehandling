@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.oppgaveRoutes

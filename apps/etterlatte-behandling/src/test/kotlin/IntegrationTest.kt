@@ -83,54 +83,12 @@ class ApplicationTest {
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
-    private lateinit var server: MockOAuth2Server
+    private val server: MockOAuth2Server = MockOAuth2Server()
     private lateinit var beanFactory: TestBeanFactory
-
-    private val tokenSaksbehandler: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01" // TODO her burde det vel være noen brukere
-            )
-        )
-    }
-
-    private val tokenAttestant: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01",
-                "groups" to listOf(
-                    "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e", // TODO er egentlig disse gruppene riktig?
-                    "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
-                )
-            )
-        )
-    }
-
-    private val tokenServiceUser: String by lazy {
-        issueToken(
-            mapOf(
-                "NAVident" to "Saksbehandler01",
-                "roles" to listOf("kan-sette-kilde") // TODO brukes dette til noe fornuftig?
-            )
-        )
-    }
-
-    private fun issueToken(claims: Map<String, Any>) =
-        server.issueToken(
-            issuerId = ISSUER_ID,
-            audience = CLIENT_ID,
-            claims = claims
-        ).serialize()
 
     @BeforeAll
     fun startServer() {
-        server = MockOAuth2Server().also {
-            it.start()
-            System.setProperty("AZURE_APP_WELL_KNOWN_URL", it.wellKnownUrl(ISSUER_ID).toString())
-            System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
-        }
+        server.start(1234)
 
         postgreSQLContainer.start()
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
@@ -145,7 +103,7 @@ class ApplicationTest {
         beanFactory.behandlingHendelser().start()
     }
 
-    @Test // TODO her må vi stykke opp på ett eller annet vis
+    @Test // TODO denne testen bør stykkes opp
     fun verdikjedetest() {
         val fnr = "123"
         var behandlingOpprettet: UUID? = null
@@ -495,17 +453,55 @@ class ApplicationTest {
 
     @AfterAll
     fun afterAll() {
-        postgreSQLContainer.stop()
         server.shutdown()
+        postgreSQLContainer.stop()
     }
 
     private fun HttpRequestBuilder.addAuthToken(token: String) {
         header(HttpHeaders.Authorization, "Bearer $token")
     }
 
+    private val tokenSaksbehandler: String by lazy {
+        issueToken(
+            mapOf(
+                "navn" to "John Doe",
+                "NAVident" to "Saksbehandler01"
+            )
+        )
+    }
+
+    private val tokenAttestant: String by lazy {
+        issueToken(
+            mapOf(
+                "navn" to "John Doe",
+                "NAVident" to "Saksbehandler01",
+                "groups" to listOf(
+                    "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e", // TODO er egentlig disse gruppene riktig?
+                    "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
+                )
+            )
+        )
+    }
+
+    private val tokenServiceUser: String by lazy {
+        issueToken(
+            mapOf(
+                "NAVident" to "Saksbehandler01",
+                "roles" to listOf("kan-sette-kilde") // TODO hva brukes dette til?
+            )
+        )
+    }
+
+    private fun issueToken(claims: Map<String, Any>) =
+        server.issueToken(
+            issuerId = ISSUER_ID,
+            audience = CLIENT_ID,
+            claims = claims
+        ).serialize()
+
     private companion object {
         const val ISSUER_ID = "azure"
-        const val CLIENT_ID = "azure-id for saksbehandler"
+        const val CLIENT_ID = "mock-client-id"
     }
 }
 

@@ -32,18 +32,39 @@ fun main() {
     postgreSQLContainer.start()
     postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
     postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
+    val azureAdAttestantClaim: String by lazy {
+        "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e"
+    }
 
+    val azureAdSaksbehandlerClaim: String by lazy {
+        "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
+    }
     Server(
         LocalAppBeanFactory(
             jdbcUrl = postgreSQLContainer.jdbcUrl,
             username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
+            password = postgreSQLContainer.password,
+            azureAdAttestantClaim = azureAdAttestantClaim,
+            azureAdSaksbehandlerClaim = azureAdSaksbehandlerClaim
         )
     ).run()
     postgreSQLContainer.stop()
 }
 
-class LocalAppBeanFactory(val jdbcUrl: String, val username: String, val password: String) : CommonFactory() {
+class LocalAppBeanFactory(
+    private val jdbcUrl: String,
+    private val username: String,
+    private val password: String,
+    private val azureAdSaksbehandlerClaim: String,
+    private val azureAdAttestantClaim: String
+) : CommonFactory() {
+
+    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> =
+        mapOf(
+            "AZUREAD_ATTESTANT_GROUPID" to azureAdAttestantClaim,
+            "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim
+        )
+
     override fun dataSource(): DataSource = DataSourceBuilder.createDataSource(jdbcUrl, username, password)
     override fun rapid(): KafkaProdusent<String, String> {
         return object : KafkaProdusent<String, String> {

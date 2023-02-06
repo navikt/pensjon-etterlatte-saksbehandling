@@ -79,6 +79,10 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: AZUREAD_ATTESTANT_GROUPID
+      value: 11053fd7-e674-4552-9a88-f9fcedfa70b3
+    - name: AZUREAD_SAKSBEHANDLER_GROUPID
+      value: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e
   accessPolicy:
     outbound:
       rules:

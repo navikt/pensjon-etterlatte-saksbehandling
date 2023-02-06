@@ -32,31 +32,6 @@ fun main() {
     Server(EnvBasedBeanFactory(System.getenv())).run()
 }
 
-fun Application.module(beanFactory: BeanFactory) {
-    with(beanFactory) {
-        val generellBehandlingService = generellBehandlingService()
-        val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
-
-        restModule(sikkerLogg) {
-            attachContekst(dataSource())
-            sakRoutes(
-                sakService = sakService(),
-                generellBehandlingService = generellBehandlingService,
-                grunnlagsendringshendelseService = grunnlagsendringshendelseService
-            )
-            behandlingRoutes(
-                generellBehandlingService = generellBehandlingService,
-                foerstegangsbehandlingService = foerstegangsbehandlingService(),
-                revurderingService = revurderingService(),
-                manueltOpphoerService = manueltOpphoerService()
-            )
-            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())
-            oppgaveRoutes(repo = OppgaveDao(dataSource()))
-            grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
-        }
-    }
-}
-
 class Server(private val beanFactory: BeanFactory) {
     private val engine = embeddedServer(
         factory = CIO,
@@ -78,11 +53,39 @@ class Server(private val beanFactory: BeanFactory) {
     }
 }
 
-private fun Route.attachContekst(ds: DataSource) {
+fun Application.module(beanFactory: BeanFactory) {
+    with(beanFactory) {
+        val generellBehandlingService = generellBehandlingService()
+        val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
+
+        restModule(sikkerLogg) {
+            attachContekst(dataSource(), beanFactory)
+            sakRoutes(
+                sakService = sakService(),
+                generellBehandlingService = generellBehandlingService,
+                grunnlagsendringshendelseService = grunnlagsendringshendelseService
+            )
+            behandlingRoutes(
+                generellBehandlingService = generellBehandlingService,
+                foerstegangsbehandlingService = foerstegangsbehandlingService(),
+                revurderingService = revurderingService(),
+                manueltOpphoerService = manueltOpphoerService()
+            )
+            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())
+            oppgaveRoutes(repo = OppgaveDao(dataSource()))
+            grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
+        }
+    }
+}
+
+private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
             Context(
-                AppUser = decideUser(call.principal() ?: throw Exception("Ingen bruker funnet i jwt token")),
+                AppUser = decideUser(
+                    call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
+                    beanFactory.getSaksbehandlerGroupIdsByKey()
+                ),
                 databasecontxt = DatabaseContext(ds)
             )
         withContext(

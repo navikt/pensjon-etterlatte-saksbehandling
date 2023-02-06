@@ -30,9 +30,11 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
     }
 }
 
-class Saksbehandler(identifiedBy: TokenValidationContext, val saksbehandlerClaims: Map<String, String>) : ExternalUser(
-    identifiedBy
-) {
+class Saksbehandler(
+    identifiedBy: TokenValidationContext,
+    val saksbehandlerGroupIdsByKey: Map<String, String>
+) :
+    ExternalUser(identifiedBy) {
     init {
         println("""Groups: ${identifiedBy.getJwtToken("azure").jwtTokenClaims.getAsList("groups")}""")
     }
@@ -43,13 +45,13 @@ class Saksbehandler(identifiedBy: TokenValidationContext, val saksbehandlerClaim
     fun harRolleSaksbehandler(): Boolean {
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
             "groups",
-            saksbehandlerClaims["AZUREAD_SAKSBEHANDLER_CLAIM"]
+            saksbehandlerGroupIdsByKey["AZUREAD_SAKSBEHANDLER_GROUPID"]
         )
     }
     fun harRolleAttestant(): Boolean {
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
             "groups",
-            saksbehandlerClaims["AZUREAD_ATTESTANT_CLAIM"]
+            saksbehandlerGroupIdsByKey["AZUREAD_ATTESTANT_GROUPID"]
         )
     }
 }
@@ -60,14 +62,17 @@ class Kunde(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
     }
 }
 
-fun decideUser(principal: TokenValidationContextPrincipal, saksbehandlerClaims: Map<String, String>): ExternalUser {
+fun decideUser(
+    principal: TokenValidationContextPrincipal,
+    saksbehandlerGroupIdsByKey: Map<String, String>
+): ExternalUser {
     return if (principal.context.issuers.contains("tokenx")) {
         Kunde(principal.context)
     } else if (principal.context.issuers.contains("azure")) {
         if (principal.context.getJwtToken("azure").jwtTokenClaims.let { it.getStringClaim("oid") == it.subject }) {
             SystemUser(principal.context)
         } else {
-            Saksbehandler(principal.context, saksbehandlerClaims)
+            Saksbehandler(principal.context, saksbehandlerGroupIdsByKey)
         }
     } else {
         throw IllegalStateException("no token from preapproved issuers")

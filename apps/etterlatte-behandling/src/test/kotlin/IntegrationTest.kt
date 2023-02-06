@@ -522,10 +522,10 @@ class TestBeanFactory(
     private val azureAdSaksbehandlerClaim: String,
     private val azureAdAttestantClaim: String
 ) : CommonFactory() {
-    override fun getSaksbehandlerClaims(): Map<String, String> =
+    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> =
         mapOf(
-            "AZUREAD_ATTESTANT_CLAIM" to azureAdAttestantClaim,
-            "AZUREAD_SAKSBEHANDLER_CLAIM" to azureAdSaksbehandlerClaim
+            "AZUREAD_ATTESTANT_GROUPID" to azureAdAttestantClaim,
+            "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim
         )
 
     val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }

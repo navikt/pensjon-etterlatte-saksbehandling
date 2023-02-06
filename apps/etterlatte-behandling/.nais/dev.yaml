@@ -60,9 +60,9 @@ spec:
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: AZUREAD_ATTESTANT_CLAIM
+    - name: AZUREAD_ATTESTANT_GROUPID
       value: 63f46f74-84a8-4d1c-87a8-78532ab3ae60
-    - name: AZUREAD_SAKSBEHANDLER_CLAIM
+    - name: AZUREAD_SAKSBEHANDLER_GROUPID
       value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
   accessPolicy:
     outbound:

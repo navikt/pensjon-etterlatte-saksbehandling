@@ -71,7 +71,7 @@ interface BeanFactory {
     fun vedtakKlient(): VedtakKlient
     fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
-    fun getSaksbehandlerClaims(): Map<String, String>
+    fun getSaksbehandlerGroupIdsByKey(): Map<String, String>
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -184,13 +184,13 @@ abstract class CommonFactory : BeanFactory {
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun getSaksbehandlerClaims(): Map<String, String> {
-        val attestantClaim = env["AZUREAD_ATTESTANT_CLAIM"] ?: throw NullPointerException("Mangler attestant claim")
-        val saksbehandlerClaim = env["AZUREAD_ATTESTANT_CLAIM"]
+    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> {
+        val attestantClaim = env["AZUREAD_ATTESTANT_GROUPID"] ?: throw NullPointerException("Mangler attestant claim")
+        val saksbehandlerClaim = env["AZUREAD_ATTESTANT_GROUPID"]
             ?: throw NullPointerException("Mangler saksbehandler claim")
         return mapOf(
-            "AZUREAD_ATTESTANT_CLAIM" to attestantClaim,
-            "AZUREAD_SAKSBEHANDLER_CLAIM" to saksbehandlerClaim
+            "AZUREAD_ATTESTANT_GROUPID" to attestantClaim,
+            "AZUREAD_SAKSBEHANDLER_GROUPID" to saksbehandlerClaim
         )
     }
 

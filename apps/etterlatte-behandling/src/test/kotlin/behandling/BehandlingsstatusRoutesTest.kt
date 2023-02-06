@@ -32,8 +32,6 @@ internal class BehandlingsstatusRoutesTest {
     @BeforeAll
     fun before() {
         server.start(1234)
-        // System.setProperty("AZURE_APP_WELL_KNOWN_URL", it.wellKnownUrl(ISSUER_ID).toString())
-        // System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
     }
 
     @AfterAll

@@ -3236,18 +3236,10 @@ react-table@^7.8.0:
   resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.8.0.tgz#07858c01c1718c09f7f1aed7034fcfd7bda907d2"
   integrity sha512-hNaz4ygkZO4bESeFfnfOft73iBUj8K5oKi1EcSHPAibEydfsX2MyU6Z8KCr3mv3C9Kqqh71U+DhZkFvibbnPbA==
 
-react-tabs@*:
+react-tabs@*, react-tabs@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/react-tabs/-/react-tabs-6.0.0.tgz#328fd61ca534e0517d24f4927e37e99b29461880"
   integrity sha512-8jKLKrlwxmn5/+xsa76yi27ZdB8E/WhlhQZw739O5UlOeUGtVoVeWnpqIewv/KbjTw7gQf/uA51zWUNt4IVygQ==
-  dependencies:
-    clsx "^1.1.0"
-    prop-types "^15.5.0"
-
-react-tabs@^5.1.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/react-tabs/-/react-tabs-5.2.0.tgz#31ce628718f37d768ae725d9e2eaabed34b13488"
-  integrity sha512-F/mf56bKOySTESKNEJVcc/KrJioA+nXIc2r8AiBU9ty08AI5ZmX3Qs67D29nq6OV04SqvB7kRumTzUspfoZ4+w==
   dependencies:
     clsx "^1.1.0"
     prop-types "^15.5.0"

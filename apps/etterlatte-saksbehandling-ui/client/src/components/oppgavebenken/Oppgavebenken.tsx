@@ -15,7 +15,8 @@ import { kolonner } from './OppgaveKolonner'
 import { initialOppgaveFelter, IOppgaveFelter } from './typer/oppgavefelter'
 import { hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
-import { isSuccess, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 const OppgavebenkContainer = styled.div`
   max-width: 60em;
@@ -42,9 +43,7 @@ const Oppgavebenken = () => {
       .map((felt) => ({ id: felt.noekkel, value: setValue(felt.filter?.selectedValue) }))
   }
 
-  useEffect(() => {
-    fetchOppgaver({})
-  }, [])
+  useEffect(() => fetchOppgaver({}), [])
 
   const columns: ReadonlyArray<Column<IOppgave>> = React.useMemo(() => kolonner, [])
 
@@ -57,14 +56,22 @@ const Oppgavebenken = () => {
           setGlobalFilter={setGlobalFilter}
           henterOppgaver={() => fetchOppgaver({})}
         />
-        <Spinner visible={isPending(oppgaver)} label={'Laster oppgaver'} />
-        {isSuccess(oppgaver) && (
-          <OppgaveListe
-            columns={columns}
-            data={oppgaver.data.oppgaver.map(mapOppgaveResponse)}
-            globalFilterValue={globalFilter}
-            filterPar={filterPar}
-          />
+        {mapApiResult(
+          oppgaver,
+          () => (
+            <Spinner visible={true} label={'Laster oppgaver'} />
+          ),
+          () => (
+            <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>
+          ),
+          (data) => (
+            <OppgaveListe
+              columns={columns}
+              data={data.oppgaver.map(mapOppgaveResponse)}
+              globalFilterValue={globalFilter}
+              filterPar={filterPar}
+            />
+          )
         )}
       </>
     </OppgavebenkContainer>

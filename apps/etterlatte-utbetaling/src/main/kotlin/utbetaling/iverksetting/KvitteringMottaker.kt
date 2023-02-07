@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
+import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.sakId
@@ -91,17 +92,21 @@ class KvitteringMottaker(
     }
 
     private fun oppdragGodkjentMedFeil(utbetaling: Utbetaling) {
-        logger.info("Utbetaling med vedtakId=${utbetaling.vedtakId.value} godkjent med feil")
+        logger.error("Utbetaling med vedtakId=${utbetaling.vedtakId.value} godkjent med feil")
         sendUtbetalingEvent(utbetaling)
     }
 
     private fun oppdragAvvist(utbetaling: Utbetaling) {
-        logger.info("Utbetaling med vedtakId=${utbetaling.vedtakId.value} avvist")
+        logger.error("Utbetaling med vedtakId=${utbetaling.vedtakId.value} avvist")
         sendUtbetalingEvent(utbetaling)
     }
 
     private fun oppdragFeilet(utbetaling: Utbetaling, oppdragXml: String) {
-        logger.info("Utbetaling med vedtakId=${utbetaling.vedtakId.value} feilet", kv("oppdrag", oppdragXml))
+        logger.error("Utbetaling med vedtakId=${utbetaling.vedtakId.value} feilet, se sikkerlogg for kvittering")
+        sikkerLogg.error(
+            "Utbetaling med vedtakId=${utbetaling.vedtakId.value} feilet, kvittering:",
+            kv("oppdrag", oppdragXml)
+        )
         sendUtbetalingEvent(utbetaling)
     }
 

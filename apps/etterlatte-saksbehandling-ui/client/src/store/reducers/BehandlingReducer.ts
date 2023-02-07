@@ -8,6 +8,7 @@ import {
   IKommerBarnetTilgode,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
+import { Soeskenjusteringsgrunnlag } from '~shared/types/Grunnlagsopplysning'
 
 export const detaljertBehandlingInitialState: IBehandlingReducer = {
   id: '',
@@ -18,6 +19,7 @@ export const detaljertBehandlingInitialState: IBehandlingReducer = {
   vilkårsprøving: undefined,
   gyldighetsprøving: undefined,
   kommerBarnetTilgode: null,
+  soeskenjusteringsgrunnlag: undefined,
   beregning: undefined,
   soeknadMottattDato: '',
   virkningstidspunkt: null,
@@ -34,11 +36,13 @@ export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering>('behandl
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
+export const updateSoeskenjusteringsgrunnlag = createAction<Soeskenjusteringsgrunnlag>('behandling/beregningsgrunnlag')
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
 
 export interface IBehandlingReducer extends IDetaljertBehandling {
+  soeskenjusteringsgrunnlag?: Soeskenjusteringsgrunnlag
   beregning?: Beregning
   vilkårsprøving?: IVilkaarsvurdering
 }
@@ -66,6 +70,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterBehandlingsstatus, (state, action) => {
     state.behandling.status = action.payload
+  })
+  builder.addCase(updateSoeskenjusteringsgrunnlag, (state, action) => {
+    state.behandling.soeskenjusteringsgrunnlag = action.payload
   })
   builder.addCase(resetBeregning, (state) => {
     state.behandling.beregning = detaljertBehandlingInitialState.beregning

@@ -36,8 +36,12 @@ data class Utbetalingsvedtak(
                         ansvarligEnhet = it.ansvarligEnhet
                     )
                 } ?: throw Exception("Mangler saksbehandler og enhet på vedtak"),
-                attestasjon = vedtak.attestasjon?.let { Attestasjon(it.attestant) }
-                    ?: throw Exception("Mangler attestant på vedtak")
+                attestasjon = vedtak.attestasjon?.let {
+                    Attestasjon(
+                        attestant = it.attestant,
+                        attesterendeEnhet = it.attesterendeEnhet
+                    )
+                } ?: throw Exception("Mangler attestant på vedtak")
             )
     }
 }
@@ -57,7 +61,8 @@ enum class Saktype {
 }
 
 data class Attestasjon(
-    val attestant: String
+    val attestant: String,
+    val attesterendeEnhet: String
 )
 
 data class Utbetalingsperiode(

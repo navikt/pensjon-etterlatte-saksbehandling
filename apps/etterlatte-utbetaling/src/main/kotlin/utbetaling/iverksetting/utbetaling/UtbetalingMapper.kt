@@ -41,6 +41,7 @@ class UtbetalingMapper(
         saksbehandler = NavIdent(vedtak.vedtakFattet.ansvarligSaksbehandler),
         saksbehandlerEnhet = vedtak.vedtakFattet.ansvarligEnhet,
         attestant = NavIdent(vedtak.attestasjon.attestant),
+        attestantEnhet = vedtak.attestasjon.attesterendeEnhet,
         vedtak = vedtak,
         utbetalingslinjer = utbetalingslinjer(vedtak.sak.sakType),
         utbetalingshendelser = listOf(

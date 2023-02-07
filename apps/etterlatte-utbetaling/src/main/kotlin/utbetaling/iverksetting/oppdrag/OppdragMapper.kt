@@ -38,9 +38,9 @@ object OppdragMapper {
 
             oppdragsEnhet120.add(
                 OppdragsEnhet120().apply {
-                    typeEnhet = OppdragDefaults.oppdragsenhet.typeEnhet
+                    typeEnhet = OppdragDefaults.OPPDRAGSENHET.typeEnhet
                     enhet = utbetaling.saksbehandlerEnhet
-                    datoEnhetFom = OppdragDefaults.oppdragsenhet.datoEnhetFom
+                    datoEnhetFom = OppdragDefaults.OPPDRAGSENHET.datoEnhetFom
                 }
             )
 
@@ -64,7 +64,7 @@ object OppdragMapper {
                         delytelseId = it.id.value.toString()
                         // TODO: dobbeltsjekk dennne også med omstillingsstønad når vi
                         //  går igjennom kodeFagomraade "BARNEPE"
-                        kodeKlassifik = OppdragDefaults.kodekomponent.toString()
+                        kodeKlassifik = OppdragDefaults.KODEKOMPONENT.toString()
                         datoVedtakFom = it.periode.fra.toXMLDate()
                         datoVedtakTom = it.periode.til?.toXMLDate()
                         sats = it.beloep

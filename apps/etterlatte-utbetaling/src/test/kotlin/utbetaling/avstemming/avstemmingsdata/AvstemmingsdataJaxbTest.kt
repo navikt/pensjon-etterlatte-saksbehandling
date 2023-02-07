@@ -136,7 +136,7 @@ internal class AvstemmingsdataJaxbTest {
                     <saksbehandlerId>EY</saksbehandlerId>
                     <oppdragsenhetListe>
                         <enhetType>BOS</enhetType>
-                        <enhet>123</enhet>
+                        <enhet>4819</enhet>
                         <enhetFom>1900-01-01T00:00:00.000</enhetFom>
                     </oppdragsenhetListe>
                     <oppdragslinjeListe>

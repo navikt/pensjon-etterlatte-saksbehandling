@@ -87,7 +87,6 @@ class KonsistensavstemmingService(
                         sakId = 0,
                         saktype = saktype,
                         fnr = utbetaling.stoenadsmottaker.value,
-                        saksbehandlerEnhet = utbetaling.saksbehandlerEnhet,
                         utbetalingslinjer = utbetaling.utbetalingslinjer,
                         utbetalingslinjerTilAttestanter = utbetaling.utbetalingslinjer.map { it.id }
                             .associateWith { listOf(utbetaling.attestant) }
@@ -113,7 +112,6 @@ class KonsistensavstemmingService(
                         sakId = sakid,
                         sakType = saktype,
                         fnr = Foedselsnummer(utbetalingslinjerPerSak.fnr),
-                        saksbehandlerEnhet = utbetalingslinjerPerSak.saksbehandlerEnhet,
                         utbetalingslinjer = utbetalingslinjerPerSak.utbetalingslinjer.map {
                             OppdragslinjeForKonsistensavstemming(
                                 id = it.id,
@@ -214,7 +212,6 @@ data class UtbetalingslinjerPerSak(
     val sakId: Long,
     val saktype: Saktype,
     val fnr: String,
-    val saksbehandlerEnhet: String,
     val utbetalingslinjer: List<Utbetalingslinje>,
     val utbetalingslinjerTilAttestanter: Map<UtbetalingslinjeId, List<NavIdent>>
 )

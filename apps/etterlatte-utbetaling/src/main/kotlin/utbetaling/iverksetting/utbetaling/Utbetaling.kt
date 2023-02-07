@@ -47,6 +47,7 @@ data class Utbetaling(
     val saksbehandler: NavIdent,
     val saksbehandlerEnhet: String,
     val attestant: NavIdent,
+    val attestantEnhet: String,
     val vedtak: Utbetalingsvedtak,
     val oppdrag: Oppdrag? = null,
     val kvittering: Kvittering? = null,

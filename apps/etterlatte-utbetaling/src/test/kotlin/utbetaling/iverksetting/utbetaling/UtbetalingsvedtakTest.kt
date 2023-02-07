@@ -37,7 +37,8 @@ internal class UtbetalingsvedtakTest {
                "ansvarligEnhet": "123"
              },
              "attestasjon": {
-               "attestant": "Z994985"
+               "attestant": "Z994985",
+               "attesterendeEnhet": "123"
              }
            }
         """.trimIndent()

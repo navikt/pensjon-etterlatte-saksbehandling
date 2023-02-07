@@ -21,6 +21,7 @@ dependencies {
     implementation(Ktor2.Auth)
     implementation(Ktor2.Jackson)
     implementation(Ktor2.CallLogging)
+    implementation(Ktor2.CallId)
     implementation(Ktor2.StatusPages)
     implementation(Ktor2.ServerContentNegotiation)
     implementation(Ktor2.OkHttp)

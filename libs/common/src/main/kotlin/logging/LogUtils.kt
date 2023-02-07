@@ -3,7 +3,7 @@ package no.nav.etterlatte.libs.common.logging
 import org.slf4j.MDC
 import java.util.*
 
-const val X_CORRELATION_ID: String = "X-Correlation-Id"
+const val X_CORRELATION_ID: String = "X-Correlation-ID"
 const val CORRELATION_ID: String = "correlation_id"
 
 fun <T> withLogContext(correlationId: String? = null, kv: Map<String, String> = emptyMap(), block: () -> T): T =

@@ -45,7 +45,7 @@ const Beregningsgrunnlag = () => {
 
   useEffect(() => {
     hentBeregningsgrunnlag(behandling.sak, (result) => {
-      setValue('beregningsgrunnlag', result.opplysning.beregningsgrunnlag)
+      setValue('beregningsgrunnlag', result?.opplysning?.beregningsgrunnlag ?? [])
     })
   }, [])
 

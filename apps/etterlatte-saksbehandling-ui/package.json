@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@navikt/ds-icons": "^0.8.12"
+    "@navikt/ds-icons": "^2.1.6"
   },
   "scripts": {
     "postinstall": "yarn --cwd server install && yarn --cwd client install",

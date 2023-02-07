@@ -70,10 +70,12 @@ fun utbetalingsvedtak(
 
     ),
     vedtakFattet = VedtakFattet(
-        ansvarligSaksbehandler = "12345678"
+        ansvarligSaksbehandler = "12345678",
+        ansvarligEnhet = "4819"
     ),
     attestasjon = Attestasjon(
-        attestant = "87654321"
+        attestant = "87654321",
+        attesterendeEnhet = "4819"
     ),
     pensjonTilUtbetaling = utbetalingsperioder
 )
@@ -154,7 +156,9 @@ fun utbetaling(
         avstemmingsnoekkel = avstemmingsnoekkel,
         stoenadsmottaker = Foedselsnummer("12345678903"),
         saksbehandler = NavIdent("12345678"),
+        saksbehandlerEnhet = "4819",
         attestant = NavIdent("87654321"),
+        attestantEnhet = "4819",
         utbetalingslinjer = utbetalingslinjer,
         kvittering = kvittering,
         utbetalingshendelser = utbetalingshendelser

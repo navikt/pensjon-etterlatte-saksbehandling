@@ -92,7 +92,7 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
         oppdragGjelderFom = LocalDate.EPOCH.format(tidsstempelDatoOppdrag)
         saksbehandlerId = OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER
         oppdragsenhetListe.addAll(
-            listOf(OppdragDefaults.oppdragsenhet).map {
+            listOf(OppdragDefaults.OPPDRAGSENHET).map {
                 Enhet().apply {
                     this.enhet = it.enhet
                     this.enhetType = it.typeEnhet
@@ -104,7 +104,7 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
             utbetalingslinjer.map {
                 Oppdragslinje().apply {
                     delytelseId = it.id.value.toString()
-                    klassifikasjonKode = OppdragDefaults.kodekomponent.toString()
+                    klassifikasjonKode = OppdragDefaults.KODEKOMPONENT.toString()
                     vedtakPeriode = Periode().apply {
                         fom = it.fraOgMed.format(tidsstempelDatoOppdrag)
                         tom = it.tilOgMed?.format(tidsstempelDatoOppdrag)

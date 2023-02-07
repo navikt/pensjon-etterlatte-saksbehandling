@@ -23,7 +23,7 @@ object OppdragMapper {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = OppdragDefaults.AKSJONSKODE_OPPDATER
             kodeEndring = if (foerstegangsbehandling) "NY" else "ENDR"
-            kodeFagomraade = "BARNEPE" // TODO: bruk saktype fra utbetaling.
+            kodeFagomraade = "BARNEPE"
             fagsystemId = utbetaling.sakId.value.toString()
             utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
             oppdragGjelderId = utbetaling.stoenadsmottaker.value
@@ -38,9 +38,9 @@ object OppdragMapper {
 
             oppdragsEnhet120.add(
                 OppdragsEnhet120().apply {
-                    typeEnhet = OppdragDefaults.oppdragsenhet.typeEnhet
-                    enhet = OppdragDefaults.oppdragsenhet.enhet
-                    datoEnhetFom = OppdragDefaults.oppdragsenhet.datoEnhetFom
+                    typeEnhet = OppdragDefaults.OPPDRAGSENHET.typeEnhet
+                    enhet = utbetaling.saksbehandlerEnhet
+                    datoEnhetFom = OppdragDefaults.OPPDRAGSENHET.datoEnhetFom
                 }
             )
 
@@ -64,7 +64,7 @@ object OppdragMapper {
                         delytelseId = it.id.value.toString()
                         // TODO: dobbeltsjekk dennne også med omstillingsstønad når vi
                         //  går igjennom kodeFagomraade "BARNEPE"
-                        kodeKlassifik = OppdragDefaults.kodekomponent.toString()
+                        kodeKlassifik = OppdragDefaults.KODEKOMPONENT.toString()
                         datoVedtakFom = it.periode.fra.toXMLDate()
                         datoVedtakTom = it.periode.til?.toXMLDate()
                         sats = it.beloep

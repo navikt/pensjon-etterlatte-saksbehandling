@@ -3,7 +3,6 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
-import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -46,7 +45,9 @@ data class Utbetaling(
     val avstemmingsnoekkel: Tidspunkt,
     val stoenadsmottaker: Foedselsnummer,
     val saksbehandler: NavIdent,
+    val saksbehandlerEnhet: String,
     val attestant: NavIdent,
+    val attestantEnhet: String,
     val vedtak: Utbetalingsvedtak,
     val oppdrag: Oppdrag? = null,
     val kvittering: Kvittering? = null,

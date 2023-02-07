@@ -672,7 +672,7 @@
   resolved "https://registry.yarnpkg.com/@swc/core-win32-x64-msvc/-/core-win32-x64-msvc-1.3.32.tgz#aa9595cb93d9dd5bbc7e5cfdabd8bb086ea6c21d"
   integrity sha512-DPMoneNFQco7SqmVVOUv1Vn53YmoImEfrAPMY9KrqQzgfzqNTuL2JvfxUqfAxwQ6pEKYAdyKJvZ483rIhgG9XQ==
 
-"@swc/core@^1.3.22":
+"@swc/core@^1.3.30":
   version "1.3.32"
   resolved "https://registry.yarnpkg.com/@swc/core/-/core-1.3.32.tgz#ecb3c9d7717e0a15796230def1b17968b18228f1"
   integrity sha512-Yx/n1j+uUkcqlJAW8IRg8Qymgkdow6NHJZPFShiR0YiaYq2sXY+JHmvh16O6GkL91Y+gTlDUS7uVgDz50czJUQ==
@@ -1044,12 +1044,12 @@
     "@typescript-eslint/types" "5.51.0"
     eslint-visitor-keys "^3.3.0"
 
-"@vitejs/plugin-react-swc@~3.0.0":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@vitejs/plugin-react-swc/-/plugin-react-swc-3.0.1.tgz#7c904f889967f2240e04ac13582399a061468990"
-  integrity sha512-3GQ2oruZO9j8dSHcI0MUeOZQBhjYyDQsF/pKY4Px+CJxn0M16OhgFeEzUjeuwci4zhhjoNIDE9aFNaV5GMQ09g==
+"@vitejs/plugin-react-swc@~3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@vitejs/plugin-react-swc/-/plugin-react-swc-3.1.0.tgz#bbf503223b496ee148c231948ff35ebb339bf225"
+  integrity sha512-xnDULNrkEbtTtRNnMPp+RsuIuIbk1JJV0xY7irchYyv9JJS4uvmc1EYip+qyrnkcX7TQ9c8vCS3AmkQqADI0Fw==
   dependencies:
-    "@swc/core" "^1.3.22"
+    "@swc/core" "^1.3.30"
 
 "@vitest/expect@0.28.4":
   version "0.28.4"

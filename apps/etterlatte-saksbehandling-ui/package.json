@@ -1,7 +1,4 @@
 {
-  "dependencies": {
-    "@navikt/ds-icons": "^0.8.12"
-  },
   "scripts": {
     "postinstall": "yarn --cwd server install && yarn --cwd client install",
     "prepare": "cd ../../ && husky install .husky"

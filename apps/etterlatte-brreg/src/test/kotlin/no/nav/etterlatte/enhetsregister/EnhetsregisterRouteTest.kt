@@ -9,12 +9,12 @@ internal class EnhetsregisterRouteTest {
     fun `url i inputnavn blir haandtert`() {
         val url = "http://localhost:123/mistenkelig"
         val vaska = vaskEnhetsnavn(url) { "" }
-        assertEquals("localhost:123/mistenkelig", vaska)
+        assertEquals("httplocalhostmistenkelig", vaska)
     }
 
     @Test
     fun `vanleg inputnavn blir haandtert uten endring`() {
-        val url = "Lorem Ipsum Dolor"
+        val url = "Lorem Ipsum Dolor ÆØÅZæøåz"
         val vaska = vaskEnhetsnavn(url) { "" }
         assertEquals(url, vaska)
     }

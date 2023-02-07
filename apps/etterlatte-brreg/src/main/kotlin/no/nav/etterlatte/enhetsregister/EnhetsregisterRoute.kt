@@ -37,8 +37,7 @@ fun Route.enhetsregApi(service: EnhetsregService) {
 
 internal fun vaskEnhetsnavn(input: String?, orElse: () -> String) = requireNotNull(input) {
     orElse
-}.replaceBefore("://", "")
-    .replace("://", "")
+}.replace("[^a-zA-Z\\sæøåÆØÅ]".toRegex(), "")
 
 internal fun vaskOrgnr(input: String?, orElse: () -> String) = requireNotNull(input) {
     orElse

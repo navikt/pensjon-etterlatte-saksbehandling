@@ -4,7 +4,6 @@ plugins {
 }
 include(
     "apps:etterlatte-fordeler",
-    "apps:etterlatte-overvaaking",
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-behandling",
     "apps:etterlatte-brreg",

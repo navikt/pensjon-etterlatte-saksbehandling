@@ -10,7 +10,7 @@ import io.ktor.server.routing.route
 fun Route.enhetsregApi(service: EnhetsregService) {
     route("enheter") {
         get {
-            val navn = vaskInput(call.request.queryParameters["navn"]) {
+            val navn = vaskEnhetsnavn(call.request.queryParameters["navn"]) {
                 "Query param \"navn\" må være satt for å hente ut bedrifter."
             }
 
@@ -20,7 +20,7 @@ fun Route.enhetsregApi(service: EnhetsregService) {
         }
 
         get("{orgnr}") {
-            val orgnr = vaskInput(call.parameters["orgnr"]) {
+            val orgnr = vaskEnhetsnavn(call.parameters["orgnr"]) {
                 "Orgnr. må være satt for å hente ut enhet fra BRREG."
             }
 
@@ -35,7 +35,7 @@ fun Route.enhetsregApi(service: EnhetsregService) {
     }
 }
 
-internal fun vaskInput(input: String?, orElse: () -> String) = requireNotNull(input) {
+internal fun vaskEnhetsnavn(input: String?, orElse: () -> String) = requireNotNull(input) {
     orElse
 }.replaceBefore("://", "")
     .replace("://", "")

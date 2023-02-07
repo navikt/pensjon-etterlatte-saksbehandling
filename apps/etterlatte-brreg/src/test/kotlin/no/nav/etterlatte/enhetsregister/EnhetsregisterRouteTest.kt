@@ -3,19 +3,19 @@ package no.nav.etterlatte.enhetsregister
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class EnhetsregisterRouteKtTest {
+internal class EnhetsregisterRouteTest {
 
     @Test
     fun `url i inputnavn blir haandtert`() {
         val url = "http://localhost:123/mistenkelig"
-        val vaska = vaskInput(url) { "" }
+        val vaska = vaskEnhetsnavn(url) { "" }
         assertEquals("localhost:123/mistenkelig", vaska)
     }
 
     @Test
     fun `vanleg inputnavn blir haandtert uten endring`() {
         val url = "Lorem Ipsum Dolor"
-        val vaska = vaskInput(url) { "" }
+        val vaska = vaskEnhetsnavn(url) { "" }
         assertEquals(url, vaska)
     }
 

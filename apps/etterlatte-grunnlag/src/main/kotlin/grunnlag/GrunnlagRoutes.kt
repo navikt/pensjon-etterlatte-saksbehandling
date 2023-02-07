@@ -40,13 +40,14 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
         }
 
         get("{sakId}/{opplysningType}") {
-            val grunnlag = grunnlagService.hentGrunnlagAvType(
-                call.parameters["sakId"]!!.toLong(),
-                Opplysningstype.valueOf(call.parameters["opplysningType"].toString())
-            )
+            val opplysningstype = Opplysningstype.valueOf(call.parameters["opplysningType"].toString())
+            val sakId = call.parameters["sakId"]!!.toLong()
+            val grunnlag = grunnlagService.hentGrunnlagAvType(sakId, opplysningstype)
 
             if (grunnlag != null) {
                 call.respond(grunnlag)
+            } else if (opplysningstype == Opplysningstype.SOESKEN_I_BEREGNINGEN) {
+                call.respond(HttpStatusCode.NoContent)
             } else {
                 call.respond(HttpStatusCode.NotFound)
             }

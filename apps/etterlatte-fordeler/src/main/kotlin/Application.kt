@@ -28,9 +28,7 @@ fun main() {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }
 
-    RapidApplication.create(env) { _, kafkaRapid ->
-        kafkaRapid.seekToBeginning()
-    }
+    RapidApplication.create(env)
         .also {
             Fordeler(
                 rapidsConnection = it,

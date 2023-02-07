@@ -71,9 +71,6 @@ Enkel Rapids&River-app som svarer på behov om opplysning INNTEKT.
 [etterlatte-opplysninger-fra-soeknad](apps/etterlatte-opplysninger-fra-soeknad) \
 // TODO
 
-[etterlatte-overvaaking](apps/etterlatte-overvaaking) \
-// TODO
-
 [etterlatte-pdltjenester](apps/etterlatte-pdltjenester) \
 // TODO
 

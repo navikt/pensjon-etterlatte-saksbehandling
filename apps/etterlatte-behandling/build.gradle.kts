@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-sporingslogg"))
     implementation(project(":libs:rapidsandrivers-extras"))
+    implementation(project(":libs:etterlatte-jobs"))
 
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ServerCore)

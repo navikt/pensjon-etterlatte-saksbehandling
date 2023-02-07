@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.utbetaling.config.LeaderElection
+import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.slf4j.LoggerFactory
 import java.time.Duration

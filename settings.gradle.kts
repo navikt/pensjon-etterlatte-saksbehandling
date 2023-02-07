@@ -30,6 +30,7 @@ include(
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-database",
     "libs:etterlatte-ktor",
+    "libs:etterlatte-jobs",
     "libs:etterlatte-kafka",
     "libs:testdata",
     "libs:etterlatte-regler",

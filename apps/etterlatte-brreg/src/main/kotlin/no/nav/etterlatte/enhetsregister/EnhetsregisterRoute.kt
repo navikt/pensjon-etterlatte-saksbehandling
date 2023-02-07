@@ -39,3 +39,7 @@ internal fun vaskInput(input: String?, orElse: () -> String) = requireNotNull(in
     orElse
 }.replaceBefore("://", "")
     .replace("://", "")
+
+internal fun vaskOrgnr(input: String?, orElse: () -> String) = requireNotNull(input) {
+    orElse
+}.replace("[^0-9]".toRegex(), "")

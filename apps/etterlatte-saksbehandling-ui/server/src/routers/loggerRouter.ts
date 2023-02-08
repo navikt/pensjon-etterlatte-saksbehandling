@@ -13,7 +13,9 @@ export interface IStackLineNoColumnNo {
 
 loggerRouter.post('/', express.json(), (req, res) => {
   const body = req.body
-  if (body.type && body.type === 'info') {
+  if (!process.env.NAIS_CLUSTER_NAME) {
+    frontendLogger.info(`Nais cluster unavailable: ${JSON.stringify(body)}`)
+  } else if (body.type && body.type === 'info') {
     frontendLogger.info('Frontendlogging: ', body)
   } else {
     if (body.stackInfo) {

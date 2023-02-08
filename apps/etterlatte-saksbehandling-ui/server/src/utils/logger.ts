@@ -1,5 +1,7 @@
-import winston, { format } from 'winston'
+import winston, { format, transports } from 'winston'
 const { colorize, combine, timestamp, simple, json } = format
+
+const { Console } = transports
 
 export const logger = winston.createLogger({
   level: 'info',
@@ -22,10 +24,5 @@ export const frontendLogger = winston.createLogger({
   defaultMeta: {
     service: 'etterlatte-saksbehandling-ui-client',
   },
+  transports: [new Console()],
 })
-
-frontendLogger.add(
-  new winston.transports.Console({
-    format: winston.format.simple(),
-  })
-)

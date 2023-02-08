@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
@@ -81,7 +82,7 @@ class ApplicationBuilder {
                 )
             }
 
-    fun start() = rapidsConnection.start()
+    fun start() = setReady().also { rapidsConnection.start() }
 
     fun publiser(melding: String, key: UUID) {
         rapidsConnection.publish(message = melding, key = key.toString())

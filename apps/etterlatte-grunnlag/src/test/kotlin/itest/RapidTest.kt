@@ -3,7 +3,6 @@ package no.nav.etterlatte.itest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
 import lagGrunnlagsopplysning
-import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
 import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
@@ -23,6 +22,8 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -54,10 +55,14 @@ internal class RapidTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        val dsb = DataSourceBuilder(mapOf("DB_JDBC_URL" to postgreSQLContainer.jdbcUrl))
-        dsb.migrate()
-        opplysningRepo = OpplysningDao(dsb.dataSource)
+        val dataSource = DataSourceBuilder.createDataSource(
+            jdbcUrl = postgreSQLContainer.jdbcUrl,
+            username = postgreSQLContainer.username,
+            password = postgreSQLContainer.password
+        )
+        dataSource.migrate()
 
+        opplysningRepo = OpplysningDao(dataSource)
         grunnlagService = RealGrunnlagService(opplysningRepo, sendToRapid, behandlingKlient, mockk())
         inspector = TestRapid().apply {
             GrunnlagHendelser(this, grunnlagService)

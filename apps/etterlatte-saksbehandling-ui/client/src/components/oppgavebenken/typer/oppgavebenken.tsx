@@ -61,26 +61,6 @@ export const statusFilter: Record<StatusFilter, IPar> = {
   RETURNERT: { id: 'RETURNERT', navn: 'Returnert' },
 }
 
-export enum SaksbehandlerFilter {
-  INNLOGGET = 'INNLOGGET',
-  ALLE = 'ALLE',
-  FORDELTE = 'FORDELTE',
-  UFORDELTE = 'UFORDELTE',
-}
-
-export const saksbehandlerFilter = (innloggetSaksbehandler: string): Record<SaksbehandlerFilter, IPar> => {
-  return {
-    INNLOGGET: { id: 'INNLOGGET', navn: innloggetSaksbehandler },
-    ALLE: { id: 'ALLE', navn: 'Alle' },
-    FORDELTE: { id: 'FORDELTE', navn: 'Fordelte' },
-    UFORDELTE: { id: 'UFORDELTE', navn: 'Ufordelte' },
-  }
-}
-
-export interface SelectFilter {
-  filter: StatusFilter
-}
-
 export interface FilterPar {
   id: string
   value: string | undefined

@@ -25,6 +25,7 @@ import no.nav.etterlatte.ktortokenexchange.secureRouteUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.person.PdlFantIkkePerson
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.person.personApi
@@ -46,7 +47,7 @@ class Server(applicationContext: ApplicationContext) {
         }
     )
 
-    fun run() = engine.start(true)
+    fun run() = setReady().also { engine.start(true) }
 }
 
 fun io.ktor.server.application.Application.module(

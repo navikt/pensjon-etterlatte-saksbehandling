@@ -7,6 +7,7 @@ import io.ktor.server.engine.embeddedServer
 import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.config.ApplicationContext
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.restModule
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -38,6 +39,7 @@ class Server(private val context: ApplicationContext) {
 
     fun run() = with(context) {
         dataSource.migrate()
+        setReady()
         engine.start(true)
     }
 }

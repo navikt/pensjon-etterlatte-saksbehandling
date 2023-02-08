@@ -51,14 +51,16 @@ const Beregningsgrunnlag = () => {
   useEffect(() => {
     if (!soeskengrunnlag) {
       fetchSoeskenjusteringsgrunnlag(behandling.sak, (result) => {
-        reset({ soeskengrunnlag: result.opplysning.beregningsgrunnlag })
-        dispatch(oppdaterSoeskenjusteringsgrunnlag(result.opplysning))
+        if (result.opplysning) {
+          reset({ soeskengrunnlag: result.opplysning.beregningsgrunnlag })
+          dispatch(oppdaterSoeskenjusteringsgrunnlag(result.opplysning))
+        }
       })
     }
   }, [])
 
   if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
-    return <div style={{ color: 'red' }}>Familieforhold kan ikke hentes ut</div>
+    return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
   }
 
   const soesken: IPdlPerson[] =
@@ -141,6 +143,7 @@ const Beregningsgrunnlag = () => {
         {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
         <Border />
         <Spinner visible={isPending(soeskenjusteringsgrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
+        {isFailure(soeskenjusteringsgrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
         {soeskengrunnlag &&
           soesken.map((barn, index) => (
             <SoeskenContainer key={barn.foedselsnummer}>

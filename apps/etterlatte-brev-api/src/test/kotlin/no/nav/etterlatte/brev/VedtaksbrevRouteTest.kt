@@ -18,6 +18,10 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.brev.model.Brev
+import no.nav.etterlatte.libs.common.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.brev.model.Status
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -26,7 +30,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksbrevRouteTest {
@@ -50,7 +54,7 @@ internal class VedtaksbrevRouteTest {
 
     @Test
     fun `Endepunkt for oppretting eller oppdatering av vedtaksbrev`() {
-        coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any(), any()) } returns 1
+        coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any(), any()) } returns opprettBrev()
 
         val sakId = 123456L
         val behandlingId = UUID.randomUUID().toString()
@@ -117,8 +121,18 @@ internal class VedtaksbrevRouteTest {
         ).serialize()
     }
 
+    private fun opprettBrev() = Brev(
+        1,
+        "behandlingId",
+        "tittel",
+        Status.OPPRETTET,
+        Mottaker(STOR_SNERK),
+        true
+    )
+
     companion object {
         private const val ISSUER_ID = "azure"
         private const val CLIENT_ID = "mock-client-id"
+        private val STOR_SNERK = Foedselsnummer.of("11057523044")
     }
 }

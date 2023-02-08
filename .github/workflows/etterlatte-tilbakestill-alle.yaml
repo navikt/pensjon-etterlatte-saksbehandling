@@ -74,11 +74,6 @@ jobs:
     with:
       applikasjon: opplysninger-fra-soeknad
     secrets: inherit
-  tilbakestill-overvaaking:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: overvaaking
-    secrets: inherit
   tilbakestill-pdltjenester:
     uses: ./.github/workflows/.deploy-main.yaml
     with:

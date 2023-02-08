@@ -4,7 +4,6 @@ plugins {
 }
 include(
     "apps:etterlatte-fordeler",
-    "apps:etterlatte-overvaaking",
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-behandling",
     "apps:etterlatte-brreg",
@@ -34,5 +33,6 @@ include(
     "libs:testdata",
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",
+    "libs:etterlatte-helsesjekk",
     "jobs:test-fordeler"
 )

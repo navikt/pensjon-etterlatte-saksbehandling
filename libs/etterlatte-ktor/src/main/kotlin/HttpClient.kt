@@ -7,8 +7,8 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.jackson.JacksonConverter
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.security.ktor.clientCredential
@@ -18,7 +18,7 @@ fun httpClient() = HttpClient(OkHttp) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
     defaultRequest {
-        header(X_CORRELATION_ID, getCorrelationId())
+        header(HttpHeaders.XCorrelationId, getCorrelationId())
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
@@ -43,6 +43,6 @@ fun httpClientClientCredentials(
         }
     }
     defaultRequest {
-        header(X_CORRELATION_ID, getCorrelationId())
+        header(HttpHeaders.XCorrelationId, getCorrelationId())
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }

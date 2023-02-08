@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.ktor
 import com.fasterxml.jackson.core.JacksonException
 import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
@@ -11,10 +12,11 @@ import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.plugins.callid.CallId
+import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.request.header
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
@@ -23,7 +25,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
@@ -45,7 +46,12 @@ fun Application.restModule(
         level = Level.INFO
         filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics")) }
         format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
-        mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
+        callIdMdc(CORRELATION_ID)
+    }
+
+    install(CallId) {
+        retrieveFromHeader(HttpHeaders.XCorrelationId)
+        generate { UUID.randomUUID().toString() }
     }
 
     install(StatusPages) {

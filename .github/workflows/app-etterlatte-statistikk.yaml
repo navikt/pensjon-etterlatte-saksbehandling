@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-statistikk/**
       - libs/common/**
       - libs/ktor2client-auth-clientcredentials/**
+      - libs/etterlatte-database/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt
@@ -29,6 +30,7 @@ on:
       - apps/etterlatte-statistikk/**
       - libs/common/**
       - libs/ktor2client-auth-clientcredentials/**
+      - libs/etterlatte-database/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt

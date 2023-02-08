@@ -61,8 +61,7 @@ class RevurderingAggregat(
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
-        begrunnelse: String?,
-        behandlingDao: BehandlingDao
+        begrunnelse: String?
     ) {
         registrerVedtakHendelseFelles(
             vedtakId = vedtakId,
@@ -72,8 +71,7 @@ class RevurderingAggregat(
             kommentar = kommentar,
             begrunnelse = begrunnelse,
             lagretBehandling = lagretBehandling,
-            hendelser = hendelser,
-            behandlingDao = behandlingDao
+            hendelser = hendelser
         )
     }
 

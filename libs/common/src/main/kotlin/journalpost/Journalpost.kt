@@ -40,7 +40,7 @@ data class JournalpostDokument(
     val dokumentvarianter: List<DokumentVariant>
 )
 
-data class Sak (
+data class Sak(
     val sakstype: Sakstype,
     val fagsakId: String? = null,
     val fagsaksystem: String? = "EY"
@@ -86,4 +86,11 @@ enum class BrukerIdType() {
     FNR,
     AKTOERID,
     ORGNR
+}
+
+class JournalpostKoder {
+    companion object {
+        const val BEHANDLINGSTEMA_BP = "ab0255"
+        const val BREV_KODE = "XX.YY-ZZ"
+    }
 }

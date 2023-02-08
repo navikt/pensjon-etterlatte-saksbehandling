@@ -18,9 +18,10 @@ on:
       - apps/etterlatte-grunnlag/**
       - libs/common/**
       - libs/testdata/**
+      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
-      - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt
@@ -33,9 +34,10 @@ on:
       - apps/etterlatte-grunnlag/**
       - libs/common/**
       - libs/testdata/**
+      - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
-      - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt

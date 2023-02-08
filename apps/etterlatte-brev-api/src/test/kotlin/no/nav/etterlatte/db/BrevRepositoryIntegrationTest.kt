@@ -1,12 +1,13 @@
 package no.nav.etterlatte.db
 
-import no.nav.etterlatte.brev.db.DataSourceBuilder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,10 +37,13 @@ internal class BrevRepositoryIntegrationTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        val dsb = DataSourceBuilder(mapOf("DB_JDBC_URL" to postgreSQLContainer.jdbcUrl))
-        dataSource = dsb.dataSource
+        dataSource = DataSourceBuilder.createDataSource(
+            jdbcUrl = postgreSQLContainer.jdbcUrl,
+            username = postgreSQLContainer.username,
+            password = postgreSQLContainer.password
+        )
+        dataSource.migrate()
 
-        dsb.migrate()
         db = BrevRepository.using(dataSource)
     }
 

@@ -1,4 +1,4 @@
-import { BodyShort, Label } from '@navikt/ds-react'
+import { BodyShort, Detail, Label } from '@navikt/ds-react'
 import { InfoElement } from './styled'
 
 export const Info = ({ tekst, label, undertekst }: { tekst: string; label: string; undertekst?: string }) => {
@@ -8,7 +8,7 @@ export const Info = ({ tekst, label, undertekst }: { tekst: string; label: strin
         {label}
       </Label>
       <BodyShort>{tekst}</BodyShort>
-      {undertekst && <BodyShort size="small">{undertekst}</BodyShort>}
+      {undertekst && <Detail size="small">{undertekst}</Detail>}
     </InfoElement>
   )
 }

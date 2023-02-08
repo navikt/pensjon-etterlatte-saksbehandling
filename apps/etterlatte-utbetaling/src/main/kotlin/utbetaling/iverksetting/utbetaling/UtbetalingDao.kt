@@ -31,10 +31,10 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 statement = """
                         INSERT INTO utbetaling(id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, oppdrag, 
                             vedtak, opprettet, avstemmingsnoekkel, endret, stoenadsmottaker, saksbehandler, 
-                            attestant, saktype)
+                            saksbehandler_enhet, attestant, attestant_enhet, saktype)
                         VALUES(:id, :vedtakId, :behandlingId, :behandlingIdTilOppdrag, :sakId, :oppdrag,
                             :vedtak, :opprettet, :avstemmingsnoekkel, :endret, :stoenadsmottaker, :saksbehandler, 
-                            :attestant, :saktype)
+                            :saksbehandlerEnhet, :attestant, :attestantEnhet, :saktype)
                         """,
                 paramMap = mapOf(
                     "id" to utbetaling.id.param(),
@@ -48,7 +48,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     "endret" to Timestamp.from(utbetaling.endret.instant).param(),
                     "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param(),
                     "saksbehandler" to utbetaling.saksbehandler.value.param(),
+                    "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet.param(),
                     "attestant" to utbetaling.attestant.value.param(),
+                    "attestantEnhet" to utbetaling.attestantEnhet.param(),
                     "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param(),
                     "saktype" to utbetaling.sakType.name.param()
                 )
@@ -126,7 +128,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
             statement = """
                     SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag,  sak_id, vedtak, opprettet, 
                         avstemmingsnoekkel, endret, stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, 
-                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, attestant, saktype
+                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, saksbehandler_enhet, attestant, 
+                        attestant_enhet, saktype 
                     FROM utbetaling 
                     WHERE vedtak_id = :vedtakId
                     """,
@@ -205,7 +208,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
             statement = """
                 SELECT DISTINCT (u.id), vedtak_id, behandling_id, behandling_id_til_oppdrag, u.sak_id, vedtak, u.opprettet,
                        avstemmingsnoekkel, endret, stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse,
-                       kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, attestant, u.saktype
+                       kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, saksbehandler_enhet, attestant, 
+                       attestant_enhet, u.saktype 
                 FROM utbetaling u
                          INNER JOIN utbetalingslinje ul on u.id = ul.utbetaling_id
                 WHERE u.id in (SELECT utbetaling_id FROM utbetalingshendelse where status = 'GODKJENT')
@@ -237,7 +241,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
             statement = """
                     SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, vedtak, opprettet, 
                         avstemmingsnoekkel, endret, stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, 
-                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, attestant, saktype
+                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, saksbehandler_enhet, attestant, 
+                        attestant_enhet, saktype 
                     FROM utbetaling
                     WHERE avstemmingsnoekkel >= :fraOgMed AND avstemmingsnoekkel < :til
                     AND saktype = :saktype
@@ -263,7 +268,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
             statement = """
                     SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, vedtak, opprettet, 
                         avstemmingsnoekkel, endret, stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, 
-                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, attestant, saktype
+                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, saksbehandler_enhet, attestant, 
+                        attestant_enhet, saktype 
                     FROM utbetaling
                     WHERE sak_id = :sakId
                     """,
@@ -339,7 +345,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
             avstemmingsnoekkel = Tidspunkt(sqlTimestamp("avstemmingsnoekkel").toInstant()),
             stoenadsmottaker = Foedselsnummer(string("stoenadsmottaker")),
             saksbehandler = NavIdent(string("saksbehandler")),
+            saksbehandlerEnhet = string("saksbehandler_enhet"),
             attestant = NavIdent(string("attestant")),
+            attestantEnhet = string("attestant_enhet"),
             vedtak = string("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
             oppdrag = string("oppdrag").let(OppdragJaxb::toOppdrag),
             kvittering = stringOrNull("kvittering")?.let {

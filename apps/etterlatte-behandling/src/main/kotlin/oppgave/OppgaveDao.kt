@@ -2,10 +2,10 @@ package no.nav.etterlatte.oppgave
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.sak.Sak
 import java.time.LocalDate
 import java.time.ZoneId
@@ -49,11 +49,11 @@ class OppgaveDao(private val datasource: DataSource) {
                 |behandlingstype, soesken 
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE status IN ${
-                aktuelleStatuser.joinToString(
-                    separator = ", ",
-                    prefix = "(",
-                    postfix = ")"
-                ) { "'${it.name}'" }
+                    aktuelleStatuser.joinToString(
+                        separator = ", ",
+                        prefix = "(",
+                        postfix = ")"
+                    ) { "'${it.name}'" }
                 }
                 """.trimMargin()
             )

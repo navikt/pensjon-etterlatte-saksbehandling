@@ -9,6 +9,9 @@ import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
@@ -32,10 +35,10 @@ class ApplicationBuilder {
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }
-    private val ds = DataSourceBuilder(env).also { it.migrate() }
+    private val ds = DataSourceBuilder.createDataSource(env).also { it.migrate() }
 
     private val config: Config = ConfigFactory.load()
-    private val opplysningDao = OpplysningDao(ds.dataSource)
+    private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val grunnlagService = RealGrunnlagService(opplysningDao, ::publiser, behandlingKlient, Sporingslogg())
 
@@ -50,5 +53,5 @@ class ApplicationBuilder {
     private fun publiser(melding: String, key: UUID) {
         rapidsConnection.publish(message = melding, key = key.toString())
     }
-    fun start() = rapidsConnection.start()
+    fun start() = setReady().also { rapidsConnection.start() }
 }

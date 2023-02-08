@@ -33,10 +33,12 @@ internal class UtbetalingsvedtakTest {
                }
              ],
              "vedtakFattet": {
-               "ansvarligSaksbehandler": "Z994985"
+               "ansvarligSaksbehandler": "Z994985",
+               "ansvarligEnhet": "123"
              },
              "attestasjon": {
-               "attestant": "Z994985"
+               "attestant": "Z994985",
+               "attesterendeEnhet": "123"
              }
            }
         """.trimIndent()

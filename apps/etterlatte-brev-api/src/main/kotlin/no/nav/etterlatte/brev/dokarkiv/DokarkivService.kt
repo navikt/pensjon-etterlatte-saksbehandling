@@ -1,22 +1,26 @@
-package no.nav.etterlatte.journalpost
+package no.nav.etterlatte.brev.dokarkiv
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
+import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
+import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.journalpost.DokumentVariant
 import no.nav.etterlatte.libs.common.journalpost.JournalPostType
 import no.nav.etterlatte.libs.common.journalpost.JournalpostDokument
+import no.nav.etterlatte.libs.common.journalpost.JournalpostKoder.Companion.BEHANDLINGSTEMA_BP
+import no.nav.etterlatte.libs.common.journalpost.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.journalpost.Sak
 import no.nav.etterlatte.libs.common.journalpost.Sakstype
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
 interface DokarkivService {
-    fun journalfoer(melding: DistribusjonMelding): JournalpostResponse
+    fun journalfoer(vedtaksbrev: Brev, vedtak: Vedtak): JournalpostResponse
 }
 
 class DokarkivServiceImpl(
@@ -25,52 +29,51 @@ class DokarkivServiceImpl(
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override fun journalfoer(melding: DistribusjonMelding): JournalpostResponse = runBlocking {
-        logger.info("Oppretter journalpost for brev med id=${melding.brevId}")
+    override fun journalfoer(vedtaksbrev: Brev, vedtak: Vedtak): JournalpostResponse = runBlocking {
+        logger.info("Oppretter journalpost for brev med id=${vedtaksbrev.id}")
 
-        val innhold = db.hentBrevInnhold(melding.brevId)
+        val innhold = db.hentBrevInnhold(vedtaksbrev.id)
         logger.info("Oppretter journalpost med brevinnhold", innhold)
 
-        val request = mapTilJournalpostRequest(melding, innhold.data)
+        val request = mapTilJournalpostRequest(vedtaksbrev, vedtak, innhold.data)
         logger.info("Oppretter journalpost med request", innhold)
 
         client.opprettJournalpost(request, true)
     }
 
-    companion object {
-        private const val BEHANDLINGSTEMA_BP = "ab0255"
-
-        fun mapTilJournalpostRequest(
-            melding: DistribusjonMelding,
-            dokumentInnhold: ByteArray
-        ): JournalpostRequest = JournalpostRequest(
-            tittel = melding.tittel,
+    private fun mapTilJournalpostRequest(
+        vedtaksbrev: Brev,
+        vedtak: Vedtak,
+        dokumentInnhold: ByteArray
+    ): JournalpostRequest {
+        return JournalpostRequest(
+            tittel = vedtaksbrev.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
             behandlingstema = BEHANDLINGSTEMA_BP,
-            avsenderMottaker = melding.mottaker.tilAvsenderMottaker(),
-            bruker = melding.bruker,
-            eksternReferanseId = "${melding.behandlingId}.${melding.brevId}",
-            sak = Sak(Sakstype.FAGSAK, melding.behandlingId),
-            dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(melding)),
+            avsenderMottaker = vedtaksbrev.mottaker.tilAvsenderMottaker(),
+            bruker = Bruker(vedtak.sak.ident),
+            eksternReferanseId = "${vedtaksbrev.behandlingId}.${vedtaksbrev.id}",
+            sak = Sak(Sakstype.FAGSAK, vedtaksbrev.behandlingId),
+            dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(vedtaksbrev.tittel)),
             tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
-            journalfoerendeEnhet = melding.journalfoerendeEnhet
+            journalfoerendeEnhet = vedtak.vedtakFattet!!.ansvarligEnhet
         )
     }
-}
 
-private fun Mottaker.tilAvsenderMottaker() = when {
-    foedselsnummer != null -> AvsenderMottaker(id = foedselsnummer!!.value)
-    orgnummer != null -> AvsenderMottaker(id = orgnummer, idType = "ORGNR")
-    adresse != null -> {
-        val mottakerNavn = "${adresse!!.fornavn} ${adresse!!.etternavn}"
-        AvsenderMottaker(id = null, navn = mottakerNavn, idType = null, land = adresse!!.land)
+    private fun ByteArray.tilJournalpostDokument(tittel: String) = JournalpostDokument(
+        tittel,
+        brevkode = BREV_KODE,
+        dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(this)))
+    )
+
+    private fun Mottaker.tilAvsenderMottaker() = when {
+        foedselsnummer != null -> AvsenderMottaker(id = foedselsnummer!!.value)
+        orgnummer != null -> AvsenderMottaker(id = orgnummer, idType = "ORGNR")
+        adresse != null -> {
+            val mottakerNavn = "${adresse!!.fornavn} ${adresse!!.etternavn}"
+            AvsenderMottaker(id = null, navn = mottakerNavn, idType = null, land = adresse!!.land)
+        }
+        else -> throw Exception("Ingen brevmottaker spesifisert")
     }
-    else -> throw Exception("Ingen brevmottaker spesifisert")
 }
-
-private fun ByteArray.tilJournalpostDokument(melding: DistribusjonMelding) = JournalpostDokument(
-    tittel = melding.tittel,
-    brevkode = melding.brevKode,
-    dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(this)))
-)

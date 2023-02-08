@@ -14,12 +14,14 @@ dependencies {
 
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:etterlatte-helsesjekk"))
 
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)
     implementation(Ktor2.Auth)
     implementation(Ktor2.Jackson)
     implementation(Ktor2.CallLogging)
+    implementation(Ktor2.CallId)
     implementation(Ktor2.StatusPages)
     implementation(Ktor2.ServerContentNegotiation)
     implementation(Ktor2.OkHttp)

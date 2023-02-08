@@ -8,17 +8,18 @@ import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
-import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
-import no.nav.etterlatte.database.DataSourceBuilder
+import no.nav.etterlatte.common.LeaderElection
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.DataSourceBuilder
 import org.testcontainers.containers.PostgreSQLContainer
+import javax.sql.DataSource
 
 fun main() {
     /*
@@ -31,13 +32,40 @@ fun main() {
     postgreSQLContainer.start()
     postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
     postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
+    val azureAdAttestantClaim: String by lazy {
+        "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e"
+    }
 
-    appFromBeanfactory(LocalAppBeanFactory(postgreSQLContainer.jdbcUrl)).run()
+    val azureAdSaksbehandlerClaim: String by lazy {
+        "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
+    }
+    Server(
+        LocalAppBeanFactory(
+            jdbcUrl = postgreSQLContainer.jdbcUrl,
+            username = postgreSQLContainer.username,
+            password = postgreSQLContainer.password,
+            azureAdAttestantClaim = azureAdAttestantClaim,
+            azureAdSaksbehandlerClaim = azureAdSaksbehandlerClaim
+        )
+    ).run()
     postgreSQLContainer.stop()
 }
 
-class LocalAppBeanFactory(val jdbcUrl: String) : CommonFactory() {
-    override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
+class LocalAppBeanFactory(
+    private val jdbcUrl: String,
+    private val username: String,
+    private val password: String,
+    private val azureAdSaksbehandlerClaim: String,
+    private val azureAdAttestantClaim: String
+) : CommonFactory() {
+
+    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> =
+        mapOf(
+            "AZUREAD_ATTESTANT_GROUPID" to azureAdAttestantClaim,
+            "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim
+        )
+
+    override fun dataSource(): DataSource = DataSourceBuilder.createDataSource(jdbcUrl, username, password)
     override fun rapid(): KafkaProdusent<String, String> {
         return object : KafkaProdusent<String, String> {
             override fun publiser(noekkel: String, verdi: String, headers: Map<String, ByteArray>): Pair<Int, Long> {

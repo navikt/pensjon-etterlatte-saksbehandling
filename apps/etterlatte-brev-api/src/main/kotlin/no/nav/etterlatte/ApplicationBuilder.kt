@@ -19,7 +19,10 @@ import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.db.DataSourceBuilder
+import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
+import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
+import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
+import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
@@ -27,13 +30,12 @@ import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
-import no.nav.etterlatte.distribusjon.DistribusjonKlient
-import no.nav.etterlatte.distribusjon.DistribusjonServiceImpl
-import no.nav.etterlatte.journalpost.DokarkivKlient
-import no.nav.etterlatte.journalpost.DokarkivServiceImpl
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -66,8 +68,8 @@ class ApplicationBuilder {
         saksbehandlere = getSaksbehandlere()
     )
     private val norg2Klient = Norg2Klient(env["NORG2_URL"]!!, httpClient())
-    private val datasourceBuilder = DataSourceBuilder(env)
-    private val db = BrevRepository.using(datasourceBuilder.dataSource)
+    private val datasource = DataSourceBuilder.createDataSource(env)
+    private val db = BrevRepository.using(datasource)
 
     private val adresseService = AdresseService(norg2Klient, regoppslagKlient)
 
@@ -103,7 +105,7 @@ class ApplicationBuilder {
             .apply {
                 register(object : RapidsConnection.StatusListener {
                     override fun onStartup(rapidsConnection: RapidsConnection) {
-                        datasourceBuilder.migrate()
+                        datasource.migrate()
                     }
                 })
                 JournalfoerVedtaksbrev(this, vedtaksbrevService)
@@ -120,7 +122,7 @@ class ApplicationBuilder {
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)
 
-    fun start() = rapidsConnection.start()
+    fun start() = setReady().also { rapidsConnection.start() }
 
     private fun httpClient(scope: String? = null) = HttpClient(OkHttp) {
         expectSuccess = true

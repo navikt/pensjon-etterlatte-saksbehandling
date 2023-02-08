@@ -2,8 +2,6 @@ import {
   IPar,
   behandlingTypeFilter,
   BehandlingTypeFilter,
-  saksbehandlerFilter,
-  SaksbehandlerFilter,
   soeknadTypeFilter,
   SoeknadTypeFilter,
   statusFilter,
@@ -32,7 +30,6 @@ export interface IOppgaveFelter {
   soeknadType: IOppgaveFelt
   beskrivelse: IOppgaveFelt
   oppgaveStatus: IOppgaveFelt
-  saksbehandler: IOppgaveFelt
 }
 
 export enum FeltSortOrder {
@@ -47,7 +44,7 @@ export const ariaSortMap = new Map<FeltSortOrder, 'none' | 'descending' | 'ascen
   [FeltSortOrder.ASCENDANT, 'ascending'],
 ])
 
-export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter => {
+export const initialOppgaveFelter = (): IOppgaveFelter => {
   return {
     regdato: {
       noekkel: 'regdato',
@@ -103,15 +100,6 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
         type: 'select',
         selectedValue: StatusFilter.VELG,
         nedtrekksliste: statusFilter,
-      },
-    },
-    saksbehandler: {
-      noekkel: 'saksbehandler',
-      label: 'Saksbehandler',
-      filter: {
-        type: 'select',
-        selectedValue: SaksbehandlerFilter.ALLE,
-        nedtrekksliste: saksbehandlerFilter(saksbehandlerNavn),
       },
     },
   }

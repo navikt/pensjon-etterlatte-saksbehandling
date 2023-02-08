@@ -60,6 +60,6 @@ spec:
     - name: OPPDRAG_MQ_MANAGER
       value: MQLS04
     - name: GRENSESNITTAVSTEMMING_ENABLED
-      value: true
+      value: "true"
     - name: KONSISTENSAVSTEMMING_ENABLED
-      value: true
+      value: "true"

@@ -24,7 +24,7 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
-    private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
     val rapidsConnection: RapidsConnection = RapidApplication.create(System.getenv().withConsumerGroupId())
 ) {
     val clock = Clock.systemUTC()

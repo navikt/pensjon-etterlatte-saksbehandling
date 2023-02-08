@@ -69,3 +69,7 @@ spec:
       value: P_ETTERLATTE
     - name: OPPDRAG_MQ_MANAGER
       value: mpls04
+    - name: GRENSESNITTAVSTEMMING_ENABLED
+      value: false
+    - name: KONSISTENSAVSTEMMING_ENABLED
+      value: false

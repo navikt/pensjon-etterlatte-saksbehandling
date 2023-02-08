@@ -59,3 +59,7 @@ spec:
       value: Q1_ETTERLATTE
     - name: OPPDRAG_MQ_MANAGER
       value: MQLS04
+    - name: GRENSESNITTAVSTEMMING_ENABLED
+      value: true
+    - name: KONSISTENSAVSTEMMING_ENABLED
+      value: true

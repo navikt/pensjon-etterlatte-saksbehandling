@@ -15,7 +15,9 @@ data class ApplicationProperties(
     val mqAvstemmingQueue: String,
     val serviceUserUsername: String,
     val serviceUserPassword: String,
-    val leaderElectorPath: String
+    val leaderElectorPath: String,
+    val grensesnittavstemmingEnabled: Boolean,
+    val konsistensavstemmingEnabled: Boolean
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) = env.run {
@@ -34,7 +36,9 @@ data class ApplicationProperties(
                 mqAvstemmingQueue = value("OPPDRAG_AVSTEMMING_MQ_NAME"),
                 serviceUserUsername = value("srvuser"),
                 serviceUserPassword = value("srvpwd"),
-                leaderElectorPath = value("ELECTOR_PATH")
+                leaderElectorPath = value("ELECTOR_PATH"),
+                grensesnittavstemmingEnabled = value("GRENSESNITTAVSTEMMING_ENABLED").toBoolean(),
+                konsistensavstemmingEnabled = value("KONSISTENSAVSTEMMING_ENABLED").toBoolean()
             )
         }
 

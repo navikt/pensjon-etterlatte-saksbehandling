@@ -14,10 +14,13 @@ class GrensesnittsavstemmingJob(
     private val starttidspunkt: Date,
     private val periode: Duration
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    fun schedule() =
-        fixedRateTimer(
+    fun schedule(): Timer {
+        log.info("$jobbNavn er satt til å starte $starttidspunkt med periode $periode")
+
+        return fixedRateTimer(
             name = jobbNavn,
             daemon = true,
             startAt = starttidspunkt,
@@ -33,6 +36,7 @@ class GrensesnittsavstemmingJob(
                 logger.error("Grensesnittavstemming feilet", throwable)
             }
         }
+    }
 
     class Grensesnittsavstemming(
         val grensesnittsavstemmingService: GrensesnittsavstemmingService,
@@ -42,6 +46,7 @@ class GrensesnittsavstemmingJob(
         private val log = LoggerFactory.getLogger(this::class.java)
 
         fun run() {
+            log.info("Starter $jobbNavn")
             withLogContext {
                 if (leaderElection.isLeader()) {
                     Saktype.values().forEach {

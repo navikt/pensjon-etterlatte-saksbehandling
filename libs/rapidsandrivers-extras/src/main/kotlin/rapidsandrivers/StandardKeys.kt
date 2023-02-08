@@ -28,13 +28,3 @@ var JsonMessage.correlationId: String?
         name?.also { this[correlationIdKey] = it }
             ?: throw IllegalArgumentException("Kan ikke sette correlationId til null")
     }
-
-fun River.behov(behov: String) {
-    validate { it.demandValue(behovNameKey, behov) }
-}
-
-var JsonMessage.behov: String
-    get() = this[behovNameKey].textValue()
-    set(name) {
-        this[behovNameKey] = name
-    }

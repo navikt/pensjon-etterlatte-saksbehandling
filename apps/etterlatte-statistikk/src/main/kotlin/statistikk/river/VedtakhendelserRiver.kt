@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
@@ -14,6 +15,14 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+fun main() {
+    val empty = listOfNotNull<Any>(null)
+
+    val listOfNotNull = listOfNotNull(eventNameKey to "STATISTIKK:REGISTRERT")
+    val toMap = listOfNotNull.toMap()
+    println(toMap)
+}
 
 class VedtakhendelserRiver(
     rapidsConnection: RapidsConnection,
@@ -55,13 +64,12 @@ class VedtakhendelserRiver(
                             return@also
                         }
                         context.publish(
-                            objectMapper.writeValueAsString(
-                                listOfNotNull(
-                                    "@event_name" to "STATISTIKK:REGISTRERT",
-                                    sakRad?.let { "sak_rad" to objectMapper.writeValueAsString(it) },
-                                    stoenadRad?.let { "stoenad_rad" to objectMapper.writeValueAsString(it) }
-                                ).toMap()
-                            )
+                            listOfNotNull(
+                                eventNameKey to "STATISTIKK:REGISTRERT",
+                                sakRad?.let { "sak_rad" to it },
+                                stoenadRad?.let { "stoenad_rad" to it }
+                            ).toMap()
+                                .toJson()
                         )
                     }
             } catch (e: Exception) {

@@ -11,7 +11,7 @@ import java.time.Duration
 import java.util.*
 
 interface ILivetErEnStroemAvHendelser {
-    fun poll(c: (Personhendelse) -> Unit): Int
+    fun poll(consumePersonHendelse: (Personhendelse) -> Unit): Int
     fun fraStart()
 }
 
@@ -58,10 +58,10 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
         }
     }
 
-    override fun poll(c: (Personhendelse) -> Unit): Int {
+    override fun poll(consumePersonHendelse: (Personhendelse) -> Unit): Int {
         val meldinger = consumer?.poll(Duration.ofSeconds(10))
         meldinger?.forEach {
-            c(it.value())
+            consumePersonHendelse(it.value())
         }
         consumer?.commitSync()
         return meldinger?.count() ?: 0

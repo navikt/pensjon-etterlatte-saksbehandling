@@ -11,7 +11,7 @@ import io.ktor.server.application.Application
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import no.nav.etterlatte.hendelserpdl.DevConfig
+import no.nav.etterlatte.hendelserpdl.AppConfig
 import no.nav.etterlatte.hendelserpdl.LivsHendelserRapid
 import no.nav.etterlatte.hendelserpdl.LyttPaaHendelser
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
@@ -45,7 +45,7 @@ fun main() {
                 try {
                     stream =
                         LyttPaaHendelser(
-                            LivetErEnStroemAvHendelser(DevConfig().env),
+                            LivetErEnStroemAvHendelser(AppConfig().env),
                             LivsHendelserRapid(this@apply),
                             pdlService
                         )

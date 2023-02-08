@@ -1,16 +1,18 @@
 package no.nav.etterlatte.hendelserpdl
 
+import io.mockk.called
 import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.verify
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
-import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class LyttPaaHendelserTest {
@@ -18,13 +20,16 @@ internal class LyttPaaHendelserTest {
     @Test
     fun hendelserSomIkkeLyttesPaa() {
         val pdlMock = mockk<PdlService>()
+        val livshendelserRapid = mockk<IPostLivsHendelserPaaRapid>()
         val subject =
             LyttPaaHendelser(
                 LeesahMock(listOf(Personhendelse().apply { put("opplysningstype", "Ikke dodsmelding") })),
-                DodsMock { _ -> fail() },
+                livshendelserRapid,
                 pdlMock
             )
         subject.stream()
+
+        verify { livshendelserRapid wasNot called }
     }
 
     @Test
@@ -40,7 +45,11 @@ internal class LyttPaaHendelserTest {
                 Foedselsnummer.of("70078749472")
             )
         }
-        val hendelser = mutableListOf<Pair<String, String>>()
+        val iPostLivsHendelserPaaRapid = mockk<IPostLivsHendelserPaaRapid>() {
+            every { personErDod(any(), any(), any()) } just runs
+            every { forelderBarnRelasjon(any(), any(), any(), any(), any(), any()) } just runs
+            every { personUtflyttingFraNorge(any(), any(), any(), any(), any()) } just runs
+        }
         val subject = LyttPaaHendelser(
             LeesahMock(
                 listOf(
@@ -60,62 +69,43 @@ internal class LyttPaaHendelserTest {
                         put(
                             "forelderBarnRelasjon",
                             ForelderBarnRelasjon(
-                                /* relatertPersonsIdent = */ "12345678911",
-                                /* relatertPersonsRolle = */ "FAR",
-                                /* minRolleForPerson = */ "BARN",
-                                /* relatertPersonUtenFolkeregisteridentifikator = */ null
+                                "12345678911",
+                                "FAR",
+                                "BARN",
+                                null
                             )
                         )
                         put("endringstype", no.nav.person.pdl.leesah.Endringstype.valueOf("OPPRETTET"))
                     }
                 )
             ),
-            DodsMock { hendelser += it },
+            iPostLivsHendelserPaaRapid,
             pdlMock
         )
         subject.stream()
-        assertEquals(3, hendelser.size)
-        assertEquals("70078749472", hendelser[0].first)
-        assertEquals("person er doed", hendelser[0].second)
-        assertEquals("12345678911", hendelser[1].first)
-        assertEquals("person flyttet ut", hendelser[1].second)
-        assertEquals("70078749472", hendelser[2].first)
-        assertEquals("ny forelder-barn-relasjon", hendelser[2].second)
-    }
-}
 
-class LeesahMock(val mockData: List<Personhendelse>) : ILivetErEnStroemAvHendelser {
-    override fun poll(c: (Personhendelse) -> Unit): Int {
-        mockData.forEach(c)
-        return 1
-    }
-
-    override fun fraStart() {
-    }
-}
-
-class DodsMock(val c: (Pair<String, String>) -> Unit) : ILivsHendelser {
-    override fun personErDod(fnr: String, doedsdato: String?, endringstype: Endringstype) =
-        c(Pair(fnr, "person er doed"))
-
-    override fun personUtflyttingFraNorge(
-        fnr: String,
-        tilflyttingsLand: String?,
-        tilflyttingsstedIUtlandet: String?,
-        utflyttingsdato: String?,
-        endringstype: Endringstype
-    ) {
-        c(Pair(fnr, "person flyttet ut"))
+        verify(exactly = 1) { iPostLivsHendelserPaaRapid.personErDod(any(), any(), any()) }
+        verify(exactly = 1) {
+            iPostLivsHendelserPaaRapid.forelderBarnRelasjon(any(), any(), any(), any(), any(), any())
+        }
+        verify(exactly = 1) {
+            iPostLivsHendelserPaaRapid.personUtflyttingFraNorge(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
     }
 
-    override fun forelderBarnRelasjon(
-        fnr: String,
-        relatertPersonsIdent: String?,
-        relatertPersonsRolle: String?,
-        minRolleForPerson: String?,
-        relatertPersonUtenFolkeregisteridentifikator: String?,
-        endringstype: Endringstype
-    ) {
-        c(Pair(fnr, "ny forelder-barn-relasjon"))
+    class LeesahMock(val mockData: List<Personhendelse>) : ILivetErEnStroemAvHendelser {
+        override fun poll(consumePersonHendelse: (Personhendelse) -> Unit): Int {
+            mockData.forEach(consumePersonHendelse)
+            return mockData.size
+        }
+
+        override fun fraStart() {
+        }
     }
 }

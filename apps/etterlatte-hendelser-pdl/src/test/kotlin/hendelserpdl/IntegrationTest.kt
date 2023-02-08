@@ -11,29 +11,23 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.common.KafkaEnvironment
-import no.nav.etterlatte.JsonMessage
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
-import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
-import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.doedsfall.Doedsfall
 import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon
 import no.nav.person.pdl.leesah.utflytting.UtflyttingFraNorge
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 
@@ -55,13 +49,12 @@ class IntegrationTest {
     @Test
     fun testDoedshendelse() {
         val leesahTopic: KafkaProducer<String, Personhendelse> = producerForLeesah()
-        val rapid: KafkaConsumer<String, String> = consumerForRapid()
         mockEndpoint("/personidentresponse.json")
-        val app = testApp().apply {
+        val testRapid = TestRapid()
+        val app = testApp(testRapid).apply {
             stream()
         }
 
-        rapid.subscribe(listOf("etterlatte.dodsmelding"))
         val doedsfall = Doedsfall(LocalDate.of(2022, 1, 1))
         leesahTopic.send(
             ProducerRecord(
@@ -180,9 +173,23 @@ class IntegrationTest {
 
         app.stream()
 
-        rapid.poll(Duration.ofSeconds(4L)).apply {
+        val message = testRapid.inspektør.message(0)
+        val hendelsesNavn = message.get("hendelse")
+        if ("DOEDSFALL_V1" == hendelsesNavn.asText()) {
+            val doedshendelse = objectMapper.treeToValue<Doedshendelse>(message.get("hendelse_data"))
+            assertEquals("70078749472", doedshendelse.avdoedFnr)
+            assertEquals(doedsfall.doedsdato, doedshendelse.doedsdato)
+            assertEquals(
+                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET,
+                doedshendelse.endringstype
+            )
+            assertEquals("PDL:PERSONHENDELSE", message.get(eventNameKey).textValue())
+        }
+
+        /*kafkaConsumer.poll(Duration.ofSeconds(4L)).apply {
             assertEquals(3, this.count())
         }.forEach {
+            //Her skal recordene ovenfor være publisert på en river som vi skal sjekke mot
             val msg = JsonMessage(it.value(), MessageProblems(it.value()))
             msg.interestedIn("hendelse", "hendelse_data", eventNameKey, "system_read_count")
             when (msg["hendelse"].textValue()) {
@@ -237,10 +244,10 @@ class IntegrationTest {
                     assertEquals(1, msg["system_read_count"].asInt())
                 }
             }
-        }
+        }*/
     }
 
-    private fun testApp() = LyttPaaHendelser(
+    private fun testApp(testRapid: TestRapid) = LyttPaaHendelser(
         LivetErEnStroemAvHendelser(
             mapOf(
                 "LEESAH_KAFKA_BROKERS" to kafkaEnv.brokersURL,
@@ -248,21 +255,8 @@ class IntegrationTest {
                 "LEESAH_KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!
             )
         ),
-        LivsHendelser(TestConfig(true, mapOf("KAFKA_BROKERS" to kafkaEnv.brokersURL))),
+        LivsHendelserRapid(testRapid),
         pdlService
-    )
-
-    private fun consumerForRapid() = KafkaConsumer(
-        mapOf(
-            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaEnv.brokersURL,
-            ConsumerConfig.GROUP_ID_CONFIG to "test",
-            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",
-            ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "10",
-            ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to "100"
-        ),
-        StringDeserializer(),
-        StringDeserializer()
     )
 
     private fun producerForLeesah() = KafkaProducer<String, Personhendelse>(

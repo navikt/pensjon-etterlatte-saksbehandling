@@ -10,7 +10,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
-import { addMonths } from 'date-fns'
+import { addMonths, isBefore, subYears } from 'date-fns'
 import { Soeknadsvurdering } from '../SoeknadsVurdering'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Info } from '../../Info'
@@ -79,6 +79,14 @@ const Virkningstidspunkt = (props: Props) => {
     setErrorTekst('')
     setVurder(props.virkningstidspunkt !== null)
     onSuccess?.()
+  }
+  const minimumsVirkningstidspunkt = () => {
+    const doedsdato = new Date(props.avdoedDoedsdato ?? '')
+
+    const treArFoerSoknad = subYears(new Date(props.soeknadMottattDato), 3)
+    const manedEtterDoedsdato = addMonths(doedsdato, 1)
+
+    return isBefore(doedsdato, treArFoerSoknad) ? treArFoerSoknad : manedEtterDoedsdato
   }
 
   return (
@@ -149,6 +157,7 @@ const Virkningstidspunkt = (props: Props) => {
                       onChange={(date: Date) => setFormData(date)}
                       autoComplete="off"
                       showMonthYearPicker
+                      minDate={minimumsVirkningstidspunkt()}
                       maxDate={addMonths(new Date(), 1)}
                     />
                   </div>

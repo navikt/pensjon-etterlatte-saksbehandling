@@ -30,8 +30,6 @@ spec:
         databases:
           - name: vilkaarsvurdering
             envVarPrefix: DB
-  kafka:
-    pool: nav-dev
   azure:
     application:
       enabled: true

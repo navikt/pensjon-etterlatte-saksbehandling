@@ -29,8 +29,6 @@ spec:
       claims:
         extra:
           - NAVident
-  kafka:
-    pool: nav-dev
   gcp:
     sqlInstances:
       - type: POSTGRES_14
@@ -39,11 +37,6 @@ spec:
           - name: beregning
             envVarPrefix: DB
   env:
-    - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
-    - name: KAFKA_RESET_POLICY
-      #sette tilbake til none senere
-      value: earliest
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
       value: f4cf400f-8ef9-406f-baf1-8218f8f7edac
     - name: ETTERLATTE_VILKAARSVURDERING_URL

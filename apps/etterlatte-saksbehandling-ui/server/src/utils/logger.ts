@@ -7,13 +7,8 @@ export const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   defaultMeta: { service: 'etterlatte-saksbehandling-ui' },
+  transports: [new Console()],
 })
-
-logger.add(
-  new winston.transports.Console({
-    format: winston.format.simple(),
-  })
-)
 
 const production = combine(timestamp(), json())
 const dev = combine(colorize(), simple())

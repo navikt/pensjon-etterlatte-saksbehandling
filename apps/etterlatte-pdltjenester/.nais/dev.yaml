@@ -31,8 +31,6 @@ spec:
   azure:
     application:
       enabled: true
-  kafka:
-    pool: nav-dev
   env:
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql

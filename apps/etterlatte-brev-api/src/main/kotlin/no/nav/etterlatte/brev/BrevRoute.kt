@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import org.slf4j.LoggerFactory
 
 fun Route.brevRoute(service: BrevService, brregService: BrregService) {
@@ -88,7 +89,7 @@ fun Route.brevRoute(service: BrevService, brregService: BrregService) {
                 val fil: ByteArray = mp.first { it is PartData.FileItem }
                     .let { (it as PartData.FileItem).streamProvider().readBytes() }
 
-                val brevInnhold = BrevInnhold(filData.filNavn, "nb", fil)
+                val brevInnhold = BrevInnhold(filData.filNavn, Spraak.NB, fil)
 
                 val brev = service.lagreAnnetBrev(behandlingId, filData.mottaker, brevInnhold)
 

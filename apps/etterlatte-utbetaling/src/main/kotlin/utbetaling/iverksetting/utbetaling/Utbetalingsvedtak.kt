@@ -62,7 +62,7 @@ enum class Saktype {
 
 data class Attestasjon(
     val attestant: String,
-    val attesterendeEnhet: String
+    val attesterendeEnhet: String? = null
 )
 
 data class Utbetalingsperiode(
@@ -74,7 +74,7 @@ data class Utbetalingsperiode(
 
 data class VedtakFattet(
     val ansvarligSaksbehandler: String,
-    val ansvarligEnhet: String
+    val ansvarligEnhet: String? = null
 )
 
 data class Periode(

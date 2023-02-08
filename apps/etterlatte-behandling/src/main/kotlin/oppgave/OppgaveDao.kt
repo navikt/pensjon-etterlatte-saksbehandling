@@ -49,11 +49,11 @@ class OppgaveDao(private val datasource: DataSource) {
                 |behandlingstype, soesken 
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE status IN ${
-                aktuelleStatuser.joinToString(
-                    separator = ", ",
-                    prefix = "(",
-                    postfix = ")"
-                ) { "'${it.name}'" }
+                    aktuelleStatuser.joinToString(
+                        separator = ", ",
+                        prefix = "(",
+                        postfix = ")"
+                    ) { "'${it.name}'" }
                 }
                 """.trimMargin()
             )

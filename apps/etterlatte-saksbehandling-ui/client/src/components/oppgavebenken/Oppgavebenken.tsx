@@ -28,24 +28,11 @@ const Oppgavebenken = () => {
   const [oppgaveFelter, setOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter())
   const [globalFilter, setGlobalFilter] = useState<string | undefined>('')
   const [filterPar, setFilterPar] = useState<Array<FilterPar>>([])
-  const [val, setVal] = useState<boolean>(false)
 
   useEffect(() => {
     const filterPar = hentFilterFraOppgaveObject(oppgaveFelter)
     setFilterPar(filterPar)
   }, [oppgaveFelter])
-
-  const createError = () => {
-    const scriptError = document.querySelector('#script-error')
-    scriptError!!.addEventListener('click', () => {
-      const badCode = 'const s;'
-      eval(badCode)
-    })
-  }
-
-  if (val) {
-    throw new Error('I crashed!')
-  }
 
   const hentFilterFraOppgaveObject = (oppgaveFelter: IOppgaveFelter): Array<FilterPar> => {
     const setValue = (value: string | undefined) => {
@@ -64,8 +51,6 @@ const Oppgavebenken = () => {
 
   return (
     <OppgavebenkContainer>
-      <button onClick={() => setVal(true)}>Klikk her for å generere feil med errorcomponent</button>
-      <button onClick={createError}>Test; klikk her for å få teste feil-logging</button>
       <>
         <OppgaveHeader
           oppgaveFelter={oppgaveFelter}

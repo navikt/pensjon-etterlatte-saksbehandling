@@ -68,7 +68,7 @@ spec:
     - name: OPPDRAG_MQ_CHANNEL
       value: P_ETTERLATTE
     - name: OPPDRAG_MQ_MANAGER
-      value: mpls04
+      value: MPLS04
     - name: GRENSESNITTAVSTEMMING_ENABLED
       value: "false"
     - name: KONSISTENSAVSTEMMING_ENABLED

@@ -17,14 +17,14 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.brev.adresse.MottakerService
+import no.nav.etterlatte.brev.adresse.BrregService
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
 
-fun Route.brevRoute(service: BrevService, mottakerService: MottakerService) {
+fun Route.brevRoute(service: BrevService, brregService: BrregService) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
 
     route("brev") {
@@ -39,7 +39,7 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService) {
         }
 
         get("mottakere") {
-            val statsforvaltere = mottakerService.hentStatsforvalterListe().map {
+            val statsforvaltere = brregService.hentStatsforvalterListe().map {
                 AvsenderMottaker(it.organisasjonsnummer, idType = "ORGNR", it.navn)
             }
 

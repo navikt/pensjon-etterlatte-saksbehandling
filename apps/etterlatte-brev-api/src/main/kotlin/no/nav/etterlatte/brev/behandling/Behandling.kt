@@ -1,8 +1,5 @@
 package no.nav.etterlatte.brev.behandling
 
-import no.nav.etterlatte.brev.model.Avdoed
-import no.nav.etterlatte.brev.model.Innsender
-import no.nav.etterlatte.brev.model.Soeker
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato

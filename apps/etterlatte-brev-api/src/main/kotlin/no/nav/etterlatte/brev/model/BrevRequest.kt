@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.model
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import java.time.LocalDate
@@ -53,38 +53,4 @@ data class Avsender(
 data class Attestant(
     val navn: String,
     val kontor: String
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class RegoppslagResponseDTO(
-    val navn: String,
-    val adresse: Adresse
-) {
-    data class Adresse(
-        val type: AdresseType,
-        val adresseKilde: AdresseKilde,
-        val adresselinje1: String,
-        val adresselinje2: String?,
-        val adresselinje3: String?,
-        val postnummer: String?,
-        val poststed: String?,
-        val landkode: String,
-        val land: String
-    )
-
-    enum class AdresseType {
-        NORSKPOSTADRESSE, UTENLANDSKPOSTADRESSE
-    }
-
-    enum class AdresseKilde {
-        BOSTEDSADRESSE, OPPHOLDSADRESSE, KONTAKTADRESSE, DELTBOSTED, KONTAKTINFORMASJONFORDØDSBO, ENHETPOSTADRESSE, ENHETFORRETNINGSADRESSE
-    }
-}
-
-data class SaksbehandlerInfo(
-    val ident: String,
-    val navn: String,
-    val fornavn: String,
-    val etternavn: String,
-    val epost: String
 )

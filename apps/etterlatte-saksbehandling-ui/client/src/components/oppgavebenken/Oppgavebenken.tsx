@@ -43,7 +43,9 @@ const Oppgavebenken = () => {
       .map((felt) => ({ id: felt.noekkel, value: setValue(felt.filter?.selectedValue) }))
   }
 
-  useEffect(() => fetchOppgaver({}), [])
+  useEffect(() => {
+    fetchOppgaver({})
+  }, [])
 
   const columns: ReadonlyArray<Column<IOppgave>> = React.useMemo(() => kolonner, [])
 

@@ -23,13 +23,24 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14
+        tier: db-custom-1-3840
+        collation: nb_NO.UTF8
+        cascadingDelete: false
         name: etterlatte-utbetaling
-        cascadingDelete: true
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
+        maintenance:
+          day: 7
+          hour: 2
         databases:
           - name: utbetaling
             envVarPrefix: DB
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   azure:
     application:
       enabled: true
@@ -41,25 +52,24 @@ spec:
     min: 1
   env:
     - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY
-      #sette tilbake til none senere
       value: latest
     - name: OPPDRAG_SEND_MQ_NAME
-      value: QA.Q1_231.OB04_OPPDRAG_XML
+      value: QA.P231.OB04_OPPDRAG_XML
     - name: OPPDRAG_AVSTEMMING_MQ_NAME
-      value: QA.Q1_234.OB29_AVSTEMMING_XML
+      value: QA.P234.OB29_AVSTEMMING_XML
     - name: OPPDRAG_KVITTERING_MQ_NAME
-      value: QA.Q1_ETTERLATTE.OPPDRAG_KVITTERING
+      value: QA.P_ETTERLATTE.OPPDRAG_KVITTERING
     - name: OPPDRAG_MQ_HOSTNAME
-      value: b27apvl222.preprod.local
+      value: mpls04.adeo.no
     - name: OPPDRAG_MQ_PORT
-      value: "1413"
+      value: "1414"
     - name: OPPDRAG_MQ_CHANNEL
-      value: Q1_ETTERLATTE
+      value: P_ETTERLATTE
     - name: OPPDRAG_MQ_MANAGER
-      value: MQLS04
+      value: mpls04
     - name: GRENSESNITTAVSTEMMING_ENABLED
-      value: "true"
+      value: "false"
     - name: KONSISTENSAVSTEMMING_ENABLED
-      value: "true"
+      value: "false"

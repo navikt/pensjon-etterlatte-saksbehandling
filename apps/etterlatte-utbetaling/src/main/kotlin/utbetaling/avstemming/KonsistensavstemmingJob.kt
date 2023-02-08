@@ -6,6 +6,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
+import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 class KonsistensavstemmingJob(
@@ -17,8 +18,10 @@ class KonsistensavstemmingJob(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    fun schedule() =
-        fixedRateTimer(
+    fun schedule(): Timer {
+        logger.info("$jobbNavn er satt til å kjøre med periode $periode")
+
+        return fixedRateTimer(
             name = jobbNavn,
             daemon = true,
             initialDelay = initialDelay,
@@ -34,6 +37,7 @@ class KonsistensavstemmingJob(
                 logger.error("Konsistensavstemming feilet", throwable)
             }
         }
+    }
 
     class Konsistensavstemming(
         val konsistensavstemmingService: KonsistensavstemmingService,

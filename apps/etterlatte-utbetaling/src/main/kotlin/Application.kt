@@ -16,8 +16,12 @@ fun main() {
 }
 
 fun jobs(applicationContext: ApplicationContext) {
-    applicationContext.grensesnittavstemmingJob.schedule()
-    applicationContext.konsistensavstemmingJob.schedule()
+    with(applicationContext.grensesnittavstemmingJob) {
+        if (applicationContext.properties.grensesnittavstemmingEnabled) schedule()
+    }
+    with(applicationContext.konsistensavstemmingJob) {
+        if (applicationContext.properties.konsistensavstemmingEnabled) schedule()
+    }
 }
 
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =

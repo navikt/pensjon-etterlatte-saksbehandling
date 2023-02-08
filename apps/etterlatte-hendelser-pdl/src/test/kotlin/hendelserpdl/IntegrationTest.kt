@@ -15,6 +15,8 @@ import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.person.pdl.leesah.Endringstype
@@ -172,30 +174,12 @@ class IntegrationTest {
         )
 
         app.stream()
-
-        val message = testRapid.inspektør.message(0)
-        val hendelsesNavn = message.get("hendelse")
-        if ("DOEDSFALL_V1" == hendelsesNavn.asText()) {
-            val doedshendelse = objectMapper.treeToValue<Doedshendelse>(message.get("hendelse_data"))
-            assertEquals("70078749472", doedshendelse.avdoedFnr)
-            assertEquals(doedsfall.doedsdato, doedshendelse.doedsdato)
-            assertEquals(
-                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET,
-                doedshendelse.endringstype
-            )
-            assertEquals("PDL:PERSONHENDELSE", message.get(eventNameKey).textValue())
-        }
-
-        /*kafkaConsumer.poll(Duration.ofSeconds(4L)).apply {
-            assertEquals(3, this.count())
-        }.forEach {
-            //Her skal recordene ovenfor være publisert på en river som vi skal sjekke mot
-            val msg = JsonMessage(it.value(), MessageProblems(it.value()))
-            msg.interestedIn("hendelse", "hendelse_data", eventNameKey, "system_read_count")
+        assertEquals(3, testRapid.inspektør.size)
+        for (n in 0 until testRapid.inspektør.size) {
+            val msg = testRapid.inspektør.message(n)
             when (msg["hendelse"].textValue()) {
                 "DOEDSFALL_V1" -> {
                     val doedshendelse = objectMapper.treeToValue<Doedshendelse>(msg["hendelse_data"])
-                    assertEquals("DOEDSFALL_V1", msg["hendelse"].textValue())
                     assertEquals("70078749472", doedshendelse.avdoedFnr)
                     assertEquals(doedsfall.doedsdato, doedshendelse.doedsdato)
                     assertEquals(
@@ -203,11 +187,9 @@ class IntegrationTest {
                         doedshendelse.endringstype
                     )
                     assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
-                    assertEquals(1, msg["system_read_count"].asInt())
                 }
                 "UTFLYTTING_FRA_NORGE" -> {
                     val utflyttingshendelse = objectMapper.treeToValue<UtflyttingsHendelse>(msg["hendelse_data"])
-                    assertEquals("UTFLYTTING_FRA_NORGE", msg["hendelse"].textValue())
                     assertEquals("70078749472", utflyttingshendelse.fnr)
                     assertEquals(utflyttingFraNorge.tilflyttingsland, utflyttingshendelse.tilflyttingsLand)
                     assertEquals(utflyttingFraNorge.utflyttingsdato, utflyttingshendelse.utflyttingsdato)
@@ -216,12 +198,10 @@ class IntegrationTest {
                         utflyttingshendelse.endringstype
                     )
                     assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
-                    assertEquals(1, msg["system_read_count"].asInt())
                 }
                 "FORELDERBARNRELASJON_V1" -> {
                     val forelderBarnRelasjonHendelse =
                         objectMapper.treeToValue<ForelderBarnRelasjonHendelse>(msg["hendelse_data"])
-                    assertEquals("FORELDERBARNRELASJON_V1", msg["hendelse"].textValue())
                     assertEquals("70078749472", forelderBarnRelasjonHendelse.fnr)
                     assertEquals(
                         forelderBarnRelasjon.relatertPersonsIdent,
@@ -233,18 +213,13 @@ class IntegrationTest {
                     )
                     assertEquals(forelderBarnRelasjon.minRolleForPerson, forelderBarnRelasjonHendelse.minRolleForPerson)
                     assertEquals(
-                        forelderBarnRelasjon.relatertPersonUtenFolkeregisteridentifikator,
-                        forelderBarnRelasjonHendelse.relatertPersonUtenFolkeregisteridentifikator
-                    )
-                    assertEquals(
                         no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET,
                         forelderBarnRelasjonHendelse.endringstype
                     )
                     assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
-                    assertEquals(1, msg["system_read_count"].asInt())
                 }
             }
-        }*/
+        }
     }
 
     private fun testApp(testRapid: TestRapid) = LyttPaaHendelser(

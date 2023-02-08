@@ -1,4 +1,5 @@
 package no.nav.etterlatte.statistikk.river
+
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -15,14 +16,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
-fun main() {
-    val empty = listOfNotNull<Any>(null)
-
-    val listOfNotNull = listOfNotNull(eventNameKey to "STATISTIKK:REGISTRERT")
-    val toMap = listOfNotNull.toMap()
-    println(toMap)
-}
 
 class VedtakhendelserRiver(
     rapidsConnection: RapidsConnection,

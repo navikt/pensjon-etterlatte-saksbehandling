@@ -124,7 +124,6 @@ class LyttPaaHendelser(
     }
 
     fun stop() {
-        // livshendelser.stop()
         stopped = true
     }
 

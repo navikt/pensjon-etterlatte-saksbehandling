@@ -22,7 +22,7 @@ import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soekn
 import {
   oppdaterBehandlingsstatus,
   resetBeregning,
-  updateSoeskenjusteringsgrunnlag,
+  oppdaterSoeskenjusteringsgrunnlag,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -36,23 +36,23 @@ const Beregningsgrunnlag = () => {
   const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
-  const soeskenMedIBeregning = behandling.soeskenjusteringsgrunnlag?.beregningsgrunnlag
+  const soeskengrunnlag = behandling.soeskenjusteringsgrunnlag?.beregningsgrunnlag
   const [ikkeValgtOppdrasSammenPaaAlle, setIkkeValgtOppdrasSammenPaaAlleFeil] = useState(false)
   const dispatch = useAppDispatch()
   const [soeskenjusteringsgrunnlag, fetchSoeskenjusteringsgrunnlag] = useApiCall(hentSoeskenjusteringsgrunnlag)
   const [lagreSoeskenMedIBeregningStatus, postSoeskenMedIBeregning] = useApiCall(lagreSoeskenMedIBeregning)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
-  const { control, handleSubmit, setValue } = useForm<{ soeskenMedIBeregning: FormValues[] }>({
+  const { control, handleSubmit, reset } = useForm<{ soeskengrunnlag: FormValues[] }>({
     defaultValues: {
-      soeskenMedIBeregning: soeskenMedIBeregning ?? [],
+      soeskengrunnlag: soeskengrunnlag ?? [],
     },
   })
 
   useEffect(() => {
-    if (!soeskenMedIBeregning) {
+    if (!soeskengrunnlag) {
       fetchSoeskenjusteringsgrunnlag(behandling.sak, (result) => {
-        setValue('soeskenMedIBeregning', result.opplysning.beregningsgrunnlag)
-        dispatch(updateSoeskenjusteringsgrunnlag(result.opplysning))
+        reset({ soeskengrunnlag: result.opplysning.beregningsgrunnlag })
+        dispatch(oppdaterSoeskenjusteringsgrunnlag(result.opplysning))
       })
     }
   }, [])
@@ -66,13 +66,13 @@ const Beregningsgrunnlag = () => {
       (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
     ) ?? []
 
-  const onSubmit = (soeskenMedIBeregning: SoeskenMedIBeregning[]) => {
+  const onSubmit = (soeskengrunnlag: SoeskenMedIBeregning[]) => {
     dispatch(resetBeregning())
-    postSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning }, () =>
+    postSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning: soeskengrunnlag }, () =>
       postOpprettEllerEndreBeregning(behandling.id, () => {
         dispatch(
-          updateSoeskenjusteringsgrunnlag({
-            beregningsgrunnlag: soeskenMedIBeregning,
+          oppdaterSoeskenjusteringsgrunnlag({
+            beregningsgrunnlag: soeskengrunnlag,
           })
         )
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
@@ -130,9 +130,9 @@ const Beregningsgrunnlag = () => {
       </ContentHeader>
       <FamilieforholdWrapper
         id="form"
-        onSubmit={handleSubmit(({ soeskenMedIBeregning }) => {
-          if (validerSoeskenjustering(soesken, soeskenMedIBeregning)) {
-            onSubmit(soeskenMedIBeregning)
+        onSubmit={handleSubmit(({ soeskengrunnlag }) => {
+          if (validerSoeskenjustering(soesken, soeskengrunnlag)) {
+            onSubmit(soeskengrunnlag)
           } else {
             setIkkeValgtOppdrasSammenPaaAlleFeil(true)
           }
@@ -141,12 +141,12 @@ const Beregningsgrunnlag = () => {
         {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
         <Border />
         <Spinner visible={isPending(soeskenjusteringsgrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
-        {soeskenMedIBeregning &&
+        {soeskengrunnlag &&
           soesken.map((barn, index) => (
             <SoeskenContainer key={barn.foedselsnummer}>
               <Soesken person={barn} familieforhold={behandling.familieforhold!} />
               <Controller
-                name={`soeskenMedIBeregning.${index}`}
+                name={`soeskengrunnlag.${index}`}
                 control={control}
                 render={(soesken) =>
                   behandles ? (
@@ -181,7 +181,7 @@ const Beregningsgrunnlag = () => {
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreSoeskenMedIBeregningStatus) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
 
-      {soeskenMedIBeregning &&
+      {soeskengrunnlag &&
         (behandles ? (
           <BehandlingHandlingKnapper>
             <Button variant="primary" size="medium" form="form">

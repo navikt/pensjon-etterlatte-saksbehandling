@@ -1,4 +1,4 @@
-package no.nav.etterlatte.common
+package no.nav.etterlatte.libs.jobs
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient

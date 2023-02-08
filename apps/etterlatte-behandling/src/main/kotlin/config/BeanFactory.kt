@@ -22,7 +22,6 @@ import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
-import no.nav.etterlatte.common.LeaderElection
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -33,6 +32,7 @@ import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg

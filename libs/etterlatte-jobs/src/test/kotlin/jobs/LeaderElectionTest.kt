@@ -1,5 +1,6 @@
-package no.nav.etterlatte.utbetaling.config
+package no.nav.etterlatte.libs.jobs
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -8,7 +9,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.serialization.jackson.JacksonConverter
-import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -29,7 +29,9 @@ internal class LeaderElectionTest {
                     }
                 }
             }
-            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+            install(ContentNegotiation) {
+                register(ContentType.Application.Json, JacksonConverter(jacksonObjectMapper()))
+            }
         }
     }
 

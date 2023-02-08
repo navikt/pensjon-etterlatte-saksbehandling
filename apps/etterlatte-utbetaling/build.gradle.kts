@@ -6,6 +6,7 @@ plugins {
 }
 dependencies {
     implementation(project(":libs:common"))
+    implementation(project(":libs:etterlatte-jobs"))
 
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ClientCore)

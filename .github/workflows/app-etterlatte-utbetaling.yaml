@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-utbetaling/**
       - libs/common/**
+      - libs/etterlatte-jobs/**
       - buildSrc/src/main/kotlin/Database.kt
       - buildSrc/src/main/kotlin/JakartaBind.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
@@ -30,6 +31,7 @@ on:
     paths:
       - apps/etterlatte-utbetaling/**
       - libs/common/**
+      - libs/etterlatte-jobs/**
       - buildSrc/src/main/kotlin/Database.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt
       - buildSrc/src/main/kotlin/Ktor2.kt

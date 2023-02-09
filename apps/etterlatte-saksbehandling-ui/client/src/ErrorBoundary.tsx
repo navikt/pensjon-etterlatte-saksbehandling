@@ -27,6 +27,7 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
         logger.error({
           lineno: stackFrame.lineNumber!!,
           columnno: stackFrame.columnNumber!!,
+          message: error.message,
           error: JSON.stringify(error),
         })
       } catch (e) {

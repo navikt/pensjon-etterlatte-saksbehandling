@@ -237,7 +237,7 @@ const TrygdetidWrapper = styled.form`
   max-width: 56em;
 `
 
-const TrygdetidInfo = styled.form`
+const TrygdetidInfo = styled.div`
   display: flex;
   flex-direction: column;
 `

@@ -138,7 +138,7 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
-    fun `skal returnere not found dersom en vilkaarsvurdering ikke finnes`() {
+    fun `skal returnere no content dersom en vilkaarsvurdering ikke finnes`() {
         testApplication {
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
@@ -148,7 +148,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            assertEquals(response.status, HttpStatusCode.NotFound)
+            assertEquals(response.status, HttpStatusCode.NoContent)
         }
     }
 

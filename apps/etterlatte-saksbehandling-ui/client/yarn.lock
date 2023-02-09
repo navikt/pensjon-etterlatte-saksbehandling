@@ -406,7 +406,7 @@
     clsx "^1.1.1"
     copy-to-clipboard "^3.3.1"
 
-"@navikt/ds-react@^2.0.10", "@navikt/ds-react@^2.1.7":
+"@navikt/ds-react@^2.1.6", "@navikt/ds-react@^2.1.7":
   version "2.1.7"
   resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-2.1.7.tgz#71ac60f7d929a34697b89874d03bd53d6b382691"
   integrity sha512-3IX4YfCbxS+ZsU/F2e9icIpacGDuZI8GEVFXZexOgWA7LfpK7a4Maif2Xi+pFo6mgmQUV6PJW4XCP417MjVrmQ==

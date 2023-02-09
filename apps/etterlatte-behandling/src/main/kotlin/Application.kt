@@ -14,6 +14,7 @@ import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
+import no.nav.etterlatte.behandling.omberegning.omberegningRoutes
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.database.migrate
@@ -70,6 +71,10 @@ fun Application.module(beanFactory: BeanFactory) {
                 foerstegangsbehandlingService = foerstegangsbehandlingService(),
                 revurderingService = revurderingService(),
                 manueltOpphoerService = manueltOpphoerService()
+            )
+            omberegningRoutes(
+                behandlingService = generellBehandlingService,
+                omberegningService = omberegningService()
             )
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())
             oppgaveRoutes(repo = OppgaveDao(dataSource()))

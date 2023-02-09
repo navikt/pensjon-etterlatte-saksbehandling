@@ -51,3 +51,4 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: etterlatte-beregning

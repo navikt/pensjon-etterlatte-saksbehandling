@@ -1,23 +1,24 @@
 package no.nav.etterlatte.statistikk.database
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
+import no.nav.etterlatte.statistikk.domain.StoenadRad
 import org.postgresql.util.PGobject
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.Statement
-import java.sql.Timestamp
-import java.time.Instant
-import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
-class StatistikkRepository(private val datasource: DataSource) {
+class StoenadRepository(private val datasource: DataSource) {
     private val connection get() = datasource.connection
 
     companion object {
-        fun using(datasource: DataSource): StatistikkRepository {
-            return StatistikkRepository(datasource)
+        fun using(datasource: DataSource): StoenadRepository {
+            return StoenadRepository(datasource)
         }
     }
 
@@ -36,13 +37,14 @@ class StatistikkRepository(private val datasource: DataSource) {
                     getObject("behandlingId") as UUID,
                     getLong("sakId"),
                     getLong("sakNummer"),
-                    getTimestamp("tekniskTid").toInstant(),
+                    getTimestamp("tekniskTid").toTidspunkt(),
                     getString("sakYtelse"),
                     getString("versjon"),
                     getString("saksbehandler"),
                     getString("attestant"),
                     getDate("vedtakLoependeFom").toLocalDate(),
-                    getDate("vedtakLoependeTom")?.toLocalDate()
+                    getDate("vedtakLoependeTom")?.toLocalDate(),
+                    objectMapper.readValue(getString("beregning"))
                 )
             }
         }
@@ -90,7 +92,7 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
     setObject(8, stoenadsrad.behandlingId)
     setLong(9, stoenadsrad.sakId)
     setLong(10, stoenadsrad.sakId)
-    setTimestamp(11, Timestamp.from(stoenadsrad.tekniskTid))
+    setTimestamp(11, stoenadsrad.tekniskTid.toTimestamp())
     setString(12, stoenadsrad.sakYtelse)
     setString(13, stoenadsrad.versjon)
     setString(14, stoenadsrad.saksbehandler)
@@ -111,24 +113,3 @@ private object Queries {
         |FROM stoenad
     """.trimMargin()
 }
-
-data class StoenadRad(
-    val id: Long,
-    val fnrSoeker: String,
-    val fnrForeldre: List<String>,
-    val fnrSoesken: List<String>,
-    val anvendtTrygdetid: String,
-    val nettoYtelse: String,
-    val beregningType: String,
-    val anvendtSats: String,
-    val behandlingId: UUID,
-    val sakId: Long,
-    val sakNummer: Long,
-    val tekniskTid: Instant,
-    val sakYtelse: String,
-    val versjon: String,
-    val saksbehandler: String,
-    val attestant: String?,
-    val vedtakLoependeFom: LocalDate,
-    val vedtakLoependeTom: LocalDate?
-)

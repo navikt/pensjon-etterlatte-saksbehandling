@@ -9,24 +9,27 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingClient
-import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
-import no.nav.etterlatte.statistikk.database.StatistikkRepository
-import no.nav.etterlatte.statistikk.database.StoenadRad
+import no.nav.etterlatte.statistikk.clients.BeregningClient
+import no.nav.etterlatte.statistikk.database.SakRepository
+import no.nav.etterlatte.statistikk.database.StoenadRepository
+import no.nav.etterlatte.statistikk.domain.BehandlingMetode
+import no.nav.etterlatte.statistikk.domain.BehandlingResultat
+import no.nav.etterlatte.statistikk.domain.Beregning
+import no.nav.etterlatte.statistikk.domain.SakRad
+import no.nav.etterlatte.statistikk.domain.SakUtland
+import no.nav.etterlatte.statistikk.domain.SoeknadFormat
+import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.river.Behandling
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
-import no.nav.etterlatte.statistikk.sak.BehandlingMetode
-import no.nav.etterlatte.statistikk.sak.BehandlingResultat
-import no.nav.etterlatte.statistikk.sak.SakRad
-import no.nav.etterlatte.statistikk.sak.SakUtland
-import no.nav.etterlatte.statistikk.sak.SoeknadFormat
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
 class StatistikkService(
-    private val stoenadRepository: StatistikkRepository,
-    private val sakRepository: SakstatistikkRepository,
-    private val behandlingClient: BehandlingClient
+    private val stoenadRepository: StoenadRepository,
+    private val sakRepository: SakRepository,
+    private val behandlingClient: BehandlingClient,
+    private val beregningClient: BeregningClient
 ) {
 
     fun registrerStatistikkForVedtak(
@@ -35,7 +38,7 @@ class StatistikkService(
         tekniskTid: LocalDateTime
     ): Pair<SakRad?, StoenadRad?> {
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakHendelse, tekniskTid)
-        if (vedtakHendelse == VedtakHendelse.ATTESTERT) {
+        if (vedtakHendelse == VedtakHendelse.IVERKSATT) {
             val stoenadRad = when (vedtak.type) {
                 VedtakType.INNVILGELSE -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
                 VedtakType.AVSLAG -> null
@@ -57,9 +60,33 @@ class StatistikkService(
         }
     }
 
+    private fun hentBeregningForBehandling(behandlingId: UUID): Beregning {
+        return runBlocking {
+            beregningClient.hentBeregningForVedtak(behandlingId)
+        }
+    }
+
     private fun vedtakshendelseTilSakRad(vedtak: Vedtak, hendelse: VedtakHendelse, tekniskTid: LocalDateTime): SakRad {
         val detaljertBehandling = hentDetaljertBehandling(vedtak.behandling.id)
         val mottattTid = detaljertBehandling.soeknadMottattDato ?: detaljertBehandling.behandlingOpprettet
+        val beregning = if (hendelse in listOf(
+                VedtakHendelse.FATTET,
+                VedtakHendelse.ATTESTERT,
+                VedtakHendelse.IVERKSATT
+            )
+        ) {
+            hentBeregningForBehandling(detaljertBehandling.id)
+        } else {
+            null
+        }
+
+        val foersteUtbetaling = if (vedtak.type == VedtakType.INNVILGELSE) {
+            vedtak.vedtakFattet?.let {
+                vedtak.pensjonTilUtbetaling?.minByOrNull { it.periode.fom }
+            }
+        } else {
+            null
+        }
 
         val fellesRad = SakRad(
             id = -1,
@@ -78,18 +105,15 @@ class StatistikkService(
             opprettetAv = null,
             ansvarligBeslutter = vedtak.attestasjon?.attestant,
             aktorId = vedtak.sak.ident,
-            datoFoersteUtbetaling = vedtak.vedtakFattet?.let {
-                vedtak.pensjonTilUtbetaling?.minByOrNull { it.periode.fom }?.periode?.fom?.atDay(
-                    20
-                )
-            },
+            datoFoersteUtbetaling = foersteUtbetaling?.periode?.fom?.atDay(1),
             tekniskTid = tekniskTid.toTidspunkt(ZoneOffset.UTC),
             sakYtelse = vedtak.sak.sakType.name,
             vedtakLoependeFom = vedtak.virk.fom.atDay(1),
             vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
-            ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet,
-            sakUtland = SakUtland.NASJONAL
+            ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet,
+            sakUtland = SakUtland.NASJONAL,
+            beregning = beregning
         )
         return fellesRad
     }
@@ -126,25 +150,27 @@ class StatistikkService(
 
     private fun vedtakTilStoenadsrad(vedtak: Vedtak, tekniskTid: LocalDateTime): StoenadRad {
         val persongalleri = hentPersongalleri(behandlingId = vedtak.behandling.id)
+        val beregning = hentBeregningForBehandling(vedtak.behandling.id)
         return StoenadRad(
-            -1,
-            vedtak.sak.ident,
-            persongalleri.avdoed,
-            persongalleri.soesken,
-            "40",
-            vedtak.beregning?.sammendrag?.firstOrNull()?.beloep.toString(),
-            "FOLKETRYGD",
-            "",
-            vedtak.behandling.id,
-            vedtak.sak.id,
-            vedtak.sak.id,
-            tekniskTid.toTidspunkt(ZoneOffset.UTC).instant,
-            vedtak.sak.sakType.toString(),
-            "",
-            vedtak.vedtakFattet!!.ansvarligSaksbehandler,
-            vedtak.attestasjon?.attestant,
-            vedtak.virk.fom.atDay(1),
-            vedtak.virk.tom?.atEndOfMonth()
+            id = -1,
+            fnrSoeker = vedtak.sak.ident,
+            fnrForeldre = persongalleri.avdoed,
+            fnrSoesken = persongalleri.soesken,
+            anvendtTrygdetid = "40",
+            nettoYtelse = vedtak.beregning?.sammendrag?.firstOrNull()?.beloep.toString(),
+            beregningType = "FOLKETRYGD",
+            anvendtSats = "",
+            behandlingId = vedtak.behandling.id,
+            sakId = vedtak.sak.id,
+            sakNummer = vedtak.sak.id,
+            tekniskTid = tekniskTid.toTidspunkt(ZoneOffset.UTC),
+            sakYtelse = vedtak.sak.sakType.toString(),
+            versjon = "",
+            saksbehandler = vedtak.vedtakFattet!!.ansvarligSaksbehandler,
+            attestant = vedtak.attestasjon?.attestant,
+            vedtakLoependeFom = vedtak.virk.fom.atDay(1),
+            vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
+            beregning = beregning
         )
     }
 
@@ -178,7 +204,8 @@ class StatistikkService(
             saksbehandler = null,
             ansvarligEnhet = null,
             soeknadFormat = SoeknadFormat.DIGITAL,
-            sakUtland = SakUtland.NASJONAL
+            sakUtland = SakUtland.NASJONAL,
+            beregning = null
         )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(

@@ -4,12 +4,13 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
-import no.nav.etterlatte.statistikk.database.StatistikkRepository
-import no.nav.etterlatte.statistikk.database.StoenadRad
-import no.nav.etterlatte.statistikk.sak.BehandlingMetode
-import no.nav.etterlatte.statistikk.sak.SakRad
-import no.nav.etterlatte.statistikk.sak.SakUtland
+import no.nav.etterlatte.statistikk.database.DataSourceBuilder
+import no.nav.etterlatte.statistikk.database.SakRepository
+import no.nav.etterlatte.statistikk.database.StoenadRepository
+import no.nav.etterlatte.statistikk.domain.BehandlingMetode
+import no.nav.etterlatte.statistikk.domain.SakRad
+import no.nav.etterlatte.statistikk.domain.SakUtland
+import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
@@ -53,27 +53,28 @@ internal class DBTest {
 
     @Test
     fun testStatitstikkRepo() {
-        val repo = StatistikkRepository.using(dataSource)
+        val repo = StoenadRepository.using(dataSource)
         repo.lagreStoenadsrad(
             StoenadRad(
-                -1,
-                "123",
-                listOf("23427249697", "18458822782"),
-                listOf(),
-                "40",
-                "1000",
-                "FOLKETRYGD",
-                "0,4G",
-                UUID.randomUUID(),
-                5,
-                5,
-                Instant.now(),
-                "BP",
-                "42",
-                "Berit Behandler",
-                "Arne Attestant",
-                LocalDate.now(),
-                null
+                id = -1,
+                fnrSoeker = "123",
+                fnrForeldre = listOf("23427249697", "18458822782"),
+                fnrSoesken = listOf(),
+                anvendtTrygdetid = "40",
+                nettoYtelse = "1000",
+                beregningType = "FOLKETRYGD",
+                anvendtSats = "0,4G",
+                behandlingId = UUID.randomUUID(),
+                sakId = 5,
+                sakNummer = 5,
+                tekniskTid = Tidspunkt.now(),
+                sakYtelse = "BP",
+                versjon = "42",
+                saksbehandler = "Berit Behandler",
+                attestant = "Arne Attestant",
+                vedtakLoependeFom = LocalDate.now(),
+                vedtakLoependeTom = null,
+                beregning = null
             )
         )
         repo.datapakke().also {
@@ -89,7 +90,7 @@ internal class DBTest {
 
     @Test
     fun testSakRepo() {
-        val repo = SakstatistikkRepository.using(dataSource)
+        val repo = SakRepository.using(dataSource)
         val lagretRad = repo.lagreRad(
             SakRad(
                 id = -2,
@@ -115,7 +116,8 @@ internal class DBTest {
                 saksbehandler = "en saksbehandler",
                 ansvarligEnhet = "en enhet",
                 soeknadFormat = null,
-                sakUtland = SakUtland.NASJONAL
+                sakUtland = SakUtland.NASJONAL,
+                beregning = null
             )
         )
 

@@ -1,13 +1,15 @@
 package no.nav.etterlatte.statistikk.database
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.database.toList
-import no.nav.etterlatte.statistikk.sak.BehandlingMetode
-import no.nav.etterlatte.statistikk.sak.BehandlingResultat
-import no.nav.etterlatte.statistikk.sak.SakRad
-import no.nav.etterlatte.statistikk.sak.SakUtland
-import no.nav.etterlatte.statistikk.sak.SoeknadFormat
+import no.nav.etterlatte.statistikk.domain.BehandlingMetode
+import no.nav.etterlatte.statistikk.domain.BehandlingResultat
+import no.nav.etterlatte.statistikk.domain.SakRad
+import no.nav.etterlatte.statistikk.domain.SakUtland
+import no.nav.etterlatte.statistikk.domain.SoeknadFormat
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -15,13 +17,13 @@ import java.sql.Statement
 import java.util.*
 import javax.sql.DataSource
 
-class SakstatistikkRepository(private val datasource: DataSource) {
+class SakRepository(private val datasource: DataSource) {
 
     private val connection get() = datasource.connection
 
     companion object {
-        fun using(datasource: DataSource): SakstatistikkRepository {
-            return SakstatistikkRepository(datasource)
+        fun using(datasource: DataSource): SakRepository {
+            return SakRepository(datasource)
         }
     }
 
@@ -34,8 +36,8 @@ class SakstatistikkRepository(private val datasource: DataSource) {
                     behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode, 
                     opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse, 
                     vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, 
-                    sak_utland
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    sak_utland, beregning
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
                 Statement.RETURN_GENERATED_KEYS
             ).apply {
@@ -79,7 +81,8 @@ class SakstatistikkRepository(private val datasource: DataSource) {
         saksbehandler = getString("saksbehandler"),
         ansvarligEnhet = getString("ansvarlig_enhet"),
         soeknadFormat = getString("soeknad_format")?.let { enumValueOf<SoeknadFormat>(it) },
-        sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) }
+        sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
+        beregning = getString("beregning")?.let { objectMapper.readValue(it) }
     )
 
     fun hentRader(): List<SakRad> {
@@ -120,4 +123,5 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = thi
     setString(21, sakRad.ansvarligEnhet)
     setString(22, sakRad.soeknadFormat?.name)
     setString(23, sakRad.sakUtland?.name)
+    setJsonb(24, sakRad.beregning)
 }

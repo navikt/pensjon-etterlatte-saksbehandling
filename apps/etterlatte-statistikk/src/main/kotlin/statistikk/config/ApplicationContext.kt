@@ -17,8 +17,12 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.etterlatte.statistikk.clients.BehandlingClient
 import no.nav.etterlatte.statistikk.clients.BehandlingClientImpl
-import no.nav.etterlatte.statistikk.database.SakstatistikkRepository
-import no.nav.etterlatte.statistikk.database.StatistikkRepository
+import no.nav.etterlatte.statistikk.clients.BeregningClient
+import no.nav.etterlatte.statistikk.clients.BeregningClientImpl
+import no.nav.etterlatte.statistikk.database.DataSourceBuilder
+import no.nav.etterlatte.statistikk.database.SakRepository
+import no.nav.etterlatte.statistikk.database.StoenadRepository
+import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.StatistikkService
@@ -31,7 +35,7 @@ class ApplicationContext {
     val rapidsConnection: RapidsConnection = RapidApplication.create(env.withConsumerGroupId())
 
     val statistikkService: StatistikkService by lazy {
-        StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingClient)
+        StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingClient, beregningClient)
     }
 
     val behandlinghendelseRiver: BehandlinghendelseRiver by lazy {
@@ -43,19 +47,46 @@ class ApplicationContext {
     }
 
     private val behandlingClient: BehandlingClient by lazy {
-        BehandlingClientImpl(httpClient)
+        BehandlingClientImpl(behandlingHttpClient)
     }
 
-    private val statistikkRepository: StatistikkRepository by lazy {
-        StatistikkRepository(datasource)
+    private val statistikkRepository: StoenadRepository by lazy {
+        StoenadRad(datasource)
     }
 
-    private val sakstatistikkRepository: SakstatistikkRepository by lazy {
-        SakstatistikkRepository(datasource)
+    private val sakstatistikkRepository: SakRepository by lazy {
+        SakRepository(datasource)
     }
     private val datasource: DataSource by lazy { DataSourceBuilder.createDataSource(env).also { it.migrate() } }
 
-    private val httpClient: HttpClient by lazy {
+    private val beregningClient: BeregningClient by lazy {
+        BeregningClientImpl(beregningHttpClient)
+    }
+
+    private val beregningHttpClient: HttpClient by lazy {
+        HttpClient(OkHttp) {
+            expectSuccess = true
+            install(ContentNegotiation) {
+                jackson {
+                    registerModule(JavaTimeModule())
+                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                }
+            }
+            install(Auth) {
+                clientCredential {
+                    config = env.toMutableMap()
+                        .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("BEREGNING_AZURE_SCOPE"))) }
+                }
+            }
+            defaultRequest {
+                header(X_CORRELATION_ID, getCorrelationId())
+                url("http://etterlatte-beregning/")
+            }
+        }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+    }
+
+    private val behandlingHttpClient: HttpClient by lazy {
         HttpClient(OkHttp) {
             expectSuccess = true
             install(ContentNegotiation) {

@@ -1,9 +1,11 @@
 package no.nav.etterlatte.hendelserpdl
 
 import no.nav.etterlatte.hendelserpdl.utils.maskerFnr
+import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -34,6 +36,12 @@ interface ILivsHendelserRapid {
         relatertPersonsRolle: String?,
         minRolleForPerson: String?,
         relatertPersonUtenFolkeregisteridentifikator: String?,
+        endringstype: Endringstype
+    )
+
+    fun haandterAdressebeskyttelse(
+        fnr: String,
+        gradering: Gradering,
         endringstype: Endringstype
     )
 }
@@ -111,6 +119,26 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
                     eventNameKey to "PDL:PERSONHENDELSE",
                     "hendelse" to "FORELDERBARNRELASJON_V1",
                     "hendelse_data" to forelderBarnRelasjonHendelse
+                )
+            )
+                .toJson()
+        )
+    }
+
+    override fun haandterAdressebeskyttelse(fnr: String, gradering: Gradering, endringstype: Endringstype) {
+        logger.info("Poster at en person med fnr=${fnr.maskerFnr()} har adressebeskyttelse")
+        val adressebeskyttelse = Adressebeskyttelse(
+            fnr = fnr,
+            gradering = gradering,
+            endringstype = endringstype
+        )
+        context.publish(
+            UUID.randomUUID().toString(),
+            JsonMessage.newMessage(
+                mapOf(
+                    eventNameKey to "PDL:PERSONHENDELSE",
+                    "hendelse" to "FORELDERBARNRELASJON_V1",
+                    "hendelse_data" to adressebeskyttelse
                 )
             )
                 .toJson()

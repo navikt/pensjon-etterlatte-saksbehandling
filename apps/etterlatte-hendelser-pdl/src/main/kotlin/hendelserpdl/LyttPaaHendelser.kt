@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.person.pdl.leesah.Personhendelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,12 +32,33 @@ class LyttPaaHendelser(
                 "DOEDSFALL_V1" -> haandterDoedsendelse(it)
                 "UTFLYTTING_FRA_NORGE" -> haandterUtflyttingFraNorge(it)
                 "FORELDERBARNRELASJON_V1" -> haandterForelderBarnRelasjon(it)
+                "ADRESSEBESKYTTELSE_V1" -> haandterAdressebeskyttelse(it)
                 else -> log.info("Så en hendelse av type ${it.opplysningstype} som vi ikke håndterer")
             }
         }
 
         runBlocking {
             if (antallMeldingerLest == 0) delay(500)
+        }
+    }
+
+    private fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
+        val hendelseType = "Adressebeskyttelse"
+        try {
+            val personnummer = runBlocking {
+                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            }
+            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+            val gradering = personhendelse.adressebeskyttelse.gradering
+            personhendelse.adressebeskyttelse.let {
+                postHendelser.haandterAdressebeskyttelse(
+                    fnr = personnummer.folkeregisterident.value,
+                    gradering = gradering.let { Gradering.valueOf(gradering.toString()) },
+                    endringstype = endringstype
+                )
+            }
+        } catch (e: Exception) {
+            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
         }
     }
 

@@ -1,37 +1,35 @@
-import { useEffect, useState } from 'react'
-import { IBehandlingInfo } from './types'
-import { BehandlingInfo } from '../attestering/Attestering'
+import { useState } from 'react'
 import { useAppSelector } from '~store/Store'
 import { Button } from '@navikt/ds-react'
 import { CollapsibleSidebar, SidebarContent, SidebarTools } from '~shared/styled'
 import { IHendelseType } from '~shared/types/IHendelse'
+import { IRolle } from '~store/reducers/SaksbehandlerReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { Behandlingsoppsummering } from '~components/behandling/attestering/oppsummering/oppsummering'
+import { Attestering } from '~components/behandling/attestering/attestering/attestering'
+import { IBeslutning } from '~components/behandling/attestering/types'
 
 export const SideMeny = () => {
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
-  const [behandlingsInfo, setBehandlingsinfo] = useState<IBehandlingInfo>()
   const [collapsed, setCollapsed] = useState(false)
+  const [beslutning, setBeslutning] = useState<IBeslutning>()
 
-  useEffect(() => {
-    const underkjentHendelser = behandling.hendelser.filter(
-      (hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_UNDERKJENT
-    )
-    const fattetHendelser = behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_FATTET)
+  const behandlingsinfo = {
+    type: behandling.behandlingType,
+    status: behandling.status,
+    saksbehandler: behandling.saksbehandlerId,
+    attestant: behandling.attestant,
+    virkningsdato: behandling.virkningstidspunkt?.dato,
+    datoFattet: behandling.datoFattet,
+    datoAttestert: behandling.datoAttestert,
+    underkjentLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_UNDERKJENT),
+    fattetLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_FATTET),
+    rolle: saksbehandler.rolle,
+  }
 
-    behandling &&
-      setBehandlingsinfo({
-        type: behandling.behandlingType,
-        status: behandling.status,
-        saksbehandler: behandling.saksbehandlerId,
-        attestant: behandling.attestant,
-        virkningsdato: behandling.virkningstidspunkt?.dato,
-        datoFattet: behandling.datoFattet,
-        datoAttestert: behandling.datoAttestert,
-        underkjentLogg: underkjentHendelser,
-        fattetLogg: fattetHendelser,
-        rolle: saksbehandler.rolle,
-      })
-  }, [saksbehandler, behandling])
+  const kanAttestere =
+    behandlingsinfo.rolle === IRolle.attestant && behandlingsinfo.status === IBehandlingStatus.FATTET_VEDTAK
 
   return (
     <CollapsibleSidebar collapsed={collapsed}>
@@ -43,7 +41,12 @@ export const SideMeny = () => {
       </SidebarTools>
 
       <SidebarContent collapsed={collapsed}>
-        {behandlingsInfo && <BehandlingInfo behandlingsInfo={behandlingsInfo} />}
+        {behandlingsinfo && (
+          <>
+            <Behandlingsoppsummering behandlingsInfo={behandlingsinfo} beslutning={beslutning} />
+            {kanAttestere && <Attestering setBeslutning={setBeslutning} beslutning={beslutning} />}
+          </>
+        )}
       </SidebarContent>
     </CollapsibleSidebar>
   )

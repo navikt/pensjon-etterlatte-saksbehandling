@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 
 class LyttPaaHendelser(
     private val livshendelser: ILivetErEnStroemAvHendelser,
-    private val postHendelser: IPostLivsHendelserPaaRapid,
+    private val postHendelser: ILivsHendelserRapid,
     private val pdlService: Pdl
 ) {
     val log: Logger = LoggerFactory.getLogger(LyttPaaHendelser::class.java)

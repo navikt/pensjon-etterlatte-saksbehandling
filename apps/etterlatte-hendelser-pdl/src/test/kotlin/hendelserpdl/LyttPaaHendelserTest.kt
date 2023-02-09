@@ -20,7 +20,7 @@ internal class LyttPaaHendelserTest {
     @Test
     fun hendelserSomIkkeLyttesPaa() {
         val pdlMock = mockk<PdlService>()
-        val livshendelserRapid = mockk<IPostLivsHendelserPaaRapid>()
+        val livshendelserRapid = mockk<ILivsHendelserRapid>()
         val subject =
             LyttPaaHendelser(
                 LeesahMock(listOf(Personhendelse().apply { put("opplysningstype", "Ikke dodsmelding") })),
@@ -45,7 +45,7 @@ internal class LyttPaaHendelserTest {
                 Foedselsnummer.of("70078749472")
             )
         }
-        val iPostLivsHendelserPaaRapid = mockk<IPostLivsHendelserPaaRapid>() {
+        val iLivsHendelserRapid = mockk<ILivsHendelserRapid>() {
             every { personErDod(any(), any(), any()) } just runs
             every { forelderBarnRelasjon(any(), any(), any(), any(), any(), any()) } just runs
             every { personUtflyttingFraNorge(any(), any(), any(), any(), any()) } just runs
@@ -79,17 +79,17 @@ internal class LyttPaaHendelserTest {
                     }
                 )
             ),
-            iPostLivsHendelserPaaRapid,
+            iLivsHendelserRapid,
             pdlMock
         )
         subject.stream()
 
-        verify(exactly = 1) { iPostLivsHendelserPaaRapid.personErDod(any(), any(), any()) }
+        verify(exactly = 1) { iLivsHendelserRapid.personErDod(any(), any(), any()) }
         verify(exactly = 1) {
-            iPostLivsHendelserPaaRapid.forelderBarnRelasjon(any(), any(), any(), any(), any(), any())
+            iLivsHendelserRapid.forelderBarnRelasjon(any(), any(), any(), any(), any(), any())
         }
         verify(exactly = 1) {
-            iPostLivsHendelserPaaRapid.personUtflyttingFraNorge(
+            iLivsHendelserRapid.personUtflyttingFraNorge(
                 any(),
                 any(),
                 any(),

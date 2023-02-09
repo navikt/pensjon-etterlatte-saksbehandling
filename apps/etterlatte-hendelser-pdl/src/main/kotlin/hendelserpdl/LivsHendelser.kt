@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
@@ -14,7 +13,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
-interface IPostLivsHendelserPaaRapid {
+interface ILivsHendelserRapid {
     fun personErDod(
         fnr: String,
         doedsdato: String?,
@@ -39,7 +38,7 @@ interface IPostLivsHendelserPaaRapid {
     )
 }
 
-class LivsHendelserRapid(private val context: RapidsConnection) : IPostLivsHendelserPaaRapid {
+class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelserRapid {
     val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun personErDod(fnr: String, doedsdato: String?, endringstype: Endringstype) {

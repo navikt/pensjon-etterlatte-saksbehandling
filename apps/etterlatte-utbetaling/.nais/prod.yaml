@@ -41,9 +41,6 @@ spec:
             envVarPrefix: DB
   kafka:
     pool: nav-prod
-  azure:
-    application:
-      enabled: true
   envFrom:
     - secret: etterlatte-secrets
   replicas:

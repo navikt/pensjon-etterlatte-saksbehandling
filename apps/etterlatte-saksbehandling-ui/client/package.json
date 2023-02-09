@@ -10,7 +10,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@navikt/ds-css": "^2.0.10",
+    "@navikt/ds-css": "^2.1.7",
     "@navikt/ds-css-internal": "^2.1.7",
     "@navikt/ds-react": "^2.1.7",
     "@navikt/ds-react-internal": "^2.1.7",

@@ -8,8 +8,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.statistikk.clients.BehandlingClient
-import no.nav.etterlatte.statistikk.clients.BeregningClient
+import no.nav.etterlatte.statistikk.clients.BehandlingKlient
+import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
@@ -28,8 +28,8 @@ import java.util.*
 class StatistikkService(
     private val stoenadRepository: StoenadRepository,
     private val sakRepository: SakRepository,
-    private val behandlingClient: BehandlingClient,
-    private val beregningClient: BeregningClient
+    private val behandlingKlient: BehandlingKlient,
+    private val beregningKlient: BeregningKlient
 ) {
 
     fun registrerStatistikkForVedtak(
@@ -62,7 +62,7 @@ class StatistikkService(
 
     private fun hentBeregningForBehandling(behandlingId: UUID): Beregning {
         return runBlocking {
-            beregningClient.hentBeregningForVedtak(behandlingId)
+            beregningKlient.hentBeregningForBehandling(behandlingId)
         }
     }
 
@@ -137,15 +137,15 @@ class StatistikkService(
     }
 
     private fun hentDetaljertBehandling(behandlingId: UUID) = runBlocking {
-        behandlingClient.hentDetaljertBehandling(behandlingId)
+        behandlingKlient.hentDetaljertBehandling(behandlingId)
     }
 
     private fun hentPersongalleri(behandlingId: UUID): Persongalleri = runBlocking {
-        behandlingClient.hentPersongalleri(behandlingId)
+        behandlingKlient.hentPersongalleri(behandlingId)
     }
 
     private fun hentSak(sakId: Long) = runBlocking {
-        behandlingClient.hentSak(sakId)
+        behandlingKlient.hentSak(sakId)
     }
 
     private fun vedtakTilStoenadsrad(vedtak: Vedtak, tekniskTid: LocalDateTime): StoenadRad {

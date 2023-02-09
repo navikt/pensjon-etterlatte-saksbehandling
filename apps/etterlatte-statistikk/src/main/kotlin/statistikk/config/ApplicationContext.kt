@@ -1,24 +1,13 @@
 package no.nav.etterlatte.statistikk.config
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
-import io.ktor.serialization.jackson.jackson
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.security.ktor.clientCredential
-import no.nav.etterlatte.statistikk.clients.BehandlingClient
-import no.nav.etterlatte.statistikk.clients.BehandlingClientImpl
-import no.nav.etterlatte.statistikk.clients.BeregningClient
-import no.nav.etterlatte.statistikk.clients.BeregningClientImpl
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.statistikk.clients.BehandlingKlient
+import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
+import no.nav.etterlatte.statistikk.clients.BeregningKlient
+import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
@@ -33,7 +22,7 @@ class ApplicationContext {
     val rapidsConnection: RapidsConnection = RapidApplication.create(env.withConsumerGroupId())
 
     private val statistikkService: StatistikkService by lazy {
-        StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingClient, beregningClient)
+        StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingKlient, beregningKlient)
     }
 
     val behandlinghendelseRiver: BehandlinghendelseRiver by lazy {
@@ -44,8 +33,8 @@ class ApplicationContext {
         VedtakhendelserRiver(rapidsConnection, statistikkService)
     }
 
-    private val behandlingClient: BehandlingClient by lazy {
-        BehandlingClientImpl(behandlingHttpClient)
+    private val behandlingKlient: BehandlingKlient by lazy {
+        BehandlingKlientImpl(behandlingHttpClient, "http://etterlatte-behandling")
     }
 
     private val statistikkRepository: StoenadRepository by lazy {
@@ -57,54 +46,26 @@ class ApplicationContext {
     }
     private val datasource: DataSource by lazy { DataSourceBuilder.createDataSource(env).also { it.migrate() } }
 
-    private val beregningClient: BeregningClient by lazy {
-        BeregningClientImpl(beregningHttpClient)
+    private val beregningKlient: BeregningKlient by lazy {
+        BeregningKlientImpl(beregningHttpClient, "http://etterlatte-beregning")
     }
 
     private val beregningHttpClient: HttpClient by lazy {
-        HttpClient(OkHttp) {
-            expectSuccess = true
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                }
-            }
-            install(Auth) {
-                clientCredential {
-                    config = env.toMutableMap()
-                        .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("BEREGNING_AZURE_SCOPE"))) }
-                }
-            }
-            defaultRequest {
-                header(X_CORRELATION_ID, getCorrelationId())
-                url("http://etterlatte-beregning/")
-            }
-        }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+        httpClientClientCredentials(
+            azureAppClientId = requireNotNull(env["AZURE_APP_CLIENT_ID"]),
+            azureAppJwk = requireNotNull(env["AZURE_APP_JWK"]),
+            azureAppWellKnownUrl = requireNotNull(env["AZURE_APP_WELL_KNOWN_URL"]),
+            azureAppScope = requireNotNull(env["BEREGNING_AZURE_SCOPE"])
+        )
     }
 
     private val behandlingHttpClient: HttpClient by lazy {
-        HttpClient(OkHttp) {
-            expectSuccess = true
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                }
-            }
-            install(Auth) {
-                clientCredential {
-                    config = env.toMutableMap()
-                        .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("BEHANDLING_AZURE_SCOPE"))) }
-                }
-            }
-            defaultRequest {
-                header(X_CORRELATION_ID, getCorrelationId())
-                url("http://etterlatte-behandling/")
-            }
-        }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+        httpClientClientCredentials(
+            azureAppClientId = requireNotNull(env["AZURE_APP_CLIENT_ID"]),
+            azureAppJwk = requireNotNull(env["AZURE_APP_JWK"]),
+            azureAppWellKnownUrl = requireNotNull(env["AZURE_APP_WELL_KNOWN_URL"]),
+            azureAppScope = requireNotNull(env["BEHANDLING_AZURE_SCOPE"])
+        )
     }
 }
 

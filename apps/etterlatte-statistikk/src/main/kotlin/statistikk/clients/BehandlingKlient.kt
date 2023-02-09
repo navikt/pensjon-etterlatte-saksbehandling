@@ -6,15 +6,18 @@ import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.sak.Sak
-import java.util.UUID
+import java.util.*
 
-interface BehandlingClient {
+interface BehandlingKlient {
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
     suspend fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling
     suspend fun hentSak(sakId: Long): Sak
 }
 
-class BehandlingClientImpl(private val behandlingHttpClient: HttpClient) : BehandlingClient {
+class BehandlingKlientImpl(
+    private val behandlingHttpClient: HttpClient,
+    private val behandlingUrl: String
+) : BehandlingKlient {
 
     override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri {
         return hentDetaljertBehandling(behandlingId).toPersongalleri()
@@ -22,7 +25,7 @@ class BehandlingClientImpl(private val behandlingHttpClient: HttpClient) : Behan
 
     override suspend fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling {
         return try {
-            behandlingHttpClient.get("behandlinger/$behandlingId")
+            behandlingHttpClient.get("$behandlingUrl/api/behandlinger/$behandlingId")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente behandling med id $behandlingId fra Behandling", e)
@@ -31,7 +34,7 @@ class BehandlingClientImpl(private val behandlingHttpClient: HttpClient) : Behan
 
     override suspend fun hentSak(sakId: Long): Sak {
         return try {
-            behandlingHttpClient.get("saker/$sakId")
+            behandlingHttpClient.get("$behandlingUrl/api/saker/$sakId")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente sak med id $sakId fra Behandling", e)

@@ -7,14 +7,17 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.statistikk.domain.Beregning
 import java.util.*
 
-interface BeregningClient {
-    suspend fun hentBeregningForVedtak(behandlingId: UUID): Beregning
+interface BeregningKlient {
+    suspend fun hentBeregningForBehandling(behandlingId: UUID): Beregning
 }
 
-class BeregningClientImpl(private val beregningHttpClient: HttpClient) : BeregningClient {
-    override suspend fun hentBeregningForVedtak(behandlingId: UUID): Beregning {
+class BeregningKlientImpl(
+    private val beregningHttpClient: HttpClient,
+    private val beregningUrl: String
+) : BeregningKlient {
+    override suspend fun hentBeregningForBehandling(behandlingId: UUID): Beregning {
         return try {
-            beregningHttpClient.get("api/beregning/$behandlingId") // TODO fix url her
+            beregningHttpClient.get("$beregningUrl/api/beregning/$behandlingId")
                 .body<BeregningDTO>()
                 .let { Beregning.fraBeregningDTO(it) }
         } catch (e: Exception) {

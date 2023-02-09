@@ -20,8 +20,8 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.statistikk.clients.BehandlingClient
-import no.nav.etterlatte.statistikk.clients.BeregningClient
+import no.nav.etterlatte.statistikk.clients.BehandlingKlient
+import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.domain.Beregning
@@ -52,8 +52,8 @@ class StatistikkServiceTest {
         val sakRepo = mockk<SakRepository>()
         every { sakRepo.lagreRad(any()) } returnsArgument 0
 
-        val behandlingClient = mockk<BehandlingClient>()
-        coEvery { behandlingClient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
+        val behandlingKlient = mockk<BehandlingKlient>()
+        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
             behandlingOpprettet = LocalDateTime.now(),
@@ -71,7 +71,7 @@ class StatistikkServiceTest {
             kommerBarnetTilgode = null,
             revurderingsaarsak = null
         )
-        coEvery { behandlingClient.hentPersongalleri(behandlingId) } returns Persongalleri(
+        coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns Persongalleri(
             "12312312312"
         )
         val mockBeregning = Beregning(
@@ -81,14 +81,14 @@ class StatistikkServiceTest {
             beregnetDato = Tidspunkt(instant = Instant.now()),
             beregningsperioder = listOf()
         )
-        val beregningClient = mockk<BeregningClient>()
-        coEvery { beregningClient.hentBeregningForVedtak(behandlingId) } returns mockBeregning
+        val beregningKlient = mockk<BeregningKlient>()
+        coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
 
         val service = StatistikkService(
             stoenadRepository = stoenadRepo,
             sakRepository = sakRepo,
-            behandlingClient = behandlingClient,
-            beregningClient = beregningClient
+            behandlingKlient = behandlingKlient,
+            beregningKlient = beregningKlient
         )
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
 
@@ -136,8 +136,8 @@ class StatistikkServiceTest {
         val sakRepo = mockk<SakRepository>()
         every { sakRepo.lagreRad(any()) } returnsArgument 0
 
-        val behandlingClient = mockk<BehandlingClient>()
-        coEvery { behandlingClient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
+        val behandlingKlient = mockk<BehandlingKlient>()
+        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
             behandlingOpprettet = LocalDateTime.now(),
@@ -155,19 +155,19 @@ class StatistikkServiceTest {
             kommerBarnetTilgode = null,
             revurderingsaarsak = null
         )
-        coEvery { behandlingClient.hentSak(sakId) } returns Sak(
+        coEvery { behandlingKlient.hentSak(sakId) } returns Sak(
             ident = "12312312312",
             sakType = SakType.BARNEPENSJON,
             id = sakId
         )
 
-        val beregningClient = mockk<BeregningClient>()
+        val beregningKlient = mockk<BeregningKlient>()
 
         val service = StatistikkService(
             stoenadRepository = stoenadRepo,
             sakRepository = sakRepo,
-            behandlingClient = behandlingClient,
-            beregningClient = beregningClient
+            behandlingKlient = behandlingKlient,
+            beregningKlient = beregningKlient
         )
 
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)

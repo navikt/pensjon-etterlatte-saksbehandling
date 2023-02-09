@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandlingfrasoknad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
@@ -12,6 +11,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType

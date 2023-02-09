@@ -1,8 +1,8 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse

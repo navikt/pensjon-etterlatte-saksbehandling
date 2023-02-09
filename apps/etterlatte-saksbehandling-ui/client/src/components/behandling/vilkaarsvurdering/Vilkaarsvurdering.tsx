@@ -42,7 +42,7 @@ export const Vilkaarsvurdering = () => {
   }, [behandlingId])
 
   const opprettHvisDenIkkeFinnes = (error: ApiError) => {
-    if (error.statusCode === 404) {
+    if (error.statusCode === 204) {
       opprettNyVilkaarsvurdering(behandlingId!!, (vilkaarsvurdering) =>
         dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
       )

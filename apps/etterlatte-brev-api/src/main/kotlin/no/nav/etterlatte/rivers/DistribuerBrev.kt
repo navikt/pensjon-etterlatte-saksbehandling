@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.brev.BrevService

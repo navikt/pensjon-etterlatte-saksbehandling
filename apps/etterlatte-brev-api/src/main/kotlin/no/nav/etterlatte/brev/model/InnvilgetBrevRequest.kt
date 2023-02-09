@@ -1,6 +1,8 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 
@@ -9,7 +11,6 @@ data class InnvilgetBrevRequest(
     val utbetalingsinfo: Utbetalingsinfo,
     val barn: Soeker,
     val avdoed: Avdoed,
-    val aktuelleParagrafer: List<String>,
     override val spraak: Spraak,
     override val avsender: Avsender,
     override val mottaker: Mottaker,
@@ -29,7 +30,6 @@ data class InnvilgetBrevRequest(
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
                 barn = behandling.persongalleri.soeker,
                 avdoed = behandling.persongalleri.avdoed,
-                aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår? Nødvendig?
                 spraak = behandling.spraak,
                 mottaker = mottaker,
                 avsender = avsender,

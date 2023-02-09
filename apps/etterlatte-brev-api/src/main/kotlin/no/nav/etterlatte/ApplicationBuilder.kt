@@ -12,7 +12,7 @@ import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.adresse.MottakerService
+import no.nav.etterlatte.brev.adresse.BrregService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
@@ -37,6 +37,8 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.rivers.DistribuerBrev
+import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -55,7 +57,7 @@ class ApplicationBuilder {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env["ETTERLATTE_PDFGEN_URL"]!!)
-    private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
+    private val brregService = BrregService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
     private val regoppslagKlient = RegoppslagKlient(proxyClient(), env["ETTERLATTE_PROXY_URL"]!!)
     private val navansattKlient = NavansattKlient(proxyClient(), env["NAVANSATT_URL"]!!)
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
@@ -96,7 +98,7 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api") {
-                    brevRoute(brevService, mottakerService)
+                    brevRoute(brevService, brregService)
                     vedtaksbrevRoute(vedtaksbrevService)
                     dokumentRoute(journalpostService)
                 }

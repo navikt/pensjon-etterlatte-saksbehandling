@@ -125,6 +125,7 @@ class VedtaksbrevService(
         return UlagretBrev(
             behandling.behandlingId,
             tittel,
+            behandling.spraak,
             Mottaker(
                 foedselsnummer = Foedselsnummer.of(behandling.persongalleri.innsender.fnr),
                 adresse = Adresse(

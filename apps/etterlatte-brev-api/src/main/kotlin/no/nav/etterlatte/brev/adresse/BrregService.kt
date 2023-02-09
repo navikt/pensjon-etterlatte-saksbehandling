@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
 
-class MottakerService(private val httpClient: HttpClient, private val url: String) {
-    private val logger = LoggerFactory.getLogger(MottakerService::class.java)
+class BrregService(private val httpClient: HttpClient, private val url: String) {
+    private val logger = LoggerFactory.getLogger(BrregService::class.java)
 
     private val cache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofDays(1))

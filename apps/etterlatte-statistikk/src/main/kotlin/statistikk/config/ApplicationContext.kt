@@ -19,10 +19,8 @@ import no.nav.etterlatte.statistikk.clients.BehandlingClient
 import no.nav.etterlatte.statistikk.clients.BehandlingClientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningClient
 import no.nav.etterlatte.statistikk.clients.BeregningClientImpl
-import no.nav.etterlatte.statistikk.database.DataSourceBuilder
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
-import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.StatistikkService
@@ -34,7 +32,7 @@ class ApplicationContext {
     private val env = System.getenv()
     val rapidsConnection: RapidsConnection = RapidApplication.create(env.withConsumerGroupId())
 
-    val statistikkService: StatistikkService by lazy {
+    private val statistikkService: StatistikkService by lazy {
         StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingClient, beregningClient)
     }
 
@@ -51,7 +49,7 @@ class ApplicationContext {
     }
 
     private val statistikkRepository: StoenadRepository by lazy {
-        StoenadRad(datasource)
+        StoenadRepository(datasource)
     }
 
     private val sakstatistikkRepository: SakRepository by lazy {

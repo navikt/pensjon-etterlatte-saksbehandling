@@ -2,9 +2,9 @@ package no.nav.etterlatte.statistikk.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
+import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import org.postgresql.util.PGobject
 import java.sql.Date
@@ -99,17 +99,19 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
     setString(15, stoenadsrad.attestant)
     setDate(16, Date.valueOf(stoenadsrad.vedtakLoependeFom))
     setDate(17, stoenadsrad.vedtakLoependeTom?.let { Date.valueOf(it) })
+    setJsonb(18, stoenadsrad?.beregning)
 }
 
 private object Queries {
     val insertMedPlaceholders = """INSERT INTO stoenad(
         |   fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId,
-        |   sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, vedtakLoependeTom
-        |) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        |   sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
+        |   vedtakLoependeTom, beregning
+        |) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """.trimMargin()
     val fetchDatapakke = """SELECT id, fnrSoeker, fnrForeldre, 
         |   fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId, sakId, sakNummer, 
-        |   tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, vedtakLoependeTom 
+        |   tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, vedtakLoependeTom, beregning
         |FROM stoenad
     """.trimMargin()
 }

@@ -19,6 +19,7 @@ import { VurderingsboksWrapper } from '~components/vurderingsboks/Vurderingsboks
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
 import { KildePdl } from '~shared/types/kilde'
 import { formaterKildePdl } from '../../utils'
+import { hentMinimumsVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
 
 interface Props {
   behandlingId: string
@@ -149,6 +150,7 @@ const Virkningstidspunkt = (props: Props) => {
                       onChange={(date: Date) => setFormData(date)}
                       autoComplete="off"
                       showMonthYearPicker
+                      minDate={hentMinimumsVirkningstidspunkt(props.avdoedDoedsdato, props.soeknadMottattDato)}
                       maxDate={addMonths(new Date(), 1)}
                     />
                   </div>

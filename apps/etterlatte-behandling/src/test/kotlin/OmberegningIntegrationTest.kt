@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -20,94 +19,24 @@ import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.Sak
-import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OmberegningIntegrationTest {
-
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:15")
-    private val server: MockOAuth2Server = MockOAuth2Server()
-    private lateinit var beanFactory: TestBeanFactory
+class OmberegningIntegrationTest : BehandlingIntegrationTest() {
 
     @BeforeAll
-    fun startServer() {
-        server.start(1234)
-
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        beanFactory = TestBeanFactory(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password,
-            azureAdAttestantClaim = azureAdAttestantClaim,
-            azureAdSaksbehandlerClaim = azureAdSaksbehandlerClaim
-        ).apply { dataSource().migrate() }
-
-        beanFactory.behandlingHendelser().start()
-    }
+    fun start() = startServer()
 
     @AfterAll
-    fun afterAll() {
-        server.shutdown()
-        postgreSQLContainer.stop()
-    }
-
-    private val azureAdAttestantClaim: String by lazy {
-        "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e"
-    }
-
-    private val azureAdSaksbehandlerClaim: String by lazy {
-        "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
-    }
-
-    private fun HttpRequestBuilder.addAuthToken(token: String) {
-        header(HttpHeaders.Authorization, "Bearer $token")
-    }
-
-    private val tokenSaksbehandler: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01"
-            )
-        )
-    }
-
-    private val tokenServiceUser: String by lazy {
-        issueToken(
-            mapOf(
-                "NAVident" to "Saksbehandler01",
-                "roles" to listOf("kan-sette-kilde") // TODO hva brukes dette til?
-            )
-        )
-    }
-
-    private fun issueToken(claims: Map<String, Any>) =
-        server.issueToken(
-            issuerId = ISSUER_ID,
-            audience = CLIENT_ID,
-            claims = claims
-        ).serialize()
-
-    private companion object {
-        const val ISSUER_ID = "azure"
-        const val CLIENT_ID = "mock-client-id"
-    }
+    fun shutdown() = afterAll()
 
     @Test
     fun omberegn() {

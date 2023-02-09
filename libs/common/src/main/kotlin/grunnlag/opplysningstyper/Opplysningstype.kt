@@ -38,8 +38,6 @@ enum class Opplysningstype {
     PERSONROLLE,
     UTENLANDSOPPHOLD, // Bruks kun idag for informasjon fra søknaden
     UTENLANDSADRESSE,
-    INNTEKT,
-    ARBEIDSFORHOLD,
 
     SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

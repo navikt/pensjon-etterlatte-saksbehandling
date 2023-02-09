@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
@@ -53,12 +52,6 @@ class GrunnlagHendelser(
                     val sakId = packet["sakId"].asLong()
                     val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
                         objectMapper.readValue(packet["opplysning"].toJson())!!
-                    // Send melding om behov som er avhengig av en annen opplysning
-                    opplysninger.forEach {
-                        if (it.opplysningType === Opplysningstype.AVDOED_PDL_V1) {
-                            sendAvdoedInntektBehov(it, context, packet)
-                        }
-                    }
 
                     val fnr = packet["fnr"].textValue()
                     if (fnr == null) {
@@ -85,26 +78,6 @@ class GrunnlagHendelser(
                     logger.error("Spiser en melding på grunn av feil", e)
                 }
             }
-        }
-    }
-
-    private fun sendAvdoedInntektBehov(
-        grunnlagsopplysning: Grunnlagsopplysning<JsonNode>,
-        context: MessageContext,
-        packet: JsonMessage
-    ) {
-        val pdlopplysninger = objectMapper.readValue<Person>(grunnlagsopplysning.opplysning.toString())
-        if (pdlopplysninger.doedsdato != null) {
-            val behov = JsonMessage.newMessage(
-                mapOf(
-                    behovNameKey to Opplysningstype.INNTEKT,
-                    "fnr" to pdlopplysninger.foedselsnummer.value,
-                    "sakId" to packet["sakId"],
-                    "doedsdato" to pdlopplysninger.doedsdato.toString(),
-                    correlationIdKey to packet[correlationIdKey]
-                )
-            )
-            context.publish(behov.toJson())
         }
     }
 }

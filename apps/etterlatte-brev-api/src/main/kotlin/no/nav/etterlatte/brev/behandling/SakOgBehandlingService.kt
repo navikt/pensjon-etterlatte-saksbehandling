@@ -78,8 +78,8 @@ class SakOgBehandlingService(
 
         val today = LocalDate.now()
 
-        val beloep =
-            beregningsperioder.find { it.datoFOM.isBefore(today) && it.datoTOM?.isAfter(today) ?: true }?.utbetaltBeloep!! // ktlint-disable max-line-length
+        val beloep = if (beregningsperioder.size == 1) beregningsperioder.first().utbetaltBeloep
+        else beregningsperioder.find { it.datoFOM.isBefore(today) && it.datoTOM?.isAfter(today) ?: true }?.utbetaltBeloep!! // ktlint-disable max-line-length
 
         return Utbetalingsinfo(
             beloep,

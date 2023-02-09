@@ -44,17 +44,15 @@ const Beregningsgrunnlag = () => {
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const { control, handleSubmit, reset } = useForm<{ soeskengrunnlag: FormValues[] }>({
     defaultValues: {
-      soeskengrunnlag: soeskengrunnlag ?? [],
+      soeskengrunnlag: soeskengrunnlag,
     },
   })
 
   useEffect(() => {
-    if (!soeskengrunnlag) {
+    if (soeskengrunnlag === undefined) {
       fetchSoeskenjusteringsgrunnlag(behandling.sak, (result) => {
-        if (result.opplysning) {
-          reset({ soeskengrunnlag: result.opplysning.beregningsgrunnlag })
-          dispatch(oppdaterSoeskenjusteringsgrunnlag(result.opplysning))
-        }
+        reset({ soeskengrunnlag: result.opplysning?.beregningsgrunnlag ?? [] })
+        dispatch(oppdaterSoeskenjusteringsgrunnlag({ beregningsgrunnlag: result.opplysning?.beregningsgrunnlag ?? [] }))
       })
     }
   }, [])
@@ -184,7 +182,7 @@ const Beregningsgrunnlag = () => {
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreSoeskenMedIBeregningStatus) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
 
-      {soeskengrunnlag &&
+      {soeskengrunnlag !== undefined &&
         (behandles ? (
           <BehandlingHandlingKnapper>
             <Button variant="primary" size="medium" form="form">

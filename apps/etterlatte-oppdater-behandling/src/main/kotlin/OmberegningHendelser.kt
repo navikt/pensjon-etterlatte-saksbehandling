@@ -15,7 +15,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-const val hendelsetype = "OMBEREGNINGSHENDELSE"
+const val hendelsetype = "OMBEREGNINGHENDELSE"
 
 internal class OmberegningHendelser(rapidsConnection: RapidsConnection, private val behandlinger: Behandling) :
     River.PacketListener {

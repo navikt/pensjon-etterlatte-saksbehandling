@@ -76,10 +76,11 @@ class SakOgBehandlingService(
 
         val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
 
-        val today = LocalDate.now()
-
         val beloep = if (beregningsperioder.size == 1) beregningsperioder.first().utbetaltBeloep
-        else beregningsperioder.find { it.datoFOM.isBefore(today) && it.datoTOM?.isAfter(today) ?: true }?.utbetaltBeloep!! // ktlint-disable max-line-length
+        else {
+            val today = LocalDate.now()
+            beregningsperioder.find { it.datoFOM.isBefore(today) && it.datoTOM?.isAfter(today) ?: true }?.utbetaltBeloep!! // ktlint-disable max-line-length
+        }
 
         return Utbetalingsinfo(
             beloep,

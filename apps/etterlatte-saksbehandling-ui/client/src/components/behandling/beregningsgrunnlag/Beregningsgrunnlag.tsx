@@ -21,8 +21,8 @@ import { IPdlPerson } from '~shared/types/Person'
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 import {
   oppdaterBehandlingsstatus,
-  resetBeregning,
   oppdaterSoeskenjusteringsgrunnlag,
+  resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -36,7 +36,7 @@ const Beregningsgrunnlag = () => {
   const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
-  const soeskengrunnlag = behandling.soeskenjusteringsgrunnlag?.beregningsgrunnlag
+  const soeskenjustering = behandling.soeskenjusteringsgrunnlag?.beregningsgrunnlag
   const [ikkeValgtOppdrasSammenPaaAlle, setIkkeValgtOppdrasSammenPaaAlleFeil] = useState(false)
   const dispatch = useAppDispatch()
   const [soeskenjusteringsgrunnlag, fetchSoeskenjusteringsgrunnlag] = useApiCall(hentSoeskenjusteringsgrunnlag)
@@ -44,12 +44,14 @@ const Beregningsgrunnlag = () => {
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const { control, handleSubmit, reset } = useForm<{ soeskengrunnlag: FormValues[] }>({
     defaultValues: {
-      soeskengrunnlag: soeskengrunnlag,
+      soeskengrunnlag: soeskenjustering,
     },
   })
 
+  const soeskenjusteringErDefinertIRedux = soeskenjustering !== undefined
+
   useEffect(() => {
-    if (soeskengrunnlag === undefined) {
+    if (!soeskenjusteringErDefinertIRedux) {
       fetchSoeskenjusteringsgrunnlag(behandling.sak, (result) => {
         reset({ soeskengrunnlag: result.opplysning?.beregningsgrunnlag ?? [] })
         dispatch(oppdaterSoeskenjusteringsgrunnlag({ beregningsgrunnlag: result.opplysning?.beregningsgrunnlag ?? [] }))
@@ -103,7 +105,10 @@ const Beregningsgrunnlag = () => {
         <Soeknadsvurdering
           tittel={'Trygdetid'}
           hjemler={[
-            { tittel: '§ 3-5 Trygdetid ved beregning av ytelser', lenke: 'https://lovdata.no/lov/1997-02-28-19/§3-5' },
+            {
+              tittel: '§ 3-5 Trygdetid ved beregning av ytelser',
+              lenke: 'https://lovdata.no/lov/1997-02-28-19/§3-5',
+            },
           ]}
           vurderingsResultat={null}
           status={null}
@@ -142,7 +147,7 @@ const Beregningsgrunnlag = () => {
         <Border />
         <Spinner visible={isPending(soeskenjusteringsgrunnlag)} label={'Henter beregningsgrunnlag for søsken'} />
         {isFailure(soeskenjusteringsgrunnlag) && <ApiErrorAlert>Søskenjustering kan ikke hentes</ApiErrorAlert>}
-        {soeskengrunnlag &&
+        {soeskenjusteringErDefinertIRedux &&
           soesken.map((barn, index) => (
             <SoeskenContainer key={barn.foedselsnummer}>
               <Soesken person={barn} familieforhold={behandling.familieforhold!} />
@@ -182,17 +187,18 @@ const Beregningsgrunnlag = () => {
       {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {isFailure(lagreSoeskenMedIBeregningStatus) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
 
-      {soeskengrunnlag !== undefined &&
-        (behandles ? (
-          <BehandlingHandlingKnapper>
+      {behandles ? (
+        <BehandlingHandlingKnapper>
+          {soeskenjusteringErDefinertIRedux && (
             <Button variant="primary" size="medium" form="form">
               Beregne og fatte vedtak{' '}
               {(isPending(lagreSoeskenMedIBeregningStatus) || isPending(endreBeregning)) && <Loader />}
             </Button>
-          </BehandlingHandlingKnapper>
-        ) : (
-          <NesteOgTilbake />
-        ))}
+          )}
+        </BehandlingHandlingKnapper>
+      ) : (
+        <NesteOgTilbake />
+      )}
     </Content>
   )
 }
@@ -231,7 +237,7 @@ const TrygdetidWrapper = styled.form`
   max-width: 56em;
 `
 
-const TrygdetidInfo = styled.form`
+const TrygdetidInfo = styled.div`
   display: flex;
   flex-direction: column;
 `

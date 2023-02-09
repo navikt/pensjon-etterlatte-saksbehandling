@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 
 class LyttPaaHendelser(
     private val livshendelser: ILivetErEnStroemAvHendelser,
-    private val postHendelser: ILivsHendelser,
+    private val postHendelser: IPostLivsHendelserPaaRapid,
     private val pdlService: Pdl
 ) {
     val log: Logger = LoggerFactory.getLogger(LyttPaaHendelser::class.java)
@@ -124,7 +124,6 @@ class LyttPaaHendelser(
     }
 
     fun stop() {
-        // livshendelser.stop()
         stopped = true
     }
 

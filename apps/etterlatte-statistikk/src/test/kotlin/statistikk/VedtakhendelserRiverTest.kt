@@ -2,8 +2,8 @@ package no.nav.etterlatte.statistikk
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.statistikk.database.StoenadRad
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.StatistikkService
@@ -62,8 +62,8 @@ internal class VedtakhendelserRiverTest {
 
         Assertions.assertEquals("STATISTIKK:REGISTRERT", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(
-            objectMapper.writeValueAsString(mockStoenadRad),
-            inspector.message(0).get("stoenad_rad").asText()
+            mockStoenadRad.toJson(),
+            inspector.message(0).get("stoenad_rad").toString()
         )
     }
 

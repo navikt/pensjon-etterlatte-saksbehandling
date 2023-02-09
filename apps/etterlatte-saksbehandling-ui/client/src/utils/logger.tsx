@@ -16,6 +16,7 @@ const loggFunc = (data: any) => apiClient.post('/logg', data)
 export interface IStackLineNoColumnNo {
   readonly lineno: number
   readonly columnno: number
+  readonly message: any
   readonly error: any
 }
 
@@ -48,8 +49,8 @@ export const logger = {
 
 export const setupWindowOnError = () => {
   addEventListener('error', (event) => {
-    const { error, lineno, colno } = event
-    logger.error({ lineno: lineno, columnno: colno, error: JSON.stringify(error) })
+    const { error, lineno, colno, message } = event
+    logger.error({ lineno, columnno: colno, message, error: JSON.stringify(error) })
     if (error.stack && error.stack?.indexOf('invokeGuardedCallbackDev') >= 0 && !error.alreadySeen) {
       error.alreadySeen = true
       event.preventDefault()

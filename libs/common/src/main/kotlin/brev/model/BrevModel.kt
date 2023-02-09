@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.common.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 
 typealias BrevID = Long
 
@@ -60,13 +61,14 @@ class Brev(
 
 class BrevInnhold(
     val mal: String,
-    val spraak: String,
+    val spraak: Spraak,
     val data: ByteArray
 )
 
 class UlagretBrev(
     val behandlingId: String,
     val tittel: String,
+    val spraak: Spraak,
     val mottaker: Mottaker,
     val erVedtaksbrev: Boolean,
     val pdf: ByteArray

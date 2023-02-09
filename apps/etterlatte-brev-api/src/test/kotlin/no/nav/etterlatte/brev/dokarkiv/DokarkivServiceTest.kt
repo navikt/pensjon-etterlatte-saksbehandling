@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.journalpost.Sakstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
@@ -59,7 +60,7 @@ internal class DokarkivServiceTest {
 
     @Test
     fun `Journalfoering`() {
-        every { mockDb.hentBrevInnhold(any()) } returns BrevInnhold("mal", "spraak", "".toByteArray())
+        every { mockDb.hentBrevInnhold(any()) } returns BrevInnhold("mal", Spraak.NB, "".toByteArray())
         coEvery { mockKlient.opprettJournalpost(any(), any()) } returns JournalpostResponse("id", "OK", "melding", true)
 
         val vedtaksbrev = opprettVedtaksbrev()

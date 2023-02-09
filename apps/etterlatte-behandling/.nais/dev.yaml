@@ -12,7 +12,8 @@ spec:
     - "https://etterlatte-behandling.dev.intern.nav.no"
   gcp:
     sqlInstances:
-      - type: POSTGRES_12
+      - type: POSTGRES_14
+        collation: nb_NO.UTF8
         cascadingDelete: false
         name: etterlatte-sakogbehandlinger
         databases:

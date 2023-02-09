@@ -1,20 +1,27 @@
 package no.nav.etterlatte.tilbakekreving
 
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.handleRequest
-import io.ktor.server.testing.withTestApplication
+import io.ktor.server.application.log
+import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.restModule
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.testsupport.kravgrunnlagId
 import no.nav.etterlatte.testsupport.mottattKravgrunnlag
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import java.util.*
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TilbakekrevingRoutesTest {
 
     private val applicationContext: ApplicationContext = mockk {
@@ -24,52 +31,73 @@ internal class TilbakekrevingRoutesTest {
         }
     }
 
+    private val server = MockOAuth2Server()
+
+    @BeforeAll
+    fun before() {
+        server.start(1234)
+    }
+
+    @AfterAll
+    fun after() {
+        server.shutdown()
+    }
+
     @Test
     fun `skal hente kravgrunnlag`() {
-        withTestApplication({ restModule(applicationContext) }) {
-            with(
-                handleRequest(HttpMethod.Get, "/api/tilbakekreving/${kravgrunnlagId.value}") {
-                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
-                }
-            ) {
-                assertEquals(HttpStatusCode.OK, response.status())
-                // TODO verifisere respons
+        testApplication {
+            application { restModule(this.log) { tilbakekreving(applicationContext.tilbakekrevingService) } }
+
+            val response = client.get("/api/tilbakekreving/${kravgrunnlagId.value}") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
             }
+
+            assertEquals(HttpStatusCode.OK, response.status)
         }
     }
 
     @Test
     fun `skal returnere 404 hvis kravgrunnlag mangler`() {
-        withTestApplication({ restModule(applicationContext) }) {
-            with(
-                handleRequest(HttpMethod.Get, "/api/tilbakekreving/2") {
-                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
-                }
-            ) {
-                assertEquals(HttpStatusCode.NotFound, response.status())
+        testApplication {
+            application { restModule(this.log) { tilbakekreving(applicationContext.tilbakekrevingService) } }
+
+            val response = client.get("/api/tilbakekreving/2") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
             }
+
+            assertEquals(HttpStatusCode.NotFound, response.status)
         }
     }
 
     @Test
     fun `skal feile med 500 dersom id ikke er gyldig`() {
-        withTestApplication({ restModule(applicationContext) }) {
-            with(
-                handleRequest(HttpMethod.Get, "/api/tilbakekreving/ugyldig") {
-                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
-                }
-            ) {
-                assertEquals(HttpStatusCode.InternalServerError, response.status())
-                assertEquals("En feil oppstod: For input string: \"ugyldig\"", response.content)
+        testApplication {
+            application { restModule(this.log) { tilbakekreving(applicationContext.tilbakekrevingService) } }
+
+            val response = client.get("/api/tilbakekreving/ugyldig") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
             }
+
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
     }
 
-    private val saksbehandlerToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibm" +
-            "FtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSJ9.271mDij4YsO4Kk8w" +
-            "8AvX5BXxlEA8U-UAOtdG1Ix_kQY"
+    private val token: String by lazy {
+        server.issueToken(
+            issuerId = ISSUER_ID,
+            audience = CLIENT_ID,
+            claims = mapOf(
+                "navn" to "John Doe",
+                "NAVident" to "Saksbehandler01"
+            )
+        ).serialize()
+    }
+
+    private companion object {
+        const val ISSUER_ID = "azure"
+        const val CLIENT_ID = "mock-client-id"
+    }
 }

@@ -46,7 +46,9 @@ spec:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
     - name: BEHANDLING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+    - name: BEREGNING_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-beregning/.default
   accessPolicy:
     outbound:
       rules:

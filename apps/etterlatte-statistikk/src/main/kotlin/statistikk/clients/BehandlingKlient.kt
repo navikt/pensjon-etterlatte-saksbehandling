@@ -25,7 +25,7 @@ class BehandlingKlientImpl(
 
     override suspend fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling {
         return try {
-            behandlingHttpClient.get("$behandlingUrl/api/behandlinger/$behandlingId")
+            behandlingHttpClient.get("$behandlingUrl/behandlinger/$behandlingId")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente behandling med id $behandlingId fra Behandling", e)
@@ -34,7 +34,7 @@ class BehandlingKlientImpl(
 
     override suspend fun hentSak(sakId: Long): Sak {
         return try {
-            behandlingHttpClient.get("$behandlingUrl/api/saker/$sakId")
+            behandlingHttpClient.get("$behandlingUrl/saker/$sakId")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente sak med id $sakId fra Behandling", e)

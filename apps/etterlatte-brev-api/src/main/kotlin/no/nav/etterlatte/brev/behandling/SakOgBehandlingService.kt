@@ -4,7 +4,6 @@ import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.vedtak.Periode
-import java.time.LocalDate
 
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -76,14 +75,8 @@ class SakOgBehandlingService(
 
         val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
 
-        val beloep = if (beregningsperioder.size == 1) beregningsperioder.first().utbetaltBeloep
-        else {
-            val today = LocalDate.now()
-            beregningsperioder.find { it.datoFOM.isBefore(today) && it.datoTOM?.isAfter(today) ?: true }?.utbetaltBeloep!! // ktlint-disable max-line-length
-        }
-
         return Utbetalingsinfo(
-            beloep,
+            beregningsperioder.hentBeloep(),
             virkningstidspunkt,
             soeskenjustering,
             beregningsperioder

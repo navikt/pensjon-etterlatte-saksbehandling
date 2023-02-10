@@ -106,3 +106,11 @@ fun Grunnlag.mapSpraak(): Spraak = with(this.sak) {
         "Sak (id=${metadata.sakId}) mangler opplysningstype SPRAAK"
     }
 }
+
+fun List<Beregningsperiode>.hentBeloep(): Int =
+    if (this.size == 1) this.first().utbetaltBeloep
+    else {
+        val today = LocalDate.now()
+        this
+            .find { it.datoFOM.isBefore(today) && it.datoTOM?.isAfter(today) ?: true }?.utbetaltBeloep!!
+    }

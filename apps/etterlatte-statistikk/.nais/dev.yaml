@@ -35,7 +35,10 @@ spec:
       value: etterlatte.dodsmelding
     - name: BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: BEREGNING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: etterlatte-beregning

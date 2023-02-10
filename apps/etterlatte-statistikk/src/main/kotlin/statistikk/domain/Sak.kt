@@ -1,4 +1,4 @@
-package no.nav.etterlatte.statistikk.sak
+package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -45,5 +45,6 @@ data class SakRad(
     val tekniskTid: Tidspunkt,
     val sakYtelse: String,
     val vedtakLoependeFom: LocalDate?,
-    val vedtakLoependeTom: LocalDate?
+    val vedtakLoependeTom: LocalDate?,
+    val beregning: Beregning?
 )

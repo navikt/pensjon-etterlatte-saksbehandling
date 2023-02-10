@@ -76,7 +76,7 @@ class SakOgBehandlingService(
         val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
 
         return Utbetalingsinfo(
-            beregningsperioder.hentBeloep(),
+            beregningsperioder.hentUtbetaltBeloep(),
             virkningstidspunkt,
             soeskenjustering,
             beregningsperioder

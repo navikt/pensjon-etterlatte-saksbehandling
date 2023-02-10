@@ -35,6 +35,7 @@ import java.time.Instant
 import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.*
+import no.nav.etterlatte.brev.behandling.Beregningsperiode as BrevBeregningsperiode
 
 internal class SakOgBehandlingServiceTest {
 
@@ -62,7 +63,7 @@ internal class SakOgBehandlingServiceTest {
     fun `SakOgBehandling fungerer som forventet`() {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, ACCESS_TOKEN) } returns opprettGrunnlag()
-        coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettEnkelBeregning()
+        coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
 
         val behandling = runBlocking {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER_IDENT, ACCESS_TOKEN)
@@ -87,32 +88,28 @@ internal class SakOgBehandlingServiceTest {
 
     @Test
     fun `FinnUtbetalingsinfo returnerer korrekt informasjon`() {
-        val AVANSERT_BEHANDLING_ID = "456"
-
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, any()) } returns opprettGrunnlag()
-        coEvery { beregningKlient.hentBeregning(BEHANDLING_ID, any()) } returns opprettEnkelBeregning()
-        coEvery { beregningKlient.hentBeregning(AVANSERT_BEHANDLING_ID, any()) } returns opprettAvansertBeregning()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
+        coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
 
-        val enkelBeregning = runBlocking {
+        val behandling = runBlocking {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER_IDENT, ACCESS_TOKEN)
         }
 
-        val avansertBeregning = runBlocking {
-            service.hentBehandling(SAK_ID, AVANSERT_BEHANDLING_ID, SAKSBEHANDLER_IDENT, ACCESS_TOKEN)
-        }
-
-        assertEquals(3063, enkelBeregning.utbetalingsinfo?.beloep)
-        assertEquals(2000, avansertBeregning.utbetalingsinfo?.beloep)
+        assertEquals(3063, behandling.utbetalingsinfo?.beloep)
+        assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo?.virkningsdato)
+        assertEquals(false, behandling.utbetalingsinfo?.soeskenjustering)
+        assertEquals(
+            listOf(BREV_BEREGNINGSPERIODE),
+            behandling.utbetalingsinfo?.beregningsperioder
+        )
 
         coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any()) }
-        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(AVANSERT_BEHANDLING_ID, any()) }
-        coVerify(exactly = 2) { grunnlagKlient.hentGrunnlag(SAK_ID, any()) }
+        coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(SAK_ID, any()) }
         coVerify(exactly = 1) { beregningKlient.hentBeregning(BEHANDLING_ID, any()) }
-        coVerify(exactly = 1) { beregningKlient.hentBeregning(AVANSERT_BEHANDLING_ID, any()) }
     }
 
-    private fun opprettEnkelBeregning() = mockk<BeregningDTO> {
+    private fun opprettBeregning() = mockk<BeregningDTO> {
         every { beregningsperioder } returns listOf(
             opprettBeregningsperiode(
                 YearMonth.now(),
@@ -189,5 +186,6 @@ internal class SakOgBehandlingServiceTest {
         private val SAKSBEHANDLER_IDENT = "Z1235"
         private val ATTESTANT_IDENT = "Z54321"
         private val SAK_ID = 123L
+        private val BREV_BEREGNINGSPERIODE = BrevBeregningsperiode(YearMonth.now().atDay(1), null, 10000, 1, 3063, 10)
     }
 }

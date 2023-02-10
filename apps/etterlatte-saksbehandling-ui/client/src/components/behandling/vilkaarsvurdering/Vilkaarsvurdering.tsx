@@ -34,7 +34,7 @@ export const Vilkaarsvurdering = () => {
     if (!vilkaarsvurdering) {
       fetchVilkaarsvurdering(behandlingId, (vilkaarsvurdering) => {
         if (vilkaarsvurdering == null) {
-          opprettHvisDenIkkeFinnes()
+          opprettHvisDenIkkeFinnes(behandlingId)
         } else {
           dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
         }
@@ -42,8 +42,8 @@ export const Vilkaarsvurdering = () => {
     }
   }, [behandlingId])
 
-  const opprettHvisDenIkkeFinnes = () => {
-    opprettNyVilkaarsvurdering(behandlingId!!, (vilkaarsvurdering) =>
+  const opprettHvisDenIkkeFinnes = (behandlingId: string) => {
+    opprettNyVilkaarsvurdering(behandlingId, (vilkaarsvurdering) =>
       dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
     )
   }

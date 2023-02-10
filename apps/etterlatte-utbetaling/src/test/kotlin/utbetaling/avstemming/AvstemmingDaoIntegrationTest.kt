@@ -4,10 +4,11 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
-import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.oppdragslinjeForKonsistensavstemming
@@ -34,15 +35,14 @@ internal class AvstemmingDaoIntegrationTest {
     init {
         postgreSQLContainer.start()
 
-        DataSourceBuilder(
+        dataSource = DataSourceBuilder.createDataSource(
             jdbcUrl = postgreSQLContainer.jdbcUrl,
             username = postgreSQLContainer.username,
             password = postgreSQLContainer.password
-        ).run {
-            dataSource = dataSource()
-            avstemmingDao = AvstemmingDao(dataSource)
-            migrate()
-        }
+        )
+
+        avstemmingDao = AvstemmingDao(dataSource)
+        dataSource.migrate()
     }
 
     @Test

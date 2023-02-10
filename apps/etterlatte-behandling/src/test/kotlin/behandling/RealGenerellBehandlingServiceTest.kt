@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -13,13 +14,18 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.ktor.Saksbehandler
+import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -28,6 +34,8 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.sql.Connection
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class RealGenerellBehandlingServiceTest {
@@ -250,26 +258,68 @@ class RealGenerellBehandlingServiceTest {
         assertEquals(Saksrolle.UKJENT, resUkjentRolle)
     }
 
+    @Test
+    fun `hentBehandlingMedEnkelPersonopplysning henter behandlingsinfo og etterspurt personopplysning`() {
+        val sakId = 1L
+        val behandlingsId = UUID.randomUUID()
+        val accesstoken = "token"
+        val soeknadMottatDato = LocalDateTime.parse("2020-01-01T00:00:00")
+        val behandling = foerstegangsbehandling(
+            id = behandlingsId,
+            sak = sakId,
+            soeknadMottattDato = soeknadMottatDato
+        )
+        val opplysningstype = Opplysningstype.DOEDSDATO
+        val doedsdato = LocalDate.parse("2020-01-01")
+
+        val personopplysning = personOpplysning(doedsdato = doedsdato)
+        val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
+
+        val service = lagRealGenerellBehandlingService(
+            behandlinger = mockk {
+                every { hentBehandlingType(behandlingsId) } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { hentBehandling(behandlingsId, BehandlingType.FØRSTEGANGSBEHANDLING) } returns behandling
+            },
+            grunnlagKlient = mockk {
+                coEvery {
+                    finnPersonOpplysning(sakId, opplysningstype, accesstoken)
+                } returns grunnlagsopplysningMedPersonopplysning
+            }
+        )
+        val behandlingMedPersonopplsning = runBlocking {
+            service.hentBehandlingMedEnkelPersonopplysning(
+                behandlingsId,
+                Saksbehandler("id"),
+                accesstoken,
+                opplysningstype
+            )
+        }
+
+        assertEquals(soeknadMottatDato, behandlingMedPersonopplsning.soeknadMottattDato)
+        assertEquals(doedsdato, behandlingMedPersonopplsning.personopplysning?.opplysning?.doedsdato)
+    }
+
     private fun lagRealGenerellBehandlingService(
-        behandlinger: BehandlingDao,
-        hendelseKanal: SendChannel<Pair<UUID, BehandlingHendelseType>>,
-        hendelseDao: HendelseDao,
-        manueltOpphoerService: ManueltOpphoerService
+        behandlinger: BehandlingDao? = null,
+        hendelseKanal: SendChannel<Pair<UUID, BehandlingHendelseType>>? = null,
+        hendelseDao: HendelseDao? = null,
+        manueltOpphoerService: ManueltOpphoerService? = null,
+        grunnlagKlient: GrunnlagKlient? = null
     ): RealGenerellBehandlingService = RealGenerellBehandlingService(
-        behandlinger = behandlinger,
-        behandlingHendelser = hendelseKanal,
+        behandlinger = behandlinger ?: mockk(),
+        behandlingHendelser = hendelseKanal ?: mockk(),
         foerstegangsbehandlingFactory = FoerstegangsbehandlingFactory(
-            behandlinger = behandlinger,
-            hendelser = hendelseDao
+            behandlinger = behandlinger ?: mockk(),
+            hendelser = hendelseDao ?: mockk()
         ),
         revurderingFactory = RevurderingFactory(
-            behandlinger = behandlinger,
-            hendelser = hendelseDao
+            behandlinger = behandlinger ?: mockk(),
+            hendelser = hendelseDao ?: mockk()
         ),
-        hendelser = hendelseDao,
-        manueltOpphoerService = manueltOpphoerService,
+        hendelser = hendelseDao ?: mockk(),
+        manueltOpphoerService = manueltOpphoerService ?: mockk(),
         mockk(),
-        mockk(),
+        grunnlagKlient ?: mockk(),
         mockk()
     )
 }

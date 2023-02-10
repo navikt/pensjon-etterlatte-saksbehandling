@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -16,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -25,8 +27,10 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -182,6 +186,41 @@ fun grunnlagsinformasjonForelderBarnRelasjonHendelse(
     minRolleForPerson = minRolleForPerson,
     relatertPersonUtenFolkeregisteridentifikator = null,
     endringstype = Endringstype.OPPRETTET
+)
+
+fun grunnlagsOpplysningMedPersonopplysning(
+    personopplysning: Person
+) = Grunnlagsopplysning(
+    id = UUID.randomUUID(),
+    kilde = Grunnlagsopplysning.Aordningen(Instant.now()),
+    opplysningType = Opplysningstype.DOEDSDATO,
+    meta = ObjectMapper().createObjectNode(),
+    opplysning = personopplysning,
+    attestering = null,
+    fnr = null,
+    periode = null
+)
+fun personOpplysning(
+    doedsdato: LocalDate? = null
+) = Person(
+    fornavn = "Test",
+    etternavn = "Testulfsen",
+    foedselsnummer = Foedselsnummer.of("19078504903"),
+    foedselsdato = LocalDate.parse("2020-06-10"),
+    foedselsaar = 1985,
+    foedeland = null,
+    doedsdato = doedsdato,
+    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+    bostedsadresse = null,
+    deltBostedsadresse = null,
+    kontaktadresse = null,
+    oppholdsadresse = null,
+    sivilstatus = null,
+    statsborgerskap = null,
+    utland = null,
+    familieRelasjon = FamilieRelasjon(null, null, null),
+    avdoedesBarn = null,
+    vergemaalEllerFremtidsfullmakt = null
 )
 
 fun kommerBarnetTilgode(

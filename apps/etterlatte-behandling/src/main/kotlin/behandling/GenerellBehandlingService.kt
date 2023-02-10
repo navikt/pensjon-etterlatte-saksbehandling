@@ -15,11 +15,13 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.BehandlingMedGrunnlagsopplysninger
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
@@ -53,6 +55,12 @@ interface GenerellBehandlingService {
     ): DetaljertBehandlingDto
 
     fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
+    suspend fun hentBehandlingMedEnkelPersonopplysning(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String,
+        opplysningstype: Opplysningstype
+    ): BehandlingMedGrunnlagsopplysninger<Person>
 }
 
 class RealGenerellBehandlingService(
@@ -124,6 +132,33 @@ class RealGenerellBehandlingService(
 
     override fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling? {
         return hentBehandling(behandlingId)?.toDetaljertBehandling()
+    }
+
+    override suspend fun hentBehandlingMedEnkelPersonopplysning(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String,
+        opplysningstype: Opplysningstype
+    ): BehandlingMedGrunnlagsopplysninger<Person> {
+        val behandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
+        val sakId = behandling.sak
+        return coroutineScope {
+            val personopplysning = async {
+                grunnlagKlient.finnPersonOpplysning(
+                    sakId,
+                    opplysningstype,
+                    accessToken
+                )
+            }
+
+            BehandlingMedGrunnlagsopplysninger(
+                id = behandling.id,
+                soeknadMottattDato = behandling.soeknadMottattDato,
+                personopplysning = personopplysning.await()
+            ).also {
+                personopplysning.await()?.fnr?.let { loggRequest(saksbehandler, it) }
+            }
+        }
     }
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(

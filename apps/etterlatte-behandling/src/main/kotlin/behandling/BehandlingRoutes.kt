@@ -28,6 +28,7 @@ import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingMedGrunnlagsopplysninger
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -37,7 +38,9 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
@@ -122,7 +125,14 @@ internal fun Route.behandlingRoutes(
                 "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
             )
             val body = call.receive<VirkningstidspunktRequest>()
-            if (!body.isValid()) {
+
+            val behandlingMedDoedsdato = generellBehandlingService.hentBehandlingMedEnkelPersonopplysning(
+                behandlingsId,
+                saksbehandler,
+                accesstoken,
+                Opplysningstype.DOEDSDATO
+            )
+            if (!body.isValid(behandlingMedDoedsdato)) {
                 return@post call.respond(HttpStatusCode.BadRequest)
             }
 
@@ -373,7 +383,23 @@ data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: St
         throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
     }
 
-    fun isValid() = dato.year in (0..9999) && begrunnelse != null
+    fun isValid(
+        behandlingMedOpplysning: BehandlingMedGrunnlagsopplysninger<Person>
+    ): Boolean {
+        val harGyldigFormat = dato.year in (0..9999) && begrunnelse != null
+
+        val doedsdato = YearMonth.from(behandlingMedOpplysning.personopplysning?.opplysning?.doedsdato)
+        val soeknadMottatt = YearMonth.from(behandlingMedOpplysning.soeknadMottattDato)
+        val treArFoerSoknad = soeknadMottatt.minusYears(3)
+
+        val maksTreAarFoerSoknadOgMinstManedEtterDoedsfall = if (doedsdato.isBefore(treArFoerSoknad)) {
+            dato.isAfter(treArFoerSoknad)
+        } else {
+            dato.isAfter(doedsdato)
+        }
+
+        return harGyldigFormat && maksTreAarFoerSoknadOgMinstManedEtterDoedsfall
+    }
 }
 
 internal data class FastsettVirkningstidspunktResponse(

@@ -53,8 +53,10 @@ const Beregningsgrunnlag = () => {
   useEffect(() => {
     if (!soeskenjusteringErDefinertIRedux) {
       fetchSoeskenjusteringsgrunnlag(behandling.sak, (result) => {
-        reset({ soeskengrunnlag: result.opplysning?.beregningsgrunnlag ?? [] })
-        dispatch(oppdaterSoeskenjusteringsgrunnlag({ beregningsgrunnlag: result.opplysning?.beregningsgrunnlag ?? [] }))
+        reset({ soeskengrunnlag: result?.opplysning?.beregningsgrunnlag ?? [] })
+        dispatch(
+          oppdaterSoeskenjusteringsgrunnlag({ beregningsgrunnlag: result?.opplysning?.beregningsgrunnlag ?? [] })
+        )
       })
     }
   }, [])

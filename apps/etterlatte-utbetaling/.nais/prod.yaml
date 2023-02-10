@@ -1,0 +1,72 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-utbetaling
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    initialDelay: 5
+    path: /isalive
+  readiness:
+    initialDelay: 5
+    path: /isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  leaderElection: true
+  strategy:
+    type: Recreate
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        tier: db-custom-1-3840
+        collation: nb_NO.UTF8
+        cascadingDelete: false
+        name: etterlatte-utbetaling
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
+        maintenance:
+          day: 7
+          hour: 2
+        databases:
+          - name: utbetaling
+            envVarPrefix: DB
+  kafka:
+    pool: nav-prod
+  envFrom:
+    - secret: etterlatte-secrets
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.etterlatteytelser
+    - name: KAFKA_RESET_POLICY
+      value: latest
+    - name: OPPDRAG_SEND_MQ_NAME
+      value: QA.P231.OB04_OPPDRAG_XML
+    - name: OPPDRAG_AVSTEMMING_MQ_NAME
+      value: QA.P234.OB29_AVSTEMMING_XML
+    - name: OPPDRAG_KVITTERING_MQ_NAME
+      value: QA.P_ETTERLATTE.OPPDRAG_KVITTERING
+    - name: OPPDRAG_MQ_HOSTNAME
+      value: mpls04.adeo.no
+    - name: OPPDRAG_MQ_PORT
+      value: "1414"
+    - name: OPPDRAG_MQ_CHANNEL
+      value: P_ETTERLATTE
+    - name: OPPDRAG_MQ_MANAGER
+      value: MPLS04
+    - name: GRENSESNITTAVSTEMMING_ENABLED
+      value: "true"
+    - name: KONSISTENSAVSTEMMING_ENABLED
+      value: "false"

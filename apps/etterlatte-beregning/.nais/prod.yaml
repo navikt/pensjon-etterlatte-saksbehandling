@@ -29,8 +29,6 @@ spec:
       claims:
         extra:
           - NAVident
-  kafka:
-    pool: nav-prod
   gcp:
     sqlInstances:
       - type: POSTGRES_14
@@ -51,11 +49,6 @@ spec:
           - name: beregning
             envVarPrefix: DB
   env:
-    - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.etterlatteytelser
-    - name: KAFKA_RESET_POLICY
-      #sette tilbake til none senere
-      value: latest
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VILKAARSVURDERING_URL
@@ -81,3 +74,4 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
+        - application: etterlatte-statistikk

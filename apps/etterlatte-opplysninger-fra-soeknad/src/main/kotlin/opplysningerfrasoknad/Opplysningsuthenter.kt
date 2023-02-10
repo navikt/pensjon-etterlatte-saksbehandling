@@ -2,7 +2,6 @@ package no.nav.etterlatte.opplysningerfrasoknad
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
@@ -19,6 +18,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpply
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
@@ -30,7 +30,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import java.time.YearMonth
 import java.time.ZoneOffset
-import java.util.UUID
+import java.util.*
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold as UtenlandsoppholdOpplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld
 

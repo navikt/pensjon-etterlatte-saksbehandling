@@ -64,7 +64,9 @@ class ApplicationIntegrationTest {
             mqAvstemmingQueue = "DEV.QUEUE.1",
             serviceUserUsername = "admin",
             serviceUserPassword = "passw0rd",
-            leaderElectorPath = ""
+            leaderElectorPath = "",
+            grensesnittavstemmingEnabled = false,
+            konsistensavstemmingEnabled = false
         )
 
         ApplicationContext(applicationProperties, rapidsConnection).also {

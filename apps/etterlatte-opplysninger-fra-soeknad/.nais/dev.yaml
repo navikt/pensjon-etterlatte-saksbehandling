@@ -19,9 +19,6 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
-  azure:
-    application:
-      enabled: true
   replicas:
     cpuThresholdPercentage: 90
     max: 1

@@ -192,7 +192,7 @@ fun grunnlagsOpplysningMedPersonopplysning(
     personopplysning: Person
 ) = Grunnlagsopplysning(
     id = UUID.randomUUID(),
-    kilde = Grunnlagsopplysning.Aordningen(Instant.now()),
+    kilde = Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, "opplysningsId1"),
     opplysningType = Opplysningstype.DOEDSDATO,
     meta = ObjectMapper().createObjectNode(),
     opplysning = personopplysning,

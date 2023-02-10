@@ -6,27 +6,15 @@ import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringSerializer
 
-sealed class AppConfig(val enableKafka: Boolean, val env: Map<String, String>) {
-    abstract fun producerConfig(): MutableMap<String, Any>
-}
-
-class TestConfig(enableKafka: Boolean = false, env: Map<String, String> = emptyMap()) : AppConfig(enableKafka, env) {
-    override fun producerConfig(): MutableMap<String, Any> = mutableMapOf(
-        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to env["KAFKA_BROKERS"]!!,
-        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.canonicalName,
-        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.canonicalName,
-        ProducerConfig.ACKS_CONFIG to "all"
-    )
-}
-
-class DevConfig : AppConfig(true, System.getenv().toMutableMap().apply { put("DELAYED_START", "true") }) {
+class AppConfig {
     private val JAVA_KEYSTORE = "jks"
     private val PKCS12 = "PKCS12"
+    val env = System.getenv().toMutableMap().apply { put("DELAYED_START", "true") }
 
     private fun envOrThrow(envVar: String) =
         env[envVar] ?: throw IllegalStateException("$envVar er påkrevd miljøvariabel")
 
-    override fun producerConfig() = mutableMapOf<String, Any>(
+    fun producerConfig() = mutableMapOf<String, Any>(
         ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to envOrThrow("KAFKA_BROKERS"),
         ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.canonicalName,
         ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.canonicalName,

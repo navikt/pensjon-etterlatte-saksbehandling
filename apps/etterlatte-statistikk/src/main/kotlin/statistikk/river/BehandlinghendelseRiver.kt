@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -54,12 +55,10 @@ class BehandlinghendelseRiver(
                 service.registrerStatistikkForBehandlinghendelse(behandling, hendelse, tekniskTid)
                     ?.also {
                         context.publish(
-                            objectMapper.writeValueAsString(
-                                mapOf(
-                                    "@event_name" to "STATISTIKK:REGISTRERT",
-                                    "sak_rad" to objectMapper.writeValueAsString(it)
-                                )
-                            )
+                            mapOf(
+                                "@event_name" to "STATISTIKK:REGISTRERT",
+                                "sak_rad" to objectMapper.writeValueAsString(it)
+                            ).toJson()
                         )
                     } ?: logger.info("Ikke registrert statistikk på pakken ${packet.correlationId}")
             } catch (e: Exception) {

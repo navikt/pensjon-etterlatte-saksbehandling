@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.utbetaling.config.LeaderElection
+import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -43,7 +43,9 @@ internal class GrensesnittsavstemmingsJobTest {
 
         grensesnittavstemming.run()
 
-        verify(exactly = 1) { grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON) }
+        verify(exactly = 1) {
+            grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON)
+        }
         assertTrue(leaderElection.isLeader())
     }
 }

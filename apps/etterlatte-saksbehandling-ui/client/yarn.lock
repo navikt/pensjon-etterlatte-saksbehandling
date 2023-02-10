@@ -381,38 +381,38 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@navikt/ds-css-internal@^2.0.11":
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-2.1.6.tgz#f205be17803f588b29d0905e2d1fa98737655f9e"
-  integrity sha512-+nMWdYIEaWVCobu+EnAn6HR/PK3+I2XiwoyQuSvMrbSURVaaVbgNv35xyJhCPmzqTbjnogiHVf7C7pipSAHVxA==
+"@navikt/ds-css-internal@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-2.1.7.tgz#3293c9c09b77427daa95d9a64b9415d709b8d964"
+  integrity sha512-SSMkiKW7gTRvk/32fdgoY7JIBA/VaCSbtp91FrZdIMMkQzNtvCJm7ZSTbodEDqnoKm11ybuQJ2fud0M/l3wa3Q==
 
-"@navikt/ds-css@^2.0.10":
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.1.6.tgz#9f179ef75c62f8ee8a81189106ed536272fef3d1"
-  integrity sha512-svT9gB9EAq59M3CiaWSuVMCfYLIB2oCRXyMZSqbTSFo7oQHxRuXDPfdioRkKB+Ez/eEQwhN+UZXK1g2m0tkOvw==
+"@navikt/ds-css@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.1.7.tgz#80f2a8fe2680ad118ccf9e1bdaba75ff3004df05"
+  integrity sha512-Dq/vFsGqnmVQCRWGLIzOB7XaFWgJRYVnbA2n4lfcnovp+zCwql1NNXKscvVWqaQEbq+2bGR71A5bgrr4NCR14w==
 
-"@navikt/ds-icons@^2.1.6":
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-icons/-/ds-icons-2.1.6.tgz#9a7caae8f6c1696dc4199917d75c3043ade6cbae"
-  integrity sha512-a6dwPPu3yAJTBB31kXS2OvFdVNUZNjaON2DiQkQppnfDZC82AdhCKE8/NEFaQ3dUZSmbEbGy/e1IHNpFI2kKRg==
+"@navikt/ds-icons@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-icons/-/ds-icons-2.1.7.tgz#4c38de9400fff6502ce7ba0509e05f770af66921"
+  integrity sha512-1QGVRkkjPeqPRJg3kbO5WcWLIkronMNmz4m1MFC+HPZ4+Dp4WXIHeBUi6b13rrJAXBxb2Dun+gpbXxSzPxx79A==
 
-"@navikt/ds-react-internal@^2.0.11":
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react-internal/-/ds-react-internal-2.1.6.tgz#2cfead909ccee8021c7a8e36ac312a2aff54f19c"
-  integrity sha512-oarITnVW4gJ0PN2LK38ZY0F7/IXEIq7OtD3j51bIh2WKPAghvj6MXNBoBA+IHl93klDpUoIwzj8BTAwSOVfe2g==
+"@navikt/ds-react-internal@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react-internal/-/ds-react-internal-2.1.7.tgz#73492375417a01f18eac23f2d16d15822c213627"
+  integrity sha512-1aaGBk3Dvvu2pAs6FVFnEsoES8BULEpYQ0Ezp2KorgjQikwAKbq79FZ6cdWUEOLwIVKB1V3987T7Km+xLBpXfQ==
   dependencies:
-    "@navikt/ds-icons" "^2.1.6"
-    "@navikt/ds-react" "^2.1.6"
+    "@navikt/ds-icons" "^2.1.7"
+    "@navikt/ds-react" "^2.1.7"
     clsx "^1.1.1"
     copy-to-clipboard "^3.3.1"
 
-"@navikt/ds-react@^2.0.10", "@navikt/ds-react@^2.1.6":
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-2.1.6.tgz#08b976a97fb98cc0f0ded2cb9b3c1708d564dcd2"
-  integrity sha512-9n8sOCxV/4mmmZ4gyDSzlR8Z6tkGPW1Dcmrk+cZxRAgD5fPspPs2Ee0tHmxhAa4hd2ekqNoHgjR7Q5dWlxBK1g==
+"@navikt/ds-react@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-2.1.7.tgz#71ac60f7d929a34697b89874d03bd53d6b382691"
+  integrity sha512-3IX4YfCbxS+ZsU/F2e9icIpacGDuZI8GEVFXZexOgWA7LfpK7a4Maif2Xi+pFo6mgmQUV6PJW4XCP417MjVrmQ==
   dependencies:
     "@floating-ui/react" "0.17.0"
-    "@navikt/ds-icons" "^2.1.6"
+    "@navikt/ds-icons" "^2.1.7"
     "@radix-ui/react-tabs" "1.0.0"
     "@radix-ui/react-toggle-group" "1.0.0"
     clsx "^1.2.1"
@@ -3048,9 +3048,9 @@ prelude-ls@~1.1.2:
   integrity sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==
 
 prettier@^2.7.1:
-  version "2.8.3"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.3.tgz#ab697b1d3dd46fb4626fbe2f543afe0cc98d8632"
-  integrity sha512-tJ/oJ4amDihPoufT5sM0Z1SKEuKay8LfVAMlbbhnnkvt6BUserZylqo2PN+p9KeljLr0OHa2rXHU1T8reeoTrw==
+  version "2.8.4"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.4.tgz#34dd2595629bfbb79d344ac4a91ff948694463c3"
+  integrity sha512-vIS4Rlc2FNh0BySk3Wkd6xmwxB0FpOndW5fisM5H8hsZSxU2VWVB5CWIkIjWvrHjIhxk2g3bfMKM87zNTrZddw==
 
 pretty-format@^27.0.2, pretty-format@^27.5.1:
   version "27.5.1"
@@ -3625,9 +3625,9 @@ tinypool@^0.3.1:
   integrity sha512-zLA1ZXlstbU2rlpA4CIeVaqvWq41MTWqLY3FfsAXgC8+f7Pk7zroaJQxDgxn1xNudKW6Kmj4808rPFShUlIRmQ==
 
 tinyspy@^1.0.2:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/tinyspy/-/tinyspy-1.1.0.tgz#b1312c128f4cec385f311fb1c0341fab4066b691"
-  integrity sha512-xdHzOlnGb1hxNdgO/45hp9ngVKhyN9fD1LH/3059kmHyUT/qZ+ee2y8F/BuaIQpK2r6l/kLLXwezfMpedc5Ycw==
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/tinyspy/-/tinyspy-1.1.1.tgz#0cb91d5157892af38cb2d217f5c7e8507a5bf092"
+  integrity sha512-UVq5AXt/gQlti7oxoIg5oi/9r0WpF7DGEVwXgqWSMmyN16+e3tl5lIvTaOpJ3TAtu5xFzWccFRM4R5NaWHF+4g==
 
 to-fast-properties@^2.0.0:
   version "2.0.0"

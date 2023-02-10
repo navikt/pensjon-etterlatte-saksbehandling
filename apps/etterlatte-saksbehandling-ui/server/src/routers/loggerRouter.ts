@@ -8,22 +8,30 @@ export const loggerRouter = express.Router()
 export interface IStackLineNoColumnNo {
   lineno: number
   columnno: number
+  message: any
   error: any
 }
 
 loggerRouter.post('/', express.json(), (req, res) => {
   const body = req.body
-  if (body.type && body.type === 'info') {
+  if (!process.env.NAIS_CLUSTER_NAME) {
+    frontendLogger.info(`Nais cluster unavailable: ${JSON.stringify(body)}`)
+  } else if (body.type && body.type === 'info') {
     frontendLogger.info('Frontendlogging: ', body)
   } else {
     if (body.stackInfo) {
       sourceMapMapper(body.stackInfo)
-        .then((mappedPositionData) => {
-          frontendLogger.error(
-            `Request got error on: \n ${JSON.stringify(mappedPositionData)} \n error: ${JSON.stringify(
-              body.stackInfo.error
-            )} \n details: ${JSON.stringify(body.jsonContent)}`
-          )
+        .then((position) => {
+          const message = body.stackInfo.message
+          const error = JSON.stringify(body.stackInfo.error)
+          const component = `'${position.source}' (line: ${position.line}, col: ${position.column})`
+
+          frontendLogger.error({
+            message: message || 'Request error on: ',
+            stack_trace: `Error occurred in ${component}:\n${message}\n${error}`,
+            user_device: JSON.stringify(body.jsonContent.userDeviceInfo),
+            user_agent: body.jsonContent.userAgent,
+          })
         })
         .catch((err) => {
           frontendLogger.error('Request got error on: \n', err)

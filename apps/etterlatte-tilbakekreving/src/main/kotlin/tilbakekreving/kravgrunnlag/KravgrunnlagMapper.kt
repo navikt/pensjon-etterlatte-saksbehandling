@@ -9,10 +9,10 @@ import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Kontrollfelt
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.KravgrunnlagStatus
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.UUID30
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.VedtakId
-import no.nav.etterlatte.tilbakekreving.utils.toLocalDate
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
+import javax.xml.datatype.XMLGregorianCalendar
 
 class KravgrunnlagMapper {
 
@@ -53,3 +53,5 @@ class KravgrunnlagMapper {
             skatteProsent = beloep.skattProsent
         )
 }
+
+fun XMLGregorianCalendar.toLocalDate() = this.toGregorianCalendar().toZonedDateTime().toLocalDate()

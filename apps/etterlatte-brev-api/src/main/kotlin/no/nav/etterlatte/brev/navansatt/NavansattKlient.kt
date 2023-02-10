@@ -5,7 +5,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import no.nav.etterlatte.brev.adresse.AdresseException
-import no.nav.etterlatte.brev.model.SaksbehandlerInfo
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 

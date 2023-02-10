@@ -1,20 +1,17 @@
-import winston, { format } from 'winston'
+import winston, { format, transports } from 'winston'
+
 const { colorize, combine, timestamp, simple, json } = format
-
-export const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  defaultMeta: { service: 'etterlatte-saksbehandling-ui' },
-})
-
-logger.add(
-  new winston.transports.Console({
-    format: winston.format.simple(),
-  })
-)
+const { Console } = transports
 
 const production = combine(timestamp(), json())
 const dev = combine(colorize(), simple())
+
+export const logger = winston.createLogger({
+  level: 'info',
+  format: process.env.NAIS_CLUSTER_NAME ? production : dev,
+  defaultMeta: { service: 'etterlatte-saksbehandling-ui' },
+  transports: [new Console()],
+})
 
 export const frontendLogger = winston.createLogger({
   level: 'info',
@@ -22,10 +19,5 @@ export const frontendLogger = winston.createLogger({
   defaultMeta: {
     service: 'etterlatte-saksbehandling-ui-client',
   },
+  transports: [new Console()],
 })
-
-frontendLogger.add(
-  new winston.transports.Console({
-    format: winston.format.simple(),
-  })
-)

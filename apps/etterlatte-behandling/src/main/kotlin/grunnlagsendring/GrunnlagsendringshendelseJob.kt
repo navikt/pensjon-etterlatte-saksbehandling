@@ -10,8 +10,8 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.common.DatabaseContext
-import no.nav.etterlatte.common.LeaderElection
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import javax.sql.DataSource

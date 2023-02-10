@@ -1,0 +1,2 @@
+ALTER TABLE sak ADD COLUMN beregning JSONB;
+ALTER TABLE stoenad ADD COLUMN beregning JSONB;

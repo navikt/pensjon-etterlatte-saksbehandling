@@ -1,6 +1,9 @@
 package no.nav.etterlatte.utbetaling.config
 
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.jdbcUrl
+import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.common.Oppgavetrigger
@@ -24,12 +27,12 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
-    private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
     val rapidsConnection: RapidsConnection = RapidApplication.create(System.getenv().withConsumerGroupId())
 ) {
     val clock = Clock.systemUTC()
 
-    val dataSourceBuilder = DataSourceBuilder(
+    val dataSource = DataSourceBuilder.createDataSource(
         jdbcUrl = jdbcUrl(
             host = properties.dbHost,
             port = properties.dbPort,
@@ -38,8 +41,6 @@ class ApplicationContext(
         username = properties.dbUsername,
         password = properties.dbPassword
     )
-
-    val dataSource = dataSourceBuilder.dataSource()
 
     val jmsConnectionFactory = JmsConnectionFactory(
         hostname = properties.mqHost,
@@ -131,9 +132,6 @@ class ApplicationContext(
             utbetalingService = utbetalingService
         )
     }
-
-    private fun jdbcUrl(host: String, port: Int, databaseName: String) =
-        "jdbc:postgresql://$host:$port/$databaseName"
 }
 
 private fun Map<String, String>.withConsumerGroupId() =

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
@@ -39,7 +40,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
             .singleOrNull {
                 BrevInnhold(
                     getString("mal"),
-                    getString("spraak"),
+                    Spraak.valueOf(getString("spraak")),
                     getBytes("bytes")
                 )
             }!!
@@ -65,7 +66,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
             it.prepareStatement(OPPDATER_INNHOLD_QUERY)
                 .apply {
                     setString(1, "TODO: mal")
-                    setString(2, "TODO: spraak")
+                    setString(2, brev.spraak.name)
                     setBytes(3, brev.pdf)
                     setLong(4, brevId)
                 }
@@ -108,12 +109,12 @@ class BrevRepository private constructor(private val ds: DataSource) {
                 .executeQuery()
                 .singleOrNull { getLong(1) }!!
 
-            // TODO: Lagre malnavn og språk
+            // TODO: Lagre malnavn
             val inserted = it.prepareStatement(OPPRETT_INNHOLD_QUERY)
                 .apply {
                     setLong(1, id)
                     setString(2, "navn på malen")
-                    setString(3, "nb")
+                    setString(3, ulagretBrev.spraak.name)
                     setBytes(4, ulagretBrev.pdf)
                 }
                 .executeUpdate()

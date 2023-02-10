@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.config
 
+import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
@@ -13,7 +14,7 @@ class ApplicationContext(
 
     var clock = Clock.systemUTC()
 
-    var dataSourceBuilder = DataSourceBuilder(
+    var dataSource = DataSourceBuilder.createDataSource(
         jdbcUrl = jdbcUrl(
             host = properties.dbHost,
             port = properties.dbPort,
@@ -22,8 +23,6 @@ class ApplicationContext(
         username = properties.dbUsername,
         password = properties.dbPassword
     )
-
-    var dataSource = dataSourceBuilder.dataSource()
 
     var jmsConnectionFactory = JmsConnectionFactory(
         hostname = properties.mqHost,

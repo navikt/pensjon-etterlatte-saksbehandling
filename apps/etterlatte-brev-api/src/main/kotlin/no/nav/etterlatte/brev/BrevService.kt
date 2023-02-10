@@ -50,11 +50,11 @@ class BrevService(
 
         val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker, Attestant("", ""))
 
-        return BrevInnhold(mal.tittel, Spraak.NB.toString(), pdfGenerator.genererPdf(request))
+        return BrevInnhold(mal.tittel, Spraak.NB, pdfGenerator.genererPdf(request))
     }
 
     fun lagreAnnetBrev(behandlingId: String, mottaker: Mottaker, brevInnhold: BrevInnhold): Brev {
-        return db.opprettBrev(UlagretBrev(behandlingId, brevInnhold.mal, mottaker, false, brevInnhold.data))
+        return db.opprettBrev(UlagretBrev(behandlingId, brevInnhold.mal, Spraak.NB, mottaker, false, brevInnhold.data))
     }
 
     fun ferdigstillBrev(id: BrevID): Boolean {

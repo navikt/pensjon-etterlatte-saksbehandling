@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
@@ -16,8 +17,12 @@ fun main() {
 }
 
 fun jobs(applicationContext: ApplicationContext) {
-    applicationContext.grensesnittavstemmingJob.schedule()
-    applicationContext.konsistensavstemmingJob.schedule()
+    with(applicationContext.grensesnittavstemmingJob) {
+        if (applicationContext.properties.grensesnittavstemmingEnabled) schedule()
+    }
+    with(applicationContext.konsistensavstemmingJob) {
+        if (applicationContext.properties.konsistensavstemmingEnabled) schedule()
+    }
 }
 
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
@@ -29,7 +34,7 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
 
             register(object : RapidsConnection.StatusListener {
                 override fun onStartup(rapidsConnection: RapidsConnection) {
-                    applicationContext.dataSourceBuilder.migrate()
+                    applicationContext.dataSource.migrate()
                 }
 
                 override fun onShutdown(rapidsConnection: RapidsConnection) {

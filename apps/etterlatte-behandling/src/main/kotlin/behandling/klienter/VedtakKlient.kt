@@ -56,12 +56,6 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     }
 }
 
-class VedtakKlientTest : VedtakKlient {
-    override suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak? {
-        TODO("Not yet implemented")
-    }
-}
-
 data class Vedtak(
     val sakId: String,
     val behandlingId: UUID,

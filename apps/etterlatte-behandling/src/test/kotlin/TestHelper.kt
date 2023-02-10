@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
@@ -277,14 +276,3 @@ fun mockPerson(
 
 val saksbehandlerToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSJ9.271mDij4YsO4Kk8w8AvX5BXxlEA8U-UAOtdG1Ix_kQY" // ktlint-disable max-line-length
-
-class GrunnlagKlientTest : GrunnlagKlient {
-    override suspend fun finnPersonOpplysning(
-        sakId: Long,
-        opplysningsType: Opplysningstype,
-        accessToken: String
-    ): Grunnlagsopplysning<Person>? {
-        val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
-        return grunnlagsOpplysningMedPersonopplysning(personopplysning)
-    }
-}

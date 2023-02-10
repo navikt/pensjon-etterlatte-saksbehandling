@@ -1,9 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.brev.model.Avdoed
-import no.nav.etterlatte.brev.model.Innsender
-import no.nav.etterlatte.brev.model.Soeker
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad

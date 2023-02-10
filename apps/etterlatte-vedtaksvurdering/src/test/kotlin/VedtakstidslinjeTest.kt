@@ -1,8 +1,8 @@
-import no.nav.etterlatte.Vedtakstidslinje
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
+import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.Instant

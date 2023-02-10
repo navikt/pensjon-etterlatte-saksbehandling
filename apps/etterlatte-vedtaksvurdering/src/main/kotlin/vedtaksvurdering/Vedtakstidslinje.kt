@@ -1,8 +1,6 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.vedtaksvurdering
 
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import java.time.LocalDate
 
 class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
@@ -10,7 +8,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
         val iverksatteVedtak = hentIverksatteVedtak()
         if (iverksatteVedtak.isEmpty()) return false
 
-        return hentSenesteVedtakPaaDato(dato)?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING
+        return hentSenesteVedtakPaaDato(dato)?.tolkVedtak() == TolketVedtak.INNVILGET
     }
 
     private fun hentSenesteVedtakPaaDato(dato: LocalDate): Vedtak? {

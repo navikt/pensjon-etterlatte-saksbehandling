@@ -3,11 +3,14 @@ import { Button } from '@navikt/ds-react'
 import { handlinger, Handlinger } from '../typer/oppgavebenken'
 import styled from 'styled-components'
 
-const HandlingerKnapp: React.FC<{ handling: Handlinger; behandlingsId: string }> = ({ handling, behandlingsId }) => {
-  //TODO skru på denne funksjonaliteten etter oppgavhåndteringer avklart
-  //return sakErTildeltInnloggetSaksbehandler ? (
+const HandlingerKnapp: React.FC<{ handling: Handlinger; behandlingsId?: string; person: string }> = ({
+  handling,
+  behandlingsId,
+  person,
+}) => {
+  const destinasjon = handling === Handlinger.BEHANDLE ? `behandling/${behandlingsId}` : `person/${person}`
   return (
-    <Button as={'a'} href={`behandling/${behandlingsId}`} size={'small'} variant={'primary'}>
+    <Button as={'a'} href={destinasjon} size={'small'} variant={'primary'}>
       <ActionText>{handlinger[handling]?.navn}</ActionText>
     </Button>
   )

@@ -9,45 +9,27 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.oppgave.domain.Handling
+import no.nav.etterlatte.oppgave.domain.Oppgave
+import no.nav.etterlatte.oppgave.domain.OppgaveType
 import java.util.*
 
-internal fun Route.oppgaveRoutes(repo: OppgaveDao) {
+internal fun Route.oppgaveRoutes(service: OppgaveService) {
     route("/api/oppgaver") {
         get {
-            val bruker = Kontekst.get().AppUser
-
-            if (bruker is Saksbehandler) {
-                val oppgaver = repo.finnOppgaverForRoller(
-                    listOfNotNull(
-                        Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
-                        Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() }
-                    )
-                ).map {
-                    OppgaveDTO(
-                        behandlingId = it.behandlingId,
-                        sakId = it.sak.id,
-                        status = it.behandlingStatus,
-                        oppgaveStatus = it.oppgaveStatus,
-                        soeknadType = it.sak.sakType.toString(),
-                        behandlingType = it.behandlingsType,
-                        regdato = it.regdato.toLocalDateTime().toString(),
-                        fristdato = it.fristDato.atStartOfDay().toString(),
-                        fnr = it.sak.ident,
-                        beskrivelse = "",
-                        saksbehandler = "",
-                        handling = Handling.BEHANDLE,
-                        antallSoesken = it.antallSoesken
-                    )
-                }.let { OppgaveListeDto(it) }
-
-                call.respond(oppgaver)
-            } else {
-                call.respond(HttpStatusCode.Forbidden)
+            when (val bruker = Kontekst.get().AppUser) {
+                is Saksbehandler -> call.respond(tilOppgaveListeDto(service.finnOppgaverForBruker(bruker)))
+                else -> call.respond(HttpStatusCode.Forbidden)
             }
         }
     }
+}
+
+fun tilOppgaveListeDto(oppgaver: List<Oppgave>): OppgaveListeDto {
+    return oppgaver.map {
+        OppgaveDTO.fraOppgave(it)
+    }.let { OppgaveListeDto(it) }
 }
 
 data class OppgaveListeDto(
@@ -55,21 +37,54 @@ data class OppgaveListeDto(
 )
 
 data class OppgaveDTO(
-    val behandlingId: UUID,
+    val behandlingId: UUID?,
     val sakId: Long,
-    val status: BehandlingStatus,
+    val status: BehandlingStatus?,
     val oppgaveStatus: OppgaveStatus?,
     val soeknadType: String,
-    val behandlingType: BehandlingType,
+    val behandlingType: OppgaveType,
     val regdato: String,
     val fristdato: String,
     val fnr: String,
     val beskrivelse: String,
     val saksbehandler: String,
     val handling: Handling,
-    val antallSoesken: Int
-)
-
-enum class Handling {
-    BEHANDLE
+    val antallSoesken: Int?
+) {
+    companion object {
+        fun fraOppgave(oppgave: Oppgave): OppgaveDTO {
+            return when (oppgave) {
+                is Oppgave.Grunnlagsendringsoppgave -> OppgaveDTO(
+                    behandlingId = null,
+                    sakId = oppgave.sakId,
+                    status = BehandlingStatus.OPPRETTET,
+                    oppgaveStatus = oppgave.oppgaveStatus,
+                    soeknadType = oppgave.sakType.toString(),
+                    behandlingType = oppgave.oppgaveType,
+                    regdato = oppgave.registrertDato.toLocalDateTime().toString(),
+                    fristdato = oppgave.fristDato.atStartOfDay().toString(),
+                    fnr = oppgave.fnr.value,
+                    beskrivelse = oppgave.beskrivelse,
+                    saksbehandler = "",
+                    handling = oppgave.handling,
+                    antallSoesken = null
+                )
+                is Oppgave.BehandlingOppgave -> OppgaveDTO(
+                    behandlingId = oppgave.behandlingId,
+                    sakId = oppgave.sakId,
+                    status = oppgave.behandlingStatus,
+                    oppgaveStatus = oppgave.oppgaveStatus,
+                    soeknadType = oppgave.sakType.toString(),
+                    behandlingType = oppgave.oppgaveType,
+                    regdato = oppgave.registrertDato.toLocalDateTime().toString(),
+                    fristdato = oppgave.fristDato.atStartOfDay().toString(),
+                    fnr = oppgave.fnr.value,
+                    beskrivelse = "",
+                    saksbehandler = "",
+                    handling = oppgave.handling,
+                    antallSoesken = oppgave.antallSoesken
+                )
+            }
+        }
+    }
 }

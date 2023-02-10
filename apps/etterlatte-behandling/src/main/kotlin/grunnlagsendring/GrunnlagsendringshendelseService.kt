@@ -43,7 +43,7 @@ class GrunnlagsendringshendelseService(
         logger.info("Henter alle hendelser for sak $sakId")
         grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
-            GrunnlagsendringStatus.values().toList()
+            GrunnlagsendringStatus.relevantForSaksbehandler().toList()
         )
     }
 

@@ -4,76 +4,82 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.database.toList
-import no.nav.etterlatte.sak.Sak
-import java.time.LocalDate
+import no.nav.etterlatte.oppgave.domain.Oppgave
+import org.slf4j.LoggerFactory
+import java.sql.Connection
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.util.*
-import javax.sql.DataSource
 
 enum class Rolle {
     SAKSBEHANDLER, ATTESTANT
 }
 
-data class Oppgave(
-    val behandlingId: UUID,
-    val behandlingStatus: BehandlingStatus,
-    val sak: Sak,
-    val regdato: ZonedDateTime,
-    val fristDato: LocalDate,
-    val behandlingsType: BehandlingType,
-    val antallSoesken: Int
-) {
-    val oppgaveStatus: OppgaveStatus = OppgaveStatus.from(behandlingStatus)
-}
+class OppgaveDao(private val connection: () -> Connection) {
 
-class OppgaveDao(private val datasource: DataSource) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun finnOppgaverForRoller(roller: List<Rolle>): List<Oppgave> {
-        val aktuelleStatuser = roller.flatMap { rolle ->
-            when (rolle) {
-                Rolle.SAKSBEHANDLER -> BehandlingStatus.kanEndres()
+    fun finnOppgaverMedStatuser(statuser: List<BehandlingStatus>): List<Oppgave> {
+        if (statuser.isEmpty()) return emptyList()
 
-                Rolle.ATTESTANT -> listOf(BehandlingStatus.FATTET_VEDTAK)
-            }
-        }.distinct()
-
-        if (aktuelleStatuser.isEmpty()) return emptyList()
-
-        datasource.connection.use {
-            val stmt = it.prepareStatement(
+        with(connection()) {
+            val stmt = prepareStatement(
                 """
                 |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, status, behandling_opprettet,
                 |behandlingstype, soesken 
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
-                |WHERE status IN ${
-                    aktuelleStatuser.joinToString(
-                        separator = ", ",
-                        prefix = "(",
-                        postfix = ")"
-                    ) { "'${it.name}'" }
-                }
+                |WHERE status = ANY(?)
                 """.trimMargin()
             )
+            stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))
             return stmt.executeQuery().toList {
                 val mottattDato = getTimestamp("soeknad_mottatt_dato")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
                     ?: getTimestamp("behandling_opprettet")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
                     ?: throw IllegalStateException(
-                        "Vi har en behandling som hverken har soekand mottatt dato eller behandling opprettet dato "
+                        "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
                     )
-                Oppgave(
-                    getObject("id") as UUID,
-                    BehandlingStatus.valueOf(getString("status")),
-                    Sak(getString("fnr"), enumValueOf(getString("sakType")), getLong("sak_id")),
-                    mottattDato,
-                    mottattDato.toLocalDate().plusMonths(1),
-                    BehandlingType.valueOf(getString("behandlingstype")),
-                    antallSoesken(getString("soesken"))
+                Oppgave.BehandlingOppgave(
+                    behandlingId = getObject("id") as UUID,
+                    behandlingStatus = BehandlingStatus.valueOf(getString("status")),
+                    sakId = getLong("sak_id"),
+                    sakType = enumValueOf(getString("sakType")),
+                    fnr = Foedselsnummer.of(getString("fnr")),
+                    registrertDato = mottattDato,
+                    behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
+                    antallSoesken = antallSoesken(getString("soesken"))
                 )
             }.also {
-                println("""Hentet oppgaveliste for bruker med roller $roller. Fant ${it.size} oppgaver""")
+                logger.info("""Hentet oppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver""")
+            }
+        }
+    }
+
+    fun finnOppgaverFraGrunnlagsendringshendelser(): List<Oppgave> {
+        with(connection()) {
+            val stmt = prepareStatement(
+                """
+                SELECT g.sak_id, g.type, g.behandling_id, g.opprettet, s.fnr, s.sakType, g.hendelse_gjelder_rolle
+                FROM grunnlagsendringshendelse g 
+                INNER JOIN sak s ON g.sak_id = s.id
+                WHERE status = ?
+                """.trimIndent()
+            )
+            stmt.setString(1, GrunnlagsendringStatus.SJEKKET_AV_JOBB.name)
+            return stmt.executeQuery().toList {
+                val registrertDato = getTimestamp("opprettet").toLocalDateTime().atZone(ZoneId.of("UTC"))
+                Oppgave.Grunnlagsendringsoppgave(
+                    sakId = getLong("sak_id"),
+                    sakType = SakType.valueOf(getString("sakType")),
+                    registrertDato = registrertDato,
+                    fnr = Foedselsnummer.of(getString("fnr")),
+                    grunnlagsendringsType = GrunnlagsendringsType.valueOf(getString("type")),
+                    gjelderRolle = Saksrolle.enumVedNavnEllerUkjent(getString("hendelse_gjelder_rolle"))
+                )
             }
         }
     }

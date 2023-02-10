@@ -9,7 +9,6 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
 import no.nav.etterlatte.kafka.KafkaProdusent

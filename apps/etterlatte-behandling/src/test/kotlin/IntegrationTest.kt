@@ -28,7 +28,6 @@ import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
 import no.nav.etterlatte.behandling.objectMapper

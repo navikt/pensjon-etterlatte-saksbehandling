@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandlingfrasoknad
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.common.objectMapper
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.opplysningerfrasoknad.Opplysningsuthenter
 import no.nav.etterlatte.opplysningerfrasoknad.StartUthentingFraSoeknad
 import no.nav.helse.rapids_rivers.testsupport.TestRapid

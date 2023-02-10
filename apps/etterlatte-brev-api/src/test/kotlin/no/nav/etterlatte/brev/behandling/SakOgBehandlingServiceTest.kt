@@ -13,11 +13,9 @@ import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
@@ -28,12 +26,12 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
-import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.*
@@ -74,25 +72,25 @@ internal class SakOgBehandlingServiceTest {
         assertEquals(BEHANDLING_ID, behandling.behandlingId)
         assertEquals(Spraak.NB, behandling.spraak)
         assertEquals("Innsend Innsender", behandling.persongalleri.innsender.navn)
-        assertEquals("Soek Soekeren", behandling.persongalleri.soeker.navn)
-        assertEquals("Avdoed Avdoederen", behandling.persongalleri.avdoed.navn)
+        assertEquals("Søker Barn", behandling.persongalleri.soeker.navn)
+        assertEquals("Død Far", behandling.persongalleri.avdoed.navn)
         assertEquals(VedtakType.INNVILGELSE, behandling.vedtak.type)
         assertEquals(123L, behandling.vedtak.id)
         assertEquals(SAKSBEHANDLER_IDENT, behandling.vedtak.saksbehandler.ident)
         assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestant?.ident)
         assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo?.virkningsdato)
 
-        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, ACCESS_TOKEN) }
-        coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(SAK_ID, ACCESS_TOKEN) }
-        coVerify(exactly = 1) { beregningKlient.hentBeregning(BEHANDLING_ID, ACCESS_TOKEN) }
+        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any()) }
+        coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(SAK_ID, any()) }
+        coVerify(exactly = 1) { beregningKlient.hentBeregning(BEHANDLING_ID, any()) }
     }
 
     @Test
-    fun `FinnUtbetalingsinfo returnerer korrekt beloep`() {
+    fun `FinnUtbetalingsinfo returnerer korrekt informasjon`() {
         val AVANSERT_BEHANDLING_ID = "456"
 
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, ACCESS_TOKEN) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(BEHANDLING_ID, any()) } returns opprettEnkelBeregning()
         coEvery { beregningKlient.hentBeregning(AVANSERT_BEHANDLING_ID, any()) } returns opprettAvansertBeregning()
 
@@ -107,11 +105,11 @@ internal class SakOgBehandlingServiceTest {
         assertEquals(3063, enkelBeregning.utbetalingsinfo?.beloep)
         assertEquals(2000, avansertBeregning.utbetalingsinfo?.beloep)
 
-        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, ACCESS_TOKEN) }
-        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(AVANSERT_BEHANDLING_ID, ACCESS_TOKEN) }
-        coVerify(exactly = 2) { grunnlagKlient.hentGrunnlag(SAK_ID, ACCESS_TOKEN) }
-        coVerify(exactly = 1) { beregningKlient.hentBeregning(BEHANDLING_ID, ACCESS_TOKEN) }
-        coVerify(exactly = 1) { beregningKlient.hentBeregning(AVANSERT_BEHANDLING_ID, ACCESS_TOKEN) }
+        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any()) }
+        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(AVANSERT_BEHANDLING_ID, any()) }
+        coVerify(exactly = 2) { grunnlagKlient.hentGrunnlag(SAK_ID, any()) }
+        coVerify(exactly = 1) { beregningKlient.hentBeregning(BEHANDLING_ID, any()) }
+        coVerify(exactly = 1) { beregningKlient.hentBeregning(AVANSERT_BEHANDLING_ID, any()) }
     }
 
     private fun opprettEnkelBeregning() = mockk<BeregningDTO> {
@@ -151,8 +149,8 @@ internal class SakOgBehandlingServiceTest {
         every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, "Attestant enhet", ZonedDateTime.now())
     }
 
-    private fun opprettGrunnlag() = mockk<Grunnlag> {
-        every { sak } returns mapOf(
+    private fun opprettGrunnlag() = GrunnlagTestData(
+        opplysningsmapSakOverrides = mapOf(
             Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
             Opplysningstype.INNSENDER_SOEKNAD_V1 to opprettOpplysning(
                 InnsenderSoeknad(
@@ -163,17 +161,7 @@ internal class SakOgBehandlingServiceTest {
                 ).toJsonNode()
             )
         )
-        every { metadata.sakId } returns 123L
-        every { soeker } returns mapOf(
-            Opplysningstype.NAVN to opprettOpplysning(Navn("Soek", "Soekeren").toJsonNode()),
-            Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(FNR.toJsonNode())
-        )
-        every { familie } returns listOf(mapOf())
-        every { hentAvdoed() } returns mapOf(
-            Opplysningstype.NAVN to opprettOpplysning(Navn("Avdoed", "Avdoederen").toJsonNode()),
-            Opplysningstype.DOEDSDATO to opprettOpplysning(LocalDate.now().toJsonNode())
-        )
-    }
+    ).hentOpplysningsgrunnlag()
 
     private fun opprettOpplysning(jsonNode: JsonNode) =
         Opplysning.Konstant(

@@ -7,13 +7,12 @@ plugins {
 dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:etterlatte-jobs"))
+    implementation(project(":libs:etterlatte-database"))
 
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ClientCore)
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.Jackson)
-
-    implementation("org.jetbrains:annotations:24.0.0")
 
     implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.3.1.0")
     implementation("org.messaginghub:pooled-jms:3.1.0")
@@ -33,7 +32,6 @@ dependencies {
     testImplementation(Ktor2.ClientMock)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
-
     testImplementation(WireMock.WireMock)
     testImplementation(TestContainer.Jupiter)
     testImplementation(TestContainer.Postgresql)

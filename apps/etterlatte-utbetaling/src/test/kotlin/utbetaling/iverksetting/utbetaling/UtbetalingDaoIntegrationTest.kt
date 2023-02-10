@@ -2,8 +2,9 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.utbetaling.TestContainers
-import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.utbetaling.oppdrag
@@ -43,15 +44,14 @@ internal class UtbetalingDaoIntegrationTest {
     fun beforeAll() {
         postgreSQLContainer.start()
 
-        DataSourceBuilder(
+        dataSource = DataSourceBuilder.createDataSource(
             jdbcUrl = postgreSQLContainer.jdbcUrl,
             username = postgreSQLContainer.username,
             password = postgreSQLContainer.password
-        ).let {
-            dataSource = it.dataSource()
-            utbetalingDao = UtbetalingDao(dataSource)
-            it.migrate()
-        }
+        )
+
+        utbetalingDao = UtbetalingDao(dataSource)
+        dataSource.migrate()
     }
 
     private fun cleanDatabase() {

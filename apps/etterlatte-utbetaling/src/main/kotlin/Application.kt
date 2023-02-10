@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
@@ -33,7 +34,7 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
 
             register(object : RapidsConnection.StatusListener {
                 override fun onStartup(rapidsConnection: RapidsConnection) {
-                    applicationContext.dataSourceBuilder.migrate()
+                    applicationContext.dataSource.migrate()
                 }
 
                 override fun onShutdown(rapidsConnection: RapidsConnection) {

@@ -28,9 +28,8 @@ import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
+import no.nav.etterlatte.behandling.klienter.Vedtak
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
@@ -44,6 +43,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
@@ -52,6 +52,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -512,6 +513,22 @@ class ApplicationTest {
     private companion object {
         const val ISSUER_ID = "azure"
         const val CLIENT_ID = "mock-client-id"
+    }
+}
+
+class VedtakKlientTest : VedtakKlient {
+    override suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak? {
+        TODO("Not yet implemented")
+    }
+}
+
+class GrunnlagKlientTest : GrunnlagKlient {
+    override suspend fun finnPersonOpplysning(
+        sakId: Long,
+        opplysningsType: Opplysningstype,
+        accessToken: String
+    ): Grunnlagsopplysning<Person>? {
+        TODO("Not yet implemented")
     }
 }
 

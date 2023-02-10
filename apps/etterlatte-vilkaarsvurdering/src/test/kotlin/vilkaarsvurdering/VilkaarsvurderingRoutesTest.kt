@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -10,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -53,6 +55,8 @@ internal class VilkaarsvurderingRoutesTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server = MockOAuth2Server()
+    private var port: Int = 0
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
 
@@ -62,8 +66,21 @@ internal class VilkaarsvurderingRoutesTest {
     @BeforeAll
     fun before() {
         server.start()
-        System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
-        System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
+        val httpServer = server.config.httpServer
+        port = httpServer.port()
+        hoconApplicationConfig = HoconApplicationConfig(
+            ConfigFactory.parseMap(
+                mapOf(
+                    "no.nav.security.jwt.issuers" to listOf(
+                        mapOf(
+                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
+                            "issuer_name" to ISSUER_ID,
+                            "accepted_audience" to CLIENT_ID
+                        )
+                    )
+                )
+            )
+        )
         postgreSQLContainer.start()
         ds = DataSourceBuilder.createDataSource(
             postgreSQLContainer.jdbcUrl,
@@ -111,6 +128,9 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -140,6 +160,9 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal returnere no content dersom en vilkaarsvurdering ikke finnes`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val nyBehandlingId = UUID.randomUUID()
@@ -155,6 +178,9 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes ved opprettelse`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
             val nyBehandlingId = UUID.randomUUID()
 
@@ -174,6 +200,9 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -213,6 +242,9 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -279,6 +311,9 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -326,6 +361,9 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -364,6 +402,9 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal ikke kunne endre eller slette vilkaar naar totalresultat er satt`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -402,6 +443,9 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `faar 401 hvis spoerring ikke har access token`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
             val response = client.get("/api/vilkaarsvurdering/$behandlingId")
 
@@ -420,6 +464,9 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -440,6 +487,9 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val response = client.post("/api/vilkaarsvurdering/$behandlingId/opprett") {
@@ -462,6 +512,9 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
@@ -486,6 +539,9 @@ internal class VilkaarsvurderingRoutesTest {
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)

@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.mock.MockEngine
@@ -18,6 +19,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsBehov
@@ -82,14 +84,30 @@ import javax.sql.DataSource
 class ApplicationTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server: MockOAuth2Server = MockOAuth2Server()
+    private var port: Int = 0
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private lateinit var beanFactory: TestBeanFactory
 
     @BeforeAll
     fun startServer() {
-        server.start(1234)
-
+        server.start()
+        val httpServer = server.config.httpServer
+        port = httpServer.port()
+        hoconApplicationConfig = HoconApplicationConfig(
+            ConfigFactory.parseMap(
+                mapOf(
+                    "no.nav.security.jwt.issuers" to listOf(
+                        mapOf(
+                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
+                            "issuer_name" to ISSUER_ID,
+                            "accepted_audience" to CLIENT_ID
+                        )
+                    )
+                )
+            )
+        )
         postgreSQLContainer.start()
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
@@ -111,6 +129,9 @@ class ApplicationTest {
         var behandlingOpprettet: UUID? = null
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             val client = createClient {
                 install(ContentNegotiation) {
                     jackson { registerModule(JavaTimeModule()) }

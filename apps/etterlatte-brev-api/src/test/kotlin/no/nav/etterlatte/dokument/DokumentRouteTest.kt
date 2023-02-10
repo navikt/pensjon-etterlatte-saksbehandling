@@ -1,10 +1,12 @@
 package no.nav.etterlatte.dokument
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
 import io.mockk.clearAllMocks
@@ -28,11 +30,29 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DokumentRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
+    private var port: Int = 0
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
+
     private val journalpostService = mockk<SafClient>()
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start(1234)
+        mockOAuth2Server.start()
+        val httpServer = mockOAuth2Server.config.httpServer
+        port = httpServer.port()
+        hoconApplicationConfig = HoconApplicationConfig(
+            ConfigFactory.parseMap(
+                mapOf(
+                    "no.nav.security.jwt.issuers" to listOf(
+                        mapOf(
+                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
+                            "issuer_name" to ISSUER_ID,
+                            "accepted_audience" to CLIENT_ID
+                        )
+                    )
+                )
+            )
+        )
     }
 
     @AfterEach
@@ -53,6 +73,9 @@ internal class DokumentRouteTest {
         val fnr = "11223300000"
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
 
             val response = client.get("/api/dokumenter/$fnr") {
@@ -73,6 +96,9 @@ internal class DokumentRouteTest {
         val dokumentInfoId = "333"
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
 
             val response = client.get("/api/dokumenter/$journalpostId/$dokumentInfoId") {
@@ -88,6 +114,9 @@ internal class DokumentRouteTest {
     @Test
     fun `Endepunkt som ikke finnes`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
 
             val response = client.get("/api/dokument/finnesikke") {

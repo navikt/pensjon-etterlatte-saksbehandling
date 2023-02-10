@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -11,6 +12,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
 import io.mockk.clearAllMocks
@@ -35,11 +37,28 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksbrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
+    private var port: Int = 0
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start(1234)
+        mockOAuth2Server.start()
+        val httpServer = mockOAuth2Server.config.httpServer
+        port = httpServer.port()
+        hoconApplicationConfig = HoconApplicationConfig(
+            ConfigFactory.parseMap(
+                mapOf(
+                    "no.nav.security.jwt.issuers" to listOf(
+                        mapOf(
+                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
+                            "issuer_name" to ISSUER_ID,
+                            "accepted_audience" to CLIENT_ID
+                        )
+                    )
+                )
+            )
+        )
     }
 
     @AfterEach
@@ -62,6 +81,9 @@ internal class VedtaksbrevRouteTest {
         val token = accessToken
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log, routePrefix = "api") { vedtaksbrevRoute(vedtaksbrevService) } }
 
             val client = createClient {
@@ -85,6 +107,9 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Endepunkt som ikke finnes`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log, routePrefix = "api") { vedtaksbrevRoute(vedtaksbrevService) } }
 
             val response = client.get("/api/brev/finnesikke") {
@@ -100,6 +125,9 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Mangler auth header`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log, routePrefix = "api") { vedtaksbrevRoute(vedtaksbrevService) } }
 
             val response = client.post("/api/brev/vedtak")

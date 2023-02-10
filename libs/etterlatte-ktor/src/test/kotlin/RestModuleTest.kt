@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.ktor
 
 import com.fasterxml.jackson.databind.JsonMappingException
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -12,6 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.server.application.call
 import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -35,6 +37,8 @@ import org.junit.jupiter.api.TestInstance
 class RestModuleTest {
 
     private val server = MockOAuth2Server()
+    private var port: Int = 0
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val token: String by lazy {
         server.issueToken(
             issuerId = ISSUER_ID,
@@ -49,8 +53,21 @@ class RestModuleTest {
     @BeforeAll
     fun beforeAll() {
         server.start()
-        System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
-        System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
+        val httpServer = server.config.httpServer
+        port = httpServer.port()
+        hoconApplicationConfig = HoconApplicationConfig(
+            ConfigFactory.parseMap(
+                mapOf(
+                    "no.nav.security.jwt.issuers" to listOf(
+                        mapOf(
+                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
+                            "issuer_name" to ISSUER_ID,
+                            "accepted_audience" to CLIENT_ID
+                        )
+                    )
+                )
+            )
+        )
     }
 
     @AfterAll
@@ -61,6 +78,9 @@ class RestModuleTest {
     @Test
     fun `skal sette opp to endepunkter med autentisering`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application {
                 restModule(this.log) {
                     route1()
@@ -84,6 +104,9 @@ class RestModuleTest {
     @Test
     fun `skal kunne lese og skrive json payload`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application {
                 restModule(this.log) { route1() }
             }
@@ -106,6 +129,9 @@ class RestModuleTest {
     @Test
     fun `skal returnere internal server error og logge dersom noe feiler`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { route1() } }
 
             val response = client.get("/test/fails") {
@@ -119,6 +145,9 @@ class RestModuleTest {
     @Test
     fun `skal svare paa helsesjekk uten autentisering`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { route1() } }.also { setReady() }
 
             val response1 = client.get("/health/isalive")

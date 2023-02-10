@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -7,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
@@ -24,6 +26,8 @@ import org.junit.jupiter.api.TestInstance
 internal class GrunnlagRoutesKtTest {
     private val grunnlagService = mockk<GrunnlagService>()
     private val server = MockOAuth2Server()
+    private var port: Int = 0
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     companion object {
         private const val ISSUER_ID = "ISSUER_ID"
@@ -33,8 +37,21 @@ internal class GrunnlagRoutesKtTest {
     @BeforeAll
     fun before() {
         server.start()
-        System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
-        System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
+        val httpServer = server.config.httpServer
+        port = httpServer.port()
+        hoconApplicationConfig = HoconApplicationConfig(
+            ConfigFactory.parseMap(
+                mapOf(
+                    "no.nav.security.jwt.issuers" to listOf(
+                        mapOf(
+                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
+                            "issuer_name" to ISSUER_ID,
+                            "accepted_audience" to CLIENT_ID
+                        )
+                    )
+                )
+            )
+        )
     }
 
     @AfterAll
@@ -56,6 +73,9 @@ internal class GrunnlagRoutesKtTest {
     @Test
     fun `returnerer 401 uten gyldig token`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
             val response = client.get("api/grunnlag/1")
 
@@ -68,6 +88,9 @@ internal class GrunnlagRoutesKtTest {
         every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns null
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
             val response = client.get("api/grunnlag/1") {
                 headers {
@@ -86,6 +109,9 @@ internal class GrunnlagRoutesKtTest {
         every { grunnlagService.hentOpplysningsgrunnlag(1) } returns testData
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
             val response = client.get("api/grunnlag/1") {
                 headers {

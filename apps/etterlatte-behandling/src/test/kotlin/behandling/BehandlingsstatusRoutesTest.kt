@@ -1,11 +1,13 @@
 package no.nav.etterlatte.behandling
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.just
@@ -28,10 +30,27 @@ internal class BehandlingsstatusRoutesTest {
 
     private val beanFactory: BeanFactory = mockk(relaxed = true)
     private val server: MockOAuth2Server = MockOAuth2Server()
+    private var port: Int = 0
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     @BeforeAll
     fun before() {
-        server.start(1234)
+        server.start()
+        val httpServer = server.config.httpServer
+        port = httpServer.port()
+        hoconApplicationConfig = HoconApplicationConfig(
+            ConfigFactory.parseMap(
+                mapOf(
+                    "no.nav.security.jwt.issuers" to listOf(
+                        mapOf(
+                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
+                            "issuer_name" to ISSUER_ID,
+                            "accepted_audience" to CLIENT_ID
+                        )
+                    )
+                )
+            )
+        )
     }
 
     @AfterAll
@@ -46,6 +65,9 @@ internal class BehandlingsstatusRoutesTest {
         }
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application {
                 module(beanFactory)
             }
@@ -76,6 +98,9 @@ internal class BehandlingsstatusRoutesTest {
         }
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application {
                 module(beanFactory)
             }

@@ -35,7 +35,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 } else {
                     logger.info("Fant ingen vilkårsvurdering for behandling ($behandlingId)")
                     call.respond(
-                        status = HttpStatusCode.NotFound,
+                        status = HttpStatusCode.NoContent,
                         message = "Det finnes ingen vilkårsvurdering for denne behandlingen"
                     )
                 }

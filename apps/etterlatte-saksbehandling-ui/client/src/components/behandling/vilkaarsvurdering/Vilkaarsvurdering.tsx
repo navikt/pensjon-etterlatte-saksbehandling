@@ -13,7 +13,6 @@ import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { ApiError } from '~shared/api/apiClient'
 
 export const Vilkaarsvurdering = () => {
   const location = useLocation()
@@ -33,20 +32,20 @@ export const Vilkaarsvurdering = () => {
   useEffect(() => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     if (!vilkaarsvurdering) {
-      fetchVilkaarsvurdering(
-        behandlingId,
-        (vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering)),
-        (error) => opprettHvisDenIkkeFinnes(error)
-      )
+      fetchVilkaarsvurdering(behandlingId, (vilkaarsvurdering) => {
+        if (vilkaarsvurdering == null) {
+          opprettHvisDenIkkeFinnes()
+        } else {
+          dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
+        }
+      })
     }
   }, [behandlingId])
 
-  const opprettHvisDenIkkeFinnes = (error: ApiError) => {
-    if (error.statusCode === 404) {
-      opprettNyVilkaarsvurdering(behandlingId!!, (vilkaarsvurdering) =>
-        dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
-      )
-    }
+  const opprettHvisDenIkkeFinnes = () => {
+    opprettNyVilkaarsvurdering(behandlingId!!, (vilkaarsvurdering) =>
+      dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
+    )
   }
 
   return (

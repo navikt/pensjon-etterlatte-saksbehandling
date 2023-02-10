@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.ktor
 
 import com.fasterxml.jackson.core.JacksonException
-import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -11,7 +10,6 @@ import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
@@ -36,6 +34,7 @@ fun Application.restModule(
     routePrefix: String? = null,
     routes: Route.() -> Unit
 ) {
+    val config = environment.config
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
@@ -67,7 +66,7 @@ fun Application.restModule(
     }
 
     install(Authentication) {
-        tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+        tokenValidationSupport(config = config)
     }
 
     routing {

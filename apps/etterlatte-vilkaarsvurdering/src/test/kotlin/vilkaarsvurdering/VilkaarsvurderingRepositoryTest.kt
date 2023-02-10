@@ -21,7 +21,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
@@ -95,7 +94,6 @@ internal class VilkaarsvurderingRepository2Test {
         with(oppdatertVilkaarsvurdering.resultat!!) {
             utfall shouldBe vilkaarsvurderingResultat.utfall
             kommentar shouldBe vilkaarsvurderingResultat.kommentar
-            // TODO tidspunkt shouldBe vilkaarsvurderingResultat.tidspunkt
             saksbehandler shouldBe vilkaarsvurderingResultat.saksbehandler
         }
     }

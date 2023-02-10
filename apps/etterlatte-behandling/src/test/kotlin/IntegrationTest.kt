@@ -82,14 +82,15 @@ import javax.sql.DataSource
 class ApplicationTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server: MockOAuth2Server = MockOAuth2Server()
     private lateinit var beanFactory: TestBeanFactory
 
     @BeforeAll
     fun startServer() {
-        server.start(1234)
-
+        server.start()
+        System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
+        System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
         postgreSQLContainer.start()
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)

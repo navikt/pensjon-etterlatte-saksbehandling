@@ -201,6 +201,6 @@ internal class BeregningRoutesTest {
 
     private companion object {
         const val ISSUER_ID = "azure"
-        const val CLIENT_ID = "azure-id for saksbehandler"
+        const val CLIENT_ID = "mock-client-id"
     }
 }

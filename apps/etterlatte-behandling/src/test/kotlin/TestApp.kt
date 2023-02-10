@@ -28,7 +28,7 @@ fun main() {
     Kaller vilkårsvurdering i dev
      */
 
-    val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
+    val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     postgreSQLContainer.start()
     postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
     postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)

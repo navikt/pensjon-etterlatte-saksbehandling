@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.module
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.http.get
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -31,7 +32,9 @@ internal class BehandlingsstatusRoutesTest {
 
     @BeforeAll
     fun before() {
-        server.start(1234)
+        server.start()
+        System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
+        System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
     }
 
     @AfterAll

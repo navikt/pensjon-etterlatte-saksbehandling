@@ -54,11 +54,6 @@ jobs:
     with:
       applikasjon: oppdater-behandling
     secrets: inherit
-  tilbakestill-opplysninger-fra-inntektskomponenten:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: opplysninger-fra-inntektskomponenten
-    secrets: inherit
   tilbakestill-opplysninger-fra-pdl:
     uses: ./.github/workflows/.deploy-main.yaml
     with:

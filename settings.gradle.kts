@@ -12,7 +12,6 @@ include(
     "apps:etterlatte-opplysninger-fra-pdl",
     "apps:etterlatte-testdata",
     "apps:etterlatte-utbetaling",
-    "apps:etterlatte-opplysninger-fra-inntektskomponenten",
     "apps:etterlatte-oppdater-behandling",
     "apps:etterlatte-beregning",
     "apps:etterlatte-vedtaksvurdering",

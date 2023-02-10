@@ -59,9 +59,6 @@ Lytter på hendelser fra Livet er en strøm av hendelser
 [etterlatte-oppdater-behandling](apps/etterlatte-oppdater-behandling) \
 Oppdater behandling er en Rapid-app, som brukes til å lese meldinger relevant for behandlings-appen og sende HTTP-kall til behandlingsappen for å gjøre forskjellige handlinger.
 
-[etterlatte-opplysninger-fra-inntektskomponenten](apps/etterlatte-opplysninger-fra-inntektskomponenten) \
-Enkel Rapids&River-app som svarer på behov om opplysning INNTEKT.
-
 [etterlatte-opplysninger-fra-pdl](apps/etterlatte-opplysninger-fra-pdl) \
 // TODO
 
@@ -85,9 +82,6 @@ Oversetter vedtak til et format som kan oversendes til oppdrag.
 
 [etterlatte-vedtaksvurdering](apps/etterlatte-vedtaksvurdering) \
 Tjeneste som tilbyr forslag til vedtak som kan fattes og attesteres
-
-[etterlatte-vilkaar-kafka](apps/etterlatte-vilkaar-kafka) \
-// TODO
 
 # Flytdiagram
 

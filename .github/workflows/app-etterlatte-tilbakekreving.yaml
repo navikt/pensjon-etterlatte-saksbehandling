@@ -16,6 +16,9 @@ on:
       - main
     paths:
       - apps/etterlatte-tilbakekreving/**
+      - libs/etterlatte-common/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
       - buildSrc/src/main/kotlin/Database.kt
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/JakartaBind.kt
@@ -29,6 +32,9 @@ on:
       - main
     paths:
       - apps/etterlatte-tilbakekreving/**
+      - libs/etterlatte-common/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-database/**
       - buildSrc/src/main/kotlin/Database.kt
       - buildSrc/src/main/kotlin/Jackson.kt
       - buildSrc/src/main/kotlin/Kotlinx.kt

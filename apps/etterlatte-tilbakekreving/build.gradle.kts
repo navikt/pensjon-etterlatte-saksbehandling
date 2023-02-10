@@ -4,6 +4,8 @@ plugins {
 }
 dependencies {
     implementation(project(":libs:common"))
+    implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:etterlatte-database"))
 
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)
@@ -26,8 +28,6 @@ dependencies {
     implementation(NavFelles.TokenClientCore)
     implementation(NavFelles.TokenValidationKtor2)
 
-    implementation("org.jetbrains:annotations:24.0.0")
-
     implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.3.1.0")
     implementation("org.messaginghub:pooled-jms:3.1.0")
     implementation("com.github.navikt.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:2589.e85bf84")
@@ -44,7 +44,9 @@ dependencies {
     testImplementation(Ktor2.ServerTests)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
-
+    testImplementation(NavFelles.MockOauth2Server) {
+        exclude("org.slf4j", "slf4j-api")
+    }
     testImplementation(WireMock.WireMock)
     testImplementation(TestContainer.Jupiter)
     testImplementation(TestContainer.Postgresql)

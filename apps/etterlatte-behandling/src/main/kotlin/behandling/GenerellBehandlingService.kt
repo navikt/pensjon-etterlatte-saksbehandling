@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
+import java.time.YearMonth
 import java.util.*
 
 interface GenerellBehandlingService {
@@ -61,6 +62,12 @@ interface GenerellBehandlingService {
         accessToken: String,
         opplysningstype: Opplysningstype
     ): BehandlingMedGrunnlagsopplysninger<Person>
+    suspend fun erGyldigVirkningstidspunkt(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String,
+        request: VirkningstidspunktRequest
+    ): Boolean
 }
 
 class RealGenerellBehandlingService(
@@ -159,6 +166,38 @@ class RealGenerellBehandlingService(
                 personopplysning.await()?.fnr?.let { loggRequest(saksbehandler, it) }
             }
         }
+    }
+
+    override suspend fun erGyldigVirkningstidspunkt(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String,
+        request: VirkningstidspunktRequest
+    ): Boolean {
+        val virkningstidspunkt = request.dato
+        val begrunnelse = request.begrunnelse
+
+        val harGyldigFormat = virkningstidspunkt.year in (0..9999) && begrunnelse != null
+
+        val maksTreAarFoerSoknadOgMinstManedEtterDoedsfall = coroutineScope {
+            val behandlingMedDoedsdato = hentBehandlingMedEnkelPersonopplysning(
+                behandlingId,
+                saksbehandler,
+                accessToken,
+                Opplysningstype.DOEDSDATO
+            )
+            val doedsdato = YearMonth.from(behandlingMedDoedsdato.personopplysning?.opplysning?.doedsdato)
+            val soeknadMottatt = YearMonth.from(behandlingMedDoedsdato.soeknadMottattDato)
+            val treArFoerSoknad = soeknadMottatt.minusYears(3)
+
+            if (doedsdato.isBefore(treArFoerSoknad)) {
+                virkningstidspunkt.isAfter(treArFoerSoknad)
+            } else {
+                virkningstidspunkt.isAfter(doedsdato)
+            }
+        }
+
+        return harGyldigFormat && maksTreAarFoerSoknadOgMinstManedEtterDoedsfall
     }
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(

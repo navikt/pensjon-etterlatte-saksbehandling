@@ -83,7 +83,7 @@ import javax.sql.DataSource
 class ApplicationTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server: MockOAuth2Server = MockOAuth2Server()
     private lateinit var beanFactory: TestBeanFactory
 

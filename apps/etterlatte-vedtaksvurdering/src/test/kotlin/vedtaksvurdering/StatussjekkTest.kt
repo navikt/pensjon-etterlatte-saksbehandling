@@ -31,7 +31,7 @@ import javax.sql.DataSource
 class StatussjekkTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
     private lateinit var dataSource: DataSource
     private val beregning = mockk<BeregningKlient>(relaxed = true)

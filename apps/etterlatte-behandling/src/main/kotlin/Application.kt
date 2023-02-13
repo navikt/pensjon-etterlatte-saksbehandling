@@ -71,10 +71,8 @@ fun Application.module(beanFactory: BeanFactory) {
                 manueltOpphoerService = manueltOpphoerService()
             )
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())
-            oppgaveRoutes(beanFactory.oppgaveService())
+            oppgaveRoutes(service = beanFactory.oppgaveService())
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
-            behandlingsstatusRoutes(beanFactory.behandlingsStatusService())
-            grunnlagsendringshendelseRoute(grunnlagsendringshendelseService)
         }
     }
 }

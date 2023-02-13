@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
+import java.time.LocalDate
 import java.util.*
 
 fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
@@ -99,6 +100,16 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             )
 
             call.respond(underkjentVedtak)
+        }
+
+        data class LoependeVedtakRequest(val dato: LocalDate)
+        data class LoependeVedtakResponse(val erLoepende: Boolean)
+        get("vedtak/loepende/{sakId}") {
+            val sakId = call.parameters["sakId"]?.toLong() ?: return@get call.respond(HttpStatusCode.BadRequest)
+            val body = call.receive<LoependeVedtakRequest>()
+
+            val erLoepende = service.vedtakErLoependePaaDato(sakId, body.dato)
+            call.respond(LoependeVedtakResponse(erLoepende))
         }
     }
 }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.fasterxml.jackson.core.type.TypeReference
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -59,7 +60,7 @@ class ApplicationBuilder {
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {
-                restModule(sikkerLogg) {
+                restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
                     vedtaksvurderingRoute(vedtaksvurderingService)
                 }
             }

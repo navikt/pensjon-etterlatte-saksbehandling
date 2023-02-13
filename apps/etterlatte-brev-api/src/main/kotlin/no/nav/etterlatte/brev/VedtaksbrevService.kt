@@ -108,6 +108,11 @@ class VedtaksbrevService(
 
         val tittel = "Vedtak om ${vedtakType.name.lowercase()}"
 
+        // TODO: slå sammen til ett navn i databasen
+        val navn = behandling.persongalleri.innsender.navn.split(" ")
+        val etternavn = navn.last()
+        val fornavn = navn.dropLast(1).joinToString(" ")
+
         return UlagretBrev(
             behandling.behandlingId,
             tittel,
@@ -115,8 +120,12 @@ class VedtaksbrevService(
             Mottaker(
                 foedselsnummer = Foedselsnummer.of(behandling.persongalleri.innsender.fnr),
                 adresse = Adresse(
-                    behandling.persongalleri.innsender.navn
-                    // TODO: skrive om objekter
+                    fornavn = fornavn,
+                    etternavn = etternavn,
+                    adresse = mottaker.adresse,
+                    postnummer = mottaker.postnummer,
+                    poststed = mottaker.poststed,
+                    land = mottaker.land
                 )
             ),
             erVedtaksbrev = true,

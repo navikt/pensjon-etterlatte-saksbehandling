@@ -1,5 +1,6 @@
 package no.nav.etterlatte.person
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -19,7 +20,11 @@ fun Route.personApi(service: PersonService) {
             val hentPersonRequest = call.receive<HentPersonRequest>()
             logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
 
-            service.hentPerson(hentPersonRequest).let { call.respond(it) }
+            try {
+                service.hentPerson(hentPersonRequest).let { call.respond(it) }
+            } catch (e: PdlFantIkkePerson) {
+                call.respond(HttpStatusCode.NotFound)
+            }
         }
 
         route("/v2") {
@@ -27,20 +32,12 @@ fun Route.personApi(service: PersonService) {
                 val hentPersonRequest = call.receive<HentPersonRequest>()
                 logger.info("Henter personopplysning med fnr=${hentPersonRequest.foedselsnummer}")
 
-                service.hentOpplysningsperson(hentPersonRequest)
-                    .let { call.respond(it) }
+                try {
+                    service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
+                } catch (e: PdlFantIkkePerson) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
-        }
-    }
-
-    route("/api/person") {
-        val logger = application.log
-
-        post {
-            val hentPersonRequest = call.receive<HentPersonRequest>()
-            logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
-
-            service.hentPerson(hentPersonRequest).let { call.respond(it) }
         }
     }
 
@@ -49,10 +46,12 @@ fun Route.personApi(service: PersonService) {
 
         post {
             val hentFolkeregisterIdentRequest = call.receive<HentFolkeregisterIdentRequest>()
-            logger.info("Henter identer for ident=${hentFolkeregisterIdentRequest.ident}")
+            logger.info("Henter identer for ident=${hentFolkeregisterIdentRequest.ident}") // TODO her må vi maskere
 
-            service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest).let {
-                call.respond(it)
+            try {
+                service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest).let { call.respond(it) }
+            } catch (e: PdlFantIkkePerson) {
+                call.respond(HttpStatusCode.NotFound)
             }
         }
     }

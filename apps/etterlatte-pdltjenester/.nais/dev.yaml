@@ -11,13 +11,13 @@ spec:
   ingresses:
     - "https://etterlatte-pdltjenester.dev.intern.nav.no"
   liveness:
-    path: "internal/isalive"
+    path: "health/isalive"
     initialDelay: 60
     timeout: 1
     periodSeconds: 5
     failureThreshold: 10
   readiness:
-    path: "internal/isready"
+    path: "health/isready"
     initialDelay: 60
     timeout: 1
   prometheus:

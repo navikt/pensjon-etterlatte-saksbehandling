@@ -2,7 +2,7 @@ package no.nav.etterlatte.behandling.omberegning
 
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
-import io.ktor.server.response.respondText
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -23,7 +23,7 @@ fun Route.omberegningRoutes(
                 sakId = request.sakId,
                 aarsak = request.aarsak
             )
-            call.respondText { omberegning.lagretBehandling.id.toString() }
+            call.respond(omberegning.lagretBehandling.id)
         }
     }
 }

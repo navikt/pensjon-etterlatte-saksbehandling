@@ -77,13 +77,12 @@ class BrevRepository private constructor(private val ds: DataSource) {
                 .apply {
                     setString(1, brev.mottaker.foedselsnummer?.value)
                     setString(2, brev.mottaker.orgnummer)
-                    setString(3, brev.mottaker.adresse?.fornavn)
-                    setString(4, brev.mottaker.adresse?.etternavn)
-                    setString(5, brev.mottaker.adresse?.adresse)
-                    setString(6, brev.mottaker.adresse?.postnummer)
-                    setString(7, brev.mottaker.adresse?.poststed)
-                    setString(8, brev.mottaker.adresse?.land)
-                    setLong(9, brevId)
+                    setString(3, brev.mottaker.adresse?.navn)
+                    setString(4, brev.mottaker.adresse?.adresse)
+                    setString(5, brev.mottaker.adresse?.postnummer)
+                    setString(6, brev.mottaker.adresse?.poststed)
+                    setString(7, brev.mottaker.adresse?.land)
+                    setLong(8, brevId)
                 }
                 .executeUpdate()
         }
@@ -100,12 +99,11 @@ class BrevRepository private constructor(private val ds: DataSource) {
                     setBoolean(3, ulagretBrev.erVedtaksbrev)
                     setString(4, ulagretBrev.mottaker.foedselsnummer?.value)
                     setString(5, ulagretBrev.mottaker.orgnummer)
-                    setString(6, ulagretBrev.mottaker.adresse?.fornavn)
-                    setString(7, ulagretBrev.mottaker.adresse?.etternavn)
-                    setString(8, ulagretBrev.mottaker.adresse?.adresse)
-                    setString(9, ulagretBrev.mottaker.adresse?.postnummer)
-                    setString(10, ulagretBrev.mottaker.adresse?.poststed)
-                    setString(11, ulagretBrev.mottaker.adresse?.land)
+                    setString(6, ulagretBrev.mottaker.adresse?.navn)
+                    setString(7, ulagretBrev.mottaker.adresse?.adresse)
+                    setString(8, ulagretBrev.mottaker.adresse?.postnummer)
+                    setString(9, ulagretBrev.mottaker.adresse?.poststed)
+                    setString(10, ulagretBrev.mottaker.adresse?.land)
                 }
                 .executeQuery()
                 .singleOrNull { getLong(1) }!!
@@ -174,10 +172,9 @@ class BrevRepository private constructor(private val ds: DataSource) {
         mottaker = Mottaker(
             foedselsnummer = getString("foedselsnummer")?.let { Foedselsnummer.of(it) },
             orgnummer = getString("orgnummer"),
-            adresse = getString("fornavn")?.let {
+            adresse = getString("navn")?.let {
                 Adresse(
-                    fornavn = it,
-                    etternavn = getString("etternavn"),
+                    navn = it,
                     adresse = getString("adresse"),
                     postnummer = getString("postnummer"),
                     poststed = getString("poststed")
@@ -231,8 +228,8 @@ class BrevRepository private constructor(private val ds: DataSource) {
             WITH nytt_brev AS (
                 INSERT INTO brev (behandling_id, tittel, vedtaksbrev) VALUES (?, ?, ?) RETURNING id
             ) 
-            INSERT INTO mottaker (brev_id, foedselsnummer, orgnummer, fornavn, etternavn, adresse, postnummer, poststed, land)
-                VALUES ((SELECT id FROM nytt_brev), ?, ?, ?, ?, ?, ?, ?, ?) RETURNING brev_id
+            INSERT INTO mottaker (brev_id, foedselsnummer, orgnummer, navn, adresse, postnummer, poststed, land)
+                VALUES ((SELECT id FROM nytt_brev), ?, ?, ?, ?, ?, ?, ?) RETURNING brev_id
         """
 
         const val OPPRETT_INNHOLD_QUERY = """
@@ -248,7 +245,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
         const val OPPDATER_MOTTAKER_QUERY = """
             UPDATE mottaker 
-            SET foedselsnummer = ?, orgnummer = ?, fornavn = ?, etternavn = ?, adresse = ?, postnummer = ?, poststed = ?, land = ?
+            SET foedselsnummer = ?, orgnummer = ?, navn = ?, adresse = ?, postnummer = ?, poststed = ?, land = ?
             WHERE brev_id = ?
         """
 

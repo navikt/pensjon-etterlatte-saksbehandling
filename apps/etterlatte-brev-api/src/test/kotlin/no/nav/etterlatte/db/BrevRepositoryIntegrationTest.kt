@@ -176,8 +176,7 @@ internal class BrevRepositoryIntegrationTest {
 
     private fun opprettMottaker() = Mottaker(
         adresse = Adresse(
-            fornavn = "Test",
-            etternavn = "Testesen",
+            navn = "Test Testesen",
             adresse = "Fyrstikkaleen 1",
             postnummer = "1234",
             poststed = "Oslo"

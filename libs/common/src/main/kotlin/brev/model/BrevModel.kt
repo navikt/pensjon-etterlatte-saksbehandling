@@ -18,8 +18,7 @@ enum class Status {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Adresse(
-    val fornavn: String? = null,
-    val etternavn: String? = null,
+    val navn: String? = null,
     val adresse: String? = null,
     val postnummer: String? = null,
     val poststed: String? = null,

@@ -71,8 +71,7 @@ class DokarkivServiceImpl(
         foedselsnummer != null -> AvsenderMottaker(id = foedselsnummer!!.value)
         orgnummer != null -> AvsenderMottaker(id = orgnummer, idType = "ORGNR")
         adresse != null -> {
-            val mottakerNavn = "${adresse!!.fornavn} ${adresse!!.etternavn}"
-            AvsenderMottaker(id = null, navn = mottakerNavn, idType = null, land = adresse!!.land)
+            AvsenderMottaker(id = null, navn = adresse!!.navn, idType = null, land = adresse!!.land)
         }
         else -> throw Exception("Ingen brevmottaker spesifisert")
     }

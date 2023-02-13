@@ -107,22 +107,14 @@ class VedtaksbrevService(
 
         logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${pdf.size}")
 
-        val tittel = "Vedtak om ${vedtakType.name.lowercase()}"
-
-        // TODO: slå sammen til ett navn i databasen
-        val navn = behandling.persongalleri.innsender.navn.split(" ")
-        val etternavn = navn.last()
-        val fornavn = navn.dropLast(1).joinToString(" ")
-
         return UlagretBrev(
             behandling.behandlingId,
-            tittel,
+            tittel = "Vedtak om ${vedtakType.name.lowercase()}",
             behandling.spraak,
             Mottaker(
                 foedselsnummer = Foedselsnummer.of(behandling.persongalleri.innsender.fnr),
                 adresse = Adresse(
-                    fornavn = fornavn,
-                    etternavn = etternavn,
+                    navn = behandling.persongalleri.innsender.navn,
                     adresse = mottaker.adresse,
                     postnummer = mottaker.postnummer,
                     poststed = mottaker.poststed,

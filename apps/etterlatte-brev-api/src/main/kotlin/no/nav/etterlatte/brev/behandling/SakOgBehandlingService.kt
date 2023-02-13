@@ -67,15 +67,17 @@ class SakOgBehandlingService(
                 datoFOM = it.datoFOM.atDay(1),
                 datoTOM = it.datoTOM?.atEndOfMonth(),
                 grunnbeloep = it.grunnbelop,
-                antallBarn = (it.soeskenFlokk?.size ?: 0) + 1,
+                antallBarn = (it.soeskenFlokk?.size ?: 0) + 1, // Legger til 1 pga at beregning fjerner soeker
                 utbetaltBeloep = it.utbetaltBeloep,
                 trygdetid = it.trygdetid
             )
         }
 
         val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
+        val antallBarn = if (soeskenjustering) beregningsperioder.first().antallBarn else null
 
         return Utbetalingsinfo(
+            antallBarn,
             beregningsperioder.hentUtbetaltBeloep(),
             virkningstidspunkt,
             soeskenjustering,

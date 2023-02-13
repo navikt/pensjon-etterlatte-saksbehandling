@@ -12,13 +12,15 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
+import no.nav.etterlatte.behandling.klienter.Vedtak
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -111,6 +113,22 @@ abstract class BehandlingIntegrationTest {
     private companion object {
         const val ISSUER_ID = "azure"
         const val CLIENT_ID = "mock-client-id"
+    }
+}
+
+class VedtakKlientTest : VedtakKlient {
+    override suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak? {
+        TODO("Not yet implemented")
+    }
+}
+
+class GrunnlagKlientTest : GrunnlagKlient {
+    override suspend fun finnPersonOpplysning(
+        sakId: Long,
+        opplysningsType: Opplysningstype,
+        accessToken: String
+    ): Grunnlagsopplysning<Person>? {
+        TODO("Not yet implemented")
     }
 }
 

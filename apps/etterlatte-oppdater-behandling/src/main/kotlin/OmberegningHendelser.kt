@@ -3,9 +3,9 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage

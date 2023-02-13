@@ -11,6 +11,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Vedtak
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -28,6 +29,7 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import testsupport.buildTestApplicationConfigurationForOauth
 import javax.sql.DataSource
 
 abstract class BehandlingIntegrationTest {
@@ -36,10 +38,13 @@ abstract class BehandlingIntegrationTest {
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:15")
     private val server: MockOAuth2Server = MockOAuth2Server()
     protected lateinit var beanFactory: TestBeanFactory
+    protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     protected fun startServer() {
-        server.start(1234)
+        server.start()
 
+        val httpServer = server.config.httpServer
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
         postgreSQLContainer.start()
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)

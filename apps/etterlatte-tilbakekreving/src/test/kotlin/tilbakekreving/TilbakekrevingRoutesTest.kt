@@ -6,6 +6,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -32,10 +34,13 @@ internal class TilbakekrevingRoutesTest {
     }
 
     private val server = MockOAuth2Server()
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     @BeforeAll
     fun before() {
-        server.start(1234)
+        server.start()
+        val httpServer = server.config.httpServer
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
     }
 
     @AfterAll
@@ -46,6 +51,9 @@ internal class TilbakekrevingRoutesTest {
     @Test
     fun `skal hente kravgrunnlag`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { tilbakekreving(applicationContext.tilbakekrevingService) } }
 
             val response = client.get("/api/tilbakekreving/${kravgrunnlagId.value}") {
@@ -60,6 +68,9 @@ internal class TilbakekrevingRoutesTest {
     @Test
     fun `skal returnere 404 hvis kravgrunnlag mangler`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { tilbakekreving(applicationContext.tilbakekrevingService) } }
 
             val response = client.get("/api/tilbakekreving/2") {
@@ -74,6 +85,9 @@ internal class TilbakekrevingRoutesTest {
     @Test
     fun `skal feile med 500 dersom id ikke er gyldig`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { tilbakekreving(applicationContext.tilbakekrevingService) } }
 
             val response = client.get("/api/tilbakekreving/ugyldig") {

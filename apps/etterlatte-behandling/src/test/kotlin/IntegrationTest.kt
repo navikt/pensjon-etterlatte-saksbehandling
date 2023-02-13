@@ -71,6 +71,9 @@ class IntegrationTest : BehandlingIntegrationTest() {
         var behandlingOpprettet: UUID? = null
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             val client = createClient {
                 install(ContentNegotiation) {
                     jackson { registerModule(JavaTimeModule()) }

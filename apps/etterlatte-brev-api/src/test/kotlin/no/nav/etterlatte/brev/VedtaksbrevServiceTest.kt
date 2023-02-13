@@ -10,6 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.adresse.Norg2Enhet
 import no.nav.etterlatte.brev.behandling.Attestant
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Behandling
@@ -23,10 +24,7 @@ import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
-import no.nav.etterlatte.brev.navansatt.NavansattKlient
-import no.nav.etterlatte.brev.navansatt.SaksbehandlerInfo
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
@@ -58,12 +56,11 @@ internal class VedtaksbrevServiceTest {
     private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
-    private val navansattKlient = mockk<NavansattKlient>()
     private val ident = "Z1234"
     private val saksbehandlerNavn = "Sak Saksbehandler"
 
     private val vedtaksbrevService =
-        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient)
+        VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
 
     @BeforeEach
     fun before() {
@@ -72,7 +69,7 @@ internal class VedtaksbrevServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient)
+        confirmVerified(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
     }
 
     @Nested
@@ -89,32 +86,24 @@ internal class VedtaksbrevServiceTest {
 
             val behandling = opprettBehandling()
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any(), any()) } returns behandling
-            coEvery {
-                adresseService.hentAvsenderEnhet(any(), any())
-            } returns Avsender("Porsgrunn", "adresse", "postnr", "telefon", saksbehandlerNavn)
             coEvery { adresseService.hentMottakerAdresse(any()) } returns opprettMottaker()
             coEvery { pdfGenerator.genererPdf(any()) } returns "".toByteArray()
-            coEvery { navansattKlient.hentSaksbehandlerInfo(any()) } returns SaksbehandlerInfo(
-                ident,
-                saksbehandlerNavn,
-                "Sak",
-                "Saksbehandler",
-                "sak@nav.no"
-            )
-            coEvery { adresseService.hentEnhet(any()) } returns ""
+            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
 
             runBlocking {
                 vedtaksbrevService.oppdaterVedtaksbrev(SAK_ID, BEHANDLING_ID, "saksbehandler", "token")
             }
 
-            verify(exactly = 1) { db.opprettBrev(any()) }
-            verify(exactly = 1) { db.hentBrevForBehandling(any()) }
-            coVerify(exactly = 1) { pdfGenerator.genererPdf(any<InnvilgetBrevRequest>()) }
-            coVerify(exactly = 1) { sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any(), any()) }
-            coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, saksbehandlerNavn) }
-            coVerify(exactly = 1) { adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr) }
-            coVerify(exactly = 1) { adresseService.hentEnhet(PORSGRUNN) }
-            coVerify(exactly = 2) { navansattKlient.hentSaksbehandlerInfo(ident) }
+            verify(exactly = 1) {
+                db.opprettBrev(any())
+                db.hentBrevForBehandling(any())
+            }
+            coVerify(exactly = 1) {
+                pdfGenerator.genererPdf(any<InnvilgetBrevRequest>())
+                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any(), any())
+                adresseService.hentAvsenderOgAttestant(behandling.vedtak)
+                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
+            }
 
             verify { dokarkivService wasNot Called }
         }
@@ -131,19 +120,10 @@ internal class VedtaksbrevServiceTest {
 
             val behandling = opprettBehandling()
             coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any(), any()) } returns behandling
-            coEvery {
-                adresseService.hentAvsenderEnhet(any(), any())
-            } returns Avsender("Porsgrunn", "adresse", "postnr", "telefon", saksbehandlerNavn)
+            coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
             coEvery { adresseService.hentMottakerAdresse(any()) } returns opprettMottaker()
             coEvery { pdfGenerator.genererPdf(any()) } returns "".toByteArray()
-            coEvery { navansattKlient.hentSaksbehandlerInfo(any()) } returns SaksbehandlerInfo(
-                ident,
-                saksbehandlerNavn,
-                "Sak",
-                "Saksbehandler",
-                "sak@nav.no"
-            )
-            coEvery { adresseService.hentEnhet(any()) } returns ""
+            coEvery { adresseService.hentEnhet(any()) } returns Norg2Enhet()
 
             runBlocking {
                 val brev = vedtaksbrevService.oppdaterVedtaksbrev(SAK_ID, BEHANDLING_ID, "saksbehandler", "token")
@@ -151,14 +131,16 @@ internal class VedtaksbrevServiceTest {
                 assertNotNull(brev)
             }
 
-            verify(exactly = 1) { db.oppdaterBrev(2, any()) }
-            verify(exactly = 1) { db.hentBrevForBehandling(any()) }
-            coVerify(exactly = 1) { pdfGenerator.genererPdf(any<InnvilgetBrevRequest>()) }
-            coVerify(exactly = 1) { sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any(), any()) }
-            coVerify(exactly = 1) { adresseService.hentAvsenderEnhet(PORSGRUNN, saksbehandlerNavn) }
-            coVerify(exactly = 1) { adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr) }
-            coVerify(exactly = 1) { adresseService.hentEnhet(PORSGRUNN) }
-            coVerify(exactly = 2) { navansattKlient.hentSaksbehandlerInfo(ident) }
+            verify(exactly = 1) {
+                db.oppdaterBrev(2, any())
+                db.hentBrevForBehandling(any())
+            }
+            coVerify(exactly = 1) {
+                pdfGenerator.genererPdf(any<InnvilgetBrevRequest>())
+                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any(), any())
+                adresseService.hentAvsenderOgAttestant(any<ForenkletVedtak>())
+                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
+            }
 
             verify { dokarkivService wasNot Called }
         }
@@ -181,8 +163,10 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
-            verify(exactly = 0) { db.oppdaterBrev(any(), any()) }
-            verify(exactly = 0) { db.opprettBrev(any()) }
+            verify(exactly = 0) {
+                db.oppdaterBrev(any(), any())
+                db.opprettBrev(any())
+            }
         }
     }
 
@@ -205,11 +189,13 @@ internal class VedtaksbrevServiceTest {
                 Assertions.assertTrue(ferdigstiltOK)
             }
 
-            verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
-            verify(exactly = 1) { db.oppdaterStatus(2, Status.FERDIGSTILT) }
+            verify(exactly = 1) {
+                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.oppdaterStatus(2, Status.FERDIGSTILT)
+            }
 
             verify {
-                listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient)
+                listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
                     .wasNot(Called)
             }
         }
@@ -232,7 +218,7 @@ internal class VedtaksbrevServiceTest {
             verify(exactly = 0) { db.oppdaterStatus(any(), any()) }
 
             verify {
-                listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient)
+                listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
                     .wasNot(Called)
             }
         }
@@ -260,7 +246,7 @@ internal class VedtaksbrevServiceTest {
             verify(exactly = 0) { db.oppdaterStatus(any(), any()) }
 
             verify {
-                listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient)
+                listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
                     .wasNot(Called)
             }
         }
@@ -291,12 +277,14 @@ internal class VedtaksbrevServiceTest {
                 assertEquals(forventetResponse, response)
             }
 
-            verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
-            verify(exactly = 1) { dokarkivService.journalfoer(forventetBrev, vedtak) }
-            verify(exactly = 1) { db.oppdaterStatus(forventetBrev.id, Status.JOURNALFOERT, any()) }
+            verify(exactly = 1) {
+                db.hentBrevForBehandling(BEHANDLING_ID)
+                dokarkivService.journalfoer(forventetBrev, vedtak)
+                db.oppdaterStatus(forventetBrev.id, Status.JOURNALFOERT, any())
+            }
 
             verify {
-                listOf(pdfGenerator, sakOgBehandlingService, adresseService, navansattKlient) wasNot Called
+                listOf(pdfGenerator, sakOgBehandlingService, adresseService) wasNot Called
             }
         }
 
@@ -323,7 +311,7 @@ internal class VedtaksbrevServiceTest {
             verify(exactly = 0) { db.oppdaterStatus(any(), any()) }
 
             verify {
-                listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService, navansattKlient)
+                listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
                     .wasNot(Called)
             }
         }
@@ -346,6 +334,7 @@ internal class VedtaksbrevServiceTest {
         ),
         ForenkletVedtak(1, VedtakType.INNVILGELSE, Saksbehandler(ident, PORSGRUNN), Attestant(ident, PORSGRUNN)),
         Utbetalingsinfo(
+            null,
             3436,
             LocalDate.now(),
             false,

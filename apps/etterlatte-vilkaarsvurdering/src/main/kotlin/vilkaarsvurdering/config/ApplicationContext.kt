@@ -10,7 +10,7 @@ import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientImpl
 
 class ApplicationContext {
-    private val config: Config = ConfigFactory.load()
+    val config: Config = ConfigFactory.load()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
     val dataSource = DataSourceBuilder.createDataSource(
         jdbcUrl = properties.jdbcUrl,

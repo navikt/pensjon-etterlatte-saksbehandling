@@ -47,6 +47,7 @@ import java.util.*
 import javax.sql.DataSource
 
 interface BeanFactory {
+    val config: Config
     fun dataSource(): DataSource
     fun sakService(): SakService
     fun foerstegangsbehandlingService(): FoerstegangsbehandlingService
@@ -77,6 +78,8 @@ interface BeanFactory {
 }
 
 abstract class CommonFactory : BeanFactory {
+    override val config: Config = ConfigFactory.load()
+
     private val behandlingsHendelser: BehandlingsHendelser by lazy {
         BehandlingsHendelser(
             rapid(),
@@ -223,7 +226,6 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
         azureAppScope = config.getString("grunnlag.azure.scope")
     )
 
-    private val config: Config = ConfigFactory.load()
     override fun vedtakKlient(): VedtakKlient {
         return VedtakKlientImpl(config, httpClient())
     }

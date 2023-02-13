@@ -6,6 +6,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -31,7 +32,7 @@ class Norg2Klient(
 
             val response = klient.get("$apiUrl/enhet/$enhet")
 
-            if (response.status == HttpStatusCode.OK) {
+            if (response.status.isSuccess()) {
                 logger.info("Hentet enhet fra Norg2 for enhet $enhet")
 
                 response.body<Norg2Enhet>()

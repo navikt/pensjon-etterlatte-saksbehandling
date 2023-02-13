@@ -1,16 +1,16 @@
-name: etterlatte-regler
+name: etterlatte-helsesjekk
 
 on:
   push:
     branches:
       - main
     paths:
-      - libs/etterlatte-regler/**
+      - libs/etterlatte-helsesjekk/**
   pull_request:
     branches:
       - main
     paths:
-      - libs/etterlatte-regler/**
+      - libs/etterlatte-helsesjekk/**
 
 jobs:
   test:

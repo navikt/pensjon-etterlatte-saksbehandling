@@ -10,6 +10,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.saksbehandler
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
@@ -26,7 +27,7 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
 
         post("attestert/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                val ferdigstiltOK = service.ferdigstillVedtaksbrev(behandlingId.toString())
+                val ferdigstiltOK = service.ferdigstillVedtaksbrev(behandlingId)
 
                 if (ferdigstiltOK) {
                     call.respond(HttpStatusCode.OK)
@@ -40,5 +41,5 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
 
 data class OpprettVedtaksbrevRequest(
     val sakId: Long,
-    val behandlingId: String
+    val behandlingId: UUID
 )

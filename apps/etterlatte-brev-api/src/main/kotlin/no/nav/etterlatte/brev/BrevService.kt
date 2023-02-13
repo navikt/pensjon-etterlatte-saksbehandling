@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import org.slf4j.LoggerFactory
+import java.util.UUID
 import no.nav.etterlatte.brev.model.Mottaker as BrevMottaker
 
 class BrevService(
@@ -22,7 +23,7 @@ class BrevService(
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
 
-    fun hentAlleBrev(behandlingId: String): List<Brev> = db.hentBrevForBehandling(behandlingId)
+    fun hentAlleBrev(behandlingId: UUID): List<Brev> = db.hentBrevForBehandling(behandlingId)
 
     fun hentBrevInnhold(id: BrevID): BrevInnhold = db.hentBrevInnhold(id)
 
@@ -53,7 +54,7 @@ class BrevService(
         return BrevInnhold(mal.tittel, Spraak.NB, pdfGenerator.genererPdf(request))
     }
 
-    fun lagreAnnetBrev(behandlingId: String, mottaker: Mottaker, brevInnhold: BrevInnhold): Brev {
+    fun lagreAnnetBrev(behandlingId: UUID, mottaker: Mottaker, brevInnhold: BrevInnhold): Brev {
         return db.opprettBrev(UlagretBrev(behandlingId, brevInnhold.mal, Spraak.NB, mottaker, false, brevInnhold.data))
     }
 

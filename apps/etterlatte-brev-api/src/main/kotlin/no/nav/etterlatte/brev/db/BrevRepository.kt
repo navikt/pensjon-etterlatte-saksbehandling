@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
+import java.util.UUID
 import javax.sql.DataSource
 
 class BrevRepository private constructor(private val ds: DataSource) {
@@ -46,9 +47,9 @@ class BrevRepository private constructor(private val ds: DataSource) {
             }!!
     }
 
-    fun hentBrevForBehandling(behandlingId: String): List<Brev> = connection.use {
+    fun hentBrevForBehandling(behandlingId: UUID): List<Brev> = connection.use {
         it.prepareStatement(HENT_ALLE_BREV_QUERY)
-            .apply { setString(1, behandlingId) }
+            .apply { setObject(1, behandlingId) }
             .executeQuery()
             .toList { mapTilBrev() }
     }
@@ -94,7 +95,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
         val id = connection.use {
             val id = it.prepareStatement(OPPRETT_BREV_QUERY)
                 .apply {
-                    setString(1, ulagretBrev.behandlingId)
+                    setObject(1, ulagretBrev.behandlingId)
                     setString(2, ulagretBrev.tittel)
                     setBoolean(3, ulagretBrev.erVedtaksbrev)
                     setString(4, ulagretBrev.mottaker.foedselsnummer?.value)
@@ -167,7 +168,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
     private fun ResultSet.mapTilBrev() = Brev(
         id = getLong("id"),
-        behandlingId = getString("behandling_id"),
+        behandlingId = getObject("behandling_id") as UUID,
         tittel = getString("tittel"),
         status = Status.valueOf(getString("status_id")),
         mottaker = Mottaker(

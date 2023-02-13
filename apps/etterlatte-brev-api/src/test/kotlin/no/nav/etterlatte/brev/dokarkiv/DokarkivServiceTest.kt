@@ -82,7 +82,7 @@ internal class DokarkivServiceTest {
 
         assertEquals(Bruker(vedtak.sak.ident), actualRequest.bruker)
         assertEquals("${vedtaksbrev.behandlingId}.${vedtaksbrev.id}", actualRequest.eksternReferanseId)
-        assertEquals(JSak(Sakstype.FAGSAK, vedtaksbrev.behandlingId), actualRequest.sak)
+        assertEquals(JSak(Sakstype.FAGSAK, vedtaksbrev.behandlingId.toString()), actualRequest.sak)
 
         val dokument = actualRequest.dokumenter.single()
         assertEquals(vedtaksbrev.tittel, dokument.tittel)
@@ -96,7 +96,7 @@ internal class DokarkivServiceTest {
 
     private fun opprettVedtaksbrev() = Brev(
         id = 1,
-        behandlingId = UUID.randomUUID().toString(),
+        behandlingId = UUID.randomUUID(),
         tittel = "vedtak om innvilgelse",
         status = Status.FERDIGSTILT,
         mottaker = Mottaker(STOR_SNERK),

@@ -11,10 +11,11 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
+import java.util.UUID
 
 data class Behandling(
     val sakId: Long,
-    val behandlingId: String,
+    val behandlingId: UUID,
     val spraak: Spraak,
     val persongalleri: Persongalleri,
     val vedtak: ForenkletVedtak,

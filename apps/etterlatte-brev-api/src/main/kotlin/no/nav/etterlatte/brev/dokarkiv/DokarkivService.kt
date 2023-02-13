@@ -53,7 +53,7 @@ class DokarkivServiceImpl(
             avsenderMottaker = vedtaksbrev.mottaker.tilAvsenderMottaker(),
             bruker = Bruker(vedtak.sak.ident),
             eksternReferanseId = "${vedtaksbrev.behandlingId}.${vedtaksbrev.id}",
-            sak = Sak(Sakstype.FAGSAK, vedtaksbrev.behandlingId),
+            sak = Sak(Sakstype.FAGSAK, vedtaksbrev.behandlingId.toString()),
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(vedtaksbrev.tittel)),
             tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal

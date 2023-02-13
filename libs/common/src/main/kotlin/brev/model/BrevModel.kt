@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.brev.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import java.util.UUID
 
 typealias BrevID = Long
 
@@ -40,7 +41,7 @@ data class Mottaker(
 
 class Brev(
     val id: BrevID,
-    val behandlingId: String,
+    val behandlingId: UUID,
     val tittel: String,
     val status: Status,
     val mottaker: Mottaker,
@@ -66,7 +67,7 @@ class BrevInnhold(
 )
 
 class UlagretBrev(
-    val behandlingId: String,
+    val behandlingId: UUID,
     val tittel: String,
     val spraak: Spraak,
     val mottaker: Mottaker,

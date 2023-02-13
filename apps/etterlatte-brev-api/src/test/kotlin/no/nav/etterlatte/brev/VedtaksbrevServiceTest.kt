@@ -318,7 +318,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     private fun opprettVedtak() = mockk<Vedtak> {
-        every { behandling.id } returns UUID.fromString(BEHANDLING_ID)
+        every { behandling.id } returns BEHANDLING_ID
         every { sak.ident } returns "ident"
         every { vedtakFattet } returns VedtakFattet("Z12345", "ansvarlig enhet", ZonedDateTime.now())
     }
@@ -352,7 +352,7 @@ internal class VedtaksbrevServiceTest {
 
     private companion object {
         private val SAK_ID = 123L
-        private val BEHANDLING_ID = UUID.randomUUID().toString()
+        private val BEHANDLING_ID = UUID.randomUUID()
         private val STOR_SNERK = Foedselsnummer.of("11057523044")
         private const val PORSGRUNN = "0805"
     }

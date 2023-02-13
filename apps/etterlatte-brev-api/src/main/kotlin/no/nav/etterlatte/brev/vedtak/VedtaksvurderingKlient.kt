@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class VedtakvurderingKlientException(override val message: String, override val cause: Throwable) :
     Exception(message, cause)
@@ -23,7 +24,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
 
-    suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak {
+    suspend fun hentVedtak(behandlingId: UUID, accessToken: String): Vedtak {
         try {
             logger.info("Henter vedtaksvurdering behandling med behandlingId=$behandlingId")
 

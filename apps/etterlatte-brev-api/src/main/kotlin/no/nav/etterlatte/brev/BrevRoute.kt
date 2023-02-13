@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.withBehandlingId
 import org.slf4j.LoggerFactory
 
 fun Route.brevRoute(service: BrevService, brregService: BrregService) {
@@ -54,19 +55,20 @@ fun Route.brevRoute(service: BrevService, brregService: BrregService) {
         }
 
         get("behandling/{behandlingId}") {
-            val behandlingId = call.parameters["behandlingId"]!!
-
-            call.respond(service.hentAlleBrev(behandlingId))
+            withBehandlingId { behandlingId ->
+                call.respond(service.hentAlleBrev(behandlingId))
+            }
         }
 
         post("behandling/{behandlingId}") {
-            val behandlingId = call.parameters["behandlingId"]!!
-            val request = call.receive<OpprettBrevRequest>()
+            withBehandlingId { behandlingId ->
+                val request = call.receive<OpprettBrevRequest>()
 
-            val brevInnhold = service.opprett(request.mottaker, request.mal, request.enhet)
-            val brev = service.lagreAnnetBrev(behandlingId, request.mottaker, brevInnhold)
+                val brevInnhold = service.opprett(request.mottaker, request.mal, request.enhet)
+                val brev = service.lagreAnnetBrev(behandlingId, request.mottaker, brevInnhold)
 
-            call.respond(brev)
+                call.respond(brev)
+            }
         }
 
         post("forhaandsvisning") {
@@ -78,25 +80,25 @@ fun Route.brevRoute(service: BrevService, brregService: BrregService) {
         }
 
         post("pdf/{behandlingId}") {
-            val behandlingId = call.parameters["behandlingId"]!!
+            withBehandlingId { behandlingId ->
+                try {
+                    val mp = call.receiveMultipart().readAllParts()
 
-            try {
-                val mp = call.receiveMultipart().readAllParts()
+                    val filData = mp.first { it is PartData.FormItem }
+                        .let { objectMapper.readValue<FilData>((it as PartData.FormItem).value) }
 
-                val filData = mp.first { it is PartData.FormItem }
-                    .let { objectMapper.readValue<FilData>((it as PartData.FormItem).value) }
+                    val fil: ByteArray = mp.first { it is PartData.FileItem }
+                        .let { (it as PartData.FileItem).streamProvider().readBytes() }
 
-                val fil: ByteArray = mp.first { it is PartData.FileItem }
-                    .let { (it as PartData.FileItem).streamProvider().readBytes() }
+                    val brevInnhold = BrevInnhold(filData.filNavn, Spraak.NB, fil)
 
-                val brevInnhold = BrevInnhold(filData.filNavn, Spraak.NB, fil)
+                    val brev = service.lagreAnnetBrev(behandlingId, filData.mottaker, brevInnhold)
 
-                val brev = service.lagreAnnetBrev(behandlingId, filData.mottaker, brevInnhold)
-
-                call.respond(brev)
-            } catch (e: Exception) {
-                logger.error("Getting multipart error", e)
-                call.respond(HttpStatusCode.BadRequest)
+                    call.respond(brev)
+                } catch (e: Exception) {
+                    logger.error("Getting multipart error", e)
+                    call.respond(HttpStatusCode.BadRequest)
+                }
             }
         }
 

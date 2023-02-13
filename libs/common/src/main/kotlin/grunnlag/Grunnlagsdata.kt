@@ -2,12 +2,10 @@ package no.nav.etterlatte.libs.common.grunnlag
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.ADRESSEBESKYTTELSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.ARBEIDSFORHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOEDESBARN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.DELTBOSTEDSADRESSE
@@ -17,7 +15,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.F
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSAAR
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNTEKT
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KONTAKTADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.OPPHOLDSADRESSE
@@ -29,7 +26,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.U
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTLAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT
-import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektInformasjon
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -76,11 +72,6 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() =
     this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentSoeskenjustering() =
     this.hentKonstantOpplysning<Beregningsgrunnlag>(SOESKEN_I_BEREGNINGEN)
-fun Grunnlagsdata<JsonNode>.hentInntekt() =
-    this.hentPeriodisertOpplysning<ArbeidsInntektInformasjon>(INNTEKT)
-
-fun Grunnlagsdata<JsonNode>.hentArbeidsforhold() = // Kun avdød som har denne opplysningen
-    this.hentPeriodisertOpplysning<AaregResponse?>(ARBEIDSFORHOLD)
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(
     opplysningstype: Opplysningstype

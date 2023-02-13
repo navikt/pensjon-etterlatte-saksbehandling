@@ -13,7 +13,7 @@ interface Options {
 }
 
 async function retrieveData(props: Options, response: Response): Promise<any> {
-  if (props.noData) {
+  if (props.noData || response.status === 204) {
     return null
   } else {
     const type = response.headers.get('content-type')?.toLowerCase()

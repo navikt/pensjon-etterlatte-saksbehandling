@@ -68,7 +68,15 @@ class VedtaksvurderingService(
 
     fun lagreIverksattVedtak(behandlingId: UUID) {
         repository.hentVedtak(behandlingId)?.also {
+            val iverksattTidspunkt = LocalDateTime.now()
             repository.lagreIverksattVedtak(behandlingId)
+            val detaljertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
+            val statistikkMelding = lagStatistikkMelding(
+                vedtakhendelse = KafkaHendelseType.IVERKSATT,
+                vedtak = detaljertVedtak,
+                tekniskTid = iverksattTidspunkt
+            )
+            sendToRapid(statistikkMelding, behandlingId)
         }
     }
 

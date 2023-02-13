@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -21,6 +22,8 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -31,12 +34,13 @@ internal class VedtaksvurderingServiceTest {
     private val beregningMock = mockk<BeregningKlient>(relaxed = true)
     private val vilkaarsvurderingMock = mockk<VilkaarsvurderingKlient>(relaxed = true)
     private val behandlingMock = mockk<BehandlingKlient>(relaxed = true)
+    private val sendToRapidMock = mockk<(String, UUID) -> Unit>(relaxed = true)
     private val service = VedtaksvurderingService(
         repositoryMock,
         beregningMock,
         vilkaarsvurderingMock,
         behandlingMock,
-        mockk(),
+        sendToRapidMock,
         mockk()
     )
 
@@ -62,6 +66,26 @@ internal class VedtaksvurderingServiceTest {
         BehandlingType.FØRSTEGANGSBEHANDLING,
         null,
         null
+    )
+
+    private val vedtakSomErAttestert = Vedtak(
+        id = 0,
+        sakId = 1,
+        sakType = SakType.BARNEPENSJON,
+        behandlingId = behandlingId,
+        saksbehandlerId = "Saksbehandler",
+        beregningsResultat = null,
+        vilkaarsResultat = null,
+        vedtakFattet = null,
+        fnr = "12312312312",
+        datoFattet = Instant.now(),
+        datoattestert = Instant.now(),
+        attestant = "Attestant",
+        virkningsDato = LocalDate.now(),
+        vedtakStatus = null,
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        attestertVedtakEnhet = "1337",
+        fattetVedtakEnhet = "1337"
     )
 
     @Test
@@ -110,6 +134,24 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             service.hentDataForVedtak(behandlingId, accessToken)
             coVerify(exactly = 0) { beregningMock.hentBeregning(behandlingId, accessToken) }
+        }
+    }
+
+    @Test
+    fun `lagre iverksatt vedtak skal sende melding til statistikk på kafka`() {
+        every {
+            repositoryMock.hentVedtak(any())
+        } returns vedtakSomErAttestert
+        every {
+            repositoryMock.lagreIverksattVedtak(any())
+        } returns 1
+        every {
+            repositoryMock.hentUtbetalingsPerioder(any())
+        } returns emptyList()
+
+        service.lagreIverksattVedtak(UUID.randomUUID())
+        verify(exactly = 1) {
+            sendToRapidMock.invoke(any(), any())
         }
     }
 

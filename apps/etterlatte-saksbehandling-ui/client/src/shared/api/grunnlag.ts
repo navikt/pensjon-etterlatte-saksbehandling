@@ -13,6 +13,6 @@ export const lagreSoeskenMedIBeregning = async (args: {
 
 export const hentSoeskenjusteringsgrunnlag = async (
   sakId: number
-): Promise<ApiResponse<Grunnlagsopplysning<Soeskenjusteringsgrunnlag | null, KildePdl>>> => {
+): Promise<ApiResponse<Grunnlagsopplysning<Soeskenjusteringsgrunnlag, KildePdl> | null>> => {
   return apiClient.get(`/grunnlag/${sakId}/SOESKEN_I_BEREGNINGEN`)
 }

@@ -61,12 +61,7 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = Saksbehandler::class, name = "saksbehandler"),
         JsonSubTypes.Type(value = Privatperson::class, name = "privatperson"),
         JsonSubTypes.Type(value = Pdl::class, name = "pdl"),
-        JsonSubTypes.Type(value = Aordningen::class, name = "a-ordningen"),
-        JsonSubTypes.Type(value = AAregisteret::class, name = "aa-registeret"),
-        JsonSubTypes.Type(value = Inntektskomponenten::class, name = "inntektskomponenten"),
-        JsonSubTypes.Type(value = Aregisteret::class, name = "Aareg"),
-        JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
-        JsonSubTypes.Type(value = Vilkaarskomponenten::class, name = "vilkaarskomponenten")
+        JsonSubTypes.Type(value = RegelKilde::class, name = "regel")
     )
     sealed class Kilde(val type: String) {
         fun toJson() = objectMapperKilde.writeValueAsString(this)
@@ -76,6 +71,7 @@ open class Grunnlagsopplysning<T>(
         companion object {
             fun create(ident: String) = Saksbehandler(ident, Tidspunkt.now().instant)
         }
+
         override fun toString(): String {
             return "saksbehandler $ident"
         }
@@ -89,30 +85,6 @@ open class Grunnlagsopplysning<T>(
         val registersReferanse: String?,
         val opplysningId: String?
     ) : Kilde("pdl") {
-        override fun toString(): String {
-            return navn
-        }
-    }
-
-    data class Aordningen(val tidspunkt: Instant) : Kilde("a-ordningen")
-
-    data class AAregisteret(val tidspunkt: Instant) : Kilde("aa-registeret")
-
-    // Depricated: Beholdes litt for å ikke brekke gamle saker/behandlinger.
-    data class Inntektskomponenten(val navn: String) : Kilde("inntektskomponenten") {
-        override fun toString(): String {
-            return navn
-        }
-    }
-
-    data class Aregisteret(val navn: String) : Kilde("Aareg") {
-        // Depricated: Beholdes litt for å ikke brekke gamle saker/behandlinger.
-        override fun toString(): String {
-            return navn
-        }
-    }
-
-    data class Vilkaarskomponenten(val navn: String) : Kilde("vilkaarskomponenten") {
         override fun toString(): String {
             return navn
         }

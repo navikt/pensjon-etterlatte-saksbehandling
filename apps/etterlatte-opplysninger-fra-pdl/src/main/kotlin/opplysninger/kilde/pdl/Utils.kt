@@ -1,8 +1,8 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
-import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer

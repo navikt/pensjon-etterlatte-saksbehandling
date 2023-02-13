@@ -1,0 +1,1 @@
+delete from grunnlagshendelse where opplysning_type in ('INNTEKT', 'ARBEIDSFORHOLD')

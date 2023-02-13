@@ -9,9 +9,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientTest
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlientTest
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
@@ -28,7 +26,7 @@ fun main() {
     Kaller vilkårsvurdering i dev
      */
 
-    val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
+    val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     postgreSQLContainer.start()
     postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
     postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)

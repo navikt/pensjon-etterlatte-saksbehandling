@@ -16,6 +16,9 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
+  prometheus:
+    enabled: true
+    path: /metrics
   secureLogs:
     enabled: true
   replicas:
@@ -74,3 +77,4 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
+        - application: etterlatte-statistikk

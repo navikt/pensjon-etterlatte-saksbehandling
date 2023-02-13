@@ -49,20 +49,10 @@ jobs:
     with:
       applikasjon: hendelser-pdl
     secrets: inherit
-  tilbakestill-medl-proxy:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: medl-proxy
-    secrets: inherit
   tilbakestill-oppdater-behandling:
     uses: ./.github/workflows/.deploy-main.yaml
     with:
       applikasjon: oppdater-behandling
-    secrets: inherit
-  tilbakestill-opplysninger-fra-inntektskomponenten:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: opplysninger-fra-inntektskomponenten
     secrets: inherit
   tilbakestill-opplysninger-fra-pdl:
     uses: ./.github/workflows/.deploy-main.yaml

@@ -3,8 +3,9 @@ package no.nav.etterlatte.statistikk
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.statistikk.database.StoenadRad
+import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
-import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
@@ -22,7 +22,7 @@ internal class VedtakhendelserRiverTest {
     companion object {
         val melding = readFile("/melding.json")
 
-        fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
+        private fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException(
                 "Fant ikke filen $file for kjøring av test ${Companion::class.java.canonicalName}"
             )
@@ -44,13 +44,14 @@ internal class VedtakhendelserRiverTest {
         behandlingId = UUID.randomUUID(),
         sakId = 0,
         sakNummer = 0,
-        tekniskTid = Instant.now(),
+        tekniskTid = Tidspunkt.now(),
         sakYtelse = "",
         versjon = "",
         saksbehandler = "",
         attestant = "",
         vedtakLoependeFom = LocalDate.now(),
-        vedtakLoependeTom = null
+        vedtakLoependeTom = null,
+        beregning = null
     )
 
     @Test

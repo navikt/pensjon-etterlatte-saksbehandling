@@ -1,6 +1,5 @@
 package no.nav.etterlatte.tilbakekreving
 
-import com.typesafe.config.ConfigFactory
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -42,19 +42,7 @@ internal class TilbakekrevingRoutesTest {
         server.start()
         val httpServer = server.config.httpServer
         port = httpServer.port()
-        hoconApplicationConfig = HoconApplicationConfig(
-            ConfigFactory.parseMap(
-                mapOf(
-                    "no.nav.security.jwt.issuers" to listOf(
-                        mapOf(
-                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
-                            "issuer_name" to ISSUER_ID,
-                            "accepted_audience" to CLIENT_ID
-                        )
-                    )
-                )
-            )
-        )
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
     }
 
     @AfterAll

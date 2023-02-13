@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import com.typesafe.config.ConfigFactory
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -46,6 +45,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.*
 import javax.sql.DataSource
 
@@ -68,19 +68,7 @@ internal class VilkaarsvurderingRoutesTest {
         server.start()
         val httpServer = server.config.httpServer
         port = httpServer.port()
-        hoconApplicationConfig = HoconApplicationConfig(
-            ConfigFactory.parseMap(
-                mapOf(
-                    "no.nav.security.jwt.issuers" to listOf(
-                        mapOf(
-                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
-                            "issuer_name" to ISSUER_ID,
-                            "accepted_audience" to CLIENT_ID
-                        )
-                    )
-                )
-            )
-        )
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
         postgreSQLContainer.start()
         ds = DataSourceBuilder.createDataSource(
             postgreSQLContainer.jdbcUrl,

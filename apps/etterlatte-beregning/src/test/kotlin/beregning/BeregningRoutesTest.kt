@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning
 
-import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -44,6 +43,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
@@ -66,19 +66,7 @@ internal class BeregningRoutesTest {
         server.start()
         val httpServer = server.config.httpServer
         port = httpServer.port()
-        hoconApplicationConfig = HoconApplicationConfig(
-            ConfigFactory.parseMap(
-                mapOf(
-                    "no.nav.security.jwt.issuers" to listOf(
-                        mapOf(
-                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
-                            "issuer_name" to ISSUER_ID,
-                            "accepted_audience" to CLIENT_ID
-                        )
-                    )
-                )
-            )
-        )
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
         beregningService =
             BeregningService(beregningRepository, vilkaarsvurderingKlient, grunnlagKlient, behandlingKlient)
     }

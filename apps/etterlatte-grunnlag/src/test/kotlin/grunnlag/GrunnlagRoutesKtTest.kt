@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import com.typesafe.config.ConfigFactory
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import testsupport.buildTestApplicationConfigurationForOauth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagRoutesKtTest {
@@ -39,19 +39,7 @@ internal class GrunnlagRoutesKtTest {
         server.start()
         val httpServer = server.config.httpServer
         port = httpServer.port()
-        hoconApplicationConfig = HoconApplicationConfig(
-            ConfigFactory.parseMap(
-                mapOf(
-                    "no.nav.security.jwt.issuers" to listOf(
-                        mapOf(
-                            "discoveryurl" to "http://localhost:$port/$ISSUER_ID/.well-known/openid-configuration",
-                            "issuer_name" to ISSUER_ID,
-                            "accepted_audience" to CLIENT_ID
-                        )
-                    )
-                )
-            )
-        )
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
     }
 
     @AfterAll

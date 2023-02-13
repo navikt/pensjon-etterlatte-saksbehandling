@@ -154,7 +154,7 @@ export const Vurdering = ({
           vurdering={
             vilkaar.vurdering
               ? { saksbehandler: vilkaar.vurdering.saksbehandler, tidspunkt: vilkaar.vurdering.tidspunkt }
-              : null
+              : undefined
           }
           kommentar={vilkaarutkast?.kommentar}
           defaultRediger={aktivVurdering}

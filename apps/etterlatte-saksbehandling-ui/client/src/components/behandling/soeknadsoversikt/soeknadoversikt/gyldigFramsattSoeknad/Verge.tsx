@@ -1,6 +1,7 @@
 import { IGyldighetproving } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { OversiktElement } from '../OversiktElement'
+import { InfoWrapper } from '../../styled'
+import { Info } from '../../Info'
 
 interface Props {
   ingenAnnenVergeEnnForelder: IGyldighetproving | undefined
@@ -10,7 +11,6 @@ export const Verge = ({ ingenAnnenVergeEnnForelder }: Props) => {
   const navn = ingenAnnenVergeEnnForelder?.resultat === VurderingsResultat.OPPFYLT ? '-' : undefined
   const label = 'Verge'
   const tekst = settTekst(ingenAnnenVergeEnnForelder?.resultat)
-  const erOppfylt = ingenAnnenVergeEnnForelder?.resultat === VurderingsResultat.OPPFYLT
 
   function settTekst(vurdering: VurderingsResultat | undefined): string {
     switch (vurdering) {
@@ -23,5 +23,9 @@ export const Verge = ({ ingenAnnenVergeEnnForelder }: Props) => {
     }
   }
 
-  return <OversiktElement navn={navn} label={label} tekst={tekst} erOppfylt={erOppfylt} />
+  return (
+    <InfoWrapper>
+      <Info tekst={navn ?? 'Ukjent'} undertekst={tekst} label={label} />
+    </InfoWrapper>
+  )
 }

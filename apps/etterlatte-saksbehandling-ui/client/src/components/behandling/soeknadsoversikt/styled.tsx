@@ -48,33 +48,6 @@ export const Undertekst = styled(BodyShort)<{ $gray: boolean }>`
   ${(props) => (props.$gray ? 'color: var(--navds-semantic-color-text-muted)' : null)};
 `
 
-export const DetailWrapper = styled.div`
-  font-size: 16px;
-  width: 150px;
-  margin-bottom: 2em;
-
-  .warningText {
-    color: #ba3a26;
-    max-width: 150px;
-  }
-  .headertext {
-    width: 250px;
-  }
-  .text {
-    width: 280px;
-  }
-
-  .labelWrapperWithIcon {
-    display: flex;
-  }
-`
-
-export const VurderingsWrapper = styled.div`
-  flex: 1;
-  flex-grow: 0;
-  min-width: 300px;
-`
-
 export const VurderingsContainer = styled.div`
   display: flex;
   border-left: 4px solid #e5e5e5;

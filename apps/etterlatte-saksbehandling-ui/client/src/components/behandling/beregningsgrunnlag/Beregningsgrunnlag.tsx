@@ -112,7 +112,6 @@ const Beregningsgrunnlag = () => {
               lenke: 'https://lovdata.no/lov/1997-02-28-19/§3-5',
             },
           ]}
-          vurderingsResultat={null}
           status={null}
         >
           <TrygdetidInfo>

@@ -30,6 +30,7 @@ on:
       - buildSrc/src/main/kotlin/Ktor2.kt
       - buildSrc/src/main/kotlin/MockK.kt
       - buildSrc/src/main/kotlin/NavFelles.kt
+      - buildSrc/src/main/kotlin/Prometheus
       - buildSrc/src/main/kotlin/TestContainer.kt
   pull_request:
     branches:
@@ -50,6 +51,7 @@ on:
       - buildSrc/src/main/kotlin/Ktor2.kt
       - buildSrc/src/main/kotlin/MockK.kt
       - buildSrc/src/main/kotlin/NavFelles.kt
+      - buildSrc/src/main/kotlin/Prometheus
       - buildSrc/src/main/kotlin/TestContainer.kt
 
 jobs:

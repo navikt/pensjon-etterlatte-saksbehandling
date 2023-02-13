@@ -334,6 +334,7 @@ internal class VedtaksbrevServiceTest {
         ),
         ForenkletVedtak(1, VedtakType.INNVILGELSE, Saksbehandler(ident, PORSGRUNN), Attestant(ident, PORSGRUNN)),
         Utbetalingsinfo(
+            null,
             3436,
             LocalDate.now(),
             false,

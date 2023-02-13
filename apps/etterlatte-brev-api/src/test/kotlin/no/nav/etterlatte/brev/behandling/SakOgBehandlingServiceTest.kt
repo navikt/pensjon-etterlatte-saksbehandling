@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -100,6 +101,7 @@ internal class SakOgBehandlingServiceTest {
             service.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER_IDENT, ACCESS_TOKEN)
         }
 
+        assertEquals(null, behandling.utbetalingsinfo?.antallBarn)
         assertEquals(3063, behandling.utbetalingsinfo?.beloep)
         assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo?.virkningsdato)
         assertEquals(false, behandling.utbetalingsinfo?.soeskenjustering)
@@ -115,6 +117,24 @@ internal class SakOgBehandlingServiceTest {
         }
     }
 
+    @Test
+    fun `FinnUtbetalingsinfo returnerer korrekt antall barn ved soeskenjustering`() {
+        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
+        coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
+
+        val behandling = runBlocking {
+            service.hentBehandling(SAK_ID, BEHANDLING_ID, SAKSBEHANDLER_IDENT, ACCESS_TOKEN)
+        }
+
+        assertEquals(2, behandling.utbetalingsinfo?.antallBarn)
+        assertTrue(behandling.utbetalingsinfo?.soeskenjustering!!)
+
+        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(any(), any()) }
+        coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(any(), any()) }
+        coVerify(exactly = 1) { beregningKlient.hentBeregning(any(), any()) }
+    }
+
     private fun opprettBeregning() = mockk<BeregningDTO> {
         every { beregningsperioder } returns listOf(
             opprettBeregningsperiode(
@@ -124,21 +144,12 @@ internal class SakOgBehandlingServiceTest {
         )
     }
 
-    private fun opprettAvansertBeregning() = mockk<BeregningDTO> {
+    private fun opprettBeregningSoeskenjustering() = mockk<BeregningDTO> {
         every { beregningsperioder } returns listOf(
             opprettBeregningsperiode(
-                YearMonth.of(2022, 6),
-                YearMonth.of(2022, 12),
-                1000
-            ),
-            opprettBeregningsperiode(
-                YearMonth.of(2023, 1),
-                YearMonth.of(2023, 6),
-                2000
-            ),
-            opprettBeregningsperiode(
-                YearMonth.of(2023, 7),
-                beloep = 3000
+                YearMonth.now(),
+                beloep = 3063,
+                soeskenFlokk = listOf("barn2")
             )
         )
     }
@@ -174,11 +185,16 @@ internal class SakOgBehandlingServiceTest {
             jsonNode
         )
 
-    private fun opprettBeregningsperiode(fom: YearMonth, tom: YearMonth? = null, beloep: Int) = Beregningsperiode(
+    private fun opprettBeregningsperiode(
+        fom: YearMonth,
+        tom: YearMonth? = null,
+        beloep: Int,
+        soeskenFlokk: List<String>? = null
+    ) = Beregningsperiode(
         fom,
         tom,
         beloep,
-        null,
+        soeskenFlokk,
         1000,
         10000,
         10

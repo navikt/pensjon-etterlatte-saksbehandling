@@ -28,7 +28,7 @@ export const Vedtaksbrev = () => {
   const { sak, soeknadMottattDato, status } = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const [fileURL, setFileURL] = useState<string>()
-  const [vedtaksbrevId, setVedtaksbrevId] = useState<string>()
+  const [vedtaksbrev, setVedtaksbrev] = useState<any>(undefined)
   const [vilkaarsvurdering, setVilkaarsvurdering] = useState<IVilkaarsvurdering | undefined>(undefined)
   const [ikkeOpfylteVilkaar, setIkkeOppfylteVilkaar] = useState<VilkaarOption[]>([])
   const [valgtVilkaarType, setValgtVilkaarType] = useState<string>()
@@ -36,9 +36,9 @@ export const Vedtaksbrev = () => {
   const [error, setError] = useState<string>()
 
   useEffect(() => {
-    if (!vedtaksbrevId) return
+    if (!vedtaksbrev?.id) return
 
-    genererPdf(vedtaksbrevId!!)
+    genererPdf(vedtaksbrev.id!!)
       .then((res) => {
         if (res.status === 'ok') {
           return new Blob([res.data], { type: 'application/pdf' })
@@ -54,7 +54,7 @@ export const Vedtaksbrev = () => {
 
         setLoading(false)
       })
-  }, [vedtaksbrevId])
+  }, [vedtaksbrev])
 
   useEffect(() => {
     if (vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT) {
@@ -96,7 +96,7 @@ export const Vedtaksbrev = () => {
       const brevResponse = await opprettEllerOppdaterBrevForVedtak(sak, behandlingId!!)
 
       if (brevResponse.status === 'ok') {
-        setVedtaksbrevId(brevResponse.data.id)
+        setVedtaksbrev(brevResponse.data)
       } else {
         setError(brevResponse.error)
         setLoading(false)
@@ -116,6 +116,30 @@ export const Vedtaksbrev = () => {
               </Heading>
             </HeadingWrapper>
             <Soeknadsdato mottattDato={soeknadMottattDato} />
+
+            {vedtaksbrev && (
+              <>
+                <InfoContainer>
+                  <Overskrift>Mottaker</Overskrift>
+
+                  <div className="info">
+                    <Info>Navn</Info>
+                    <Tekst>
+                      {vedtaksbrev.mottaker?.adresse?.fornavn} {vedtaksbrev.mottaker?.adresse?.etternavn}
+                    </Tekst>
+                  </div>
+
+                  <div className="info">
+                    <Info>Adresse</Info>
+                    <Tekst>
+                      {vedtaksbrev.mottaker?.adresse?.adresse},&nbsp;
+                      {vedtaksbrev.mottaker?.adresse?.postnummer} {vedtaksbrev.mottaker?.adresse?.poststed}
+                    </Tekst>
+                    <Tekst>{vedtaksbrev.mottaker?.adresse?.land}</Tekst>
+                  </div>
+                </InfoContainer>
+              </>
+            )}
           </ContentHeader>
 
           {!!ikkeOpfylteVilkaar.length && (
@@ -160,4 +184,28 @@ const Editor = styled.div`
   min-width: 40%;
   width: 40%;
   border-right: 1px solid #c6c2bf;
+`
+
+const InfoContainer = styled.div`
+  margin-top: 1em;
+  padding: 1em;
+  border: 1px solid #c7c0c0;
+  border-radius: 3px;
+`
+
+const Overskrift = styled.div`
+  font-size: 20px;
+  font-weight: 600;
+  color: #3e3832;
+`
+
+const Info = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+`
+
+const Tekst = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: #595959;
 `

@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import io.ktor.server.cio.CIO
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
@@ -27,6 +28,7 @@ class Server(private val context: ApplicationContext) {
         embeddedServer(
             factory = CIO,
             environment = applicationEngineEnvironment {
+                config = HoconApplicationConfig(context.config)
                 module {
                     restModule(sikkerLogg) {
                         vilkaarsvurdering(vilkaarsvurderingService)

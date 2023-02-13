@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 
 class ApplicationContext {
-    private val config: Config = ConfigFactory.load()
+    val config: Config = ConfigFactory.load()
     private val env = System.getenv()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
     val dataSource = DataSourceBuilder.createDataSource(

@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
@@ -50,19 +52,18 @@ import java.util.UUID.randomUUID
 internal class BeregningRoutesTest {
 
     private val server = MockOAuth2Server()
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val beregningRepository = mockk<BeregningRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
-
     private lateinit var beregningService: BeregningService
 
     @BeforeAll
     fun before() {
         server.start()
-        System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
-        System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
-
+        val httpServer = server.config.httpServer
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
         beregningService =
             BeregningService(beregningRepository, vilkaarsvurderingKlient, grunnlagKlient, behandlingKlient)
     }
@@ -77,6 +78,9 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hent(any()) } returns null
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { beregning(beregningService) } }
 
             val response = client.get("/api/beregning/${randomUUID()}") {
@@ -95,6 +99,9 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { beregning(beregningService) } }
 
             val response = client.get("/api/beregning/${beregning.behandlingId}") {
@@ -124,6 +131,9 @@ internal class BeregningRoutesTest {
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application { restModule(this.log) { beregning(beregningService) } }
 
             val response = client.post("/api/beregning/$behandlingId") {

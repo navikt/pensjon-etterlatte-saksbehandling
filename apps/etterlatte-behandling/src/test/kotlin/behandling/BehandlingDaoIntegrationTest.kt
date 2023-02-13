@@ -47,7 +47,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingDaoIntegrationTest {
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao

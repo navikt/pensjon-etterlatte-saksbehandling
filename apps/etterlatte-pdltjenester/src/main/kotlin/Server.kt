@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -7,6 +8,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.cio.CIO
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
@@ -37,6 +39,7 @@ class Server(applicationContext: ApplicationContext) {
     private val engine = embeddedServer(
         CIO,
         environment = applicationEngineEnvironment {
+            config = HoconApplicationConfig(ConfigFactory.load())
             module {
                 module(
                     securityContextMediator = applicationContext.securityMediator,

@@ -1,0 +1,19 @@
+name: etterlatte-helsesjekk
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-helsesjekk/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-helsesjekk/**
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.lib-test.yaml
+    secrets: inherit

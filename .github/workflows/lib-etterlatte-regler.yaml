@@ -14,16 +14,6 @@ on:
 
 jobs:
   test:
-    name: Gradle test and build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Setup Java v17.x
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17.x
-          cache: gradle
-      - name: Gradle test and build
-        run: ./gradlew :libs:etterlatte-regler:test :libs:etterlatte-regler:build
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.lib-test.yaml
+    secrets: inherit

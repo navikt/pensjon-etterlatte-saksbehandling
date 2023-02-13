@@ -10,6 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
@@ -42,6 +44,7 @@ import java.util.*
 internal class BehandlingRoutesTest {
 
     private val mockOAuth2Server = MockOAuth2Server()
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val generellBehandlingService = mockk<GenerellBehandlingService>()
     private val foerstegangsbehandlingService = mockk<FoerstegangsbehandlingService>()
     private val revurderingService = mockk<RevurderingService>()
@@ -50,6 +53,8 @@ internal class BehandlingRoutesTest {
     @BeforeAll
     fun before() {
         mockOAuth2Server.start(1234)
+        val httpServer = mockOAuth2Server.config.httpServer
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
     }
 
     @AfterEach
@@ -74,6 +79,9 @@ internal class BehandlingRoutesTest {
         } returns true
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application {
                 restModule(this.log) {
                     behandlingRoutes(
@@ -120,6 +128,9 @@ internal class BehandlingRoutesTest {
         } returns false
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application {
                 restModule(this.log) {
                     behandlingRoutes(

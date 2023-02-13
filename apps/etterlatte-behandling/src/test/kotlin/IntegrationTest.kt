@@ -18,6 +18,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsBehov
@@ -71,6 +72,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import testsupport.buildTestApplicationConfigurationForOauth
 import java.lang.Thread.sleep
 import java.time.Instant
 import java.time.LocalDate
@@ -83,14 +85,16 @@ import javax.sql.DataSource
 class ApplicationTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server: MockOAuth2Server = MockOAuth2Server()
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private lateinit var beanFactory: TestBeanFactory
 
     @BeforeAll
     fun startServer() {
-        server.start(1234)
-
+        server.start()
+        val httpServer = server.config.httpServer
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
         postgreSQLContainer.start()
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
@@ -112,6 +116,9 @@ class ApplicationTest {
         var behandlingOpprettet: UUID? = null
 
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             val client = createClient {
                 install(ContentNegotiation) {
                     jackson { registerModule(JavaTimeModule()) }

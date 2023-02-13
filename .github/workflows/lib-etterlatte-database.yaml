@@ -1,0 +1,19 @@
+name: etterlatte-database
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-database/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-database/**
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.lib-test.yaml
+    secrets: inherit

@@ -140,11 +140,15 @@ For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> R
 ## Lokal bygg/test - docker
 
 Docker må være installert og kjørende for at lokal bygg/test skal fungere. Hvis man bruker docker desktop så klarer testene
-å finne docker socket automatisk. Hvis man har colima kjørende så må man ha en symlink:
+å finne docker socket automatisk. Hvis man har colima kjørende så må man sette opp noen miljøvariabler.
 
 ```
-sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
+DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock
+TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 ```
+
+* DOCKER_HOST peker docker app osv mot sock filen fra colima
+* TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE setter sock adressen på innsiden av kontainere
 
 ## Arbeidsflyter og bygging
 Foruten lokal Gradle-bruk skjer bygging via Github Actions. Vi har definert flere arbeidsflyter (workflows) som spiller sammen.

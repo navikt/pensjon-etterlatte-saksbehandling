@@ -42,6 +42,9 @@ data class Saksbehandler(
 typealias Attestant = Saksbehandler
 
 data class Utbetalingsinfo(
+    val antallBarn: Int?,
+    val beloep: Int,
+    val virkningsdato: LocalDate,
     val soeskenjustering: Boolean,
     val beregningsperioder: List<Beregningsperiode>
 )
@@ -103,4 +106,9 @@ fun Grunnlag.mapSpraak(): Spraak = with(this.sak) {
     requireNotNull(opplysning?.verdi) {
         "Sak (id=${metadata.sakId}) mangler opplysningstype SPRAAK"
     }
+}
+
+fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {
+    // TODO: Håndter grunnbeløpsendringer
+    return this.last().utbetaltBeloep
 }

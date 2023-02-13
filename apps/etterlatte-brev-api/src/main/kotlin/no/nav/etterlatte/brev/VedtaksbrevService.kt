@@ -5,10 +5,8 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
-import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
@@ -27,8 +25,7 @@ class VedtaksbrevService(
     private val pdfGenerator: PdfGeneratorKlient,
     private val sakOgBehandlingService: SakOgBehandlingService,
     private val adresseService: AdresseService,
-    private val dokarkivService: DokarkivServiceImpl,
-    private val navansattKlient: NavansattKlient
+    private val dokarkivService: DokarkivServiceImpl
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -93,19 +90,8 @@ class VedtaksbrevService(
     }
 
     private suspend fun opprettEllerOppdater(behandling: Behandling): UlagretBrev {
-        val saksbehandler = behandling.vedtak.saksbehandler
-        val saksbehandlerInfo = navansattKlient.hentSaksbehandlerInfo(saksbehandler.ident)
-        val attestant = behandling.vedtak.attestant?.let {
-            Attestant(
-                navansattKlient.hentSaksbehandlerInfo(it.ident).navn,
-                adresseService.hentEnhet(it.enhet)
-            )
-        }
+        val (avsender, attestant) = adresseService.hentAvsenderOgAttestant(behandling.vedtak)
 
-        val avsender = adresseService.hentAvsenderEnhet(
-            saksbehandler.enhet,
-            saksbehandlerInfo.navn
-        )
         val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
 
         val vedtakType = behandling.vedtak.type
@@ -122,6 +108,11 @@ class VedtaksbrevService(
 
         val tittel = "Vedtak om ${vedtakType.name.lowercase()}"
 
+        // TODO: slå sammen til ett navn i databasen
+        val navn = behandling.persongalleri.innsender.navn.split(" ")
+        val etternavn = navn.last()
+        val fornavn = navn.dropLast(1).joinToString(" ")
+
         return UlagretBrev(
             behandling.behandlingId,
             tittel,
@@ -129,8 +120,12 @@ class VedtaksbrevService(
             Mottaker(
                 foedselsnummer = Foedselsnummer.of(behandling.persongalleri.innsender.fnr),
                 adresse = Adresse(
-                    behandling.persongalleri.innsender.navn
-                    // TODO: skrive om objekter
+                    fornavn = fornavn,
+                    etternavn = etternavn,
+                    adresse = mottaker.adresse,
+                    postnummer = mottaker.postnummer,
+                    poststed = mottaker.poststed,
+                    land = mottaker.land
                 )
             ),
             erVedtaksbrev = true,

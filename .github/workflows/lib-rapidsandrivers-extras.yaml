@@ -1,0 +1,19 @@
+name: rapidsandrivers-extras
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - libs/rapidsandrivers-extras/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - libs/rapidsandrivers-extras/**
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.lib-test.yaml
+    secrets: inherit

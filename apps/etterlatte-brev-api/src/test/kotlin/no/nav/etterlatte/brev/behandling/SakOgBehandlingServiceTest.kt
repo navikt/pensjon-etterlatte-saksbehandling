@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -121,7 +122,7 @@ internal class SakOgBehandlingServiceTest {
         }
 
         assertEquals(2, behandling.utbetalingsinfo?.antallBarn)
-        assertEquals(true, behandling.utbetalingsinfo?.soeskenjustering)
+        assertTrue(behandling.utbetalingsinfo?.soeskenjustering!!)
 
         coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(any(), any()) }
         coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(any(), any()) }

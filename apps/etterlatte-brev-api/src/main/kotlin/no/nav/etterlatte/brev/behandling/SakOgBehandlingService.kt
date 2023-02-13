@@ -74,7 +74,7 @@ class SakOgBehandlingService(
         }
 
         val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
-        val antallBarn = if (soeskenjustering) beregningsperioder.first().antallBarn else null
+        val antallBarn = if (soeskenjustering) beregningsperioder.last().antallBarn else null
 
         return Utbetalingsinfo(
             antallBarn,

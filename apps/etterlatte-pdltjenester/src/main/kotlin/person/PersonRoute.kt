@@ -12,7 +12,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 
-fun Route.personApi(service: PersonService) {
+fun Route.personRoute(service: PersonService) {
     route("person") {
         val logger = application.log
 
@@ -46,7 +46,7 @@ fun Route.personApi(service: PersonService) {
 
         post {
             val hentFolkeregisterIdentRequest = call.receive<HentFolkeregisterIdentRequest>()
-            logger.info("Henter identer for ident=${hentFolkeregisterIdentRequest.ident}") // TODO her må vi maskere
+            logger.info("Henter identer for ident=${hentFolkeregisterIdentRequest.ident}")
 
             try {
                 service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest).let { call.respond(it) }

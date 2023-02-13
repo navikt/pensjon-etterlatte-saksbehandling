@@ -1,38 +1,38 @@
 package no.nav.etterlatte
 
-import com.typesafe.config.Config
-import com.typesafe.config.ConfigFactory
-import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
-import no.nav.etterlatte.ktortokenexchange.SecurityContextMediatorFactory
-import no.nav.etterlatte.libs.ktor.httpClient
-import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import no.nav.etterlatte.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.pdl.PdlKlient
-import no.nav.etterlatte.person.PersonService
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.libs.helsesjekk.setReady
+import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.person.personRoute
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-class ApplicationContext(configLocation: String? = null) {
-    private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
+val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
-    val securityMediator: SecurityContextMediator = SecurityContextMediatorFactory.from(config)
-    val personService: PersonService = PersonService(
-        pdlKlient = PdlKlient(
-            httpClient = pdlhttpclient(config.getConfig("no.nav.etterlatte.tjenester.pdl.aad")),
-            apiUrl = config.getString("no.nav.etterlatte.tjenester.pdl.aad.url")
-        ),
-        ppsKlient = ParallelleSannheterKlient(
-            httpClient = httpClient(),
-            apiUrl = config.getString("no.nav.etterlatte.tjenester.pps.url")
-        )
-    )
-
-    private fun pdlhttpclient(aad: Config) = httpClientClientCredentials(
-        azureAppClientId = aad.getString("client_id"),
-        azureAppJwk = aad.getString("client_jwk"),
-        azureAppWellKnownUrl = aad.getString("well_known_url"),
-        azureAppScope = aad.getString("outbound")
-    )
-}
 fun main() {
-    ApplicationContext()
-        .also { Server(it).run() }
+    Server(ApplicationContext()).run()
+}
+
+class Server(applicationContext: ApplicationContext) {
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-pdltjenester oppstart")
+    }
+
+    private val engine = embeddedServer(
+        CIO,
+        environment = applicationEngineEnvironment {
+            module {
+                restModule(sikkerLogg) {
+                    personRoute(applicationContext.personService)
+                }
+            }
+            connector { port = 8080 }
+        }
+    )
+
+    fun run() = setReady().also { engine.start(true) }
 }

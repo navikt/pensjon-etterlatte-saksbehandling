@@ -269,7 +269,7 @@ class RealGenerellBehandlingServiceTest {
             sak = SAK_ID,
             soeknadMottattDato = soeknadMottatDato
         )
-        val opplysningstype = Opplysningstype.DOEDSDATO
+        val opplysningstype = Opplysningstype.AVDOED_PDL_V1
         val doedsdato = LocalDate.parse("2020-01-01")
 
         val personopplysning = personOpplysning(doedsdato = doedsdato)
@@ -370,7 +370,7 @@ class RealGenerellBehandlingServiceTest {
             },
             grunnlagKlient = mockk {
                 coEvery {
-                    finnPersonOpplysning(SAK_ID, Opplysningstype.DOEDSDATO, TOKEN)
+                    finnPersonOpplysning(SAK_ID, Opplysningstype.AVDOED_PDL_V1, TOKEN)
                 } returns grunnlagsopplysningMedPersonopplysning
             }
         )

@@ -56,12 +56,14 @@ interface GenerellBehandlingService {
     ): DetaljertBehandlingDto
 
     fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
+
     suspend fun hentBehandlingMedEnkelPersonopplysning(
         behandlingId: UUID,
         saksbehandler: Saksbehandler,
         accessToken: String,
         opplysningstype: Opplysningstype
     ): BehandlingMedGrunnlagsopplysninger<Person>
+
     suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
         saksbehandler: Saksbehandler,
@@ -149,22 +151,17 @@ class RealGenerellBehandlingService(
     ): BehandlingMedGrunnlagsopplysninger<Person> {
         val behandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
         val sakId = behandling.sak
-        return coroutineScope {
-            val personopplysning = async {
-                grunnlagKlient.finnPersonOpplysning(
-                    sakId,
-                    opplysningstype,
-                    accessToken
-                )
-            }
-
-            BehandlingMedGrunnlagsopplysninger(
-                id = behandling.id,
-                soeknadMottattDato = behandling.soeknadMottattDato,
-                personopplysning = personopplysning.await()
-            ).also {
-                personopplysning.await()?.fnr?.let { loggRequest(saksbehandler, it) }
-            }
+        val personopplysning = grunnlagKlient.finnPersonOpplysning(
+            sakId,
+            opplysningstype,
+            accessToken
+        )
+        return BehandlingMedGrunnlagsopplysninger(
+            id = behandling.id,
+            soeknadMottattDato = behandling.soeknadMottattDato,
+            personopplysning = personopplysning
+        ).also {
+            personopplysning?.fnr?.let { loggRequest(saksbehandler, it) }
         }
     }
 
@@ -176,28 +173,25 @@ class RealGenerellBehandlingService(
     ): Boolean {
         val virkningstidspunkt = request.dato
         val begrunnelse = request.begrunnelse
-
         val harGyldigFormat = virkningstidspunkt.year in (0..9999) && begrunnelse != null
 
-        val maksTreAarFoerSoknadOgMinstManedEtterDoedsfall = coroutineScope {
-            val behandlingMedDoedsdato = hentBehandlingMedEnkelPersonopplysning(
-                behandlingId,
-                saksbehandler,
-                accessToken,
-                Opplysningstype.DOEDSDATO
-            )
-            val doedsdato = YearMonth.from(behandlingMedDoedsdato.personopplysning?.opplysning?.doedsdato)
-            val soeknadMottatt = YearMonth.from(behandlingMedDoedsdato.soeknadMottattDato)
-            val treArFoerSoknad = soeknadMottatt.minusYears(3)
+        val behandlingMedDoedsdato = hentBehandlingMedEnkelPersonopplysning(
+            behandlingId,
+            saksbehandler,
+            accessToken,
+            Opplysningstype.AVDOED_PDL_V1
+        )
+        val doedsdato = YearMonth.from(behandlingMedDoedsdato.personopplysning?.opplysning?.doedsdato)
+        val soeknadMottatt = YearMonth.from(behandlingMedDoedsdato.soeknadMottattDato)
+        val makstidspunktFoerSoeknad = soeknadMottatt.minusYears(3)
 
-            if (doedsdato.isBefore(treArFoerSoknad)) {
-                virkningstidspunkt.isAfter(treArFoerSoknad)
-            } else {
-                virkningstidspunkt.isAfter(doedsdato)
-            }
+        val etterMaksTidspunktEllersMinstManedEtterDoedsfall = if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
+            virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
+        } else {
+            virkningstidspunkt.isAfter(doedsdato)
         }
 
-        return harGyldigFormat && maksTreAarFoerSoknadOgMinstManedEtterDoedsfall
+        return harGyldigFormat && etterMaksTidspunktEllersMinstManedEtterDoedsfall
     }
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(

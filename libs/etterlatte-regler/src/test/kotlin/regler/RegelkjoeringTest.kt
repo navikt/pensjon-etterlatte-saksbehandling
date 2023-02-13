@@ -21,7 +21,6 @@ internal class RegelkjoeringTest {
         testVerdi2022 = FaktumNode(2022, saksbehandler, "Verdi for test"),
         testVerdi2023 = FaktumNode(2023, saksbehandler, "Verdi for test")
     )
-
     private val gjelderFra1900: LocalDate = LocalDate.of(1900, 1, 1)
     private val gjelderFra2021: LocalDate = LocalDate.of(2021, 1, 1)
     private val gjelderFra2022: LocalDate = LocalDate.of(2022, 1, 1)

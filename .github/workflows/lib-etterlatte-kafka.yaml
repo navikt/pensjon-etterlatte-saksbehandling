@@ -1,16 +1,16 @@
-name: etterlatte-regler
+name: etterlatte-kafka
 
 on:
   push:
     branches:
       - main
     paths:
-      - libs/etterlatte-regler/**
+      - libs/etterlatte-kafka/**
   pull_request:
     branches:
       - main
     paths:
-      - libs/etterlatte-regler/**
+      - libs/etterlatte-kafka/**
 
 jobs:
   test:

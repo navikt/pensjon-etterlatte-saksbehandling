@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.spyk
 import io.mockk.verify
 import kotliquery.queryOf
@@ -7,8 +8,10 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.utbetaling.TestContainers
@@ -115,9 +118,9 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains(
-                                "En feil oppstod under prosessering av vedtak med vedtakId=null"
-                            ) != false &&
+                                ?.contains(
+                                    "En feil oppstod under prosessering av vedtak med vedtakId=null"
+                                ) != false &&
                             this.utbetalingResponse.behandlingId == null
                     }
                 }
@@ -157,11 +160,11 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
+                                ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains("behandlingId for nytt vedtak: $behandlingId_andre") == true &&
+                                ?.contains("behandlingId for nytt vedtak: $behandlingId_andre") == true &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains("behandlingId for tidligere utbetaling: $behandlingId_forste") == true &&
+                                ?.contains("behandlingId for tidligere utbetaling: $behandlingId_forste") == true &&
                             this.utbetalingResponse.behandlingId == behandlingId_andre
                     }
                 }
@@ -196,9 +199,9 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains(
-                                "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
-                            ) != false &&
+                                ?.contains(
+                                    "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
+                                ) != false &&
                             this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
@@ -225,12 +228,12 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 any(),
                 match {
-                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_OPPDATERT &&
-                            this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatusDto.GODKJENT &&
-                            this.utbetalingResponse.behandlingId == behandlingId
-                    }
+                    val (eventName, utbetalingResponse) = it.toResponse()
+
+                    return@match eventName == EVENT_NAME_OPPDATERT &&
+                        utbetalingResponse.vedtakId == 1L &&
+                        utbetalingResponse.status == UtbetalingStatusDto.GODKJENT &&
+                        utbetalingResponse.behandlingId == behandlingId
                 }
             )
         }
@@ -244,12 +247,12 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 any(),
                 match {
-                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_OPPDATERT &&
-                            this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
-                            this.utbetalingResponse.behandlingId == null
-                    }
+                    val (eventName, utbetalingResponse) = it.toResponse()
+
+                    return@match eventName == EVENT_NAME_OPPDATERT &&
+                        utbetalingResponse.vedtakId == 1L &&
+                        utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
+                        utbetalingResponse.behandlingId == null
                 }
             )
         }
@@ -275,14 +278,14 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 any(),
                 match {
-                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_OPPDATERT &&
-                            this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
-                            this.utbetalingResponse.feilmelding ==
-                            "Utbetalingen for vedtakId=1 har feil status (GODKJENT)" &&
-                            this.utbetalingResponse.behandlingId == behandlingId
-                    }
+                    val (eventName, utbetalingResponse) = it.toResponse()
+
+                    return@match eventName == EVENT_NAME_OPPDATERT &&
+                        utbetalingResponse.vedtakId == 1L &&
+                        utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
+                        utbetalingResponse.feilmelding ==
+                        "Utbetalingen for vedtakId=1 har feil status (GODKJENT)" &&
+                        utbetalingResponse.behandlingId == behandlingId
                 }
             )
         }
@@ -307,13 +310,13 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 any(),
                 match {
-                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_OPPDATERT &&
-                            this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
-                            this.utbetalingResponse.feilmelding == "KodeMelding Beskrivelse" &&
-                            this.utbetalingResponse.behandlingId == behandlingId
-                    }
+                    val (eventName, utbetalingResponse) = it.toResponse()
+
+                    return@match eventName == EVENT_NAME_OPPDATERT &&
+                        utbetalingResponse.vedtakId == 1L &&
+                        utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
+                        utbetalingResponse.feilmelding == "KodeMelding Beskrivelse" &&
+                        utbetalingResponse.behandlingId == behandlingId
                 }
             )
         }
@@ -349,5 +352,16 @@ class ApplicationIntegrationTest {
 
     companion object {
         const val TIMEOUT: Long = 5000
+    }
+
+    private fun String.toResponse(): Pair<String, UtbetalingResponseDto> {
+        val message = objectMapper.readTree(this)
+
+        return Pair(
+            message[eventNameKey].asText(),
+            objectMapper.treeToValue(
+                message["utbetaling_response"]
+            )
+        )
     }
 }

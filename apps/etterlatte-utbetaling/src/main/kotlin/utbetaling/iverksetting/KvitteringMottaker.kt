@@ -7,7 +7,8 @@ import jakarta.jms.Session
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -21,6 +22,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringRe
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UtbetalingFinnesIkke
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
@@ -60,12 +62,14 @@ class KvitteringMottaker(
                         is KvitteringOppdatert -> {
                             oppdrag.haandterMottattKvittering(resultat.utbetaling, oppdragXml)
                         }
+
                         is UtbetalingFinnesIkke -> {
                             "Finner ingen utbetaling for vedtakId=${resultat.vedtakId}".also {
                                 logger.error(it)
                                 sendUtbetalingFeiletEvent(it, oppdrag, null)
                             }
                         }
+
                         is UgyldigStatus -> {
                             """Utbetalingen for vedtakId=${oppdrag.vedtakId()} har feil status (${resultat.status})
                             """.trimIndent().also {
@@ -119,7 +123,7 @@ class KvitteringMottaker(
                 behandlingId = utbetaling.behandlingId.value,
                 feilmelding = utbetaling.kvitteringFeilmelding()
             )
-        ).toJson()
+        ).toMessage()
     )
 
     private fun sendUtbetalingFeiletEvent(
@@ -135,7 +139,7 @@ class KvitteringMottaker(
                 behandlingId = utbetaling?.behandlingId?.value,
                 feilmelding = feilmelding
             )
-        ).toJson()
+        ).toMessage()
     )
 
     private fun Utbetaling.kvitteringFeilmelding() = when (this.kvittering?.alvorlighetsgrad) {
@@ -154,5 +158,26 @@ class KvitteringMottaker(
 
     companion object {
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)
+    }
+
+    private fun UtbetalingResponseDto.toMessage(): Map<String, Any> {
+        val utbetalingResponse = mutableMapOf<String, Any>(
+            "status" to this.status
+        )
+
+        this.vedtakId?.let { utbetalingResponse.put("vedtakId", it) }
+        this.behandlingId?.let { utbetalingResponse.put("behandlingId", it) }
+        this.feilmelding?.let { utbetalingResponse.put("feilmelding", it) }
+
+        return utbetalingResponse
+    }
+
+    private fun UtbetalingEventDto.toMessage(): String {
+        return JsonMessage.newMessage(
+            mapOf(
+                eventNameKey to EVENT_NAME_OPPDATERT,
+                "utbetaling_response" to this.utbetalingResponse.toMessage()
+            )
+        ).toJson()
     }
 }

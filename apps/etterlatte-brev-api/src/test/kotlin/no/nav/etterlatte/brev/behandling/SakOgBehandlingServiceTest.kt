@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -34,7 +36,7 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.YearMonth
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.etterlatte.brev.behandling.Beregningsperiode as BrevBeregningsperiode
 
 internal class SakOgBehandlingServiceTest {
@@ -81,9 +83,11 @@ internal class SakOgBehandlingServiceTest {
         assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestant?.ident)
         assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo?.virkningsdato)
 
-        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any()) }
-        coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(SAK_ID, any()) }
-        coVerify(exactly = 1) { beregningKlient.hentBeregning(BEHANDLING_ID, any()) }
+        coVerify(exactly = 1) {
+            vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
+            grunnlagKlient.hentGrunnlag(SAK_ID, any())
+            beregningKlient.hentBeregning(BEHANDLING_ID, any())
+        }
     }
 
     @Test
@@ -104,9 +108,11 @@ internal class SakOgBehandlingServiceTest {
             behandling.utbetalingsinfo?.beregningsperioder
         )
 
-        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any()) }
-        coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(SAK_ID, any()) }
-        coVerify(exactly = 1) { beregningKlient.hentBeregning(BEHANDLING_ID, any()) }
+        coVerify(exactly = 1) {
+            vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
+            grunnlagKlient.hentGrunnlag(SAK_ID, any())
+            beregningKlient.hentBeregning(BEHANDLING_ID, any())
+        }
     }
 
     private fun opprettBeregning() = mockk<BeregningDTO> {
@@ -138,7 +144,8 @@ internal class SakOgBehandlingServiceTest {
     }
 
     private fun opprettVedtak() = mockk<Vedtak> {
-        every { sak.ident } returns "ident"
+        every { sak } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID)
+        every { behandling.id } returns UUID.fromString(BEHANDLING_ID)
         every { vedtakId } returns 123L
         every { type } returns VedtakType.INNVILGELSE
         every { virk } returns Periode(YearMonth.now(), null)
@@ -181,7 +188,7 @@ internal class SakOgBehandlingServiceTest {
         private val FNR = Foedselsnummer.of("11057523044")
         private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, null)
         private val STATISK_UUID = UUID.randomUUID()
-        private val BEHANDLING_ID = "123"
+        private val BEHANDLING_ID = UUID.randomUUID().toString()
         private val ACCESS_TOKEN = "321"
         private val SAKSBEHANDLER_IDENT = "Z1235"
         private val ATTESTANT_IDENT = "Z54321"

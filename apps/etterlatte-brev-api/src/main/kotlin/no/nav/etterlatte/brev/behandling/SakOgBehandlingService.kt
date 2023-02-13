@@ -1,9 +1,13 @@
 package no.nav.etterlatte.brev.behandling
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -17,12 +21,26 @@ class SakOgBehandlingService(
         behandlingId: String,
         innloggetSaksbehandlerIdent: String,
         accessToken: String
-    ): Behandling {
-        val vedtak = vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken)
-        val grunnlag = grunnlagKlient.hentGrunnlag(sakId, accessToken)
+    ): Behandling = coroutineScope {
+        val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken) }
+        val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, accessToken) }
 
-        val innloggetSaksbehandlerEnhet =
-            saksbehandlere[innloggetSaksbehandlerIdent] ?: throw SaksbehandlerManglerEnhetException(
+        mapBehandling(
+            vedtak.await(),
+            grunnlag.await(),
+            innloggetSaksbehandlerIdent,
+            accessToken
+        )
+    }
+
+    private suspend fun mapBehandling(
+        vedtak: Vedtak,
+        grunnlag: Grunnlag,
+        innloggetSaksbehandlerIdent: String,
+        accessToken: String
+    ): Behandling {
+        val innloggetSaksbehandlerEnhet = saksbehandlere[innloggetSaksbehandlerIdent]
+            ?: throw SaksbehandlerManglerEnhetException(
                 "Saksbehandler $innloggetSaksbehandlerIdent mangler enhet fra secret"
             )
 
@@ -36,8 +54,8 @@ class SakOgBehandlingService(
         }
 
         return Behandling(
-            sakId = sakId,
-            behandlingId = behandlingId,
+            sakId = vedtak.sak.id,
+            behandlingId = vedtak.behandling.id.toString(),
             spraak = grunnlag.mapSpraak(),
             persongalleri = Persongalleri(
                 innsender = grunnlag.mapInnsender(),
@@ -53,7 +71,7 @@ class SakOgBehandlingService(
                 ),
                 attestant
             ),
-            utbetalingsinfo = finnUtbetalingsinfo(behandlingId, vedtak.virk, accessToken)
+            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id.toString(), vedtak.virk, accessToken)
         )
     }
 

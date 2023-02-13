@@ -160,6 +160,9 @@ class RestModuleTest {
     @Test
     fun `metrics test`() {
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             application {
                 restModule(this.log) { route1() }
             }

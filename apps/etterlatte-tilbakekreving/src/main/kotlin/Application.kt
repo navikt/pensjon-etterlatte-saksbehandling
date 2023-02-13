@@ -1,5 +1,7 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.ConfigFactory
+import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
@@ -21,7 +23,11 @@ fun rapidApplication(
     applicationContext: ApplicationContext,
     rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(System.getenv().withConsumerGroupId()))
-            .withKtorModule { restModule(sikkerLogg) { tilbakekreving(applicationContext.tilbakekrevingService) } }
+            .withKtorModule {
+                restModule(sikkerLogg, config = HoconApplicationConfig(ConfigFactory.load())) {
+                    tilbakekreving(applicationContext.tilbakekrevingService)
+                }
+            }
             .build()
 ): RapidsConnection =
     with(applicationContext) {

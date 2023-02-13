@@ -22,6 +22,7 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.etterlatte.vedtaksvurdering.Vedtak as VedtakEntity
@@ -86,6 +87,12 @@ class VedtaksvurderingService(
 
     fun hentVedtak(behandlingId: UUID): VedtakEntity? {
         return repository.hentVedtak(behandlingId)
+    }
+
+    fun vedtakErLoependePaaDato(sakId: Long, dato: LocalDate): Boolean {
+        val alleVedtakForSak = repository.hentVedtakForSak(sakId)
+
+        return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)
     }
 
     suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, accessToken: String): Vedtak {

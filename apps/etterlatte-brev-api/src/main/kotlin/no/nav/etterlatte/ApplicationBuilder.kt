@@ -73,7 +73,7 @@ class ApplicationBuilder {
     private val datasource = DataSourceBuilder.createDataSource(env)
     private val db = BrevRepository.using(datasource)
 
-    private val adresseService = AdresseService(norg2Klient, regoppslagKlient)
+    private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 
     private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE"), requireNotNull(env["DOKARKIV_URL"]))
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
@@ -88,8 +88,7 @@ class ApplicationBuilder {
             pdfGenerator,
             sakOgBehandlingService,
             adresseService,
-            dokarkivService,
-            navansattKlient
+            dokarkivService
         )
 
     private val journalpostService = SafClient(httpClient(), env["SAF_BASE_URL"]!!, env["SAF_SCOPE"]!!)

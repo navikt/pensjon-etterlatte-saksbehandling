@@ -44,4 +44,5 @@ dependencies {
     testImplementation(NavFelles.MockOauth2Server)
     testImplementation(TestContainer.Jupiter)
     testImplementation(TestContainer.Postgresql)
+    testImplementation(project(":libs:testdata"))
 }

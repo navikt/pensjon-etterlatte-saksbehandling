@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.ktor
 
 import com.fasterxml.jackson.databind.JsonMappingException
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -139,6 +140,22 @@ class RestModuleTest {
 
         assertTrue(jacksonException.erDeserialiseringsException())
         assertTrue(wrappedException.erDeserialiseringsException())
+    }
+
+    @Test
+    fun `metrics test`() {
+        testApplication {
+            application {
+                restModule(this.log) { route1() }
+            }
+
+            client.get("/metrics").also {
+                val body: String = it.body()
+
+                assertEquals(OK, it.status)
+                assertTrue(body.contains("HELP"))
+            }
+        }
     }
 
     private fun Route.route1() {

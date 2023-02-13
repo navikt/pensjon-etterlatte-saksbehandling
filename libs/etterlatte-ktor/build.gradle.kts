@@ -29,6 +29,9 @@ dependencies {
 
     implementation(NavFelles.TokenValidationKtor2)
 
+    implementation(Prometheus.SimpleClientCommon)
+    implementation(Prometheus.SimpleClientHotspot)
+
     testImplementation(Jupiter.Engine)
     testImplementation(Ktor2.ServerTests)
     testImplementation(NavFelles.MockOauth2Server)

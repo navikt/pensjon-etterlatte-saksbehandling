@@ -60,13 +60,3 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
         }
     }
 }
-
-class GrunnlagKlientTest : GrunnlagKlient {
-    override suspend fun finnPersonOpplysning(
-        sakId: Long,
-        opplysningsType: Opplysningstype,
-        accessToken: String
-    ): Grunnlagsopplysning<Person>? {
-        TODO("Not yet implemented")
-    }
-}

@@ -42,6 +42,9 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
     fun omberegn() {
         val fnr = "234"
         testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
             val client = createClient {
                 install(ContentNegotiation) {
                     jackson { registerModule(JavaTimeModule()) }

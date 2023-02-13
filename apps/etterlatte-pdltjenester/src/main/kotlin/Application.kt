@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import io.ktor.server.cio.CIO
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
@@ -25,6 +26,7 @@ class Server(applicationContext: ApplicationContext) {
     private val engine = embeddedServer(
         CIO,
         environment = applicationEngineEnvironment {
+            config = HoconApplicationConfig(applicationContext.config)
             module {
                 restModule(sikkerLogg) {
                     personRoute(applicationContext.personService)

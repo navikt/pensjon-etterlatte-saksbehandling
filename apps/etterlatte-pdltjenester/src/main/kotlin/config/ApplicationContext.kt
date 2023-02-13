@@ -9,7 +9,7 @@ import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.person.PersonService
 
 class ApplicationContext {
-    private val config: Config = ConfigFactory.load()
+    val config: Config = ConfigFactory.load()
 
     val pdlKlient = PdlKlient(
         httpClient = httpClientClientCredentials(

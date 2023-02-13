@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -29,10 +31,17 @@ class RegoppslagKlient(
         } else {
             logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
-            client.get("$url/regoppslag/${ident}") {
+            val response = client.get("$url/regoppslag/${ident}") {
                 header("x_correlation_id", getXCorrelationId())
                 header("Nav_Call_Id", getXCorrelationId())
-            }.body()
+            }
+
+            if (response.status.isSuccess()) {
+                response.body<RegoppslagResponseDTO>()
+                    .also { cache.put(ident, it) }
+            } else {
+                throw ResponseException(response, "Ukjent feil fra navansatt api")
+            }
         }
     } catch (exception: Exception) {
         throw AdresseException("Feil i kall mot Regoppslag", exception)

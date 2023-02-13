@@ -97,6 +97,7 @@ internal class DokarkivServiceTest {
     private fun opprettVedtaksbrev() = Brev(
         id = 1,
         behandlingId = UUID.randomUUID(),
+        soekerFnr = "soeker fnr",
         tittel = "vedtak om innvilgelse",
         status = Status.FERDIGSTILT,
         mottaker = Mottaker(STOR_SNERK),

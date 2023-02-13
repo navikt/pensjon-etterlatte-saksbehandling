@@ -137,6 +137,7 @@ internal class VedtaksbrevRouteTest {
     private fun opprettBrev() = Brev(
         1,
         BEHANDLING_ID,
+        "soeker_fnr",
         "tittel",
         Status.OPPRETTET,
         Mottaker(STOR_SNERK),

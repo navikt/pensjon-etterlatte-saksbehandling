@@ -41,6 +41,7 @@ data class Mottaker(
 class Brev(
     val id: BrevID,
     val behandlingId: UUID,
+    val soekerFnr: String,
     val tittel: String,
     val status: Status,
     val mottaker: Mottaker,
@@ -51,6 +52,7 @@ class Brev(
             Brev(
                 id = id,
                 behandlingId = ulagretBrev.behandlingId,
+                soekerFnr = ulagretBrev.soekerFnr,
                 tittel = ulagretBrev.tittel,
                 status = ulagretBrev.status,
                 mottaker = ulagretBrev.mottaker,
@@ -67,6 +69,7 @@ class BrevInnhold(
 
 class UlagretBrev(
     val behandlingId: UUID,
+    val soekerFnr: String,
     val tittel: String,
     val spraak: Spraak,
     val mottaker: Mottaker,

@@ -55,7 +55,17 @@ class BrevService(
     }
 
     fun lagreAnnetBrev(behandlingId: UUID, mottaker: Mottaker, brevInnhold: BrevInnhold): Brev {
-        return db.opprettBrev(UlagretBrev(behandlingId, brevInnhold.mal, Spraak.NB, mottaker, false, brevInnhold.data))
+        return db.opprettBrev(
+            UlagretBrev(
+                behandlingId,
+                "TODO FNR SOEKER",
+                brevInnhold.mal,
+                Spraak.NB,
+                mottaker,
+                false,
+                brevInnhold.data
+            )
+        )
     }
 
     fun ferdigstillBrev(id: BrevID): Boolean {

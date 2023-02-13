@@ -109,6 +109,7 @@ class VedtaksbrevService(
 
         return UlagretBrev(
             behandling.behandlingId,
+            soekerFnr = behandling.persongalleri.soeker.fnr,
             tittel = "Vedtak om ${vedtakType.name.lowercase()}",
             behandling.spraak,
             Mottaker(

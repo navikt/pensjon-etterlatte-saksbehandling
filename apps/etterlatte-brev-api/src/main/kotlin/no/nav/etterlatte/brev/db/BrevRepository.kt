@@ -95,15 +95,16 @@ class BrevRepository private constructor(private val ds: DataSource) {
             val id = it.prepareStatement(OPPRETT_BREV_QUERY)
                 .apply {
                     setObject(1, ulagretBrev.behandlingId)
-                    setString(2, ulagretBrev.tittel)
-                    setBoolean(3, ulagretBrev.erVedtaksbrev)
-                    setString(4, ulagretBrev.mottaker.foedselsnummer?.value)
-                    setString(5, ulagretBrev.mottaker.orgnummer)
-                    setString(6, ulagretBrev.mottaker.adresse?.navn)
-                    setString(7, ulagretBrev.mottaker.adresse?.adresse)
-                    setString(8, ulagretBrev.mottaker.adresse?.postnummer)
-                    setString(9, ulagretBrev.mottaker.adresse?.poststed)
-                    setString(10, ulagretBrev.mottaker.adresse?.land)
+                    setString(2, ulagretBrev.soekerFnr)
+                    setString(3, ulagretBrev.tittel)
+                    setBoolean(4, ulagretBrev.erVedtaksbrev)
+                    setString(5, ulagretBrev.mottaker.foedselsnummer?.value)
+                    setString(6, ulagretBrev.mottaker.orgnummer)
+                    setString(7, ulagretBrev.mottaker.adresse?.navn)
+                    setString(8, ulagretBrev.mottaker.adresse?.adresse)
+                    setString(9, ulagretBrev.mottaker.adresse?.postnummer)
+                    setString(10, ulagretBrev.mottaker.adresse?.poststed)
+                    setString(11, ulagretBrev.mottaker.adresse?.land)
                 }
                 .executeQuery()
                 .singleOrNull { getLong(1) }!!
@@ -167,6 +168,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
     private fun ResultSet.mapTilBrev() = Brev(
         id = getLong("id"),
         behandlingId = getObject("behandling_id") as UUID,
+        soekerFnr = getString("soeker_fnr"),
         tittel = getString("tittel"),
         status = Status.valueOf(getString("status_id")),
         mottaker = Mottaker(
@@ -192,7 +194,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
     private object Queries {
         const val HENT_BREV_QUERY = """
-            SELECT b.id, b.behandling_id, b.tittel, b.vedtaksbrev, h.status_id, m.*
+            SELECT b.id, b.behandling_id, b.soeker_fnr, b.tittel, b.vedtaksbrev, h.status_id, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -205,7 +207,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
         """
 
         const val HENT_ALLE_BREV_QUERY = """
-            SELECT b.id, b.behandling_id, b.tittel, b.vedtaksbrev, h.status_id, m.*
+            SELECT b.id, b.behandling_id, b.soeker_fnr, b.tittel, b.vedtaksbrev, h.status_id, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -226,7 +228,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
         const val OPPRETT_BREV_QUERY = """
             WITH nytt_brev AS (
-                INSERT INTO brev (behandling_id, tittel, vedtaksbrev) VALUES (?, ?, ?) RETURNING id
+                INSERT INTO brev (behandling_id, soeker_fnr, tittel, vedtaksbrev) VALUES (?, ?, ?, ?) RETURNING id
             ) 
             INSERT INTO mottaker (brev_id, foedselsnummer, orgnummer, navn, adresse, postnummer, poststed, land)
                 VALUES ((SELECT id FROM nytt_brev), ?, ?, ?, ?, ?, ?, ?) RETURNING brev_id

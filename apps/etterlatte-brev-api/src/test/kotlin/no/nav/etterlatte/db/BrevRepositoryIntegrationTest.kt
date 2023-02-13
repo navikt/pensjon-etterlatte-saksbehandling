@@ -165,6 +165,7 @@ internal class BrevRepositoryIntegrationTest {
         return db.opprettBrev(
             UlagretBrev(
                 behandlingId = behandlingId,
+                soekerFnr = "00000012345",
                 tittel = UUID.randomUUID().toString(),
                 spraak = Spraak.NB,
                 mottaker = opprettMottaker(),

@@ -53,7 +53,7 @@ internal class JournalfoerVedtaksbrevTest {
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
         val adresse = Adresse("Fornavn", "Etternavn", "Testgaten 13", "1234", "OSLO")
-        val brev = Brev(1, BEHANDLING_ID, "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK, null, adresse), true)
+        val brev = Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK, null, adresse), true)
         val response = JournalpostResponse("1234", null, null, true, emptyList())
 
         every { vedtaksbrevService.journalfoerVedtaksbrev(any()) } returns Pair(brev, response)

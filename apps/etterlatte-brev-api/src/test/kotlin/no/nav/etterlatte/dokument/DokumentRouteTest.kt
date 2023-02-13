@@ -30,17 +30,14 @@ import testsupport.buildTestApplicationConfigurationForOauth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DokumentRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private var port: Int = 0
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
-
     private val journalpostService = mockk<SafClient>()
 
     @BeforeAll
     fun before() {
         mockOAuth2Server.start()
         val httpServer = mockOAuth2Server.config.httpServer
-        port = httpServer.port()
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
     }
 
     @AfterEach

@@ -86,7 +86,6 @@ class ApplicationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server: MockOAuth2Server = MockOAuth2Server()
-    private var port: Int = 0
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private lateinit var beanFactory: TestBeanFactory
 
@@ -94,8 +93,7 @@ class ApplicationTest {
     fun startServer() {
         server.start()
         val httpServer = server.config.httpServer
-        port = httpServer.port()
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
         postgreSQLContainer.start()
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)

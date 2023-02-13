@@ -37,7 +37,6 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksbrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private var port: Int = 0
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
 
@@ -45,8 +44,7 @@ internal class VedtaksbrevRouteTest {
     fun before() {
         mockOAuth2Server.start()
         val httpServer = mockOAuth2Server.config.httpServer
-        port = httpServer.port()
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
     }
 
     @AfterEach

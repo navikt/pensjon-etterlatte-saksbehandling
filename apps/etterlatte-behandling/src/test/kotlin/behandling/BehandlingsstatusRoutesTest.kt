@@ -30,15 +30,13 @@ internal class BehandlingsstatusRoutesTest {
 
     private val beanFactory: BeanFactory = mockk(relaxed = true)
     private val server: MockOAuth2Server = MockOAuth2Server()
-    private var port: Int = 0
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     @BeforeAll
     fun before() {
         server.start()
         val httpServer = server.config.httpServer
-        port = httpServer.port()
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
     }
 
     @AfterAll

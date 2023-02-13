@@ -55,7 +55,6 @@ internal class VilkaarsvurderingRoutesTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server = MockOAuth2Server()
-    private var port: Int = 0
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
@@ -67,8 +66,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun before() {
         server.start()
         val httpServer = server.config.httpServer
-        port = httpServer.port()
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
         postgreSQLContainer.start()
         ds = DataSourceBuilder.createDataSource(
             postgreSQLContainer.jdbcUrl,

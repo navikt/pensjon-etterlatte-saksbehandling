@@ -37,7 +37,6 @@ import testsupport.buildTestApplicationConfigurationForOauth
 class RestModuleTest {
 
     private val server = MockOAuth2Server()
-    private var port: Int = 0
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val token: String by lazy {
         server.issueToken(
@@ -54,8 +53,7 @@ class RestModuleTest {
     fun beforeAll() {
         server.start()
         val httpServer = server.config.httpServer
-        port = httpServer.port()
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
     }
 
     @AfterAll

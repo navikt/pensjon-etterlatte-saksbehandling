@@ -52,21 +52,18 @@ import java.util.UUID.randomUUID
 internal class BeregningRoutesTest {
 
     private val server = MockOAuth2Server()
-    private var port: Int = 0
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val beregningRepository = mockk<BeregningRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
-
     private lateinit var beregningService: BeregningService
 
     @BeforeAll
     fun before() {
         server.start()
         val httpServer = server.config.httpServer
-        port = httpServer.port()
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
         beregningService =
             BeregningService(beregningRepository, vilkaarsvurderingKlient, grunnlagKlient, behandlingKlient)
     }

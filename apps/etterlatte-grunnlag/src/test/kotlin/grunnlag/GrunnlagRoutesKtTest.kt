@@ -26,7 +26,6 @@ import testsupport.buildTestApplicationConfigurationForOauth
 internal class GrunnlagRoutesKtTest {
     private val grunnlagService = mockk<GrunnlagService>()
     private val server = MockOAuth2Server()
-    private var port: Int = 0
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     companion object {
@@ -38,8 +37,7 @@ internal class GrunnlagRoutesKtTest {
     fun before() {
         server.start()
         val httpServer = server.config.httpServer
-        port = httpServer.port()
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(port, ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
     }
 
     @AfterAll

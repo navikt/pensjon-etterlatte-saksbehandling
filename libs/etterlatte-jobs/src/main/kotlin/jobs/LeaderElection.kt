@@ -23,7 +23,6 @@ open class LeaderElection(
         logger.info("Current pod: $me. Leader: $leader. Current pod is leader: $amLeader")
         return amLeader
     }
-
     companion object {
         private val logger = LoggerFactory.getLogger(LeaderElection::class.java)
     }

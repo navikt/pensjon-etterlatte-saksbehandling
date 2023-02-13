@@ -8,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
+import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -28,19 +29,20 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import testsupport.buildTestApplicationConfigurationForOauth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PersonRouteTest {
 
     private val server = MockOAuth2Server()
+    private lateinit var applicationConfig: ApplicationConfig
     private val personService: PersonService = mockk()
 
     @BeforeAll
     fun before() {
         server.start()
-        server.config.httpServer.port()
-        System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
-        System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
+        applicationConfig =
+            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID, CLIENT_ID)
     }
 
     @AfterAll
@@ -58,6 +60,9 @@ class PersonRouteTest {
         coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().soeker
 
         testApplication {
+            environment {
+                config = applicationConfig
+            }
             application {
                 restModule(log) { personRoute(personService) }
             }
@@ -84,6 +89,9 @@ class PersonRouteTest {
         coEvery { personService.hentOpplysningsperson(hentPersonRequest) } returns mockPerson()
 
         testApplication {
+            environment {
+                config = applicationConfig
+            }
             application {
                 restModule(log) { personRoute(personService) }
             }
@@ -112,6 +120,9 @@ class PersonRouteTest {
         )
 
         testApplication {
+            environment {
+                config = applicationConfig
+            }
             application {
                 restModule(log) { personRoute(personService) }
             }
@@ -140,6 +151,9 @@ class PersonRouteTest {
         } throws PdlForesporselFeilet("Noe feilet")
 
         testApplication {
+            environment {
+                config = applicationConfig
+            }
             application {
                 restModule(log) { personRoute(personService) }
             }
@@ -170,6 +184,9 @@ class PersonRouteTest {
         )
 
         testApplication {
+            environment {
+                config = applicationConfig
+            }
             application {
                 restModule(log) { personRoute(personService) }
             }

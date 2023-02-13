@@ -41,6 +41,7 @@ internal class OmberegningHendelser(rapidsConnection: RapidsConnection, private 
                 runBlocking {
                     val omberegningId = behandlinger.opprettOmberegning(hendelse).body<UUID>()
                     packet["omberegning"] = omberegningId
+                    packet.eventName = "Omberegninghendelse-behandlet"
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")

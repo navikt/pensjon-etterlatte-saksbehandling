@@ -54,7 +54,9 @@ class OppgaveDao(private val connection: () -> Connection) {
                     antallSoesken = antallSoesken(getString("soesken"))
                 )
             }.also {
-                logger.info("""Hentet oppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver""")
+                logger.info(
+                    "Hentet behandlingsoppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver"
+                )
             }
         }
     }
@@ -80,6 +82,8 @@ class OppgaveDao(private val connection: () -> Connection) {
                     grunnlagsendringsType = GrunnlagsendringsType.valueOf(getString("type")),
                     gjelderRolle = Saksrolle.enumVedNavnEllerUkjent(getString("hendelse_gjelder_rolle"))
                 )
+            }.also {
+                logger.info("Hentet grunnlagsoppgaveliste for saksbehandler. Fant ${it.size} oppgaver")
             }
         }
     }

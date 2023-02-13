@@ -1,16 +1,16 @@
-name: etterlatte-regler
+name: testdata
 
 on:
   push:
     branches:
       - main
     paths:
-      - libs/etterlatte-regler/**
+      - libs/testdata/**
   pull_request:
     branches:
       - main
     paths:
-      - libs/etterlatte-regler/**
+      - libs/testdata/**
 
 jobs:
   test:

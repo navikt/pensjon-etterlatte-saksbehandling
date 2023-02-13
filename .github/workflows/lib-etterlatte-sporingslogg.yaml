@@ -1,16 +1,16 @@
-name: etterlatte-regler
+name: etterlatte-sporingslogg
 
 on:
   push:
     branches:
       - main
     paths:
-      - libs/etterlatte-regler/**
+      - libs/etterlatte-sporingslogg/**
   pull_request:
     branches:
       - main
     paths:
-      - libs/etterlatte-regler/**
+      - libs/etterlatte-sporingslogg/**
 
 jobs:
   test:

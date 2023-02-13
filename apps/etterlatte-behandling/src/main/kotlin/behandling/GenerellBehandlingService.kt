@@ -15,16 +15,19 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.BehandlingMedGrunnlagsopplysninger
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
+import java.time.YearMonth
 import java.util.*
 
 interface GenerellBehandlingService {
@@ -53,6 +56,20 @@ interface GenerellBehandlingService {
     ): DetaljertBehandlingDto
 
     fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
+
+    suspend fun hentBehandlingMedEnkelPersonopplysning(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String,
+        opplysningstype: Opplysningstype
+    ): BehandlingMedGrunnlagsopplysninger<Person>
+
+    suspend fun erGyldigVirkningstidspunkt(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String,
+        request: VirkningstidspunktRequest
+    ): Boolean
 }
 
 class RealGenerellBehandlingService(
@@ -124,6 +141,57 @@ class RealGenerellBehandlingService(
 
     override fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling? {
         return hentBehandling(behandlingId)?.toDetaljertBehandling()
+    }
+
+    override suspend fun hentBehandlingMedEnkelPersonopplysning(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String,
+        opplysningstype: Opplysningstype
+    ): BehandlingMedGrunnlagsopplysninger<Person> {
+        val behandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
+        val sakId = behandling.sak
+        val personopplysning = grunnlagKlient.finnPersonOpplysning(
+            sakId,
+            opplysningstype,
+            accessToken
+        )
+        return BehandlingMedGrunnlagsopplysninger(
+            id = behandling.id,
+            soeknadMottattDato = behandling.soeknadMottattDato,
+            personopplysning = personopplysning
+        ).also {
+            personopplysning?.fnr?.let { loggRequest(saksbehandler, it) }
+        }
+    }
+
+    override suspend fun erGyldigVirkningstidspunkt(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        accessToken: String,
+        request: VirkningstidspunktRequest
+    ): Boolean {
+        val virkningstidspunkt = request.dato
+        val begrunnelse = request.begrunnelse
+        val harGyldigFormat = virkningstidspunkt.year in (0..9999) && begrunnelse != null
+
+        val behandlingMedDoedsdato = hentBehandlingMedEnkelPersonopplysning(
+            behandlingId,
+            saksbehandler,
+            accessToken,
+            Opplysningstype.AVDOED_PDL_V1
+        )
+        val doedsdato = YearMonth.from(behandlingMedDoedsdato.personopplysning?.opplysning?.doedsdato)
+        val soeknadMottatt = YearMonth.from(behandlingMedDoedsdato.soeknadMottattDato)
+        val makstidspunktFoerSoeknad = soeknadMottatt.minusYears(3)
+
+        val etterMaksTidspunktEllersMinstManedEtterDoedsfall = if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
+            virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
+        } else {
+            virkningstidspunkt.isAfter(doedsdato)
+        }
+
+        return harGyldigFormat && etterMaksTidspunktEllersMinstManedEtterDoedsfall
     }
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(

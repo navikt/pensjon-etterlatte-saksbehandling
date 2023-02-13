@@ -528,14 +528,14 @@ class VedtakKlientTest : VedtakKlient {
         TODO("Not yet implemented")
     }
 }
-
 class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstype,
         accessToken: String
     ): Grunnlagsopplysning<Person>? {
-        TODO("Not yet implemented")
+        val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
+        return grunnlagsOpplysningMedPersonopplysning(personopplysning)
     }
 }
 

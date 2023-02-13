@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -13,21 +14,31 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.ktor.Saksbehandler
+import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.sql.Connection
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class RealGenerellBehandlingServiceTest {
@@ -250,26 +261,148 @@ class RealGenerellBehandlingServiceTest {
         assertEquals(Saksrolle.UKJENT, resUkjentRolle)
     }
 
+    @Test
+    fun `hentBehandlingMedEnkelPersonopplysning henter behandlingsinfo og etterspurt personopplysning`() {
+        val soeknadMottatDato = LocalDateTime.parse("2020-01-01T00:00:00")
+        val behandling = foerstegangsbehandling(
+            id = BEHANDLINGS_ID,
+            sak = SAK_ID,
+            soeknadMottattDato = soeknadMottatDato
+        )
+        val opplysningstype = Opplysningstype.AVDOED_PDL_V1
+        val doedsdato = LocalDate.parse("2020-01-01")
+
+        val personopplysning = personOpplysning(doedsdato = doedsdato)
+        val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
+
+        val service = lagRealGenerellBehandlingService(
+            behandlinger = mockk {
+                every { hentBehandlingType(BEHANDLINGS_ID) } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { hentBehandling(BEHANDLINGS_ID, BehandlingType.FØRSTEGANGSBEHANDLING) } returns behandling
+            },
+            grunnlagKlient = mockk {
+                coEvery {
+                    finnPersonOpplysning(SAK_ID, opplysningstype, TOKEN)
+                } returns grunnlagsopplysningMedPersonopplysning
+            }
+        )
+        val behandlingMedPersonopplsning = runBlocking {
+            service.hentBehandlingMedEnkelPersonopplysning(
+                BEHANDLINGS_ID,
+                Saksbehandler("id"),
+                TOKEN,
+                opplysningstype
+            )
+        }
+
+        assertEquals(soeknadMottatDato, behandlingMedPersonopplsning.soeknadMottattDato)
+        assertEquals(doedsdato, behandlingMedPersonopplsning.personopplysning?.opplysning?.doedsdato)
+    }
+
+    @Test
+    fun `erGyldigVirkningstidspunkt hvis tidspunkt er maaned etter doedsfall og maks tre aar foer mottatt soeknad`() {
+        val bodyVirkningstidspunkt = Instant.parse("2017-02-01T00:00:00Z")
+        val bodyBegrunnelse = "begrunnelse"
+        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
+
+        val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
+        val doedsdato = LocalDate.parse("2016-12-30")
+
+        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
+
+        val gyldigVirkningstidspunkt = runBlocking {
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, Saksbehandler("id"), TOKEN, request)
+        }
+
+        assertTrue(gyldigVirkningstidspunkt)
+    }
+
+    @Test
+    fun `erGyldigVirkningstidspunkt er false hvis tidspunkt er foer en maaned etter doedsfall`() {
+        val bodyVirkningstidspunkt = Instant.parse("2020-01-01T00:00:00Z")
+        val bodyBegrunnelse = "begrunnelse"
+        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
+
+        val soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00.000000000")
+        val doedsdato = LocalDate.parse("2020-01-01")
+
+        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
+
+        val gyldigVirkningstidspunkt = runBlocking {
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, Saksbehandler("id"), TOKEN, request)
+        }
+
+        assertFalse(gyldigVirkningstidspunkt)
+    }
+
+    @Test
+    fun `erGyldigVirkningstidspunkt hvis tidspunkt er tre aar foer mottatt soeknad`() {
+        val bodyVirkningstidspunkt = Instant.parse("2017-01-01T00:00:00Z")
+        val bodyBegrunnelse = "begrunnelse"
+        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
+
+        val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
+        val doedsdato = LocalDate.parse("2016-12-30")
+
+        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
+
+        val gyldigVirkningstidspunkt = runBlocking {
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, Saksbehandler("id"), TOKEN, request)
+        }
+
+        assertFalse(gyldigVirkningstidspunkt)
+    }
+
+    private fun behandlingServiceMedMocks(
+        doedsdato: LocalDate?,
+        soeknadMottatt: LocalDateTime
+    ): RealGenerellBehandlingService {
+        val behandling = foerstegangsbehandling(id = BEHANDLINGS_ID, sak = SAK_ID, soeknadMottattDato = soeknadMottatt)
+        val personopplysning = personOpplysning(doedsdato = doedsdato)
+        val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
+
+        return lagRealGenerellBehandlingService(
+            behandlinger = mockk {
+                every { hentBehandlingType(BEHANDLINGS_ID) } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every {
+                    hentBehandling(BEHANDLINGS_ID, BehandlingType.FØRSTEGANGSBEHANDLING)
+                } returns behandling
+            },
+            grunnlagKlient = mockk {
+                coEvery {
+                    finnPersonOpplysning(SAK_ID, Opplysningstype.AVDOED_PDL_V1, TOKEN)
+                } returns grunnlagsopplysningMedPersonopplysning
+            }
+        )
+    }
+
     private fun lagRealGenerellBehandlingService(
-        behandlinger: BehandlingDao,
-        hendelseKanal: SendChannel<Pair<UUID, BehandlingHendelseType>>,
-        hendelseDao: HendelseDao,
-        manueltOpphoerService: ManueltOpphoerService
+        behandlinger: BehandlingDao? = null,
+        hendelseKanal: SendChannel<Pair<UUID, BehandlingHendelseType>>? = null,
+        hendelseDao: HendelseDao? = null,
+        manueltOpphoerService: ManueltOpphoerService? = null,
+        grunnlagKlient: GrunnlagKlient? = null
     ): RealGenerellBehandlingService = RealGenerellBehandlingService(
-        behandlinger = behandlinger,
-        behandlingHendelser = hendelseKanal,
+        behandlinger = behandlinger ?: mockk(),
+        behandlingHendelser = hendelseKanal ?: mockk(),
         foerstegangsbehandlingFactory = FoerstegangsbehandlingFactory(
-            behandlinger = behandlinger,
-            hendelser = hendelseDao
+            behandlinger = behandlinger ?: mockk(),
+            hendelser = hendelseDao ?: mockk()
         ),
         revurderingFactory = RevurderingFactory(
-            behandlinger = behandlinger,
-            hendelser = hendelseDao
+            behandlinger = behandlinger ?: mockk(),
+            hendelser = hendelseDao ?: mockk()
         ),
-        hendelser = hendelseDao,
-        manueltOpphoerService = manueltOpphoerService,
+        hendelser = hendelseDao ?: mockk(),
+        manueltOpphoerService = manueltOpphoerService ?: mockk(),
         mockk(),
-        mockk(),
+        grunnlagKlient ?: mockk(),
         mockk()
     )
+
+    companion object {
+        const val SAK_ID = 1L
+        val BEHANDLINGS_ID: UUID = UUID.randomUUID()
+        const val TOKEN = "token"
+    }
 }

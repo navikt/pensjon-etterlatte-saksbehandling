@@ -96,7 +96,7 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                 )
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                UUID.fromString(it.body())
+                it.body<UUID>()
             }
 
             client.get("/sak/1/behandlinger") {

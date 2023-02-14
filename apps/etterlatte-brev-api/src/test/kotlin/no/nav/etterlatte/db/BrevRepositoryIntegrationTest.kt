@@ -62,7 +62,7 @@ internal class BrevRepositoryIntegrationTest {
 
     @Test
     fun `Enkel test med lagring og henting av brev`() {
-        val behandlingId = UUID.randomUUID().toString()
+        val behandlingId = UUID.randomUUID()
 
         assertTrue(db.hentBrevForBehandling(behandlingId).isEmpty())
 
@@ -79,14 +79,14 @@ internal class BrevRepositoryIntegrationTest {
 
     @Test
     fun `Lagring av flere brev paa flere behandlinger`() {
-        val behandlingId = "1"
+        val behandlingId = UUID.randomUUID()
 
         opprettBrev(behandlingId)
         opprettBrev(behandlingId)
         opprettBrev(behandlingId)
 
         LongRange(2, 10).forEach {
-            opprettBrev(it.toString())
+            opprettBrev(UUID.randomUUID())
         }
 
         assertEquals(3, db.hentBrevForBehandling(behandlingId).size)
@@ -94,7 +94,7 @@ internal class BrevRepositoryIntegrationTest {
 
     @Test
     fun `Hent pdf for brev`() {
-        val nyttBrev = opprettBrev("1")
+        val nyttBrev = opprettBrev(UUID.randomUUID())
 
         val innhold = db.hentBrevInnhold(nyttBrev.id)
 
@@ -103,7 +103,7 @@ internal class BrevRepositoryIntegrationTest {
 
     @Test
     fun `Slett brev`() {
-        val behandlingId = "1"
+        val behandlingId = UUID.randomUUID()
 
         opprettBrev(behandlingId)
         opprettBrev(behandlingId)
@@ -122,7 +122,7 @@ internal class BrevRepositoryIntegrationTest {
     fun `Oppdater journalpost ID`() {
         val journalpostId = UUID.randomUUID().toString()
 
-        val brev = opprettBrev("1")
+        val brev = opprettBrev(UUID.randomUUID())
 
         assertTrue(db.setJournalpostId(brev.id, journalpostId))
     }
@@ -131,14 +131,14 @@ internal class BrevRepositoryIntegrationTest {
     fun `Oppdater bestilling ID`() {
         val journalpostId = UUID.randomUUID().toString()
 
-        val brev = opprettBrev("1")
+        val brev = opprettBrev(UUID.randomUUID())
 
         assertTrue(db.setBestillingsId(brev.id, journalpostId))
     }
 
     @Test
     fun `Oppdater status`() {
-        val opprettetBrev = opprettBrev("1")
+        val opprettetBrev = opprettBrev(UUID.randomUUID())
 
         db.oppdaterStatus(opprettetBrev.id, Status.OPPDATERT)
         db.oppdaterStatus(opprettetBrev.id, Status.FERDIGSTILT)
@@ -161,10 +161,11 @@ internal class BrevRepositoryIntegrationTest {
         assertEquals(5, count)
     }
 
-    private fun opprettBrev(behandlingId: String): Brev {
+    private fun opprettBrev(behandlingId: UUID): Brev {
         return db.opprettBrev(
             UlagretBrev(
                 behandlingId = behandlingId,
+                soekerFnr = "00000012345",
                 tittel = UUID.randomUUID().toString(),
                 spraak = Spraak.NB,
                 mottaker = opprettMottaker(),
@@ -176,8 +177,7 @@ internal class BrevRepositoryIntegrationTest {
 
     private fun opprettMottaker() = Mottaker(
         adresse = Adresse(
-            fornavn = "Test",
-            etternavn = "Testesen",
+            navn = "Test Testesen",
             adresse = "Fyrstikkaleen 1",
             postnummer = "1234",
             poststed = "Oslo"

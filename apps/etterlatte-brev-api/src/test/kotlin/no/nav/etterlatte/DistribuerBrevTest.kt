@@ -28,7 +28,7 @@ internal class DistribuerBrevTest {
 
     private val brevId = 100L
     private val journalpostId = "11111"
-    private val adresse = Adresse("Fornavn", "Etternavn", "testveien 13", "0123", "Oslo", "Norge")
+    private val adresse = Adresse("Fornavn Etternavn", "testveien 13", "0123", "Oslo", "Norge")
 
     @BeforeEach
     fun before() = clearMocks(distribusjonService)

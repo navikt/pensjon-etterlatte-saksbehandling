@@ -472,7 +472,7 @@ fun opprettSkjemaInfo(
       "soesken": $soeskenString,
       "versjon": "2",
       "type": "BARNEPENSJON",
-      "mottattDato": $mottatt_dato,
+      "mottattDato": "$mottatt_dato",
       "template": "barnepensjon_v2"
     }
     """.trimIndent()

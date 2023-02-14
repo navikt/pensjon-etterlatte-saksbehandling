@@ -271,16 +271,17 @@ internal class VedtaksbrevServiceTest {
 
             val vedtak = opprettVedtak()
 
-            runBlocking {
-                val (brev, response) = vedtaksbrevService.journalfoerVedtaksbrev(vedtak)
-
-                assertEquals(forventetBrev, brev)
-                assertEquals(forventetResponse, response)
+            val (brev, response) = runBlocking {
+                vedtaksbrevService.journalfoerVedtaksbrev(vedtak)
             }
+
+            assertEquals(forventetBrev, brev)
+            assertEquals(forventetResponse, response)
 
             verify(exactly = 1) {
                 db.hentBrevForBehandling(BEHANDLING_ID)
                 dokarkivService.journalfoer(forventetBrev, vedtak)
+                db.setJournalpostId(forventetBrev.id, response.journalpostId)
                 db.oppdaterStatus(forventetBrev.id, Status.JOURNALFOERT, any())
             }
 

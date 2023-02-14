@@ -74,7 +74,6 @@ fun Application.module(beanFactory: BeanFactory) {
                 manueltOpphoerService = manueltOpphoerService()
             )
             omberegningRoutes(
-                behandlingService = generellBehandlingService,
                 omberegningService = omberegningService()
             )
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())

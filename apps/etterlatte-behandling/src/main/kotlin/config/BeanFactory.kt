@@ -200,7 +200,8 @@ abstract class CommonFactory : BeanFactory {
 
     override fun sporingslogg(): Sporingslogg = Sporingslogg()
 
-    override fun omberegningService(): OmberegningService = OmberegningService(revurderingFactory = revurderingFactory)
+    override fun omberegningService(): OmberegningService =
+        OmberegningService(revurderingFactory = revurderingFactory, behandlingService = generellBehandlingService())
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {

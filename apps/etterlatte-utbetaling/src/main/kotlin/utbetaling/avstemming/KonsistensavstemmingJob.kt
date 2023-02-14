@@ -56,11 +56,11 @@ class KonsistensavstemmingJob(
 
         fun run() {
             withLogContext {
-                log.info("Starter $jobbNavn")
-
                 val idag = LocalDate.now(clock.withZone(norskTidssone))
                 kjoereplan.find { dato -> dato == idag }?.let {
                     if (leaderElection.isLeader()) {
+                        log.info("Starter $jobbNavn")
+
                         Saktype.values().forEach {
                             when (it) {
                                 Saktype.BARNEPENSJON -> {

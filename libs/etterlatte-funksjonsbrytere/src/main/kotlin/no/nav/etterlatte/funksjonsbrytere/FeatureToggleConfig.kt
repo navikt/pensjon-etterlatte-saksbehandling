@@ -2,7 +2,7 @@ package no.nav.etterlatte.funksjonsbrytere
 
 class FeatureToggleConfig {
     companion object {
-        const val TREKK_I_LØPENDE_UTBETALING = "pensjon-etterlatte.trekk-i-loepende-utbetaling"
+        const val NoOperationToggle = "pensjon-etterlatte.no-operation-toggle"
     }
 }
 

@@ -156,7 +156,7 @@ internal class SakOgBehandlingServiceTest {
 
     private fun opprettVedtak() = mockk<Vedtak> {
         every { sak } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID)
-        every { behandling.id } returns UUID.fromString(BEHANDLING_ID)
+        every { behandling.id } returns BEHANDLING_ID
         every { vedtakId } returns 123L
         every { type } returns VedtakType.INNVILGELSE
         every { virk } returns Periode(YearMonth.now(), null)
@@ -204,7 +204,7 @@ internal class SakOgBehandlingServiceTest {
         private val FNR = Foedselsnummer.of("11057523044")
         private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, null)
         private val STATISK_UUID = UUID.randomUUID()
-        private val BEHANDLING_ID = UUID.randomUUID().toString()
+        private val BEHANDLING_ID = UUID.randomUUID()
         private val ACCESS_TOKEN = "321"
         private val SAKSBEHANDLER_IDENT = "Z1235"
         private val ATTESTANT_IDENT = "Z54321"

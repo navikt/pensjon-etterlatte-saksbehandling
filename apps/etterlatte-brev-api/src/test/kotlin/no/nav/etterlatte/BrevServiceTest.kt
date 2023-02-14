@@ -1,20 +1,21 @@
 package no.nav.etterlatte
 
-import io.mockk.coEvery
-import io.mockk.coVerify
+import io.mockk.Called
+import io.mockk.clearAllMocks
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.libs.common.brev.model.Brev
-import no.nav.etterlatte.libs.common.brev.model.Status
+import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class BrevServiceTest {
@@ -24,25 +25,32 @@ internal class BrevServiceTest {
     private val adresseService = mockk<AdresseService>()
     private val distribusjonsService = mockk<DistribusjonService>()
 
-    private val service = BrevService(
-        mockkDb,
-        mockPdfGen,
-        adresseService
-    )
+    private val service = BrevService(mockkDb, mockPdfGen, adresseService)
+
+    @BeforeEach
+    fun before() {
+        clearAllMocks()
+    }
+
+    @AfterEach
+    fun after() {
+        confirmVerified(mockkDb, mockPdfGen, adresseService, distribusjonsService)
+    }
 
     @Test
-    @Disabled("Dette er ikke lengre relevant.")
-    fun `Hent alle brev, ingen brev, skal opprette for vedtak`() {
-        every { mockkDb.hentBrevForBehandling(any()) } returns emptyList()
-        every { mockkDb.opprettBrev(any()) } returns Brev(1, "1", "tittel", Status.OPPRETTET, mockk(), false)
-        coEvery { mockPdfGen.genererPdf(any()) } returns "viktig dokument".toByteArray()
+    fun `Hent brev innhold`() {
+        val innhold = BrevInnhold("mal", Spraak.NB, "data".toByteArray())
 
-        val alleBrev = runBlocking { service.hentAlleBrev("1") }
+        every { mockkDb.hentBrevInnhold(any())} returns innhold
 
-        assertEquals(1, alleBrev.size)
+        val faktiskInnhold = service.hentBrevInnhold(1)
 
-        verify(exactly = 1) { mockkDb.hentBrevForBehandling("1") }
-        verify(exactly = 1) { mockkDb.opprettBrev(any()) }
-        coVerify(exactly = 1) { mockPdfGen.genererPdf(any()) }
+        assertEquals(innhold, faktiskInnhold)
+
+        verify(exactly = 1) { mockkDb.hentBrevInnhold(1) }
+        verify {
+            listOf(mockPdfGen, adresseService, distribusjonsService) wasNot Called
+        }
     }
+
 }

@@ -49,9 +49,11 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
@@ -348,7 +350,7 @@ class ApplicationTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     UtflyttingsHendelse(
-                        fnr = "søker",
+                        fnr = fnr,
                         tilflyttingsLand = null,
                         tilflyttingsstedIUtlandet = null,
                         utflyttingsdato = null,
@@ -362,11 +364,23 @@ class ApplicationTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     ForelderBarnRelasjonHendelse(
-                        fnr = "søker",
+                        fnr = fnr,
                         relatertPersonsIdent = null,
                         relatertPersonsRolle = "",
                         minRolleForPerson = "",
                         relatertPersonUtenFolkeregisteridentifikator = null,
+                        endringstype = Endringstype.OPPRETTET
+                    )
+                )
+            }
+
+            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                addAuthToken(tokenServiceUser)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Adressebeskyttelse(
+                        fnr = fnr,
+                        gradering = Gradering.STRENGT_FORTROLIG,
                         endringstype = Endringstype.OPPRETTET
                     )
                 )

@@ -53,7 +53,7 @@ class DokarkivServiceImpl(
             avsenderMottaker = vedtaksbrev.mottaker.tilAvsenderMottaker(),
             bruker = Bruker(vedtak.sak.ident),
             eksternReferanseId = "${vedtaksbrev.behandlingId}.${vedtaksbrev.id}",
-            sak = Sak(Sakstype.FAGSAK, vedtaksbrev.behandlingId),
+            sak = Sak(Sakstype.FAGSAK, vedtaksbrev.behandlingId.toString()),
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(vedtaksbrev.tittel)),
             tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
@@ -71,8 +71,7 @@ class DokarkivServiceImpl(
         foedselsnummer != null -> AvsenderMottaker(id = foedselsnummer!!.value)
         orgnummer != null -> AvsenderMottaker(id = orgnummer, idType = "ORGNR")
         adresse != null -> {
-            val mottakerNavn = "${adresse!!.fornavn} ${adresse!!.etternavn}"
-            AvsenderMottaker(id = null, navn = mottakerNavn, idType = null, land = adresse!!.land)
+            AvsenderMottaker(id = null, navn = adresse!!.navn, idType = null, land = adresse!!.land)
         }
         else -> throw Exception("Ingen brevmottaker spesifisert")
     }

@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class VedtaksbrevService(
     private val db: BrevRepository,
@@ -31,7 +32,7 @@ class VedtaksbrevService(
 
     suspend fun oppdaterVedtaksbrev(
         sakId: Long,
-        behandlingId: String,
+        behandlingId: UUID,
         saksbehandler: String,
         accessToken: String = ""
     ): Brev {
@@ -56,7 +57,7 @@ class VedtaksbrevService(
         }
     }
 
-    fun ferdigstillVedtaksbrev(behandlingId: String): Boolean {
+    fun ferdigstillVedtaksbrev(behandlingId: UUID): Boolean {
         logger.info("Ferdigstiller vedtaksbrev for behandlingId=$behandlingId")
 
         val vedtaksbrev = hentVedtaksbrev(behandlingId)
@@ -72,7 +73,7 @@ class VedtaksbrevService(
     }
 
     fun journalfoerVedtaksbrev(vedtak: Vedtak): Pair<Brev, JournalpostResponse> {
-        val behandlingId = vedtak.behandling.id.toString()
+        val behandlingId = vedtak.behandling.id
 
         val vedtaksbrev = hentVedtaksbrev(behandlingId)
             ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
@@ -106,22 +107,15 @@ class VedtaksbrevService(
 
         logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${pdf.size}")
 
-        val tittel = "Vedtak om ${vedtakType.name.lowercase()}"
-
-        // TODO: slå sammen til ett navn i databasen
-        val navn = behandling.persongalleri.innsender.navn.split(" ")
-        val etternavn = navn.last()
-        val fornavn = navn.dropLast(1).joinToString(" ")
-
         return UlagretBrev(
             behandling.behandlingId,
-            tittel,
+            soekerFnr = behandling.persongalleri.soeker.fnr,
+            tittel = "Vedtak om ${vedtakType.name.lowercase()}",
             behandling.spraak,
             Mottaker(
                 foedselsnummer = Foedselsnummer.of(behandling.persongalleri.innsender.fnr),
                 adresse = Adresse(
-                    fornavn = fornavn,
-                    etternavn = etternavn,
+                    navn = behandling.persongalleri.innsender.navn,
                     adresse = mottaker.adresse,
                     postnummer = mottaker.postnummer,
                     poststed = mottaker.poststed,
@@ -133,6 +127,6 @@ class VedtaksbrevService(
         )
     }
 
-    private fun hentVedtaksbrev(behandlingId: String): Brev? =
+    private fun hentVedtaksbrev(behandlingId: UUID): Brev? =
         db.hentBrevForBehandling(behandlingId).find { it.erVedtaksbrev }
 }

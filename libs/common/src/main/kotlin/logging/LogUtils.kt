@@ -13,16 +13,24 @@ fun withLogContext(correlationId: String? = null, kv: Map<String, String> = empt
     innerLogContext(correlationId, kv, block)
 
 private fun <T> innerLogContext(correlationId: String?, kv: Map<String, String> = emptyMap(), block: () -> T): T {
+    var exceptionThrown = false
+
     try {
         MDC.put(CORRELATION_ID, correlationId ?: generateCorrelationId())
         kv.forEach {
             MDC.put(it.key, it.value)
         }
         return block()
+    } catch (e: Exception) {
+        exceptionThrown = true
+
+        throw e
     } finally {
-        MDC.remove(CORRELATION_ID)
-        kv.forEach {
-            MDC.remove(it.key)
+        if (!exceptionThrown) {
+            MDC.remove(CORRELATION_ID)
+            kv.forEach {
+                MDC.remove(it.key)
+            }
         }
     }
 }

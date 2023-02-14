@@ -26,7 +26,7 @@ export interface IOppgaveFelter {
   regdato: IOppgaveFelt
   fristdato: IOppgaveFelt
   fnr: IOppgaveFelt
-  behandlingType: IOppgaveFelt
+  oppgaveType: IOppgaveFelt
   soeknadType: IOppgaveFelt
   beskrivelse: IOppgaveFelt
   oppgaveStatus: IOppgaveFelt
@@ -71,8 +71,8 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       },
     },
 
-    behandlingType: {
-      noekkel: 'behandlingType',
+    oppgaveType: {
+      noekkel: 'oppgaveType',
       label: 'Behandlingstype',
       filter: {
         type: 'select',

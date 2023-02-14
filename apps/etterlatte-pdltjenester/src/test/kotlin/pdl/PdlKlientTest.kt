@@ -105,6 +105,6 @@ internal class PdlKlientTest {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         }
 
-        pdlKlient = PdlKlient(httpClient)
+        pdlKlient = PdlKlient(httpClient, "")
     }
 }

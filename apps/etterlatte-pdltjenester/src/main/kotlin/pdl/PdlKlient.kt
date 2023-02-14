@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 
-class PdlKlient(private val httpClient: HttpClient) {
+class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
     suspend fun hentPerson(fnr: Foedselsnummer, rolle: PersonRolle): PdlPersonResponse {
         val request = PdlGraphqlRequest(
@@ -24,7 +24,7 @@ class PdlKlient(private val httpClient: HttpClient) {
         )
 
         return retry<PdlPersonResponse> {
-            httpClient.post {
+            httpClient.post(apiUrl) {
                 header("Tema", TEMA)
                 accept(Json)
                 setBody(TextContent(request.toJson(), Json))
@@ -58,7 +58,7 @@ class PdlKlient(private val httpClient: HttpClient) {
         )
         logger.info("Bolkhenter personer med fnr=${request.variables.identer} fra PDL")
         return retry<PdlPersonResponseBolk> {
-            httpClient.post {
+            httpClient.post(apiUrl) {
                 header("Tema", TEMA)
                 accept(Json)
                 setBody(TextContent(request.toJson(), Json))
@@ -82,7 +82,7 @@ class PdlKlient(private val httpClient: HttpClient) {
         )
         logger.info("Henter folkeregisterident for ident = $ident fra PDL")
         return retry<PdlFolkeregisterIdentResponse> {
-            httpClient.post {
+            httpClient.post(apiUrl) {
                 header("Tema", TEMA)
                 accept(Json)
                 setBody(TextContent(request.toJson(), Json))

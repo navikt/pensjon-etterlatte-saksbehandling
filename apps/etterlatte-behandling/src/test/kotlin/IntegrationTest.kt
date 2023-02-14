@@ -350,7 +350,7 @@ class ApplicationTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     UtflyttingsHendelse(
-                        fnr = "søker",
+                        fnr = fnr,
                         tilflyttingsLand = null,
                         tilflyttingsstedIUtlandet = null,
                         utflyttingsdato = null,
@@ -364,7 +364,7 @@ class ApplicationTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     ForelderBarnRelasjonHendelse(
-                        fnr = "søker",
+                        fnr = fnr,
                         relatertPersonsIdent = null,
                         relatertPersonsRolle = "",
                         minRolleForPerson = "",
@@ -379,7 +379,7 @@ class ApplicationTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
-                        fnr = "søker",
+                        fnr = fnr,
                         gradering = Gradering.STRENGT_FORTROLIG,
                         endringstype = Endringstype.OPPRETTET
                     )

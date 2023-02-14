@@ -16,13 +16,13 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class OmberegningHendelser(rapidsConnection: RapidsConnection, private val behandlinger: Behandling) :
+internal class OmberegningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: Behandling) :
     River.PacketListener {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        logger.info("initierer rapid for omberegninghendelser")
+        logger.info("initierer rapid for omberegningshendelser")
         River(rapidsConnection).apply {
             eventName(Hendelsestype.OMBEREGNINGSHENDELSE.toString())
 
@@ -34,7 +34,7 @@ internal class OmberegningHendelser(rapidsConnection: RapidsConnection, private 
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
-            logger.info("Mottatt omberegninghendelse")
+            logger.info("Mottatt omberegningshendelse")
             try {
                 val hendelse: Omberegningshendelse = objectMapper.treeToValue(packet["hendelse_data"])
                 runBlocking {

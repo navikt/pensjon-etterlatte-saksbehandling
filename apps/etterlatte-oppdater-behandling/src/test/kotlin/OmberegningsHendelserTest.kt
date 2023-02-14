@@ -5,17 +5,17 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingsService
-import no.nav.etterlatte.OmberegningHendelser
+import no.nav.etterlatte.OmberegningsHendelser
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class OmberegningHendelserTest {
+internal class OmberegningsHendelserTest {
 
     private val behandlingService = mockk<BehandlingsService>()
-    private val inspector = TestRapid().apply { OmberegningHendelser(this, behandlingService) }
+    private val inspector = TestRapid().apply { OmberegningsHendelser(this, behandlingService) }
 
     @Test
     fun `skal opprette omberegning`() {
@@ -39,6 +39,6 @@ internal class OmberegningHendelserTest {
     }
 
     companion object {
-        val fullMelding = readFile("/omberegninghendelse.json")
+        val fullMelding = readFile("/omberegningshendelse.json")
     }
 }

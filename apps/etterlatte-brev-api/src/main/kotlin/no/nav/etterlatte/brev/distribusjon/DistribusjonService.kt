@@ -40,7 +40,10 @@ class DistribusjonServiceImpl(
         )
 
         klient.distribuerJournalpost(request)
-            .also { db.oppdaterStatus(brevId, Status.DISTRIBUERT, it.toJson()) }
+            .also {
+                db.setBestillingsId(brevId, it.bestillingsId)
+                db.oppdaterStatus(brevId, Status.DISTRIBUERT, it.toJson())
+            }
             .let { it.bestillingsId }
     }
 }

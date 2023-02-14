@@ -83,6 +83,7 @@ class VedtaksbrevService(
 
         val response = dokarkivService.journalfoer(vedtaksbrev, vedtak)
 
+        db.setJournalpostId(vedtaksbrev.id, response.journalpostId)
         db.oppdaterStatus(vedtaksbrev.id, Status.JOURNALFOERT, response.toJson())
             .also { logger.info("Brev med id=${vedtaksbrev.id} markert som ferdigstilt") }
 

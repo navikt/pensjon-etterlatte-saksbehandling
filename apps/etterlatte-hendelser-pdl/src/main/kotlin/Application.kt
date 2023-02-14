@@ -11,6 +11,7 @@ import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,6 +30,7 @@ import kotlin.system.exitProcess
 
 var stream: LyttPaaHendelser? = null
 
+@OptIn(DelicateCoroutinesApi::class)
 fun main() {
     val env = System.getenv().toMutableMap()
     env["KAFKA_BOOTSTRAP_SERVERS"] = env["KAFKA_BROKERS"]

@@ -12,7 +12,7 @@ class ApplicationTest {
     fun testRoot() {
         testApplication {
             application { this.module() }
-            assertEquals(HttpStatusCode.OK, client.get("/isReady").status)
+            assertEquals(HttpStatusCode.OK, client.get("/status").status)
         }
     }
 }

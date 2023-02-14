@@ -1,9 +1,13 @@
 package no.nav.etterlatte.funksjonsbrytere
 
-class FeatureToggleConfig {
-    companion object {
-        const val NoOperationToggle = "pensjon-etterlatte.no-operation-toggle"
-    }
+interface FeatureToggle {
+    fun key(): String
+}
+
+enum class FellesFeatureToggle(private val key: String) : FeatureToggle {
+    NoOperationToggle("pensjon-etterlatte.no-operation-toggle");
+
+    override fun key() = key
 }
 
 enum class Properties(val navn: String) {

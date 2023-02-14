@@ -25,7 +25,7 @@ fun initialiser(env: Map<String, String>): FeatureToggleService {
 }
 
 interface FeatureToggleService {
-    fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
+    fun isEnabled(toggleId: FeatureToggle, defaultValue: Boolean): Boolean
 }
 
 class UnleashFeatureToggleService(private val unleash: Unleash) : FeatureToggleService {
@@ -46,7 +46,8 @@ class UnleashFeatureToggleService(private val unleash: Unleash) : FeatureToggleS
             .build()
     }
 
-    override fun isEnabled(toggleId: String, defaultValue: Boolean) = defaultUnleash.isEnabled(toggleId, defaultValue)
+    override fun isEnabled(toggleId: FeatureToggle, defaultValue: Boolean) =
+        defaultUnleash.isEnabled(toggleId.key(), defaultValue)
 }
 
 class DummyFeatureToggleService : FeatureToggleService {
@@ -59,10 +60,11 @@ class DummyFeatureToggleService : FeatureToggleService {
     }
 
     private val overstyrteBrytere = mapOf(
-        Pair(FeatureToggleConfig.NoOperationToggle, true)
+        Pair(FellesFeatureToggle.NoOperationToggle, true)
     )
 
-    override fun isEnabled(toggleId: String, defaultValue: Boolean) = overstyrteBrytere.getOrDefault(toggleId, true)
+    override fun isEnabled(toggleId: FeatureToggle, defaultValue: Boolean) =
+        overstyrteBrytere.getOrDefault(toggleId, true)
 
     companion object {
         private val logger = LoggerFactory.getLogger(FeatureToggleService::class.java)

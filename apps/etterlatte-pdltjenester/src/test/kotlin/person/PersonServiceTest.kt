@@ -9,7 +9,6 @@ import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.mockResponse
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlFolkeregisterIdentResponse
@@ -31,7 +30,6 @@ internal class PersonServiceTest {
     private val pdlKlient = mockk<PdlKlient>()
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
     private val personService = PersonService(pdlKlient, ppsKlient)
-    private val saksbehandler = Saksbehandler("A1234")
 
     @BeforeEach
     fun beforeEach() {

@@ -27,12 +27,12 @@ export enum OppgaveTypeFilter {
   VELG = 'VELG',
   FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
   REVURDERING = 'REVURDERING',
-  HENDELSE = 'HENDELSE',
+  ENDRING_PAA_SAK = 'ENDRING_PAA_SAK',
   MANUELT_OPPHOER = 'MANUELT_OPPHOER',
 }
 
 export const behandlingTypeFilter: Record<OppgaveTypeFilter, IPar> = {
-  HENDELSE: { id: 'HENDELSE', navn: 'Hendelse' },
+  ENDRING_PAA_SAK: { id: 'ENDRING_PAA_SAK', navn: 'Endring på sak' },
   VELG: { id: 'VELG', navn: 'Velg' },
   FØRSTEGANGSBEHANDLING: { id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
   REVURDERING: { id: 'REVURDERING', navn: 'Revurdering' },

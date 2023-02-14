@@ -84,13 +84,15 @@ class GrunnlagsendringshendelseService(
 
         return opprettHendelseAvTypeForPerson(
             adressebeskyttelse.fnr,
-            grunnlagsendringsType
+            grunnlagsendringsType,
+            GrunnlagsendringStatus.SJEKKET_AV_JOBB
         )
     }
 
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,
-        grunnlagendringType: GrunnlagsendringsType
+        grunnlagendringType: GrunnlagsendringsType,
+        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
     ):
         List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = LocalDateTime.now()
@@ -113,11 +115,7 @@ class GrunnlagsendringshendelseService(
                             Grunnlagsendringshendelse(
                                 id = hendelseId,
                                 sakId = rolleOgSak.second,
-                                status = if (grunnlagendringType.isAdresseBeskyttelse()) {
-                                    GrunnlagsendringStatus.SJEKKET_AV_JOBB
-                                } else {
-                                    GrunnlagsendringStatus.VENTER_PAA_JOBB
-                                },
+                                status = grunnlagsEndringsStatus,
                                 type = grunnlagendringType,
                                 opprettet = tidspunktForMottakAvHendelse,
                                 hendelseGjelderRolle = rolleOgSak.first,

@@ -5,7 +5,7 @@ export interface IOppgave {
   fristdato: Date
   fnr: string
   soeknadType: SoeknadTypeFilter
-  behandlingType: BehandlingTypeFilter
+  oppgaveType: OppgaveTypeFilter
   beskrivelse: string
   oppgaveStatus: StatusFilter
   saksbehandler: string
@@ -23,7 +23,7 @@ export const handlinger: Record<Handlinger, IPar> = {
   GAA_TIL_SAK: { id: 'GAA_TIL_SAK', navn: 'Gå til sak' },
 }
 
-export enum BehandlingTypeFilter {
+export enum OppgaveTypeFilter {
   VELG = 'VELG',
   FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
   REVURDERING = 'REVURDERING',
@@ -31,7 +31,7 @@ export enum BehandlingTypeFilter {
   MANUELT_OPPHOER = 'MANUELT_OPPHOER',
 }
 
-export const behandlingTypeFilter: Record<BehandlingTypeFilter, IPar> = {
+export const behandlingTypeFilter: Record<OppgaveTypeFilter, IPar> = {
   HENDELSE: { id: 'HENDELSE', navn: 'Hendelse' },
   VELG: { id: 'VELG', navn: 'Velg' },
   FØRSTEGANGSBEHANDLING: { id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },

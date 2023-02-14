@@ -1,4 +1,4 @@
-import { BehandlingTypeFilter, SoeknadTypeFilter } from '~components/oppgavebenken/typer/oppgavebenken'
+import { OppgaveTypeFilter, SoeknadTypeFilter } from '~components/oppgavebenken/typer/oppgavebenken'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import styled from 'styled-components'
@@ -17,13 +17,13 @@ enum Variants {
 }
 
 export const tagColors: Record<
-  BehandlingTypeFilter | SoeknadTypeFilter | ISaksType | INasjonalitetsType | IBehandlingsType,
+  OppgaveTypeFilter | SoeknadTypeFilter | ISaksType | INasjonalitetsType | IBehandlingsType,
   Variants
 > = {
-  [BehandlingTypeFilter.VELG]: Variants.NEUTRAL,
-  [BehandlingTypeFilter.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
-  [BehandlingTypeFilter.REVURDERING]: Variants.ALT3_FILLED,
-  [BehandlingTypeFilter.HENDELSE]: Variants.ALT3_FILLED,
+  [OppgaveTypeFilter.VELG]: Variants.NEUTRAL,
+  [OppgaveTypeFilter.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
+  [OppgaveTypeFilter.REVURDERING]: Variants.ALT3_FILLED,
+  [OppgaveTypeFilter.HENDELSE]: Variants.ALT3_FILLED,
   [SoeknadTypeFilter.VELG]: Variants.NEUTRAL,
   [SoeknadTypeFilter.GJENLEVENDEPENSJON]: Variants.ALT1_FILLED,
   [SoeknadTypeFilter.BARNEPENSJON]: Variants.INFO,

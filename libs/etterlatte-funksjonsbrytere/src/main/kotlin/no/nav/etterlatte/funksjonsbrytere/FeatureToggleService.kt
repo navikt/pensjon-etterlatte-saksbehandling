@@ -1,12 +1,10 @@
-package no.nav.etterlatte.featureToggle
+package no.nav.etterlatte.funksjonsbrytere
 
 import io.getunleash.DefaultUnleash
 import io.getunleash.UnleashContext
 import io.getunleash.UnleashContextProvider
 import io.getunleash.strategy.GradualRolloutRandomStrategy
 import io.getunleash.util.UnleashConfig
-import no.nav.etterlatte.FeatureToggleConfig
-import no.nav.etterlatte.Properties
 import org.slf4j.LoggerFactory
 import java.net.URI
 

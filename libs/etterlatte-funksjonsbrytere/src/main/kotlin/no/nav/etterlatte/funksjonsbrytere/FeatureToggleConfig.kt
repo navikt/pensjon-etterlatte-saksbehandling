@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.funksjonsbrytere
 
 class FeatureToggleConfig {
     companion object {

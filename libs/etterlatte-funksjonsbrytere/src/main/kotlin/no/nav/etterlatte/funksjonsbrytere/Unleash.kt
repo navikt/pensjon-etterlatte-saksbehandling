@@ -1,4 +1,4 @@
-package no.nav.etterlatte.featureToggle
+package no.nav.etterlatte.funksjonsbrytere
 
 import java.net.URI
 

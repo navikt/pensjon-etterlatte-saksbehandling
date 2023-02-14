@@ -3,6 +3,12 @@ plugins {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:common"))
+    implementation(Ktor2.OkHttp)
+    implementation(Ktor2.ClientCore)
+    implementation(Ktor2.ClientLoggingJvm)
+    implementation(Ktor2.ClientAuth)
+    implementation(Ktor2.ClientContentNegotiation)
+    implementation(Ktor2.ClientJackson)
 }

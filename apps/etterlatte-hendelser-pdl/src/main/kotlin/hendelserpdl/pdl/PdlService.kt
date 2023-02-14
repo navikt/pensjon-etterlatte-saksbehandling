@@ -9,6 +9,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import org.slf4j.LoggerFactory
 
 interface Pdl {
@@ -30,7 +31,7 @@ class PdlService(
             try {
                 pdl_app.post("$url/folkeregisterident") {
                     contentType(ContentType.Application.Json)
-                    setBody(HentFolkeregisterIdentRequest(ident))
+                    setBody(HentFolkeregisterIdentRequest(PersonIdent(ident)))
                 }.body()
             } catch (e: Exception) {
                 logger.info("Kunne ikke hente folkeregisteridentifikator", e)

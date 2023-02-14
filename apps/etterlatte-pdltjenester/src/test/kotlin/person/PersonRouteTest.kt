@@ -22,6 +22,7 @@ import no.nav.etterlatte.SecurityContextMediatorStub
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.Saksbehandler
@@ -95,7 +96,7 @@ class PersonRouteTest {
     @Test
     fun `skal returnere folkeregisterIdent`() {
         val hentFolkeregisterIdentRequest = HentFolkeregisterIdentRequest(
-            ident = "2305469522806"
+            ident = PersonIdent("2305469522806")
         )
         coEvery {
             personService.hentFolkeregisterIdent(hentFolkeregisterIdentRequest)
@@ -154,7 +155,7 @@ class PersonRouteTest {
     @Test
     fun `skal returne 500 naar kall mot folkeregisterident feiler`() {
         val hentFolkeregisterIdentReq = HentFolkeregisterIdentRequest(
-            ident = "2305469522806"
+            ident = PersonIdent("2305469522806")
         )
 
         coEvery {

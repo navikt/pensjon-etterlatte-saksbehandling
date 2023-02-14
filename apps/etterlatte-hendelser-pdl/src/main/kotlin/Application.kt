@@ -15,7 +15,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import no.nav.etterlatte.hendelserpdl.AppConfig
 import no.nav.etterlatte.hendelserpdl.LivsHendelserRapid
 import no.nav.etterlatte.hendelserpdl.LyttPaaHendelser
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
@@ -32,7 +31,7 @@ var stream: LyttPaaHendelser? = null
 
 @OptIn(DelicateCoroutinesApi::class)
 fun main() {
-    val env = System.getenv().toMutableMap()
+    val env = System.getenv().toMutableMap().apply { put("DELAYED_START", "true") }
     env["KAFKA_BOOTSTRAP_SERVERS"] = env["KAFKA_BROKERS"]
     env["NAV_TRUSTSTORE_PATH"] = env["KAFKA_TRUSTSTORE_PATH"]
     env["NAV_TRUSTSTORE_PASSWORD"] = env["KAFKA_CREDSTORE_PASSWORD"]
@@ -51,7 +50,7 @@ fun main() {
                 try {
                     stream =
                         LyttPaaHendelser(
-                            LivetErEnStroemAvHendelser(AppConfig().env),
+                            LivetErEnStroemAvHendelser(env),
                             LivsHendelserRapid(this@apply),
                             pdlService
                         )

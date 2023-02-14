@@ -9,6 +9,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface Pdl {
@@ -21,7 +22,7 @@ class PdlService(
 ) : Pdl {
 
     companion object {
-        val logger = LoggerFactory.getLogger(PdlService::class.java)
+        val logger: Logger = LoggerFactory.getLogger(PdlService::class.java)
     }
 
     override suspend fun hentFolkeregisterIdentifikator(ident: String): FolkeregisterIdent {

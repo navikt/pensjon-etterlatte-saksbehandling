@@ -14,9 +14,11 @@ fun initialiser(env: Map<String, String>): FeatureToggleService {
         UnleashFeatureToggleService(
             Unleash(
                 enabled = true,
-                uri = URI(env.getOrDefault(Properties.URI.navn, "")),
-                cluster = env.getOrDefault(Properties.CLUSTER.navn, ""),
-                applicationName = env.getOrDefault(Properties.APPLICATIONNAME.navn, "")
+                uri = URI(env[Properties.URI.navn] ?: throw IllegalArgumentException("Unleash-URI er ikke definert")),
+                cluster = env[Properties.CLUSTER.navn]
+                    ?: throw IllegalArgumentException("Unleash-cluster er ikke definert"),
+                applicationName = env[Properties.APPLICATIONNAME.navn]
+                    ?: throw IllegalArgumentException("Unleash-applikasjonsnavn er ikke definert")
             )
         )
     } else {

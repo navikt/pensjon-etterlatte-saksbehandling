@@ -30,6 +30,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
+import java.time.LocalDate
 import javax.sql.DataSource
 
 abstract class BehandlingIntegrationTest {
@@ -133,7 +134,8 @@ class GrunnlagKlientTest : GrunnlagKlient {
         opplysningsType: Opplysningstype,
         accessToken: String
     ): Grunnlagsopplysning<Person>? {
-        TODO("Not yet implemented")
+        val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
+        return grunnlagsOpplysningMedPersonopplysning(personopplysning)
     }
 }
 

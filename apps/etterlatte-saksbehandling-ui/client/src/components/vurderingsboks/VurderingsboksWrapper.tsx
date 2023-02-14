@@ -17,11 +17,12 @@ interface Props {
   kommentar?: string
   defaultRediger?: boolean
   redigerbar: boolean
-  vurdering: Vurdering | null
+  vurdering?: Vurdering
+  automatiskVurdertDato?: Date
   slett?: (onSuccess?: () => void) => void
-  children: ReactElement
-  lagreklikk: (onSuccess?: () => void) => void
-  avbrytklikk: (onSuccess?: () => void) => void
+  children?: ReactElement
+  lagreklikk?: (onSuccess?: () => void) => void
+  avbrytklikk?: (onSuccess?: () => void) => void
 }
 
 export const VurderingsboksWrapper = (props: Props) => {
@@ -42,6 +43,12 @@ export const VurderingsboksWrapper = (props: Props) => {
                 <Detail>
                   Sist endret {props.vurdering.tidspunkt ? formaterDatoMedTidspunkt(props.vurdering.tidspunkt) : '-'}
                 </Detail>
+              </VilkaarVurdertInformasjon>
+            )}
+            {props.automatiskVurdertDato && (
+              <VilkaarVurdertInformasjon>
+                <Detail>Automatisk</Detail>
+                <Detail>{formaterDatoMedTidspunkt(props.automatiskVurdertDato)}</Detail>
               </VilkaarVurdertInformasjon>
             )}
             {props.subtittelKomponent ?? <></>}
@@ -86,22 +93,26 @@ export const VurderingsboksWrapper = (props: Props) => {
         <>
           {props.children}
           <VurderingKnapper>
-            <Button
-              loading={lagrer}
-              variant={'primary'}
-              size={'small'}
-              onClick={async () => {
-                setLagrer(true)
-                new Promise((resolve) => resolve(props.lagreklikk(() => setRediger(false)))).finally(() =>
-                  setLagrer(false)
-                )
-              }}
-            >
-              Lagre
-            </Button>
-            <Button variant={'secondary'} size={'small'} onClick={() => props.avbrytklikk(() => setRediger(false))}>
-              Avbryt
-            </Button>
+            {props.lagreklikk && (
+              <Button
+                loading={lagrer}
+                variant={'primary'}
+                size={'small'}
+                onClick={async () => {
+                  setLagrer(true)
+                  new Promise((resolve) => resolve(props.lagreklikk!!(() => setRediger(false)))).finally(() =>
+                    setLagrer(false)
+                  )
+                }}
+              >
+                Lagre
+              </Button>
+            )}
+            {props.avbrytklikk && (
+              <Button variant={'secondary'} size={'small'} onClick={() => props.avbrytklikk!!(() => setRediger(false))}>
+                Avbryt
+              </Button>
+            )}
           </VurderingKnapper>
         </>
       )}

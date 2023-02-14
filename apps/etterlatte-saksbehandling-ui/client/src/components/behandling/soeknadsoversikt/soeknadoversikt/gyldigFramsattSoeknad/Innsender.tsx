@@ -1,6 +1,7 @@
 import { IGyldighetproving } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { OversiktElement } from '../OversiktElement'
+import { InfoWrapper } from '../../styled'
+import { Info } from '../../Info'
 
 interface Props {
   innsenderErForelder: IGyldighetproving | undefined
@@ -13,7 +14,6 @@ export const Innsender = ({ innsenderErForelder }: Props) => {
       : innsenderErForelder?.basertPaaOpplysninger?.innsender?.navn
   const label = 'Innsender'
   const tekst = settTekst(innsenderErForelder?.resultat)
-  const erOppfylt = innsenderErForelder?.resultat === VurderingsResultat.OPPFYLT
 
   function settTekst(vurdering: VurderingsResultat | undefined): string {
     switch (vurdering) {
@@ -26,5 +26,9 @@ export const Innsender = ({ innsenderErForelder }: Props) => {
     }
   }
 
-  return <OversiktElement navn={navn} label={label} tekst={tekst} erOppfylt={erOppfylt} />
+  return (
+    <InfoWrapper>
+      <Info tekst={navn ?? 'Ukjent'} undertekst={tekst} label={label} />
+    </InfoWrapper>
+  )
 }

@@ -112,15 +112,14 @@ const Beregningsgrunnlag = () => {
               lenke: 'https://lovdata.no/lov/1997-02-28-19/§3-5',
             },
           ]}
-          vurderingsResultat={null}
           status={null}
         >
           <TrygdetidInfo>
             <p>
               Trygdetiden er minst 40 år som følge av faktisk trygdetid og fremtidig trygdetid. Faktisk trygdetid er den
-              tiden fra avdøde fylte 16 til personen døde. Fremtidig trygdetid er tiden fra dødsfallet til året avdøde
-              hadde blitt 66 år. Saksbehandler bekrefter at følgende stemmer for denne behandlingen ved å gå videre til
-              beregning:
+              tiden fra avdøde fylte 16 til personen døde. Fremtidig trygdetid er tiden fra dødsfallet til og med
+              kalenderåret avdøde hadde blitt 66 år. Saksbehandler bekrefter at følgende stemmer for denne behandlingen
+              ved å gå videre til beregning:
             </p>
             <p>
               Trygdetid: <strong>40 år</strong>

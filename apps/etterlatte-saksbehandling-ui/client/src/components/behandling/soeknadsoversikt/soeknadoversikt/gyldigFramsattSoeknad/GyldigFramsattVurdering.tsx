@@ -1,9 +1,7 @@
-import { format } from 'date-fns'
-import { GyldighetIcon } from '~shared/icons/gyldigIcon'
 import { IGyldighetResultat, IGyldighetproving } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { Undertekst, VurderingsContainer, VurderingsTitle } from '../../styled'
 import { hentGyldighetsTekst } from '../../utils'
+import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 
 export const GyldigFramsattVurdering = ({
   gyldigFramsatt,
@@ -33,13 +31,11 @@ export const GyldigFramsattVurdering = ({
   const vurderingstekst = hentTekst()
 
   return (
-    <VurderingsContainer>
-      <div>{gyldigFramsatt.resultat && <GyldighetIcon status={gyldigFramsatt.resultat} large={true} />}</div>
-      <div>
-        <VurderingsTitle title={tittel} />
-        <Undertekst $gray>Automatisk {format(new Date(gyldigFramsatt.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
-        {gyldigFramsatt.resultat !== VurderingsResultat.OPPFYLT && <Undertekst>{vurderingstekst}</Undertekst>}
-      </div>
-    </VurderingsContainer>
+    <VurderingsboksWrapper
+      tittel={tittel}
+      redigerbar={false}
+      automatiskVurdertDato={new Date(gyldigFramsatt.vurdertDato)}
+      kommentar={vurderingstekst}
+    />
   )
 }

@@ -23,6 +23,7 @@ include(
     "apps:etterlatte-hendelser-pdl",
     "apps:etterlatte-statistikk",
     "apps:etterlatte-vilkaarsvurdering",
+    "apps:etterlatte-vilkaarsvurdering-asynk",
     "libs:ktor2client-auth-clientcredentials",
     "libs:common",
     "libs:ktor2client-onbehalfof",

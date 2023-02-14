@@ -1,7 +1,7 @@
 import {
-  IPar,
   behandlingTypeFilter,
-  BehandlingTypeFilter,
+  IPar,
+  OppgaveTypeFilter,
   soeknadTypeFilter,
   SoeknadTypeFilter,
   statusFilter,
@@ -76,7 +76,7 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       label: 'Behandlingstype',
       filter: {
         type: 'select',
-        selectedValue: BehandlingTypeFilter.VELG,
+        selectedValue: OppgaveTypeFilter.VELG,
         nedtrekksliste: behandlingTypeFilter,
       },
     },

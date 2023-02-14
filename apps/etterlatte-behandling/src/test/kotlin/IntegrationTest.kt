@@ -53,6 +53,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -112,7 +113,7 @@ class ApplicationTest {
 
     @Test // TODO denne testen bør stykkes opp
     fun verdikjedetest() {
-        val fnr = "123"
+        val fnr = Foedselsnummer.of("08071272487").value
         var behandlingOpprettet: UUID? = null
 
         testApplication {
@@ -126,7 +127,7 @@ class ApplicationTest {
             }
             application { module(beanFactory) }
 
-            client.get("/saker/123") {
+            client.get("/saker/$fnr") {
                 addAuthToken(tokenSaksbehandler)
             }.apply {
                 assertEquals(HttpStatusCode.NotFound, status)
@@ -142,7 +143,7 @@ class ApplicationTest {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
                 val lestSak: Sak = it.body()
-                assertEquals("123", lestSak.ident)
+                assertEquals(fnr, lestSak.ident)
                 assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
             }
 

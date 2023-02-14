@@ -40,10 +40,10 @@ class GrunnlagsendringshendelseService(
     }
 
     fun hentAlleHendelserForSak(sakId: Long) = inTransaction {
-        logger.info("Henter alle hendelser for sak $sakId")
+        logger.info("Henter alle relevante hendelser for sak $sakId")
         grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
-            GrunnlagsendringStatus.values().toList()
+            GrunnlagsendringStatus.relevantForSaksbehandler().toList()
         )
     }
 

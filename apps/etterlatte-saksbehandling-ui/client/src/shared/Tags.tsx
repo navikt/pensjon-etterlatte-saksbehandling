@@ -1,25 +1,29 @@
-import { BehandlingTypeFilter, SoeknadTypeFilter } from '~components/oppgavebenken/typer/oppgavebenken'
+import { OppgaveTypeFilter, SoeknadTypeFilter } from '~components/oppgavebenken/typer/oppgavebenken'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import styled from 'styled-components'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 
 enum Variants {
-    NEUTRAL= 'neutral',
-    INFO= 'info',
-    INFO_FILLED= 'info-filled',
-    ALT1 = 'alt1',
-    ALT1_FILLED= 'alt1-filled',
-    ALT2= 'alt2',
-    ALT2_FILLED= 'alt2-filled',
-    ALT3= 'alt3',
-    ALT3_FILLED= 'alt3-filled',
+  NEUTRAL = 'neutral',
+  INFO = 'info',
+  INFO_FILLED = 'info-filled',
+  ALT1 = 'alt1',
+  ALT1_FILLED = 'alt1-filled',
+  ALT2 = 'alt2',
+  ALT2_FILLED = 'alt2-filled',
+  ALT3 = 'alt3',
+  ALT3_FILLED = 'alt3-filled',
 }
 
-export const tagColors = {
-  [BehandlingTypeFilter.VELG]: Variants.NEUTRAL,
-  [BehandlingTypeFilter.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
-  [BehandlingTypeFilter.REVURDERING]: Variants.ALT3_FILLED,
+export const tagColors: Record<
+  OppgaveTypeFilter | SoeknadTypeFilter | ISaksType | INasjonalitetsType | IBehandlingsType,
+  Variants
+> = {
+  [OppgaveTypeFilter.VELG]: Variants.NEUTRAL,
+  [OppgaveTypeFilter.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
+  [OppgaveTypeFilter.REVURDERING]: Variants.ALT3_FILLED,
+  [OppgaveTypeFilter.HENDELSE]: Variants.ALT3_FILLED,
   [SoeknadTypeFilter.VELG]: Variants.NEUTRAL,
   [SoeknadTypeFilter.GJENLEVENDEPENSJON]: Variants.ALT1_FILLED,
   [SoeknadTypeFilter.BARNEPENSJON]: Variants.INFO,
@@ -38,4 +42,3 @@ export const TagList = styled.ul`
   gap: 0.5em;
   margin-top: 0.5em;
 `
-

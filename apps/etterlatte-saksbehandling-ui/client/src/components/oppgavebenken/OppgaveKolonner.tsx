@@ -1,8 +1,8 @@
 import { Column } from 'react-table'
 import {
-  IOppgave,
   behandlingTypeFilter,
-  BehandlingTypeFilter,
+  IOppgave,
+  OppgaveTypeFilter,
   SoeknadTypeFilter,
   soeknadTypeFilter,
   statusFilter,
@@ -40,12 +40,12 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   },
   {
     Header: 'Behandlingstype',
-    accessor: 'behandlingType',
+    accessor: 'oppgaveType',
     filter: 'exact',
     Cell: ({ value: oppgavetype }) => {
       return (
         <Tag variant={tagColors[oppgavetype]} size={'small'}>
-          {behandlingTypeFilter[oppgavetype as BehandlingTypeFilter]?.navn}
+          {behandlingTypeFilter[oppgavetype as OppgaveTypeFilter]?.navn}
         </Tag>
       )
     },
@@ -84,7 +84,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     Header: 'Handlinger',
     accessor: 'handling',
     Cell: ({ row, value: handling }) => {
-      return <HandlingerKnapp handling={handling} behandlingsId={row.original.behandlingId} />
+      return <HandlingerKnapp handling={handling} behandlingsId={row.original.behandlingId} person={row.original.fnr} />
     },
   },
 ]

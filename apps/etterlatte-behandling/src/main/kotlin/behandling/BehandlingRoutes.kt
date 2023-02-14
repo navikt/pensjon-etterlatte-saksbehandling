@@ -122,8 +122,15 @@ internal fun Route.behandlingRoutes(
                 "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
             )
             val body = call.receive<VirkningstidspunktRequest>()
-            if (!body.isValid()) {
-                return@post call.respond(HttpStatusCode.BadRequest)
+
+            val erGyldigVirkningstidspunkt = generellBehandlingService.erGyldigVirkningstidspunkt(
+                behandlingsId,
+                saksbehandler,
+                accesstoken,
+                body
+            )
+            if (!erGyldigVirkningstidspunkt) {
+                return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
             }
 
             try {
@@ -372,8 +379,6 @@ data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: St
     } catch (e: Exception) {
         throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
     }
-
-    fun isValid() = dato.year in (0..9999) && begrunnelse != null
 }
 
 internal data class FastsettVirkningstidspunktResponse(

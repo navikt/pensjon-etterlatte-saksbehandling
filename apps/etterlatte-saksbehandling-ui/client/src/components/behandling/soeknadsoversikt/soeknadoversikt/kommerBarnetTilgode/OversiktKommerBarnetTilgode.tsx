@@ -2,8 +2,7 @@ import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
 import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
-import { formaterKildePdl, svarTilStatusIcon, svarTilVurderingsstatus } from '../../utils'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
+import { formaterKildePdl, svarTilStatusIcon } from '../../utils'
 import { Soeknadsvurdering } from '../SoeknadsVurdering'
 import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
@@ -38,11 +37,6 @@ export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, redigerbar, s
   return (
     <Soeknadsvurdering
       tittel="Kommer pensjonen barnet tilgode?"
-      vurderingsResultat={
-        kommerBarnetTilgode?.svar
-          ? svarTilVurderingsstatus(kommerBarnetTilgode.svar)
-          : VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-      }
       hjemler={[
         { lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-1', tittel: 'Folketrygdeloven § 18-1 og § 22-1' },
         { lenke: 'https://lovdata.no/lov/2010-03-26-9/§9', tittel: 'Vergemålsloven § 9, § 16 og § 19' },

@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
 import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
@@ -43,7 +44,11 @@ class ApplicationBuilder {
     private val grunnlagService = RealGrunnlagService(opplysningDao, ::publiser, behandlingKlient, Sporingslogg())
 
     private val rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
-        .withKtorModule { restModule(sikkerLogg, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
+        .withKtorModule {
+            restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
+                grunnlagRoute(grunnlagService)
+            }
+        }
         .build().apply {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)

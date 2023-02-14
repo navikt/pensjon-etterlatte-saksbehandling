@@ -14,6 +14,7 @@ import no.nav.etterlatte.logger
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.JsonMessage
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -28,7 +29,7 @@ object StandardMeldingFeature : TestDataFeature {
         get() = {
             get {
                 sendMelding(
-                    payload(aremark_person),
+                    payload(aremark_person, LocalDateTime.now()),
                     producer
                 )
 

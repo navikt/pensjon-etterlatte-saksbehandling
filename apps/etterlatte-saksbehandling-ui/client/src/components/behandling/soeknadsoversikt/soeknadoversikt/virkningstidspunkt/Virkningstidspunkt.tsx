@@ -12,7 +12,6 @@ import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { addMonths } from 'date-fns'
 import { Soeknadsvurdering } from '../SoeknadsVurdering'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Info } from '../../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
@@ -86,9 +85,6 @@ const Virkningstidspunkt = (props: Props) => {
     <>
       <Soeknadsvurdering
         tittel="Virkningstidspunkt"
-        vurderingsResultat={
-          props.virkningstidspunkt !== null ? VurderingsResultat.OPPFYLT : VurderingsResultat.IKKE_OPPFYLT
-        }
         hjemler={[
           { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12', tittel: 'Folketrygdeloven § 22-12 første ledd' },
           { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-13', tittel: '§ 22-13 fjerde ledd' },
@@ -128,7 +124,7 @@ const Virkningstidspunkt = (props: Props) => {
                       saksbehandler: props.virkningstidspunkt.kilde.ident,
                       tidspunkt: new Date(props.virkningstidspunkt.kilde.tidspunkt),
                     }
-                  : null
+                  : undefined
               }
               redigerbar={props.redigerbar}
               lagreklikk={fastsett}

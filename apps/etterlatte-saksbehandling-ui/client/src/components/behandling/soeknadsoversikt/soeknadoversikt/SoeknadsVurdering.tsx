@@ -3,7 +3,6 @@ import { BodyLong, Heading, Link } from '@navikt/ds-react'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { SoeknadOversiktWrapper } from '../styled'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { StatusIconProps, StatusIcon } from '~shared/icons/statusIcon'
 
 interface HjemmelLenkeProps {
@@ -23,7 +22,6 @@ const HjemmelLenke = (props: HjemmelLenkeProps) => {
 interface SoeknadsVurderingProps {
   tittel: string
   hjemler: HjemmelLenkeProps[]
-  vurderingsResultat: VurderingsResultat | null
   children: ReactNode
   status: StatusIconProps | null
 }

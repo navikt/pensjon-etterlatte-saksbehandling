@@ -20,6 +20,7 @@ import no.nav.etterlatte.testdata.JsonMessage
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.usernameFraToken
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -234,6 +235,7 @@ fun opprettSkjemaInfo(
             gjenlevendeFnr
         )
     }
+    val mottatt_dato = LocalDateTime.now()
     return """
     {
       "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
@@ -470,7 +472,7 @@ fun opprettSkjemaInfo(
       "soesken": $soeskenString,
       "versjon": "2",
       "type": "BARNEPENSJON",
-      "mottattDato": "2022-02-10T10:51:12.298943803",
+      "mottattDato": "$mottatt_dato",
       "template": "barnepensjon_v2"
     }
     """.trimIndent()

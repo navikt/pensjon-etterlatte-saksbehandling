@@ -72,7 +72,7 @@ export const KommerBarnetTilGodeVurdering = ({
               saksbehandler: kommerBarnetTilgode?.kilde.ident,
               tidspunkt: new Date(kommerBarnetTilgode?.kilde.tidspunkt),
             }
-          : null
+          : undefined
       }
       lagreklikk={lagre}
       avbrytklikk={reset}

@@ -4,7 +4,6 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -23,7 +22,7 @@ import java.util.UUID
 
 internal class DistribusjonServiceTest {
     private val mockKlient = mockk<DistribusjonKlient>()
-    private val mockDb = mockk<BrevRepository>()
+    private val mockDb = mockk<BrevRepository>(relaxed = true)
 
     private val service = DistribusjonServiceImpl(mockKlient, mockDb)
 
@@ -42,7 +41,6 @@ internal class DistribusjonServiceTest {
         val distribusjonResponse = DistribuerJournalpostResponse(UUID.randomUUID().toString())
 
         coEvery { mockKlient.distribuerJournalpost(any()) } returns distribusjonResponse
-        every { mockDb.oppdaterStatus(any(), any(), any()) } returns true
 
         val brevId = 1L
         val journalpostId = UUID.randomUUID().toString()
@@ -63,6 +61,9 @@ internal class DistribusjonServiceTest {
         assertEquals(tidspunkt, faktiskRequest.distribusjonstidspunkt)
         assertEquals("etterlatte-brev-api", faktiskRequest.dokumentProdApp)
 
-        verify(exactly = 1) { mockDb.oppdaterStatus(brevId, Status.DISTRIBUERT, distribusjonResponse.toJson()) }
+        verify(exactly = 1) {
+            mockDb.setBestillingsId(brevId, bestillingsID)
+            mockDb.oppdaterStatus(brevId, Status.DISTRIBUERT, distribusjonResponse.toJson())
+        }
     }
 }

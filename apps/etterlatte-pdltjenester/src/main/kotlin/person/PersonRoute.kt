@@ -1,5 +1,6 @@
 package no.nav.etterlatte.person
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -11,7 +12,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 
-fun Route.personApi(service: PersonService) {
+fun Route.personRoute(service: PersonService) {
     route("person") {
         val logger = application.log
 
@@ -19,7 +20,11 @@ fun Route.personApi(service: PersonService) {
             val hentPersonRequest = call.receive<HentPersonRequest>()
             logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
 
-            service.hentPerson(hentPersonRequest).let { call.respond(it) }
+            try {
+                service.hentPerson(hentPersonRequest).let { call.respond(it) }
+            } catch (e: PdlFantIkkePerson) {
+                call.respond(HttpStatusCode.NotFound)
+            }
         }
 
         route("/v2") {
@@ -27,20 +32,12 @@ fun Route.personApi(service: PersonService) {
                 val hentPersonRequest = call.receive<HentPersonRequest>()
                 logger.info("Henter personopplysning med fnr=${hentPersonRequest.foedselsnummer}")
 
-                service.hentOpplysningsperson(hentPersonRequest)
-                    .let { call.respond(it) }
+                try {
+                    service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
+                } catch (e: PdlFantIkkePerson) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
-        }
-    }
-
-    route("/api/person") {
-        val logger = application.log
-
-        post {
-            val hentPersonRequest = call.receive<HentPersonRequest>()
-            logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
-
-            service.hentPerson(hentPersonRequest).let { call.respond(it) }
         }
     }
 
@@ -51,8 +48,10 @@ fun Route.personApi(service: PersonService) {
             val hentFolkeregisterIdentRequest = call.receive<HentFolkeregisterIdentRequest>()
             logger.info("Henter identer for ident=${hentFolkeregisterIdentRequest.ident}")
 
-            service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest).let {
-                call.respond(it)
+            try {
+                service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest).let { call.respond(it) }
+            } catch (e: PdlFantIkkePerson) {
+                call.respond(HttpStatusCode.NotFound)
             }
         }
     }

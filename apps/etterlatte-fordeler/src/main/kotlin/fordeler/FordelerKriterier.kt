@@ -24,31 +24,29 @@ enum class FordelerKriterie(val forklaring: String) {
     BARN_ER_IKKE_NORSK_STATSBORGER("Barn er ikke norsk statsborger"),
     BARN_ER_FOR_GAMMELT("Barn er for gammelt"),
     BARN_HAR_ADRESSEBESKYTTELSE("Barn har adressebeskyttelse"),
-    BARN_ER_IKKE_FOEDT_I_NORGE("Barn ikke fodt i Norge"),
+    BARN_ER_IKKE_FOEDT_I_NORGE("Barn er ikke født i Norge"),
     BARN_HAR_UTVANDRING("Barn har utvandring"),
     BARN_HAR_HUKET_AV_UTLANDSADRESSE("Det er huket av for utenlandsopphold for avdøde i søknaden"),
-    BARN_HAR_VERGE("Barn er market med verge i søknaden"),
+    BARN_HAR_VERGE("Barn er markert med verge i søknaden"),
     BARN_HAR_REGISTRERT_VERGE("Barn er registrert med verge i PDL"),
     BARN_ER_IKKE_BOSATT_I_NORGE("Barn er ikke bosatt i Norge"),
 
-    // Kommentert ut for å teste søskenjustering
-    // BARN_ER_IKKE_ALENEBARN("Barn (søker) er ikke alenebarn"),
     BARN_HAR_FOR_GAMLE_SOESKEN("Det finnes barn av avdøde som er for gamle"),
 
-    AVDOED_HAR_UTVANDRING("Avdoed har utvandring"),
-    AVDOED_HAR_YRKESSKADE("Avdød er market med yrkesskade i søknaden"),
-    AVDOED_ER_IKKE_REGISTRERT_SOM_DOED("Avdød er ikke død"),
+    AVDOED_HAR_UTVANDRING("Avdød har utvandring"),
+    AVDOED_HAR_YRKESSKADE("Avdød er markert med yrkesskade i søknaden"),
+    AVDOED_ER_IKKE_REGISTRERT_SOM_DOED("Avdød er ikke registrert som død"),
     AVDOED_HAR_HATT_UTLANDSOPPHOLD("Det er huket av for utenlandsopphold for avdøde i søknaden"),
-    AVDOED_VAR_IKKE_BOSATT_I_NORGE("Avdød er ikke bosatt i Norge"),
-    AVDOED_ER_IKKE_FORELDER_TIL_BARN("Avdød er forelder til søker"),
+    AVDOED_VAR_IKKE_BOSATT_I_NORGE("Avdød var ikke bosatt i Norge"),
+    AVDOED_ER_IKKE_FORELDER_TIL_BARN("Avdød er ikke forelder til barnet"),
     AVDOED_HAR_ADRESSEBESKYTTELSE("Avdød har adressebeskyttelse"),
 
     GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE("Gjenlevende er ikke bosatt i Norge"),
-    GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE("Gjenlevende har samme adresse"),
-    GJENLEVENDE_HAR_IKKE_FORELDREANSVAR("Gjenlevende søker har ikke foreldreanvar"),
+    GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE("Gjenlevende har ikke samme adresse som barnet"),
+    GJENLEVENDE_HAR_IKKE_FORELDREANSVAR("Gjenlevende har ikke foreldreansvar for barnet"),
     GJENLEVENDE_HAR_ADRESSEBESKYTTELSE("Gjenlevende har adressebeskyttelse"),
 
-    INNSENDER_ER_IKKE_FORELDER("Søker er ikke markert som forelder i søknaden"),
+    INNSENDER_ER_IKKE_FORELDER("Innsender er ikke markert som forelder til barnet"),
 
     SOEKNAD_ER_IKKE_PAA_BOKMAAL("Søknaden er ikke sendt inn på bokmål")
 }
@@ -183,14 +181,6 @@ class FordelerKriterier {
 
     private fun forGammel(person: Person, alder: Int = 14): Boolean {
         return person.alder()?.let { it > alder } ?: true
-    }
-
-    private fun barnErIkkeAlenebarn(avdoed: Person, barn: Person, gjenlevende: Person): Boolean {
-        return avdoed.familieRelasjon?.barn?.minus(barn.foedselsnummer)?.let { avdoedAndreBarn ->
-            gjenlevende.familieRelasjon?.barn?.let { gjenlevendeBarn ->
-                (avdoedAndreBarn.any { (it in gjenlevendeBarn) })
-            }
-        } ?: false
     }
 
     private fun harHuketAvForYrkesskade(barnepensjon: Barnepensjon): Boolean {

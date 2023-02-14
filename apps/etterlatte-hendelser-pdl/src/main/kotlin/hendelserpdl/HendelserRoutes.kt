@@ -43,12 +43,5 @@ fun Application.module() {
             stream?.fraStart()
             call.respondText("partition has been set to start", contentType = ContentType.Text.Plain)
         }
-
-        get("/isAlive") {
-            call.respondText("JADDA!", contentType = ContentType.Text.Plain)
-        }
-        get("/isReady") {
-            call.respondText("JADDA!", contentType = ContentType.Text.Plain)
-        }
     }
 }

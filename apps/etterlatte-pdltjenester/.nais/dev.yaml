@@ -11,13 +11,13 @@ spec:
   ingresses:
     - "https://etterlatte-pdltjenester.dev.intern.nav.no"
   liveness:
-    path: "internal/isalive"
+    path: "health/isalive"
     initialDelay: 60
     timeout: 1
     periodSeconds: 5
     failureThreshold: 10
   readiness:
-    path: "internal/isready"
+    path: "health/isready"
     initialDelay: 60
     timeout: 1
   prometheus:
@@ -26,24 +26,16 @@ spec:
   replicas:
     min: 1
     max: 1
-  tokenx:
-    enabled: true
   azure:
     application:
       enabled: true
   env:
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
-    - name: PDL_AUDIENCE
-      value: "dev-fss:pdl:pdl-api"
     - name: PDL_OUTBOUND_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
     - name: PPS_URL
       value: https://pensjon-parallelle-sannheter.dev.intern.nav.no
-    - name: ROOT_LOGLEVEL
-      value: "INFO"
-    - name: NAV_CONSUMER_ID
-      value: "srvbarnepensjon"
   accessPolicy:
     outbound:
       external:

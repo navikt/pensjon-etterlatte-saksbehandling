@@ -13,6 +13,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -41,6 +42,13 @@ internal fun Route.grunnlagsendringshendelseRoute(
             val forelderBarnRelasjonHendelse = call.receive<ForelderBarnRelasjonHendelse>()
             logger.info("Mottar en forelder-barn-relasjon-hendelse fra PDL")
             grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse)
+            call.respond(HttpStatusCode.OK)
+        }
+
+        post("/adressebeskyttelse") {
+            val adressebeskyttelse = call.receive<Adressebeskyttelse>()
+            logger.info("Mottar en adressebeskyttelse-hendelse fra PDL")
+            grunnlagsendringshendelseService.opprettAdressebeskyttelseHendelse(adressebeskyttelse)
             call.respond(HttpStatusCode.OK)
         }
 

@@ -6,6 +6,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -16,6 +17,7 @@ interface Behandling {
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
+    fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
 }
 
 class BehandlingsService(
@@ -51,6 +53,15 @@ class BehandlingsService(
             behandling_app.post("$url/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(forelderBarnRelasjon)
+            }
+        }
+    }
+
+    override fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
+        runBlocking {
+            behandling_app.post("$url/grunnlagsendringshendelse/adressebeskyttelse") {
+                contentType(ContentType.Application.Json)
+                setBody(adressebeskyttelse)
             }
         }
     }

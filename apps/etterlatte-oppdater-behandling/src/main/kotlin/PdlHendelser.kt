@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -54,6 +55,12 @@ internal class PdlHendelser(
                         val forelderBarnRelasjon: ForelderBarnRelasjonHendelse =
                             objectMapper.treeToValue(packet["hendelse_data"])
                         behandlinger.sendForelderBarnRelasjonHendelse(forelderBarnRelasjon)
+                    }
+                    "ADRESSEBESKYTTELSE_V1" -> {
+                        logger.info("Adressebeskyttelse mottatt")
+                        val adressebeskyttelse: Adressebeskyttelse =
+                            objectMapper.treeToValue(packet["hendelse_data"])
+                        behandlinger.sendAdressebeskyttelseHendelse(adressebeskyttelse)
                     }
                     else -> {
                         logger.info("Pdl-hendelsestypen mottatt håndteres ikke av applikasjonen")

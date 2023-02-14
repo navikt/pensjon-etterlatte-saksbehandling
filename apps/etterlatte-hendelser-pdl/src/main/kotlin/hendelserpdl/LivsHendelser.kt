@@ -58,7 +58,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             JsonMessage.newMessage(
                 mapOf(
                     eventNameKey to "PDL:PERSONHENDELSE",
-                    "hendelse" to "DOEDSFALL_V1",
+                    "hendelse" to LeesahOpplysningstyper.DOEDSFALL_V1.toString(),
                     "hendelse_data" to doedshendelse
                 )
             ).toJson()
@@ -87,7 +87,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             JsonMessage.newMessage(
                 mapOf(
                     eventNameKey to "PDL:PERSONHENDELSE",
-                    "hendelse" to "UTFLYTTING_FRA_NORGE",
+                    "hendelse" to LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString(),
                     "hendelse_data" to utflyttingsHendelse
                 )
             )
@@ -117,7 +117,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             JsonMessage.newMessage(
                 mapOf(
                     eventNameKey to "PDL:PERSONHENDELSE",
-                    "hendelse" to "FORELDERBARNRELASJON_V1",
+                    "hendelse" to LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString(),
                     "hendelse_data" to forelderBarnRelasjonHendelse
                 )
             )
@@ -137,7 +137,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             JsonMessage.newMessage(
                 mapOf(
                     eventNameKey to "PDL:PERSONHENDELSE",
-                    "hendelse" to "FORELDERBARNRELASJON_V1",
+                    "hendelse" to LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString(),
                     "hendelse_data" to adressebeskyttelse
                 )
             )

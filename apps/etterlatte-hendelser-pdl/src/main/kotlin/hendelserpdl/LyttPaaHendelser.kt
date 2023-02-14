@@ -29,10 +29,10 @@ class LyttPaaHendelser(
             meldinger++
 
             when (it.opplysningstype) {
-                "DOEDSFALL_V1" -> haandterDoedsendelse(it)
-                "UTFLYTTING_FRA_NORGE" -> haandterUtflyttingFraNorge(it)
-                "FORELDERBARNRELASJON_V1" -> haandterForelderBarnRelasjon(it)
-                "ADRESSEBESKYTTELSE_V1" -> haandterAdressebeskyttelse(it)
+                LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(it)
+                LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(it)
+                LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(it)
+                LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(it)
                 else -> log.info("Så en hendelse av type ${it.opplysningstype} som vi ikke håndterer")
             }
         }

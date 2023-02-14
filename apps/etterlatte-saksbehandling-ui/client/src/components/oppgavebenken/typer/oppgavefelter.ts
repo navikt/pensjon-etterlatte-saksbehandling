@@ -1,6 +1,6 @@
 import {
-  behandlingTypeFilter,
   IPar,
+  oppgaveTypeFilter,
   OppgaveTypeFilter,
   soeknadTypeFilter,
   SoeknadTypeFilter,
@@ -73,11 +73,11 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
 
     oppgaveType: {
       noekkel: 'oppgaveType',
-      label: 'Behandlingstype',
+      label: 'Oppgavetype',
       filter: {
         type: 'select',
         selectedValue: OppgaveTypeFilter.VELG,
-        nedtrekksliste: behandlingTypeFilter,
+        nedtrekksliste: oppgaveTypeFilter,
       },
     },
     soeknadType: {

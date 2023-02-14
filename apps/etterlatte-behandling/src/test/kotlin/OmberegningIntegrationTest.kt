@@ -14,7 +14,6 @@ import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -39,7 +38,7 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
     fun shutdown() = afterAll()
 
     @Test
-    fun omberegn() {
+    fun `kan opprette omberegning paa sak som har foerstegangsbehandling`() {
         val fnr = "234"
         testApplication {
             environment {
@@ -93,7 +92,6 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                     Omberegningshendelse(
                         1,
                         LocalDate.now(),
-                        BehandlingType.REVURDERING,
                         RevurderingAarsak.GRUNNBELOEPREGULERING
                     )
                 )

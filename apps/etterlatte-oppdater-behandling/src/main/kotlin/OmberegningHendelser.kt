@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.Hendelsestype
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -15,8 +16,6 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-const val hendelsetype = "OMBEREGNINGHENDELSE"
-
 internal class OmberegningHendelser(rapidsConnection: RapidsConnection, private val behandlinger: Behandling) :
     River.PacketListener {
 
@@ -25,23 +24,22 @@ internal class OmberegningHendelser(rapidsConnection: RapidsConnection, private 
     init {
         logger.info("initierer rapid for omberegninghendelser")
         River(rapidsConnection).apply {
-            eventName("OMBEREGNINGHENDELSE")
+            eventName(Hendelsestype.OMBEREGNINGSHENDELSE.toString())
 
             correlationId()
-            validate { it.requireValue("hendelse", hendelsetype) }
-            validate { it.interestedIn("hendelse_data") }
+            validate { it.rejectKey("omberegning") }
+            validate { it.requireKey("hendelse_data") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
-            logger.info("Mottatt omberegninghendelse: ${packet["hendelse"]}")
+            logger.info("Mottatt omberegninghendelse")
             try {
                 val hendelse: Omberegningshendelse = objectMapper.treeToValue(packet["hendelse_data"])
                 runBlocking {
                     val omberegningId = behandlinger.opprettOmberegning(hendelse).body<UUID>()
                     packet["omberegning"] = omberegningId
-                    packet.eventName = "Omberegninghendelse-behandlet"
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")

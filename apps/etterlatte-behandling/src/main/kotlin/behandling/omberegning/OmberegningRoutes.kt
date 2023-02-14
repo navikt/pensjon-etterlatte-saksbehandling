@@ -17,7 +17,8 @@ fun Route.omberegningRoutes(
         post {
             val request = call.receive<Omberegningshendelse>()
             val forrigeBehandling = behandlingService.hentBehandlingerISak(request.sakId)
-                .maxByOrNull { it.behandlingOpprettet }!!
+                .maxByOrNull { it.behandlingOpprettet }
+                ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak ${request.sakId}")
             val omberegning = omberegningService.opprettOmberegning(
                 persongalleri = forrigeBehandling.persongalleri,
                 sakId = request.sakId,

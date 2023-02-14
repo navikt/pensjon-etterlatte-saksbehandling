@@ -7,7 +7,18 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.common.Oppgavetrigger
+import no.nav.etterlatte.utbetaling.common.april
+import no.nav.etterlatte.utbetaling.common.august
+import no.nav.etterlatte.utbetaling.common.februar
+import no.nav.etterlatte.utbetaling.common.januar
+import no.nav.etterlatte.utbetaling.common.juli
+import no.nav.etterlatte.utbetaling.common.juni
+import no.nav.etterlatte.utbetaling.common.mai
+import no.nav.etterlatte.utbetaling.common.mars
 import no.nav.etterlatte.utbetaling.common.next
+import no.nav.etterlatte.utbetaling.common.november
+import no.nav.etterlatte.utbetaling.common.oktober
+import no.nav.etterlatte.utbetaling.common.september
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
@@ -103,10 +114,11 @@ class ApplicationContext(
 
     val konsistensavstemmingJob = KonsistensavstemmingJob(
         konsistensavstemmingService,
+        kjoereplanKonsistensavstemming(),
         leaderElection,
         initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
-        periode = Duration.of(1, ChronoUnit.HOURS)
-
+        periode = Duration.of(4, ChronoUnit.HOURS),
+        clock = clock
     )
 
     val oppgavetrigger by lazy {
@@ -133,6 +145,25 @@ class ApplicationContext(
         )
     }
 }
+
+/**
+ * Kjøreplan får vi en gang i året fra økonomi og brukes for konsistensavstemming
+ * av løpende/aktive utbetalinger
+ */
+private fun kjoereplanKonsistensavstemming() = setOf(
+    5.januar(2023),
+    30.januar(2023),
+    27.februar(2023),
+    28.mars(2023),
+    25.april(2023),
+    30.mai(2023),
+    29.juni(2023),
+    28.juli(2023),
+    30.august(2023),
+    29.september(2023),
+    30.oktober(2023),
+    22.november(2023)
+)
 
 private fun Map<String, String>.withConsumerGroupId() =
     this.toMutableMap().apply {

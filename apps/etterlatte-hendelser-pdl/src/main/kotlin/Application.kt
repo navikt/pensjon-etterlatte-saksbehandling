@@ -6,8 +6,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -17,6 +21,7 @@ import no.nav.etterlatte.hendelserpdl.LyttPaaHendelser
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.module
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.LoggerFactory
@@ -25,6 +30,7 @@ import kotlin.system.exitProcess
 
 var stream: LyttPaaHendelser? = null
 
+@OptIn(DelicateCoroutinesApi::class)
 fun main() {
     val env = System.getenv().toMutableMap()
     env["KAFKA_BOOTSTRAP_SERVERS"] = env["KAFKA_BROKERS"]
@@ -78,5 +84,8 @@ fun pdlHttpClient(props: Map<String, String>) = HttpClient(OkHttp) {
             config = props.toMutableMap()
                 .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("PDL_AZURE_SCOPE"))) }
         }
+    }
+    defaultRequest {
+        header(HttpHeaders.XCorrelationId, getCorrelationId())
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }

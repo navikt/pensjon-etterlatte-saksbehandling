@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.person.pdl.leesah.Personhendelse
@@ -28,12 +29,14 @@ class LyttPaaHendelser(
         val antallMeldingerLest = livshendelser.poll {
             meldinger++
 
-            when (it.opplysningstype) {
-                LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(it)
-                LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(it)
-                LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(it)
-                LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(it)
-                else -> log.info("Så en hendelse av type ${it.opplysningstype} som vi ikke håndterer")
+            withLogContext {
+                when (it.opplysningstype) {
+                    LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(it)
+                    LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(it)
+                    LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(it)
+                    LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(it)
+                    else -> log.info("Så en hendelse av type ${it.opplysningstype} som vi ikke håndterer")
+                }
             }
         }
 

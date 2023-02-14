@@ -1,0 +1,19 @@
+name: etterlatte-funksjonsbrytere
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-funksjonsbrytere/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-funksjonsbrytere/**
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.lib-test.yaml
+    secrets: inherit

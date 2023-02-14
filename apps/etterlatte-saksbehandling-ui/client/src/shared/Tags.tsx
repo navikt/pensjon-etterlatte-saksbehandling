@@ -23,7 +23,7 @@ export const tagColors: Record<
   [OppgaveTypeFilter.VELG]: Variants.NEUTRAL,
   [OppgaveTypeFilter.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
   [OppgaveTypeFilter.REVURDERING]: Variants.ALT3_FILLED,
-  [OppgaveTypeFilter.HENDELSE]: Variants.ALT3_FILLED,
+  [OppgaveTypeFilter.ENDRING_PAA_SAK]: Variants.ALT3_FILLED,
   [SoeknadTypeFilter.VELG]: Variants.NEUTRAL,
   [SoeknadTypeFilter.GJENLEVENDEPENSJON]: Variants.ALT1_FILLED,
   [SoeknadTypeFilter.BARNEPENSJON]: Variants.INFO,

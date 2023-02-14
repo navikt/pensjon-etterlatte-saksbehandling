@@ -24,7 +24,7 @@ data class Mottaker(
 ) {
     companion object {
         fun fraAdresse(adresse: Adresse) = Mottaker(
-            navn = "${adresse.fornavn} ${adresse.etternavn}",
+            navn = adresse.navn,
             adresse = adresse.adresse,
             postnummer = adresse.postnummer,
             poststed = adresse.poststed,

@@ -62,7 +62,6 @@ internal class VedtaksbrevRouteTest {
         coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any(), any()) } returns opprettBrev()
 
         val sakId = 123456L
-        val behandlingId = UUID.randomUUID().toString()
         val saksbehandler = "S123456"
         val token = accessToken
 
@@ -81,13 +80,13 @@ internal class VedtaksbrevRouteTest {
             val response = client.post("/api/brev/vedtak") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
-                setBody(OpprettVedtaksbrevRequest(sakId, behandlingId))
+                setBody(OpprettVedtaksbrevRequest(sakId, BEHANDLING_ID))
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
-        coVerify(exactly = 1) { vedtaksbrevService.oppdaterVedtaksbrev(sakId, behandlingId, saksbehandler, token) }
+        coVerify(exactly = 1) { vedtaksbrevService.oppdaterVedtaksbrev(sakId, BEHANDLING_ID, saksbehandler, token) }
     }
 
     @Test
@@ -137,7 +136,8 @@ internal class VedtaksbrevRouteTest {
 
     private fun opprettBrev() = Brev(
         1,
-        "behandlingId",
+        BEHANDLING_ID,
+        "soeker_fnr",
         "tittel",
         Status.OPPRETTET,
         Mottaker(STOR_SNERK),
@@ -148,5 +148,6 @@ internal class VedtaksbrevRouteTest {
         private const val ISSUER_ID = "azure"
         private const val CLIENT_ID = "mock-client-id"
         private val STOR_SNERK = Foedselsnummer.of("11057523044")
+        private val BEHANDLING_ID = UUID.randomUUID()
     }
 }

@@ -19,8 +19,10 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import org.slf4j.LoggerFactory
@@ -40,10 +42,10 @@ class GrunnlagsendringshendelseService(
     }
 
     fun hentAlleHendelserForSak(sakId: Long) = inTransaction {
-        logger.info("Henter alle hendelser for sak $sakId")
+        logger.info("Henter alle relevante hendelser for sak $sakId")
         grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
-            GrunnlagsendringStatus.values().toList()
+            GrunnlagsendringStatus.relevantForSaksbehandler().toList()
         )
     }
 
@@ -70,9 +72,27 @@ class GrunnlagsendringshendelseService(
         )
     }
 
+    fun opprettAdressebeskyttelseHendelse(
+        adressebeskyttelse: Adressebeskyttelse
+    ): List<Grunnlagsendringshendelse> {
+        val grunnlagsendringsType = when (adressebeskyttelse.gradering) {
+            Gradering.STRENGT_FORTROLIG_UTLAND -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND
+            Gradering.STRENGT_FORTROLIG -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG
+            Gradering.FORTROLIG -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_FORTROLIG
+            else -> throw RuntimeException("Tom eller feil gradering mottatt ${adressebeskyttelse.gradering}")
+        }
+
+        return opprettHendelseAvTypeForPerson(
+            adressebeskyttelse.fnr,
+            grunnlagsendringsType,
+            GrunnlagsendringStatus.SJEKKET_AV_JOBB
+        )
+    }
+
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,
-        grunnlagendringType: GrunnlagsendringsType
+        grunnlagendringType: GrunnlagsendringsType,
+        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
     ):
         List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = LocalDateTime.now()
@@ -95,6 +115,7 @@ class GrunnlagsendringshendelseService(
                             Grunnlagsendringshendelse(
                                 id = hendelseId,
                                 sakId = rolleOgSak.second,
+                                status = grunnlagsEndringsStatus,
                                 type = grunnlagendringType,
                                 opprettet = tidspunktForMottakAvHendelse,
                                 hendelseGjelderRolle = rolleOgSak.first,
@@ -193,6 +214,27 @@ class GrunnlagsendringshendelseService(
                         barnGrunnlag = grunnlag?.barn(rolle)
                     )
                 }
+            }
+
+            GrunnlagsendringsType.ADRESSEBESKYTTELSE_FORTROLIG -> {
+                throw IllegalArgumentException(
+                    "Statusen ${GrunnlagsendringsType.ADRESSEBESKYTTELSE_FORTROLIG} " +
+                        "skal ikke forekomme her, da den blir opprettet automatisk"
+                )
+            }
+
+            GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG -> {
+                throw IllegalArgumentException(
+                    "Statusen ${GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG} " +
+                        "skal ikke forekomme her, da den blir opprettet automatisk"
+                )
+            }
+
+            GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND -> {
+                throw IllegalArgumentException(
+                    "Statusen ${GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND} " +
+                        "skal ikke forekomme her, da den blir opprettet automatisk"
+                )
             }
         }
     }

@@ -37,6 +37,9 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.oppgave.OppgaveDao
+import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
@@ -55,8 +58,10 @@ interface BeanFactory {
     fun generellBehandlingService(): GenerellBehandlingService
     fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService
     fun manueltOpphoerService(): ManueltOpphoerService
+    fun oppgaveService(): OppgaveService
     fun omberegningService(): OmberegningService
     fun sakDao(): SakDao
+    fun oppgaveDao(): OppgaveDao
     fun behandlingDao(): BehandlingDao
     fun hendelseDao(): HendelseDao
     fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao
@@ -97,6 +102,14 @@ abstract class CommonFactory : BeanFactory {
 
     private val revurderingFactory: RevurderingFactory by lazy {
         RevurderingFactory(behandlingDao(), hendelseDao())
+    }
+
+    private val oppgaveService: OppgaveService by lazy {
+        OppgaveServiceImpl(oppgaveDao())
+    }
+
+    private val oppgaveDao: OppgaveDao by lazy {
+        OppgaveDao { databaseContext().activeTx() }
     }
 
     override fun behandlingHendelser(): BehandlingsHendelser {
@@ -152,6 +165,8 @@ abstract class CommonFactory : BeanFactory {
         )
     }
 
+    override fun oppgaveDao(): OppgaveDao = oppgaveDao
+    override fun oppgaveService(): OppgaveService = oppgaveService
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
     override fun hendelseDao(): HendelseDao = HendelseDao { databaseContext().activeTx() }

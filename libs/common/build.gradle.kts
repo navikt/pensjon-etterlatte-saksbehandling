@@ -1,3 +1,4 @@
+import Logging.LogbackClassic
 import Logging.Slf4jApi
 
 plugins {
@@ -17,6 +18,8 @@ dependencies {
     api(Jackson.ModuleKotlin)
 
     compileOnly(Slf4jApi)
+    testImplementation(Slf4jApi)
+    testImplementation(LogbackClassic)
 
     testImplementation(Jupiter.Api)
     testImplementation(Jupiter.Params)

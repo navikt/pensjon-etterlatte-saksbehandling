@@ -3,10 +3,10 @@ import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
 import styled from 'styled-components'
 import {
-  BehandlingTypeFilter,
   FilterPar,
   Handlinger,
   IOppgave,
+  OppgaveTypeFilter,
   SoeknadTypeFilter,
   StatusFilter,
 } from './typer/oppgavebenken'
@@ -85,7 +85,7 @@ const mapOppgaveResponse = (data: OppgaveDTO): IOppgave => ({
   behandlingId: data.behandlingId,
   regdato: new Date(data.regdato),
   soeknadType: data.soeknadType.toUpperCase() as SoeknadTypeFilter,
-  behandlingType: data.behandlingType.toUpperCase() as BehandlingTypeFilter,
+  oppgaveType: data.oppgaveType.toUpperCase() as OppgaveTypeFilter,
   fristdato: new Date(data.fristdato),
   fnr: data.fnr,
   beskrivelse: data.beskrivelse,

@@ -34,10 +34,13 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -67,7 +70,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
 
     @Test // TODO denne testen bør stykkes opp
     fun verdikjedetest() {
-        val fnr = "123"
+        val fnr = Foedselsnummer.of("08071272487").value
         var behandlingOpprettet: UUID? = null
 
         testApplication {
@@ -81,7 +84,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
             application { module(beanFactory) }
 
-            client.get("/saker/123") {
+            client.get("/saker/$fnr") {
                 addAuthToken(tokenSaksbehandler)
             }.apply {
                 assertEquals(HttpStatusCode.NotFound, status)
@@ -97,7 +100,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
                 val lestSak: Sak = it.body()
-                assertEquals("123", lestSak.ident)
+                assertEquals(fnr, lestSak.ident)
                 assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
             }
 
@@ -302,7 +305,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     UtflyttingsHendelse(
-                        fnr = "søker",
+                        fnr = fnr,
                         tilflyttingsLand = null,
                         tilflyttingsstedIUtlandet = null,
                         utflyttingsdato = null,
@@ -316,11 +319,23 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     ForelderBarnRelasjonHendelse(
-                        fnr = "søker",
+                        fnr = fnr,
                         relatertPersonsIdent = null,
                         relatertPersonsRolle = "",
                         minRolleForPerson = "",
                         relatertPersonUtenFolkeregisteridentifikator = null,
+                        endringstype = Endringstype.OPPRETTET
+                    )
+                )
+            }
+
+            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                addAuthToken(tokenServiceUser)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Adressebeskyttelse(
+                        fnr = fnr,
+                        gradering = Gradering.STRENGT_FORTROLIG,
                         endringstype = Endringstype.OPPRETTET
                     )
                 )

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -10,6 +11,7 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
@@ -102,14 +104,21 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             call.respond(underkjentVedtak)
         }
 
-        data class LoependeVedtakRequest(val dato: LocalDate)
-        data class LoependeVedtakResponse(val erLoepende: Boolean)
         get("vedtak/loepende/{sakId}") {
-            val sakId = call.parameters["sakId"]?.toLong() ?: return@get call.respond(HttpStatusCode.BadRequest)
-            val body = call.receive<LoependeVedtakRequest>()
+            val sakId = call.parameters["sakId"]?.toLong() ?: return@get call.respond(
+                BadRequest,
+                "Sak ID må sendes med som et tall i requesten"
+            )
+            val dato = call.request.queryParameters["dato"]
+                ?.runCatching { LocalDate.parse(this) }
+                ?.fold(
+                    onSuccess = { it },
+                    onFailure = { return@get call.respond(BadRequest, "Dato som sendes må være på format YYYY-MM-DD") }
+                )
+                ?: return@get call.respond(BadRequest, "Det mangler et query parameter på dato")
 
-            val erLoepende = service.vedtakErLoependePaaDato(sakId, body.dato)
-            call.respond(LoependeVedtakResponse(erLoepende))
+            val erLoepende = service.vedtakErLoependePaaDato(sakId, dato)
+            call.respond(LoependeYtelseDTO(erLoepende, dato)) // TODO sj: Returnere den faktiske datoen
         }
     }
 }

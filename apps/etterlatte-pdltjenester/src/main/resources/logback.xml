@@ -13,4 +13,5 @@
         <appender-ref ref="STDOUT_JSON"/>
     </root>
 
+    <include resource="logback-secure.xml"/>
 </configuration>

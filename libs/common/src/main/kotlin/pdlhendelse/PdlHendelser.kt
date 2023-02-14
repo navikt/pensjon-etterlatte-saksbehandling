@@ -27,6 +27,19 @@ data class ForelderBarnRelasjonHendelse(
     val endringstype: Endringstype
 ) : PdlHendelse
 
+data class Adressebeskyttelse(
+    val fnr: String,
+    val gradering: Gradering,
+    val endringstype: Endringstype
+)
+
 enum class Endringstype {
     OPPRETTET, KORRIGERT, ANNULLERT, OPPHOERT
+}
+
+enum class Gradering {
+    STRENGT_FORTROLIG_UTLAND,
+    STRENGT_FORTROLIG,
+    FORTROLIG,
+    UGRADERT
 }

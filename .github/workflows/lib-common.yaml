@@ -1,0 +1,19 @@
+name: common
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - libs/common/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - libs/common/**
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.lib-test.yaml
+    secrets: inherit

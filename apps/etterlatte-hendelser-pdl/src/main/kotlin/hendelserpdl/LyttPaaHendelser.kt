@@ -4,7 +4,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.person.pdl.leesah.Personhendelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,16 +29,43 @@ class LyttPaaHendelser(
         val antallMeldingerLest = livshendelser.poll {
             meldinger++
 
-            when (it.opplysningstype) {
-                "DOEDSFALL_V1" -> haandterDoedsendelse(it)
-                "UTFLYTTING_FRA_NORGE" -> haandterUtflyttingFraNorge(it)
-                "FORELDERBARNRELASJON_V1" -> haandterForelderBarnRelasjon(it)
-                else -> log.info("Så en hendelse av type ${it.opplysningstype} som vi ikke håndterer")
+            withLogContext {
+                when (it.opplysningstype) {
+                    LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(it)
+                    LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(it)
+                    LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(it)
+                    LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(it)
+                    else -> log.info("Så en hendelse av type ${it.opplysningstype} som vi ikke håndterer")
+                }
             }
         }
 
         runBlocking {
             if (antallMeldingerLest == 0) delay(500)
+        }
+    }
+
+    private fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
+        val hendelseType = "Adressebeskyttelse"
+        val gradering = personhendelse.adressebeskyttelse.gradering
+        if (gradering == null || gradering == no.nav.person.pdl.leesah.adressebeskyttelse.Gradering.UGRADERT) {
+            log.info("Ignorerer person med tom eller ugradert gradering, krever ingen tiltak.")
+            return
+        }
+        try {
+            val personnummer = runBlocking {
+                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            }
+            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+            personhendelse.adressebeskyttelse.let {
+                postHendelser.haandterAdressebeskyttelse(
+                    fnr = personnummer.folkeregisterident.value,
+                    gradering = gradering.let { Gradering.valueOf(gradering.toString()) },
+                    endringstype = endringstype
+                )
+            }
+        } catch (e: Exception) {
+            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
         }
     }
 

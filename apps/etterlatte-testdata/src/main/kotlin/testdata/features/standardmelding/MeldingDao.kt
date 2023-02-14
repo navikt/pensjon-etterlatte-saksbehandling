@@ -1,6 +1,8 @@
 package no.nav.etterlatte.batch
 
-fun payload(fnr: String) = """
+import java.time.LocalDateTime
+
+fun payload(fnr: String, mottattDato: LocalDateTime) = """
  {
     "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
     "spraak": "nb",
@@ -205,7 +207,7 @@ fun payload(fnr: String) = """
     "soesken": [],
     "versjon": "2",
     "type": "BARNEPENSJON",
-    "mottattDato": "2022-02-14T14:37:24.573612786",
+    "mottattDato": "$mottattDato",
     "template": "barnepensjon_v2"
   }
 """.trimIndent()

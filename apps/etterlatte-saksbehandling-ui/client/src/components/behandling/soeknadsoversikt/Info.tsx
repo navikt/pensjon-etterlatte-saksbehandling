@@ -8,7 +8,7 @@ export const Info = ({ tekst, label, undertekst }: { tekst: string; label: strin
         {label}
       </Label>
       <BodyShort>{tekst}</BodyShort>
-      {undertekst && <Detail size="small">{undertekst}</Detail>}
+      {undertekst && <Detail>{undertekst}</Detail>}
     </InfoElement>
   )
 }

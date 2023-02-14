@@ -24,7 +24,19 @@ data class Grunnlagsendringshendelse(
 )
 
 enum class GrunnlagsendringsType {
-    DOEDSFALL, UTFLYTTING, FORELDER_BARN_RELASJON
+    DOEDSFALL,
+    UTFLYTTING,
+    FORELDER_BARN_RELASJON,
+    ADRESSEBESKYTTELSE_FORTROLIG,
+    ADRESSEBESKYTTELSE_STRENGT_FORTROLIG,
+    ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND;
+
+    fun isAdresseBeskyttelse() =
+        this in listOf(
+            ADRESSEBESKYTTELSE_FORTROLIG,
+            ADRESSEBESKYTTELSE_STRENGT_FORTROLIG,
+            ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND
+        )
 }
 
 enum class GrunnlagsendringStatus {
@@ -32,7 +44,11 @@ enum class GrunnlagsendringStatus {
     SJEKKET_AV_JOBB, // FØR: MED_I_BEHANDLING
     TATT_MED_I_BEHANDLING, // tatt med i behandling av saksbehandler
     FORKASTET,
-    VURDERT_SOM_IKKE_RELEVANT
+    VURDERT_SOM_IKKE_RELEVANT;
+
+    companion object {
+        fun relevantForSaksbehandler() = listOf(SJEKKET_AV_JOBB, TATT_MED_I_BEHANDLING, VURDERT_SOM_IKKE_RELEVANT)
+    }
 }
 
 enum class Saksrolle {

@@ -16,6 +16,7 @@ import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.JsonMessage
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -86,7 +87,7 @@ object OpprettSoeknadFeature : TestDataFeature {
 }
 
 private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {
-    val skjemaInfo = opprettSkjemaInfo(gjenlevendeFnr, barnFnr, avdoedFnr)
+    val skjemaInfo = opprettSkjemaInfo(gjenlevendeFnr, barnFnr, avdoedFnr, LocalDateTime.now())
 
     return JsonMessage.newMessage(
         mapOf(
@@ -104,7 +105,8 @@ private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFn
 private fun opprettSkjemaInfo(
     gjenlevendeFnr: String,
     barnFnr: String,
-    avdoedFnr: String
+    avdoedFnr: String,
+    mottattDato: LocalDateTime
 ) = """
     {
       "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
@@ -341,7 +343,7 @@ private fun opprettSkjemaInfo(
       "soesken": [],
       "versjon": "2",
       "type": "BARNEPENSJON",
-      "mottattDato": "2022-02-10T10:51:12.298943803",
+      "mottattDato": "$mottattDato",
       "template": "barnepensjon_v2"
     }
 """.trimIndent()

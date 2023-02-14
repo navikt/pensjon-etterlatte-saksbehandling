@@ -1,9 +1,6 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import io.ktor.server.application.Application
-import io.ktor.server.routing.Route
-import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -72,9 +69,3 @@ fun mockPerson(
 )
 
 fun mockFolkeregisterident(fnr: String) = FolkeregisterIdent(Foedselsnummer.of(fnr))
-
-object SecurityContextMediatorStub : SecurityContextMediator {
-    override fun outgoingToken(audience: String): suspend () -> String = { "token" }
-    override fun installSecurity(ktor: Application) = Unit
-    override fun secureRoute(ctx: Route, block: Route.() -> Unit) = block(ctx)
-}

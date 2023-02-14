@@ -77,7 +77,6 @@ internal class FoedselsnummerTest {
     @Test
     fun `Foedselsnummer sin toString anonymiserer`() {
         val fnr = Foedselsnummer.of("24014021406")
-
         assertEquals("240140*****", fnr.toString())
     }
 }

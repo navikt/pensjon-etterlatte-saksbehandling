@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import java.util.UUID
 
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -18,7 +19,7 @@ class SakOgBehandlingService(
 
     suspend fun hentBehandling(
         sakId: Long,
-        behandlingId: String,
+        behandlingId: UUID,
         innloggetSaksbehandlerIdent: String,
         accessToken: String
     ): Behandling = coroutineScope {
@@ -55,7 +56,7 @@ class SakOgBehandlingService(
 
         return Behandling(
             sakId = vedtak.sak.id,
-            behandlingId = vedtak.behandling.id.toString(),
+            behandlingId = vedtak.behandling.id,
             spraak = grunnlag.mapSpraak(),
             persongalleri = Persongalleri(
                 innsender = grunnlag.mapInnsender(),
@@ -71,11 +72,11 @@ class SakOgBehandlingService(
                 ),
                 attestant
             ),
-            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id.toString(), vedtak.virk, accessToken)
+            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virk, accessToken)
         )
     }
 
-    private suspend fun finnUtbetalingsinfo(behandlingId: String, virk: Periode, accessToken: String): Utbetalingsinfo {
+    private suspend fun finnUtbetalingsinfo(behandlingId: UUID, virk: Periode, accessToken: String): Utbetalingsinfo {
         val beregning = beregningKlient.hentBeregning(behandlingId, accessToken)
 
         val virkningstidspunkt = virk.fom.atDay(1)

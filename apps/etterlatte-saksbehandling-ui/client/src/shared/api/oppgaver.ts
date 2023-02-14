@@ -7,7 +7,7 @@ export interface OppgaveDTO {
   fristdato: Date
   fnr: string
   soeknadType: string
-  behandlingType: string
+  oppgaveType: string
   beskrivelse: string
   oppgaveStatus: string
   saksbehandler: string

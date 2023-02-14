@@ -8,6 +8,7 @@ import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.mockResponse
@@ -175,7 +176,9 @@ internal class PersonServiceTest {
         val personIdentResponse =
             runBlocking {
                 personService.hentFolkeregisterIdent(
-                    HentFolkeregisterIdentRequest("2305469522806")
+                    HentFolkeregisterIdentRequest(
+                        PersonIdent("2305469522806")
+                    )
                 )
             }
         val expectedFolkeregisterIdent = "70078749472"
@@ -187,7 +190,7 @@ internal class PersonServiceTest {
         coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
         runBlocking {
             assertThrows<PdlFantIkkePerson> {
-                personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest("1234"))
+                personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest(PersonIdent("1234")))
             }
         }
     }

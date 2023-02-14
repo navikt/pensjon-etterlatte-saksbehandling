@@ -12,7 +12,7 @@ import java.time.ZonedDateTime
 import java.util.*
 
 enum class Handling {
-    BEHANDLE, GAA_TIL_SAK;
+    BEHANDLE, GAA_TIL_SAK
 }
 
 sealed class Oppgave {

@@ -41,7 +41,7 @@ internal class BrevServiceTest {
     fun `Hent brev innhold`() {
         val innhold = BrevInnhold("mal", Spraak.NB, "data".toByteArray())
 
-        every { mockkDb.hentBrevInnhold(any())} returns innhold
+        every { mockkDb.hentBrevInnhold(any()) } returns innhold
 
         val faktiskInnhold = service.hentBrevInnhold(1)
 
@@ -52,5 +52,4 @@ internal class BrevServiceTest {
             listOf(mockPdfGen, adresseService, distribusjonsService) wasNot Called
         }
     }
-
 }

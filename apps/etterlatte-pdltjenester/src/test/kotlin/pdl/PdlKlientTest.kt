@@ -11,6 +11,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -68,7 +69,7 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/folkeregisterident.json")
 
         runBlocking {
-            val identResponse = pdlKlient.hentFolkeregisterIdent("2305469522806")
+            val identResponse = pdlKlient.hentFolkeregisterIdent(PersonIdent("2305469522806"))
             assertEquals("70078749472", identResponse.data?.hentIdenter?.identer?.first()?.ident)
             assertEquals(false, identResponse.data?.hentIdenter?.identer?.first()?.historisk)
             assertEquals("FOLKEREGISTERIDENT", identResponse.data?.hentIdenter?.identer?.first()?.gruppe)
@@ -80,7 +81,7 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/ident_ikke_funnet.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentFolkeregisterIdent("1234")
+            val personResponse = pdlKlient.hentFolkeregisterIdent(PersonIdent("1234"))
             val errors = personResponse.errors
 
             assertEquals("Fant ikke person", errors?.first()?.message)

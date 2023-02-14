@@ -10,6 +10,7 @@ import io.ktor.content.TextContent
 import io.ktor.http.ContentType.Application.Json
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
@@ -71,11 +72,11 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
-    suspend fun hentFolkeregisterIdent(ident: String): PdlFolkeregisterIdentResponse {
+    suspend fun hentFolkeregisterIdent(ident: PersonIdent): PdlFolkeregisterIdentResponse {
         val request = PdlFolkeregisterIdentRequest(
             query = getQuery("/pdl/hentFolkeregisterIdent.graphql"),
             variables = PdlFolkeregisterIdentVariables(
-                ident = ident,
+                ident = ident.value,
                 grupper = listOf("FOLKEREGISTERIDENT"),
                 historikk = true
             )

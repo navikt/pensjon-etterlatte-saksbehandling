@@ -83,7 +83,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         return stmt.executeQuery().toList {
             when (type) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> asFoerstegangsbehandling(this)
-                BehandlingType.REVURDERING -> asRevurdering(this)
+                BehandlingType.REVURDERING, BehandlingType.REGULERING -> asRevurdering(this)
                 BehandlingType.MANUELT_OPPHOER -> asManueltOpphoer(this)
             }
         }
@@ -104,7 +104,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         }.toList {
             when (type) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> asFoerstegangsbehandling(this)
-                BehandlingType.REVURDERING -> asRevurdering(this)
+                BehandlingType.REVURDERING, BehandlingType.REGULERING -> asRevurdering(this)
                 BehandlingType.MANUELT_OPPHOER -> asManueltOpphoer(this)
             }
         }
@@ -402,7 +402,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         toList {
             when (getString("behandlingstype")) {
                 BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
-                BehandlingType.REVURDERING.name -> asRevurdering(this)
+                BehandlingType.REVURDERING.name, BehandlingType.REGULERING.name -> asRevurdering(this)
                 BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
                 else -> null
             }
@@ -411,7 +411,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun ResultSet.behandlingAvRettType() =
         when (getString("behandlingstype")) {
             BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
-            BehandlingType.REVURDERING.name -> asRevurdering(this)
+            BehandlingType.REVURDERING.name, BehandlingType.REGULERING.name -> asRevurdering(this)
             BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
             else -> null
         }

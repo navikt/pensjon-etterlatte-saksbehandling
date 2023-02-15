@@ -272,7 +272,7 @@ class RealGenerellBehandlingService(
                     )
                 }
 
-                BehandlingType.REVURDERING -> {
+                BehandlingType.REVURDERING, BehandlingType.REGULERING -> {
                     revurderingFactory.hentRevurdering(behandlingId).registrerVedtakHendelse(
                         vedtakHendelse.vedtakId,
                         hendelseType,

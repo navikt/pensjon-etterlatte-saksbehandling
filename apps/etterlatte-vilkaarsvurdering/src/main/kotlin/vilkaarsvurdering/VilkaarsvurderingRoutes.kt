@@ -11,6 +11,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -108,6 +109,26 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                         "Kan ikke slette vurdering av vilkår på en vilkårsvurdering som har et resultat."
                     )
                 }
+            }
+        }
+
+        post("/omberegning") {
+            val omberegningshendelse = call.receive<Omberegningshendelse>()
+            try {
+                vilkaarsvurderingService.omberegn(omberegningshendelse, accesstoken)
+                call.respond(HttpStatusCode.Created)
+            } catch (e: BehandlingstilstandException) {
+                logger.error(
+                    "Kunne ikke oppdatere vilkaarsvurdering. " +
+                        "Statussjekk for behandling feilet"
+                )
+                call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+            } catch (e: VilkaarsvurderingTilstandException) {
+                logger.error(e.message)
+                call.respond(
+                    HttpStatusCode.PreconditionFailed,
+                    "Kan ikke omberegne fordi vilkårsvurdering mangler på forrige behandling"
+                )
             }
         }
 

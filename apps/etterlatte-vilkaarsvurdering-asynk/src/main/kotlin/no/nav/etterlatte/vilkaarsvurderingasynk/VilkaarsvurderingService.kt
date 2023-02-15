@@ -14,7 +14,7 @@ class VilkaarsvurderingService(
     private val url: String
 ) {
     fun opprettOmberegning(omberegningshendelse: Omberegningshendelse): HttpResponse = runBlocking {
-        behandling_app.post("$url/omberegning") {
+        behandling_app.post("$url/api/vilkaarsvurdering/omberegning") {
             contentType(ContentType.Application.Json)
             setBody(omberegningshendelse)
         }

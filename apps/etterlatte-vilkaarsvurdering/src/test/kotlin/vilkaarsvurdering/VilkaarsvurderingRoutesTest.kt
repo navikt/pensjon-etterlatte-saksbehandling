@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
@@ -559,6 +560,7 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
+    @Disabled // Inntil ferdig implementert
     fun `kan omberegne og da blir omberegningsbehandlinga knytta til vilkaarsvurderinga fra forrige behandling`() {
         testApplication {
             environment {

@@ -42,10 +42,10 @@ class GrunnlagHendelser(
         val opplysningsTyper = Opplysningstype.values().map { it.name }
 
         if ((packet[eventNameKey].asText() == "OPPLYSNING:NY") || (
-            opplysningsTyper.contains(
+                opplysningsTyper.contains(
                     packet[behovNameKey].asText()
                 )
-            )
+                )
         ) {
             withLogContext(packet.correlationId) {
                 try {

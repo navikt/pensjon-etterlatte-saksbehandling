@@ -62,7 +62,7 @@ internal class AdresseServiceTest {
         enhetNr = enhetNr,
         kontaktinfo = Norg2Kontaktinfo(
             telefonnummer = "00 11 22 33",
-            epost  = "test@nav.no",
+            epost = "test@nav.no",
             postadresse = Postadresse(
                 type = "postboksadresse",
                 postboksnummer = "012345",

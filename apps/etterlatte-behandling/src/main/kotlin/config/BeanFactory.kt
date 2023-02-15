@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
+import no.nav.etterlatte.behandling.omberegning.OmberegningService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -58,6 +59,7 @@ interface BeanFactory {
     fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService
     fun manueltOpphoerService(): ManueltOpphoerService
     fun oppgaveService(): OppgaveService
+    fun omberegningService(): OmberegningService
     fun sakDao(): SakDao
     fun oppgaveDao(): OppgaveDao
     fun behandlingDao(): BehandlingDao
@@ -197,6 +199,9 @@ abstract class CommonFactory : BeanFactory {
     ).schedule()
 
     override fun sporingslogg(): Sporingslogg = Sporingslogg()
+
+    override fun omberegningService(): OmberegningService =
+        OmberegningService(revurderingFactory = revurderingFactory, behandlingService = generellBehandlingService())
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {

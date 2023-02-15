@@ -5,6 +5,7 @@ import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.Hendelsestype
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
+import no.nav.etterlatte.libs.common.behandling.Omberegningsnoekler
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -30,9 +31,9 @@ internal class OmberegningHendelser(
             eventName(Hendelsestype.OMBEREGNINGSHENDELSE.toString())
 
             correlationId()
-            validate { it.requireKey("omberegning") }
-            validate { it.rejectKey("vilkaarsvurdering") }
-            validate { it.requireKey("hendelse_data") }
+            validate { it.requireKey(Omberegningsnoekler.omberegningId) }
+            validate { it.rejectKey(Omberegningsnoekler.vilkaarsvurdering) }
+            validate { it.requireKey(Omberegningsnoekler.hendelse_data) }
         }.register(this)
     }
 
@@ -40,10 +41,10 @@ internal class OmberegningHendelser(
         withLogContext(packet.correlationId) {
             logger.info("Mottatt omberegninghendelse")
             try {
-                val hendelse: Omberegningshendelse = objectMapper.treeToValue(packet["hendelse_data"])
+                val hendelse: Omberegningshendelse = objectMapper.treeToValue(packet[Omberegningsnoekler.hendelse_data])
                 runBlocking {
                     val vilkaarsvurdering = vilkaarsvurderingService.opprettOmberegning(hendelse).body<UUID>()
-                    packet["vilkaarsvurdering"] = vilkaarsvurdering
+                    packet[Omberegningsnoekler.vilkaarsvurdering] = vilkaarsvurdering
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")

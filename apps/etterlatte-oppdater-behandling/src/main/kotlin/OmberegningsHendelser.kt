@@ -5,6 +5,7 @@ import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.Hendelsestype
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
+import no.nav.etterlatte.libs.common.behandling.Omberegningsnoekler
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -27,8 +28,8 @@ internal class OmberegningsHendelser(rapidsConnection: RapidsConnection, private
             eventName(Hendelsestype.OMBEREGNINGSHENDELSE.toString())
 
             correlationId()
-            validate { it.rejectKey("omberegning") }
-            validate { it.requireKey("hendelse_data") }
+            validate { it.rejectKey(Omberegningsnoekler.omberegningId) }
+            validate { it.requireKey(Omberegningsnoekler.hendelse_data) }
         }.register(this)
     }
 
@@ -36,10 +37,10 @@ internal class OmberegningsHendelser(rapidsConnection: RapidsConnection, private
         withLogContext(packet.correlationId) {
             logger.info("Mottatt omberegningshendelse")
             try {
-                val hendelse: Omberegningshendelse = objectMapper.treeToValue(packet["hendelse_data"])
+                val hendelse: Omberegningshendelse = objectMapper.treeToValue(packet[Omberegningsnoekler.hendelse_data])
                 runBlocking {
                     val omberegningId = behandlinger.opprettOmberegning(hendelse).body<UUID>()
-                    packet["omberegning"] = omberegningId
+                    packet[Omberegningsnoekler.omberegningId] = omberegningId
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")

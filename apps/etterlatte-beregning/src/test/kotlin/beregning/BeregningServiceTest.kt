@@ -225,7 +225,11 @@ internal class BeregningServiceTest {
         }
 
     private fun vilkaarsvurdering(oppfylt: Boolean) =
-        if (oppfylt) VilkaarsvurderingTestData.oppfylt else VilkaarsvurderingTestData.ikkeOppfylt
+        if (oppfylt) {
+            { VilkaarsvurderingTestData.oppfylt }
+        } else {
+            { VilkaarsvurderingTestData.ikkeOppfylt }
+        }
 
     companion object {
         val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, 1)

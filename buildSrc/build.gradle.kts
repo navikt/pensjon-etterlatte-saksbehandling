@@ -23,7 +23,7 @@ dependencies {
 
 tasks {
     withType<Wrapper> {
-        gradleVersion = "7.2"
+        gradleVersion = "8.0"
     }
 
     withType<KotlinCompile> {

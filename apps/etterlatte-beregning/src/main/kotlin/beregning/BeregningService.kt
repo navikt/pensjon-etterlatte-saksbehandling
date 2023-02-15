@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentSoeskenjustering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -63,7 +62,11 @@ class BeregningService(
 
                     else -> {
                         beregnBarnepensjon(grunnlag.await(), behandling) {
-                            runBlocking { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
+                            runBlocking {
+                                vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
+                                    .resultat?.utfall
+                                    ?: throw RuntimeException("Forventa å ha resultat for behandling $behandlingId")
+                            }
                         }
                     }
                 }
@@ -96,7 +99,7 @@ class BeregningService(
     fun beregnBarnepensjon(
         grunnlag: Grunnlag,
         behandling: DetaljertBehandling,
-        hentVilkaarsvurdering: () -> VilkaarsvurderingDto
+        hentVilkaarsvurdering: () -> VilkaarsvurderingUtfall
     ): Beregning {
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
@@ -109,7 +112,7 @@ class BeregningService(
                 beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {
-                when (requireNotNull(hentVilkaarsvurdering.invoke().resultat?.utfall)) {
+                when (requireNotNull(hentVilkaarsvurdering.invoke())) {
                     VilkaarsvurderingUtfall.OPPFYLT ->
                         beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 

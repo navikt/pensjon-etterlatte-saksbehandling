@@ -172,7 +172,7 @@ class VilkaarsvurderingService(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )
 
-            RevurderingAarsak.GRUNNBELOEPREGULERING -> throw NotImplementedError() // TODO Mads implementer
+            RevurderingAarsak.GRUNNBELOEPREGULERING -> throw IllegalArgumentException("Skal ikke revurdere regulering")
         }
     }
 }

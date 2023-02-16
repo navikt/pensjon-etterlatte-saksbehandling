@@ -11,7 +11,6 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.accesstoken
 import no.nav.etterlatte.libs.ktor.saksbehandler
@@ -117,8 +116,8 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
                 )
                 ?: return@get call.respond(BadRequest, "Det mangler et query parameter på dato")
 
-            val erLoepende = service.vedtakErLoependePaaDato(sakId, dato)
-            call.respond(LoependeYtelseDTO(erLoepende, dato)) // TODO sj: Returnere den faktiske datoen
+            val loependeYtelse = service.vedtakErLoependePaaDato(sakId, dato)
+            call.respond(loependeYtelse)
         }
     }
 }
@@ -126,10 +125,3 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 data class UnderkjennVedtakClientRequest(val kommentar: String, val valgtBegrunnelse: String)
 private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
 private data class VedtakBolkResponse(val vedtak: List<Vedtak>)
-
-enum class HendelseType {
-    FATTET,
-    ATTESTERT,
-    UNDERKJENT,
-    IVERKSATT
-}

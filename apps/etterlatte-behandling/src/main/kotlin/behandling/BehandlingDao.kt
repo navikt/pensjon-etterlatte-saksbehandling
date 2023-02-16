@@ -523,7 +523,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 }
 
-private fun LocalDateTime.somTimestamp(): Timestamp = Timestamp.from(this.atZone(ZoneId.systemDefault()).toInstant())
+private fun LocalDateTime.somTimestamp() = Timestamp.from(this.atZone(ZoneId.systemDefault()).toInstant())
 
 private fun ResultSet.somLocalDateTime(kolonne: String) =
     getTimestamp(kolonne).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()

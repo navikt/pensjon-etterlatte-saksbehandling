@@ -19,8 +19,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -39,18 +37,15 @@ import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
@@ -556,54 +551,6 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(HttpStatusCode.PreconditionFailed, response.status)
             val actual = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)
             assertEquals(vilkaarsvurdering, actual)
-        }
-    }
-
-    @Test
-    @Disabled // Inntil ferdig implementert
-    fun `kan omberegne og da blir omberegningsbehandlinga knytta til vilkaarsvurderinga fra forrige behandling`() {
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
-
-            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
-
-            val vurdertVilkaarDto = VurdertVilkaarDto(
-                vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORUTGAAENDE_MEDLEMSKAP)?.id!!,
-                hovedvilkaar = VilkaarTypeOgUtfall(
-                    type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
-                    resultat = Utfall.OPPFYLT
-                ),
-                kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.FORUTGAAENDE_MEDLEMSKAP}"
-            )
-
-            client.post("/api/vilkaarsvurdering/$behandlingId") {
-                setBody(vurdertVilkaarDto.toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
-
-            val omberegning = detaljertBehandling()
-            val omberegningshendelse = Omberegningshendelse(
-                sakId = lagSak().id,
-                fradato = LocalDate.now(),
-                aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING,
-                omberegningsId = omberegning.id
-            )
-            client.post("/api/vilkaarsvurdering/omberegning") {
-                setBody(omberegningshendelse.toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
-
-            val vilkaarsvurderingFoerstegangsbehandling = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(
-                behandlingId
-            )
-            val vilkaarsvurderingOmberegning = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(omberegning.id)
-
-            Assertions.assertEquals(vilkaarsvurderingFoerstegangsbehandling, vilkaarsvurderingOmberegning)
         }
     }
 

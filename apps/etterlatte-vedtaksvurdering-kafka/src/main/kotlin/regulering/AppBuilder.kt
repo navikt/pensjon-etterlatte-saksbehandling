@@ -15,10 +15,10 @@ import no.nav.etterlatte.security.ktor.clientCredential
 
 class AppBuilder(private val props: Map<String, String>) {
     private val vedtakHttpKlient = vedtakHttpKlient()
-    private val vedtakUrl = props["ETTERLATTE_VEDTAK_URL"]
+    private val vedtakUrl = requireNotNull(props["ETTERLATTE_VEDTAK_URL"])
 
     fun lagVedtakKlient(): VedtakServiceImpl {
-        return VedtakServiceImpl(vedtakHttpKlient, (vedtakUrl ?: ""))
+        return VedtakServiceImpl(vedtakHttpKlient, vedtakUrl)
     }
 
     private fun vedtakHttpKlient() = HttpClient(OkHttp) {

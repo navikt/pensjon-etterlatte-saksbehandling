@@ -33,8 +33,6 @@ spec:
       value: earliest
     - name: VEDTAK_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
-    - name: ETTERLATTE_VEDTAK_CLIENT_ID
-      value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
   accessPolicy:

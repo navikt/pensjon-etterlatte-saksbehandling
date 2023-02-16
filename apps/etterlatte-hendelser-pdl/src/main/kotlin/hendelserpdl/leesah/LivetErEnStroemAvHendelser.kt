@@ -53,6 +53,7 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
                 put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
                 put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true)
+                put(ConsumerConfig.CLIENT_ID_CONFIG, env["NAIS_APP_NAME"])
             }
 
             val consumer: KafkaConsumer<String?, String?> = KafkaConsumer<String?, String?>(properties)

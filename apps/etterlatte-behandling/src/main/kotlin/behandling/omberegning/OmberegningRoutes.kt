@@ -15,8 +15,7 @@ fun Route.omberegningRoutes(
         post {
             val request = call.receive<Omberegningshendelse>()
             val omberegning = omberegningService.opprettOmberegning(
-                sakId = request.sakId,
-                aarsak = request.aarsak
+                sakId = request.sakId
             )
             call.respond(omberegning)
         }

@@ -260,17 +260,17 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setLong(2, sak)
             stmt.setTimestamp(
                 3,
-                Timestamp.from(behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant())
+                behandlingOpprettet.somTimestamp()
             )
             stmt.setTimestamp(
                 4,
-                Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
+                sistEndret.somTimestamp()
             )
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
             stmt.setTimestamp(
                 7,
-                Timestamp.from(soeknadMottattDato.atZone(ZoneId.systemDefault()).toInstant())
+                soeknadMottattDato.somTimestamp()
             )
             with(persongalleri) {
                 stmt.setString(8, innsender)
@@ -304,11 +304,11 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setLong(2, sak)
             stmt.setTimestamp(
                 3,
-                Timestamp.from(behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant())
+                behandlingOpprettet.somTimestamp()
             )
             stmt.setTimestamp(
                 4,
-                Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
+                sistEndret.somTimestamp()
             )
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
@@ -340,14 +340,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         with(regulering) {
             stmt.setObject(1, id)
             stmt.setLong(2, sak)
-            stmt.setTimestamp(
-                3,
-                Timestamp.from(behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant())
-            )
-            stmt.setTimestamp(
-                4,
-                Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
-            )
+            stmt.setTimestamp(3, behandlingOpprettet.somTimestamp())
+            stmt.setTimestamp(4, sistEndret.somTimestamp())
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
             with(persongalleri) {
@@ -381,11 +375,11 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setLong(2, sak)
             stmt.setTimestamp(
                 3,
-                Timestamp.from(behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant())
+                behandlingOpprettet.somTimestamp()
             )
             stmt.setTimestamp(
                 4,
-                Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
+                sistEndret.somTimestamp()
             )
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
@@ -417,7 +411,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(2, behandling.status.name)
         stmt.setTimestamp(
             3,
-            Timestamp.from(behandling.sistEndret.atZone(ZoneId.systemDefault()).toInstant())
+            behandling.sistEndret.somTimestamp()
         )
         stmt.setObject(4, behandling.id)
         require(stmt.executeUpdate() == 1)
@@ -439,7 +433,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(1, status.name)
         stmt.setTimestamp(
             2,
-            Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
+            sistEndret.somTimestamp()
         )
         stmt.setObject(3, behandling)
         return requireNotNull(
@@ -528,6 +522,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 }
+
+private fun LocalDateTime.somTimestamp(): Timestamp = Timestamp.from(this.atZone(ZoneId.systemDefault()).toInstant())
 
 private fun ResultSet.somLocalDateTime(kolonne: String) =
     getTimestamp(kolonne).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()

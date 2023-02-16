@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.LoggerFactory
-import kotlin.collections.set
 import kotlin.system.exitProcess
 
 var stream: LyttPaaHendelser? = null
@@ -32,10 +31,6 @@ var stream: LyttPaaHendelser? = null
 @OptIn(DelicateCoroutinesApi::class)
 fun main() {
     val env = System.getenv().toMutableMap().apply { put("DELAYED_START", "true") }
-    env["KAFKA_BOOTSTRAP_SERVERS"] = env["KAFKA_BROKERS"]
-    env["NAV_TRUSTSTORE_PATH"] = env["KAFKA_TRUSTSTORE_PATH"]
-    env["NAV_TRUSTSTORE_PASSWORD"] = env["KAFKA_CREDSTORE_PASSWORD"]
-    env["KAFKA_KEYSTORE_PASSWORD"] = env["KAFKA_CREDSTORE_PASSWORD"]
 
     val logger = LoggerFactory.getLogger(Application::class.java)
     val pdlService by lazy {

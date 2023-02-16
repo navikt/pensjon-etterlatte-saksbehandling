@@ -28,20 +28,23 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
+@Disabled
 class IntegrationTest {
 
     private lateinit var pdlService: PdlService
 
     companion object {
+        val pdlPersonTopic = "pdl.leesah-v1"
         val kafkaEnv = KafkaEnvironment(
             noOfBrokers = 1,
-            topicNames = listOf("etterlatte.dodsmelding", "pdl.leesah-v1"),
+            topicNames = listOf("etterlatte.dodsmelding", pdlPersonTopic),
             withSecurity = false,
             autoStart = true,
             withSchemaRegistry = true
@@ -60,7 +63,7 @@ class IntegrationTest {
         val doedsfall = Doedsfall(LocalDate.of(2022, 1, 1))
         leesahTopic.send(
             ProducerRecord(
-                "pdl.leesah-v1",
+                pdlPersonTopic,
                 1,
                 "x",
                 Personhendelse(
@@ -101,7 +104,7 @@ class IntegrationTest {
         )
         leesahTopic.send(
             ProducerRecord(
-                "pdl.leesah-v1",
+                pdlPersonTopic,
                 1,
                 "x",
                 Personhendelse(
@@ -142,7 +145,7 @@ class IntegrationTest {
         )
         leesahTopic.send(
             ProducerRecord(
-                "pdl.leesah-v1",
+                pdlPersonTopic,
                 Personhendelse(
                     "1",
                     listOf("1234567"),

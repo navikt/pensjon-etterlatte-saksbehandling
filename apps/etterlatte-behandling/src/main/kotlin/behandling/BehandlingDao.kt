@@ -171,8 +171,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
-            .toLocalDateTime(),
+        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         soeknadMottattDato = rs.getTimestamp("soeknad_mottatt_dato").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -194,8 +193,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asRevurdering(rs: ResultSet) = Revurdering(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
-            .toLocalDateTime(),
+        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -208,8 +206,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asRegulering(rs: ResultSet) = Regulering(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
-            .toLocalDateTime(),
+        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -222,8 +219,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
-            .toLocalDateTime(),
+        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -532,6 +528,9 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 }
+
+private fun ResultSet.somLocalDateTime(kolonne: String) =
+    getTimestamp(kolonne).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

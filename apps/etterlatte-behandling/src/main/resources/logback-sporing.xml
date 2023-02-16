@@ -11,7 +11,7 @@
             <!-- remote port to log to -->
             <port>6514</port>
             <!-- IMPORTANT: Set to your application name. -->
-            <ident>etterlatte-api</ident>
+            <ident>etterlatte-behandling</ident>
             <!-- max log message length in bytes -->
             <maxMessageLength>128000</maxMessageLength>
         </syslogConfig>

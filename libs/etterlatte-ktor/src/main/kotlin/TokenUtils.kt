@@ -6,6 +6,7 @@ import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.auth.principal
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 inline val PipelineContext<*, ApplicationCall>.saksbehandler: Saksbehandler
@@ -26,8 +27,6 @@ inline val PipelineContext<*, ApplicationCall>.accesstoken: String
             throw Exception("Missing authorization header")
         }
     }
-
-data class Saksbehandler(val ident: String)
 
 data class SaksbehandlerProvider(val saksbehandler: (call: ApplicationCall) -> Saksbehandler) {
     fun invoke(call: ApplicationCall) = saksbehandler.invoke(call)

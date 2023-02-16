@@ -1,26 +1,30 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
+import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import java.time.LocalDate
 
 class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
-    fun erLoependePaa(dato: LocalDate): Boolean {
-        val iverksatteVedtak = hentIverksatteVedtak()
-        if (iverksatteVedtak.isEmpty()) return false
+    private val iverksatteVedtak = hentIverksatteVedtak()
 
-        return hentSenesteVedtakPaaDato(dato)?.tolkVedtak() == TolketVedtak.INNVILGET
+    fun erLoependePaa(dato: LocalDate): LoependeYtelseDTO {
+        if (iverksatteVedtak.isEmpty()) return LoependeYtelseDTO(false, dato)
+
+        val erLoepende = hentSenesteVedtakPaaDato(dato)?.tolkVedtak() == TolketVedtak.INNVILGET
+        return LoependeYtelseDTO(
+            erLoepende = erLoepende,
+            dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato
+        )
     }
 
-    private fun hentSenesteVedtakPaaDato(dato: LocalDate): Vedtak? {
-        val foersteVirkningsdato = hentIverksatteVedtak().minBy { it.datoattestert!! }.virkningsDato!!
-        val foersteMuligeVedtaksdag = maxOf(foersteVirkningsdato, dato)
+    private fun hentSenesteVedtakPaaDato(dato: LocalDate): Vedtak? = iverksatteVedtak
+        .filter { !it.virkningsDato!!.isAfter(foersteMuligeVedtaksdag(dato)) }
+        .maxByOrNull { it.datoattestert!! }
 
-        return hentIverksatteVedtak()
-            .filter { !it.virkningsDato!!.isAfter(foersteMuligeVedtaksdag) }
-            .maxByOrNull { it.datoattestert!! }
-    }
+    private fun hentIverksatteVedtak(): List<Vedtak> = vedtak.filter { it.vedtakStatus === VedtakStatus.IVERKSATT }
 
-    private fun hentIverksatteVedtak(): List<Vedtak> {
-        return vedtak.filter { it.vedtakStatus === VedtakStatus.IVERKSATT }
+    private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {
+        val foersteVirkningsdato = iverksatteVedtak.minBy { it.datoattestert!! }.virkningsDato!! // TODO sj: remove !!
+        return maxOf(foersteVirkningsdato, fraDato)
     }
 }

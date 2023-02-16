@@ -3,7 +3,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -22,7 +22,8 @@ internal class VedtakstidslinjeTest {
     @Test
     fun `sak uten vedtak er ikke loepende`() {
         val actual = Vedtakstidslinje(emptyList()).erLoependePaa(fraOgMed)
-        Assertions.assertEquals(false, actual)
+        assertEquals(false, actual.erLoepende)
+        assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
     }
 
     /**
@@ -38,7 +39,8 @@ internal class VedtakstidslinjeTest {
             vedtakStatus = VedtakStatus.FATTET_VEDTAK
         )
         val actual = Vedtakstidslinje(listOf(fattetVedtak)).erLoependePaa(fraOgMed)
-        Assertions.assertEquals(false, actual)
+        assertEquals(false, actual.erLoepende)
+        assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
     }
 
     /**
@@ -55,7 +57,8 @@ internal class VedtakstidslinjeTest {
         )
 
         val actual = Vedtakstidslinje(listOf(iverksattDato)).erLoependePaa(fraOgMed)
-        Assertions.assertEquals(true, actual)
+        assertEquals(true, actual.erLoepende)
+        assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
     }
 
     /**
@@ -87,7 +90,8 @@ internal class VedtakstidslinjeTest {
                 opphoertDato
             )
         ).erLoependePaa(fraOgMed)
-        Assertions.assertEquals(false, actual)
+        assertEquals(false, actual.erLoepende)
+        assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
     }
 
     /**
@@ -119,7 +123,8 @@ internal class VedtakstidslinjeTest {
                 opphoertDato
             )
         ).erLoependePaa(fraOgMed)
-        Assertions.assertEquals(true, actual)
+        assertEquals(true, actual.erLoepende)
+        assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
     }
 
     /**
@@ -138,7 +143,8 @@ internal class VedtakstidslinjeTest {
         )
 
         val actual = Vedtakstidslinje(listOf(iverksattDato)).erLoependePaa(fraOgMed)
-        Assertions.assertEquals(true, actual)
+        assertEquals(true, actual.erLoepende)
+        assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
     }
 
     /**
@@ -165,7 +171,8 @@ internal class VedtakstidslinjeTest {
         )
 
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).erLoependePaa(fraOgMed)
-        Assertions.assertEquals(true, actual)
+        assertEquals(true, actual.erLoepende)
+        assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
     }
 
     /**
@@ -192,7 +199,8 @@ internal class VedtakstidslinjeTest {
         )
 
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).erLoependePaa(fraOgMed)
-        Assertions.assertEquals(false, actual)
+        assertEquals(false, actual.erLoepende)
+        assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
     }
 }
 

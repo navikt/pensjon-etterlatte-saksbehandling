@@ -41,7 +41,7 @@ class IntegrationTest {
     companion object {
         val kafkaEnv = KafkaEnvironment(
             noOfBrokers = 1,
-            topicNames = listOf("etterlatte.dodsmelding", "aapen-person-pdl-leesah-v1"),
+            topicNames = listOf("etterlatte.dodsmelding", "pdl.leesah-v1"),
             withSecurity = false,
             autoStart = true,
             withSchemaRegistry = true
@@ -60,7 +60,7 @@ class IntegrationTest {
         val doedsfall = Doedsfall(LocalDate.of(2022, 1, 1))
         leesahTopic.send(
             ProducerRecord(
-                "aapen-person-pdl-leesah-v1",
+                "pdl.leesah-v1",
                 1,
                 "x",
                 Personhendelse(
@@ -101,7 +101,7 @@ class IntegrationTest {
         )
         leesahTopic.send(
             ProducerRecord(
-                "aapen-person-pdl-leesah-v1",
+                "pdl.leesah-v1",
                 1,
                 "x",
                 Personhendelse(
@@ -142,7 +142,7 @@ class IntegrationTest {
         )
         leesahTopic.send(
             ProducerRecord(
-                "aapen-person-pdl-leesah-v1",
+                "pdl.leesah-v1",
                 Personhendelse(
                     "1",
                     listOf("1234567"),

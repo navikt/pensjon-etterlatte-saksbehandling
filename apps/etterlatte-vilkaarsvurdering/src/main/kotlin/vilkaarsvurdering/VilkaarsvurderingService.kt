@@ -4,7 +4,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -175,16 +174,6 @@ class VilkaarsvurderingService(
 
             RevurderingAarsak.GRUNNBELOEPREGULERING -> throw NotImplementedError() // TODO Mads implementer
         }
-    }
-
-    suspend fun omberegn(omberegningshendelse: Omberegningshendelse, accessToken: String) {
-        omberegningshendelse.omberegningsId?.let {
-            val omberegningsbehandling = behandlingKlient.hentBehandling(it, accessToken)
-            // vilkaarsvurderingRepository.kopleVilkaarsvurdering(omberegningsbehandling)
-        }
-        // kople ny behandling til vilkårsvurderinga frå forrige behandling
-        // lagre det i databasen
-        // må nok fort også endre uthentingslogikken til å sjå på denne
     }
 }
 

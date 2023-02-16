@@ -1,5 +1,6 @@
 package no.nav.etterlatte.regulering
 
+import no.nav.etterlatte.libs.common.behandling.Hendelsestype
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -13,7 +14,6 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import org.slf4j.LoggerFactory
 
 const val REGULERING_EVENT_NAME = "REGULERING" // TODO sj: Flyttes ut
-const val OMBEREGNING_EVENT_NAME = "OMBEREGNINGHENDELSE"
 
 internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
@@ -38,7 +38,7 @@ internal class Reguleringsforespoersel(
             val reguleringsdato = packet["dato"].asLocalDate()
             val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
             respons.takeIf { it.erLoepende }?.let {
-                packet.eventName = OMBEREGNING_EVENT_NAME
+                packet.eventName = Hendelsestype.OMBEREGNINGSHENDELSE.toString()
                 packet["hendelse_data"] = Omberegningshendelse(
                     sakId = sakId,
                     fradato = it.dato,

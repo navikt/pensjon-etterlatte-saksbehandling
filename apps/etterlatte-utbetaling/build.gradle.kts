@@ -14,7 +14,7 @@ dependencies {
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.Jackson)
 
-    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.3.1.0")
+    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.3.2.0")
     implementation("org.messaginghub:pooled-jms:3.1.0")
     implementation(
         "com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon:1.4201aa"

@@ -77,7 +77,6 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
 
     override fun poll(consumePersonHendelse: (Personhendelse) -> Unit): Int {
         val meldinger = consumer?.poll(Duration.ofSeconds(10))
-        logger.info("Leser meldinger count ${meldinger?.count()}")
         meldinger?.forEach {
             consumePersonHendelse(it.value())
         }

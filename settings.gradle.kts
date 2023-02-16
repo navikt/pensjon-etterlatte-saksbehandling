@@ -14,6 +14,7 @@ include(
     "apps:etterlatte-utbetaling",
     "apps:etterlatte-oppdater-behandling",
     "apps:etterlatte-beregning",
+    "apps:etterlatte-beregning-asynk",
     "apps:etterlatte-vedtaksvurdering",
     "apps:etterlatte-vedtaksvurdering-kafka",
     "apps:etterlatte-grunnlag",
@@ -37,3 +38,5 @@ include(
     "libs:etterlatte-helsesjekk",
     "jobs:test-fordeler"
 )
+include("apps:etterlatte-beregning-asynk")
+findProject(":apps:etterlatte-beregning-asynk")?.name = "etterlatte-beregning-asynk"

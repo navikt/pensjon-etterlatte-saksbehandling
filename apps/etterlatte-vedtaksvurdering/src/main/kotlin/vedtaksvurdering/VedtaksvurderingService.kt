@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
 import no.nav.etterlatte.libs.common.sak.Saksbehandler
@@ -89,7 +90,7 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)
     }
 
-    fun vedtakErLoependePaaDato(sakId: Long, dato: LocalDate): Boolean {
+    fun vedtakErLoependePaaDato(sakId: Long, dato: LocalDate): LoependeYtelseDTO {
         val alleVedtakForSak = repository.hentVedtakForSak(sakId)
 
         return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)

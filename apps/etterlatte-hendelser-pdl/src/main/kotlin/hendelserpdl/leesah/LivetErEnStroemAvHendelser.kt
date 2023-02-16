@@ -45,7 +45,7 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
 
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1000")
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
-                put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
+                put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                 put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, femSekunder)
 
                 put(SCHEMA_REGISTRY_URL_CONFIG, env["KAFKA_SCHEMA_REGISTRY"])
@@ -78,7 +78,7 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
 
     override fun poll(consumePersonHendelse: (Personhendelse) -> Unit): Int {
         val meldinger = consumer?.poll(Duration.ofSeconds(10))
-        logger.info("Leser meldinger")
+        logger.info("Leser meldinger count ${meldinger?.count()}")
         meldinger?.forEach {
             consumePersonHendelse(it.value())
         }

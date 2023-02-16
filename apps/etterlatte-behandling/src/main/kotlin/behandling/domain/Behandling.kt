@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.Logger
@@ -150,7 +149,7 @@ fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
         is Foerstegangsbehandling -> "SOEKNAD"
         is Revurdering -> this.revurderingsaarsak.name
         is ManueltOpphoer -> "MANUELT OPPHOER"
-        is Regulering -> RevurderingAarsak.GRUNNBELOEPREGULERING.name
+        is Regulering -> this.revurderingsaarsak.name
     },
     virkningstidspunkt = this.virkningstidspunkt,
     vilkaarsvurderingUtfall = this.vilkaarUtfall

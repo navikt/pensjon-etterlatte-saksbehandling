@@ -13,7 +13,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import org.slf4j.LoggerFactory
 
-const val REGULERING_EVENT_NAME = "REGULERING" // TODO sj: Flyttes ut
+const val REGULERING_EVENT_NAME = "REGULERING"
 
 internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,

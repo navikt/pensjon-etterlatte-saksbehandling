@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
+import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
@@ -78,6 +79,7 @@ class RealGenerellBehandlingServiceTest {
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
             RevurderingFactory(behandlingerMock, hendelserMock),
+            ReguleringFactory(behandlingerMock, hendelserMock),
             hendelserMock,
             manueltOpphoerMock,
             mockk(),
@@ -109,6 +111,7 @@ class RealGenerellBehandlingServiceTest {
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
             RevurderingFactory(behandlingerMock, hendelserMock),
+            ReguleringFactory(behandlingerMock, hendelserMock),
             hendelserMock,
             manueltOpphoerMock,
             mockk(),
@@ -135,6 +138,7 @@ class RealGenerellBehandlingServiceTest {
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
             RevurderingFactory(behandlingerMock, hendelserMock),
+            ReguleringFactory(behandlingerMock, hendelserMock),
             hendelserMock,
             manueltOpphoerMock,
             mockk(),
@@ -390,6 +394,10 @@ class RealGenerellBehandlingServiceTest {
             hendelser = hendelseDao ?: mockk()
         ),
         revurderingFactory = RevurderingFactory(
+            behandlinger = behandlinger ?: mockk(),
+            hendelser = hendelseDao ?: mockk()
+        ),
+        reguleringFactory = ReguleringFactory(
             behandlinger = behandlinger ?: mockk(),
             hendelser = hendelseDao ?: mockk()
         ),

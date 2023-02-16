@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -83,7 +84,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         return stmt.executeQuery().toList {
             when (type) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> asFoerstegangsbehandling(this)
-                BehandlingType.REVURDERING, BehandlingType.REGULERING -> asRevurdering(this)
+                BehandlingType.REVURDERING -> asRevurdering(this)
+                BehandlingType.REGULERING -> asRegulering(this)
                 BehandlingType.MANUELT_OPPHOER -> asManueltOpphoer(this)
             }
         }
@@ -104,7 +106,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         }.toList {
             when (type) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> asFoerstegangsbehandling(this)
-                BehandlingType.REVURDERING, BehandlingType.REGULERING -> asRevurdering(this)
+                BehandlingType.REVURDERING -> asRevurdering(this)
+                BehandlingType.REGULERING -> asRegulering(this)
                 BehandlingType.MANUELT_OPPHOER -> asManueltOpphoer(this)
             }
         }
@@ -189,6 +192,20 @@ class BehandlingDao(private val connection: () -> Connection) {
     )
 
     private fun asRevurdering(rs: ResultSet) = Revurdering(
+        id = rs.getObject("id") as UUID,
+        sak = rs.getLong("sak_id"),
+        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
+            .toLocalDateTime(),
+        sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
+        persongalleri = hentPersongalleri(rs),
+        status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
+        revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
+        kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
+        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
+        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) }
+    )
+
+    private fun asRegulering(rs: ResultSet) = Regulering(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
         behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
@@ -314,6 +331,44 @@ class BehandlingDao(private val connection: () -> Connection) {
         require(stmt.executeUpdate() == 1)
     }
 
+    fun opprettRegulering(regulering: Regulering) {
+        val stmt =
+            connection().prepareStatement(
+                """
+                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
+                    innsender, soeker, gjenlevende, avdoed, soesken, revurdering_aarsak, kommer_barnet_tilgode, 
+                    vilkaar_utfall, virkningstidspunkt)
+                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """.trimIndent()
+            )
+        with(regulering) {
+            stmt.setObject(1, id)
+            stmt.setLong(2, sak)
+            stmt.setTimestamp(
+                3,
+                Timestamp.from(behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant())
+            )
+            stmt.setTimestamp(
+                4,
+                Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
+            )
+            stmt.setString(5, status.name)
+            stmt.setString(6, type.name)
+            with(persongalleri) {
+                stmt.setString(7, innsender)
+                stmt.setString(8, soeker)
+                stmt.setString(9, gjenlevende.toJson())
+                stmt.setString(10, avdoed.toJson())
+                stmt.setString(11, soesken.toJson())
+            }
+            stmt.setString(12, revurderingsaarsak.name)
+            stmt.setString(13, kommerBarnetTilgode?.let { objectMapper.writeValueAsString(it) })
+            stmt.setString(14, vilkaarUtfall?.name)
+            stmt.setString(15, virkningstidspunkt?.toJson())
+        }
+        require(stmt.executeUpdate() == 1)
+    }
+
     fun opprettManueltOpphoer(manueltOpphoer: ManueltOpphoer): ManueltOpphoer {
         val stmt =
             connection().prepareStatement(
@@ -402,7 +457,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         toList {
             when (getString("behandlingstype")) {
                 BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
-                BehandlingType.REVURDERING.name, BehandlingType.REGULERING.name -> asRevurdering(this)
+                BehandlingType.REVURDERING.name -> asRevurdering(this)
+                BehandlingType.REGULERING.name -> asRegulering(this)
                 BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
                 else -> null
             }
@@ -411,7 +467,8 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun ResultSet.behandlingAvRettType() =
         when (getString("behandlingstype")) {
             BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
-            BehandlingType.REVURDERING.name, BehandlingType.REGULERING.name -> asRevurdering(this)
+            BehandlingType.REVURDERING.name -> asRevurdering(this)
+            BehandlingType.REGULERING.name -> asRegulering(this)
             BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
             else -> null
         }

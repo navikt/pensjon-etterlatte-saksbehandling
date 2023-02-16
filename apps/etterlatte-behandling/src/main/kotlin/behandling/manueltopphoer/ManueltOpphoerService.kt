@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
@@ -92,6 +93,14 @@ class RealManueltOpphoerService(
                 )
 
                 is Revurdering -> ManueltOpphoer(
+                    sak = forrigeBehandling.sak,
+                    persongalleri = forrigeBehandling.persongalleri,
+                    opphoerAarsaker = opphoerRequest.opphoerAarsaker,
+                    fritekstAarsak = opphoerRequest.fritekstAarsak,
+                    virkningstidspunkt = virkningstidspunkt
+                )
+
+                is Regulering -> ManueltOpphoer(
                     sak = forrigeBehandling.sak,
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,

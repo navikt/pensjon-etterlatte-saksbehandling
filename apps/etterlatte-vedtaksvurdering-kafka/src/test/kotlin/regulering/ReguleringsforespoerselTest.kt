@@ -3,12 +3,12 @@ package regulering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.behandling.Hendelsestype
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.regulering.OMBEREGNING_EVENT_NAME
 import no.nav.etterlatte.regulering.Reguleringsforespoersel
 import no.nav.etterlatte.regulering.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -52,7 +52,7 @@ internal class ReguleringsforespoerselTest {
 
         inspector.sendTestMessage(melding.toJson())
         val sendtMelding = inspector.inspektør.message(0)
-        Assertions.assertEquals(OMBEREGNING_EVENT_NAME, sendtMelding.get(eventNameKey).asText())
+        Assertions.assertEquals(Hendelsestype.OMBEREGNINGSHENDELSE.toString(), sendtMelding.get(eventNameKey).asText())
         Assertions.assertEquals(
             Omberegningshendelse(
                 sakId = sakId,

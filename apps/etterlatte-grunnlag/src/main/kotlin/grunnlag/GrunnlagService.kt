@@ -15,9 +15,9 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg

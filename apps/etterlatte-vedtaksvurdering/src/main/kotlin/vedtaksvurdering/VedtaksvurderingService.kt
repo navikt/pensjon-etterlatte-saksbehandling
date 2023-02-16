@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
+import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -17,7 +18,6 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.ktor.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient

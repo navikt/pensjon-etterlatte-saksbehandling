@@ -26,6 +26,7 @@ include(
     "libs:ktor2client-onbehalfof",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-database",
+    "libs:etterlatte-funksjonsbrytere",
     "libs:etterlatte-ktor",
     "libs:etterlatte-jobs",
     "libs:etterlatte-kafka",

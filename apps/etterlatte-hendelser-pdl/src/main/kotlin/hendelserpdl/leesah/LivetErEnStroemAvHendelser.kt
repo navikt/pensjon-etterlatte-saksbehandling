@@ -47,7 +47,7 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 // Nais doc: Password needed to use the keystore and truststore
 
                 put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
-                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1000)
+                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
                 put(ConsumerConfig.CLIENT_ID_CONFIG, env["NAIS_APP_NAME"])
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
@@ -62,11 +62,11 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                     KafkaAvroDeserializerConfig.USER_INFO_CONFIG,
                     "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"
                 )
-                put(SCHEMA_REGISTRY_URL_CONFIG, env["KAFKA_SCHEMA_REGISTRY"])
-                /*put(
+                put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, env["KAFKA_SCHEMA_REGISTRY"])
+                put(
                     "schema.registry.basic.auth.user.info",
                     "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"
-                )*/
+                )
             }
 
             val consumer: KafkaConsumer<String?, String?> = KafkaConsumer<String?, String?>(properties)

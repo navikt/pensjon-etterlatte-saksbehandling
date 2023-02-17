@@ -1,7 +1,7 @@
 import { Column } from 'react-table'
 import {
-  behandlingTypeFilter,
   IOppgave,
+  oppgaveTypeFilter,
   OppgaveTypeFilter,
   SoeknadTypeFilter,
   soeknadTypeFilter,
@@ -45,7 +45,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     Cell: ({ value: oppgavetype }) => {
       return (
         <Tag variant={tagColors[oppgavetype]} size={'small'}>
-          {behandlingTypeFilter[oppgavetype as OppgaveTypeFilter]?.navn}
+          {oppgaveTypeFilter[oppgavetype as OppgaveTypeFilter]?.navn}
         </Tag>
       )
     },

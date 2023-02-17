@@ -14,7 +14,7 @@ import java.time.Duration
 
 class RegoppslagKlient(
     private val client: HttpClient,
-    private val url: String,
+    private val url: String
 ) {
     private val logger = LoggerFactory.getLogger(RegoppslagKlient::class.java)
 
@@ -31,7 +31,7 @@ class RegoppslagKlient(
         } else {
             logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
-            val response = client.get("$url/regoppslag/${ident}") {
+            val response = client.get("$url/regoppslag/$ident") {
                 header("x_correlation_id", getXCorrelationId())
                 header("Nav_Call_Id", getXCorrelationId())
             }
@@ -70,7 +70,8 @@ data class RegoppslagResponseDTO(
     }
 
     enum class AdresseKilde {
-        BOSTEDSADRESSE, OPPHOLDSADRESSE, KONTAKTADRESSE, DELTBOSTED, KONTAKTINFORMASJONFORDØDSBO, ENHETPOSTADRESSE, ENHETFORRETNINGSADRESSE
+        BOSTEDSADRESSE, OPPHOLDSADRESSE, KONTAKTADRESSE, DELTBOSTED,
+        KONTAKTINFORMASJONFORDØDSBO, ENHETPOSTADRESSE, ENHETFORRETNINGSADRESSE
     }
 }
 

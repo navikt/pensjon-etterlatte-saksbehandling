@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.ktor.Saksbehandler
+import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertEquals

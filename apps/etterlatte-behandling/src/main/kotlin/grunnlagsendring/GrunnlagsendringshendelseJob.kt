@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.util.*
 import javax.sql.DataSource
 import kotlin.concurrent.fixedRateTimer
 
@@ -59,10 +60,11 @@ class GrunnlagsendringshendelseJob(
         private val log = LoggerFactory.getLogger(this::class.java)
 
         suspend fun run() {
+            val correlationId = UUID.randomUUID().toString()
+
             if (leaderElection.isLeader()) {
-                withLogContext {
-                    log.info("Starter jobb: $jobbNavn")
-                }
+                withLogContext(correlationId) { log.info("Starter jobb: $jobbNavn") }
+
                 coroutineScope {
                     launch {
                         withContext(
@@ -70,7 +72,7 @@ class GrunnlagsendringshendelseJob(
                                 value = Context(Self("GrunnlagsendringshendelseJob"), DatabaseContext(datasource))
                             )
                         ) {
-                            withLogContext {
+                            withLogContext(correlationId) {
                                 grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(
                                     minutterGamleHendelser
                                 )
@@ -79,7 +81,7 @@ class GrunnlagsendringshendelseJob(
                     }
                 }
             } else {
-                withLogContext { log.info("Ikke leader, saa kjoerer ikke jobb.") }
+                withLogContext(correlationId) { log.info("Ikke leader, saa kjoerer ikke jobb: $jobbNavn.") }
             }
         }
     }

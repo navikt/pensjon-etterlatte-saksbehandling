@@ -31,12 +31,12 @@ export enum OppgaveTypeFilter {
   MANUELT_OPPHOER = 'MANUELT_OPPHOER',
 }
 
-export const behandlingTypeFilter: Record<OppgaveTypeFilter, IPar> = {
-  ENDRING_PAA_SAK: { id: 'ENDRING_PAA_SAK', navn: 'Endring på sak' },
+export const oppgaveTypeFilter: Record<OppgaveTypeFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
   FØRSTEGANGSBEHANDLING: { id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
   REVURDERING: { id: 'REVURDERING', navn: 'Revurdering' },
   MANUELT_OPPHOER: { id: 'MANUELT_OPPHOER', navn: 'Manuelt opphør' },
+  ENDRING_PAA_SAK: { id: 'ENDRING_PAA_SAK', navn: 'Endring på sak' },
 }
 
 export enum SoeknadTypeFilter {

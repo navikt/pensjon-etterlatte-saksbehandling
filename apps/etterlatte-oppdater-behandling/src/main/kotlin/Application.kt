@@ -12,6 +12,7 @@ fun main() {
                     val behandlingservice = ab.createBehandlingService()
                     OppdaterBehandling(it, behandlingservice)
                     PdlHendelser(it, behandlingservice)
+                    OmberegningsHendelser(it, behandlingservice)
                 }
                 .start()
         }

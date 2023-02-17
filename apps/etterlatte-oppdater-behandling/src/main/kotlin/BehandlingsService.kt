@@ -3,9 +3,11 @@ package no.nav.etterlatte
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
@@ -18,6 +20,8 @@ interface Behandling {
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
     fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
+
+    fun opprettOmberegning(omberegningshendelse: Omberegningshendelse): HttpResponse
 }
 
 class BehandlingsService(
@@ -62,6 +66,15 @@ class BehandlingsService(
             behandling_app.post("$url/grunnlagsendringshendelse/adressebeskyttelse") {
                 contentType(ContentType.Application.Json)
                 setBody(adressebeskyttelse)
+            }
+        }
+    }
+
+    override fun opprettOmberegning(omberegningshendelse: Omberegningshendelse): HttpResponse {
+        return runBlocking {
+            behandling_app.post("$url/omberegning") {
+                contentType(ContentType.Application.Json)
+                setBody(omberegningshendelse)
             }
         }
     }

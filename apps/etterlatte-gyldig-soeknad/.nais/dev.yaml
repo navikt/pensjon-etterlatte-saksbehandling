@@ -18,6 +18,9 @@ spec:
   readiness:
     initialDelay: 5
     path: /isready
+  prometheus:
+    enabled: true
+    path: /metrics
   replicas:
     cpuThresholdPercentage: 90
     max: 1

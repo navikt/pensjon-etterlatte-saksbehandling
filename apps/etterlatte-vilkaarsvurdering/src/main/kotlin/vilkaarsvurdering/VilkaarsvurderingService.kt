@@ -171,6 +171,7 @@ class VilkaarsvurderingService(
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )
+            RevurderingAarsak.GRUNNBELOEPREGULERING -> throw NotImplementedError() // TODO Mads implementer
         }
     }
 }

@@ -37,7 +37,6 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, env["KAFKA_TRUSTSTORE_PATH"])
                 put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
                 // Nais doc: Password needed to use the keystore and truststore
-                put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks")
                 put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12")
                 put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
                 put(ConsumerConfig.GROUP_ID_CONFIG, env["KAFKA_CONSUMER_GROUP_ID"])

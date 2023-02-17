@@ -31,6 +31,10 @@ spec:
       value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY
       value: earliest
+    - name: VEDTAK_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+    - name: ETTERLATTE_VEDTAK_URL
+      value: http://etterlatte-vedtaksvurdering
   accessPolicy:
     outbound:
       rules:

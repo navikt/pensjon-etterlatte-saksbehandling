@@ -1,6 +1,8 @@
 package no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -16,7 +18,9 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
 internal class InnsendtSoeknadRiver(
-    rapidsConnection: RapidsConnection
+    rapidsConnection: RapidsConnection,
+    private val gyldigOmstillingsSoeknadService: GyldigOmstillingsSoeknadService,
+    private val behandlingClient: BehandlingClient
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(InnsendtSoeknadRiver::class.java)
 
@@ -36,9 +40,24 @@ internal class InnsendtSoeknadRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val soeknad = packet.soeknad()
         withLogContext(packet.correlationId) {
-            logger.info("Mottatt søknad fra søker: ${soeknad.soeker.fornavn.svar}")
+            try {
+                val soeknad = packet.soeknad()
+                val personGalleri = gyldigOmstillingsSoeknadService.hentPersongalleriFraSoeknad(soeknad)
+                val gyldighetsVurdering = gyldigOmstillingsSoeknadService.vurderGyldighet(personGalleri)
+                logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
+
+                val sakId = behandlingClient.skaffSak(personGalleri.soeker, SakType.OMSTILLINGSSTOENAD.name)
+                val behandlingId = behandlingClient.initierBehandling(sakId, soeknad.mottattDato, personGalleri)
+                behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
+                logger.info("Behandling {} startet på sak {}", behandlingId, sakId)
+
+                // TODO send event om gyldig søknad?
+
+                logger.info("Vurdert gyldighet av søknad om omstillingsstønad er fullført")
+            } catch (e: Exception) {
+                logger.error("Gyldighetsvurdering av søknad om omstillingsstønad feilet", e)
+            }
         }
     }
 

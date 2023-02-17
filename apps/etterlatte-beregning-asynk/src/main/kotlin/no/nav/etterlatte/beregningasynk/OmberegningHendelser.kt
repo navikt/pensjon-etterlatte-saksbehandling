@@ -15,6 +15,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.util.*
 
 internal class OmberegningHendelser(
     rapidsConnection: RapidsConnection,
@@ -40,7 +41,7 @@ internal class OmberegningHendelser(
         withLogContext(packet.correlationId) {
             logger.info("Mottatt omberegninghendelse")
             try {
-                val omberegningsId: Long = objectMapper.treeToValue(packet[Omberegningsnoekler.omberegningId])
+                val omberegningsId: UUID = objectMapper.treeToValue(packet[Omberegningsnoekler.omberegningId])
                 runBlocking {
                     val beregning = beregningService.opprettOmberegning(omberegningsId).body<BeregningDTO>()
                     packet[Omberegningsnoekler.beregning] = beregning

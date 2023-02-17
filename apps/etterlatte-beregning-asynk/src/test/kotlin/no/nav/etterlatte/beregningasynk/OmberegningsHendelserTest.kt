@@ -25,7 +25,7 @@ internal class OmberegningsHendelserTest {
 
     @Test
     fun `skal opprette omberegning`() {
-        val omberegningsid = slot<Long>()
+        val omberegningsid = slot<UUID>()
         val beregningDTO = BeregningDTO(
             beregningId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
@@ -46,7 +46,7 @@ internal class OmberegningsHendelserTest {
 
         inspector.sendTestMessage(fullMelding)
 
-        Assertions.assertEquals(1234, omberegningsid.captured)
+        Assertions.assertEquals(UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31"), omberegningsid.captured)
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             beregningDTO.toJson(),

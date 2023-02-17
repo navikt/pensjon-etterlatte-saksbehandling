@@ -34,7 +34,7 @@ fun main() {
 
     val logger = LoggerFactory.getLogger(Application::class.java)
     val pdlService by lazy {
-        PdlService(pdlHttpClient(System.getenv()), "http://etterlatte-pdltjenester")
+        PdlService(pdlHttpClient(env), "http://etterlatte-pdltjenester")
     }
 
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))

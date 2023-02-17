@@ -47,7 +47,7 @@ class LyttPaaHendelser(
 
     private fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
         val hendelseType = "Adressebeskyttelse"
-        val gradering = personhendelse.adressebeskyttelse.gradering
+        val gradering = personhendelse.adressebeskyttelse?.gradering
         if (gradering == null || gradering == no.nav.person.pdl.leesah.adressebeskyttelse.Gradering.UGRADERT) {
             log.info("Ignorerer person med tom eller ugradert gradering, krever ingen tiltak.")
             return

@@ -391,18 +391,18 @@
   resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.1.7.tgz#80f2a8fe2680ad118ccf9e1bdaba75ff3004df05"
   integrity sha512-Dq/vFsGqnmVQCRWGLIzOB7XaFWgJRYVnbA2n4lfcnovp+zCwql1NNXKscvVWqaQEbq+2bGR71A5bgrr4NCR14w==
 
-"@navikt/ds-icons@^2.1.7", "@navikt/ds-icons@^2.2.0":
+"@navikt/ds-icons@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@navikt/ds-icons/-/ds-icons-2.2.0.tgz#3bcfc2145b897a7c36c6ca4ce20ba3b991d64a90"
   integrity sha512-86vmaBIwdk8THOOYqHusiSKZ8e7imaog7EdHsJz+9CCt7uKE+as+c/aVCyz1LUJjjXhdt7ify4mq4MzPuHK9MQ==
 
-"@navikt/ds-react-internal@^2.1.7":
-  version "2.1.7"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react-internal/-/ds-react-internal-2.1.7.tgz#73492375417a01f18eac23f2d16d15822c213627"
-  integrity sha512-1aaGBk3Dvvu2pAs6FVFnEsoES8BULEpYQ0Ezp2KorgjQikwAKbq79FZ6cdWUEOLwIVKB1V3987T7Km+xLBpXfQ==
+"@navikt/ds-react-internal@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react-internal/-/ds-react-internal-2.2.0.tgz#40474832be085a8359214d875cddc4cba677d56d"
+  integrity sha512-35XpwOGC+AouBKNvlyQJazd3B7IWasb8ZcAkZ7WMfkZKGXrzNArlYvYgTUIV0R1Jl9RoR5QrW2s3SNx1K4qQWQ==
   dependencies:
-    "@navikt/ds-icons" "^2.1.7"
-    "@navikt/ds-react" "^2.1.7"
+    "@navikt/ds-icons" "^2.2.0"
+    "@navikt/ds-react" "^2.2.0"
     clsx "^1.1.1"
     copy-to-clipboard "^3.3.1"
 

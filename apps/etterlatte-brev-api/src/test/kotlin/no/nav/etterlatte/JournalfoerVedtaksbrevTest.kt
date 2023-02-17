@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import io.mockk.Called
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.every
@@ -102,12 +103,29 @@ internal class JournalfoerVedtaksbrevTest {
         assertEquals(adresse.toJson(), actualMessage.get("mottakerAdresse").toJson())
     }
 
-    private fun opprettVedtak(): Vedtak {
+
+    @Test
+    fun `Attestering av sak med behandlingstype MANUELT_OPPHOER`() {
+        val vedtak = opprettVedtak(BehandlingType.MANUELT_OPPHOER)
+
+        val melding = JsonMessage.newMessage(
+            mapOf(
+                eventNameKey to KafkaHendelseType.ATTESTERT.toString(),
+                "vedtak" to vedtak
+            )
+        )
+
+        testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
+
+        verify { vedtaksbrevService wasNot Called }
+    }
+
+    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): Vedtak {
         return Vedtak(
             vedtakId = 1L,
             virk = Periode(YearMonth.now(), YearMonth.now().plusYears(2)),
             sak = Sak("Z123456", SakType.BARNEPENSJON, 2L),
-            behandling = Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.randomUUID()),
+            behandling = Behandling(behandlingType, UUID.randomUUID()),
             type = VedtakType.INNVILGELSE,
             grunnlag = emptyList(),
             vilkaarsvurdering = null,

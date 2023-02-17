@@ -46,7 +46,8 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
                 // Nais doc: Password needed to use the keystore and truststore
 
-                put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
+                put(ConsumerConfig.GROUP_ID_CONFIG, env["KAFKA_CONSUMER_GROUP_ID"])
+                // LEESAH_KAFKA_GROUP_ID hvor skal denne brukes?
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
                 put(ConsumerConfig.CLIENT_ID_CONFIG, env["NAIS_APP_NAME"])
@@ -90,9 +91,16 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
 
     override fun poll(consumePersonHendelse: (Personhendelse) -> Unit): Int {
         val meldinger = consumer?.poll(Duration.ofSeconds(10))
+
         meldinger?.forEach {
             consumePersonHendelse(it.value())
         }
+        if (meldinger?.isEmpty == true) {
+            logger.info("Meldinger er tomt")
+        } else {
+            logger.info("Får inn meldinger ${meldinger?.count()}")
+        }
+
         consumer?.commitSync()
         return meldinger?.count() ?: 0
     }

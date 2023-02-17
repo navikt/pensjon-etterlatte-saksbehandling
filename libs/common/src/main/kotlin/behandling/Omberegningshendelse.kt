@@ -19,5 +19,4 @@ enum class Hendelsestype {
 object Omberegningsnoekler {
     const val hendelse_data = "hendelse_data"
     const val omberegningId = "omberegningId"
-    const val vilkaarsvurdering = "vilkaarsvurdering"
 }

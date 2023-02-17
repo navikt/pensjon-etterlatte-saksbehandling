@@ -30,7 +30,7 @@ var stream: LyttPaaHendelser? = null
 
 @OptIn(DelicateCoroutinesApi::class)
 fun main() {
-    val env = System.getenv().toMutableMap().apply { put("DELAYED_START", "true") }
+    val env = System.getenv().toMutableMap()
 
     val logger = LoggerFactory.getLogger(Application::class.java)
     val pdlService by lazy {

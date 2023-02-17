@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
 import no.nav.etterlatte.libs.common.sak.Saksbehandler
@@ -22,6 +23,7 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.etterlatte.vedtaksvurdering.Vedtak as VedtakEntity
@@ -86,6 +88,12 @@ class VedtaksvurderingService(
 
     fun hentVedtak(behandlingId: UUID): VedtakEntity? {
         return repository.hentVedtak(behandlingId)
+    }
+
+    fun vedtakErLoependePaaDato(sakId: Long, dato: LocalDate): LoependeYtelseDTO {
+        val alleVedtakForSak = repository.hentVedtakForSak(sakId)
+
+        return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)
     }
 
     suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, accessToken: String): Vedtak {

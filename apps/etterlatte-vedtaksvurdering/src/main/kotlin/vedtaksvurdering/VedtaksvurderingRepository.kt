@@ -96,6 +96,15 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         ) { it.toVedtak() }
     }
 
+    fun hentVedtakForSak(sakId: Long): List<Vedtak> {
+        val hentVedtak =
+            "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, attestertVedtakEnhet, fattetVedtakEnhet FROM vedtak WHERE sakId = :sakId" // ktlint-disable max-line-length
+        return repositoryWrapper.hentListeMedKotliquery(
+            query = hentVedtak,
+            params = { mapOf("sakId" to sakId) }
+        ) { it.toVedtak() }
+    }
+
     private fun Row.toVedtak() = Vedtak(
         sakId = longOrNull("sakid"),
         behandlingId = uuid("behandlingid"),

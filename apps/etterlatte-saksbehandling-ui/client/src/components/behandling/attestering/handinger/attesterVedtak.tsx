@@ -17,7 +17,7 @@ export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
       return true
     }
 
-    return await attesterVedtaksbrev(behandlingId!!).then((response) => {
+    return attesterVedtaksbrev(behandlingId!!).then((response) => {
       if (response.status === 'ok') return true
       else throw new Error(`Feil oppsto ved attestering av brev: \n${response.error}`)
     })

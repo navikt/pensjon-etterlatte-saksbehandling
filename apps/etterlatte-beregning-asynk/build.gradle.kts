@@ -11,4 +11,8 @@ dependencies {
     implementation(Ktor2.ClientAuth)
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.ClientJackson)
+
+    testImplementation(Ktor2.ClientMock)
+    testImplementation(MockK.MockK)
+    testImplementation(Kotlinx.CoroutinesCore)
 }

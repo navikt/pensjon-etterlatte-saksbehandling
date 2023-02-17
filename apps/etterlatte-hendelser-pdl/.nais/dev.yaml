@@ -14,9 +14,6 @@ spec:
   readiness:
     initialDelay: 5
     path: /isready
-  prometheus:
-    enabled: true
-    path: /metrics
   strategy:
     type: Recreate
   kafka:

@@ -95,6 +95,8 @@ function endringStatusNavn(status: IBehandlingStatus) {
     case IBehandlingStatus.FATTET_VEDTAK:
       return 'Til attestering'
     case IBehandlingStatus.ATTESTERT:
+      return 'Attestert'
+    case IBehandlingStatus.IVERKSATT:
       return 'Iverksatt'
     default:
       return status

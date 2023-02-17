@@ -1,7 +1,6 @@
 package no.nav.etterlatte.hendelserpdl.leesah
 
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE
-import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import kotlinx.coroutines.GlobalScope
@@ -46,7 +45,7 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
                 // Nais doc: Password needed to use the keystore and truststore
 
-                put(ConsumerConfig.GROUP_ID_CONFIG, env["KAFKA_CONSUMER_GROUP_ID"])
+                put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
                 // LEESAH_KAFKA_GROUP_ID hvor skal denne brukes?
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
@@ -70,11 +69,11 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 )
             }
 
-            val consumer: KafkaConsumer<String?, String?> = KafkaConsumer<String?, String?>(properties)
-            consumer.subscribe(listOf(leesahtopic))
+            consumer = KafkaConsumer<String, Personhendelse>(properties)
+            consumer!!.subscribe(listOf(leesahtopic))
 
             logger.info("kafka consumer startet")
-            Runtime.getRuntime().addShutdownHook(Thread { consumer.close() })
+            Runtime.getRuntime().addShutdownHook(Thread { consumer!!.close() })
         }
 
         if (env["DELAYED_START"] == "true") {

@@ -81,14 +81,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 """.trimIndent()
             )
         stmt.setString(1, type.name)
-        return stmt.executeQuery().toList {
-            when (type) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> asFoerstegangsbehandling(this)
-                BehandlingType.REVURDERING -> asRevurdering(this)
-                BehandlingType.REGULERING -> asRegulering(this)
-                BehandlingType.MANUELT_OPPHOER -> asManueltOpphoer(this)
-            }
-        }
+        return stmt.executeQuery().toList { tilBehandling(type.name)!! }
     }
 
     fun alleBehandlingerISakAvType(sakId: Long, type: BehandlingType): List<Behandling> {
@@ -103,14 +96,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             it.setLong(1, sakId)
             it.setString(2, type.name)
             it.executeQuery()
-        }.toList {
-            when (type) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> asFoerstegangsbehandling(this)
-                BehandlingType.REVURDERING -> asRevurdering(this)
-                BehandlingType.REGULERING -> asRegulering(this)
-                BehandlingType.MANUELT_OPPHOER -> asManueltOpphoer(this)
-            }
-        }
+        }.toList { tilBehandling(type.name)!! }
     }
 
     fun alleBehandlinger(): List<Behandling> {
@@ -444,24 +430,17 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     private fun ResultSet.behandlingsListe(): List<Behandling> =
-        toList {
-            when (getString("behandlingstype")) {
-                BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
-                BehandlingType.REVURDERING.name -> asRevurdering(this)
-                BehandlingType.REGULERING.name -> asRegulering(this)
-                BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
-                else -> null
-            }
-        }.filterNotNull()
+        toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()
 
-    private fun ResultSet.behandlingAvRettType() =
-        when (getString("behandlingstype")) {
-            BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
-            BehandlingType.REVURDERING.name -> asRevurdering(this)
-            BehandlingType.REGULERING.name -> asRegulering(this)
-            BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
-            else -> null
-        }
+    private fun ResultSet.tilBehandling(key: String?) = when (key) {
+        BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
+        BehandlingType.REVURDERING.name -> asRevurdering(this)
+        BehandlingType.REGULERING.name -> asRegulering(this)
+        BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
+        else -> null
+    }
+
+    private fun ResultSet.behandlingAvRettType() = tilBehandling(getString("behandlingstype"))
 
     fun avbrytBehandling(behandlingId: UUID): Behandling {
         return this.lagreStatus(

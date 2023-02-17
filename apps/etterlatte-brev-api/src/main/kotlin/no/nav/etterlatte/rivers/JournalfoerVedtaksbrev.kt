@@ -1,6 +1,7 @@
 package no.nav.etterlatte.rivers
 
 import no.nav.etterlatte.brev.VedtaksbrevService
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.deserialize
@@ -27,6 +28,7 @@ internal class JournalfoerVedtaksbrev(
         River(rapidsConnection).apply {
             eventName(KafkaHendelseType.ATTESTERT.toString())
             validate { it.requireKey("vedtak") }
+            validate { it.rejectValue("vedtak.behandling.type", BehandlingType.MANUELT_OPPHOER.name) }
         }.register(this)
     }
 

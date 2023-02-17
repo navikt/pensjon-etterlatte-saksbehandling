@@ -46,7 +46,6 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 // Nais doc: Password needed to use the keystore and truststore
 
                 put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
-                // LEESAH_KAFKA_GROUP_ID hvor skal denne brukes?
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
                 put(ConsumerConfig.CLIENT_ID_CONFIG, env["NAIS_APP_NAME"])
@@ -93,11 +92,6 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
 
         meldinger?.forEach {
             consumePersonHendelse(it.value())
-        }
-        if (meldinger?.isEmpty == true) {
-            logger.info("Meldinger er tomt")
-        } else {
-            logger.info("Får inn meldinger ${meldinger?.count()}")
         }
 
         consumer?.commitSync()

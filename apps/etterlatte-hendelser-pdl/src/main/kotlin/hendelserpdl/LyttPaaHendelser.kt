@@ -28,7 +28,6 @@ class LyttPaaHendelser(
 
         val antallMeldingerLest = livshendelser.poll {
             meldinger++
-            log.info("Så en hendelse av type ${it.opplysningstype} som vi ikke håndterer")
             withLogContext {
                 when (it.opplysningstype) {
                     LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(it)

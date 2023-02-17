@@ -42,7 +42,7 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, env["KAFKA_KEYSTORE_PATH"])
                 put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
 
-                put(ConsumerConfig.GROUP_ID_CONFIG, env["KAFKA_CONSUMER_GROUP_ID"])
+                put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
 
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1000")
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
@@ -51,6 +51,10 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
 
                 put(SCHEMA_REGISTRY_URL_CONFIG, env["KAFKA_SCHEMA_REGISTRY"])
                 put(USER_INFO_CONFIG, "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}")
+                put(
+                    "schema.registry.basic.auth.user.info",
+                    "${env["KAFKA_SCHEMA_REGISTRY_USER"]}:${env["KAFKA_SCHEMA_REGISTRY_PASSWORD"]}"
+                )
                 put(BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
 
                 put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)

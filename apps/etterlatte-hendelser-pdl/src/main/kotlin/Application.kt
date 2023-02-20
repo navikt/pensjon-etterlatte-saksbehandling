@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.etterlatte.hendelserpdl.LivsHendelserRapid
 import no.nav.etterlatte.hendelserpdl.LyttPaaHendelser
+import no.nav.etterlatte.hendelserpdl.LyttPaaHendelserProvider
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.module
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
@@ -34,28 +35,29 @@ fun main() {
     val pdlService by lazy {
         PdlService(pdlHttpClient(env), "http://etterlatte-pdltjenester")
     }
-    lateinit var stream: LyttPaaHendelser
+    val provider = LyttPaaHendelserProvider
 
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
         .withKtorModule {
-            module(stream)
+            module(provider)
         }
         .build()
         .apply {
             GlobalScope.launch {
                 try {
-                    stream =
+                    LyttPaaHendelserProvider.setStream(
                         LyttPaaHendelser(
                             LivetErEnStroemAvHendelser(env),
                             LivsHendelserRapid(this@apply),
                             pdlService
                         )
+                    )
 
                     while (true) {
-                        if (stream.getStopped()) {
+                        if (provider.getStream().getStopped()) {
                             delay(200)
                         } else {
-                            stream.stream()
+                            provider.getStream().stream()
                         }
                     }
                 } catch (e: Exception) {

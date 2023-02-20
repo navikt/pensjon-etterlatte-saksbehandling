@@ -6,6 +6,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.hendelserpdl.LyttPaaHendelser
+import no.nav.etterlatte.hendelserpdl.LyttPaaHendelserProvider
 import no.nav.etterlatte.hendelserpdl.module
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -19,8 +20,9 @@ class ApplicationTest {
         every { stream.getAntallDoedsMeldinger() } returns 22
         every { stream.getAntallMeldinger() } returns 22
 
+        LyttPaaHendelserProvider.setStream(stream)
         testApplication {
-            application { this.module(stream) }
+            application { this.module(LyttPaaHendelserProvider) }
             assertEquals(HttpStatusCode.OK, client.get("/status").status)
         }
     }

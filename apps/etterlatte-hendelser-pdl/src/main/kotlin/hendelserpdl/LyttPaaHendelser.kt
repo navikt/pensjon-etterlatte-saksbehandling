@@ -12,6 +12,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
 
+object LyttPaaHendelserProvider {
+    private var lyttPaaHendelser: LyttPaaHendelser? = null
+
+    fun getStream() = requireNotNull(this.lyttPaaHendelser)
+
+    fun setStream(lyttPaaHendelserTmp: LyttPaaHendelser) {
+        this.lyttPaaHendelser = lyttPaaHendelserTmp
+    }
+}
+
 class LyttPaaHendelser(
     private val livshendelser: ILivetErEnStroemAvHendelser,
     private val postHendelser: ILivsHendelserRapid,

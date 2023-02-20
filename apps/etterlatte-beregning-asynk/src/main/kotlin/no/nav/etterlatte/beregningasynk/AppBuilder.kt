@@ -8,8 +8,9 @@ import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.security.ktor.clientCredential
+import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(private val props: Map<String, String>) {
+class AppBuilder(props: Map<String, String>) : RapidsAndRiversAppBuilder(props) {
 
     private val beregningapp = beregningHttpClient()
 

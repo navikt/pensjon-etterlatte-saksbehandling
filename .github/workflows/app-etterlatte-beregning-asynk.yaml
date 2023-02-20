@@ -17,12 +17,13 @@ on:
     paths:
       - libs/common/**
       - libs/ktor2client-auth-clientcredentials/**
+      - libs/rapidsandrivers-extras/**
   pull_request:
     branches:
       - main
     paths:
       - libs/common/**
-      - libs/ktor2client-auth-clientcredentials/**
+      - libs/rapidsandrivers-extras/**
 
 jobs:
   test:

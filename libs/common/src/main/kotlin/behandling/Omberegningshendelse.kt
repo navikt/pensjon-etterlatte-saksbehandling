@@ -7,9 +7,3 @@ data class Omberegningshendelse(
     val fradato: LocalDate,
     val aarsak: RevurderingAarsak
 )
-
-enum class Hendelsestype {
-    OMBEREGNINGSHENDELSE;
-
-    override fun toString() = name
-}

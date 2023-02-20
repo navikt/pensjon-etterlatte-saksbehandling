@@ -34,14 +34,17 @@ fun main() {
     val pdlService by lazy {
         PdlService(pdlHttpClient(env), "http://etterlatte-pdltjenester")
     }
+    lateinit var stream: LyttPaaHendelser
 
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
-        .withKtorModule(Application::module)
+        .withKtorModule {
+            module(stream)
+        }
         .build()
         .apply {
             GlobalScope.launch {
                 try {
-                    val stream =
+                    stream =
                         LyttPaaHendelser(
                             LivetErEnStroemAvHendelser(env),
                             LivsHendelserRapid(this@apply),
@@ -49,7 +52,7 @@ fun main() {
                         )
 
                     while (true) {
-                        if (stream.stopped) {
+                        if (stream.getStopped()) {
                             delay(200)
                         } else {
                             stream.stream()

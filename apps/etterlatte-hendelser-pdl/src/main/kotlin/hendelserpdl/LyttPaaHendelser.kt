@@ -18,10 +18,10 @@ class LyttPaaHendelser(
     private val pdlService: Pdl
 ) {
     val log: Logger = LoggerFactory.getLogger(LyttPaaHendelser::class.java)
-    var iterasjoner = 0
-    var dodsmeldinger = 0
-    var meldinger = 0
-    var stopped = false
+    private var iterasjoner = 0
+    private var doedsmeldinger = 0
+    private var meldinger = 0
+    private var stopped = false
 
     fun stream() {
         iterasjoner++
@@ -43,6 +43,14 @@ class LyttPaaHendelser(
             if (antallMeldingerLest == 0) delay(500)
         }
     }
+
+    fun getAntallIterasjoner(): Int = this.iterasjoner
+
+    fun getAntallDoedsMeldinger(): Int = this.doedsmeldinger
+
+    fun getAntallMeldinger(): Int = this.meldinger
+
+    fun getStopped(): Boolean = this.stopped
 
     private fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
         val hendelseType = "Adressebeskyttelse"
@@ -111,7 +119,7 @@ class LyttPaaHendelser(
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
         }
-        dodsmeldinger++
+        doedsmeldinger++
     }
 
     fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {

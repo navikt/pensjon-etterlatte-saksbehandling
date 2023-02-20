@@ -1,6 +1,6 @@
 # start-regulering
 ___
-[Naisjob](https://doc.nais.io/naisjob/) for å poste en melding (søknad) til kafka. Benyttes ifm. integrasjonstesting av søknadsflyten.
+[Naisjob](https://doc.nais.io/naisjob/) for å poste en melding til kafka. Benyttes for å starte reguleringsflyten.
 
 
 For å trigge denne jobben gjøres følgende:

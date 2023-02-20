@@ -16,15 +16,17 @@ interface ILivetErEnStroemAvHendelser {
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvHendelser {
+class LivetErEnStroemAvHendelser(
+    env: Map<String, String>,
+    kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment()
+) : ILivetErEnStroemAvHendelser {
     val logger = LoggerFactory.getLogger(LivetErEnStroemAvHendelser::class.java)
 
     val leesahtopic = env["LEESAH_TOPIC_PERSON"]
     private lateinit var consumer: KafkaConsumer<String, Personhendelse>
-
     init {
         val startuptask = {
-            consumer = KafkaConsumer<String, Personhendelse>(generateKafkaConsumerProperties(env))
+            consumer = KafkaConsumer<String, Personhendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env))
             consumer.subscribe(listOf(leesahtopic))
 
             logger.info("kafka consumer startet")
@@ -44,7 +46,7 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
     }
 
     override fun poll(consumePersonHendelse: (Personhendelse) -> Unit): Int {
-        val meldinger = consumer.poll(Duration.ofMinutes(4L))
+        val meldinger = consumer.poll(Duration.ofSeconds(10L))
 
         meldinger?.forEach {
             consumePersonHendelse(it.value())

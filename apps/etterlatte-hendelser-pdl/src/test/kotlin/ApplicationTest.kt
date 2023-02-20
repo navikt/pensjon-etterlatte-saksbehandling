@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ApplicationTest {
-    private val stream: LyttPaaHendelser = mockk<LyttPaaHendelser>()
+    private val stream = mockk<LyttPaaHendelser>()
 
     @Test
     fun testRoot() {

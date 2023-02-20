@@ -1,6 +1,8 @@
 package no.nav.etterlatte.hendelserpdl
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import io.confluent.kafka.serializers.KafkaAvroDeserializer
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -11,6 +13,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.common.KafkaEnvironment
+import no.nav.etterlatte.hendelserpdl.leesah.KafkaConsumerConfiguration
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
 import no.nav.etterlatte.libs.common.objectMapper
@@ -24,18 +27,20 @@ import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.doedsfall.Doedsfall
 import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon
 import no.nav.person.pdl.leesah.utflytting.UtflyttingFraNorge
+import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-@Disabled
 class IntegrationTest {
 
     private lateinit var pdlService: PdlService
@@ -228,21 +233,44 @@ class IntegrationTest {
     private fun testApp(testRapid: TestRapid) = LyttPaaHendelser(
         LivetErEnStroemAvHendelser(
             mapOf(
-                "LEESAH_KAFKA_BROKERS" to kafkaEnv.brokersURL,
-                "LEESAH_KAFKA_GROUP_ID" to "leesah-consumer",
-                "LEESAH_KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!
-            )
+                "KAFKA_BROKERS" to kafkaEnv.brokersURL,
+                "LEESAH_KAFKA_GROUP_ID" to "etterlatte-v1",
+                "KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!,
+                "LEESAH_TOPIC_PERSON" to pdlPersonTopic
+            ),
+            KafkaConsumerEnvironmentTest()
         ),
         LivsHendelserRapid(testRapid),
         pdlService
     )
+
+    class KafkaConsumerEnvironmentTest : KafkaConsumerConfiguration {
+        override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {
+            val trettiSekunder = 30000
+
+            val properties = Properties().apply {
+                put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, kafkaEnv.brokersURL)
+                put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
+                put(ConsumerConfig.CLIENT_ID_CONFIG, "etterlatte-pdl-hendelser")
+                put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, kafkaEnv.schemaRegistry?.url!!)
+                put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
+                put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
+                put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
+                put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
+                put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, trettiSekunder)
+                put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true)
+            }
+            return properties
+        }
+    }
 
     private fun producerForLeesah() = KafkaProducer<String, Personhendelse>(
         mapOf(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaEnv.brokersURL,
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
-            "schema.registry.url" to kafkaEnv.schemaRegistry?.url,
+            KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG to kafkaEnv.schemaRegistry?.url,
             ProducerConfig.ACKS_CONFIG to "all"
         )
     )

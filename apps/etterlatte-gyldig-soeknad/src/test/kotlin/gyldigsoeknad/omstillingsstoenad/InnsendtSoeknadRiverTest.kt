@@ -34,8 +34,6 @@ internal class InnsendtSoeknadRiverTest {
         val gyldighetsResultat = GyldighetsResultat(VurderingsResultat.OPPFYLT, listOf(), LocalDateTime.now())
         val id = UUID.randomUUID()
 
-        // TODO tilpasse med Todos..
-
         every { gyldigOmstillingsSoeknadServiceMock.hentPersongalleriFraSoeknad(any()) } returns persongalleri
         every { gyldigOmstillingsSoeknadServiceMock.vurderGyldighet(persongalleri) } returns gyldighetsResultat
         every { behandlingClientMock.skaffSak(any(), any()) } returns 4
@@ -44,6 +42,7 @@ internal class InnsendtSoeknadRiverTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
+//        TODO EY-1777 verifiser event om gyldig søknad?
 //        assertEquals(GyldigSoeknadVurdert.eventName, inspector.first().get(eventNameKey).asText())
 //        assertEquals(4, inspector.first().get(GyldigSoeknadVurdert.sakIdKey).longValue())
 //        assertEquals(id.toString(), inspector.first().get(GyldigSoeknadVurdert.behandlingIdKey).asText())

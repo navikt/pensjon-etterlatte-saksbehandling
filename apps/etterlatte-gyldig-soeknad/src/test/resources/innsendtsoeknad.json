@@ -13,7 +13,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "03108718357",
+        "svar": "26058411891",
         "spoersmaal": "Fødselsnummer"
       },
       "type": "INNSENDER"
@@ -52,7 +52,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "12101376212",
+        "svar": "26058411891",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {
@@ -176,7 +176,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "12101376212",
+        "svar": "21478247343",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "datoForDoedsfallet": {
@@ -213,12 +213,12 @@
     "barn": [],
     "versjon": "1",
     "type": "OMSTILLINGSSTOENAD",
-    "mottattDato": "2023-02-14T14:37:24.573612786",
+    "mottattDato": "2023-02-17T14:37:24.573612786",
     "template": "omstillingsstoenad_v1"
   },
   "@lagret_soeknad_id": "TEST-157fb687-3dfe-40bf-b099-45d531c0d12d",
   "@template": "soeknad",
-  "@fnr_soeker": "12101376212",
+  "@fnr_soeker": "26058411891",
   "@hendelse_gyldig_til": "2022-05-12T10:17:34.833603804+02:00",
   "system_read_count": 2,
   "system_participating_services": [

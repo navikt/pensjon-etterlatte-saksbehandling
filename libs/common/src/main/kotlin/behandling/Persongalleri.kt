@@ -6,4 +6,3 @@ data class Persongalleri(
     val avdoed: List<String> = emptyList(),
     val gjenlevende: List<String> = emptyList()
 )
-// TODO - bygge på videre? Legge til barn? Kan det eksistere

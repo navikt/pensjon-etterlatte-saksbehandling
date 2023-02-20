@@ -107,12 +107,7 @@ private fun opprettSoeknadJson(ytelse: String, gjenlevendeFnr: String, avdoedFnr
             "@fnr_soeker" to soeker,
             "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
             "@adressebeskyttelse" to "UGRADERT"
-        ).let {
-            if (erOmstilling) {
-                it["soeknadFordelt"] = true
-            }
-            it
-        }
+        )
     ).toJson()
 }
 

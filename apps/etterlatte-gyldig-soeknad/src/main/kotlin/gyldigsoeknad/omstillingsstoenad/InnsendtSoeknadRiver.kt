@@ -52,7 +52,7 @@ internal class InnsendtSoeknadRiver(
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
                 logger.info("Behandling {} startet på sak {}", behandlingId, sakId)
 
-                // TODO send event om gyldig søknad?
+                // TODO EY-1777 send event om gyldig søknad
 
                 logger.info("Vurdert gyldighet av søknad om omstillingsstønad er fullført")
             } catch (e: Exception) {

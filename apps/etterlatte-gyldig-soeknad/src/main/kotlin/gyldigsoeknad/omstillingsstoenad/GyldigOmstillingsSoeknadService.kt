@@ -19,7 +19,7 @@ class GyldigOmstillingsSoeknadService(private val pdlClient: PdlClient) {
     }
 
     fun vurderGyldighet(personGalleri: Persongalleri): GyldighetsResultat {
-        // TODO Implementer vurdering av gyldig søknad
+        // TODO EY-1776 Implementer vurdering av gyldig søknad
         return GyldighetsResultat(VurderingsResultat.OPPFYLT, emptyList(), LocalDateTime.now())
     }
 }

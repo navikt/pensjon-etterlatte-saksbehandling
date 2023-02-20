@@ -49,7 +49,7 @@ class IntegrationTest {
         val pdlPersonTopic = "pdl.leesah-v1"
         val kafkaEnv = KafkaEnvironment(
             noOfBrokers = 1,
-            topicNames = listOf("etterlatte.dodsmelding", pdlPersonTopic),
+            topicNames = listOf(pdlPersonTopic),
             withSecurity = false,
             autoStart = true,
             withSchemaRegistry = true

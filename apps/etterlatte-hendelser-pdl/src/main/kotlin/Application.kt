@@ -26,8 +26,6 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
 
-var stream: LyttPaaHendelser? = null
-
 @OptIn(DelicateCoroutinesApi::class)
 fun main() {
     val env = System.getenv().toMutableMap()
@@ -43,7 +41,7 @@ fun main() {
         .apply {
             GlobalScope.launch {
                 try {
-                    stream =
+                    val stream =
                         LyttPaaHendelser(
                             LivetErEnStroemAvHendelser(env),
                             LivsHendelserRapid(this@apply),
@@ -51,10 +49,10 @@ fun main() {
                         )
 
                     while (true) {
-                        if (stream?.stopped == true) {
+                        if (stream.stopped) {
                             delay(200)
                         } else {
-                            stream?.stream()
+                            stream.stream()
                         }
                     }
                 } catch (e: Exception) {

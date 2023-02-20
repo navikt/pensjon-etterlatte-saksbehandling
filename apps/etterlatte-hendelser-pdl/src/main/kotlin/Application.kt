@@ -52,6 +52,13 @@ fun main() {
                             pdlService
                         )
                     )
+                    if (env["DELAYED_START"] == "true") {
+                        GlobalScope.launch {
+                            logger.info("venter 30s for sidecars")
+                            delay(30L * 1000L)
+                            logger.info("starter kafka consumer")
+                        }
+                    }
 
                     while (true) {
                         if (provider.getStream().getStopped()) {

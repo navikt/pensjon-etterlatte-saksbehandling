@@ -31,6 +31,18 @@
             </div>
 
             <div class="mb-3">
+                <label for="ytelse" class="form-label">Ytelse:</label>
+                <select name="ytelse"
+                        id="ytelse"
+                        class="form-control"
+                        required
+                >
+                <option value="Barnepensjon" >Barnepensjon</opttion>
+                <option value="Omstillingsstoenad" >Omstillingstønad</opttion>
+                </select>
+            </div>
+
+            <div class="mb-3">
                 <label for="fnrGjenlevende" class="form-label">Gjenlevende (fnr):</label>
                 <input type="tel"
                        pattern="[0-9]+"

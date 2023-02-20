@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.Saker
 
 interface Behandling {
     fun grunnlagEndretISak(sak: Long)
@@ -24,7 +24,7 @@ interface Behandling {
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
     fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
 
-    fun hentAlleSaker(): List<Sak>
+    fun hentAlleSaker(): Saker
 
     fun opprettOmberegning(omberegningshendelse: Omberegningshendelse): HttpResponse
 }
@@ -84,7 +84,7 @@ class BehandlingsService(
         }
     }
 
-    override fun hentAlleSaker(): List<Sak> =
+    override fun hentAlleSaker(): Saker =
         runBlocking {
             behandling_app.get("$url/saker").body()
         }

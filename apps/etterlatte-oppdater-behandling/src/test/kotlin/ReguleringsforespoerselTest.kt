@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.sakIdKey
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
 import no.nav.etterlatte.rapidsandrivers.EventNames.REGULERING_EVENT_NAME
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -42,10 +43,12 @@ internal class ReguleringsforespoerselTest {
     fun `skal lage ny melding for hver sak den faar tilbake`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
         val vedtakServiceMock = mockk<Behandling>(relaxed = true)
-        every { vedtakServiceMock.hentAlleSaker() } returns listOf(
-            Sak("saksbehandler1", SakType.BARNEPENSJON, 1L),
-            Sak("saksbehandler2", SakType.BARNEPENSJON, 2L),
-            Sak("saksbehandler1", SakType.BARNEPENSJON, 3L)
+        every { vedtakServiceMock.hentAlleSaker() } returns Saker(
+            listOf(
+                Sak("saksbehandler1", SakType.BARNEPENSJON, 1L),
+                Sak("saksbehandler2", SakType.BARNEPENSJON, 2L),
+                Sak("saksbehandler1", SakType.BARNEPENSJON, 3L)
+            )
         )
         val inspector = TestRapid().apply { Reguleringsforespoersel(this, vedtakServiceMock) }
 
@@ -63,10 +66,12 @@ internal class ReguleringsforespoerselTest {
     fun `skal sende med sakId for alle saker i basen`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
         val behandlingServiceMock = mockk<Behandling>(relaxed = true)
-        every { behandlingServiceMock.hentAlleSaker() } returns listOf(
-            Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L),
-            Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L),
-            Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L)
+        every { behandlingServiceMock.hentAlleSaker() } returns Saker(
+            listOf(
+                Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L),
+                Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L),
+                Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L)
+            )
         )
         val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceMock) }
         inspector.sendTestMessage(melding.toJson())

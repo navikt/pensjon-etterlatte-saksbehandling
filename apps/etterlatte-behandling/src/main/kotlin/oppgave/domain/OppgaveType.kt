@@ -10,7 +10,7 @@ enum class OppgaveType {
         fun fraBehandlingsType(behandlingType: BehandlingType): OppgaveType = when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> FØRSTEGANGSBEHANDLING
             BehandlingType.REVURDERING -> REVURDERING
-            BehandlingType.REGULERING -> REGULERING
+            BehandlingType.OMREGNING -> REGULERING
             BehandlingType.MANUELT_OPPHOER -> MANUELT_OPPHOER
         }
     }

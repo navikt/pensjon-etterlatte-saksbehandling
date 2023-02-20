@@ -12,7 +12,7 @@ enum class TolketVedtak {
  * */
 internal fun Vedtak.tolkVedtak(): TolketVedtak = when (this.behandlingType) {
     BehandlingType.FØRSTEGANGSBEHANDLING -> TolketVedtak.INNVILGET
-    BehandlingType.REGULERING -> TolketVedtak.INNVILGET
+    BehandlingType.OMREGNING -> TolketVedtak.INNVILGET
     BehandlingType.REVURDERING -> TolketVedtak.OPPHOER
     BehandlingType.MANUELT_OPPHOER -> TolketVedtak.OPPHOER
 }

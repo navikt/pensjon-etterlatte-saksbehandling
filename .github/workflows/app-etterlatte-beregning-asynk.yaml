@@ -16,11 +16,13 @@ on:
       - main
     paths:
       - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
   pull_request:
     branches:
       - main
     paths:
       - libs/common/**
+      - libs/ktor2client-auth-clientcredentials/**
 
 jobs:
   test:

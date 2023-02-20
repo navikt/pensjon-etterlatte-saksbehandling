@@ -32,7 +32,7 @@ spec:
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
       value: latest
-    - name: beregning_AZURE_SCOPE
+    - name: BEREGNING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-beregning/.default
   accessPolicy:
     outbound:

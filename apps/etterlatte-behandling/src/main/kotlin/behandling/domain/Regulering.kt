@@ -22,5 +22,5 @@ data class Regulering(
     override val virkningstidspunkt: Virkningstidspunkt?,
     val revurderingsaarsak: RevurderingAarsak = RevurderingAarsak.GRUNNBELOEPREGULERING
 ) : Behandling() {
-    override val type: BehandlingType = BehandlingType.REGULERING
+    override val type: BehandlingType = BehandlingType.OMREGNING
 }

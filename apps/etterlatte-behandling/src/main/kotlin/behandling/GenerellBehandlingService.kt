@@ -285,7 +285,7 @@ class RealGenerellBehandlingService(
                     )
                 }
 
-                BehandlingType.REGULERING -> {
+                BehandlingType.OMREGNING -> {
                     reguleringFactory.hentRegulering(behandlingId).registrerVedtakHendelse(
                         vedtakHendelse.vedtakId,
                         hendelseType,

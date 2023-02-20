@@ -435,7 +435,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun ResultSet.tilBehandling(key: String?) = when (key) {
         BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
         BehandlingType.REVURDERING.name -> asRevurdering(this)
-        BehandlingType.REGULERING.name -> asRegulering(this)
+        BehandlingType.OMREGNING.name -> asRegulering(this)
         BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
         else -> null
     }

@@ -50,7 +50,7 @@ class ReguleringAggregat(
     }
 
     var lagretBehandling: Regulering =
-        requireNotNull(behandlinger.hentBehandling(id, BehandlingType.REGULERING) as Regulering)
+        requireNotNull(behandlinger.hentBehandling(id, BehandlingType.OMREGNING) as Regulering)
 
     fun registrerVedtakHendelse(
         vedtakId: Long,

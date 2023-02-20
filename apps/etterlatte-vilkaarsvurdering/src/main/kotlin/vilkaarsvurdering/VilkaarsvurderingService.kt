@@ -128,7 +128,7 @@ class VilkaarsvurderingService(
                 BehandlingType.REVURDERING ->
                     mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak))
 
-                BehandlingType.REGULERING, BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
+                BehandlingType.OMREGNING, BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
                     "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                 )
             }

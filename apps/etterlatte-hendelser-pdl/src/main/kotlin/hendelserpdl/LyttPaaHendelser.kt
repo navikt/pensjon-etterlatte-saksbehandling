@@ -15,12 +15,15 @@ import java.time.format.DateTimeFormatter
 object LyttPaaHendelserProvider {
     private var lyttPaaHendelser: LyttPaaHendelser? = null
 
-    fun getStream() = requireNotNull(this.lyttPaaHendelser)
+    fun getStream(): LyttPaaHendelser {
+        return this.lyttPaaHendelser ?: throw LyttPaaHendelserStreamNullable()
+    }
 
     fun setStream(lyttPaaHendelserTmp: LyttPaaHendelser) {
         this.lyttPaaHendelser = lyttPaaHendelserTmp
     }
 }
+class LyttPaaHendelserStreamNullable : Exception("LyttPaaHendelser er ikke initialisert")
 
 class LyttPaaHendelser(
     private val livshendelser: ILivetErEnStroemAvHendelser,

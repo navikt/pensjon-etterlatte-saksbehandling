@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.soeknad.dataklasser
+package no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
@@ -17,18 +17,18 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.UtbetalingsInfor
 import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Gjenlevendepensjon(
+data class Omstillingsstoenad(
     override val imageTag: ImageTag,
     override val spraak: Spraak,
     override val innsender: Innsender,
-    override val soeker: Gjenlevende,
     override val harSamtykket: Opplysning<Boolean>,
     override val utbetalingsInformasjon: BetingetOpplysning<EnumSvar<BankkontoType>, UtbetalingsInformasjon>?,
 
+    override val soeker: Gjenlevende,
     val avdoed: Avdoed,
     val barn: List<Barn>
 ) : InnsendtSoeknad {
     override val versjon = "2"
-    override val type: SoeknadType = SoeknadType.GJENLEVENDEPENSJON
+    override val type: SoeknadType = SoeknadType.OMSTILLINGSSTOENAD
     override val mottattDato: LocalDateTime = LocalDateTime.now()
 }

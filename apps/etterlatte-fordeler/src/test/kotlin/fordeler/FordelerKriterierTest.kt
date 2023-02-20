@@ -1,23 +1,8 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.FNR_1
-import no.nav.etterlatte.FNR_2
-import no.nav.etterlatte.FNR_4
-import no.nav.etterlatte.FNR_5
-import no.nav.etterlatte.SVERIGE
-import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
-import no.nav.etterlatte.libs.common.person.Utland
-import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
-import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.*
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.mockNorskAdresse
-import no.nav.etterlatte.mockPerson
-import no.nav.etterlatte.mockUgyldigAdresse
-import no.nav.etterlatte.readSoknad
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -232,34 +217,6 @@ internal class FordelerKriterierTest {
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE))
-    }
-
-    // @Test
-    // Kommentert ut for å teste søskenjustering
-    fun `barn med sosken er ikke en gyldig kandidat`() {
-        val barn = mockPerson(
-            bostedsadresse = mockNorskAdresse()
-        )
-        val avdoed = mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                barn = listOf(Foedselsnummer.of(FNR_4)),
-                ansvarligeForeldre = null,
-                foreldre = null
-            )
-        )
-        val gjenlevende = mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                barn = listOf(Foedselsnummer.of(FNR_4)),
-                ansvarligeForeldre = null,
-                foreldre = null
-            )
-        )
-
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
-
-        // assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_ALENEBARN))
     }
 
     @Test

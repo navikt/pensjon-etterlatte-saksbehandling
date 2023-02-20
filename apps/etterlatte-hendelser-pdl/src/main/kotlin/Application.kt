@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.etterlatte.hendelserpdl.LivsHendelserRapid
 import no.nav.etterlatte.hendelserpdl.LyttPaaHendelser
+import no.nav.etterlatte.hendelserpdl.LyttPaaHendelserProvider
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.module
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
@@ -24,42 +25,46 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.LoggerFactory
-import kotlin.collections.set
 import kotlin.system.exitProcess
-
-var stream: LyttPaaHendelser? = null
 
 @OptIn(DelicateCoroutinesApi::class)
 fun main() {
-    val env = System.getenv().toMutableMap().apply { put("DELAYED_START", "true") }
-    env["KAFKA_BOOTSTRAP_SERVERS"] = env["KAFKA_BROKERS"]
-    env["NAV_TRUSTSTORE_PATH"] = env["KAFKA_TRUSTSTORE_PATH"]
-    env["NAV_TRUSTSTORE_PASSWORD"] = env["KAFKA_CREDSTORE_PASSWORD"]
-    env["KAFKA_KEYSTORE_PASSWORD"] = env["KAFKA_CREDSTORE_PASSWORD"]
+    val env = System.getenv().toMutableMap()
 
     val logger = LoggerFactory.getLogger(Application::class.java)
     val pdlService by lazy {
-        PdlService(pdlHttpClient(System.getenv()), "http://etterlatte-pdltjenester")
+        PdlService(pdlHttpClient(env), "http://etterlatte-pdltjenester")
     }
+    val provider = LyttPaaHendelserProvider
 
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
-        .withKtorModule(Application::module)
+        .withKtorModule {
+            module(provider)
+        }
         .build()
         .apply {
             GlobalScope.launch {
                 try {
-                    stream =
+                    LyttPaaHendelserProvider.setStream(
                         LyttPaaHendelser(
                             LivetErEnStroemAvHendelser(env),
                             LivsHendelserRapid(this@apply),
                             pdlService
                         )
+                    )
+                    if (env["DELAYED_START"] == "true") {
+                        GlobalScope.launch {
+                            logger.info("venter 30s for sidecars")
+                            delay(30L * 1000L)
+                            logger.info("starter kafka consumer")
+                        }
+                    }
 
                     while (true) {
-                        if (stream?.stopped == true) {
+                        if (provider.getStream().getStopped()) {
                             delay(200)
                         } else {
-                            stream?.stream()
+                            provider.getStream().stream()
                         }
                     }
                 } catch (e: Exception) {

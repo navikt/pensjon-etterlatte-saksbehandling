@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Gjenlevendepensjon
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
 import java.time.LocalDateTime
 
 @JsonTypeInfo(
@@ -14,7 +15,8 @@ import java.time.LocalDateTime
 )
 @JsonSubTypes(
     JsonSubTypes.Type(value = Gjenlevendepensjon::class, name = "GJENLEVENDEPENSJON"),
-    JsonSubTypes.Type(value = Barnepensjon::class, name = "BARNEPENSJON")
+    JsonSubTypes.Type(value = Barnepensjon::class, name = "BARNEPENSJON"),
+    JsonSubTypes.Type(value = Omstillingsstoenad::class, name = "OMSTILLINGSSTOENAD")
 )
 interface InnsendtSoeknad {
     val versjon: String

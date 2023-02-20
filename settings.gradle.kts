@@ -36,5 +36,6 @@ include(
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",
     "libs:etterlatte-helsesjekk",
-    "jobs:test-fordeler"
+    "jobs:test-fordeler",
+    "jobs:start-regulering"
 )

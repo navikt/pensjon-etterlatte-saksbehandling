@@ -1,4 +1,4 @@
-package no.nav.etterlatte.beregningasynk
+package no.nav.etterlatte.beregningkafka
 
 import no.nav.etterlatte.rapidsandrivers.init
 import no.nav.helse.rapids_rivers.RapidsConnection

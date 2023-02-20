@@ -1,4 +1,4 @@
-package no.nav.etterlatte.beregningasynk
+package no.nav.etterlatte.beregningkafka
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post

@@ -1,4 +1,4 @@
-name: etterlatte-beregning-asynk
+name: etterlatte-beregning-kafka
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run

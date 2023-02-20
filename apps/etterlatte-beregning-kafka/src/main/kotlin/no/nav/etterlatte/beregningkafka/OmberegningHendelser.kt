@@ -1,4 +1,4 @@
-package no.nav.etterlatte.beregningasynk
+package no.nav.etterlatte.beregningkafka
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body

@@ -1,7 +1,7 @@
 # Etterlatte-hendelser-pdl
 
 Applikasjonen lytter på livshendelser fra PDL sitt
-Kafka-topic `aapen-person-pdl-leesah-v1` ([Livet er en strøm av hendelser](https://pdldocs-navno.msappproxy.net/ekstern/index.html#))
+Kafka-topic `pdl.leesah-v1` ([Livet er en strøm av hendelser](https://pdldocs-navno.msappproxy.net/ekstern/index.html#))
 . Hendelser av bestemte typer blir håndtert, og det blir postet events til Rapids & Rivers som plukkes opp av
 applikasjonen `etterlatte-oppdater-behandling`.
 

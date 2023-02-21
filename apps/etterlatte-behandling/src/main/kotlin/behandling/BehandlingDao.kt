@@ -430,20 +430,16 @@ class BehandlingDao(private val connection: () -> Connection) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }
 
-    fun lagreStatus(behandling: UUID, status: BehandlingStatus, sistEndret: LocalDateTime): Behandling {
+    fun lagreStatus(behandling: UUID, status: BehandlingStatus, sistEndret: LocalDateTime) {
         val stmt =
-            connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ? RETURNING *")
+            connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
         stmt.setString(1, status.name)
         stmt.setTimestamp(
             2,
             sistEndret.somTimestamp()
         )
         stmt.setObject(3, behandling)
-        return requireNotNull(
-            stmt.executeQuery().singleOrNull {
-                behandlingAvRettType()
-            }
-        )
+        require(stmt.executeUpdate() == 1)
     }
 
     private fun ResultSet.behandlingsListe(): List<Behandling> =
@@ -459,8 +455,8 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     private fun ResultSet.behandlingAvRettType() = tilBehandling(getString("behandlingstype"))
 
-    fun avbrytBehandling(behandlingId: UUID): Behandling {
-        return this.lagreStatus(
+    fun avbrytBehandling(behandlingId: UUID) {
+        this.lagreStatus(
             behandling = behandlingId,
             status = BehandlingStatus.AVBRUTT,
             sistEndret = LocalDateTime.now()

@@ -3,7 +3,9 @@ package no.nav.etterlatte.behandling
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
@@ -169,8 +171,7 @@ class RealGenerellBehandlingServiceTest {
             every { hentBehandling(attestertBehandling.id) } returns attestertBehandling
             every { hentBehandling(iverksattBehandling.id) } returns iverksattBehandling
             every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-            every { avbrytBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                .copy(status = BehandlingStatus.AVBRUTT)
+            every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
         }
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
@@ -206,8 +207,7 @@ class RealGenerellBehandlingServiceTest {
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-            every { avbrytBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                .copy(status = BehandlingStatus.AVBRUTT)
+            every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
         }
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
@@ -233,8 +233,7 @@ class RealGenerellBehandlingServiceTest {
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-            every { avbrytBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                .copy(status = BehandlingStatus.AVBRUTT)
+            every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
         }
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit

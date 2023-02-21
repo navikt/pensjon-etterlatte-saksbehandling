@@ -5,8 +5,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
-import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.person.pdl.leesah.Personhendelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -60,7 +60,9 @@ class LyttPaaHendelser(
             personhendelse.adressebeskyttelse.let {
                 postHendelser.haandterAdressebeskyttelse(
                     fnr = personnummer.folkeregisterident.value,
-                    gradering = gradering.let { Gradering.valueOf(gradering.toString()) },
+                    adressebeskyttelseGradering = gradering.let {
+                        AdressebeskyttelseGradering.valueOf(gradering.toString())
+                    },
                     endringstype = endringstype
                 )
             }

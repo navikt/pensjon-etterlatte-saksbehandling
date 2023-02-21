@@ -1,5 +1,7 @@
-package no.nav.etterlatte.beregningkafka
+package no.nav.etterlatte
 
+import no.nav.etterlatte.beregningkafka.AppBuilder
+import no.nav.etterlatte.beregningkafka.OmberegningHendelser
 import no.nav.etterlatte.rapidsandrivers.init
 import no.nav.helse.rapids_rivers.RapidsConnection
 

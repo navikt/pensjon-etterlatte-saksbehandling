@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.behandling.Omberegningsnoekler
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -15,6 +14,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import rapidsandrivers.beregningKey
 import java.io.FileNotFoundException
 import java.util.*
 
@@ -50,7 +50,7 @@ internal class OmberegningsHendelserTest {
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             beregningDTO.toJson(),
-            inspector.inspektør.message(1).get(Omberegningsnoekler.beregning).toJson()
+            inspector.inspektør.message(1).get(beregningKey).toJson()
         )
     }
 

@@ -8,6 +8,7 @@ const val behovNameKey = "@behov"
 const val correlationIdKey = "@correlation_id"
 const val tekniskTidKey = "teknisk_tid"
 const val sakIdKey = "sakId"
+const val hendelse_data = "hendelse_data"
 
 fun River.eventName(eventName: String) {
     validate { it.demandValue(eventNameKey, eventName) }

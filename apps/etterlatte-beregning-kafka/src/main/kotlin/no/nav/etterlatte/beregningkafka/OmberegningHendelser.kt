@@ -3,19 +3,22 @@ package no.nav.etterlatte.beregningkafka
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.behandling.Hendelsestype
-import no.nav.etterlatte.libs.common.behandling.Omberegningsnoekler
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.hendelse_data
+import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
+import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import rapidsandrivers.beregningKey
+import rapidsandrivers.omberegningId
 import java.util.*
 
 internal class OmberegningHendelser(
@@ -29,12 +32,12 @@ internal class OmberegningHendelser(
     init {
         logger.info("initierer rapid for omberegninghendelser")
         River(rapidsConnection).apply {
-            eventName(Hendelsestype.OMBEREGNINGSHENDELSE.toString())
+            eventName(OMBEREGNINGSHENDELSE)
 
             correlationId()
-            validate { it.requireKey(Omberegningsnoekler.omberegningId) }
-            validate { it.rejectKey(Omberegningsnoekler.beregning) }
-            validate { it.requireKey(Omberegningsnoekler.hendelse_data) }
+            validate { it.requireKey(omberegningId) }
+            validate { it.rejectKey(beregningKey) }
+            validate { it.requireKey(hendelse_data) }
         }.register(this)
     }
 
@@ -42,11 +45,11 @@ internal class OmberegningHendelser(
         withLogContext(packet.correlationId) {
             logger.info("Mottatt omberegninghendelse")
             try {
-                val omberegningsId: UUID = objectMapper.treeToValue(packet[Omberegningsnoekler.omberegningId])
+                val omberegningsId: UUID = objectMapper.treeToValue(packet[omberegningId])
                 runBlocking {
                     val beregning = beregningService.opprettOmberegning(omberegningsId).body<BeregningDTO>()
-                    packet[Omberegningsnoekler.beregning] = beregning
-                    packet[eventNameKey] = "vedtak"
+                    packet[beregningKey] = beregning
+                    packet[eventNameKey] = OPPRETT_VEDTAK
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")

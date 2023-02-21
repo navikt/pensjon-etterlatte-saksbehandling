@@ -12,23 +12,35 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
 
+object LyttPaaHendelserProvider {
+    private var lyttPaaHendelser: LyttPaaHendelser? = null
+
+    fun getStream(): LyttPaaHendelser {
+        return this.lyttPaaHendelser ?: throw LyttPaaHendelserStreamNullable()
+    }
+
+    fun setStream(lyttPaaHendelserTmp: LyttPaaHendelser) {
+        this.lyttPaaHendelser = lyttPaaHendelserTmp
+    }
+}
+class LyttPaaHendelserStreamNullable : Exception("LyttPaaHendelser er ikke initialisert")
+
 class LyttPaaHendelser(
     private val livshendelser: ILivetErEnStroemAvHendelser,
     private val postHendelser: ILivsHendelserRapid,
     private val pdlService: Pdl
 ) {
     val log: Logger = LoggerFactory.getLogger(LyttPaaHendelser::class.java)
-    var iterasjoner = 0
-    var dodsmeldinger = 0
-    var meldinger = 0
-    var stopped = false
+    private var iterasjoner = 0
+    private var doedsmeldinger = 0
+    private var meldinger = 0
+    private var stopped = false
 
     fun stream() {
         iterasjoner++
 
         val antallMeldingerLest = livshendelser.poll {
             meldinger++
-
             withLogContext {
                 when (it.opplysningstype) {
                     LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(it)
@@ -45,9 +57,17 @@ class LyttPaaHendelser(
         }
     }
 
+    fun getAntallIterasjoner(): Int = this.iterasjoner
+
+    fun getAntallDoedsMeldinger(): Int = this.doedsmeldinger
+
+    fun getAntallMeldinger(): Int = this.meldinger
+
+    fun getStopped(): Boolean = this.stopped
+
     private fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
         val hendelseType = "Adressebeskyttelse"
-        val gradering = personhendelse.adressebeskyttelse.gradering
+        val gradering = personhendelse.adressebeskyttelse?.gradering
         if (gradering == null || gradering == no.nav.person.pdl.leesah.adressebeskyttelse.Gradering.UGRADERT) {
             log.info("Ignorerer person med tom eller ugradert gradering, krever ingen tiltak.")
             return
@@ -114,7 +134,7 @@ class LyttPaaHendelser(
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
         }
-        dodsmeldinger++
+        doedsmeldinger++
     }
 
     fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {

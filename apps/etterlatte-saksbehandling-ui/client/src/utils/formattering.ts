@@ -36,7 +36,5 @@ export const formaterBehandlingstype = (behandlingstype: IBehandlingsType): stri
       return 'Revurdering'
     case IBehandlingsType.MANUELT_OPPHOER:
       return 'Manuelt opphør'
-    case IBehandlingsType.OMREGNING:
-      return 'Omregning'
   }
 }

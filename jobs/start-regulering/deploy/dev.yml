@@ -1,0 +1,14 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  labels:
+    team: etterlatte
+  name: start-regulering
+  namespace: etterlatte
+spec:
+  image: ghcr.io/navikt/pensjon-etterlatte-saksbehandling/start-regulering:67b42507962c9ce264985d545132133e2b8050d8
+  kafka:
+    pool: nav-dev
+  env:
+    - name: KAFKA_TARGET_TOPIC
+      value: etterlatte.dodsmelding

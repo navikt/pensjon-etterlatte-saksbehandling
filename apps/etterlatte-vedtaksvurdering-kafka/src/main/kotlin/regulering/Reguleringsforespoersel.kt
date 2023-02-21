@@ -1,11 +1,11 @@
 package no.nav.etterlatte.regulering
 
-import no.nav.etterlatte.libs.common.behandling.Hendelsestype
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -38,7 +38,7 @@ internal class Reguleringsforespoersel(
             val reguleringsdato = packet["dato"].asLocalDate()
             val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
             respons.takeIf { it.erLoepende }?.let {
-                packet.eventName = Hendelsestype.OMBEREGNINGSHENDELSE.toString()
+                packet.eventName = OMBEREGNINGSHENDELSE
                 packet["hendelse_data"] = Omberegningshendelse(
                     sakId = sakId,
                     fradato = it.dato,

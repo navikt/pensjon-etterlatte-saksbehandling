@@ -20,9 +20,9 @@ import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
-import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import org.slf4j.LoggerFactory
@@ -75,11 +75,14 @@ class GrunnlagsendringshendelseService(
     fun opprettAdressebeskyttelseHendelse(
         adressebeskyttelse: Adressebeskyttelse
     ): List<Grunnlagsendringshendelse> {
-        val grunnlagsendringsType = when (adressebeskyttelse.gradering) {
-            Gradering.STRENGT_FORTROLIG_UTLAND -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND
-            Gradering.STRENGT_FORTROLIG -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG
-            Gradering.FORTROLIG -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_FORTROLIG
-            else -> throw RuntimeException("Tom eller feil gradering mottatt ${adressebeskyttelse.gradering}")
+        val grunnlagsendringsType = when (adressebeskyttelse.adressebeskyttelseGradering) {
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND ->
+                GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG
+            AdressebeskyttelseGradering.FORTROLIG -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_FORTROLIG
+            else -> throw RuntimeException(
+                "Tom eller feil gradering mottatt ${adressebeskyttelse.adressebeskyttelseGradering}"
+            )
         }
 
         return opprettHendelseAvTypeForPerson(

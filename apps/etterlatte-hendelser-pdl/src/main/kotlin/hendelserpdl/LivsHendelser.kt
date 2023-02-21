@@ -2,10 +2,10 @@ package no.nav.etterlatte.hendelserpdl
 
 import no.nav.etterlatte.hendelserpdl.utils.maskerFnr
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
-import no.nav.etterlatte.libs.common.pdlhendelse.Gradering
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -41,7 +41,7 @@ interface ILivsHendelserRapid {
 
     fun haandterAdressebeskyttelse(
         fnr: String,
-        gradering: Gradering,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering,
         endringstype: Endringstype
     )
 }
@@ -125,11 +125,15 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
         )
     }
 
-    override fun haandterAdressebeskyttelse(fnr: String, gradering: Gradering, endringstype: Endringstype) {
+    override fun haandterAdressebeskyttelse(
+        fnr: String,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering,
+        endringstype: Endringstype
+    ) {
         logger.info("Poster at en person med fnr=${fnr.maskerFnr()} har adressebeskyttelse")
         val adressebeskyttelse = Adressebeskyttelse(
             fnr = fnr,
-            gradering = gradering,
+            adressebeskyttelseGradering = adressebeskyttelseGradering,
             endringstype = endringstype
         )
         context.publish(

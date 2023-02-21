@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.hendelse_data
 import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -18,7 +17,8 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.beregningKey
-import rapidsandrivers.omberegningId
+import rapidsandrivers.hendelseDataKey
+import rapidsandrivers.omberegningIdKey
 import java.util.*
 
 internal class OmberegningHendelser(
@@ -35,9 +35,9 @@ internal class OmberegningHendelser(
             eventName(OMBEREGNINGSHENDELSE)
 
             correlationId()
-            validate { it.requireKey(omberegningId) }
+            validate { it.requireKey(omberegningIdKey) }
             validate { it.rejectKey(beregningKey) }
-            validate { it.requireKey(hendelse_data) }
+            validate { it.requireKey(hendelseDataKey) }
         }.register(this)
     }
 
@@ -45,7 +45,7 @@ internal class OmberegningHendelser(
         withLogContext(packet.correlationId) {
             logger.info("Mottatt omberegninghendelse")
             try {
-                val omberegningsId: UUID = objectMapper.treeToValue(packet[omberegningId])
+                val omberegningsId: UUID = objectMapper.treeToValue(packet[omberegningIdKey])
                 runBlocking {
                     val beregning = beregningService.opprettOmberegning(omberegningsId).body<BeregningDTO>()
                     packet[beregningKey] = beregning

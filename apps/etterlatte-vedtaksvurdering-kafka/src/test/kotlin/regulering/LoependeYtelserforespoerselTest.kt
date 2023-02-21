@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.sakIdKey
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
 import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
 import no.nav.etterlatte.regulering.LoependeYtelserforespoersel
@@ -17,6 +16,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import rapidsandrivers.datoKey
+import rapidsandrivers.hendelseDataKey
+import rapidsandrivers.sakIdKey
 import java.time.LocalDate
 
 internal class LoependeYtelserforespoerselTest {
@@ -28,7 +30,7 @@ internal class LoependeYtelserforespoerselTest {
         mapOf(
             eventNameKey to FINN_LOEPENDE_YTELSER,
             sakIdKey to sakId,
-            "dato" to dato
+            datoKey to dato
         )
     )
 
@@ -61,7 +63,7 @@ internal class LoependeYtelserforespoerselTest {
                 fradato = fraDato,
                 aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING
             ),
-            objectMapper.readValue(sendtMelding.get("hendelse_data").toString(), Omberegningshendelse::class.java)
+            objectMapper.readValue(sendtMelding.get(hendelseDataKey).toString(), Omberegningshendelse::class.java)
         )
     }
 

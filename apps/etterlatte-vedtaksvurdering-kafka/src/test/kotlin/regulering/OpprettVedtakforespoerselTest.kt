@@ -3,7 +3,6 @@ package regulering
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.sakIdKey
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.EventNames.TIL_UTBETALING
 import no.nav.etterlatte.regulering.OpprettVedtakforespoersel
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import rapidsandrivers.behandlingIdKey
 import rapidsandrivers.datoKey
+import rapidsandrivers.sakIdKey
 import java.time.LocalDate
 import java.util.*
 

@@ -3,8 +3,6 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.rapidsandrivers.sakId
-import no.nav.etterlatte.libs.common.rapidsandrivers.sakIdKey
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.EventNames.TIL_UTBETALING
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -15,6 +13,8 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.behandlingId
 import rapidsandrivers.behandlingIdKey
 import rapidsandrivers.datoKey
+import rapidsandrivers.sakId
+import rapidsandrivers.sakIdKey
 
 internal class OpprettVedtakforespoersel(
     rapidsConnection: RapidsConnection,

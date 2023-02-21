@@ -5,7 +5,6 @@ import no.nav.etterlatte.Behandling
 import no.nav.etterlatte.Reguleringsforespoersel
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.sakIdKey
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
@@ -14,6 +13,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import rapidsandrivers.datoKey
+import rapidsandrivers.sakIdKey
 import java.time.LocalDate
 
 internal class ReguleringsforespoerselTest {
@@ -23,7 +24,7 @@ internal class ReguleringsforespoerselTest {
     private fun genererReguleringMelding(dato: LocalDate) = JsonMessage.newMessage(
         mapOf(
             eventNameKey to REGULERING_EVENT_NAME,
-            "dato" to dato
+            datoKey to dato
         )
     )
 
@@ -58,7 +59,7 @@ internal class ReguleringsforespoerselTest {
 
         for (i in 0 until inspector.inspektør.size) {
             Assertions.assertEquals(FINN_LOEPENDE_YTELSER, inspector.inspektør.message(i).get(eventNameKey).asText())
-            Assertions.assertEquals(`1_mai_2023`.toString(), inspector.inspektør.message(i).get("dato").asText())
+            Assertions.assertEquals(`1_mai_2023`.toString(), inspector.inspektør.message(i).get(datoKey).asText())
         }
     }
 

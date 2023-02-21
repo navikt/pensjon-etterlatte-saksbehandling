@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.omberegningId
+import rapidsandrivers.omberegningIdKey
 import java.util.*
 
 internal class OmberegningsHendelserTest {
@@ -38,7 +38,7 @@ internal class OmberegningsHendelserTest {
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             uuid.toString(),
-            inspector.inspektør.message(1).get(omberegningId).asText()
+            inspector.inspektør.message(1).get(omberegningIdKey).asText()
         )
     }
 

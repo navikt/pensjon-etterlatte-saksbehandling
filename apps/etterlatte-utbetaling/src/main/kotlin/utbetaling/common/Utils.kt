@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.common
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -49,7 +50,7 @@ fun ZonedDateTime.next(atTime: LocalTime): Date {
     }
 }
 
-fun tidspunktMidnattIdag(clock: Clock = Clock.systemUTC()): Tidspunkt =
+fun tidspunktMidnattIdag(clock: Clock = klokke()): Tidspunkt =
     Tidspunkt.now(clock)
         .toNorskTid()
         .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid

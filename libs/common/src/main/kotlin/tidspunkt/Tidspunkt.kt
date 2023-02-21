@@ -40,7 +40,7 @@ constructor(
 
     companion object {
         val unit: ChronoUnit = ChronoUnit.MICROS
-        fun now(clock: Clock = Clock.systemUTC()) = Tidspunkt(Instant.now(clock))
+        fun now(clock: Clock = klokke()) = Tidspunkt(Instant.now(clock))
     }
 
     /**

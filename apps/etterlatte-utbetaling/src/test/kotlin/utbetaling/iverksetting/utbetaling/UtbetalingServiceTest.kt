@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
-import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -31,7 +31,7 @@ internal class UtbetalingServiceTest {
         oppdragSender = oppdragSender,
         utbetalingDao = utbetalingDao,
         rapidsConnection = mockk(),
-        clock = Clock.systemUTC()
+        clock = klokke()
     )
 
     /**

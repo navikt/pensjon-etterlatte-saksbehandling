@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.config
 
+import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.jdbcUrl
@@ -31,7 +32,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import java.time.Clock
 import java.time.Duration
 import java.time.LocalTime
 import java.time.ZonedDateTime
@@ -41,7 +41,7 @@ class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
     val rapidsConnection: RapidsConnection = RapidApplication.create(System.getenv().withConsumerGroupId())
 ) {
-    val clock = Clock.systemUTC()
+    val clock = klokke()
 
     val dataSource = DataSourceBuilder.createDataSource(
         jdbcUrl = jdbcUrl(

@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -181,7 +180,7 @@ class StatistikkServiceTest {
         Assertions.assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
         Assertions.assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
         Assertions.assertEquals(registrertStatistikk.behandlingId, behandlingId)
-        Assertions.assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt(ZoneId.of("UTC")))
+        Assertions.assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         Assertions.assertNull(registrertStatistikk.behandlingMetode)
         Assertions.assertNull(registrertStatistikk.ansvarligBeslutter)
         Assertions.assertNull(registrertStatistikk.ansvarligEnhet)

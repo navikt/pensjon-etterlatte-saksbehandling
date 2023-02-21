@@ -14,6 +14,7 @@ include(
     "apps:etterlatte-utbetaling",
     "apps:etterlatte-oppdater-behandling",
     "apps:etterlatte-beregning",
+    "apps:etterlatte-beregning-kafka",
     "apps:etterlatte-vedtaksvurdering",
     "apps:etterlatte-vedtaksvurdering-kafka",
     "apps:etterlatte-grunnlag",

@@ -6,10 +6,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 import java.util.*
 
-enum class Beregningstype {
-    BP
-}
-
 data class BeregningDTO(
     val beregningId: UUID,
     val behandlingId: UUID,

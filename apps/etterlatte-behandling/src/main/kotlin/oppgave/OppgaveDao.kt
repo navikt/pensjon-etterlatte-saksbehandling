@@ -9,11 +9,11 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.tidspunkt.tilZonedDateTime
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import org.slf4j.LoggerFactory
 import java.sql.Connection
-import java.time.ZoneId
 import java.util.*
 
 enum class Rolle {
@@ -38,8 +38,8 @@ class OppgaveDao(private val connection: () -> Connection) {
             )
             stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))
             return stmt.executeQuery().toList {
-                val mottattDato = getTimestamp("soeknad_mottatt_dato")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
-                    ?: getTimestamp("behandling_opprettet")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))
+                val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
+                    ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
                     ?: throw IllegalStateException(
                         "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
                     )
@@ -73,7 +73,7 @@ class OppgaveDao(private val connection: () -> Connection) {
             )
             stmt.setString(1, GrunnlagsendringStatus.SJEKKET_AV_JOBB.name)
             return stmt.executeQuery().toList {
-                val registrertDato = getTimestamp("opprettet").toLocalDateTime().atZone(ZoneId.of("UTC"))
+                val registrertDato = getTimestamp("opprettet").tilZonedDateTime()
                 Oppgave.Grunnlagsendringsoppgave(
                     sakId = getLong("sak_id"),
                     sakType = SakType.valueOf(getString("sakType")),

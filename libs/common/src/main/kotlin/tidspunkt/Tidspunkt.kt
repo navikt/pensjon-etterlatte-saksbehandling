@@ -8,7 +8,6 @@ import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.Temporal
@@ -61,15 +60,8 @@ constructor(
 
 fun Instant.toTidspunkt() = Tidspunkt(this)
 fun ZonedDateTime.toTidspunkt() = toInstant().toTidspunkt()
-fun LocalDateTime.toTidspunktUTC() = toTidspunkt(ZoneOffset.UTC)
-fun LocalDateTime.toTidspunkt(zoneId: ZoneId) = atZone(zoneId).toTidspunkt()
+fun LocalDateTime.toTidspunkt(zoneId: ZoneId = standardTidssone) = atZone(zoneId).toTidspunkt()
 fun LocalDateTime.toNorskTidspunkt() = atZone(norskTidssone).toTidspunkt()
 fun Tidspunkt.toNorskTid(): ZonedDateTime = ZonedDateTime.ofInstant(this.instant, norskTidssone)
 fun Tidspunkt.toTimestamp(): Timestamp = Timestamp.from(this.instant)
 fun Timestamp.toTidspunkt(): Tidspunkt = Tidspunkt(this.toInstant())
-
-val norskTidssone: ZoneId = ZoneId.of("Europe/Oslo")
-
-fun LocalDateTime.tilInstant() = toInstant(ZoneOffset.UTC)
-
-fun Instant.tilZonedDateTime() = atZone(ZoneOffset.UTC)

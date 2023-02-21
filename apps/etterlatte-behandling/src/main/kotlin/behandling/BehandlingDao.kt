@@ -23,9 +23,7 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
-import java.sql.Timestamp
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.*
 
 class BehandlingDao(private val connection: () -> Connection) {

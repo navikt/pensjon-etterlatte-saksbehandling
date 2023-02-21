@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.libs.common.tidspunkt.tilSystemDefaultTimestamp
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.postgresql.util.PGobject
@@ -15,7 +16,6 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
-import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 
@@ -34,7 +34,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 stmt.setObject(1, id)
                 stmt.setLong(2, sakId)
                 stmt.setString(3, type.name)
-                stmt.setTimestamp(4, Timestamp.from(opprettet.atZone(ZoneId.systemDefault()).toInstant()))
+                stmt.setTimestamp(4, opprettet.tilSystemDefaultTimestamp())
                 stmt.setString(5, status.name)
                 stmt.setString(6, hendelseGjelderRolle.name)
                 stmt.setJsonb(7, samsvarMellomPdlOgGrunnlag)

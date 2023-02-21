@@ -19,6 +19,7 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
@@ -302,6 +303,7 @@ internal fun Route.behandlingRoutes(
                             is Foerstegangsbehandling -> "SOEKNAD"
                             is Revurdering -> it.revurderingsaarsak.name
                             is ManueltOpphoer -> "MANUELT OPPHOER"
+                            is Regulering -> it.revurderingsaarsak.name
                         },
                         virkningstidspunkt = it.virkningstidspunkt,
                         vilkaarsvurderingUtfall = it.vilkaarUtfall

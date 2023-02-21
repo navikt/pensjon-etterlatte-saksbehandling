@@ -93,16 +93,16 @@ class GrunnlagsendringshendelseService(
             GrunnlagsendringStatus.SJEKKET_AV_JOBB
         )
 
-        val grunnlagsendringshendelse = grunnlagsendringshendelseList.get(0)
-        val antallOppdatertMedAdressebeskyttelseGradering = sakService.oppdaterAdressebeskyttelse(
-            grunnlagsendringshendelse.sakId,
-            adressebeskyttelse.adressebeskyttelseGradering
-        )
-
-        logger.info(
-            "Oppdaterte adressebeskyttelse for sak ${grunnlagsendringshendelse.sakId} " +
-                "antall: $antallOppdatertMedAdressebeskyttelseGradering"
-        )
+        grunnlagsendringshendelseList.map { it.sakId }.distinct().forEach { sakId ->
+            val oppdaterAdressebeskyttelse = sakService.oppdaterAdressebeskyttelse(
+                sakId,
+                adressebeskyttelse.adressebeskyttelseGradering
+            )
+            logger.info(
+                "Oppdaterte adressebeskyttelse for sak $sakId " +
+                    "antall: $oppdaterAdressebeskyttelse"
+            )
+        }
 
         return grunnlagsendringshendelseList
     }

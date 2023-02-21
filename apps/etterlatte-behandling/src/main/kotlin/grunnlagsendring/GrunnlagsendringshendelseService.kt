@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -33,7 +34,8 @@ class GrunnlagsendringshendelseService(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val generellBehandlingService: GenerellBehandlingService,
     private val pdlKlient: PdlKlient,
-    private val grunnlagKlient: GrunnlagKlient
+    private val grunnlagKlient: GrunnlagKlient,
+    private val sakService: SakService
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -85,11 +87,24 @@ class GrunnlagsendringshendelseService(
             )
         }
 
-        return opprettHendelseAvTypeForPerson(
+        val grunnlagsendringshendelseList = opprettHendelseAvTypeForPerson(
             adressebeskyttelse.fnr,
             grunnlagsendringsType,
             GrunnlagsendringStatus.SJEKKET_AV_JOBB
         )
+
+        val grunnlagsendringshendelse = grunnlagsendringshendelseList.get(0)
+        val antallOppdatertMedAdressebeskyttelseGradering = sakService.oppdaterAdressebeskyttelse(
+            grunnlagsendringshendelse.sakId,
+            adressebeskyttelse.adressebeskyttelseGradering
+        )
+
+        logger.info(
+            "Oppdaterte adressebeskyttelse for sak ${grunnlagsendringshendelse.sakId} " +
+                "antall: $antallOppdatertMedAdressebeskyttelseGradering"
+        )
+
+        return grunnlagsendringshendelseList
     }
 
     private fun opprettHendelseAvTypeForPerson(

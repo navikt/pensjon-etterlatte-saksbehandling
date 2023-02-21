@@ -1,14 +1,18 @@
 package no.nav.etterlatte
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
+import io.ktor.server.application.createApplicationPlugin
+import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.auth.principal
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
@@ -83,6 +87,13 @@ fun Application.module(beanFactory: BeanFactory) {
     }
 }
 
+val kode67plugin = createApplicationPlugin(name = "DataTransformationPlugin") {
+    on(CallSetup) { call ->
+        // sjekkomkode67 behandling
+        call.respond(HttpStatusCode.NotFound)
+    }
+}
+
 private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
@@ -93,6 +104,7 @@ private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {
                 ),
                 databasecontxt = DatabaseContext(ds)
             )
+
         withContext(
             Dispatchers.Default + Kontekst.asContextElement(
                 value = requestContekst

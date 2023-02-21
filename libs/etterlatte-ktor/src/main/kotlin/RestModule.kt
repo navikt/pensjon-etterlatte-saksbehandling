@@ -77,6 +77,7 @@ fun Application.restModule(
                 routes()
             }
         }
+
         metrics()
     }
 }

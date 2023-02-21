@@ -28,7 +28,7 @@ internal class StartUthentingFraSoeknad(
             validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.behandlingIdKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.gyldigInnsenderKey) }
-            // TODO legg til skjemainfo type
+            validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoTypeKey) }
         }.register(this)
     }
 
@@ -36,7 +36,7 @@ internal class StartUthentingFraSoeknad(
         withLogContext(packet.correlationId) {
             val opplysninger = opplysningsuthenter.lagOpplysningsListe(
                 packet[GyldigSoeknadVurdert.skjemaInfoKey],
-                SoeknadType.BARNEPENSJON // TODO bruk type fra packet
+                SoeknadType.valueOf(packet[GyldigSoeknadVurdert.skjemaInfoTypeKey].textValue())
             )
 
             JsonMessage.newMessage(

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandlingfrasoknad
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.every
 import io.mockk.mockk
@@ -28,15 +29,16 @@ internal class StartUthentingFraSoeknadTest {
 
     @Test
     fun `skal lese inn melding og lage message med opplysninger`() {
+        val soknad: JsonNode = objectMapper.treeToValue(
+            objectMapper.readTree(
+                javaClass.getResource("/melding.json")!!.readText()
+            )!!["@skjema_info"]
+        )
         val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
-            objectMapper.treeToValue(
-                objectMapper.readTree(
-                    javaClass.getResource("/melding.json")!!.readText()
-                )!!["@skjema_info"]
-            ),
+            soknad,
             SoeknadType.BARNEPENSJON
         )
-        every { opplysningsuthenterMock.lagOpplysningsListe(any(), any()) } returns opplysninger
+        every { opplysningsuthenterMock.lagOpplysningsListe(soknad, SoeknadType.BARNEPENSJON) } returns opplysninger
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         assertEquals(1, inspector.message(0).get("sakId").intValue())

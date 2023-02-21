@@ -57,7 +57,6 @@ internal class FordeltSoeknadRiver(
                         set(GyldigSoeknadVurdert.sakIdKey, sakId)
                         set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
                         set(GyldigSoeknadVurdert.gyldigInnsenderKey, gyldighetsVurdering.resultat == OPPFYLT)
-                        // TODO legg til skjemainfo type
                     }.toJson()
                 )
 

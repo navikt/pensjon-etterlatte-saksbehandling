@@ -6,9 +6,12 @@ import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad.GyldigOmstillingsSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad.InnsendtSoeknadRiver
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
@@ -42,11 +45,10 @@ internal class InnsendtSoeknadRiverTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-//        TODO EY-1777 verifiser event om gyldig søknad?
-//        assertEquals(GyldigSoeknadVurdert.eventName, inspector.first().get(eventNameKey).asText())
-//        assertEquals(4, inspector.first().get(GyldigSoeknadVurdert.sakIdKey).longValue())
-//        assertEquals(id.toString(), inspector.first().get(GyldigSoeknadVurdert.behandlingIdKey).asText())
-//        assertEquals(true, inspector.first().get(GyldigSoeknadVurdert.gyldigInnsenderKey).asBoolean())
+        assertEquals(GyldigSoeknadVurdert.eventName, inspector.first().get(eventNameKey).asText())
+        assertEquals(4, inspector.first().get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals(id.toString(), inspector.first().get(GyldigSoeknadVurdert.behandlingIdKey).asText())
+        assertEquals(true, inspector.first().get(GyldigSoeknadVurdert.gyldigInnsenderKey).asBoolean())
     }
 
     private fun TestRapid.RapidInspector.first() = this.message(0)

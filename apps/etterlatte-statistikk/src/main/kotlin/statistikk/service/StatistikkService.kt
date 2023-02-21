@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunktUTC
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -22,7 +23,6 @@ import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.river.Behandling
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.*
 
 class StatistikkService(
@@ -92,8 +92,8 @@ class StatistikkService(
             id = -1,
             behandlingId = vedtak.behandling.id,
             sakId = vedtak.sak.id,
-            mottattTidspunkt = mottattTid.toTidspunkt(ZoneOffset.UTC),
-            registrertTidspunkt = detaljertBehandling.behandlingOpprettet.toTidspunkt(ZoneOffset.UTC),
+            mottattTidspunkt = mottattTid.toTidspunktUTC(),
+            registrertTidspunkt = detaljertBehandling.behandlingOpprettet.toTidspunktUTC(),
             ferdigbehandletTidspunkt = vedtak.attestasjon?.tidspunkt?.toTidspunkt(),
             vedtakTidspunkt = vedtak.attestasjon?.tidspunkt?.toTidspunkt(),
             behandlingType = vedtak.behandling.type,
@@ -106,7 +106,7 @@ class StatistikkService(
             ansvarligBeslutter = vedtak.attestasjon?.attestant,
             aktorId = vedtak.sak.ident,
             datoFoersteUtbetaling = foersteUtbetaling?.periode?.fom?.atDay(1),
-            tekniskTid = tekniskTid.toTidspunkt(ZoneOffset.UTC),
+            tekniskTid = tekniskTid.toTidspunktUTC(),
             sakYtelse = vedtak.sak.sakType.name,
             vedtakLoependeFom = vedtak.virk.fom.atDay(1),
             vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
@@ -163,7 +163,7 @@ class StatistikkService(
             behandlingId = vedtak.behandling.id,
             sakId = vedtak.sak.id,
             sakNummer = vedtak.sak.id,
-            tekniskTid = tekniskTid.toTidspunkt(ZoneOffset.UTC),
+            tekniskTid = tekniskTid.toTidspunktUTC(),
             sakYtelse = vedtak.sak.sakType.toString(),
             versjon = "",
             saksbehandler = vedtak.vedtakFattet!!.ansvarligSaksbehandler,
@@ -184,8 +184,8 @@ class StatistikkService(
             id = -1,
             behandlingId = behandling.id,
             sakId = behandling.sak,
-            mottattTidspunkt = behandling.behandlingOpprettet.toTidspunkt(ZoneOffset.UTC),
-            registrertTidspunkt = behandling.behandlingOpprettet.toTidspunkt(ZoneOffset.UTC),
+            mottattTidspunkt = behandling.behandlingOpprettet.toTidspunktUTC(),
+            registrertTidspunkt = behandling.behandlingOpprettet.toTidspunktUTC(),
             ferdigbehandletTidspunkt = null,
             vedtakTidspunkt = null,
             behandlingType = behandling.type,
@@ -197,7 +197,7 @@ class StatistikkService(
             ansvarligBeslutter = null,
             aktorId = behandling.persongalleri.soeker,
             datoFoersteUtbetaling = null,
-            tekniskTid = tekniskTid.toTidspunkt(ZoneOffset.UTC),
+            tekniskTid = tekniskTid.toTidspunktUTC(),
             sakYtelse = sak.sakType.name,
             vedtakLoependeFom = null,
             vedtakLoependeTom = null,
@@ -209,7 +209,7 @@ class StatistikkService(
         )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(
-                ferdigbehandletTidspunkt = behandling.sistEndret.toTidspunkt(ZoneOffset.UTC),
+                ferdigbehandletTidspunkt = behandling.sistEndret.toTidspunktUTC(),
                 behandlingResultat = BehandlingResultat.AVBRUTT
             )
         }

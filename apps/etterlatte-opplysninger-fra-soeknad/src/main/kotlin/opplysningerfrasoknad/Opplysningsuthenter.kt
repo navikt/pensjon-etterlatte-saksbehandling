@@ -32,8 +32,8 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
+import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
 import java.time.YearMonth
-import java.time.ZoneOffset
 import java.util.*
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold as UtenlandsoppholdOpplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld
@@ -54,7 +54,7 @@ private object BarnepensjonUthenter {
         val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)
         val kilde = Grunnlagsopplysning.Privatperson(
             barnepensjonssoknad.innsender.foedselsnummer.svar.value,
-            barnepensjonssoknad.mottattDato.toInstant(ZoneOffset.UTC)
+            barnepensjonssoknad.mottattDato.tilInstant()
         )
 
         val søkerUtenlandsopphold = barnepensjonssoknad.soeker.utenlandsAdresse?.let {
@@ -128,7 +128,7 @@ private object BarnepensjonUthenter {
             UUID.randomUUID(),
             Grunnlagsopplysning.Privatperson(
                 barnepensjon.innsender.foedselsnummer.svar.value,
-                barnepensjon.mottattDato.toInstant(ZoneOffset.UTC)
+                barnepensjon.mottattDato.tilInstant()
             ),
             opplysningsType,
             objectMapper.createObjectNode(),

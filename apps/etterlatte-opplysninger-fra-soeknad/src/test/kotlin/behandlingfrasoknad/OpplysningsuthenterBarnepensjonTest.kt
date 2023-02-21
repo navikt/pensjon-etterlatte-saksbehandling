@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
 import no.nav.etterlatte.opplysningerfrasoknad.Opplysningsuthenter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
-import java.time.ZoneOffset
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OpplysningsuthenterBarnepensjonTest {
@@ -45,9 +45,7 @@ internal class OpplysningsuthenterBarnepensjonTest {
     fun `alle opplysninger skal ha innsender som kilde`() {
         val kilde = Grunnlagsopplysning.Privatperson(
             "03108718357",
-            LocalDateTime.parse("2022-02-14T14:37:24.573612786").toInstant(
-                ZoneOffset.UTC
-            )
+            LocalDateTime.parse("2022-02-14T14:37:24.573612786").tilInstant()
         )
         opplysninger.forEach {
             assertEquals(kilde.fnr, (it.kilde as Grunnlagsopplysning.Privatperson).fnr)

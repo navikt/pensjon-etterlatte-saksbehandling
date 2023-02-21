@@ -3,13 +3,13 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.behandling.Hendelsestype
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.Omberegningsnoekler
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -25,7 +25,7 @@ internal class OmberegningsHendelser(rapidsConnection: RapidsConnection, private
     init {
         logger.info("initierer rapid for omberegningshendelser")
         River(rapidsConnection).apply {
-            eventName(Hendelsestype.OMBEREGNINGSHENDELSE.toString())
+            eventName(OMBEREGNINGSHENDELSE)
 
             correlationId()
             validate { it.rejectKey(Omberegningsnoekler.omberegningId) }

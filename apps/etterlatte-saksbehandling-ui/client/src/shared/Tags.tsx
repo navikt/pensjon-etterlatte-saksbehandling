@@ -27,6 +27,7 @@ export const tagColors: Record<
   [SoeknadTypeFilter.VELG]: Variants.NEUTRAL,
   [SoeknadTypeFilter.GJENLEVENDEPENSJON]: Variants.ALT1_FILLED,
   [SoeknadTypeFilter.BARNEPENSJON]: Variants.INFO,
+  [SoeknadTypeFilter.OMSTILLINGSSTOENAD]: Variants.INFO,
   [IBehandlingsType.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
   [IBehandlingsType.REVURDERING]: Variants.ALT3_FILLED,
   [IBehandlingsType.OMREGNING]: Variants.ALT3_FILLED,

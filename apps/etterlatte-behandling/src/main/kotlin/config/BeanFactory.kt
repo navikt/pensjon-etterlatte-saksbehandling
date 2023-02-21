@@ -197,7 +197,8 @@ abstract class CommonFactory : BeanFactory {
             grunnlagsendringshendelseDao(),
             generellBehandlingService(),
             pdlKlient(),
-            grunnlagKlientClientCredentials()
+            grunnlagKlientClientCredentials(),
+            sakService()
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(

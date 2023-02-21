@@ -3,13 +3,15 @@ package regulering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.libs.common.behandling.Hendelsestype
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.regulering.Reguleringsforespoersel
+import no.nav.etterlatte.libs.common.rapidsandrivers.sakIdKey
+import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
+import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
+import no.nav.etterlatte.regulering.LoependeYtelserforespoersel
 import no.nav.etterlatte.regulering.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -17,15 +19,15 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class ReguleringsforespoerselTest {
+internal class LoependeYtelserforespoerselTest {
 
     private val `1_mai_2023` = LocalDate.of(2023, 5, 1)
     private val sakId = 1L
 
     private fun genererReguleringMelding(dato: LocalDate, sakId: Long) = JsonMessage.newMessage(
         mapOf(
-            eventNameKey to "REGULERING",
-            "sakId" to sakId,
+            eventNameKey to FINN_LOEPENDE_YTELSER,
+            sakIdKey to sakId,
             "dato" to dato
         )
     )
@@ -34,7 +36,7 @@ internal class ReguleringsforespoerselTest {
     fun `kan ta imot reguleringsmelding og kalle paa vedtakservice med riktige verdier`() {
         val melding = genererReguleringMelding(`1_mai_2023`, sakId)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-        val inspector = TestRapid().apply { Reguleringsforespoersel(this, vedtakServiceMock) }
+        val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
@@ -48,11 +50,11 @@ internal class ReguleringsforespoerselTest {
         val melding = genererReguleringMelding(`1_mai_2023`, sakId)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         every { vedtakServiceMock.harLoependeYtelserFra(sakId, `1_mai_2023`) } returns LoependeYtelseDTO(true, fraDato)
-        val inspector = TestRapid().apply { Reguleringsforespoersel(this, vedtakServiceMock) }
+        val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
         val sendtMelding = inspector.inspektør.message(0)
-        Assertions.assertEquals(Hendelsestype.OMBEREGNINGSHENDELSE.toString(), sendtMelding.get(eventNameKey).asText())
+        Assertions.assertEquals(OMBEREGNINGSHENDELSE, sendtMelding.get(eventNameKey).asText())
         Assertions.assertEquals(
             Omberegningshendelse(
                 sakId = sakId,
@@ -71,7 +73,7 @@ internal class ReguleringsforespoerselTest {
             false,
             `1_mai_2023`
         )
-        val inspector = TestRapid().apply { Reguleringsforespoersel(this, vedtakServiceMock) }
+        val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
         Assertions.assertEquals(0, inspector.inspektør.size)

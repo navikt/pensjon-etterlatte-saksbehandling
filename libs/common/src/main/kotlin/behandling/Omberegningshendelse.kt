@@ -9,14 +9,3 @@ data class Omberegningshendelse(
     val aarsak: RevurderingAarsak,
     val omberegningsId: UUID? = null
 )
-
-enum class Hendelsestype {
-    OMBEREGNINGSHENDELSE;
-
-    override fun toString() = name
-}
-
-object Omberegningsnoekler {
-    const val hendelse_data = "hendelse_data"
-    const val omberegningId = "omberegningId"
-}

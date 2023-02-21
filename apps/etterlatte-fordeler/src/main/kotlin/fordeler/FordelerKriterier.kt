@@ -1,6 +1,12 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.aktiv
+import no.nav.etterlatte.libs.common.person.alder
+import no.nav.etterlatte.libs.common.person.nyeste
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -73,6 +79,8 @@ class FordelerKriterier {
         Kriterie(FordelerKriterie.BARN_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(barn) },
         Kriterie(FordelerKriterie.BARN_HAR_VERGE) { harHuketAvForVerge(it) },
         Kriterie(FordelerKriterie.BARN_HAR_REGISTRERT_VERGE) { harVergemaalPDL(barn) },
+        // Kommentert ut for å teste søskenjustering
+        // Kriterie(BARN_ER_IKKE_ALENEBARN) { barnErIkkeAlenebarn(avdoed, barn, gjenlevende) },
         Kriterie(FordelerKriterie.BARN_HAR_FOR_GAMLE_SOESKEN) { barnHarForGamleSoesken(barn, avdoed) },
 
         // Avdød

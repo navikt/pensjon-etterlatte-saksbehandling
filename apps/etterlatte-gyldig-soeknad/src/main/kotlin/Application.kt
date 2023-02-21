@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import no.nav.etterlatte.gyldigsoeknad.barnepensjon.FordeltSoeknadRiver
 import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.config.AppBuilder
-import no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad.GyldigOmstillingsSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad.InnsendtSoeknadRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 
@@ -20,9 +19,7 @@ fun main() {
                         ab.createBehandlingClient()
                     )
                     InnsendtSoeknadRiver(
-                        it,
-                        GyldigOmstillingsSoeknadService(ab.createPdlClient()),
-                        ab.createBehandlingClient()
+                        it
                     )
                 }.start()
         }

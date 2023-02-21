@@ -1,27 +1,27 @@
 package no.nav.etterlatte.behandling.omberegning
 
 import no.nav.etterlatte.behandling.GenerellBehandlingService
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
+import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import java.time.LocalDate
 import java.util.*
 
 class OmberegningService(
-    private val revurderingFactory: RevurderingFactory,
+    private val reguleringFactory: ReguleringFactory,
     private val behandlingService: GenerellBehandlingService
 ) {
     fun opprettOmberegning(
         sakId: Long,
-        aarsak: RevurderingAarsak
+        fradato: LocalDate
     ): UUID {
         val forrigeBehandling = behandlingService.hentBehandlingerISak(sakId)
             .maxByOrNull { it.behandlingOpprettet }
             ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
         return inTransaction {
-            revurderingFactory.opprettRevurdering(
+            reguleringFactory.opprettRegulering(
                 sakId = sakId,
-                persongalleri = forrigeBehandling.persongalleri,
-                revurderingAarsak = aarsak
+                forrigeBehandling = forrigeBehandling,
+                fradato = fradato
             )
         }.lagretBehandling.id
     }

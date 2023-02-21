@@ -13,6 +13,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.inTransaction
@@ -102,6 +103,10 @@ class BehandlingsHendelser(
                             it[BehandlingGrunnlagEndret.manueltOpphoerAarsakKey] = behandling.opphoerAarsaker
                             it[BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey] =
                                 behandling.fritekstAarsak ?: ""
+                        }
+                        is Regulering -> {
+                            it[BehandlingGrunnlagEndret.fnrSoekerKey] = behandling.persongalleri.soeker
+                            it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
                         }
                     }
                 }.toJson()

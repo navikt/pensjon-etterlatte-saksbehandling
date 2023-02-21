@@ -20,7 +20,7 @@ export const Person = () => {
     if (match.fnr) {
       hentPerson(match.fnr)
     }
-  }, [match.fnr])
+  }, [])
 
   const personInfo = isSuccess(personStatus)
     ? {

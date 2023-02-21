@@ -5,9 +5,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.rapidsandrivers.sakId
-import no.nav.etterlatte.libs.common.rapidsandrivers.sakIdKey
-import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
 import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -16,16 +13,18 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import org.slf4j.LoggerFactory
 
-internal class LoependeYtelserforespoersel(
+const val REGULERING_EVENT_NAME = "REGULERING"
+
+internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService
 ) : River.PacketListener {
-    private val logger = LoggerFactory.getLogger(LoependeYtelserforespoersel::class.java)
+    private val logger = LoggerFactory.getLogger(Reguleringsforespoersel::class.java)
 
     init {
         River(rapidsConnection).apply {
-            eventName(FINN_LOEPENDE_YTELSER)
-            validate { it.requireKey(sakIdKey) }
+            eventName(REGULERING_EVENT_NAME)
+            validate { it.requireKey("sakId") }
             validate { it.requireKey("dato") }
             correlationId()
         }.register(this)
@@ -33,7 +32,7 @@ internal class LoependeYtelserforespoersel(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val sakId = packet.sakId
+            val sakId = packet["sakId"].asLong()
             logger.info("Leser reguleringsfoerespoersel for sak $sakId")
 
             val reguleringsdato = packet["dato"].asLocalDate()

@@ -13,7 +13,6 @@ fun main() {
                     OppdaterBehandling(it, behandlingservice)
                     PdlHendelser(it, behandlingservice)
                     OmberegningsHendelser(it, behandlingservice)
-                    Reguleringsforespoersel(it, behandlingservice)
                 }
                 .start()
         }

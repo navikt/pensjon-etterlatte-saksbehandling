@@ -13,8 +13,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.stream
 
-fun Application.module(provider: LyttPaaHendelserProvider) {
+fun Application.module() {
     install(CallLogging) {
         level = org.slf4j.event.Level.INFO
         filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics")) }
@@ -24,24 +25,22 @@ fun Application.module(provider: LyttPaaHendelserProvider) {
 
     routing {
         get("/start") {
-            provider.getStream().start()
+            stream?.start()
             call.respondText("Starting leesah stream", contentType = ContentType.Text.Plain)
         }
         get("/status") {
             call.respondText(
-                "Iterasjoner: ${provider.getStream().getAntallIterasjoner()}, " +
-                    "Dødsmeldinger ${provider.getStream().getAntallDoedsMeldinger()}" +
-                    " av ${provider.getStream().getAntallMeldinger()}",
+                "Iterasjoner: ${stream?.iterasjoner}, Dødsmeldinger ${stream?.dodsmeldinger} av ${stream?.meldinger}",
                 contentType = ContentType.Text.Plain
             )
         }
         get("/stop") {
-            provider.getStream().stop()
+            stream?.stop()
             call.respondText("Stopped reading messages", contentType = ContentType.Text.Plain)
         }
 
         get("/fromstart") {
-            provider.getStream().fraStart()
+            stream?.fraStart()
             call.respondText("partition has been set to start", contentType = ContentType.Text.Plain)
         }
     }

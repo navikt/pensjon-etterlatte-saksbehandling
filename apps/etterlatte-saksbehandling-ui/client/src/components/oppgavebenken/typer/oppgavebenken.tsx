@@ -27,6 +27,7 @@ export enum OppgaveTypeFilter {
   VELG = 'VELG',
   FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
   REVURDERING = 'REVURDERING',
+  OMREGNING = 'OMREGNING',
   ENDRING_PAA_SAK = 'ENDRING_PAA_SAK',
   MANUELT_OPPHOER = 'MANUELT_OPPHOER',
 }
@@ -35,6 +36,7 @@ export const oppgaveTypeFilter: Record<OppgaveTypeFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
   FØRSTEGANGSBEHANDLING: { id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
   REVURDERING: { id: 'REVURDERING', navn: 'Revurdering' },
+  OMREGNING: { id: 'OMREGNING', navn: 'Omregning' },
   MANUELT_OPPHOER: { id: 'MANUELT_OPPHOER', navn: 'Manuelt opphør' },
   ENDRING_PAA_SAK: { id: 'ENDRING_PAA_SAK', navn: 'Endring på sak' },
 }
@@ -43,14 +45,12 @@ export enum SoeknadTypeFilter {
   VELG = 'VELG',
   BARNEPENSJON = 'BARNEPENSJON',
   GJENLEVENDEPENSJON = 'GJENLEVENDEPENSJON',
-  OMSTILLINGSSTOENAD = 'OMSTILLINGSSTOENAD',
 }
 
 export const soeknadTypeFilter: Record<SoeknadTypeFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
   BARNEPENSJON: { id: 'BARNEPENSJON', navn: 'Barnepensjon' },
   GJENLEVENDEPENSJON: { id: 'GJENLEVENDEPENSJON', navn: 'Gjenlevendepensjon' },
-  OMSTILLINGSSTOENAD: { id: 'OMSTILLINGSSTOENAD', navn: 'Omstillingsstønad' },
 }
 
 export enum StatusFilter {

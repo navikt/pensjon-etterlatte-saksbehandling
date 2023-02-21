@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.soeknad.dataklasser.common
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.Gjenlevende
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -77,28 +78,6 @@ data class Barn(
     val dagligOmsorg: Opplysning<EnumSvar<OmsorgspersonType>>?
 ) : Person {
     override val type = PersonType.BARN
-}
-
-data class Gjenlevende(
-    override val fornavn: Opplysning<String>,
-    override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>,
-
-    val statsborgerskap: Opplysning<String>,
-    val sivilstatus: Opplysning<String>,
-    val adresse: Opplysning<String>?,
-    val bostedsAdresse: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, Opplysning<FritekstSvar>?>?,
-    val kontaktinfo: Kontaktinfo,
-    val flyktning: Opplysning<EnumSvar<JaNeiVetIkke>>?,
-    val oppholdUtland: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, OppholdUtland?>?,
-    val nySivilstatus: BetingetOpplysning<EnumSvar<SivilstatusType>, Samboer?>,
-    val arbeidOgUtdanning: ArbeidOgUtdanning?,
-    val fullfoertUtdanning: BetingetOpplysning<EnumSvar<HoeyesteUtdanning>, Opplysning<AnnenUtdanning>?>?,
-    val andreYtelser: AndreYtelser,
-    val uregistrertEllerVenterBarn: Opplysning<EnumSvar<JaNeiVetIkke>>,
-    val forholdTilAvdoede: ForholdTilAvdoede
-) : Person {
-    override val type = PersonType.GJENLEVENDE
 }
 
 data class Avdoed(

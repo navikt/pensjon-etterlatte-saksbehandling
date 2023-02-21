@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
@@ -83,15 +84,7 @@ class RealManueltOpphoerService(
             }
 
             when (forrigeBehandling) {
-                is Foerstegangsbehandling -> ManueltOpphoer(
-                    sak = forrigeBehandling.sak,
-                    persongalleri = forrigeBehandling.persongalleri,
-                    opphoerAarsaker = opphoerRequest.opphoerAarsaker,
-                    fritekstAarsak = opphoerRequest.fritekstAarsak,
-                    virkningstidspunkt = virkningstidspunkt
-                )
-
-                is Revurdering -> ManueltOpphoer(
+                is Foerstegangsbehandling, is Revurdering, is Regulering -> ManueltOpphoer(
                     sak = forrigeBehandling.sak,
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
@@ -104,12 +97,8 @@ class RealManueltOpphoerService(
                     null
                 }
 
-                else -> {
-                    logger.error(
-                        "En forrige ikke-avbrutt behandling for sak ${opphoerRequest.sak} eksisterer ikke eller " +
-                            "er av en type som gjør at manuelt opphør ikke kan opprettes: " +
-                            "${forrigeBehandling?.javaClass?.kotlin}"
-                    )
+                null -> {
+                    logger.error("En forrige ikke-avbrutt behandling for sak ${opphoerRequest.sak} eksisterer ikke")
                     null
                 }
             }?.let {

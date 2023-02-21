@@ -1,3 +1,4 @@
+
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.mockk.every
@@ -7,10 +8,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingsService
 import no.nav.etterlatte.OmberegningsHendelser
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
-import no.nav.etterlatte.libs.common.behandling.Omberegningsnoekler
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import rapidsandrivers.omberegningId
 import java.util.*
 
 internal class OmberegningsHendelserTest {
@@ -38,7 +39,7 @@ internal class OmberegningsHendelserTest {
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             uuid.toString(),
-            inspector.inspektør.message(1).get(Omberegningsnoekler.omberegningId).asText()
+            inspector.inspektør.message(1).get(omberegningId).asText()
         )
     }
 

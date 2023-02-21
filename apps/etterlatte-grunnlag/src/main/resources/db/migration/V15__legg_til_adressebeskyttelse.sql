@@ -1,0 +1,1 @@
+ALTER TABLE opplysning ADD COLUMN adressebeskyttelse TEXT;

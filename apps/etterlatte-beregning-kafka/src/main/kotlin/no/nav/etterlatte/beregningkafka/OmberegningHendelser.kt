@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -45,6 +46,7 @@ internal class OmberegningHendelser(
                 runBlocking {
                     val beregning = beregningService.opprettOmberegning(omberegningsId).body<BeregningDTO>()
                     packet[Omberegningsnoekler.beregning] = beregning
+                    packet[eventNameKey] = "vedtak"
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")

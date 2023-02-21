@@ -69,3 +69,4 @@ spec:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
         - application: etterlatte-statistikk
+        - application: etterlatte-beregning-kafka

@@ -44,6 +44,8 @@ open class Grunnlagsopplysning<T>(
                 periode = fom?.let { Periode(it, tom) }
             )
         }
+
+        val automatiskSaksbehandler = Saksbehandler.create(ident = "Doffen")
     }
 
     override fun toString(): String {

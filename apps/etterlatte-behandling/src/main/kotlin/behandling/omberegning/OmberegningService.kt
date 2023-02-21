@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.omberegning
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
 import no.nav.etterlatte.inTransaction
+import java.time.LocalDate
 import java.util.*
 
 class OmberegningService(
@@ -10,7 +11,8 @@ class OmberegningService(
     private val behandlingService: GenerellBehandlingService
 ) {
     fun opprettOmberegning(
-        sakId: Long
+        sakId: Long,
+        fradato: LocalDate
     ): UUID {
         val forrigeBehandling = behandlingService.hentBehandlingerISak(sakId)
             .maxByOrNull { it.behandlingOpprettet }
@@ -18,7 +20,8 @@ class OmberegningService(
         return inTransaction {
             reguleringFactory.opprettRegulering(
                 sakId = sakId,
-                persongalleri = forrigeBehandling.persongalleri
+                forrigeBehandling = forrigeBehandling,
+                fradato = fradato
             )
         }.lagretBehandling.id
     }

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.regulering
 
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingAggregat
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -8,9 +9,10 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -24,7 +26,8 @@ class ReguleringAggregat(
 
         fun opprettRegulering(
             sak: Long,
-            persongalleri: Persongalleri,
+            forrigeBehandling: Behandling,
+            fradato: LocalDate,
             behandlinger: BehandlingDao,
             hendelser: HendelseDao
         ): ReguleringAggregat {
@@ -35,10 +38,10 @@ class ReguleringAggregat(
                 behandlingOpprettet = LocalDateTime.now(),
                 sistEndret = LocalDateTime.now(),
                 status = BehandlingStatus.OPPRETTET,
-                persongalleri = persongalleri,
-                kommerBarnetTilgode = null,
-                vilkaarUtfall = null,
-                virkningstidspunkt = null
+                persongalleri = forrigeBehandling.persongalleri,
+                kommerBarnetTilgode = forrigeBehandling.kommerBarnetTilgode,
+                vilkaarUtfall = forrigeBehandling.vilkaarUtfall,
+                virkningstidspunkt = fradato.tilVirkningstidspunkt("Regulering")
             )
                 .also {
                     behandlinger.opprettRegulering(it)

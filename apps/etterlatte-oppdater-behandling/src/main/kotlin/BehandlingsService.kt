@@ -1,6 +1,8 @@
 package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -12,6 +14,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.sak.Saker
 
 interface Behandling {
     fun grunnlagEndretISak(sak: Long)
@@ -20,6 +23,8 @@ interface Behandling {
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
     fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
+
+    fun hentAlleSaker(): Saker
 
     fun opprettOmberegning(omberegningshendelse: Omberegningshendelse): HttpResponse
 }
@@ -78,4 +83,9 @@ class BehandlingsService(
             }
         }
     }
+
+    override fun hentAlleSaker(): Saker =
+        runBlocking {
+            behandling_app.get("$url/saker").body()
+        }
 }

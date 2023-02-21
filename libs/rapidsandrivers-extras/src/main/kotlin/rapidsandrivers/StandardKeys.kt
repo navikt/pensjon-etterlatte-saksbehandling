@@ -7,6 +7,7 @@ const val eventNameKey = "@event_name"
 const val behovNameKey = "@behov"
 const val correlationIdKey = "@correlation_id"
 const val tekniskTidKey = "teknisk_tid"
+const val sakIdKey = "sakId"
 
 fun River.eventName(eventName: String) {
     validate { it.demandValue(eventNameKey, eventName) }
@@ -27,4 +28,10 @@ var JsonMessage.correlationId: String?
     set(name) {
         name?.also { this[correlationIdKey] = it }
             ?: throw IllegalArgumentException("Kan ikke sette correlationId til null")
+    }
+
+var JsonMessage.sakId: Long
+    get() = this[sakIdKey].asLong()
+    set(name) {
+        this[sakIdKey] = name
     }

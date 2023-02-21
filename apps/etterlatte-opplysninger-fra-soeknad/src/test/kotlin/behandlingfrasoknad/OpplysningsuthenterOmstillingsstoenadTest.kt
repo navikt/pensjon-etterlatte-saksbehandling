@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
@@ -58,6 +59,13 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                 assertEquals(JaNeiVetIkke.NEI, utenlandsopphold.harHattUtenlandsopphold)
                 assertEquals(JaNeiVetIkke.NEI, doedsaarsakSkyldesYrkesskadeEllerYrkessykdom)
             }
+    }
+
+    @Test
+    fun `skal hente opplysning om soeknadstype`() {
+        consumeSingle<SoeknadstypeOpplysning>(Opplysningstype.SOEKNADSTYPE_V1).apply {
+            assertEquals(SoeknadType.OMSTILLINGSSTOENAD, this.type)
+        }
     }
 
     private inline fun <reified T> consumeSingle(opplysningType: Opplysningstype) =

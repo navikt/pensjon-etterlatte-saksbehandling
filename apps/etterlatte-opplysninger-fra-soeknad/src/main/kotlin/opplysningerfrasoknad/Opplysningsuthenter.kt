@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForeld
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_SOEKNAD_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNADSTYPE_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
@@ -303,10 +304,10 @@ private object BarnepensjonUthenter {
 
 private object OmstillingsstoenadUthenter {
     fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any?>> {
-        val barnepensjonssoknad = objectMapper.treeToValue<Omstillingsstoenad>(jsonNode)
+        val omstillingsstoenad = objectMapper.treeToValue<Omstillingsstoenad>(jsonNode)
 
         return listOfNotNull(
-            avdoedOpplysning(barnepensjonssoknad)
+            avdoedOpplysning(omstillingsstoenad),
             // soeker(barnepensjonssoknad, Opplysningstype.SOEKER_SOEKNAD_V1),
             // innsender(barnepensjonssoknad, Opplysningstype.INNSENDER_SOEKNAD_V1),
             // utbetalingsinformasjon(barnepensjonssoknad, Opplysningstype.UTBETALINGSINFORMASJON_V1),
@@ -315,7 +316,7 @@ private object OmstillingsstoenadUthenter {
             // samtykke(barnepensjonssoknad, Opplysningstype.SAMTYKKE),
             // spraak(barnepensjonssoknad, Opplysningstype.SPRAAK),
             // soeknadMottattDato(barnepensjonssoknad, Opplysningstype.SOEKNAD_MOTTATT_DATO),
-            // soeknadsType(barnepensjonssoknad, Opplysningstype.SOEKNADSTYPE_V1),
+            soeknadsType(omstillingsstoenad)
             // personGalleri(barnepensjonssoknad),
             // gjenlevendeForelder(barnepensjonssoknad, Opplysningstype.GJENLEVENDE_FORELDER_SOEKNAD_V1),
         )
@@ -328,9 +329,13 @@ private object OmstillingsstoenadUthenter {
         )
     }
 
-    private fun avdoedOpplysning(soknad: Omstillingsstoenad): Grunnlagsopplysning<out Any?> {
+    private fun avdoedOpplysning(soknad: Omstillingsstoenad): Grunnlagsopplysning<AvdoedSoeknad> {
         val opplysning = avdoedOpplysning(soknad.avdoed)
         return lagOpplysning(AVDOED_SOEKNAD_V1, kilde(soknad), opplysning, null)
+    }
+
+    private fun soeknadsType(soknad: Omstillingsstoenad): Grunnlagsopplysning<SoeknadstypeOpplysning> {
+        return lagOpplysning(SOEKNADSTYPE_V1, kilde(soknad), SoeknadstypeOpplysning(soknad.type), null)
     }
 }
 

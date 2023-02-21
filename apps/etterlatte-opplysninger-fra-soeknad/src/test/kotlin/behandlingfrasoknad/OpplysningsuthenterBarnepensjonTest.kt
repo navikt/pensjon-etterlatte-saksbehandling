@@ -28,7 +28,7 @@ import java.time.Month
 import java.time.ZoneOffset
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class OpplysningsuthenterTest {
+internal class OpplysningsuthenterBarnepensjonTest {
 
     companion object {
         val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
@@ -36,7 +36,8 @@ internal class OpplysningsuthenterTest {
                 objectMapper.readTree(
                     javaClass.getResource("/melding.json")!!.readText()
                 )!!["@skjema_info"]
-            )!!
+            ),
+            SoeknadType.BARNEPENSJON
         )
     }
 
@@ -157,7 +158,7 @@ internal class OpplysningsuthenterTest {
         }
     }
 
-    inline fun <reified T> consumeSingle(opplysningType: Opplysningstype) =
+    private inline fun <reified T> consumeSingle(opplysningType: Opplysningstype) =
         opplysninger.filter { it.opplysningType == opplysningType }
             .also { assertEquals(1, it.size) }
             .first()

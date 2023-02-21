@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -27,12 +28,16 @@ internal class StartUthentingFraSoeknad(
             validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.behandlingIdKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.gyldigInnsenderKey) }
+            // TODO legg til skjemainfo type
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val opplysninger = opplysningsuthenter.lagOpplysningsListe(packet[GyldigSoeknadVurdert.skjemaInfoKey])
+            val opplysninger = opplysningsuthenter.lagOpplysningsListe(
+                packet[GyldigSoeknadVurdert.skjemaInfoKey],
+                SoeknadType.BARNEPENSJON // TODO bruk type fra packet
+            )
 
             JsonMessage.newMessage(
                 "OPPLYSNING:NY",

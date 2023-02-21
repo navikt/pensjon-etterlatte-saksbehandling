@@ -53,6 +53,7 @@ internal class InnsendtSoeknadRiver(
                 logger.info("Behandling {} startet på sak {}", behandlingId, sakId)
 
                 // TODO EY-1777 send event om gyldig søknad
+                // TODO legg til skjemainfo type
 
                 logger.info("Vurdert gyldighet av søknad om omstillingsstønad er fullført")
             } catch (e: Exception) {

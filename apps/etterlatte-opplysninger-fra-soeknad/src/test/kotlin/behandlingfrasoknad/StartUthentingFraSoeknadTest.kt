@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.opplysningerfrasoknad.Opplysningsuthenter
 import no.nav.etterlatte.opplysningerfrasoknad.StartUthentingFraSoeknad
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -32,9 +33,10 @@ internal class StartUthentingFraSoeknadTest {
                 objectMapper.readTree(
                     javaClass.getResource("/melding.json")!!.readText()
                 )!!["@skjema_info"]
-            )
+            ),
+            SoeknadType.BARNEPENSJON
         )
-        every { opplysningsuthenterMock.lagOpplysningsListe(any()) } returns opplysninger
+        every { opplysningsuthenterMock.lagOpplysningsListe(any(), any()) } returns opplysninger
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         assertEquals(1, inspector.message(0).get("sakId").intValue())

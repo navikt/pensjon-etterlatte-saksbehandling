@@ -69,4 +69,4 @@ spec:
     - name: GRENSESNITTAVSTEMMING_ENABLED
       value: "true"
     - name: KONSISTENSAVSTEMMING_ENABLED
-      value: "false"
+      value: "true"

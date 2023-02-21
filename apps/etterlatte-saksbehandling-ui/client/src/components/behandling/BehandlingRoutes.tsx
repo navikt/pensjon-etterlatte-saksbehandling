@@ -39,7 +39,7 @@ function useRouteNavigation() {
     setCurrentRoute(match?.params?.section)
   }, [match])
 
-  const goto = (path: typeof behandlingRoutes[number]['path']) => {
+  const goto = (path: (typeof behandlingRoutes)[number]['path']) => {
     setCurrentRoute(path)
     navigate(`/behandling/${match?.params?.behandlingId}/${path}`)
     window.scrollTo(0, 0)
@@ -82,6 +82,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer) => {
       }
       return soeknadRoutes
     case IBehandlingsType.REVURDERING:
+    case IBehandlingsType.OMREGNING:
       return behandlingRoutes.filter((route) => route.erRevurderingRoute)
     case IBehandlingsType.MANUELT_OPPHOER:
       return behandlingRoutes.filter((route) => route.erManueltOpphoerRoute)

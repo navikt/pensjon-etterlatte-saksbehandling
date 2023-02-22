@@ -370,7 +370,6 @@ class BehandlingDao(private val connection: () -> Connection) {
                     innsender, soeker, gjenlevende, avdoed, soesken, opphoer_aarsaker, fritekst_aarsak,
                     virkningstidspunkt)
                     VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    RETURNING *
                 """.trimIndent()
             )
         with(manueltOpphoer) {
@@ -397,9 +396,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setString(13, fritekstAarsak)
             stmt.setString(14, virkningstidspunkt?.toJson())
         }
-        return stmt.executeQuery().singleOrNull {
-            behandlingAvRettType() as ManueltOpphoer
-        }
+        require(stmt.executeUpdate() == 1)
+        return hentBehandling(manueltOpphoer.id, BehandlingType.MANUELT_OPPHOER) as? ManueltOpphoer
             ?: throw BehandlingNotFoundException("Fant ikke manuelt opphoer med id ${manueltOpphoer.id}")
     }
 

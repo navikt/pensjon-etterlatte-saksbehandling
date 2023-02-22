@@ -39,6 +39,8 @@ jobs:
           docker build --tag ${{ env.image }} --tag ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }} -f docker/Dockerfile apps/${{ github.workflow }}
           docker push ${{ env.image }}
           docker push ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}
+      - name: Print docker tag
+        run: echo 'Docker-tag er ${{ env.image }} ' >> $GITHUB_STEP_SUMMARY
   snyk:
     name: Snyk
     runs-on: ubuntu-latest

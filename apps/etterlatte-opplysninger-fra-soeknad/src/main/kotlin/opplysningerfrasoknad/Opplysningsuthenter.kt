@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_SOEKNAD_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNADSTYPE_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
@@ -27,7 +29,9 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.GjenlevendeForelder
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
 import java.time.YearMonth
 import java.time.ZoneOffset
 import java.util.*
@@ -35,6 +39,16 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold 
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld
 
 class Opplysningsuthenter {
+    fun lagOpplysningsListe(jsonNode: JsonNode, type: SoeknadType): List<Grunnlagsopplysning<out Any?>> {
+        return when (type) {
+            SoeknadType.BARNEPENSJON -> BarnepensjonUthenter.lagOpplysningsListe(jsonNode)
+            SoeknadType.OMSTILLINGSSTOENAD -> OmstillingsstoenadUthenter.lagOpplysningsListe(jsonNode)
+            else -> throw Exception("Ugyldig SoeknadType")
+        }
+    }
+}
+
+private object BarnepensjonUthenter {
 
     fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any?>> {
         val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)
@@ -139,29 +153,7 @@ class Opplysningsuthenter {
             setBehandlingsopplysninger(
                 barnepensjon,
                 opplysningsType,
-                AvdoedSoeknad(
-                    type = PersonType.AVDOED,
-                    fornavn = avdoed.fornavn.svar,
-                    etternavn = avdoed.etternavn.svar,
-                    foedselsnummer = avdoed.foedselsnummer.svar,
-                    doedsdato = avdoed.datoForDoedsfallet.svar.innhold,
-                    statsborgerskap = avdoed.statsborgerskap.svar.innhold,
-                    utenlandsopphold = UtenlandsoppholdOpplysningstype(
-                        avdoed.utenlandsopphold.svar.verdi,
-                        avdoed.utenlandsopphold.opplysning?.map { opphold ->
-                            UtenlandsoppholdOpplysningerOld(
-                                opphold.land.svar.innhold,
-                                opphold.fraDato?.svar?.innhold,
-                                opphold.tilDato?.svar?.innhold,
-                                opphold.oppholdsType.svar.map { it.verdi },
-                                opphold.medlemFolketrygd.svar.verdi,
-                                opphold.pensjonsutbetaling?.svar?.innhold
-                            )
-                        }
-                    ),
-                    doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = avdoed
-                        .doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi
-                )
+                avdoedOpplysning(avdoed)
             )
         }
     }
@@ -308,6 +300,69 @@ class Opplysningsuthenter {
             )
         )
     }
+}
+
+private object OmstillingsstoenadUthenter {
+    fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any?>> {
+        val omstillingsstoenad = objectMapper.treeToValue<Omstillingsstoenad>(jsonNode)
+
+        return listOfNotNull(
+            avdoedOpplysning(omstillingsstoenad),
+            // soeker(barnepensjonssoknad, Opplysningstype.SOEKER_SOEKNAD_V1),
+            // innsender(barnepensjonssoknad, Opplysningstype.INNSENDER_SOEKNAD_V1),
+            // utbetalingsinformasjon(barnepensjonssoknad, Opplysningstype.UTBETALINGSINFORMASJON_V1),
+            // søkerUtenlandsopphold,
+            // utenlandsoppholdAvdød,
+            // samtykke(barnepensjonssoknad, Opplysningstype.SAMTYKKE),
+            // spraak(barnepensjonssoknad, Opplysningstype.SPRAAK),
+            // soeknadMottattDato(barnepensjonssoknad, Opplysningstype.SOEKNAD_MOTTATT_DATO),
+            soeknadsType(omstillingsstoenad)
+            // personGalleri(barnepensjonssoknad),
+            // gjenlevendeForelder(barnepensjonssoknad, Opplysningstype.GJENLEVENDE_FORELDER_SOEKNAD_V1),
+        )
+    }
+
+    private fun kilde(soknad: Omstillingsstoenad): Grunnlagsopplysning.Kilde {
+        return Grunnlagsopplysning.Privatperson(
+            soknad.innsender.foedselsnummer.svar.value,
+            soknad.mottattDato.toInstant(ZoneOffset.UTC)
+        )
+    }
+
+    private fun avdoedOpplysning(soknad: Omstillingsstoenad): Grunnlagsopplysning<AvdoedSoeknad> {
+        val opplysning = avdoedOpplysning(soknad.avdoed)
+        return lagOpplysning(AVDOED_SOEKNAD_V1, kilde(soknad), opplysning, null)
+    }
+
+    private fun soeknadsType(soknad: Omstillingsstoenad): Grunnlagsopplysning<SoeknadstypeOpplysning> {
+        return lagOpplysning(SOEKNADSTYPE_V1, kilde(soknad), SoeknadstypeOpplysning(soknad.type), null)
+    }
+}
+
+private fun avdoedOpplysning(avdoed: Avdoed): AvdoedSoeknad {
+    return AvdoedSoeknad(
+        type = PersonType.AVDOED,
+        fornavn = avdoed.fornavn.svar,
+        etternavn = avdoed.etternavn.svar,
+        foedselsnummer = avdoed.foedselsnummer.svar,
+        doedsdato = avdoed.datoForDoedsfallet.svar.innhold,
+        statsborgerskap = avdoed.statsborgerskap.svar.innhold,
+        utenlandsopphold = UtenlandsoppholdOpplysningstype(
+            avdoed.utenlandsopphold.svar.verdi,
+            avdoed.utenlandsopphold.opplysning?.map { opphold ->
+                UtenlandsoppholdOpplysningerOld(
+                    opphold.land.svar.innhold,
+                    opphold.fraDato?.svar?.innhold,
+                    opphold.tilDato?.svar?.innhold,
+                    opphold.oppholdsType.svar.map { it.verdi },
+                    opphold.medlemFolketrygd.svar.verdi,
+                    opphold.pensjonsutbetaling?.svar?.innhold
+                )
+            }
+        ),
+        doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = avdoed
+            .doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi
+    )
 }
 
 private fun <T : Any> lagOpplysning(

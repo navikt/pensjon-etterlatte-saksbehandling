@@ -4,11 +4,14 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
+import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.OPPFYLT
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -52,8 +55,14 @@ internal class InnsendtSoeknadRiver(
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
                 logger.info("Behandling {} startet på sak {}", behandlingId, sakId)
 
-                // TODO EY-1777 send event om gyldig søknad
-
+                context.publish(
+                    packet.apply {
+                        set(eventNameKey, GyldigSoeknadVurdert.eventName)
+                        set(GyldigSoeknadVurdert.sakIdKey, sakId)
+                        set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
+                        set(GyldigSoeknadVurdert.gyldigInnsenderKey, gyldighetsVurdering.resultat == OPPFYLT)
+                    }.toJson()
+                )
                 logger.info("Vurdert gyldighet av søknad om omstillingsstønad er fullført")
             } catch (e: Exception) {
                 logger.error("Gyldighetsvurdering av søknad om omstillingsstønad feilet", e)

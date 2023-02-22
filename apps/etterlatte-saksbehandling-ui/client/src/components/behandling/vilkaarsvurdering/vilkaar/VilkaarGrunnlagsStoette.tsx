@@ -5,7 +5,7 @@ import styled from 'styled-components'
 export const VilkaarGrunnlagsStoette = ({ vilkaar }: { vilkaar: Vilkaar }) => {
   const finnGrunnlag = (vilkaar: Vilkaar) => {
     switch (vilkaar.hovedvilkaar.type) {
-      case 'ALDER_BARN':
+      case 'BP_ALDER_BARN':
         return <AlderBarn grunnlag={vilkaar.grunnlag} />
       default:
         return <></>

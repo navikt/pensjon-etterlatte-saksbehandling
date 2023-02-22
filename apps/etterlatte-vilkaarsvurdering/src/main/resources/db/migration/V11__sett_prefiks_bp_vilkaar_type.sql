@@ -1,0 +1,1 @@
+UPDATE delvilkaar SET vilkaar_type = 'BP_' || vilkaar_type;

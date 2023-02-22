@@ -1,6 +1,8 @@
+
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
+import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -8,7 +10,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.*
 
 internal class VedtakstidslinjeTest {
@@ -74,14 +75,14 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 1, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
-            datoAttestert = attesteringsdato.toInstant(ZoneOffset.UTC)
+            datoAttestert = attesteringsdato.tilInstant()
         )
         val opphoertDato = lagVedtak(
             id = 2,
             virkningsDato = LocalDate.of(2023, 4, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
             behandlingType = BehandlingType.REVURDERING,
-            datoAttestert = attesteringsdato.plusDays(1).toInstant(ZoneOffset.UTC)
+            datoAttestert = attesteringsdato.plusDays(1).tilInstant()
         )
 
         val actual = Vedtakstidslinje(
@@ -107,14 +108,14 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 1, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
-            datoAttestert = attesteringsdato.toInstant(ZoneOffset.UTC)
+            datoAttestert = attesteringsdato.tilInstant()
         )
         val opphoertDato = lagVedtak(
             id = 2,
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
             behandlingType = BehandlingType.REVURDERING,
-            datoAttestert = attesteringsdato.plusDays(1).toInstant(ZoneOffset.UTC)
+            datoAttestert = attesteringsdato.plusDays(1).tilInstant()
         )
 
         val actual = Vedtakstidslinje(
@@ -139,7 +140,7 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
-            datoAttestert = attesteringsdato.toInstant(ZoneOffset.UTC)
+            datoAttestert = attesteringsdato.tilInstant()
         )
 
         val actual = Vedtakstidslinje(listOf(iverksattDato)).erLoependePaa(fraOgMed)
@@ -160,14 +161,14 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
-            datoAttestert = attesteringsdato.toInstant(ZoneOffset.UTC)
+            datoAttestert = attesteringsdato.tilInstant()
         )
         val opphoertDato = lagVedtak(
             id = 2,
             virkningsDato = LocalDate.of(2023, 7, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
             behandlingType = BehandlingType.REVURDERING,
-            datoAttestert = attesteringsdato.plusDays(1).toInstant(ZoneOffset.UTC)
+            datoAttestert = attesteringsdato.plusDays(1).tilInstant()
         )
 
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).erLoependePaa(fraOgMed)
@@ -188,14 +189,14 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
-            datoAttestert = attesteringsdato.toInstant(ZoneOffset.UTC)
+            datoAttestert = attesteringsdato.tilInstant()
         )
         val opphoertDato = lagVedtak(
             id = 2,
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
             behandlingType = BehandlingType.REVURDERING,
-            datoAttestert = attesteringsdato.plusDays(1).toInstant(ZoneOffset.UTC)
+            datoAttestert = attesteringsdato.plusDays(1).tilInstant()
         )
 
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).erLoependePaa(fraOgMed)

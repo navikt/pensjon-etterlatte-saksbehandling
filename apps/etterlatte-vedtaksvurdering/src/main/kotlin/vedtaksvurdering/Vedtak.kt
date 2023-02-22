@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.tilZonedDateTime
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
@@ -23,7 +24,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.ZoneOffset
 import java.util.*
 
 data class Vedtak(
@@ -89,9 +89,7 @@ data class Vedtak(
                 VedtakFattet(
                     ansvarligSaksbehandler,
                     fattetVedtakEnhet!!,
-                    this.datoFattet?.atZone(
-                        ZoneOffset.UTC
-                    )!!
+                    this.datoFattet?.tilZonedDateTime()!!
                 )
             }
         } else {
@@ -101,7 +99,7 @@ data class Vedtak(
             Attestasjon(
                 attestant,
                 attestertVedtakEnhet!!,
-                this.datoattestert!!.atZone(ZoneOffset.UTC)
+                this.datoattestert!!.tilZonedDateTime()
             )
         }
     )

@@ -1,11 +1,11 @@
 package no.nav.etterlatte.libs.sporingslogg
 
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 internal class SporingsloggerTest {
@@ -14,7 +14,7 @@ internal class SporingsloggerTest {
         ZonedDateTime.of(
             LocalDate.of(2020, Month.FEBRUARY, 1),
             LocalTime.NOON,
-            ZoneId.of("Europe/Oslo")
+            norskTidssone
         ).toInstant()
 
     @Test

@@ -40,7 +40,7 @@ constructor(
 
     companion object {
         val unit: ChronoUnit = ChronoUnit.MICROS
-        fun now(clock: Clock = Clock.systemUTC()) = Tidspunkt(Instant.now(clock))
+        fun now(clock: Clock = klokke()) = Tidspunkt(Instant.now(clock))
     }
 
     /**
@@ -60,10 +60,8 @@ constructor(
 
 fun Instant.toTidspunkt() = Tidspunkt(this)
 fun ZonedDateTime.toTidspunkt() = toInstant().toTidspunkt()
-fun LocalDateTime.toTidspunkt(zoneId: ZoneId) = atZone(zoneId).toTidspunkt()
+fun LocalDateTime.toTidspunkt(zoneId: ZoneId = standardTidssone) = atZone(zoneId).toTidspunkt()
 fun LocalDateTime.toNorskTidspunkt() = atZone(norskTidssone).toTidspunkt()
 fun Tidspunkt.toNorskTid(): ZonedDateTime = ZonedDateTime.ofInstant(this.instant, norskTidssone)
 fun Tidspunkt.toTimestamp(): Timestamp = Timestamp.from(this.instant)
 fun Timestamp.toTidspunkt(): Tidspunkt = Tidspunkt(this.toInstant())
-
-val norskTidssone: ZoneId = ZoneId.of("Europe/Oslo")

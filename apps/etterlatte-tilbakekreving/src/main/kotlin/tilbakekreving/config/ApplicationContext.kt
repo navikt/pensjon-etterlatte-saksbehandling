@@ -1,18 +1,18 @@
 package no.nav.etterlatte.tilbakekreving.config
 
+import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
-import java.time.Clock
 
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
 ) {
 
-    var clock = Clock.systemUTC()
+    var clock = klokke()
 
     var dataSource = DataSourceBuilder.createDataSource(
         jdbcUrl = jdbcUrl(

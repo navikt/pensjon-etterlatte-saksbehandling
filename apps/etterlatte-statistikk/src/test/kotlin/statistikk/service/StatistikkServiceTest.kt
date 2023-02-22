@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -112,13 +111,13 @@ class StatistikkServiceTest {
         Assertions.assertEquals(registrertSakRad.sakYtelse, "BARNEPENSJON")
         Assertions.assertEquals(registrertSakRad.sakUtland, SakUtland.NASJONAL)
         Assertions.assertEquals(registrertSakRad.behandlingId, behandlingId)
-        Assertions.assertEquals(registrertSakRad.tekniskTid, tekniskTidForHendelse.toTidspunkt(ZoneId.of("UTC")))
+        Assertions.assertEquals(registrertSakRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         Assertions.assertEquals(registrertSakRad.ansvarligEnhet, "attestantEnhet")
         Assertions.assertEquals(registrertSakRad.ansvarligBeslutter, "Attestant")
         Assertions.assertEquals(registrertSakRad.saksbehandler, "Saksbehandler")
         Assertions.assertEquals(registrertSakRad.beregning, mockBeregning)
 
-        Assertions.assertEquals(registrertStoenadRad.tekniskTid, tekniskTidForHendelse.toTidspunkt(ZoneId.of("UTC")))
+        Assertions.assertEquals(registrertStoenadRad.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         Assertions.assertEquals(registrertStoenadRad.beregning, mockBeregning)
         Assertions.assertEquals(registrertStoenadRad.behandlingId, behandlingId)
         Assertions.assertEquals(registrertStoenadRad.sakId, sakId)
@@ -181,7 +180,7 @@ class StatistikkServiceTest {
         Assertions.assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
         Assertions.assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
         Assertions.assertEquals(registrertStatistikk.behandlingId, behandlingId)
-        Assertions.assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt(ZoneId.of("UTC")))
+        Assertions.assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         Assertions.assertNull(registrertStatistikk.behandlingMetode)
         Assertions.assertNull(registrertStatistikk.ansvarligBeslutter)
         Assertions.assertNull(registrertStatistikk.ansvarligEnhet)

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
-import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -81,7 +80,13 @@ class BehandlingDao(private val connection: () -> Connection) {
                 """.trimIndent()
             )
         stmt.setString(1, type.name)
-        return stmt.executeQuery().toList { tilBehandling(type.name)!! }
+        return stmt.executeQuery().toList {
+            when (type) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> asFoerstegangsbehandling(this)
+                BehandlingType.REVURDERING -> asRevurdering(this)
+                BehandlingType.MANUELT_OPPHOER -> asManueltOpphoer(this)
+            }
+        }
     }
 
     fun alleBehandlingerISakAvType(sakId: Long, type: BehandlingType): List<Behandling> {
@@ -96,7 +101,13 @@ class BehandlingDao(private val connection: () -> Connection) {
             it.setLong(1, sakId)
             it.setString(2, type.name)
             it.executeQuery()
-        }.toList { tilBehandling(type.name)!! }
+        }.toList {
+            when (type) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> asFoerstegangsbehandling(this)
+                BehandlingType.REVURDERING -> asRevurdering(this)
+                BehandlingType.MANUELT_OPPHOER -> asManueltOpphoer(this)
+            }
+        }
     }
 
     fun alleBehandlinger(): List<Behandling> {
@@ -157,7 +168,8 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
+        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
+            .toLocalDateTime(),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         soeknadMottattDato = rs.getTimestamp("soeknad_mottatt_dato").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -179,20 +191,8 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asRevurdering(rs: ResultSet) = Revurdering(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
-        sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
-        persongalleri = hentPersongalleri(rs),
-        status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
-        kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
-        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) }
-    )
-
-    private fun asRegulering(rs: ResultSet) = Regulering(
-        id = rs.getObject("id") as UUID,
-        sak = rs.getLong("sak_id"),
-        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
+        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
+            .toLocalDateTime(),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -205,7 +205,8 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
+        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
+            .toLocalDateTime(),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -246,17 +247,17 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setLong(2, sak)
             stmt.setTimestamp(
                 3,
-                behandlingOpprettet.somTimestamp()
+                Timestamp.from(behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant())
             )
             stmt.setTimestamp(
                 4,
-                sistEndret.somTimestamp()
+                Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
             )
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
             stmt.setTimestamp(
                 7,
-                soeknadMottattDato.somTimestamp()
+                Timestamp.from(soeknadMottattDato.atZone(ZoneId.systemDefault()).toInstant())
             )
             with(persongalleri) {
                 stmt.setString(8, innsender)
@@ -290,44 +291,12 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setLong(2, sak)
             stmt.setTimestamp(
                 3,
-                behandlingOpprettet.somTimestamp()
+                Timestamp.from(behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant())
             )
             stmt.setTimestamp(
                 4,
-                sistEndret.somTimestamp()
+                Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
             )
-            stmt.setString(5, status.name)
-            stmt.setString(6, type.name)
-            with(persongalleri) {
-                stmt.setString(7, innsender)
-                stmt.setString(8, soeker)
-                stmt.setString(9, gjenlevende.toJson())
-                stmt.setString(10, avdoed.toJson())
-                stmt.setString(11, soesken.toJson())
-            }
-            stmt.setString(12, revurderingsaarsak.name)
-            stmt.setString(13, kommerBarnetTilgode?.let { objectMapper.writeValueAsString(it) })
-            stmt.setString(14, vilkaarUtfall?.name)
-            stmt.setString(15, virkningstidspunkt?.toJson())
-        }
-        require(stmt.executeUpdate() == 1)
-    }
-
-    fun opprettRegulering(regulering: Regulering) {
-        val stmt =
-            connection().prepareStatement(
-                """
-                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                    innsender, soeker, gjenlevende, avdoed, soesken, revurdering_aarsak, kommer_barnet_tilgode, 
-                    vilkaar_utfall, virkningstidspunkt)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent()
-            )
-        with(regulering) {
-            stmt.setObject(1, id)
-            stmt.setLong(2, sak)
-            stmt.setTimestamp(3, behandlingOpprettet.somTimestamp())
-            stmt.setTimestamp(4, sistEndret.somTimestamp())
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
             with(persongalleri) {
@@ -361,11 +330,11 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setLong(2, sak)
             stmt.setTimestamp(
                 3,
-                behandlingOpprettet.somTimestamp()
+                Timestamp.from(behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant())
             )
             stmt.setTimestamp(
                 4,
-                sistEndret.somTimestamp()
+                Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
             )
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
@@ -397,7 +366,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(2, behandling.status.name)
         stmt.setTimestamp(
             3,
-            behandling.sistEndret.somTimestamp()
+            Timestamp.from(behandling.sistEndret.atZone(ZoneId.systemDefault()).toInstant())
         )
         stmt.setObject(4, behandling.id)
         require(stmt.executeUpdate() == 1)
@@ -419,7 +388,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(1, status.name)
         stmt.setTimestamp(
             2,
-            sistEndret.somTimestamp()
+            Timestamp.from(sistEndret.atZone(ZoneId.systemDefault()).toInstant())
         )
         stmt.setObject(3, behandling)
         return requireNotNull(
@@ -430,17 +399,22 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     private fun ResultSet.behandlingsListe(): List<Behandling> =
-        toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()
+        toList {
+            when (getString("behandlingstype")) {
+                BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
+                BehandlingType.REVURDERING.name -> asRevurdering(this)
+                BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
+                else -> null
+            }
+        }.filterNotNull()
 
-    private fun ResultSet.tilBehandling(key: String?) = when (key) {
-        BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
-        BehandlingType.REVURDERING.name -> asRevurdering(this)
-        BehandlingType.OMREGNING.name -> asRegulering(this)
-        BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
-        else -> null
-    }
-
-    private fun ResultSet.behandlingAvRettType() = tilBehandling(getString("behandlingstype"))
+    private fun ResultSet.behandlingAvRettType() =
+        when (getString("behandlingstype")) {
+            BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
+            BehandlingType.REVURDERING.name -> asRevurdering(this)
+            BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
+            else -> null
+        }
 
     fun avbrytBehandling(behandlingId: UUID): Behandling {
         return this.lagreStatus(
@@ -501,11 +475,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 }
-
-private fun LocalDateTime.somTimestamp() = Timestamp.from(this.atZone(ZoneId.systemDefault()).toInstant())
-
-private fun ResultSet.somLocalDateTime(kolonne: String) =
-    getTimestamp(kolonne).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

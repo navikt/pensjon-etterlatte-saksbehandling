@@ -2,7 +2,6 @@ package no.nav.etterlatte.beregning
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
@@ -23,6 +22,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentSoeskenjustering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -61,13 +61,9 @@ class BeregningService(
                     )
 
                     else -> {
-                        beregnBarnepensjon(grunnlag.await(), behandling) {
-                            runBlocking {
-                                vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
-                                    .resultat?.utfall
-                                    ?: throw RuntimeException("Forventa å ha resultat for behandling $behandlingId")
-                            }
-                        }
+                        val vilkaarsvurdering =
+                            async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken) }
+                        beregnBarnepensjon(grunnlag.await(), behandling, vilkaarsvurdering.await())
                     }
                 }
                 beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
@@ -99,7 +95,7 @@ class BeregningService(
     fun beregnBarnepensjon(
         grunnlag: Grunnlag,
         behandling: DetaljertBehandling,
-        hentVilkaarsvurdering: () -> VilkaarsvurderingUtfall
+        vilkaarsvurdering: VilkaarsvurderingDto
     ): Beregning {
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
@@ -108,11 +104,11 @@ class BeregningService(
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.OMREGNING ->
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
                 beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {
-                when (requireNotNull(hentVilkaarsvurdering.invoke())) {
+                when (requireNotNull(vilkaarsvurdering.resultat?.utfall)) {
                     VilkaarsvurderingUtfall.OPPFYLT ->
                         beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 

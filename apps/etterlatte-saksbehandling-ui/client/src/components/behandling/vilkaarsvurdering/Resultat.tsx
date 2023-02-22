@@ -75,7 +75,7 @@ export const Resultat: React.FC<Props> = ({
     setKommentar('')
   }
 
-  const sakType = 'BARNEPENSJON' // TODO må hentes fra behandling? sak?
+  const sakType = 'Barnepensjon' // TODO finnes pr for å gjøre dette tilgjengelig fra behandling (EY-1804)
   const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'
   const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
   return (

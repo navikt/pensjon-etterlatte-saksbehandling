@@ -1,17 +1,14 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.statistikk.database
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.statistikk.database.SakRepository
-import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
 import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
-import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -27,7 +24,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class DBTest {
+class SakRepositoryTest {
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
@@ -66,78 +63,6 @@ internal class DBTest {
     fun afterEach() {
         dataSource.connection.prepareStatement("TRUNCATE TABLE sak")
             .executeUpdate()
-        dataSource.connection.prepareStatement("TRUNCATE TABLE stoenad")
-            .executeUpdate()
-    }
-
-    @Test
-    fun testStoenadRepository() {
-        val repo = StoenadRepository.using(dataSource)
-        repo.lagreStoenadsrad(
-            StoenadRad(
-                id = -1,
-                fnrSoeker = "123",
-                fnrForeldre = listOf("23427249697", "18458822782"),
-                fnrSoesken = listOf(),
-                anvendtTrygdetid = "40",
-                nettoYtelse = "1000",
-                beregningType = "FOLKETRYGD",
-                anvendtSats = "0,4G",
-                behandlingId = UUID.randomUUID(),
-                sakId = 5,
-                sakNummer = 5,
-                tekniskTid = Tidspunkt.now(),
-                sakYtelse = "BP",
-                versjon = "42",
-                saksbehandler = "Berit Behandler",
-                attestant = "Arne Attestant",
-                vedtakLoependeFom = LocalDate.now(),
-                vedtakLoependeTom = null,
-                beregning = mockBeregning
-            )
-        )
-        repo.datapakke().also {
-            Assertions.assertEquals(1, it.size)
-            val stoenadRad = it.first()
-            Assertions.assertEquals(5, stoenadRad.sakId)
-            Assertions.assertEquals(
-                stoenadRad.fnrForeldre,
-                listOf("23427249697", "18458822782")
-            )
-            Assertions.assertEquals(stoenadRad.beregning, mockBeregning)
-        }
-    }
-
-    @Test
-    fun `stoenadRepository lagrer ned og henter ut null for beregning riktig`() {
-        val repo = StoenadRepository.using(dataSource)
-        val lagretRad = repo.lagreStoenadsrad(
-            StoenadRad(
-                id = -1,
-                fnrSoeker = "123",
-                fnrForeldre = listOf("23427249697", "18458822782"),
-                fnrSoesken = listOf(),
-                anvendtTrygdetid = "40",
-                nettoYtelse = "1000",
-                beregningType = "FOLKETRYGD",
-                anvendtSats = "0,4G",
-                behandlingId = UUID.randomUUID(),
-                sakId = 5,
-                sakNummer = 5,
-                tekniskTid = Tidspunkt.now(),
-                sakYtelse = "BP",
-                versjon = "42",
-                saksbehandler = "Berit Behandler",
-                attestant = "Arne Attestant",
-                vedtakLoependeFom = LocalDate.now(),
-                vedtakLoependeTom = null,
-                beregning = null
-            )
-        )
-
-        Assertions.assertNotNull(lagretRad)
-        Assertions.assertNull(lagretRad?.beregning)
-        Assertions.assertNull(repo.datapakke()[0].beregning)
     }
 
     @Test

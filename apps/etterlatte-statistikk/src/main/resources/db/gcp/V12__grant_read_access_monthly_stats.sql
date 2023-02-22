@@ -1,0 +1,1 @@
+GRANT SELECT ON maaned_stoenad_statistikk TO bigquery_import;

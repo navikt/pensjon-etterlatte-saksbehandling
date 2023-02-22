@@ -15,6 +15,7 @@ import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
 import no.nav.etterlatte.statistikk.domain.BehandlingResultat
 import no.nav.etterlatte.statistikk.domain.Beregning
+import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
 import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SoeknadFormat
@@ -22,6 +23,7 @@ import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.river.Behandling
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 class StatistikkService(
@@ -47,6 +49,11 @@ class StatistikkService(
             return sakRad to stoenadRad
         }
         return sakRad to null
+    }
+
+    fun produserStoenadStatistikkForMaaned(maaned: YearMonth): MaanedStatistikk {
+        val vedtak = stoenadRepository.hentRaderInnenforMaaned(maaned)
+        return MaanedStatistikk(maaned, vedtak)
     }
 
     private fun registrerSakStatistikkForVedtak(
@@ -87,7 +94,7 @@ class StatistikkService(
             null
         }
 
-        val fellesRad = SakRad(
+        return SakRad(
             id = -1,
             behandlingId = vedtak.behandling.id,
             sakId = vedtak.sak.id,
@@ -114,7 +121,6 @@ class StatistikkService(
             sakUtland = SakUtland.NASJONAL,
             beregning = beregning
         )
-        return fellesRad
     }
 
     private fun behandlingResultatFraVedtak(
@@ -169,7 +175,8 @@ class StatistikkService(
             attestant = vedtak.attestasjon?.attestant,
             vedtakLoependeFom = vedtak.virk.fom.atDay(1),
             vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
-            beregning = beregning
+            beregning = beregning,
+            vedtakType = vedtak.type
         )
     }
 

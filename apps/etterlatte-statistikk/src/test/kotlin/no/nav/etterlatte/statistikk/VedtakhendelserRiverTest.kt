@@ -51,7 +51,8 @@ internal class VedtakhendelserRiverTest {
         attestant = "",
         vedtakLoependeFom = LocalDate.now(),
         vedtakLoependeTom = null,
-        beregning = null
+        beregning = null,
+        vedtakType = null
     )
 
     @Test

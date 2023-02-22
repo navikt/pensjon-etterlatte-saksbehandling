@@ -1,4 +1,4 @@
-package statistikk.service
+package no.nav.etterlatte.statistikk.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.coEvery
@@ -28,8 +28,6 @@ import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
-import no.nav.etterlatte.statistikk.service.StatistikkService
-import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -242,5 +240,4 @@ fun behandling(
         avdoed = avdoed,
         gjenlevende = gjenlevende
     )
-
 )

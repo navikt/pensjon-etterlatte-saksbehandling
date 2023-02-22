@@ -325,7 +325,7 @@ private object OmstillingsstoenadUthenter {
     private fun kilde(soknad: Omstillingsstoenad): Grunnlagsopplysning.Kilde {
         return Grunnlagsopplysning.Privatperson(
             soknad.innsender.foedselsnummer.svar.value,
-            soknad.mottattDato.toInstant(ZoneOffset.UTC)
+            soknad.mottattDato.tilInstant()
         )
     }
 

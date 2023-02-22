@@ -128,7 +128,7 @@ class VilkaarsvurderingService(
                 BehandlingType.REVURDERING ->
                     mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak))
 
-                else -> throw IllegalArgumentException(
+                BehandlingType.OMREGNING, BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
                     "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                 )
             }
@@ -171,7 +171,8 @@ class VilkaarsvurderingService(
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )
-            RevurderingAarsak.GRUNNBELOEPREGULERING -> throw NotImplementedError() // TODO Mads implementer
+
+            RevurderingAarsak.GRUNNBELOEPREGULERING -> throw IllegalArgumentException("Skal ikke revurdere regulering")
         }
     }
 }

@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -70,6 +71,12 @@ class RealRevurderingService(
                 )
 
                 is ManueltOpphoer -> revurderingFactory.opprettRevurdering(
+                    forrigeBehandling.sak,
+                    forrigeBehandling.persongalleri,
+                    revurderingAarsak
+                )
+
+                is Regulering -> revurderingFactory.opprettRevurdering(
                     forrigeBehandling.sak,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak

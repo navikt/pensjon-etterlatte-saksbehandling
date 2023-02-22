@@ -19,10 +19,10 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
-import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -48,11 +48,10 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken`() {
-        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
         val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = grunnlag(soesken = emptyList())
 
-        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling) { VilkaarsvurderingUtfall.OPPFYLT }
 
         with(beregning) {
             beregningId shouldNotBe null
@@ -76,11 +75,10 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken`() {
-        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
         val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = grunnlag(soesken = listOf(FNR_1))
 
-        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling) { VilkaarsvurderingUtfall.OPPFYLT }
 
         with(beregning) {
             beregningId shouldNotBe null
@@ -102,11 +100,10 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - to soesken`() {
-        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
         val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = grunnlag(soesken = listOf(FNR_1, FNR_2))
 
-        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling) { VilkaarsvurderingUtfall.OPPFYLT }
 
         with(beregning) {
             beregningId shouldNotBe null
@@ -128,11 +125,10 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal beregne barnepensjon revurdering - ingen soesken`() {
-        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = true)
         val behandling = behandling(BehandlingType.REVURDERING)
         val grunnlag = grunnlag(soesken = emptyList())
 
-        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling) { VilkaarsvurderingUtfall.OPPFYLT }
 
         with(beregning) {
             beregningId shouldNotBe null
@@ -154,11 +150,11 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal sette beloep til 0 ved revurdering og vilkaar ikke oppfylt`() {
-        val vilkaarsvurdering = vilkaarsvurdering(oppfylt = false)
         val behandling = behandling(BehandlingType.REVURDERING)
         val grunnlag = grunnlag(soesken = emptyList())
 
-        val beregning = beregningService.beregnBarnepensjon(grunnlag, behandling, vilkaarsvurdering)
+        val beregning =
+            beregningService.beregnBarnepensjon(grunnlag, behandling) { VilkaarsvurderingUtfall.IKKE_OPPFYLT }
 
         with(beregning) {
             beregningId shouldNotBe null
@@ -223,9 +219,6 @@ internal class BeregningServiceTest {
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         }
-
-    private fun vilkaarsvurdering(oppfylt: Boolean) =
-        if (oppfylt) VilkaarsvurderingTestData.oppfylt else VilkaarsvurderingTestData.ikkeOppfylt
 
     companion object {
         val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, 1)

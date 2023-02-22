@@ -82,6 +82,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer) => {
       }
       return soeknadRoutes
     case IBehandlingsType.REVURDERING:
+    case IBehandlingsType.OMREGNING:
       return behandlingRoutes.filter((route) => route.erRevurderingRoute)
     case IBehandlingsType.MANUELT_OPPHOER:
       return behandlingRoutes.filter((route) => route.erManueltOpphoerRoute)

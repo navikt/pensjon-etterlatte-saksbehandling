@@ -17,6 +17,8 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.tilSystemDefaultLocalDateTime
+import no.nav.etterlatte.libs.common.tidspunkt.tilSystemDefaultTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -500,10 +502,9 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 }
 
-private fun LocalDateTime.somTimestamp() = Timestamp.from(this.atZone(ZoneId.systemDefault()).toInstant())
+private fun LocalDateTime.somTimestamp() = tilSystemDefaultTimestamp()
 
-private fun ResultSet.somLocalDateTime(kolonne: String) =
-    getTimestamp(kolonne).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+private fun ResultSet.somLocalDateTime(kolonne: String) = getTimestamp(kolonne).tilSystemDefaultLocalDateTime()
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

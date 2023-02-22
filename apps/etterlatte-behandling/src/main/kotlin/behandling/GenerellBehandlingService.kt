@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingMedGrunnlagsopplysninger
@@ -78,7 +77,6 @@ class RealGenerellBehandlingService(
     private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>,
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
     private val revurderingFactory: RevurderingFactory,
-    private val reguleringFactory: ReguleringFactory,
     private val hendelser: HendelseDao,
     private val manueltOpphoerService: ManueltOpphoerService,
     private val vedtakKlient: VedtakKlient,
@@ -276,17 +274,6 @@ class RealGenerellBehandlingService(
 
                 BehandlingType.REVURDERING -> {
                     revurderingFactory.hentRevurdering(behandlingId).registrerVedtakHendelse(
-                        vedtakHendelse.vedtakId,
-                        hendelseType,
-                        vedtakHendelse.inntruffet,
-                        vedtakHendelse.saksbehandler,
-                        vedtakHendelse.kommentar,
-                        vedtakHendelse.valgtBegrunnelse
-                    )
-                }
-
-                BehandlingType.OMREGNING -> {
-                    reguleringFactory.hentRegulering(behandlingId).registrerVedtakHendelse(
                         vedtakHendelse.vedtakId,
                         hendelseType,
                         vedtakHendelse.inntruffet,

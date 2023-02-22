@@ -9,9 +9,9 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.OPPFYLT
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -57,7 +57,7 @@ internal class InnsendtSoeknadRiver(
 
                 context.publish(
                     packet.apply {
-                        set(eventNameKey, GyldigSoeknadVurdert.eventName)
+                        set(EVENT_NAME_KEY, GyldigSoeknadVurdert.eventName)
                         set(GyldigSoeknadVurdert.sakIdKey, sakId)
                         set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
                         set(GyldigSoeknadVurdert.gyldigInnsenderKey, gyldighetsVurdering.resultat == OPPFYLT)

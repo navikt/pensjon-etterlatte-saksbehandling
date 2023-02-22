@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -46,7 +46,7 @@ internal class BehandlingEndretHendelseTest {
 
     private fun behandlingGrunnlagEndretMelding() = JsonMessage.newMessage(
         mapOf(
-            eventNameKey to BehandlingGrunnlagEndret.eventName,
+            EVENT_NAME_KEY to BehandlingGrunnlagEndret.eventName,
             BehandlingGrunnlagEndret.sakIdKey to 1,
             "persongalleri" to GrunnlagTestData().hentPersonGalleri()
         )

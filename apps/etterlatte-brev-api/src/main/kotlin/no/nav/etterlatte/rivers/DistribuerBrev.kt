@@ -10,10 +10,10 @@ import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -38,7 +38,7 @@ internal class DistribuerBrev(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet[correlationIdKey].asText()) {
+        withLogContext(packet[CORRELATION_ID_KEY].asText()) {
             logger.info("Starter distribuering av brev.")
 
             val bestillingsId = distribusjonService.distribuerJournalpost(
@@ -70,7 +70,7 @@ internal class DistribuerBrev(
     private fun RapidsConnection.svarSuksess(packet: JsonMessage, bestillingsId: BestillingsID) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
-        packet[eventNameKey] = BrevEventTypes.DISTRIBUERT.toString()
+        packet[EVENT_NAME_KEY] = BrevEventTypes.DISTRIBUERT.toString()
         packet["bestillingsId"] = bestillingsId
 
         publish(packet.toJson())

@@ -10,8 +10,8 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import rapidsandrivers.DATO_KEY
 import rapidsandrivers.dato
-import rapidsandrivers.datoKey
 import rapidsandrivers.sakId
 
 internal class Reguleringsforespoersel(
@@ -23,7 +23,7 @@ internal class Reguleringsforespoersel(
     init {
         River(rapidsConnection).apply {
             eventName(REGULERING_EVENT_NAME)
-            validate { it.requireKey(datoKey) }
+            validate { it.requireKey(DATO_KEY) }
             correlationId()
         }.register(this)
     }

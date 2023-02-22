@@ -2,8 +2,8 @@ package no.nav.etterlatte.opplysningerfrasoknad
 
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -45,7 +45,7 @@ internal class StartUthentingFraSoeknad(
                     "sakId" to packet[GyldigSoeknadVurdert.sakIdKey],
                     "behandlingId" to packet[GyldigSoeknadVurdert.behandlingIdKey],
                     "gyldigInnsender" to packet[GyldigSoeknadVurdert.gyldigInnsenderKey],
-                    correlationIdKey to packet[correlationIdKey],
+                    CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY],
                     "opplysning" to opplysninger
                 )
             ).apply {

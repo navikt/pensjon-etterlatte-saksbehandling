@@ -4,8 +4,8 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
@@ -342,9 +342,9 @@ class SaksbehandlerManglerEnhetException(message: String) : Exception(message)
 private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak, tekniskTid: LocalDateTime) =
     JsonMessage.newMessage(
         mapOf(
-            eventNameKey to vedtakhendelse.toString(),
+            EVENT_NAME_KEY to vedtakhendelse.toString(),
             "vedtak" to vedtak,
-            tekniskTidKey to tekniskTid
+            TEKNISK_TID_KEY to tekniskTid
         )
     ).toJson()
 

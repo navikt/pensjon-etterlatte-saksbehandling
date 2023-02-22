@@ -6,7 +6,7 @@ import jakarta.jms.Message
 import jakarta.jms.MessageListener
 import jakarta.jms.Session
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
 
 data class TilbakekrevingEvent(
-    @JsonProperty(eventNameKey) val event: String,
+    @JsonProperty(EVENT_NAME_KEY) val event: String,
     @JsonProperty("tilbakekreving") val tilbakekreving: Map<String, Any> // TODO finne ut hva som bør sendes her
 )
 

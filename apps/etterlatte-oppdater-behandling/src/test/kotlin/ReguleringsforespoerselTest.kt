@@ -4,7 +4,7 @@ import io.mockk.verify
 import no.nav.etterlatte.Behandling
 import no.nav.etterlatte.Reguleringsforespoersel
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
@@ -13,8 +13,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.datoKey
-import rapidsandrivers.sakIdKey
+import rapidsandrivers.DATO_KEY
+import rapidsandrivers.SAK_ID_KEY
 import java.time.LocalDate
 
 internal class ReguleringsforespoerselTest {
@@ -23,8 +23,8 @@ internal class ReguleringsforespoerselTest {
 
     private fun genererReguleringMelding(dato: LocalDate) = JsonMessage.newMessage(
         mapOf(
-            eventNameKey to REGULERING_EVENT_NAME,
-            datoKey to dato
+            EVENT_NAME_KEY to REGULERING_EVENT_NAME,
+            DATO_KEY to dato
         )
     )
 
@@ -58,8 +58,8 @@ internal class ReguleringsforespoerselTest {
         Assertions.assertEquals(3, sendteMeldinger)
 
         for (i in 0 until inspector.inspektør.size) {
-            Assertions.assertEquals(FINN_LOEPENDE_YTELSER, inspector.inspektør.message(i).get(eventNameKey).asText())
-            Assertions.assertEquals(`1_mai_2023`.toString(), inspector.inspektør.message(i).get(datoKey).asText())
+            Assertions.assertEquals(FINN_LOEPENDE_YTELSER, inspector.inspektør.message(i).get(EVENT_NAME_KEY).asText())
+            Assertions.assertEquals(`1_mai_2023`.toString(), inspector.inspektør.message(i).get(DATO_KEY).asText())
         }
     }
 
@@ -81,8 +81,8 @@ internal class ReguleringsforespoerselTest {
         val melding2 = inspector.inspektør.message(1)
         val melding3 = inspector.inspektør.message(2)
 
-        Assertions.assertEquals(1000L, melding1.get(sakIdKey).asLong())
-        Assertions.assertEquals(1002L, melding2.get(sakIdKey).asLong())
-        Assertions.assertEquals(1003L, melding3.get(sakIdKey).asLong())
+        Assertions.assertEquals(1000L, melding1.get(SAK_ID_KEY).asLong())
+        Assertions.assertEquals(1002L, melding2.get(SAK_ID_KEY).asLong())
+        Assertions.assertEquals(1003L, melding3.get(SAK_ID_KEY).asLong())
     }
 }

@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
@@ -194,7 +194,7 @@ class IntegrationTest {
                         no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET,
                         doedshendelse.endringstype
                     )
-                    assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
+                    assertEquals("PDL:PERSONHENDELSE", msg[EVENT_NAME_KEY].textValue())
                 }
                 "UTFLYTTING_FRA_NORGE" -> {
                     val utflyttingshendelse = objectMapper.treeToValue<UtflyttingsHendelse>(msg["hendelse_data"])
@@ -205,7 +205,7 @@ class IntegrationTest {
                         no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET,
                         utflyttingshendelse.endringstype
                     )
-                    assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
+                    assertEquals("PDL:PERSONHENDELSE", msg[EVENT_NAME_KEY].textValue())
                 }
                 "FORELDERBARNRELASJON_V1" -> {
                     val forelderBarnRelasjonHendelse =
@@ -224,7 +224,7 @@ class IntegrationTest {
                         no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET,
                         forelderBarnRelasjonHendelse.endringstype
                     )
-                    assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
+                    assertEquals("PDL:PERSONHENDELSE", msg[EVENT_NAME_KEY].textValue())
                 }
             }
         }

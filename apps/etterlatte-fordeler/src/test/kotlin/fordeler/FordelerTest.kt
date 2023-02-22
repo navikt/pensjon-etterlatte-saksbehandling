@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.readFile
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,7 +24,7 @@ internal class FordelerTest {
 
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
-        assertEquals(FordelerFordelt.eventName, inspector.message(0).get(eventNameKey).asText())
+        assertEquals(FordelerFordelt.eventName, inspector.message(0).get(EVENT_NAME_KEY).asText())
         assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
 
         verify { fordelerMetricLogger.logMetricFordelt() }

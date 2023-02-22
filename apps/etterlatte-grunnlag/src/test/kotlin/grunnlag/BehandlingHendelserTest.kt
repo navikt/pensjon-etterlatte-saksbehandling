@@ -1,7 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -30,7 +30,7 @@ class BehandlingHendelserTest {
 
     private fun behandlingOpprettetMelding() = JsonMessage.newMessage(
         mapOf(
-            eventNameKey to "BEHANDLING:GYLDIG_FREMSATT",
+            EVENT_NAME_KEY to "BEHANDLING:GYLDIG_FREMSATT",
             "sakId" to 1,
             "persongalleri" to GrunnlagTestData().hentPersonGalleri()
         )

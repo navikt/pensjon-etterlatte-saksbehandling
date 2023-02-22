@@ -6,9 +6,9 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -32,7 +32,7 @@ class BehandlinghendelseRiver(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandAny(eventNameKey, behandlingshendelser) }
+            validate { it.demandAny(EVENT_NAME_KEY, behandlingshendelser) }
             validate { it.interestedIn("behandling") }
             validate { it.requireKey("behandling.id") }
             validate { it.requireKey("behandling.sak") }
@@ -41,7 +41,7 @@ class BehandlinghendelseRiver(
             validate { it.requireKey("behandling.status") }
             validate { it.requireKey("behandling.type") }
             validate { it.requireKey("behandling.persongalleri") }
-            validate { it.interestedIn(tekniskTidKey) }
+            validate { it.interestedIn(TEKNISK_TID_KEY) }
             correlationId()
         }.register(this)
     }
@@ -50,7 +50,7 @@ class BehandlinghendelseRiver(
         withLogContext(packet.correlationId) {
             try {
                 val behandling: Behandling = objectMapper.treeToValue(packet["behandling"])
-                val hendelse: BehandlingHendelse = enumValueOf(packet[eventNameKey].textValue().split(":")[1])
+                val hendelse: BehandlingHendelse = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
                 val tekniskTid = parseTekniskTid(packet, logger)
                 service.registrerStatistikkForBehandlinghendelse(behandling, hendelse, tekniskTid)
                     ?.also {

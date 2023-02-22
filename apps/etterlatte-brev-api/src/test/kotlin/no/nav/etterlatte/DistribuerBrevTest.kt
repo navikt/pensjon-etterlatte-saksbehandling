@@ -10,15 +10,15 @@ import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rivers.DistribuerBrev
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 internal class DistribuerBrevTest {
     private val distribusjonService = mockk<DistribusjonServiceImpl>(relaxed = true)
@@ -40,8 +40,8 @@ internal class DistribuerBrevTest {
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
         val melding = JsonMessage.newMessage(
             mapOf(
-                eventNameKey to BrevEventTypes.JOURNALFOERT.toString(),
-                correlationIdKey to UUID.randomUUID().toString(),
+                EVENT_NAME_KEY to BrevEventTypes.JOURNALFOERT.toString(),
+                CORRELATION_ID_KEY to UUID.randomUUID().toString(),
                 "brevId" to brevId,
                 "journalpostId" to journalpostId,
                 "distribusjonType" to DistribusjonsType.VEDTAK.toString(),

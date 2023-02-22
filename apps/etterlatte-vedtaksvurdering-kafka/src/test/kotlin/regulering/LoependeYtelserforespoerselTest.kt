@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
 import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
 import no.nav.etterlatte.regulering.LoependeYtelserforespoersel
@@ -16,9 +16,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.datoKey
-import rapidsandrivers.hendelseDataKey
-import rapidsandrivers.sakIdKey
+import rapidsandrivers.DATO_KEY
+import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.SAK_ID_KEY
 import java.time.LocalDate
 
 internal class LoependeYtelserforespoerselTest {
@@ -28,9 +28,9 @@ internal class LoependeYtelserforespoerselTest {
 
     private fun genererReguleringMelding(dato: LocalDate, sakId: Long) = JsonMessage.newMessage(
         mapOf(
-            eventNameKey to FINN_LOEPENDE_YTELSER,
-            sakIdKey to sakId,
-            datoKey to dato
+            EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
+            SAK_ID_KEY to sakId,
+            DATO_KEY to dato
         )
     )
 
@@ -56,14 +56,14 @@ internal class LoependeYtelserforespoerselTest {
 
         inspector.sendTestMessage(melding.toJson())
         val sendtMelding = inspector.inspektør.message(0)
-        Assertions.assertEquals(OMBEREGNINGSHENDELSE, sendtMelding.get(eventNameKey).asText())
+        Assertions.assertEquals(OMBEREGNINGSHENDELSE, sendtMelding.get(EVENT_NAME_KEY).asText())
         Assertions.assertEquals(
             Omberegningshendelse(
                 sakId = sakId,
                 fradato = fraDato,
                 aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING
             ),
-            objectMapper.readValue(sendtMelding.get(hendelseDataKey).toString(), Omberegningshendelse::class.java)
+            objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omberegningshendelse::class.java)
         )
     }
 

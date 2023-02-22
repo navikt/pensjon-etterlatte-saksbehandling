@@ -10,11 +10,11 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.DATO_KEY
+import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.behandlingIdKey
-import rapidsandrivers.datoKey
 import rapidsandrivers.sakId
-import rapidsandrivers.sakIdKey
 
 internal class OpprettVedtakforespoersel(
     rapidsConnection: RapidsConnection,
@@ -25,9 +25,9 @@ internal class OpprettVedtakforespoersel(
     init {
         River(rapidsConnection).apply {
             eventName(OPPRETT_VEDTAK)
-            validate { it.requireKey(sakIdKey) }
-            validate { it.requireKey(datoKey) }
-            validate { it.requireKey(behandlingIdKey) }
+            validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(DATO_KEY) }
+            validate { it.requireKey(BEHANDLING_ID_KEY) }
             correlationId()
         }.register(this)
     }

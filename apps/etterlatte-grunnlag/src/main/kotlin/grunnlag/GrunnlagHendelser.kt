@@ -8,10 +8,10 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -29,8 +29,8 @@ class GrunnlagHendelser(
     init {
         River(rapidsConnection).apply {
             correlationId()
-            validate { it.interestedIn(eventNameKey) }
-            validate { it.interestedIn(behovNameKey) }
+            validate { it.interestedIn(EVENT_NAME_KEY) }
+            validate { it.interestedIn(BEHOV_NAME_KEY) }
             validate { it.interestedIn("fnr") }
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sakId") }
@@ -41,11 +41,11 @@ class GrunnlagHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val opplysningsTyper = Opplysningstype.values().map { it.name }
 
-        if ((packet[eventNameKey].asText() == "OPPLYSNING:NY") || (
-                opplysningsTyper.contains(
-                    packet[behovNameKey].asText()
+        if ((packet[EVENT_NAME_KEY].asText() == "OPPLYSNING:NY") || (
+            opplysningsTyper.contains(
+                    packet[BEHOV_NAME_KEY].asText()
                 )
-                )
+            )
         ) {
             withLogContext(packet.correlationId) {
                 try {
@@ -69,7 +69,7 @@ class GrunnlagHendelser(
 
                     JsonMessage.newMessage(
                         eventName = "GRUNNLAG:GRUNNLAGENDRET",
-                        map = mapOf(correlationIdKey to packet[correlationIdKey], "sakId" to sakId)
+                        map = mapOf(CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY], "sakId" to sakId)
                     ).also {
                         context.publish(it.toJson())
                         logger.info("Lagt ut melding om grunnlagsendring")

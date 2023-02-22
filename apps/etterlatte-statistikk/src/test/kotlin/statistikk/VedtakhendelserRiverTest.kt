@@ -2,7 +2,7 @@ package no.nav.etterlatte.statistikk
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.statistikk.domain.StoenadRad
@@ -61,7 +61,7 @@ internal class VedtakhendelserRiverTest {
         } returns (null to mockStoenadRad)
         val inspector = testRapid.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals("STATISTIKK:REGISTRERT", inspector.message(0).get(eventNameKey).asText())
+        Assertions.assertEquals("STATISTIKK:REGISTRERT", inspector.message(0).get(EVENT_NAME_KEY).asText())
         Assertions.assertEquals(
             mockStoenadRad.toJson(),
             inspector.message(0).get("stoenad_rad").toString()

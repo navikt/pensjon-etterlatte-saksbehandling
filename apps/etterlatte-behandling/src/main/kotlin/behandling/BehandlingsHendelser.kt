@@ -21,7 +21,7 @@ import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -80,7 +80,7 @@ class BehandlingsHendelser(
                     "BEHANDLING:${hendelse.second.name}",
                     mapOf(
                         "behandlingId" to behandling.id,
-                        correlationIdKey to getCorrelationId(),
+                        CORRELATION_ID_KEY to getCorrelationId(),
                         BehandlingGrunnlagEndret.behandlingObjectKey to behandling,
                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak,
                         BehandlingGrunnlagEndret.sakObjectKey to sak,

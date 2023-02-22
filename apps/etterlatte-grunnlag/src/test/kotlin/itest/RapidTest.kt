@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -103,7 +103,10 @@ internal class RapidTest {
         @Test
         fun `ny enkeltopplysning sender ut melding om at grunnlaget er endret`() {
             inspector.sendTestMessage(melding)
-            Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.inspektør.message(0)[eventNameKey].textValue())
+            Assertions.assertEquals(
+                "GRUNNLAG:GRUNNLAGENDRET",
+                inspector.inspektør.message(0)[EVENT_NAME_KEY].textValue()
+            )
         }
 
         @Test
@@ -126,7 +129,10 @@ internal class RapidTest {
         @Test
         fun `svar på opplysningsbehov sender ut melding om at grunnlaget er endret`() {
             inspector.sendTestMessage(melding)
-            Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.inspektør.message(0)[eventNameKey].textValue())
+            Assertions.assertEquals(
+                "GRUNNLAG:GRUNNLAGENDRET",
+                inspector.inspektør.message(0)[EVENT_NAME_KEY].textValue()
+            )
         }
 
         @Test
@@ -185,7 +191,7 @@ internal class RapidTest {
 
         val packet = inspector.inspektør.message(1)
 
-        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET".toJson(), packet[eventNameKey].toJson())
+        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET".toJson(), packet[EVENT_NAME_KEY].toJson())
         Assertions.assertEquals(
             Grunnlag(
                 soeker = mapOf(

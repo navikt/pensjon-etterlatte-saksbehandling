@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.beregningKey
+import rapidsandrivers.BEREGNING_KEY
 import java.io.FileNotFoundException
 import java.util.*
 
@@ -50,7 +50,7 @@ internal class OmberegningsHendelserTest {
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             beregningDTO.toJson(),
-            inspector.inspektør.message(1).get(beregningKey).toJson()
+            inspector.inspektør.message(1).get(BEREGNING_KEY).toJson()
         )
     }
 

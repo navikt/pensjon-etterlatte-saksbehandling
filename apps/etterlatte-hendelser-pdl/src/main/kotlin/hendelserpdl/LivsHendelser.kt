@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
@@ -57,7 +57,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
                 mapOf(
-                    eventNameKey to "PDL:PERSONHENDELSE",
+                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.DOEDSFALL_V1.toString(),
                     "hendelse_data" to doedshendelse
                 )
@@ -86,7 +86,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
                 mapOf(
-                    eventNameKey to "PDL:PERSONHENDELSE",
+                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString(),
                     "hendelse_data" to utflyttingsHendelse
                 )
@@ -116,7 +116,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
                 mapOf(
-                    eventNameKey to "PDL:PERSONHENDELSE",
+                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString(),
                     "hendelse_data" to forelderBarnRelasjonHendelse
                 )
@@ -140,7 +140,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
                 mapOf(
-                    eventNameKey to "PDL:PERSONHENDELSE",
+                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString(),
                     "hendelse_data" to adressebeskyttelse
                 )

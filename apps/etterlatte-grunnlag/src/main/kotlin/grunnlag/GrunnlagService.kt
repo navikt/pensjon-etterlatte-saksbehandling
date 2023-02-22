@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -111,7 +111,7 @@ class RealGrunnlagService(
         lagreNyeSaksopplysninger(sakId, opplysning)
         val grunnlagEndretMessage = JsonMessage.newMessage(
             eventName = "GRUNNLAG:GRUNNLAGENDRET",
-            map = mapOf(correlationIdKey to getCorrelationId(), "sakId" to sakId)
+            map = mapOf(CORRELATION_ID_KEY to getCorrelationId(), "sakId" to sakId)
         )
         sendToRapid(grunnlagEndretMessage.toJson(), behandlingId)
         logger.info("Lagt ut melding om grunnlagsendring for behandling $behandlingId")

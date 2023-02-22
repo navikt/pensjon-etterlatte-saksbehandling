@@ -7,7 +7,7 @@ import jakarta.jms.Session
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
@@ -175,7 +175,7 @@ class KvitteringMottaker(
     private fun UtbetalingEventDto.toMessage(): String {
         return JsonMessage.newMessage(
             mapOf(
-                eventNameKey to EVENT_NAME_OPPDATERT,
+                EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
                 "utbetaling_response" to this.utbetalingResponse.toMessage()
             )
         ).toJson()

@@ -3,8 +3,6 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.rapidsandrivers.sakId
-import no.nav.etterlatte.libs.common.rapidsandrivers.sakIdKey
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.EventNames.TIL_UTBETALING
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -12,9 +10,11 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.DATO_KEY
+import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.behandlingIdKey
-import rapidsandrivers.datoKey
+import rapidsandrivers.sakId
 
 internal class OpprettVedtakforespoersel(
     rapidsConnection: RapidsConnection,
@@ -25,9 +25,9 @@ internal class OpprettVedtakforespoersel(
     init {
         River(rapidsConnection).apply {
             eventName(OPPRETT_VEDTAK)
-            validate { it.requireKey(sakIdKey) }
-            validate { it.requireKey(datoKey) }
-            validate { it.requireKey(behandlingIdKey) }
+            validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(DATO_KEY) }
+            validate { it.requireKey(BEHANDLING_ID_KEY) }
             correlationId()
         }.register(this)
     }

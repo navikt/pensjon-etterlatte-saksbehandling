@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -75,7 +75,7 @@ class BesvarOpplysningsbehovTest {
         every { pdlMock.hentOpplysningsperson(any(), any()) } answers { mockPerson(fnr = firstArg()) }
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals(Opplysningstype.SOEKER_PDL_V1.name, inspector.message(0).get(behovNameKey).asText())
+        Assertions.assertEquals(Opplysningstype.SOEKER_PDL_V1.name, inspector.message(0).get(BEHOV_NAME_KEY).asText())
         // TODO fikse litt på denne
         Assertions.assertEquals(
             "Ola",

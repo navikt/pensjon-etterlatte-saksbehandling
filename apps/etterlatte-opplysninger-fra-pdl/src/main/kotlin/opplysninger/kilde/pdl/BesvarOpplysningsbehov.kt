@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -23,7 +23,7 @@ internal class BesvarOpplysningsbehov(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.requireKey(behovNameKey) }
+            validate { it.requireKey(BEHOV_NAME_KEY) }
             validate { it.requireKey("sakId") }
             validate { it.requireKey("fnr") }
             validate { it.requireKey("rolle") }
@@ -34,7 +34,7 @@ internal class BesvarOpplysningsbehov(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            if (packet[behovNameKey].asText() in listOf(
+            if (packet[BEHOV_NAME_KEY].asText() in listOf(
                     Opplysningstype.AVDOED_PDL_V1.name,
                     Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1.name,
                     Opplysningstype.SOEKER_PDL_V1.name
@@ -42,7 +42,7 @@ internal class BesvarOpplysningsbehov(
             ) {
                 val fnr = packet["fnr"].textValue()
                 val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
-                val opplysningstype = objectMapper.treeToValue(packet[behovNameKey], Opplysningstype::class.java)!!
+                val opplysningstype = objectMapper.treeToValue(packet[BEHOV_NAME_KEY], Opplysningstype::class.java)!!
                 val person = pdl.hentPerson(fnr, personRolle)
                 val opplysningsperson = pdl.hentOpplysningsperson(fnr, personRolle)
 

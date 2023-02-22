@@ -8,7 +8,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
@@ -118,9 +118,9 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
-                                ?.contains(
-                                    "En feil oppstod under prosessering av vedtak med vedtakId=null"
-                                ) != false &&
+                            ?.contains(
+                                "En feil oppstod under prosessering av vedtak med vedtakId=null"
+                            ) != false &&
                             this.utbetalingResponse.behandlingId == null
                     }
                 }
@@ -160,11 +160,11 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
-                                ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
+                            ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
                             this.utbetalingResponse.feilmelding
-                                ?.contains("behandlingId for nytt vedtak: $behandlingId_andre") == true &&
+                            ?.contains("behandlingId for nytt vedtak: $behandlingId_andre") == true &&
                             this.utbetalingResponse.feilmelding
-                                ?.contains("behandlingId for tidligere utbetaling: $behandlingId_forste") == true &&
+                            ?.contains("behandlingId for tidligere utbetaling: $behandlingId_forste") == true &&
                             this.utbetalingResponse.behandlingId == behandlingId_andre
                     }
                 }
@@ -199,9 +199,9 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
-                                ?.contains(
-                                    "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
-                                ) != false &&
+                            ?.contains(
+                                "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
+                            ) != false &&
                             this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
@@ -358,7 +358,7 @@ class ApplicationIntegrationTest {
         val message = objectMapper.readTree(this)
 
         return Pair(
-            message[eventNameKey].asText(),
+            message[EVENT_NAME_KEY].asText(),
             objectMapper.treeToValue(
                 message["utbetaling_response"]
             )

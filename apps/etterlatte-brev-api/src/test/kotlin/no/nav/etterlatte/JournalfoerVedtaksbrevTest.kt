@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.toJson
@@ -71,7 +71,7 @@ internal class JournalfoerVedtaksbrevTest {
 
         val melding = JsonMessage.newMessage(
             mapOf(
-                eventNameKey to KafkaHendelseType.ATTESTERT.toString(),
+                EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
                 "vedtak" to vedtak
             )
         )
@@ -96,7 +96,7 @@ internal class JournalfoerVedtaksbrevTest {
         assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.attestasjon!!.attesterendeEnhet)
 
         val actualMessage = inspektoer.message(0)
-        assertEquals(BrevEventTypes.JOURNALFOERT.toString(), actualMessage.get(eventNameKey).asText())
+        assertEquals(BrevEventTypes.JOURNALFOERT.toString(), actualMessage.get(EVENT_NAME_KEY).asText())
         assertEquals(brev.id, actualMessage.get("brevId").asLong())
         assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
@@ -109,7 +109,7 @@ internal class JournalfoerVedtaksbrevTest {
 
         val melding = JsonMessage.newMessage(
             mapOf(
-                eventNameKey to KafkaHendelseType.ATTESTERT.toString(),
+                EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
                 "vedtak" to vedtak
             )
         )

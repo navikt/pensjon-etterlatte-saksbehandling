@@ -3,9 +3,9 @@ package no.nav.etterlatte.statistikk.river
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.tekniskTidKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.statistikk.service.StatistikkService
@@ -30,11 +30,12 @@ class VedtakhendelserRiver(
     )
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
     init {
         River(rapidsConnection).apply {
-            validate { it.demandAny(eventNameKey, vedtakshendelser) }
+            validate { it.demandAny(EVENT_NAME_KEY, vedtakshendelser) }
             validate { it.requireKey("vedtak") }
-            validate { it.interestedIn(tekniskTidKey) }
+            validate { it.interestedIn(TEKNISK_TID_KEY) }
             correlationId()
         }.register(this)
     }
@@ -42,7 +43,7 @@ class VedtakhendelserRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             try {
-                val vedtakshendelse = enumValueOf<VedtakHendelse>(packet[eventNameKey].textValue().split(":")[1])
+                val vedtakshendelse = enumValueOf<VedtakHendelse>(packet[EVENT_NAME_KEY].textValue().split(":")[1])
                 val tekniskTid = parseTekniskTid(packet, logger)
                 service.registrerStatistikkForVedtak(
                     objectMapper.treeToValue(packet["vedtak"]),
@@ -58,7 +59,7 @@ class VedtakhendelserRiver(
                         }
                         context.publish(
                             listOfNotNull(
-                                eventNameKey to "STATISTIKK:REGISTRERT",
+                                EVENT_NAME_KEY to "STATISTIKK:REGISTRERT",
                                 sakRad?.let { "sak_rad" to it },
                                 stoenadRad?.let { "stoenad_rad" to it }
                             ).toMap()

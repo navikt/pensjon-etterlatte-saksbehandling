@@ -151,7 +151,7 @@ enum class PdlGradering {
     STRENGT_FORTROLIG_UTLAND,
     STRENGT_FORTROLIG,
     FORTROLIG,
-    UGRADERT;
+    UGRADERT
 }
 
 data class PdlNavn(
@@ -206,7 +206,7 @@ data class PdlEndring(
 enum class PdlEndringstype {
     KORRIGER,
     OPPHOER,
-    OPPRETT;
+    OPPRETT
 }
 
 enum class PdlSivilstandstype {
@@ -219,7 +219,7 @@ enum class PdlSivilstandstype {
     REGISTRERT_PARTNER,
     SEPARERT_PARTNER,
     SKILT_PARTNER,
-    GJENLEVENDE_PARTNER;
+    GJENLEVENDE_PARTNER
 }
 
 data class PdlSivilstand(

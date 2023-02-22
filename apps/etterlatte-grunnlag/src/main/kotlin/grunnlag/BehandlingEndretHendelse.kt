@@ -15,7 +15,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class BehandlingEndretHendlese(
+class BehandlingEndretHendelse(
     rapidsConnection: RapidsConnection,
     private val grunnlagService: GrunnlagService
 ) : River.PacketListener {

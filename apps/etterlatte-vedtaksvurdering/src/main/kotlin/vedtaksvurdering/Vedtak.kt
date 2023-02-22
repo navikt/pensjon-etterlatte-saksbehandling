@@ -53,8 +53,8 @@ data class Vedtak(
         ), // må få inn dette på toppnivå?
         sak = Sak(this.fnr!!, this.sakType!!, this.sakId!!),
         behandling = Behandling(this.behandlingType, behandlingId),
-        type = if (this.vilkaarsResultat?.get("resultat")?.get("utfall")
-            ?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
+        type = if (
+            this.vilkaarsResultat?.get("resultat")?.get("utfall")?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
         ) {
             VedtakType.INNVILGELSE
         } else if (this.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.MANUELT_OPPHOER)) {

@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.UUID
+import java.util.*
 
 internal class JournalfoerVedtaksbrevTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
@@ -102,7 +102,6 @@ internal class JournalfoerVedtaksbrevTest {
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
         assertEquals(adresse.toJson(), actualMessage.get("mottakerAdresse").toJson())
     }
-
 
     @Test
     fun `Attestering av sak med behandlingstype MANUELT_OPPHOER`() {

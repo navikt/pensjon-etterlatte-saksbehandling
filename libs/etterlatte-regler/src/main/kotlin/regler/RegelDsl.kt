@@ -126,14 +126,14 @@ infix fun <G, S1, S2, S> Pair<Pair<RegelMeta, Regel<G, S1>>, Regel<G, S2>>.med(t
         transformer = transformer
     )
 
-infix fun <G, S1, S2, S3, S>
-Triple<Pair<RegelMeta, Regel<G, S1>>, Regel<G, S2>, Regel<G, S3>>.med(transformer: (S1, S2, S3) -> S) =
-    transformerTreRegler(
-        gjelderFra = first.first.gjelderFra,
-        beskrivelse = first.first.beskrivelse,
-        regelReferanse = first.first.regelReferanse,
-        regel1 = first.second,
-        regel2 = second,
-        regel3 = third,
-        transformer = transformer
-    )
+infix fun <G, S1, S2, S3, S> Triple<Pair<RegelMeta, Regel<G, S1>>, Regel<G, S2>, Regel<G, S3>>.med(
+    transformer: (S1, S2, S3) -> S
+) = transformerTreRegler(
+    gjelderFra = first.first.gjelderFra,
+    beskrivelse = first.first.beskrivelse,
+    regelReferanse = first.first.regelReferanse,
+    regel1 = first.second,
+    regel2 = second,
+    regel3 = third,
+    transformer = transformer
+)

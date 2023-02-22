@@ -21,7 +21,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 

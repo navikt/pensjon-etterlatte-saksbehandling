@@ -14,7 +14,7 @@ import java.util.*
 data class Revurdering(
     override val id: UUID,
     override val sak: Long,
-    override val sakType: SakType? = null,
+    override val sakType: SakType,
     override val behandlingOpprettet: LocalDateTime,
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,

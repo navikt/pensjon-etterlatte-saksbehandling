@@ -76,6 +76,7 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                 setBody(
                     BehandlingsBehov(
                         1,
+                        SakType.BARNEPENSJON,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
                         LocalDateTime.now().toString()
                     )
@@ -91,6 +92,7 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                 setBody(
                     Omberegningshendelse(
                         1,
+                        SakType.BARNEPENSJON,
                         LocalDate.now(),
                         RevurderingAarsak.GRUNNBELOEPREGULERING
                     )

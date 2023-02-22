@@ -14,7 +14,7 @@ import java.util.*
 data class ManueltOpphoer(
     override val id: UUID,
     override val sak: Long,
-    override val sakType: SakType? = null,
+    override val sakType: SakType,
     override val behandlingOpprettet: LocalDateTime,
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
@@ -27,6 +27,7 @@ data class ManueltOpphoer(
 
     constructor(
         sak: Long,
+        sakType: SakType,
         persongalleri: Persongalleri,
         opphoerAarsaker: List<ManueltOpphoerAarsak>,
         fritekstAarsak: String?,
@@ -34,6 +35,7 @@ data class ManueltOpphoer(
     ) : this(
         id = UUID.randomUUID(),
         sak = sak,
+        sakType = sakType,
         behandlingOpprettet = LocalDateTime.now(),
         sistEndret = LocalDateTime.now(),
         status = BehandlingStatus.OPPRETTET,

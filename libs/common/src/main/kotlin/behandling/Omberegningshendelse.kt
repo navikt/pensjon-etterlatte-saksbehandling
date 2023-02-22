@@ -5,6 +5,7 @@ import java.util.*
 
 data class Omberegningshendelse(
     val sakId: Long,
+    val sakType: SakType,
     val fradato: LocalDate,
     val aarsak: RevurderingAarsak,
     val omberegningsId: UUID? = null

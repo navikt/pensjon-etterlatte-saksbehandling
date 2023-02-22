@@ -216,6 +216,7 @@ internal fun Route.behandlingRoutes(
 
                 foerstegangsbehandlingService.startFoerstegangsbehandling(
                     behandlingsBehov.sak,
+                    behandlingsBehov.sakType,
                     behandlingsBehov.persongalleri,
                     behandlingsBehov.mottattDato
                 ).also { call.respondText(it.id.toString()) }

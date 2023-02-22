@@ -60,18 +60,21 @@ class RealRevurderingService(
             when (forrigeBehandling) {
                 is Foerstegangsbehandling -> revurderingFactory.opprettRevurdering(
                     forrigeBehandling.sak,
+                    forrigeBehandling.sakType,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )
 
                 is Revurdering -> revurderingFactory.opprettRevurdering(
                     forrigeBehandling.sak,
+                    forrigeBehandling.sakType,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )
 
                 is ManueltOpphoer -> revurderingFactory.opprettRevurdering(
                     forrigeBehandling.sak,
+                    forrigeBehandling.sakType,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )

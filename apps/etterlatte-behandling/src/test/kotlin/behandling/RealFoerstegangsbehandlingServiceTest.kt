@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -65,6 +66,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         } returns Foerstegangsbehandling(
             id = id,
             sak = 1,
+            sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = LocalDateTime.now(),
             sistEndret = LocalDateTime.now(),
             status = BehandlingStatus.OPPRETTET,
@@ -102,6 +104,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         val opprettetBehandling = Foerstegangsbehandling(
             id = UUID.randomUUID(),
             sak = 1,
+            sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = datoNaa,
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
@@ -150,6 +153,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
 
         val resultat = sut.startFoerstegangsbehandling(
             1,
+            SakType.BARNEPENSJON,
             persongalleri,
             datoNaa.toString()
         )

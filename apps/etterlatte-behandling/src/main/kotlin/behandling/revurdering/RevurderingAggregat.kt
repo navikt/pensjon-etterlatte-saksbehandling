@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -25,6 +26,7 @@ class RevurderingAggregat(
 
         fun opprettRevurdering(
             sak: Long,
+            sakType: SakType,
             persongalleri: Persongalleri,
             revurderingAarsak: RevurderingAarsak,
             behandlinger: BehandlingDao,
@@ -34,6 +36,7 @@ class RevurderingAggregat(
             return Revurdering(
                 id = UUID.randomUUID(),
                 sak = sak,
+                sakType = sakType,
                 behandlingOpprettet = LocalDateTime.now(),
                 sistEndret = LocalDateTime.now(),
                 status = BehandlingStatus.OPPRETTET,

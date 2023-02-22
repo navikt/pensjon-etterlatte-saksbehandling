@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -55,6 +56,7 @@ fun foerstegangsbehandling(
 ) = Foerstegangsbehandling(
     id = id,
     sak = sak,
+    sakType = SakType.BARNEPENSJON,
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -80,6 +82,7 @@ fun revurdering(
 ) = Revurdering(
     id = id,
     sak = sak,
+    sakType = SakType.BARNEPENSJON,
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -103,6 +106,7 @@ fun manueltOpphoer(
 ) = ManueltOpphoer(
     id = behandlingId,
     sak = sak,
+    sakType = SakType.BARNEPENSJON,
     behandlingOpprettet = LocalDateTime.now(),
     sistEndret = LocalDateTime.now(),
     status = BehandlingStatus.OPPRETTET,

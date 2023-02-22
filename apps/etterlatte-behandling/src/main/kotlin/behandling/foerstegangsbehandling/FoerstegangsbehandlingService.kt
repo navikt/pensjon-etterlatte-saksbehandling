@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -19,6 +20,7 @@ interface FoerstegangsbehandlingService {
     fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling?
     fun startFoerstegangsbehandling(
         sak: Long,
+        sakType: SakType,
         persongalleri: Persongalleri,
         mottattDato: String
     ): Foerstegangsbehandling
@@ -56,6 +58,7 @@ class RealFoerstegangsbehandlingService(
 
     override fun startFoerstegangsbehandling(
         sak: Long,
+        sakType: SakType,
         persongalleri: Persongalleri,
         mottattDato: String
     ): Foerstegangsbehandling {
@@ -63,6 +66,7 @@ class RealFoerstegangsbehandlingService(
         return inTransaction {
             foerstegangsbehandlingFactory.opprettFoerstegangsbehandling(
                 sak,
+                sakType,
                 mottattDato,
                 persongalleri
             )

@@ -29,7 +29,7 @@ internal sealed class TilstandException : IllegalStateException() {
 sealed class Behandling {
     abstract val id: UUID
     abstract val sak: Long
-    abstract val sakType: SakType?
+    abstract val sakType: SakType
     abstract val behandlingOpprettet: LocalDateTime
     abstract val sistEndret: LocalDateTime
     abstract val status: BehandlingStatus

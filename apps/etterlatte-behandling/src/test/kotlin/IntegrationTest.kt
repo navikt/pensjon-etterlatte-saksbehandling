@@ -110,6 +110,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(
                     BehandlingsBehov(
                         1,
+                        SakType.BARNEPENSJON,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
                         LocalDateTime.now().toString()
                     )
@@ -373,6 +374,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(
                     BehandlingsBehov(
                         1,
+                        SakType.BARNEPENSJON,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
                         LocalDateTime.now().toString()
                     )

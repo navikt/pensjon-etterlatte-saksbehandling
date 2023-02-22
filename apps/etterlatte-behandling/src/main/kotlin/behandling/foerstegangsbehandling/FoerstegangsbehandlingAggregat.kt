@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -28,6 +29,7 @@ class FoerstegangsbehandlingAggregat(
 
         fun opprettFoerstegangsbehandling(
             sak: Long,
+            sakType: SakType,
             mottattDato: String,
             persongalleri: Persongalleri,
             behandlinger: BehandlingDao,
@@ -37,6 +39,7 @@ class FoerstegangsbehandlingAggregat(
             return Foerstegangsbehandling(
                 id = UUID.randomUUID(),
                 sak = sak,
+                sakType = sakType,
                 behandlingOpprettet = LocalDateTime.now(),
                 sistEndret = LocalDateTime.now(),
                 status = BehandlingStatus.OPPRETTET,

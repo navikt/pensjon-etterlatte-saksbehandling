@@ -151,6 +151,7 @@ internal class BehandlingDaoIntegrationTest {
         val virkDato = YearMonth.of(2022, 8)
         val behandling = ManueltOpphoer(
             sak = sak1,
+            sakType = SakType.BARNEPENSJON,
             persongalleri = persongalleri(),
             opphoerAarsaker = listOf(
                 ManueltOpphoerAarsak.SOESKEN_DOED,
@@ -282,6 +283,7 @@ internal class BehandlingDaoIntegrationTest {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
         val behandling = ManueltOpphoer(
             sak = sak1,
+            sakType = SakType.BARNEPENSJON,
             persongalleri = persongalleri(),
             opphoerAarsaker = listOf(
                 ManueltOpphoerAarsak.SOESKEN_DOED,

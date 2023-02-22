@@ -86,6 +86,7 @@ class RealManueltOpphoerService(
             when (forrigeBehandling) {
                 is Foerstegangsbehandling, is Revurdering, is Regulering -> ManueltOpphoer(
                     sak = forrigeBehandling.sak,
+                    sakType = forrigeBehandling.sakType,
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak,

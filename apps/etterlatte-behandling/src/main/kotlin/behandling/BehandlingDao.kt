@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilSystemDefaultLocalDateTime
@@ -171,7 +170,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        sakType = rs.valueOrNull("sakType") { enumValueOf<SakType>(rs.getString("sakType")) },
+        sakType = rs.valueOrError("saktype") { enumValueOf(rs.getString("saktype")) },
         behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         soeknadMottattDato = rs.getTimestamp("soeknad_mottatt_dato").toLocalDateTime(),
@@ -194,7 +193,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asRevurdering(rs: ResultSet) = Revurdering(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        sakType = rs.valueOrNull("sakType") { enumValueOf<SakType>(rs.getString("sakType")) },
+        sakType = rs.valueOrError("saktype") { enumValueOf(rs.getString("saktype")) },
         behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -221,7 +220,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        sakType = rs.valueOrNull("sakType") { enumValueOf<SakType>(rs.getString("sakType")) },
+        sakType = rs.valueOrError("saktype") { enumValueOf(rs.getString("saktype")) },
         behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -512,14 +511,14 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
-    private fun <T> ResultSet.valueOrNull(columnName: String, block: (ResultSet) -> T?): T? {
+    private fun <T> ResultSet.valueOrError(columnName: String, block: (ResultSet) -> T): T {
         return when (
             (1..this.metaData.columnCount).map {
                 this.metaData.getColumnName(it)
             }.contains(columnName)
         ) {
             true -> block(this)
-            false -> null
+            false -> throw RuntimeException("Manglende $columnName i resultat")
         }
     }
 }

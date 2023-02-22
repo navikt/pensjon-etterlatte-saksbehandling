@@ -40,7 +40,7 @@ data class Kravgrunnlag(
     data class UUID30(val value: String)
 
     enum class KravgrunnlagStatus {
-        ANNU, ANOM, AVSL, BEHA, ENDR, FEIL, MANU, NY, SPER;
+        ANNU, ANOM, AVSL, BEHA, ENDR, FEIL, MANU, NY, SPER
     }
 
     data class Grunnlagsperiode(

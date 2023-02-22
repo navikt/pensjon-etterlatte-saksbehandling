@@ -33,7 +33,7 @@ enum class Adressebeskyttelse {
     STRENGT_FORTROLIG_UTLAND,
     STRENGT_FORTROLIG,
     FORTROLIG,
-    UGRADERT;
+    UGRADERT
 }
 
 enum class AdresseType {
@@ -73,7 +73,7 @@ enum class Sivilstatus {
     REGISTRERT_PARTNER,
     SEPARERT_PARTNER,
     SKILT_PARTNER,
-    GJENLEVENDE_PARTNER;
+    GJENLEVENDE_PARTNER
 }
 
 data class Utland(

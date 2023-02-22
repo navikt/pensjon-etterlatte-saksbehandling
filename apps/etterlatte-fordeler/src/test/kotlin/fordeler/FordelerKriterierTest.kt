@@ -1,7 +1,5 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.*
-import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

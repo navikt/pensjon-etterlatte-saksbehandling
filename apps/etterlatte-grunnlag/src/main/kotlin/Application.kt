@@ -3,7 +3,7 @@ package no.nav.etterlatte
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
-import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
+import no.nav.etterlatte.grunnlag.BehandlingEndretHendelse
 import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -52,7 +52,7 @@ class ApplicationBuilder {
         .build().apply {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)
-            BehandlingEndretHendlese(this, grunnlagService)
+            BehandlingEndretHendelse(this, grunnlagService)
         }
 
     private fun publiser(melding: String, key: UUID) {

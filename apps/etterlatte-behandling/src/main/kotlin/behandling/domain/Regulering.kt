@@ -23,4 +23,21 @@ data class Regulering(
     val revurderingsaarsak: RevurderingAarsak = RevurderingAarsak.GRUNNBELOEPREGULERING
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.OMREGNING
+
+    override fun tilOpprettet() = endreTilStatus(BehandlingStatus.OPPRETTET)
+
+    override fun tilVilkaarsvurdert(utfall: VilkaarsvurderingUtfall?) = endreTilStatus(BehandlingStatus.VILKAARSVURDERT)
+
+    override fun tilBeregnet() = endreTilStatus(BehandlingStatus.BEREGNET)
+
+    override fun tilFattetVedtak() = endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
+
+    override fun tilAttestert() = endreTilStatus(BehandlingStatus.ATTESTERT)
+
+    override fun tilReturnert() = endreTilStatus(BehandlingStatus.RETURNERT)
+
+    override fun tilIverksatt() = endreTilStatus(BehandlingStatus.IVERKSATT)
+
+    private fun endreTilStatus(status: BehandlingStatus) =
+        this.copy(status = status, sistEndret = LocalDateTime.now())
 }

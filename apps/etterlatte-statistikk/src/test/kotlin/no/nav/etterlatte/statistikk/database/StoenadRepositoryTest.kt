@@ -61,8 +61,10 @@ class StoenadRepositoryTest {
 
     @AfterEach
     fun afterEach() {
-        dataSource.connection.prepareStatement("TRUNCATE TABLE stoenad")
-            .executeUpdate()
+        dataSource.connection.use {
+            it.prepareStatement("TRUNCATE TABLE stoenad")
+                .executeUpdate()
+        }
     }
 
     @Test

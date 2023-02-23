@@ -1,8 +1,5 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -146,8 +143,8 @@ internal class AvstemmingDaoIntegrationTest {
 
     @AfterEach
     fun afterEach() {
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("TRUNCATE avstemming").asExecute)
+        dataSource.connection.use {
+            it.prepareStatement(""" TRUNCATE avstemming""").execute()
         }
     }
 

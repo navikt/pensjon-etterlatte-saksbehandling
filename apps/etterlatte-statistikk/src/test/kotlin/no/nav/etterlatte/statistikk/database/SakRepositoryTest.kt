@@ -61,8 +61,10 @@ class SakRepositoryTest {
 
     @AfterEach
     fun afterEach() {
-        dataSource.connection.prepareStatement("TRUNCATE TABLE sak")
-            .executeUpdate()
+        dataSource.connection.use {
+            it.prepareStatement("TRUNCATE TABLE sak")
+                .executeUpdate()
+        }
     }
 
     @Test

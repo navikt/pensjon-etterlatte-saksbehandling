@@ -3,9 +3,6 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.spyk
 import io.mockk.verify
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -118,9 +115,9 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains(
-                                "En feil oppstod under prosessering av vedtak med vedtakId=null"
-                            ) != false &&
+                                ?.contains(
+                                    "En feil oppstod under prosessering av vedtak med vedtakId=null"
+                                ) != false &&
                             this.utbetalingResponse.behandlingId == null
                     }
                 }
@@ -160,11 +157,11 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
+                                ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains("behandlingId for nytt vedtak: $behandlingId_andre") == true &&
+                                ?.contains("behandlingId for nytt vedtak: $behandlingId_andre") == true &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains("behandlingId for tidligere utbetaling: $behandlingId_forste") == true &&
+                                ?.contains("behandlingId for tidligere utbetaling: $behandlingId_forste") == true &&
                             this.utbetalingResponse.behandlingId == behandlingId_andre
                     }
                 }
@@ -199,9 +196,9 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains(
-                                "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
-                            ) != false &&
+                                ?.contains(
+                                    "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
+                                ) != false &&
                             this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
@@ -326,8 +323,8 @@ class ApplicationIntegrationTest {
     fun afterEach() {
         rapidsConnection.reset()
 
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("TRUNCATE utbetaling CASCADE").asExecute)
+        dataSource.connection.use {
+            it.prepareStatement(""" TRUNCATE utbetaling CASCADE""").execute()
         }
     }
 

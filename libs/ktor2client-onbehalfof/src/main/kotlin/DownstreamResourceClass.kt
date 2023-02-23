@@ -15,6 +15,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.contentType
+import no.nav.etterlatte.token.AccessTokenWrapper
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
@@ -23,6 +24,11 @@ class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
     private val httpClient: HttpClient = defaultHttpClient
 ) {
+    suspend fun get(
+        resource: Resource,
+        accessToken: AccessTokenWrapper
+    ): Result<Resource, ThrowableErrorMessage> = get(resource, accessToken.accessToken)
+
     suspend fun get(
         resource: Resource,
         accessToken: String
@@ -37,6 +43,12 @@ class DownstreamResourceClient(
                 Ok(resource.addResponse(response))
             }
     }
+
+    suspend fun post(
+        resource: Resource,
+        accessToken: AccessTokenWrapper,
+        postBody: Any
+    ): Result<Resource, ThrowableErrorMessage> = post(resource, accessToken.accessToken, postBody)
 
     suspend fun post(
         resource: Resource,

@@ -42,7 +42,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                         clientId = clientId,
                         url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"
                     ),
-                    accessToken = accessToken.accessToken
+                    accessToken = accessToken
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

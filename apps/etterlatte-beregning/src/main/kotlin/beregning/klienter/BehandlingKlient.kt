@@ -41,7 +41,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/behandlinger/$behandlingId"
                     ),
-                    accessToken = accessToken.accessToken
+                    accessToken = accessToken
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -65,8 +65,8 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/beregn")
 
         val response = when (commit) {
-            false -> downstreamResourceClient.get(resource, accessToken.accessToken)
-            true -> downstreamResourceClient.post(resource, accessToken.accessToken, "{}")
+            false -> downstreamResourceClient.get(resource, accessToken)
+            true -> downstreamResourceClient.post(resource, accessToken, "{}")
         }
 
         return response.mapBoth(

@@ -28,14 +28,23 @@ class DownstreamResourceClient(
         accessToken: String
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient
-            .getOnBehalfOfAccessTokenForResource(scopes, accessToken)
-            .andThen { oboAccessToken ->
-                fetchFromDownstreamApi(resource, oboAccessToken)
-            }
-            .andThen { response ->
-                Ok(resource.addResponse(response))
-            }
+
+        return try {
+            azureAdClient
+                .getOnBehalfOfAccessTokenForResource(scopes, accessToken)
+                .andThen { oboAccessToken ->
+                    fetchFromDownstreamApi(resource, oboAccessToken)
+                }
+                .andThen { response ->
+                    Ok(resource.addResponse(response))
+                }
+        } catch (e: Error) {
+            azureAdClient
+                .getAccessTokenForResource(scopes)
+                .let { fetchFromDownstreamApi(resource, it) }
+                .let { resource.addResponse(it) }
+                .let { Ok(it) }
+        }
     }
 
     suspend fun post(

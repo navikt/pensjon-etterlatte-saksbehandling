@@ -27,7 +27,22 @@ class DownstreamResourceClient(
     suspend fun get(
         resource: Resource,
         accessToken: AccessTokenWrapper
-    ): Result<Resource, ThrowableErrorMessage> = get(resource, accessToken.accessToken)
+    ): Result<Resource, ThrowableErrorMessage> {
+        val scopes = listOf("api://${resource.clientId}/.default")
+        val result = if (accessToken.oid == accessToken.sub) {
+            azureAdClient.getAccessTokenForResource(scopes)
+        } else {
+            azureAdClient
+                .getOnBehalfOfAccessTokenForResource(scopes, accessToken.accessToken)
+        }
+        return result
+            .andThen { oboAccessToken ->
+                fetchFromDownstreamApi(resource, oboAccessToken)
+            }
+            .andThen { response ->
+                Ok(resource.addResponse(response))
+            }
+    }
 
     suspend fun get(
         resource: Resource,

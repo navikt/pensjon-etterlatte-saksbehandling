@@ -1,7 +1,7 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.opplysningerfrasoknad.Opplysningsuthenter
 import no.nav.etterlatte.opplysningerfrasoknad.StartUthentingFraSoeknad
+import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
 import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {

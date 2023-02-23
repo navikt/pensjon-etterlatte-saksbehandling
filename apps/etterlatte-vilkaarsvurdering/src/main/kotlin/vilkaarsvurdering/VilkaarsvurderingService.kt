@@ -11,9 +11,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.BarnepensjonVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -119,22 +120,27 @@ class VilkaarsvurderingService(
         sak: Sak,
         grunnlag: Grunnlag,
         virkningstidspunkt: Virkningstidspunkt
-    ) = when (sak.sakType) {
+    ): List<Vilkaar> = when (sak.sakType) {
         SakType.BARNEPENSJON ->
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
                     BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
 
                 BehandlingType.REVURDERING ->
-                    mapVilkaarRevurdering(requireNotNull(behandling.revurderingsaarsak))
+                    vilkaarRevurderingBarnepensjon(requireNotNull(behandling.revurderingsaarsak))
 
                 BehandlingType.OMREGNING, BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
                     "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                 )
             }
-
         SakType.OMSTILLINGSSTOENAD ->
-            throw IllegalArgumentException("Støtter ikke vilkårsvurdering for sakType=${sak.sakType}")
+            when (behandling.behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING ->
+                    OmstillingstoenadVilkaar.inngangsvilkaar()
+                else -> throw IllegalArgumentException(
+                    "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
+                )
+            }
     }
 
     private suspend fun tilstandssjekkFoerKjoering(
@@ -164,7 +170,7 @@ class VilkaarsvurderingService(
         }
     }
 
-    private fun mapVilkaarRevurdering(revurderingAarsak: RevurderingAarsak): List<Vilkaar> {
+    private fun vilkaarRevurderingBarnepensjon(revurderingAarsak: RevurderingAarsak): List<Vilkaar> {
         logger.info("Vilkårsvurdering har revurderingsårsak $revurderingAarsak")
         return when (revurderingAarsak) {
             RevurderingAarsak.SOEKER_DOD -> BarnepensjonVilkaar.loependevilkaar()

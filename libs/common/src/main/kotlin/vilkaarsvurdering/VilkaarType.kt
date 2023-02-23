@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
 enum class VilkaarType(val rekkefoelge: Int) {
+    // Barnepensjon
     DOEDSFALL_FORELDER(100),
     ALDER_BARN(200),
     ALDER_BARN_UNNTAK_UTDANNING(201),
@@ -16,5 +17,8 @@ enum class VilkaarType(val rekkefoelge: Int) {
     FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_AVTALEFESTET_PENSJON(404),
     FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_LOVFESTET_PENSJONSORDNING(405),
     YRKESSKADE_AVDOED(500),
-    FORMAAL(600)
+    FORMAAL(600),
+
+    // Omstillingstønad
+    OMS_TESTVILKAAR(100) // TODO barnepensjonvilkår bør prefixes med BP_
 }

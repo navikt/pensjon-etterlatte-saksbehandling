@@ -75,6 +75,7 @@ export const Resultat: React.FC<Props> = ({
     setKommentar('')
   }
 
+  const sakType = 'Barnepensjon' // TODO finnes pr for å gjøre dette tilgjengelig fra behandling (EY-1804)
   const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'
   const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
   return (
@@ -83,7 +84,7 @@ export const Resultat: React.FC<Props> = ({
         <VilkaarsvurderingContent>
           <HeadingWrapper>
             <Heading size="small" level={'2'}>
-              Er vilkårene for barnepensjon oppfylt?
+              Er vilkårene for {sakType.toLowerCase()} oppfylt?
             </Heading>
           </HeadingWrapper>
           {vilkaarsvurdering.resultat && (
@@ -93,7 +94,7 @@ export const Resultat: React.FC<Props> = ({
               </TekstWrapper>
               {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
                 <BodyShort>
-                  Barnepensjon er innvilget f.o.m {formaterStringDato(vilkaarsvurdering.virkningstidspunkt)}
+                  {sakType} er innvilget f.o.m {formaterStringDato(vilkaarsvurdering.virkningstidspunkt)}
                 </BodyShort>
               )}
               {vilkaarsvurdering?.resultat?.kommentar && (

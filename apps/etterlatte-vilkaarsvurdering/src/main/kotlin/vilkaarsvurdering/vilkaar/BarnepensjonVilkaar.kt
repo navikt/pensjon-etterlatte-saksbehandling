@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vilkaarsvurdering.barnepensjon
+package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.ktor.AccessTokenWrapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 interface VilkaarsvurderingKlient {
-    suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingDto
+    suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: AccessTokenWrapper): VilkaarsvurderingDto
 }
 
 class VilkaarsvurderingKlientException(override val message: String, override val cause: Throwable) :
@@ -29,7 +30,10 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
     private val clientId = config.getString("vilkaarsvurdering.client.id")
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
 
-    override suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: String): VilkaarsvurderingDto {
+    override suspend fun hentVilkaarsvurdering(
+        behandlingId: UUID,
+        accessToken: AccessTokenWrapper
+    ): VilkaarsvurderingDto {
         logger.info("Henter vilkaarsvurdering med behandlingid $behandlingId")
         return retry<VilkaarsvurderingDto> {
             downstreamResourceClient
@@ -38,7 +42,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                         clientId = clientId,
                         url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"
                     ),
-                    accessToken = accessToken
+                    accessToken = accessToken.accessToken
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

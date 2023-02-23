@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnla
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.ktor.AccessTokenWrapper
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
@@ -47,7 +48,7 @@ class BeregningService(
 
     fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
 
-    suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
+    suspend fun lagreBeregning(behandlingId: UUID, accessToken: AccessTokenWrapper): Beregning {
         logger.info("Oppretter barnepensjonberegning for behandlingId=$behandlingId")
         return tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
             coroutineScope {
@@ -229,7 +230,7 @@ class BeregningService(
 
     private suspend fun tilstandssjekkFoerKjoerning(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         block: suspend () -> Beregning
     ): Beregning {
         val kanBeregne = behandlingKlient.beregn(behandlingId, accessToken, false)

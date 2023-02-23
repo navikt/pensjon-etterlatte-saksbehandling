@@ -19,6 +19,7 @@ interface BehandlingStatusService {
     fun sjekkOmKanReturnereVedtak(behandlingId: UUID)
     fun settReturnertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
     fun settIverksattVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
 }
 
 class BehandlingStatusServiceImpl constructor(
@@ -93,6 +94,10 @@ class BehandlingStatusServiceImpl constructor(
             lagreNyBehandlingStatus(behandling.tilIverksatt(), LocalDateTime.now())
             registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
         }
+    }
+
+    override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning() {
+        behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
     }
 
     fun registrerVedtakHendelse(behandlingId: UUID, vedtakHendelse: VedtakHendelse, hendelseType: HendelseType) {

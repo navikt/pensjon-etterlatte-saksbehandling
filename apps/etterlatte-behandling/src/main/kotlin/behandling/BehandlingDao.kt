@@ -154,6 +154,17 @@ class BehandlingDao(private val connection: () -> Connection) {
         return stmt.executeQuery().behandlingsListe()
     }
 
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning() {
+        val stmt = connection().prepareStatement(
+            """
+                SET status = ${BehandlingStatus.VILKAARSVURDERT} 
+                FROM behandling 
+                WHERE status NOT IN ${BehandlingStatus.skalIkkeOmberegnesVedGRegulering()}
+            """.trimIndent()
+        )
+        stmt.executeQuery()
+    }
+
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),

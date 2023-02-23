@@ -66,7 +66,9 @@ internal class GrunnlagDaoIntegrationTest {
 
     @AfterEach
     fun afterEach() {
-        dataSource.connection.prepareStatement(""" TRUNCATE grunnlagshendelse""").execute()
+        dataSource.connection.use {
+            it.prepareStatement(""" TRUNCATE grunnlagshendelse""").execute()
+        }
     }
 
     @Test

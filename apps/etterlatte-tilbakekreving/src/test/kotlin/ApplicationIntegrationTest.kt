@@ -2,9 +2,6 @@ package no.nav.etterlatte
 
 import io.mockk.spyk
 import io.mockk.verify
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.testsupport.TestContainers
 import no.nav.etterlatte.testsupport.TestRapid
@@ -88,8 +85,8 @@ class ApplicationIntegrationTest {
 
     @AfterEach
     fun afterEach() {
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("TRUNCATE tilbakekreving CASCADE").asExecute)
+        dataSource.connection.use {
+            it.prepareStatement(""" TRUNCATE tilbakekreving CASCADE""").execute()
         }
     }
 

@@ -96,8 +96,10 @@ internal fun Route.behandlingsstatusRoutes(
         }
     }
 
-    route("/behandlinger/settTilbakeTilVilkaarsvurdert") {
-        behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+    route("/behandlinger") {
+        get("/settTilbakeTilVilkaarsvurdert") {
+            behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+        }
     }
 }
 

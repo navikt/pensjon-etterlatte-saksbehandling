@@ -8,7 +8,7 @@ import javax.sql.DataSource
 
 object DataSourceBuilder {
 
-    private const val MAX_POOL_SIZE = 5
+    private const val MAX_POOL_SIZE = 10
 
     fun createDataSource(env: Map<String, String>, maxPoolSize: Int = MAX_POOL_SIZE): DataSource {
         val jdbcUrl = jdbcUrl(

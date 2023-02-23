@@ -157,12 +157,14 @@ class BehandlingDao(private val connection: () -> Connection) {
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning() {
         val stmt = connection().prepareStatement(
             """
-                SET status = ${BehandlingStatus.VILKAARSVURDERT} 
-                FROM behandling 
-                WHERE status NOT IN ${BehandlingStatus.skalIkkeOmberegnesVedGRegulering()}
+                UPDATE behandling
+                SET status = '${BehandlingStatus.VILKAARSVURDERT}'
+                WHERE status not in (${
+            BehandlingStatus.skalIkkeOmberegnesVedGRegulering().joinToString(", ") { "'$it'" }
+            })
             """.trimIndent()
         )
-        stmt.executeQuery()
+        stmt.executeUpdate()
     }
 
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(

@@ -36,6 +36,9 @@ internal class ReguleringsforespoerselTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
+            vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
+        }
+        verify(exactly = 1) {
             vedtakServiceMock.hentAlleSaker()
         }
     }

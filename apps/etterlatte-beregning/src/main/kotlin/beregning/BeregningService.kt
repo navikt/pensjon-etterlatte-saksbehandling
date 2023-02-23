@@ -24,12 +24,12 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnla
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.ktor.AccessTokenWrapper
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
+import no.nav.etterlatte.token.AccessTokenWrapper
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.YearMonth

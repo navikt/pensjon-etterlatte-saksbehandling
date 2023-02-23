@@ -24,6 +24,7 @@ include(
     "apps:etterlatte-statistikk",
     "apps:etterlatte-vilkaarsvurdering",
     "libs:ktor2client-auth-clientcredentials",
+    "libs:etterlatte-token-model",
     "libs:common",
     "libs:ktor2client-onbehalfof",
     "libs:rapidsandrivers-extras",

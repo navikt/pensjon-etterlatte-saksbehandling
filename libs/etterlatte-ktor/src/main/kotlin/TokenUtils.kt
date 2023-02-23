@@ -7,6 +7,8 @@ import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.auth.principal
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.sak.Saksbehandler
+import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
@@ -45,14 +47,6 @@ inline val PipelineContext<*, ApplicationCall>.accesstokenWrapper: AccessTokenWr
 
 data class SaksbehandlerProvider(val saksbehandler: (call: ApplicationCall) -> Saksbehandler) {
     fun invoke(call: ApplicationCall) = saksbehandler.invoke(call)
-}
-
-data class AccessTokenWrapper(val accessToken: String, val oid: String?, val sub: String?)
-
-enum class Claims {
-    NAVident,
-    oid, // ktlint-disable enum-entry-name-case
-    sub // ktlint-disable enum-entry-name-case
 }
 
 fun JwtTokenClaims.getClaim(claim: Claims) = getStringClaim(claim.name)

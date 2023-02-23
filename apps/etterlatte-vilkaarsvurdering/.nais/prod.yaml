@@ -40,6 +40,9 @@ spec:
         databases:
           - name: vilkaarsvurdering
             envVarPrefix: DB
+        flags:
+          - name: max_connections
+            value: "100"
   azure:
     application:
       enabled: true

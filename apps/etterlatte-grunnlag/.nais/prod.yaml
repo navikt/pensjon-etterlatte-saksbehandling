@@ -29,6 +29,9 @@ spec:
         databases:
           - name: grunnlag
             envVarPrefix: DB
+        flags:
+          - name: max_connections
+            value: "100"
   #startup:
   #  initialDelay: 7
   #  failureThreshold: 10

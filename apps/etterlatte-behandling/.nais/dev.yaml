@@ -19,6 +19,9 @@ spec:
         databases:
           - name: sakogbehandlinger
             envVarPrefix: DB
+        flags:
+          - name: max_connections
+            value: "100"
   liveness:
     initialDelay: 5
     path: /health/isalive

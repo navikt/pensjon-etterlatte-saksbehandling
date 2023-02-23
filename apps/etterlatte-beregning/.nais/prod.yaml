@@ -51,6 +51,9 @@ spec:
         databases:
           - name: beregning
             envVarPrefix: DB
+        flags:
+          - name: max_connections
+            value: "100"
   env:
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering

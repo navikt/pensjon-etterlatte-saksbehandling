@@ -56,15 +56,25 @@ data class AzureAdOpenIdConfiguration(
     val authorizationEndpoint: String
 )
 
-data class OboTokenRequest(
-    val scopes: List<String>,
-    val accessToken: String
+sealed class TokenRequest(
+    open val scopes: List<String>
 )
+
+data class OboTokenRequest(
+    override val scopes: List<String>,
+    val accessToken: String
+) : TokenRequest(scopes)
+
+data class ClientCredentialsTokenRequest(override val scopes: List<String>) : TokenRequest(scopes)
 
 class AzureAdClient(
     private val config: Config,
     private val httpClient: HttpClient = defaultHttpClient,
     private val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
+        .newBuilder()
+        .expireAfterAccess(5, TimeUnit.SECONDS)
+        .buildAsync(),
+    private val clientCredentialsCache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> = Caffeine
         .newBuilder()
         .expireAfterAccess(5, TimeUnit.SECONDS)
         .buildAsync()
@@ -121,15 +131,31 @@ class AzureAdClient(
     }
 
     // Service-to-service access token request (client credentials grant)
-    suspend fun getAccessTokenForResource(scopes: List<String>): AccessToken =
-        fetchAccessToken(
-            Parameters.build {
-                append("client_id", config.getString("azure.app.client.id"))
-                append("client_secret", config.getString("azure.app.client.secret"))
-                append("scope", scopes.joinToString(separator = " "))
-                append("grant_type", "client_credentials")
+    suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> {
+        val context = currentCoroutineContext()
+
+        val value = clientCredentialsCache.get(ClientCredentialsTokenRequest(scopes)) { req, _ ->
+            CoroutineScope(context).future {
+                fetchAccessToken(
+                    Parameters.build {
+                        append("client_id", config.getString("azure.app.client.id"))
+                        append("client_secret", config.getString("azure.app.client.secret"))
+                        append("scope", scopes.joinToString(separator = " "))
+                        append("grant_type", "client_credentials")
+                    }
+                )
             }
-        )
+        }
+
+        return value.handle { token, exception ->
+            if (exception != null) {
+                Err(ThrowableErrorMessage("Henting av token feilet", exception))
+            } else {
+                Ok(token)
+            }
+        }.asDeferred()
+            .await()
+    }
 
     // Service-to-service access token request (on-behalf-of flow)
     suspend fun getOnBehalfOfAccessTokenForResource(

@@ -34,8 +34,9 @@ class DownstreamResourceClient(
         accessToken: String
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient
+        val result = azureAdClient
             .getOnBehalfOfAccessTokenForResource(scopes, accessToken)
+        return result
             .andThen { oboAccessToken ->
                 fetchFromDownstreamApi(resource, oboAccessToken)
             }

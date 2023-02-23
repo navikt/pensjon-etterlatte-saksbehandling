@@ -140,9 +140,17 @@ class AzureAdClient(
                 append("grant_type", "client_credentials")
             }
         }
+        return hentAccessToken(params, clientCredentialsCache, ClientCredentialsTokenRequest(scopes))
+    }
+
+    private suspend fun <T : TokenRequest> hentAccessToken(
+        params: (T) -> Parameters,
+        asyncCache: AsyncCache<T, AccessToken>,
+        request: T
+    ): Result<AccessToken, ThrowableErrorMessage> {
         val context = currentCoroutineContext()
 
-        val value = clientCredentialsCache.get(ClientCredentialsTokenRequest(scopes)) { req, _ ->
+        val value = asyncCache.get(request) { req, _ ->
             CoroutineScope(context).future {
                 fetchAccessToken(params.invoke(req))
             }
@@ -174,20 +182,7 @@ class AzureAdClient(
                 append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
             }
         }
-        val context = currentCoroutineContext()
-
-        val value = cache.get(OboTokenRequest(scopes, accessToken)) { req, _ ->
-            CoroutineScope(context).future { fetchAccessToken(params.invoke(req)) }
-        }
-
-        return value.handle { token, exception ->
-            if (exception != null) {
-                Err(ThrowableErrorMessage("Henting av token feilet", exception))
-            } else {
-                Ok(token)
-            }
-        }.asDeferred()
-            .await()
+        return hentAccessToken(params, cache, OboTokenRequest(scopes, accessToken))
     }
 
     // Graph API lookup (on-behalf-of flow)

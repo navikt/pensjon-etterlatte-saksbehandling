@@ -4,9 +4,9 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.FNR_3
+import no.nav.etterlatte.beregning.regler.barnepensjon.beregnBarnepensjon1967Regel
+import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
-import no.nav.etterlatte.beregning.regler.beregnBarnepensjon1967Regel
-import no.nav.etterlatte.beregning.regler.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.toBeregningstall
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import org.junit.jupiter.api.Test

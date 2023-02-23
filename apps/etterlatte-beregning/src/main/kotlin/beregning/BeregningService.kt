@@ -5,11 +5,14 @@ import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.beregning.regler.AvdoedForelder
-import no.nav.etterlatte.beregning.regler.BarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.Beregningstall
+import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
+import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
-import no.nav.etterlatte.beregning.regler.kroneavrundetBarnepensjonRegel
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.Avdoed
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.OmstillingstoenadGrunnlag
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegel
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -54,8 +57,13 @@ class BeregningService(
             val sak = behandlingKlient.hentSak(behandling.sak, bruker)
 
             val beregning = when (sak.sakType) {
+<<<<<<< HEAD
                 SakType.BARNEPENSJON -> beregnBarnepensjon(behandling, bruker)
                 SakType.OMSTILLINGSSTOENAD -> beregnOmstillingstoenad(behandling, bruker)
+=======
+                SakType.BARNEPENSJON -> beregnBarnepensjon(behandling, accessToken)
+                SakType.OMSTILLINGSSTOENAD -> beregnOmstillingsstoenad(behandling, accessToken)
+>>>>>>> 6ed0e77e7 (wip)
             }
 
             beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
@@ -64,6 +72,7 @@ class BeregningService(
         }
     }
 
+<<<<<<< HEAD
     private suspend fun beregnOmstillingstoenad(behandling: DetaljertBehandling, bruker: Bruker): Beregning {
         logger.info("Beregner omstillingstønad for behandlingId=${behandling.id}")
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
@@ -73,7 +82,33 @@ class BeregningService(
                 vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
                     .resultat?.utfall
                     ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
+=======
+    private suspend fun beregnOmstillingsstoenad(behandling: DetaljertBehandling, accessToken: String): Beregning {
+        logger.info("Beregner omstillingstønad for behandlingId=${behandling.id}")
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
+        val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, accessToken)
+        val behandlingType = behandling.behandlingType
+        val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
+        val beregningsgrunnlag = opprettBeregningsgrunnlagOmstillingsstoenad(FASTSATT_TRYGDETID_PILOT)
+
+        logger.info("Beregner omstillingstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
+
+        return when (behandlingType) {
+            BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.OMREGNING ->
+                beregnOmstillingsstoenad(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+
+            BehandlingType.REVURDERING -> {
+                when (requireNotNull(vilkaarsvurdering.resultat?.utfall)) {
+                    VilkaarsvurderingUtfall.OPPFYLT ->
+                        beregnOmstillingsstoenad(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
+                        beregnOpphoer(behandling, grunnlag, virkningstidspunkt)
+                }
+>>>>>>> 6ed0e77e7 (wip)
             }
+
+            else -> throw IllegalArgumentException("Kan ikke beregne manuelt opphør med en vilkårsvurdering!")
         }
     }
 
@@ -109,11 +144,9 @@ class BeregningService(
                     "som ikke kan beregnes som et manuelt opphør."
             )
         }
-        val beregningsgrunnlag = opprettBeregningsgrunnlag(requireNotNull(grunnlag.sak.hentSoeskenjustering()))
         return beregnOpphoer(
             behandling = behandling,
             grunnlag = grunnlag,
-            beregningsgrunnlag = beregningsgrunnlag,
             virkningstidspunkt = behandling.virkningstidspunkt!!.dato
         )
     }
@@ -139,7 +172,7 @@ class BeregningService(
                         beregn(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
-                        beregnOpphoer(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+                        beregnOpphoer(behandling, grunnlag, virkningstidspunkt)
                 }
             }
 
@@ -196,10 +229,58 @@ class BeregningService(
         }
     }
 
+    private fun beregnOmstillingsstoenad(
+        behandling: DetaljertBehandling,
+        grunnlag: Grunnlag,
+        beregningsgrunnlag: OmstillingstoenadGrunnlag,
+        virkningstidspunkt: YearMonth
+    ): Beregning {
+        val resultat = kroneavrundetOmstillingstoenadRegel.eksekver(
+            grunnlag = beregningsgrunnlag,
+            periode = RegelPeriode(virkningstidspunkt.atDay(1))
+        )
+
+        return when (resultat) {
+            is RegelkjoeringResultat.Suksess ->
+                beregning(
+                    behandling = behandling,
+                    grunnlag = grunnlag,
+                    beregningsperioder = resultat.periodiserteResultater.map { periodisertResultat ->
+                        logger.info(
+                            "Beregnet barnepensjon for periode fra={} til={} og beløp={} med regler={}",
+                            periodisertResultat.periode.fraDato,
+                            periodisertResultat.periode.tilDato,
+                            periodisertResultat.resultat.verdi,
+                            periodisertResultat.resultat.finnAnvendteRegler()
+                                .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet()
+                        )
+
+                        val grunnbeloep = requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep()) {
+                            "Anvendt grunnbeløp ikke funnet for perioden"
+                        }
+
+                        Beregningsperiode(
+                            datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
+                            datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
+                            utbetaltBeloep = periodisertResultat.resultat.verdi,
+                            soeskenFlokk = null,
+                            grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
+                            grunnbelop = grunnbeloep.grunnbeloep,
+                            trygdetid = beregningsgrunnlag.avdoed.verdi.trygdetid.toInteger(),
+                            regelResultat = objectMapper.valueToTree(periodisertResultat),
+                            regelVersjon = periodisertResultat.reglerVersjon
+                        )
+                    }
+                )
+
+            is RegelkjoeringResultat.UgyldigPeriode ->
+                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+        }
+    }
+
     private fun beregnOpphoer(
         behandling: DetaljertBehandling,
         grunnlag: Grunnlag,
-        beregningsgrunnlag: BarnepensjonGrunnlag,
         virkningstidspunkt: YearMonth
     ): Beregning {
         val grunnbeloep = GrunnbeloepRepository.hentGjeldendeGrunnbeloep(virkningstidspunkt)
@@ -212,10 +293,10 @@ class BeregningService(
                     datoFOM = virkningstidspunkt,
                     datoTOM = null,
                     utbetaltBeloep = 0,
-                    soeskenFlokk = beregningsgrunnlag.soeskenKull.verdi.map { it.value },
+                    soeskenFlokk = null,
                     grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                     grunnbelop = grunnbeloep.grunnbeloep,
-                    trygdetid = beregningsgrunnlag.avdoedForelder.verdi.trygdetid.toInteger()
+                    trygdetid = 0
                 )
             )
         )
@@ -246,6 +327,14 @@ class BeregningService(
             verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_PILOT)),
             kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Instant.now(), "1"),
             beskrivelse = "Trygdetid avdøed forelder"
+        )
+    )
+
+    private fun opprettBeregningsgrunnlagOmstillingsstoenad(trygdetid: Int) = OmstillingstoenadGrunnlag(
+        avdoed = FaktumNode(
+            verdi = Avdoed(Beregningstall(trygdetid)),
+            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Instant.now(), "1"),
+            beskrivelse = "Trygdetid avdøed ektefelle"
         )
     )
 

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.beregning.regler
 
 import no.nav.etterlatte.beregning.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.beregning.regler.sats.grunnbeloep
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.libs.regler.Node
 import no.nav.etterlatte.libs.regler.SubsumsjonsNode
 import no.nav.etterlatte.libs.regler.Visitor

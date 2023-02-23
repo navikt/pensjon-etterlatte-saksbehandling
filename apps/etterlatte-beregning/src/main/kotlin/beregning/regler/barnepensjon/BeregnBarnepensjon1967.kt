@@ -1,7 +1,8 @@
-package no.nav.etterlatte.beregning.regler
+package no.nav.etterlatte.beregning.regler.barnepensjon
 
-import no.nav.etterlatte.beregning.regler.sats.barnepensjonSatsRegel
-import no.nav.etterlatte.beregning.regler.trygdetidsfaktor.trygdetidsFaktor
+import no.nav.etterlatte.beregning.regler.Beregningstall
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
+import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelMeta

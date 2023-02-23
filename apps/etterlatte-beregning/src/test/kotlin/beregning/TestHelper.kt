@@ -1,5 +1,7 @@
 package no.nav.etterlatte.beregning.regler
 
+import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
+import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode

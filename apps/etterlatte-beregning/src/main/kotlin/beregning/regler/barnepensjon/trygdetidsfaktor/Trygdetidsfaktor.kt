@@ -1,9 +1,9 @@
-package no.nav.etterlatte.beregning.regler.trygdetidsfaktor
+package no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor
 
-import no.nav.etterlatte.beregning.regler.AvdoedForelder
-import no.nav.etterlatte.beregning.regler.BP_1967_DATO
-import no.nav.etterlatte.beregning.regler.BarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.Beregningstall
+import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
+import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
+import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse

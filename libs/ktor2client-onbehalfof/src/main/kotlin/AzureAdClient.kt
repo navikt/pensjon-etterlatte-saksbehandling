@@ -132,18 +132,19 @@ class AzureAdClient(
 
     // Service-to-service access token request (client credentials grant)
     suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> {
+        val params = { req: ClientCredentialsTokenRequest ->
+            Parameters.build {
+                append("client_id", config.getString("azure.app.client.id"))
+                append("client_secret", config.getString("azure.app.client.secret"))
+                append("scope", scopes.joinToString(separator = " "))
+                append("grant_type", "client_credentials")
+            }
+        }
         val context = currentCoroutineContext()
 
         val value = clientCredentialsCache.get(ClientCredentialsTokenRequest(scopes)) { req, _ ->
             CoroutineScope(context).future {
-                fetchAccessToken(
-                    Parameters.build {
-                        append("client_id", config.getString("azure.app.client.id"))
-                        append("client_secret", config.getString("azure.app.client.secret"))
-                        append("scope", scopes.joinToString(separator = " "))
-                        append("grant_type", "client_credentials")
-                    }
-                )
+                fetchAccessToken(params.invoke(req))
             }
         }
 
@@ -162,22 +163,21 @@ class AzureAdClient(
         scopes: List<String>,
         accessToken: String
     ): Result<AccessToken, ThrowableErrorMessage> {
+        val params = { req: OboTokenRequest ->
+            Parameters.build {
+                append("client_id", config.getString("azure.app.client.id"))
+                append("client_secret", config.getString("azure.app.client.secret"))
+                append("scope", req.scopes.joinToString(separator = " "))
+                append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                append("requested_token_use", "on_behalf_of")
+                append("assertion", req.accessToken)
+                append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+            }
+        }
         val context = currentCoroutineContext()
 
         val value = cache.get(OboTokenRequest(scopes, accessToken)) { req, _ ->
-            CoroutineScope(context).future {
-                fetchAccessToken(
-                    Parameters.build {
-                        append("client_id", config.getString("azure.app.client.id"))
-                        append("client_secret", config.getString("azure.app.client.secret"))
-                        append("scope", req.scopes.joinToString(separator = " "))
-                        append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                        append("requested_token_use", "on_behalf_of")
-                        append("assertion", req.accessToken)
-                        append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                    }
-                )
-            }
+            CoroutineScope(context).future { fetchAccessToken(params.invoke(req)) }
         }
 
         return value.handle { token, exception ->

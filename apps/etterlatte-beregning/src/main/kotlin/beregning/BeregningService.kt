@@ -1,7 +1,5 @@
 package no.nav.etterlatte.beregning
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
@@ -14,6 +12,7 @@ import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -51,28 +50,50 @@ class BeregningService(
     suspend fun lagreBeregning(behandlingId: UUID, bruker: Bruker): Beregning {
         logger.info("Oppretter barnepensjonberegning for behandlingId=$behandlingId")
         return tilstandssjekkFoerKjoerning(behandlingId, bruker) {
-            coroutineScope {
-                val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-                val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, bruker) }
+            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+            val sak = behandlingKlient.hentSak(behandling.sak, bruker)
 
-                val beregning = when (behandling.behandlingType) {
-                    BehandlingType.MANUELT_OPPHOER -> beregnManueltOpphoerBarnepensjon(
-                        grunnlag = grunnlag.await(),
-                        behandling = behandling
-                    )
+            val beregning = when (sak.sakType) {
+                SakType.BARNEPENSJON -> beregnBarnepensjon(behandling, bruker)
+                SakType.OMSTILLINGSSTOENAD -> beregnOmstillingstoenad(behandling, bruker)
+            }
 
-                    else -> {
-                        beregnBarnepensjon(grunnlag.await(), behandling) {
-                            runBlocking {
-                                vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
-                                    .resultat?.utfall
-                                    ?: throw RuntimeException("Forventa å ha resultat for behandling $behandlingId")
-                            }
-                        }
+            beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
+                behandlingKlient.beregn(behandlingId, bruker, true)
+            }
+        }
+    }
+
+    private suspend fun beregnOmstillingstoenad(behandling: DetaljertBehandling, bruker: Bruker): Beregning {
+        logger.info("Beregner omstillingstønad for behandlingId=${behandling.id}")
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
+
+        beregnBarnepensjon(grunnlag, behandling) {
+            runBlocking {
+                vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
+                    .resultat?.utfall
+                    ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
+            }
+        }
+    }
+
+    private suspend fun beregnBarnepensjon(behandling: DetaljertBehandling, bruker: Bruker): Beregning {
+        logger.info("Beregner barnepensjon for behandlingId=${behandling.id}")
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
+
+        return when (behandling.behandlingType) {
+            BehandlingType.MANUELT_OPPHOER -> beregnManueltOpphoerBarnepensjon(
+                grunnlag = grunnlag,
+                behandling = behandling
+            )
+
+            else -> {
+                beregnBarnepensjon(grunnlag, behandling) {
+                    runBlocking {
+                        vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
+                            .resultat?.utfall
+                            ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
                     }
-                }
-                beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
-                    behandlingKlient.beregn(behandlingId, bruker, true)
                 }
             }
         }
@@ -236,7 +257,7 @@ class BeregningService(
         val kanBeregne = behandlingKlient.beregn(behandlingId, bruker, false)
 
         if (!kanBeregne) {
-            throw IllegalStateException("Kunne ikke beregne, er i feil state")
+            throw IllegalStateException("Kunne ikke beregne, behandling er i feil state")
         }
 
         return block()

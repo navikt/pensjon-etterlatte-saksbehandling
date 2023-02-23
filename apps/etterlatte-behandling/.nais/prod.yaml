@@ -58,8 +58,8 @@ spec:
     pool: nav-prod
   replicas:
     cpuThresholdPercentage: 90
-    max: 1
-    min: 1
+    max: 4
+    min: 2
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser

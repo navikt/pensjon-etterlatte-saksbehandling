@@ -11,8 +11,8 @@ spec:
   image: {{ image }}
   port: 8080
   replicas:
-    min: 2
     max: 4
+    min: 2
     cpuThresholdPercentage: 90
   ingresses:
     - https://etterlatte-saksbehandling.intern.nav.no

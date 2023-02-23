@@ -6,6 +6,11 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.Hook
+import io.ktor.server.application.call
+import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
@@ -23,6 +28,7 @@ import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.security.token.support.v2.tokenValidationSupport
@@ -30,12 +36,38 @@ import org.slf4j.Logger
 import org.slf4j.event.Level
 import java.util.*
 
+internal object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
+    internal val AuthenticatePhase: PipelinePhase = PipelinePhase("Authenticate")
+
+    override fun install(
+        pipeline: ApplicationCallPipeline,
+        handler: suspend (ApplicationCall) -> Unit
+    ) {
+        // Fix own defined phaes
+        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AuthenticatePhase)
+        pipeline.intercept(AuthenticatePhase) { handler(call) }
+    }
+}
+
+val adressebeskyttelsePlugin = createApplicationPlugin(name = "CustomHeaderPlugin") {
+    onCall { call ->
+        call.response.headers.append("X-Custom-Header", "Hello, world!")
+    }
+
+    on(AdressebeskyttelseHook) { application ->
+        application.log.info("Server is started")
+    }
+}
+
 fun Application.restModule(
     sikkerLogg: Logger,
     routePrefix: String? = null,
     config: ApplicationConfig = environment.config,
     routes: Route.() -> Unit
 ) {
+    install(adressebeskyttelsePlugin) {
+    }
+
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }

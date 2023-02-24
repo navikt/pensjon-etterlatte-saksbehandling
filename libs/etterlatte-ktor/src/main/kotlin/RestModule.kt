@@ -15,6 +15,7 @@ import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
@@ -51,7 +52,7 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit
     ) {
-        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AdressebeskyttelseHook)
+        println("phases${pipeline.items}")
         pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
         pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)
 
@@ -65,7 +66,7 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
     name = "Adressebeskyttelsesplugin",
     createConfiguration = ::PluginConfiguration
 ) {
-    on(AdressebeskyttelseHook) { call ->
+    on(AuthenticationChecked) { call ->
         logger.info("Sjekker adressebeskyttelse interceptor")
         val claims = call.principal<TokenValidationContextPrincipal>()
             ?.context

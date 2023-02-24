@@ -56,17 +56,6 @@ data class AzureAdOpenIdConfiguration(
     val authorizationEndpoint: String
 )
 
-sealed class TokenRequest(
-    open val scopes: List<String>
-)
-
-data class OboTokenRequest(
-    override val scopes: List<String>,
-    val accessToken: String
-) : TokenRequest(scopes)
-
-data class ClientCredentialsTokenRequest(override val scopes: List<String>) : TokenRequest(scopes)
-
 class AzureAdClient(
     private val config: Config,
     private val httpClient: HttpClient = defaultHttpClient,
@@ -195,13 +184,3 @@ class AzureAdClient(
             .andThen { oboAccessToken -> get(url, oboAccessToken) }
     }
 }
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class AccessToken(
-    @JsonProperty("access_token")
-    val accessToken: String,
-    @JsonProperty("expires_in")
-    val expiresIn: Int,
-    @JsonProperty("token_type")
-    val tokenType: String
-)

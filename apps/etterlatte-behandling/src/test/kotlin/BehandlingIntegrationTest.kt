@@ -83,6 +83,7 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "navn" to "John Doe",
                 "NAVident" to "Saksbehandler01"
+
             )
         )
     }

@@ -14,7 +14,6 @@ interface SakService {
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
     fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int
-    fun behandlingHarAdressebeskyttelse(behandlingId: Long): Boolean
 }
 
 class RealSakService(private val dao: SakDao) : SakService {
@@ -51,20 +50,5 @@ class RealSakService(private val dao: SakDao) : SakService {
 
     override fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {
         return dao.setAdresseBeskyttelse(id, adressebeskyttelseGradering)
-    }
-
-    override fun behandlingHarAdressebeskyttelse(behandlingId: Long): Boolean {
-        val adressebeskyttelseGradering = dao.sjekkOmBehandlingHarAdressebeskyttelse(behandlingId)
-        logger.info("Adressebeskyttelse $adressebeskyttelseGradering for behandling $behandlingId")
-        return if (adressebeskyttelseGradering != null) {
-            when (adressebeskyttelseGradering) {
-                AdressebeskyttelseGradering.FORTROLIG -> true
-                AdressebeskyttelseGradering.STRENGT_FORTROLIG -> true
-                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> true
-                else -> false
-            }
-        } else {
-            false
-        }
     }
 }

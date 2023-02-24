@@ -72,15 +72,4 @@ class SakDao(private val connection: () -> Connection) {
         statement.setLong(2, id)
         return statement.executeUpdate()
     }
-
-    fun sjekkOmBehandlingHarAdressebeskyttelse(behandlingId: Long): AdressebeskyttelseGradering? {
-        val statement = connection()
-            .prepareStatement(
-                "SELECT adressebeskyttelse FROM behandling b INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?"
-            )
-        statement.setLong(1, behandlingId)
-        return statement.executeQuery().singleOrNull {
-            AdressebeskyttelseGradering.valueOf(getString("1"))
-        }
-    }
 }

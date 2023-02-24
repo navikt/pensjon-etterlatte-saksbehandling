@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JacksonException
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
@@ -17,7 +16,6 @@ import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.callid.CallId
@@ -32,7 +30,6 @@ import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
@@ -43,32 +40,20 @@ import org.slf4j.event.Level
 import java.util.*
 
 class PluginConfiguration {
-    var canAccessAdressebeskyttelse: (id: Long) -> Boolean = { false }
+    var canAccessAdressebeskyttelse: (id: String) -> Boolean = { false }
 }
 
 private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
-    private val AdressebeskyttelseHook: PipelinePhase = PipelinePhase("Adressebeskyttelse")
-    private val AuthenticatePhase: PipelinePhase = PipelinePhase("Authenticate")
     override fun install(
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit
     ) {
-/*        pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
-        pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)*/
-
         pipeline.intercept(Call) { handler(call) }
     }
 }
 
 val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
 
-fun getAccessToken(call: ApplicationCall): String {
-    val authHeader = call.request.parseAuthorizationHeader()
-    if (!(authHeader == null || authHeader !is HttpAuthHeader.Single || authHeader.authScheme != "Bearer")) {
-        return authHeader.blob
-    }
-    throw Exception("Missing authorization header")
-}
 val adressebeskyttelsePlugin = createApplicationPlugin(
     name = "Adressebeskyttelsesplugin",
     createConfiguration = ::PluginConfiguration
@@ -80,7 +65,6 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
             ?.context
             ?.getJwtToken("azure")
             ?.jwtTokenClaims
-
         val firstvalidtokenclaims =
             call.principal<TokenValidationContextPrincipal>()?.context?.firstValidToken?.get()?.jwtTokenClaims
         logger.info(
@@ -98,11 +82,16 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
         val isMaskinToMaskinRequest: Boolean = oid == sub
         logger.info("$oid $sub Er maskin til maskin request $isMaskinToMaskinRequest")
         if (isMaskinToMaskinRequest) {
+            logger.info("returns on isMaskinToMaskinRequest")
             return@on
         }
         val behandlingId = call.parameters["behandlingsid"] ?: return@on
+
         logger.info("params behandlingId $behandlingId")
-        if (pluginConfig.canAccessAdressebeskyttelse(behandlingId.toLong())) {
+
+        val canAccessAdressebeskyttelse = pluginConfig.canAccessAdressebeskyttelse(behandlingId)
+        logger.info("kan se adressebeskyttelse $canAccessAdressebeskyttelse")
+        if (pluginConfig.canAccessAdressebeskyttelse(behandlingId)) {
             logger.info("Kan aksesse adressebeskyttelse for behandlingId $behandlingId")
             return@on
         }

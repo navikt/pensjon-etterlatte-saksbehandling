@@ -16,6 +16,7 @@ import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
@@ -32,6 +33,7 @@ import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
@@ -48,7 +50,6 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit
     ) {
-        // Fix own defined phases
         pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AdressebeskyttelseHook)
         pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
         pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)
@@ -62,9 +63,21 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
     createConfiguration = ::PluginConfiguration
 ) {
     on(AdressebeskyttelseHook) { call ->
-        if (!pluginConfig.canAccessAdressebeskyttelse()) {
-            call.respond(HttpStatusCode.NotFound)
+        val claims = call.principal<TokenValidationContextPrincipal>()
+            ?.context
+            ?.getJwtToken("azure")
+            ?.jwtTokenClaims
+        val oid = claims?.getStringClaim("oid")
+        val sub = claims?.getStringClaim("sub")
+        val isMaskinToMaskinRequest: Boolean = oid == sub
+
+        if (isMaskinToMaskinRequest) {
+            return@on
         }
+        if (pluginConfig.canAccessAdressebeskyttelse()) {
+            return@on
+        }
+        call.respond(HttpStatusCode.NotFound)
     }
 }
 
@@ -74,10 +87,6 @@ fun Application.restModule(
     config: ApplicationConfig = environment.config,
     routes: Route.() -> Unit
 ) {
-    /*install(adressebeskyttelsePlugin) {
-        canAccessAdressebeskyttelse = { false }
-    }*/
-
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }

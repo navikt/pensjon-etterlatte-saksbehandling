@@ -62,6 +62,7 @@ fun Application.module(beanFactory: BeanFactory) {
         val generellBehandlingService = generellBehandlingService()
         val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
         install(adressebeskyttelsePlugin) {
+            canAccessAdressebeskyttelse = { false }
         }
         restModule(sikkerLogg) {
             attachContekst(dataSource(), beanFactory)

@@ -51,7 +51,6 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit
     ) {
-        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AdressebeskyttelseHook)
         pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
         pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)
 
@@ -73,6 +72,7 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
             ?.jwtTokenClaims
         val oid = claims?.getStringClaim("oid")
         val sub = claims?.getStringClaim("sub")
+        // TODO: hvis begge er null?
         val isMaskinToMaskinRequest: Boolean = oid == sub
         logger.info("$oid $sub Er maskin til maskin request $isMaskinToMaskinRequest")
         if (isMaskinToMaskinRequest) {

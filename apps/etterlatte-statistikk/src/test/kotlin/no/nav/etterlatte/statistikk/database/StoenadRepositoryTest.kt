@@ -280,7 +280,7 @@ class StoenadRepositoryTest {
 
         repo.lagreMaanedJobUtfoert(
             maaned = maaned,
-            raderMedFeil = 7,
+            raderMedFeil = 0,
             raderRegistrert = 20
         )
 

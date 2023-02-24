@@ -51,6 +51,7 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit
     ) {
+        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AdressebeskyttelseHook)
         pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
         pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)
 

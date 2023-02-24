@@ -97,7 +97,9 @@ class BehandlingStatusServiceImpl constructor(
     }
 
     override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning() {
-        behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+        inTransaction {
+            behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+        }
     }
 
     fun registrerVedtakHendelse(behandlingId: UUID, vedtakHendelse: VedtakHendelse, hendelseType: HendelseType) {

@@ -122,6 +122,77 @@ class StoenadRepository(private val datasource: DataSource) {
             }.executeQuery().toList { asStoenadRad() }
         }
     }
+
+    fun kjoertStatusForMaanedsstatistikk(maaned: YearMonth): KjoertStatus {
+        return connection.use { conn ->
+            conn.prepareStatement(
+                """
+                SELECT id, statistikkMaaned, kjoertStatus, raderRegistrert, raderMedFeil 
+                FROM maanedsstatistikk_job 
+                WHERE statistikkMaaned = ?
+                """.trimIndent()
+            )
+                .apply {
+                    setString(1, maaned.toString())
+                }
+                .executeQuery().toList {
+                    MaanedstatistikkJobExecution(
+                        id = getLong("id"),
+                        statistikkMaaned = YearMonth.parse(getString("statistikkMaaned")),
+                        kjoertStatus = KjoertStatus.valueOf(getString("kjoertStatus")),
+                        raderRegistrert = getLong("raderRegistrert"),
+                        raderMedFeil = getLong("raderMedFeil")
+                    )
+                }.map { it.kjoertStatus }.toSet()
+                .let {
+                    if (it.contains(KjoertStatus.INGEN_FEIL)) {
+                        KjoertStatus.INGEN_FEIL
+                    } else if (it.contains(KjoertStatus.FEIL)) {
+                        KjoertStatus.FEIL
+                    } else {
+                        KjoertStatus.IKKE_KJOERT
+                    }
+                }
+        }
+    }
+
+    fun lagreMaanedJobUtfoert(
+        maaned: YearMonth,
+        raderMedFeil: Long,
+        raderRegistrert: Long
+    ) {
+        val kjoertStatus = when (raderMedFeil) {
+            0L -> KjoertStatus.INGEN_FEIL
+            else -> KjoertStatus.FEIL
+        }
+        connection.use {
+            it.prepareStatement(
+                """
+                INSERT INTO maanedsstatistikk_job (
+                    statistikkMaaned, kjoertStatus, raderRegistrert, raderMedFeil
+                ) VALUES (?, ?, ?, ?)
+                """.trimIndent()
+            )
+                .apply {
+                    setString(1, maaned.toString())
+                    setString(2, kjoertStatus.toString())
+                    setLong(3, raderRegistrert)
+                    setLong(4, raderMedFeil)
+                }.executeUpdate()
+        }
+    }
+}
+
+data class MaanedstatistikkJobExecution(
+    val id: Long,
+    val statistikkMaaned: YearMonth,
+    val kjoertStatus: KjoertStatus,
+    val raderRegistrert: Long,
+    val raderMedFeil: Long
+)
+
+enum class KjoertStatus {
+    INGEN_FEIL, FEIL, IKKE_KJOERT
 }
 
 inline fun <reified T> PreparedStatement.setJsonb(parameterIndex: Int, jsonb: T): PreparedStatement {

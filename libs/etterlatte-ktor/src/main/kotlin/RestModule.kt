@@ -72,8 +72,12 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
             ?.context
             ?.getJwtToken("azure")
             ?.jwtTokenClaims
-        val oid = claims?.getStringClaim("oid")
-        val sub = claims?.getStringClaim("sub")
+
+        val firstvalidtokenclaims =
+            call.principal<TokenValidationContextPrincipal>()?.context?.firstValidToken?.get()?.jwtTokenClaims
+        logger.info("${firstvalidtokenclaims?.get("oid")} ${firstvalidtokenclaims?.get("sub")}")
+        val oid = claims?.get("oid").toString()
+        val sub = claims?.get("sub").toString()
         // TODO: hvis begge er null?
         val isMaskinToMaskinRequest: Boolean = oid == sub
         logger.info("$oid $sub Er maskin til maskin request $isMaskinToMaskinRequest")

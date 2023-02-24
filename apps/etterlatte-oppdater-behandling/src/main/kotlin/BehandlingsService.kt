@@ -27,6 +27,7 @@ interface Behandling {
     fun hentAlleSaker(): Saker
 
     fun opprettOmberegning(omberegningshendelse: Omberegningshendelse): HttpResponse
+    fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
 }
 
 class BehandlingsService(
@@ -80,6 +81,14 @@ class BehandlingsService(
             behandling_app.post("$url/omberegning") {
                 contentType(ContentType.Application.Json)
                 setBody(omberegningshendelse)
+            }
+        }
+    }
+
+    override fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert() {
+        return runBlocking {
+            behandling_app.post("$url/behandlinger/settTilbakeTilVilkaarsvurdert") {
+                contentType(ContentType.Application.Json)
             }
         }
     }

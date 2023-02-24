@@ -95,6 +95,12 @@ internal fun Route.behandlingsstatusRoutes(
             }
         }
     }
+
+    route("/behandlinger") {
+        get("/settTilbakeTilVilkaarsvurdert") {
+            behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+        }
+    }
 }
 
 data class OperasjonGyldig(val gyldig: Boolean)

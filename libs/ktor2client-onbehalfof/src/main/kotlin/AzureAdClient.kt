@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.andThen
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -18,10 +16,7 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.CoroutineScope
@@ -29,12 +24,9 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
-private val logger = LoggerFactory.getLogger(AzureAdClient::class.java)
-
-internal val defaultHttpClient = HttpClient() {
+internal val defaultHttpClient = HttpClient {
     expectSuccess = true
     install(ContentNegotiation) {
         jackson {
@@ -90,36 +82,6 @@ class AzureAdClient(
             )
         }
 
-    private suspend inline fun get(url: String, oboAccessToken: AccessToken): Result<JsonNode, ThrowableErrorMessage> =
-        runCatching {
-            httpClient.get(url) {
-                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
-            }
-        }.mapCatching { response ->
-            response.checkForError()
-        }.fold(
-            onSuccess = { result -> Ok(result.body()) },
-            onFailure = { error ->
-                val downstreamResourceClient = when (error) {
-                    is HttpStatusRuntimeException -> error.downstreamStatusCode
-                    else -> null
-                }
-
-                error.handleError("Could not GET $url", downstreamResourceClient)
-            }
-        )
-
-    private suspend fun Throwable.handleError(message: String, downstreamResourceClient: HttpStatusCode?):
-        Err<ThrowableErrorMessage> {
-        val responseBody: String? = when (this) {
-            is ResponseException -> this.response.bodyAsText()
-            else -> null
-        }
-        return "$message. response body: $responseBody"
-            .also { errorMessage -> logger.error(errorMessage, this) }
-            .let { errorMessage -> Err(ThrowableErrorMessage(errorMessage, this, downstreamResourceClient)) }
-    }
-
     // Service-to-service access token request (client credentials grant)
     suspend fun getAccessTokenForResource(scopes: List<String>): AccessToken =
         fetchAccessToken(
@@ -162,16 +124,6 @@ class AzureAdClient(
             }
         }.asDeferred()
             .await()
-    }
-
-    // Graph API lookup (on-behalf-of flow)
-    suspend fun getUserInfoFromGraph(accessToken: String): Result<JsonNode, ThrowableErrorMessage> {
-        val queryProperties =
-            "onPremisesSamAccountName,displayName,givenName,mail,officeLocation,surname,userPrincipalName,id,jobTitle"
-        val url = "https://graph.microsoft.com/v1.0/me?\$select=$queryProperties"
-        val scopes = listOf("https://graph.microsoft.com/.default")
-        return getOnBehalfOfAccessTokenForResource(scopes, accessToken)
-            .andThen { oboAccessToken -> get(url, oboAccessToken) }
     }
 }
 

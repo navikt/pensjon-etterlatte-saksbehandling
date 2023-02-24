@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
 
@@ -58,11 +59,14 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
     }
 }
 
+val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
+
 val adressebeskyttelsePlugin = createApplicationPlugin(
     name = "Adressebeskyttelsesplugin",
     createConfiguration = ::PluginConfiguration
 ) {
     on(AdressebeskyttelseHook) { call ->
+        logger.info("Sjekker adressebeskyttelse interceptor")
         val claims = call.principal<TokenValidationContextPrincipal>()
             ?.context
             ?.getJwtToken("azure")
@@ -70,14 +74,17 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
         val oid = claims?.getStringClaim("oid")
         val sub = claims?.getStringClaim("sub")
         val isMaskinToMaskinRequest: Boolean = oid == sub
-
+        logger.info("$oid $sub Er maskin til maskin request $isMaskinToMaskinRequest")
         if (isMaskinToMaskinRequest) {
             return@on
         }
         val behandlingId = call.parameters["behandlingsid"] ?: return@on
+        logger.info("params behandlingId $behandlingId")
         if (pluginConfig.canAccessAdressebeskyttelse(behandlingId.toLong())) {
+            logger.info("Kan aksesse adressebeskyttelse for behandlingId $behandlingId")
             return@on
         }
+        logger.info("Not found ")
         call.respond(HttpStatusCode.NotFound)
     }
 }

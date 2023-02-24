@@ -64,9 +64,12 @@ fun Application.module(beanFactory: BeanFactory) {
 
         val sakService = sakService()
 
+        val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
+
         install(adressebeskyttelsePlugin) {
             canAccessAdressebeskyttelse = { behandlingId ->
-                sakService.behandlingHarAdressebeskyttelse(behandlingId)
+                logger.info("Sjekker opp adressebeskyttelse for id $behandlingId")
+                !sakService.behandlingHarAdressebeskyttelse(behandlingId)
             }
         }
         restModule(sikkerLogg) {

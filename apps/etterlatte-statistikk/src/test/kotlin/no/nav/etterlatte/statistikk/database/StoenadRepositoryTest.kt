@@ -66,7 +66,7 @@ class StoenadRepositoryTest {
                 .executeUpdate()
         }
         dataSource.connection.use {
-            it.prepareStatement("TRUNCATE maanedsstatistikk_job")
+            it.prepareStatement("TRUNCATE TABLE maanedsstatistikk_job")
                 .executeUpdate()
         }
     }

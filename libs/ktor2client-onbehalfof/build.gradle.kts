@@ -32,6 +32,7 @@ dependencies {
     testImplementation(Jupiter.Api)
     testImplementation(Ktor2.ClientMock)
     testImplementation(Kotest.AssertionsCore)
+    testImplementation(MockK.MockK)
 
     tasks {
         withType<Test> {

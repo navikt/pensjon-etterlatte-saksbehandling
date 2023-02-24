@@ -15,6 +15,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.contentType
+import no.nav.etterlatte.token.AccessTokenWrapper
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
@@ -25,11 +26,10 @@ class DownstreamResourceClient(
 ) {
     suspend fun get(
         resource: Resource,
-        accessToken: String
+        accessToken: AccessTokenWrapper
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient
-            .getOnBehalfOfAccessTokenForResource(scopes, accessToken)
+        return hentTokenFraAD(accessToken, scopes)
             .andThen { oboAccessToken ->
                 fetchFromDownstreamApi(resource, oboAccessToken)
             }
@@ -38,6 +38,49 @@ class DownstreamResourceClient(
             }
     }
 
+    private suspend fun hentTokenFraAD(
+        accessToken: AccessTokenWrapper,
+        scopes: List<String>
+    ): Result<AccessToken, ThrowableErrorMessage> = if (accessToken.erMaskinTilMaskin()) {
+        azureAdClient.getAccessTokenForResource(scopes)
+    } else {
+        azureAdClient
+            .getOnBehalfOfAccessTokenForResource(scopes, accessToken.accessToken)
+    }
+
+    @Deprecated(message = "Bruk heller den som tar inn AccessTokenWrapper")
+    suspend fun get(
+        resource: Resource,
+        accessToken: String
+    ): Result<Resource, ThrowableErrorMessage> {
+        val scopes = listOf("api://${resource.clientId}/.default")
+        val result = azureAdClient
+            .getOnBehalfOfAccessTokenForResource(scopes, accessToken)
+        return result
+            .andThen { oboAccessToken ->
+                fetchFromDownstreamApi(resource, oboAccessToken)
+            }
+            .andThen { response ->
+                Ok(resource.addResponse(response))
+            }
+    }
+
+    suspend fun post(
+        resource: Resource,
+        accessToken: AccessTokenWrapper,
+        postBody: Any
+    ): Result<Resource, ThrowableErrorMessage> {
+        val scopes = listOf("api://${resource.clientId}/.default")
+        return hentTokenFraAD(accessToken, scopes)
+            .andThen { token ->
+                postToDownstreamApi(resource, token, postBody)
+            }
+            .andThen { response ->
+                Ok(resource.addResponse(response))
+            }
+    }
+
+    @Deprecated(message = "Bruk heller den som tar inn AccessTokenWrapper")
     suspend fun post(
         resource: Resource,
         accessToken: String,

@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
+import no.nav.etterlatte.token.AccessTokenWrapper
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.YearMonth
@@ -47,7 +48,7 @@ class BeregningService(
 
     fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
 
-    suspend fun lagreBeregning(behandlingId: UUID, accessToken: String): Beregning {
+    suspend fun lagreBeregning(behandlingId: UUID, accessToken: AccessTokenWrapper): Beregning {
         logger.info("Oppretter barnepensjonberegning for behandlingId=$behandlingId")
         return tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
             coroutineScope {
@@ -229,7 +230,7 @@ class BeregningService(
 
     private suspend fun tilstandssjekkFoerKjoerning(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         block: suspend () -> Beregning
     ): Beregning {
         val kanBeregne = behandlingKlient.beregn(behandlingId, accessToken, false)

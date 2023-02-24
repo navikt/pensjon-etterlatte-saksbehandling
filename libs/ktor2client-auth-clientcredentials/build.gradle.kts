@@ -18,6 +18,7 @@ dependencies {
     api(Ktor2.ClientContentNegotiation)
     api(Ktor2.Jackson)
     api(Ktor2.ClientLoggingJvm)
+    api(project(":libs:etterlatte-token-model"))
 
     api(NavFelles.TokenClientCore)
 }

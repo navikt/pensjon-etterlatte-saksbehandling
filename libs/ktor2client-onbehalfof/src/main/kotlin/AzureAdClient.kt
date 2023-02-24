@@ -48,15 +48,14 @@ data class AzureAdOpenIdConfiguration(
     val authorizationEndpoint: String
 )
 
-data class OboTokenRequest(
-    val scopes: List<String>,
-    val accessToken: String
-)
-
 class AzureAdClient(
     private val config: Config,
     private val httpClient: HttpClient = defaultHttpClient,
     private val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
+        .newBuilder()
+        .expireAfterAccess(5, TimeUnit.SECONDS)
+        .buildAsync(),
+    private val clientCredentialsCache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> = Caffeine
         .newBuilder()
         .expireAfterAccess(5, TimeUnit.SECONDS)
         .buildAsync()
@@ -83,36 +82,28 @@ class AzureAdClient(
         }
 
     // Service-to-service access token request (client credentials grant)
-    suspend fun getAccessTokenForResource(scopes: List<String>): AccessToken =
-        fetchAccessToken(
+    suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> {
+        val params = { req: ClientCredentialsTokenRequest ->
             Parameters.build {
                 append("client_id", config.getString("azure.app.client.id"))
                 append("client_secret", config.getString("azure.app.client.secret"))
                 append("scope", scopes.joinToString(separator = " "))
                 append("grant_type", "client_credentials")
             }
-        )
+        }
+        return hentAccessToken(params, clientCredentialsCache, ClientCredentialsTokenRequest(scopes))
+    }
 
-    // Service-to-service access token request (on-behalf-of flow)
-    suspend fun getOnBehalfOfAccessTokenForResource(
-        scopes: List<String>,
-        accessToken: String
+    private suspend fun <T : TokenRequest> hentAccessToken(
+        params: (T) -> Parameters,
+        asyncCache: AsyncCache<T, AccessToken>,
+        request: T
     ): Result<AccessToken, ThrowableErrorMessage> {
         val context = currentCoroutineContext()
 
-        val value = cache.get(OboTokenRequest(scopes, accessToken)) { req, _ ->
+        val value = asyncCache.get(request) { req, _ ->
             CoroutineScope(context).future {
-                fetchAccessToken(
-                    Parameters.build {
-                        append("client_id", config.getString("azure.app.client.id"))
-                        append("client_secret", config.getString("azure.app.client.secret"))
-                        append("scope", req.scopes.joinToString(separator = " "))
-                        append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                        append("requested_token_use", "on_behalf_of")
-                        append("assertion", req.accessToken)
-                        append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                    }
-                )
+                fetchAccessToken(params.invoke(req))
             }
         }
 
@@ -125,14 +116,23 @@ class AzureAdClient(
         }.asDeferred()
             .await()
     }
-}
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class AccessToken(
-    @JsonProperty("access_token")
-    val accessToken: String,
-    @JsonProperty("expires_in")
-    val expiresIn: Int,
-    @JsonProperty("token_type")
-    val tokenType: String
-)
+    // Service-to-service access token request (on-behalf-of flow)
+    suspend fun getOnBehalfOfAccessTokenForResource(
+        scopes: List<String>,
+        accessToken: String
+    ): Result<AccessToken, ThrowableErrorMessage> {
+        val params = { req: OboTokenRequest ->
+            Parameters.build {
+                append("client_id", config.getString("azure.app.client.id"))
+                append("client_secret", config.getString("azure.app.client.secret"))
+                append("scope", req.scopes.joinToString(separator = " "))
+                append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                append("requested_token_use", "on_behalf_of")
+                append("assertion", req.accessToken)
+                append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+            }
+        }
+        return hentAccessToken(params, cache, OboTokenRequest(scopes, accessToken))
+    }
+}

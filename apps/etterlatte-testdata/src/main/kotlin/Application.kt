@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.michaelbull.result.get
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -167,5 +168,6 @@ fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.principal<T
     ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("preferred_username")?.toString()
 
 fun getClientAccessToken(): String = runBlocking {
-    azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default")).accessToken
+    azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
+        .get()!!.accessToken
 }

@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
+import io.ktor.server.application.install
 import io.ktor.server.auth.principal
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
@@ -20,6 +21,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
+import no.nav.etterlatte.libs.ktor.adressebeskyttelsePlugin
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
@@ -59,7 +61,8 @@ fun Application.module(beanFactory: BeanFactory) {
     with(beanFactory) {
         val generellBehandlingService = generellBehandlingService()
         val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
-
+        install(adressebeskyttelsePlugin) {
+        }
         restModule(sikkerLogg) {
             attachContekst(dataSource(), beanFactory)
             sakRoutes(

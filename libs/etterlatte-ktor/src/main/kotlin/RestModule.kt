@@ -8,6 +8,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.ApplicationCallPipeline.ApplicationPhase.Call
 import io.ktor.server.application.Hook
 import io.ktor.server.application.call
 import io.ktor.server.application.createApplicationPlugin
@@ -36,26 +37,34 @@ import org.slf4j.Logger
 import org.slf4j.event.Level
 import java.util.*
 
-internal object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
-    internal val AuthenticatePhase: PipelinePhase = PipelinePhase("Authenticate")
+class PluginConfiguration {
+    var canAccessAdressebeskyttelse: () -> Boolean = { false }
+}
 
+private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
+    private val AdressebeskyttelseHook: PipelinePhase = PipelinePhase("Adressebeskyttelse")
+    private val AuthenticatePhase: PipelinePhase = PipelinePhase("Authenticate")
     override fun install(
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit
     ) {
-        // Fix own defined phaes
-        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AuthenticatePhase)
-        pipeline.intercept(AuthenticatePhase) { handler(call) }
+        // Fix own defined phases
+        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AdressebeskyttelseHook)
+        pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
+        pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)
+
+        pipeline.intercept(AdressebeskyttelseHook) { handler(call) }
     }
 }
 
-val adressebeskyttelsePlugin = createApplicationPlugin(name = "CustomHeaderPlugin") {
-    onCall { call ->
-        call.response.headers.append("X-Custom-Header", "Hello, world!")
-    }
-
-    on(AdressebeskyttelseHook) { application ->
-        application.log.info("Server is started")
+val adressebeskyttelsePlugin = createApplicationPlugin(
+    name = "Adressebeskyttelsesplugin",
+    createConfiguration = ::PluginConfiguration
+) {
+    on(AdressebeskyttelseHook) { call ->
+        if (!pluginConfig.canAccessAdressebeskyttelse()) {
+            call.respond(HttpStatusCode.NotFound)
+        }
     }
 }
 
@@ -65,8 +74,9 @@ fun Application.restModule(
     config: ApplicationConfig = environment.config,
     routes: Route.() -> Unit
 ) {
-    install(adressebeskyttelsePlugin) {
-    }
+    /*install(adressebeskyttelsePlugin) {
+        canAccessAdressebeskyttelse = { false }
+    }*/
 
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))

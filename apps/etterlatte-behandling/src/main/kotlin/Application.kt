@@ -66,7 +66,7 @@ fun Application.module(beanFactory: BeanFactory) {
 
         install(adressebeskyttelsePlugin) {
             canAccessAdressebeskyttelse = { behandlingId ->
-                sakService.sjekkAdressebeskyttelseForBehandling(behandlingId)
+                sakService.behandlingHarAdressebeskyttelse(behandlingId)
             }
         }
         restModule(sikkerLogg) {

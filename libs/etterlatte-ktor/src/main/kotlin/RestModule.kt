@@ -58,6 +58,23 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
     name = "Adressebeskyttelsesplugin",
     createConfiguration = ::PluginConfiguration
 ) {
+    onCall { call ->
+        val token = call.principal<TokenValidationContextPrincipal>()
+            ?.context
+            ?.getJwtToken("azure")
+        logger.info("token $token")
+        val firstvalidtokenclaims =
+            call.principal<TokenValidationContextPrincipal>()?.context?.firstValidToken?.get()?.jwtTokenClaims
+        logger.info(
+            "har info om saksbehandeler, navident: " +
+                "${call.principal<TokenValidationContextPrincipal>()
+                    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get(
+                        "NAVident"
+                    )}"
+        )
+
+        logger.info("${firstvalidtokenclaims?.get("oid")} ${firstvalidtokenclaims?.get("sub")}")
+    }
     // AuthenticationChecked
     on(AdressebeskyttelseHook) { call ->
         logger.info("Sjekker adressebeskyttelse interceptor")

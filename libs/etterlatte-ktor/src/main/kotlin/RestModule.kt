@@ -75,6 +75,13 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
 
         val firstvalidtokenclaims =
             call.principal<TokenValidationContextPrincipal>()?.context?.firstValidToken?.get()?.jwtTokenClaims
+        logger.info(
+            "har info om saksbehandeler, navident: " +
+                "${call.principal<TokenValidationContextPrincipal>()
+                    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get(
+                        "NAVident"
+                    )}"
+        )
         logger.info("${firstvalidtokenclaims?.get("oid")} ${firstvalidtokenclaims?.get("sub")}")
         val oid = claims?.get("oid").toString()
         val sub = claims?.get("sub").toString()

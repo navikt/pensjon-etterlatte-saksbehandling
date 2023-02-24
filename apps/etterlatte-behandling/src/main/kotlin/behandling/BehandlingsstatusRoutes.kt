@@ -97,7 +97,7 @@ internal fun Route.behandlingsstatusRoutes(
     }
 
     route("/behandlinger") {
-        get("/settTilbakeTilVilkaarsvurdert") {
+        post("/settTilbakeTilVilkaarsvurdert") {
             behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
         }
     }

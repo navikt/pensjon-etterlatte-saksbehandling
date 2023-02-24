@@ -48,6 +48,7 @@ class DownstreamResourceClient(
             .getOnBehalfOfAccessTokenForResource(scopes, accessToken.accessToken)
     }
 
+    @Deprecated(message = "Bruk heller den som tar inn AccessTokenWrapper")
     suspend fun get(
         resource: Resource,
         accessToken: String
@@ -71,14 +72,15 @@ class DownstreamResourceClient(
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(accessToken, scopes)
-            .andThen { oboAccessToken ->
-                postToDownstreamApi(resource, oboAccessToken, postBody)
+            .andThen { token ->
+                postToDownstreamApi(resource, token, postBody)
             }
             .andThen { response ->
                 Ok(resource.addResponse(response))
             }
     }
 
+    @Deprecated(message = "Bruk heller den som tar inn AccessTokenWrapper")
     suspend fun post(
         resource: Resource,
         accessToken: String,

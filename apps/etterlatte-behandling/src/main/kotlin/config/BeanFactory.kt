@@ -58,7 +58,7 @@ interface BeanFactory {
     val config: Config
     fun dataSource(): DataSource
     fun sakService(): SakService
-    fun sakServiceAdressebeskyttelse(connection: Connection): SakServiceAdressebeskyttelse
+    fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse
     fun foerstegangsbehandlingService(): FoerstegangsbehandlingService
     fun revurderingService(): RevurderingService
     fun generellBehandlingService(): GenerellBehandlingService
@@ -142,8 +142,8 @@ abstract class CommonFactory : BeanFactory {
 
     override fun sakService(): SakService = RealSakService(sakDao())
 
-    override fun sakServiceAdressebeskyttelse(connection: Connection): SakServiceAdressebeskyttelse =
-        SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(connection))
+    override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
+        SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource().connection))
     override fun behandlingsStatusService(): BehandlingStatusService {
         return BehandlingStatusServiceImpl(behandlingDao(), generellBehandlingService())
     }

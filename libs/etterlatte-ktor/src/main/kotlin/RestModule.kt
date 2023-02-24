@@ -40,7 +40,7 @@ import org.slf4j.event.Level
 import java.util.*
 
 class PluginConfiguration {
-    var canAccessAdressebeskyttelse: () -> Boolean = { false }
+    var canAccessAdressebeskyttelse: (id: Long) -> Boolean = { false }
 }
 
 private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
@@ -74,7 +74,9 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
         if (isMaskinToMaskinRequest) {
             return@on
         }
-        if (pluginConfig.canAccessAdressebeskyttelse()) {
+        val behandlingId = call.parameters["behandlingsid"]
+            ?: throw NullPointerException("BehandlingsId er ikke i path params")
+        if (pluginConfig.canAccessAdressebeskyttelse(behandlingId.toLong())) {
             return@on
         }
         call.respond(HttpStatusCode.NotFound)

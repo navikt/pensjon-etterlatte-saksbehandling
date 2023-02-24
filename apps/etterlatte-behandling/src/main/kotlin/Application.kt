@@ -61,13 +61,18 @@ fun Application.module(beanFactory: BeanFactory) {
     with(beanFactory) {
         val generellBehandlingService = generellBehandlingService()
         val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
+
+        val sakService = sakService()
+
         install(adressebeskyttelsePlugin) {
-            canAccessAdressebeskyttelse = { false }
+            canAccessAdressebeskyttelse = { behandlingId ->
+                sakService.sjekkAdressebeskyttelseForBehandling(behandlingId)
+            }
         }
         restModule(sikkerLogg) {
             attachContekst(dataSource(), beanFactory)
             sakRoutes(
-                sakService = sakService(),
+                sakService = sakService,
                 generellBehandlingService = generellBehandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService
             )

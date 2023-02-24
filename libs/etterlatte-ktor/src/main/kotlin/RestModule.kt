@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JacksonException
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
@@ -15,8 +16,8 @@ import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.callid.CallId
@@ -52,21 +53,28 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit
     ) {
-        println("phases${pipeline.items}")
-        pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
-        pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)
+/*        pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
+        pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)*/
 
-        pipeline.intercept(AdressebeskyttelseHook) { handler(call) }
+        pipeline.intercept(Call) { handler(call) }
     }
 }
 
 val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
 
+fun getAccessToken(call: ApplicationCall): String {
+    val authHeader = call.request.parseAuthorizationHeader()
+    if (!(authHeader == null || authHeader !is HttpAuthHeader.Single || authHeader.authScheme != "Bearer")) {
+        return authHeader.blob
+    }
+    throw Exception("Missing authorization header")
+}
 val adressebeskyttelsePlugin = createApplicationPlugin(
     name = "Adressebeskyttelsesplugin",
     createConfiguration = ::PluginConfiguration
 ) {
-    on(AuthenticationChecked) { call ->
+    // AuthenticationChecked
+    on(AdressebeskyttelseHook) { call ->
         logger.info("Sjekker adressebeskyttelse interceptor")
         val claims = call.principal<TokenValidationContextPrincipal>()
             ?.context
@@ -82,6 +90,7 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
                         "NAVident"
                     )}"
         )
+
         logger.info("${firstvalidtokenclaims?.get("oid")} ${firstvalidtokenclaims?.get("sub")}")
         val oid = claims?.get("oid").toString()
         val sub = claims?.get("sub").toString()

@@ -19,14 +19,7 @@ on:
       - libs/etterlatte-common/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
-      - buildSrc/src/main/kotlin/Database.kt
-      - buildSrc/src/main/kotlin/Jackson.kt
-      - buildSrc/src/main/kotlin/JakartaBind.kt
-      - buildSrc/src/main/kotlin/Kotlinx.kt
-      - buildSrc/src/main/kotlin/Ktor2.kt
-      - buildSrc/src/main/kotlin/MockK.kt
-      - buildSrc/src/main/kotlin/NavFelles.kt
-      - buildSrc/src/main/kotlin/WireMock.kt
+      - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
@@ -35,13 +28,7 @@ on:
       - libs/etterlatte-common/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
-      - buildSrc/src/main/kotlin/Database.kt
-      - buildSrc/src/main/kotlin/Jackson.kt
-      - buildSrc/src/main/kotlin/Kotlinx.kt
-      - buildSrc/src/main/kotlin/Ktor2.kt
-      - buildSrc/src/main/kotlin/MockK.kt
-      - buildSrc/src/main/kotlin/NavFelles.kt
-      - buildSrc/src/main/kotlin/WireMock.kt
+      - gradle/libs.versions.toml
 
 jobs:
   test:

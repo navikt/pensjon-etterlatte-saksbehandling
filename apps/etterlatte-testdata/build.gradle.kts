@@ -9,34 +9,31 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-onbehalfof"))
 
-    implementation(Ktor2.ServerCore)
-    implementation(Ktor2.ServerCio)
-    implementation(Ktor2.ServerContentNegotiation)
-    implementation(Ktor2.ClientContentNegotiation)
-    implementation(Ktor2.MetricsMicrometer)
-    implementation(Ktor2.Jackson)
-    implementation(Ktor2.ClientJackson)
-    implementation(Ktor2.Auth)
-    implementation(Ktor2.Mustache)
+    implementation(libs.ktor2.servercore)
+    implementation(libs.ktor2.servercio)
+    implementation(libs.ktor2.servercontentnegotiation)
+    implementation(libs.ktor2.clientcontentnegotiation)
+    implementation(libs.ktor2.metricsmicrometer)
+    implementation(libs.ktor2.jackson)
+    implementation(libs.ktor2.clientjackson)
+    implementation(libs.ktor2.auth)
+    implementation(libs.ktor2.mustache)
 
-    implementation(Micrometer.Prometheus)
-    implementation(Jackson.DatatypeJsr310)
-    implementation(Jackson.DatatypeJdk8)
-    implementation(Jackson.ModuleKotlin)
+    implementation(libs.metrics.micrometer.prometheus)
+    implementation(libs.bundles.jackson)
+    implementation(libs.jackson.core)
+    implementation(libs.jackson.databind)
 
-    implementation(NavFelles.TokenClientCore)
-    implementation(NavFelles.TokenValidationKtor2)
+    implementation(libs.navfelles.tokenclientcore)
+    implementation(libs.navfelles.tokenvalidationktor2)
 
-    implementation(Logging.LogbackClassic)
-    implementation(Logging.LogstashLogbackEncoder) {
+    implementation(libs.logging.logbackclassic)
+    implementation(libs.logging.logstashlogbackencoder) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")
     }
 
-    implementation(Jackson.Core)
-    implementation(Jackson.Databind)
-
-    testImplementation(Jupiter.Root)
-    testImplementation(MockK.MockK)
-    testImplementation(Kotest.AssertionsCore)
+    testImplementation(libs.test.jupiter.root)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.test.kotest.assertionscore)
 }

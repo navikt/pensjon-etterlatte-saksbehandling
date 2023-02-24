@@ -1,5 +1,3 @@
-import Logging.Slf4jApi
-
 plugins {
     kotlin("jvm")
 }
@@ -13,11 +11,11 @@ dependencies {
     implementation(project(":libs:common"))
     runtimeOnly(group = "com.papertrailapp", name = "logback-syslog4j", version = "1.0.0")
 
-    compileOnly(Slf4jApi)
+    compileOnly(libs.logging.slf4japi)
 
-    testImplementation(Jupiter.Api)
-    testRuntimeOnly(Jupiter.Engine)
-    testImplementation(Kotest.AssertionsCore)
+    testImplementation(libs.test.jupiter.api)
+    testRuntimeOnly(libs.test.jupiter.engine)
+    testImplementation(libs.test.kotest.assertionscore)
 }
 
 tasks {

@@ -1,3 +1,7 @@
+import org.gradle.accessors.dm.LibrariesForLibs
+
+val libs = the<LibrariesForLibs>()
+
 plugins {
     id("etterlatte.common")
 }
@@ -7,6 +11,6 @@ repositories {
 }
 
 dependencies {
-    implementation(NavFelles.RapidAndRiversKtor2)
+    implementation(libs.navfelles.rapidandriversktor2)
     implementation(project(":libs:rapidsandrivers-extras"))
 }

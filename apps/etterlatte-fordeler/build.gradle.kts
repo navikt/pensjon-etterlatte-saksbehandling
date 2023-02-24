@@ -1,4 +1,3 @@
-
 plugins {
     id("etterlatte.rapids-and-rivers-ktor2")
 }
@@ -7,15 +6,15 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
 
-    implementation(Ktor2.OkHttp)
-    implementation(Ktor2.ClientCore)
-    implementation(Ktor2.ClientLoggingJvm)
-    implementation(Ktor2.ClientAuth)
-    implementation(Ktor2.ClientJackson)
-    implementation(Ktor2.ClientContentNegotiation)
-    implementation(Ktor2.Jackson)
+    implementation(libs.ktor2.okhttp)
+    implementation(libs.ktor2.clientcore)
+    implementation(libs.ktor2.clientloggingjvm)
+    implementation(libs.ktor2.clientauth)
+    implementation(libs.ktor2.clientjackson)
+    implementation(libs.ktor2.clientcontentnegotiation)
+    implementation(libs.ktor2.jackson)
 
-    testImplementation(Ktor2.ClientMock)
-    testImplementation(MockK.MockK)
-    testImplementation(Kotlinx.CoroutinesCore)
+    testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.kotlinx.coroutinescore)
 }

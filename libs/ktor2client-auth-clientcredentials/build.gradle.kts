@@ -12,13 +12,13 @@ dependencies {
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
 
-    api(Ktor2.OkHttp)
-    api(Ktor2.ClientCore)
-    api(Ktor2.ClientAuth)
-    api(Ktor2.ClientContentNegotiation)
-    api(Ktor2.Jackson)
-    api(Ktor2.ClientLoggingJvm)
+    api(libs.ktor2.okhttp)
+    api(libs.ktor2.clientcore)
+    api(libs.ktor2.clientauth)
+    api(libs.ktor2.clientcontentnegotiation)
+    api(libs.ktor2.jackson)
+    api(libs.ktor2.clientloggingjvm)
     api(project(":libs:etterlatte-token-model"))
 
-    api(NavFelles.TokenClientCore)
+    api(libs.navfelles.tokenclientcore)
 }

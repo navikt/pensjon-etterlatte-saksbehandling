@@ -11,14 +11,14 @@ dependencies {
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
 
-    implementation(Database.Postgresql)
-    implementation(Database.FlywayDB)
-    implementation(Database.HikariCP)
-    implementation(Database.KotliQuery)
+    implementation(libs.database.postgresql)
+    implementation(libs.database.flywaydb)
+    implementation(libs.database.hikaricp)
+    implementation(libs.database.kotliquery)
 
-    testImplementation(Jupiter.Engine)
-    testImplementation(TestContainer.Jupiter)
-    testImplementation(TestContainer.Postgresql)
+    testImplementation(libs.test.jupiter.engine)
+    testImplementation(libs.test.testcontainer.jupiter)
+    testImplementation(libs.test.testcontainer.postgresql)
 
     tasks {
         withType<Test> {

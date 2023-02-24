@@ -18,12 +18,14 @@ on:
       - libs/common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/rapidsandrivers-extras/**
+      - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - libs/common/**
       - libs/rapidsandrivers-extras/**
+      - gradle/libs.versions.toml
 
 jobs:
   test:

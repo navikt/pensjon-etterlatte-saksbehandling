@@ -5,16 +5,14 @@ plugins {
 dependencies {
     api(kotlin("reflect"))
 
-    implementation(Logging.LogbackClassic)
-    implementation(Logging.LogstashLogbackEncoder) {
+    implementation(libs.logging.logbackclassic)
+    implementation(libs.logging.logstashlogbackencoder) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")
     }
 
-    implementation(Jackson.Core)
-    implementation(Jackson.Databind)
-    implementation(Jackson.ModuleKotlin)
-    implementation(Jackson.DatatypeJsr310)
+    implementation(libs.jackson.core)
+    implementation(libs.bundles.jackson)
 
-    testImplementation(MockK.MockK)
+    testImplementation(libs.test.mockk)
 }

@@ -1,6 +1,3 @@
-import Logging.LogbackClassic
-import Logging.Slf4jApi
-
 plugins {
     kotlin("jvm")
 }
@@ -13,18 +10,16 @@ dependencies {
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
 
-    api(Jackson.DatatypeJsr310)
-    api(Jackson.DatatypeJdk8)
-    api(Jackson.ModuleKotlin)
+    api(libs.bundles.jackson)
 
-    compileOnly(Slf4jApi)
-    testImplementation(Slf4jApi)
-    testImplementation(LogbackClassic)
+    compileOnly(libs.logging.slf4japi)
+    testImplementation(libs.logging.slf4japi)
+    testImplementation(libs.logging.logbackclassic)
 
-    testImplementation(Jupiter.Api)
-    testImplementation(Jupiter.Params)
-    testRuntimeOnly(Jupiter.Engine)
-    testImplementation(Kotest.AssertionsCore)
+    testImplementation(libs.test.jupiter.api)
+    testImplementation(libs.test.jupiter.params)
+    testRuntimeOnly(libs.test.jupiter.engine)
+    testImplementation(libs.test.kotest.assertionscore)
 }
 
 tasks {

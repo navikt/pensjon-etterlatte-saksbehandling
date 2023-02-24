@@ -17,16 +17,14 @@ on:
     paths:
       - apps/etterlatte-opplysninger-fra-soeknad/**
       - libs/common/**
-      - buildSrc/src/main/kotlin/Kotlinx.kt
-      - buildSrc/src/main/kotlin/MockK.kt
+      - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-soeknad/**
       - libs/common/**
-      - buildSrc/src/main/kotlin/Kotlinx.kt
-      - buildSrc/src/main/kotlin/MockK.kt
+      - gradle/libs.versions.toml
 
 jobs:
   test:

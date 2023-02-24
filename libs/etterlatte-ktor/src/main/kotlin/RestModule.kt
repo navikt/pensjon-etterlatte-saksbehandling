@@ -74,8 +74,7 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
         if (isMaskinToMaskinRequest) {
             return@on
         }
-        val behandlingId = call.parameters["behandlingsid"]
-            ?: throw NullPointerException("BehandlingsId er ikke i path params")
+        val behandlingId = call.parameters["behandlingsid"] ?: return@on
         if (pluginConfig.canAccessAdressebeskyttelse(behandlingId.toLong())) {
             return@on
         }

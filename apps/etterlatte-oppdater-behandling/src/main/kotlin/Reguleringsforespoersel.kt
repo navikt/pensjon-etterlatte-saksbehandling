@@ -31,6 +31,8 @@ internal class Reguleringsforespoersel(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             logger.info("Leser reguleringsfoerespoersel for dato ${packet.dato}")
+
+            behandlingService.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
             behandlingService.hentAlleSaker().saker.forEach {
                 packet.eventName = FINN_LOEPENDE_YTELSER
                 packet.sakId = it.id

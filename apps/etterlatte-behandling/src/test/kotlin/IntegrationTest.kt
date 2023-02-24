@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.KommerBarnetTilgodeJson
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -424,5 +425,8 @@ class IntegrationTest : BehandlingIntegrationTest() {
             "BEHANDLING:AVBRUTT",
             objectMapper.readTree(rapid.publiserteMeldinger.last().verdi)["@event_name"].textValue()
         )
+        beanFactory.dataSource().connection.use {
+            HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
+        }
     }
 }

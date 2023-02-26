@@ -6,4 +6,5 @@ object EventNames {
     const val OMBEREGNINGSHENDELSE = "OMBEREGNINGSHENDELSE"
     const val OPPRETT_VEDTAK = "OPPRETT_VEDTAK"
     const val TIL_UTBETALING = "TIL_UTBETALING"
+    const val FEILA = "FEILA"
 }

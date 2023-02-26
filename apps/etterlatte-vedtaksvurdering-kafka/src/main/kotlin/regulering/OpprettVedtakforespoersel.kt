@@ -39,6 +39,10 @@ internal class OpprettVedtakforespoersel(
 
             val behandlingId = packet.behandlingId
             val respons = vedtak.upsertVedtak(behandlingId)
+            logger.info("Opprettet vedtak ${respons.vedtakId}")
+
+            val fattetVedtak = vedtak.fattVedtak(behandlingId)
+            logger.info("Fattet vedtak ${fattetVedtak.vedtakId}")
 
             packet.eventName = TIL_UTBETALING
             context.publish(packet.toJson())

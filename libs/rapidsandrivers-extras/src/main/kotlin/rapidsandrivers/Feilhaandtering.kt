@@ -15,7 +15,7 @@ private fun <T> innerFeilhaandtering(packet: JsonMessage, context: MessageContex
     return try {
         block()
     } catch (e: Exception) {
-        feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila.")
+        feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila.", e)
         packet.eventName = EventNames.FEILA
         context.publish(packet.toJson())
         null

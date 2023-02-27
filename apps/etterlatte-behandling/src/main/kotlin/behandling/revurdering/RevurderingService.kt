@@ -81,6 +81,7 @@ class RealRevurderingService(
 
                 is Regulering -> revurderingFactory.opprettRevurdering(
                     forrigeBehandling.sak,
+                    forrigeBehandling.sakType,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )

@@ -92,7 +92,6 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                 setBody(
                     Omberegningshendelse(
                         1,
-                        SakType.BARNEPENSJON,
                         LocalDate.now(),
                         RevurderingAarsak.GRUNNBELOEPREGULERING
                     )

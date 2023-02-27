@@ -207,6 +207,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asRegulering(rs: ResultSet) = Regulering(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
+        sakType = rs.valueOrError("saktype") { enumValueOf(rs.getString("saktype")) },
         behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),

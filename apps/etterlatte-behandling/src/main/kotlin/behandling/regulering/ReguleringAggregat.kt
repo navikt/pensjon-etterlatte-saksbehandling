@@ -35,6 +35,7 @@ class ReguleringAggregat(
             return Regulering(
                 id = UUID.randomUUID(),
                 sak = sak,
+                sakType = forrigeBehandling.sakType,
                 behandlingOpprettet = LocalDateTime.now(),
                 sistEndret = LocalDateTime.now(),
                 status = BehandlingStatus.OPPRETTET,

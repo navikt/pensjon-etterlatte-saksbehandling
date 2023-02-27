@@ -39,7 +39,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
     fun shutdown() = afterAll()
 
     @Test
-    fun `Skal kunne se på en vanlig behandling`() {
+    fun `Skal kunne se på en vanlig behandling før adressebeskyttelse men ikke etter`() {
         val fnr = Foedselsnummer.of("08071272487").value
 
         testApplication {
@@ -97,6 +97,12 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             )
 
             client.get("/behandlinger/foerstegangsbehandling/$behandlingId") {
+                addAuthToken(tokenSaksbehandler)
+            }.let {
+                Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
+            }
+
+            client.get("/fakeurlwithbehandlingsid/$behandlingId") {
                 addAuthToken(tokenSaksbehandler)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.NotFound, it.status)

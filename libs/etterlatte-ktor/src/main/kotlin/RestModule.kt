@@ -15,6 +15,7 @@ import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
@@ -58,25 +59,8 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
     name = "Adressebeskyttelsesplugin",
     createConfiguration = ::PluginConfiguration
 ) {
-    onCall { call ->
-        val token = call.principal<TokenValidationContextPrincipal>()
-            ?.context
-            ?.getJwtToken("azure")
-        logger.info("token $token")
-        val firstvalidtokenclaims =
-            call.principal<TokenValidationContextPrincipal>()?.context?.firstValidToken?.get()?.jwtTokenClaims
-        logger.info(
-            "har info om saksbehandeler, navident: " +
-                "${call.principal<TokenValidationContextPrincipal>()
-                    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get(
-                        "NAVident"
-                    )}"
-        )
-
-        logger.info("${firstvalidtokenclaims?.get("oid")} ${firstvalidtokenclaims?.get("sub")}")
-    }
     // AuthenticationChecked
-    on(AdressebeskyttelseHook) { call ->
+    on(AuthenticationChecked) { call ->
         logger.info("Sjekker adressebeskyttelse interceptor")
         val claims = call.principal<TokenValidationContextPrincipal>()
             ?.context

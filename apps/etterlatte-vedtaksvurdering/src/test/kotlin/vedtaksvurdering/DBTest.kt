@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
+import no.nav.etterlatte.token.AccessTokenWrapper
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -47,7 +48,7 @@ internal class DBTest {
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     private val sakId = 123L
-    private val accessToken = "accessToken"
+    private val accessToken = AccessTokenWrapper(accessToken = "accessToken", oid = null, sub = null)
 
     private val saksbehandlereSecret = mapOf("saksbehandler" to "4808", "attestant" to "4808")
 
@@ -97,7 +98,7 @@ internal class DBTest {
         val uuid = UUID.randomUUID().also { settOpp(it) }
 
         runBlocking {
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, "access")
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, AccessTokenWrapper("access", null, null))
         }
 
         val vedtaket: Vedtak? = vedtaksvurderingService.hentFellesvedtak(uuid)
@@ -188,8 +189,8 @@ internal class DBTest {
         val behandling3Id = UUID.randomUUID().also { settOpp(it) }
 
         runBlocking {
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandling1Id, "access")
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandling2Id, "access")
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandling1Id, AccessTokenWrapper("access", null, null))
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandling2Id, AccessTokenWrapper("access", null, null))
         }
 
         runBlocking {

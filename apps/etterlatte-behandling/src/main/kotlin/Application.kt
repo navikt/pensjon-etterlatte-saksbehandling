@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
-import io.ktor.server.application.install
 import io.ktor.server.auth.principal
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
@@ -21,7 +20,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
-import no.nav.etterlatte.libs.ktor.adressebeskyttelsePlugin
+import no.nav.etterlatte.libs.ktor.adresseBeskyttelseRoute
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
@@ -62,8 +61,19 @@ fun Application.module(beanFactory: BeanFactory) {
         val generellBehandlingService = generellBehandlingService()
         val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
 
+        val sakServiceAdressebeskyttelse = sakServiceAdressebeskyttelse()
+
         restModule(sikkerLogg) {
-            attachContekst(dataSource(), beanFactory)
+            interceptorWrapper(
+                adressebeskyttelse = {
+                    adresseBeskyttelseRoute(
+                        canAccessAdressebeskyttelse = { behandlingId ->
+                            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
+                        }
+                    )
+                },
+                leggTilKontekst = { attachContekst(dataSource(), beanFactory) }
+            )
             sakRoutes(
                 sakService = sakService(),
                 generellBehandlingService = generellBehandlingService,
@@ -82,14 +92,18 @@ fun Application.module(beanFactory: BeanFactory) {
             oppgaveRoutes(service = beanFactory.oppgaveService())
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
         }
-        install(adressebeskyttelsePlugin) {
-            canAccessAdressebeskyttelse = { behandlingId ->
-                !sakServiceAdressebeskyttelse().behandlingHarAdressebeskyttelse(behandlingId)
-            }
-        }
     }
 }
 
+private fun Route.interceptorWrapper(
+    adressebeskyttelse: () -> Unit,
+    leggTilKontekst: () -> Unit
+) {
+    adressebeskyttelse()
+    leggTilKontekst()
+}
+
+// wrapper interceptor for denne route extensionen og min.
 private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =

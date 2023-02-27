@@ -6,18 +6,12 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.ApplicationCallPipeline.ApplicationPhase.Call
-import io.ktor.server.application.Hook
 import io.ktor.server.application.call
-import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.authentication
 import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.callid.CallId
@@ -41,37 +35,16 @@ import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
 
-class PluginConfiguration {
-    var canAccessAdressebeskyttelse: (id: String) -> Boolean = { false }
-}
+val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
 
-private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
-    override fun install(
-        pipeline: ApplicationCallPipeline,
-        handler: suspend (ApplicationCall) -> Unit
-    ) {
-        pipeline.intercept(Call) { handler(call) }
-    }
-}
-
-fun Route.sjekkKode6(canAccessAdressebeskyttelse: (id: String) -> Boolean = { false }) {
+fun Route.adresseBeskyttelseRoute(canAccessAdressebeskyttelse: (id: String) -> Boolean = { false }) {
     logger.info("Route interceptor")
     intercept(Call) {
         val claims = call.principal<TokenValidationContextPrincipal>()
             ?.context
             ?.getJwtToken("azure")
             ?.jwtTokenClaims
-        val firstvalidtokenclaims =
-            call.principal<TokenValidationContextPrincipal>()?.context?.firstValidToken?.get()?.jwtTokenClaims
-        logger.info(
-            "har info om saksbehandeler, navident: " +
-                "${call.principal<TokenValidationContextPrincipal>()
-                    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get(
-                        "NAVident"
-                    )}"
-        )
 
-        logger.info("${firstvalidtokenclaims?.get("oid")} ${firstvalidtokenclaims?.get("sub")}")
         val oid = claims?.get("oid").toString()
         val sub = claims?.get("sub").toString()
         // TODO: hvis begge er null?
@@ -92,48 +65,6 @@ fun Route.sjekkKode6(canAccessAdressebeskyttelse: (id: String) -> Boolean = { fa
         if (canAccessAdressebeskyttelse(behandlingId)) {
             logger.info("Kan aksesse adressebeskyttelse for behandlingId $behandlingId")
             return@intercept
-        }
-        logger.info("Not found ")
-        call.respond(HttpStatusCode.NotFound)
-    }
-}
-
-val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
-
-// TODO: kan evt prøve med en Route.func extension function
-val adressebeskyttelsePlugin = createApplicationPlugin(
-    name = "Adressebeskyttelsesplugin",
-    createConfiguration = ::PluginConfiguration
-) {
-    // AuthenticationChecked
-    on(AuthenticationChecked) { call ->
-        logger.info("Sjekker adressebeskyttelse interceptor")
-
-        val claims = call.authentication.principal<TokenValidationContextPrincipal>()
-            ?.context
-            ?.getJwtToken("azure")
-            ?.jwtTokenClaims
-
-        val oid = claims?.get("oid").toString()
-        val sub = claims?.get("sub").toString()
-        // TODO: hvis begge er null?
-        val isMaskinToMaskinRequest: Boolean = oid == sub
-        logger.info(
-            "$oid $sub Er maskin til maskin request $isMaskinToMaskinRequest navident ${claims?.get("NAVident")}"
-        )
-        if (isMaskinToMaskinRequest) {
-            logger.info("returns on isMaskinToMaskinRequest")
-            return@on
-        }
-        val behandlingId = call.parameters["behandlingsid"] ?: return@on
-
-        logger.info("params behandlingId $behandlingId")
-
-        val canAccessAdressebeskyttelse = pluginConfig.canAccessAdressebeskyttelse(behandlingId)
-        logger.info("kan se adressebeskyttelse $canAccessAdressebeskyttelse")
-        if (pluginConfig.canAccessAdressebeskyttelse(behandlingId)) {
-            logger.info("Kan aksesse adressebeskyttelse for behandlingId $behandlingId")
-            return@on
         }
         logger.info("Not found ")
         call.respond(HttpStatusCode.NotFound)

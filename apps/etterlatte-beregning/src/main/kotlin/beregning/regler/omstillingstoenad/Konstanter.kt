@@ -2,4 +2,5 @@ package no.nav.etterlatte.beregning.regler.omstillingstoenad
 
 import java.time.LocalDate
 
-val OMS_2024_DATO: LocalDate = LocalDate.of(2024, 1, 1)
+// TODO settes tidligere enn reformtidspunkt for å kunne gjøre en beregning
+val OMS_GYLDIG_FROM_TEST: LocalDate = LocalDate.of(2023, 1, 1)

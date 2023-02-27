@@ -2,6 +2,8 @@ package no.nav.etterlatte.beregning.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.beregning.BeregnBarnepensjonService
+import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
@@ -19,10 +21,20 @@ class ApplicationContext {
         username = properties.dbUsername,
         password = properties.dbPassword
     )
+    val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
+    val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
+    val beregnBarnepensjonService = BeregnBarnepensjonService(
+        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+        grunnlagKlient = grunnlagKlient
+    )
+    val beregnOmstillingsstoenadService = BeregnOmstillingsstoenadService(
+        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+        grunnlagKlient = grunnlagKlient
+    )
     val beregningService = BeregningService(
         beregningRepository = BeregningRepository(dataSource),
-        vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
-        grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
-        behandlingKlient = BehandlingKlientImpl(config, httpClient())
+        behandlingKlient = BehandlingKlientImpl(config, httpClient()),
+        beregnBarnepensjonService = beregnBarnepensjonService,
+        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService
     )
 }

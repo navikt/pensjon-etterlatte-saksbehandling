@@ -17,27 +17,18 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.beregning.klienter.BehandlingKlient
-import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
-import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.kilde
-import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -52,20 +43,24 @@ import java.util.UUID.randomUUID
 internal class BeregningRoutesTest {
 
     private val server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
+    private lateinit var applicationConfig: HoconApplicationConfig
     private val beregningRepository = mockk<BeregningRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
-    private lateinit var beregningService: BeregningService
+    private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
+    private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
+    private val beregningService = BeregningService(
+        beregningRepository = beregningRepository,
+        behandlingKlient = behandlingKlient,
+        beregnBarnepensjonService = beregnBarnepensjonService,
+        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService
+    )
 
     @BeforeAll
     fun before() {
         server.start()
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
-        beregningService =
-            BeregningService(beregningRepository, vilkaarsvurderingKlient, grunnlagKlient, behandlingKlient)
+
+        applicationConfig =
+            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID, CLIENT_ID)
     }
 
     @AfterAll
@@ -78,10 +73,8 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hent(any()) } returns null
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application { restModule(this.log) { beregning(beregningService) } }
+            environment { config = applicationConfig }
+            application { restModule(log) { beregning(beregningService) } }
 
             val response = client.get("/api/beregning/${randomUUID()}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -99,10 +92,8 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application { restModule(this.log) { beregning(beregningService) } }
+            environment { config = applicationConfig }
+            application { restModule(log) { beregning(beregningService) } }
 
             val response = client.get("/api/beregning/${beregning.behandlingId}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -116,27 +107,22 @@ internal class BeregningRoutesTest {
     }
 
     @Test
-    fun `skal opprette ny beregning for foerstegangsbehandling`() {
-        val behandlingId = randomUUID()
+    fun `skal opprette ny beregning for foerstegangsbehandling av barnepensjon`() {
+        val behandling = mockBehandling()
+        val beregning = beregning()
+        val sak = Sak("ident", SakType.BARNEPENSJON, 1)
 
-        coEvery { behandlingKlient.beregn(behandlingId, any(), false) } returns true
-        coEvery { behandlingKlient.beregn(behandlingId, any(), true) } returns true
-        coEvery {
-            behandlingKlient.hentBehandling(behandlingId, any())
-        } returns behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag(emptyList())
-        coEvery {
-            vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, any())
-        } returns VilkaarsvurderingTestData.oppfylt
+        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
+        coEvery { behandlingKlient.hentSak(any(), any()) } returns sak
+        coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application { restModule(this.log) { beregning(beregningService) } }
+            environment { config = applicationConfig }
+            application { restModule(log) { beregning(beregningService) } }
 
-            val response = client.post("/api/beregning/$behandlingId") {
+            val response = client.post("/api/beregning/${behandling.id}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
@@ -147,7 +133,7 @@ internal class BeregningRoutesTest {
             with(opprettetBeregning) {
                 beregningsperioder shouldHaveSize 1
                 with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe 3716
+                    utbetaltBeloep shouldBe 3000
                 }
             }
         }
@@ -176,29 +162,12 @@ internal class BeregningRoutesTest {
             )
         )
 
-    private fun grunnlag(soesken: List<String>) = GrunnlagTestData(
-        opplysningsmapSakOverrides = mapOf(
-            Opplysningstype.SOESKEN_I_BEREGNINGEN to Opplysning.Konstant(
-                randomUUID(),
-                kilde,
-                Beregningsgrunnlag(
-                    soesken.map {
-                        SoeskenMedIBeregning(Foedselsnummer.of(it), true)
-                    }
-                ).toJsonNode()
-            )
-        )
-    ).hentOpplysningsgrunnlag()
-
-    private fun behandling(
-        type: BehandlingType,
-        virk: YearMonth = BeregningServiceTest.VIRKNINGSTIDSPUNKT_JAN_23
-    ): DetaljertBehandling =
+    private fun mockBehandling(): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { behandlingType } returns type
+            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { sak } returns 1
-            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
+            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         }
 
     private val token: String by lazy {

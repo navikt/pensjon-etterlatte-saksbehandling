@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
@@ -9,6 +10,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -199,3 +201,20 @@ private object Queries {
         WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
     """
 }
+
+private data class BeregningsperiodeDAO(
+    val beregningId: UUID,
+    val behandlingId: UUID,
+    val type: Beregningstype,
+    val beregnetDato: Tidspunkt,
+    val datoFOM: YearMonth,
+    val datoTOM: YearMonth?,
+    val utbetaltBeloep: Int,
+    val soeskenFlokk: List<String>?,
+    val grunnbelopMnd: Int,
+    val grunnbelop: Int,
+    val grunnlagMetadata: Metadata,
+    val trygdetid: Int,
+    val regelResultat: JsonNode? = null,
+    val regelVersjon: String? = null
+)

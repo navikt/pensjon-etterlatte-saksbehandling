@@ -17,9 +17,9 @@ data class BeregningDTO(
 
 data class Beregningsperiode(
     val datoFOM: YearMonth,
-    val datoTOM: YearMonth?,
+    val datoTOM: YearMonth? = null,
     val utbetaltBeloep: Int,
-    val soeskenFlokk: List<String>?,
+    val soeskenFlokk: List<String>? = null,
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val trygdetid: Int,

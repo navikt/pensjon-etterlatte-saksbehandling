@@ -13,7 +13,7 @@ data class AccessTokenWrapper(
             saksbehandler!!.ident
         }
 
-    fun erMaskinTilMaskin() = oid == sub
+    fun erMaskinTilMaskin() = (oid == sub) && (oid != null)
     fun saksbehandlerEnhet(saksbehandlere: Map<String, String>): String {
         if (erMaskinTilMaskin()) {
             return Fagsaksystem.EY.name

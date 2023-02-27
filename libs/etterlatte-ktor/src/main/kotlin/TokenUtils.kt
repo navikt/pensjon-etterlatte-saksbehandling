@@ -12,6 +12,10 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
+@Deprecated(
+    "gå heller via accesstokenWrapper for å få støtte for også automatiske behandlinger",
+    ReplaceWith("accesstokenWrapper")
+)
 inline val PipelineContext<*, ApplicationCall>.saksbehandler: Saksbehandler
     get() = hentSaksbehandler(call)
 
@@ -22,6 +26,7 @@ fun hentSaksbehandler(call: ApplicationCall) = call.principal<TokenValidationCon
     Saksbehandler(navIdent)
 }
 
+@Deprecated("bruk heller accesstokenWrapper", ReplaceWith("accesstokenWrapper"))
 inline val PipelineContext<*, ApplicationCall>.accesstoken: String
     get() = hentAccessToken(call)
 
@@ -35,21 +40,22 @@ fun hentAccessToken(call: ApplicationCall) = call.request.parseAuthorizationHead
 
 inline val PipelineContext<*, ApplicationCall>.accesstokenWrapper: AccessTokenWrapper
     get() {
-        val principal = call.principal<TokenValidationContextPrincipal>()
-        val oidSub = principal.let {
-            val claims = it?.context?.getJwtToken("azure")
-                ?.jwtTokenClaims
-            val oid = claims?.getClaim(Claims.oid)
-            val sub = claims?.getClaim(Claims.sub)
-            Pair(oid, sub)
-        }
-        val saksbehandler = principal?.context?.getJwtToken("azure")
-            ?.jwtTokenClaims?.getClaim(Claims.NAVident)
+        val claims = call.principal<TokenValidationContextPrincipal>()
+            ?.context
+            ?.getJwtToken("azure")
+            ?.jwtTokenClaims
+        val oidSub = claims
+            ?.let {
+                val oid = it.getClaim(Claims.oid)
+                val sub = it.getClaim(Claims.sub)
+                Pair(oid, sub)
+            }
+        val saksbehandler = claims?.getClaim(Claims.NAVident)
             ?.let { Saksbehandler(it) }
         return AccessTokenWrapper(
             accessToken = hentAccessToken(call),
-            oid = oidSub.first,
-            sub = oidSub.second,
+            oid = oidSub?.first,
+            sub = oidSub?.second,
             saksbehandler = saksbehandler
         )
     }

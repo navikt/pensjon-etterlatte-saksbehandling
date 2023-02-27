@@ -5,7 +5,7 @@ plugins {
 dependencies {
     implementation(project(":libs:common"))
 
-    testImplementation(MockK.MockK)
-    testImplementation(Kotlinx.CoroutinesCore)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(project(":libs:testdata"))
 }

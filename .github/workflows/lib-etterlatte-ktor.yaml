@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - libs/etterlatte-ktor/**
+      - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - libs/etterlatte-ktor/**
+      - gradle/libs.versions.toml
 
 jobs:
   test:

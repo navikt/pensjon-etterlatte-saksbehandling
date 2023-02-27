@@ -22,15 +22,7 @@ on:
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
-      - buildSrc/src/main/kotlin/Cache.kt
-      - buildSrc/src/main/kotlin/Database.kt
-      - buildSrc/src/main/kotlin/Jackson.kt
-      - buildSrc/src/main/kotlin/Ktor2.kt
-      - buildSrc/src/main/kotlin/Micrometer.kt
-      - buildSrc/src/main/kotlin/MockK.kt
-      - buildSrc/src/main/kotlin/NavFelles.kt
-      - buildSrc/src/main/kotlin/Prometheus
-      - buildSrc/src/main/kotlin/TestContainer.kt
+      - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
@@ -42,15 +34,7 @@ on:
       - libs/etterlatte-database/**
       - libs/ktor2client-onbehalfof/**
       - libs/ktor2client-auth-clientcredentials/**
-      - buildSrc/src/main/kotlin/Cache.kt
-      - buildSrc/src/main/kotlin/Database.kt
-      - buildSrc/src/main/kotlin/Jackson.kt
-      - buildSrc/src/main/kotlin/Ktor2.kt
-      - buildSrc/src/main/kotlin/Micrometer.kt
-      - buildSrc/src/main/kotlin/MockK.kt
-      - buildSrc/src/main/kotlin/NavFelles.kt
-      - buildSrc/src/main/kotlin/Prometheus
-      - buildSrc/src/main/kotlin/TestContainer.kt
+      - gradle/libs.versions.toml
 
 jobs:
   test:

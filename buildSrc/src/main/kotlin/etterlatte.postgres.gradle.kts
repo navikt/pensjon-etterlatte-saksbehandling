@@ -1,3 +1,7 @@
+import org.gradle.accessors.dm.LibrariesForLibs
+
+val libs = the<LibrariesForLibs>()
+
 plugins {
     id("etterlatte.common")
 }
@@ -7,10 +11,10 @@ repositories {
 }
 
 dependencies {
-    implementation(Database.Postgresql)
-    implementation(Database.FlywayDB)
-    implementation(Database.HikariCP)
+    implementation(libs.database.postgresql)
+    implementation(libs.database.flywaydb)
+    implementation(libs.database.hikaricp)
 
-    testImplementation(TestContainer.Jupiter)
-    testImplementation(TestContainer.Postgresql)
+    testImplementation(libs.test.testcontainer.jupiter)
+    testImplementation(libs.test.testcontainer.postgresql)
 }

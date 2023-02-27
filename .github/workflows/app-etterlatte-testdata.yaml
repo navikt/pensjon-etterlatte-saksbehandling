@@ -8,28 +8,14 @@ on:
     paths:
       - apps/etterlatte-testdata/**
       - libs/ktor2client-onbehalfof/**
-      - buildSrc/src/main/kotlin/Jackson.kt
-      - buildSrc/src/main/kotlin/Jupiter.kt
-      - buildSrc/src/main/kotlin/Kotest.kt
-      - buildSrc/src/main/kotlin/Ktor2.kt
-      - buildSrc/src/main/kotlin/Logging.kt
-      - buildSrc/src/main/kotlin/MockK.kt
-      - buildSrc/src/main/kotlin/Micrometer.kt
-      - buildSrc/src/main/kotlin/NavFelles.kt
+      - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-testdata/**
       - libs/ktor2client-onbehalfof/**
-      - buildSrc/src/main/kotlin/Jackson.kt
-      - buildSrc/src/main/kotlin/Jupiter.kt
-      - buildSrc/src/main/kotlin/Kotest.kt
-      - buildSrc/src/main/kotlin/Ktor2.kt
-      - buildSrc/src/main/kotlin/Logging.kt
-      - buildSrc/src/main/kotlin/MockK.kt
-      - buildSrc/src/main/kotlin/Micrometer.kt
-      - buildSrc/src/main/kotlin/NavFelles.kt
+      - gradle/libs.versions.toml
 
 jobs:
   test:

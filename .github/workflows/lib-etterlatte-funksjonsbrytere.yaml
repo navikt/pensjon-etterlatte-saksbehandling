@@ -6,13 +6,13 @@ on:
       - main
     paths:
       - libs/etterlatte-funksjonsbrytere/**
-      - buildSrc/src/main/Unleash.kt
+      - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - libs/etterlatte-funksjonsbrytere/**
-      - buildSrc/src/main/Unleash.kt
+      - gradle/libs.versions.toml
 
 jobs:
   test:

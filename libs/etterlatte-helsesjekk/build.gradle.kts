@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    implementation(Ktor2.OkHttp)
+    implementation(libs.ktor2.okhttp)
 }

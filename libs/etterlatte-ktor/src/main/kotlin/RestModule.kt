@@ -46,26 +46,17 @@ fun Route.adresseBeskyttelseRoute(ressursHarAdressebeskyttelse: (id: String) -> 
 
         val oid = claims?.get("oid").toString()
         val sub = claims?.get("sub").toString()
-        // TODO: hvis begge er null?
+
         val isMaskinToMaskinRequest: Boolean = oid == sub
-        logger.info(
-            "$oid $sub Er maskin til maskin request $isMaskinToMaskinRequest navident ${claims?.get("NAVident")}"
-        )
         if (isMaskinToMaskinRequest) {
-            logger.info("returns on isMaskinToMaskinRequest")
             return@intercept
         }
+
         val behandlingId = call.parameters["behandlingsid"] ?: return@intercept
 
-        logger.info("params behandlingId $behandlingId")
-
-        val canAccess = ressursHarAdressebeskyttelse(behandlingId)
-        logger.info("ressursHarAdressebeskyttelse $canAccess")
         if (ressursHarAdressebeskyttelse(behandlingId)) {
-            logger.info("Not found ")
             call.respond(HttpStatusCode.NotFound)
         }
-        logger.info("Kan aksessere adressebeskyttelse for behandlingId $behandlingId")
         return@intercept
     }
 }

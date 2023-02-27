@@ -17,6 +17,7 @@ import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.authentication
 import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.callid.CallId
@@ -53,15 +54,9 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
     }
 }
 
-val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
-
-val adressebeskyttelsePlugin = createApplicationPlugin(
-    name = "Adressebeskyttelsesplugin",
-    createConfiguration = ::PluginConfiguration
-) {
-    // AuthenticationChecked
-    on(AuthenticationChecked) { call ->
-        logger.info("Sjekker adressebeskyttelse interceptor")
+fun Route.sjekkKode6(canAccessAdressebeskyttelse: (id: String) -> Boolean = { false }) {
+    logger.info("Route interceptor")
+    intercept(Call) {
         val claims = call.principal<TokenValidationContextPrincipal>()
             ?.context
             ?.getJwtToken("azure")
@@ -81,7 +76,51 @@ val adressebeskyttelsePlugin = createApplicationPlugin(
         val sub = claims?.get("sub").toString()
         // TODO: hvis begge er null?
         val isMaskinToMaskinRequest: Boolean = oid == sub
-        logger.info("$oid $sub Er maskin til maskin request $isMaskinToMaskinRequest")
+        logger.info(
+            "$oid $sub Er maskin til maskin request $isMaskinToMaskinRequest navident ${claims?.get("NAVident")}"
+        )
+        if (isMaskinToMaskinRequest) {
+            logger.info("returns on isMaskinToMaskinRequest")
+            return@intercept
+        }
+        val behandlingId = call.parameters["behandlingsid"] ?: return@intercept
+
+        logger.info("params behandlingId $behandlingId")
+
+        val canAccess = canAccessAdressebeskyttelse(behandlingId)
+        logger.info("kan se adressebeskyttelse $canAccess")
+        if (canAccessAdressebeskyttelse(behandlingId)) {
+            logger.info("Kan aksesse adressebeskyttelse for behandlingId $behandlingId")
+            return@intercept
+        }
+        logger.info("Not found ")
+        call.respond(HttpStatusCode.NotFound)
+    }
+}
+
+val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
+
+// TODO: kan evt prøve med en Route.func extension function
+val adressebeskyttelsePlugin = createApplicationPlugin(
+    name = "Adressebeskyttelsesplugin",
+    createConfiguration = ::PluginConfiguration
+) {
+    // AuthenticationChecked
+    on(AuthenticationChecked) { call ->
+        logger.info("Sjekker adressebeskyttelse interceptor")
+
+        val claims = call.authentication.principal<TokenValidationContextPrincipal>()
+            ?.context
+            ?.getJwtToken("azure")
+            ?.jwtTokenClaims
+
+        val oid = claims?.get("oid").toString()
+        val sub = claims?.get("sub").toString()
+        // TODO: hvis begge er null?
+        val isMaskinToMaskinRequest: Boolean = oid == sub
+        logger.info(
+            "$oid $sub Er maskin til maskin request $isMaskinToMaskinRequest navident ${claims?.get("NAVident")}"
+        )
         if (isMaskinToMaskinRequest) {
             logger.info("returns on isMaskinToMaskinRequest")
             return@on

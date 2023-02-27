@@ -43,7 +43,10 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
+import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -54,6 +57,7 @@ interface BeanFactory {
     val config: Config
     fun dataSource(): DataSource
     fun sakService(): SakService
+    fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse
     fun foerstegangsbehandlingService(): FoerstegangsbehandlingService
     fun revurderingService(): RevurderingService
     fun generellBehandlingService(): GenerellBehandlingService
@@ -62,6 +66,7 @@ interface BeanFactory {
     fun oppgaveService(): OppgaveService
     fun omberegningService(): OmberegningService
     fun sakDao(): SakDao
+    fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse
     fun oppgaveDao(): OppgaveDao
     fun behandlingDao(): BehandlingDao
     fun hendelseDao(): HendelseDao
@@ -136,6 +141,9 @@ abstract class CommonFactory : BeanFactory {
 
     override fun sakService(): SakService = RealSakService(sakDao())
 
+    override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
+        SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()))
+
     override fun behandlingsStatusService(): BehandlingStatusService {
         return BehandlingStatusServiceImpl(behandlingDao(), generellBehandlingService())
     }
@@ -179,6 +187,8 @@ abstract class CommonFactory : BeanFactory {
     override fun oppgaveDao(): OppgaveDao = oppgaveDao
     override fun oppgaveService(): OppgaveService = oppgaveService
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
+    override fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse =
+        SakDaoAdressebeskyttelse(datasource)
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
     override fun hendelseDao(): HendelseDao = HendelseDao { databaseContext().activeTx() }
     override fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao =
@@ -198,7 +208,7 @@ abstract class CommonFactory : BeanFactory {
             generellBehandlingService(),
             pdlKlient(),
             grunnlagKlientClientCredentials(),
-            sakService()
+            sakServiceAdressebeskyttelse()
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(

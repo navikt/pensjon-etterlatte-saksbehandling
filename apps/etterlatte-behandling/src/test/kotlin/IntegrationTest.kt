@@ -68,7 +68,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    @Test // TODO denne testen bør stykkes opp
+    @Test
     fun verdikjedetest() {
         val fnr = Foedselsnummer.of("08071272487").value
         var behandlingOpprettet: UUID? = null
@@ -425,7 +425,6 @@ class IntegrationTest : BehandlingIntegrationTest() {
             "BEHANDLING:AVBRUTT",
             objectMapper.readTree(rapid.publiserteMeldinger.last().verdi)["@event_name"].textValue()
         )
-
         beanFactory.dataSource().connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
         }

@@ -20,6 +20,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
+import no.nav.etterlatte.libs.ktor.adresseBeskyttelseRoute
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
@@ -60,8 +61,19 @@ fun Application.module(beanFactory: BeanFactory) {
         val generellBehandlingService = generellBehandlingService()
         val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
 
+        val sakServiceAdressebeskyttelse = sakServiceAdressebeskyttelse()
+
         restModule(sikkerLogg) {
-            attachContekst(dataSource(), beanFactory)
+            interceptorWrapper(
+                adressebeskyttelse = {
+                    adresseBeskyttelseRoute(
+                        ressursHarAdressebeskyttelse = { behandlingId ->
+                            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
+                        }
+                    )
+                },
+                leggTilKontekst = { attachContekst(dataSource(), beanFactory) }
+            )
             sakRoutes(
                 sakService = sakService(),
                 generellBehandlingService = generellBehandlingService,
@@ -81,6 +93,14 @@ fun Application.module(beanFactory: BeanFactory) {
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
         }
     }
+}
+
+private fun Route.interceptorWrapper(
+    adressebeskyttelse: () -> Unit,
+    leggTilKontekst: () -> Unit
+) {
+    adressebeskyttelse()
+    leggTilKontekst()
 }
 
 private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {

@@ -83,6 +83,7 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "navn" to "John Doe",
                 "NAVident" to "Saksbehandler01"
+
             )
         )
     }
@@ -152,9 +153,10 @@ class TestBeanFactory(
             "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim
         )
 
-    val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
-    override fun dataSource(): DataSource =
-        DataSourceBuilder.createDataSource(jdbcUrl, username, password)
+    val rapidSingleton: TestProdusent<String, String> by lazy() { TestProdusent() }
+
+    private val dataSource: DataSource by lazy { DataSourceBuilder.createDataSource(jdbcUrl, username, password) }
+    override fun dataSource(): DataSource = dataSource
 
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
 

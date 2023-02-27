@@ -203,6 +203,15 @@ internal fun Route.behandlingRoutes(
             }
         }
 
+        route("/foerstegangsbehandling/{behandlingsId}") {
+            get {
+                call.respond(
+                    foerstegangsbehandlingService.hentFoerstegangsbehandling(behandlingsId)?.toDetaljertBehandling()
+                        ?: HttpStatusCode.NotFound
+                )
+            }
+        }
+
         route("/foerstegangsbehandling") {
             get {
                 call.respond(

@@ -38,7 +38,6 @@ import java.util.*
 val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
 
 fun Route.adresseBeskyttelseRoute(ressursHarAdressebeskyttelse: (id: String) -> Boolean = { false }) {
-    logger.info("Route interceptor")
     intercept(Call) {
         val claims = call.principal<TokenValidationContextPrincipal>()
             ?.context

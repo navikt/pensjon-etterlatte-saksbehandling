@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -35,7 +35,7 @@ class GrunnlagsendringshendelseService(
     private val generellBehandlingService: GenerellBehandlingService,
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val sakService: SakService
+    private val sakServiceAdressebeskyttelse: SakServiceAdressebeskyttelse
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -94,7 +94,7 @@ class GrunnlagsendringshendelseService(
         )
 
         grunnlagsendringshendelseList.map { it.sakId }.distinct().forEach { sakId ->
-            val oppdaterAdressebeskyttelse = sakService.oppdaterAdressebeskyttelse(
+            val oppdaterAdressebeskyttelse = sakServiceAdressebeskyttelse.setAdressebeskyttelse(
                 sakId,
                 adressebeskyttelse.adressebeskyttelseGradering
             )

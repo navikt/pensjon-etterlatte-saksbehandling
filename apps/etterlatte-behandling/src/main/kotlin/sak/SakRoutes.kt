@@ -40,9 +40,7 @@ internal fun Route.sakRoutes(
         get("saker") {
             call.respond(
                 Saker(
-                    inTransaction {
-                        sakService.finnSaker(requireNotNull(call.parameters["id"]))
-                    }
+                    sakService.finnSaker(requireNotNull(call.parameters["id"]))
                 )
             )
         }

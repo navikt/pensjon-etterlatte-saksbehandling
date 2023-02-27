@@ -143,6 +143,7 @@ abstract class CommonFactory : BeanFactory {
 
     override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
         SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()))
+
     override fun behandlingsStatusService(): BehandlingStatusService {
         return BehandlingStatusServiceImpl(behandlingDao(), generellBehandlingService())
     }
@@ -207,7 +208,7 @@ abstract class CommonFactory : BeanFactory {
             generellBehandlingService(),
             pdlKlient(),
             grunnlagKlientClientCredentials(),
-            sakService()
+            sakServiceAdressebeskyttelse()
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(

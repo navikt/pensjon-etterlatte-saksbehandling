@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -87,13 +87,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val pdlService = mockk<PdlKlientImpl>()
         val grunnlagClient = mockk<GrunnlagKlient>()
-        val sakService = mockk<SakService>()
+        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
             pdlService,
             grunnlagClient,
-            sakService
+            sakServiceAdressebeskyttelse
         )
 
         val lagredeGrunnlagsendringshendelser = grunnlagsendringshendelseService.opprettDoedshendelse(
@@ -145,13 +145,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val grunnlagClient = mockk<GrunnlagKlient>()
         val pdlService = mockk<PdlKlientImpl>()
-        val sakService = mockk<SakService>()
+        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
             pdlService,
             grunnlagClient,
-            sakService
+            sakServiceAdressebeskyttelse
         )
 
         grunnlagsendringshendelseService.opprettUtflyttingshendelse(
@@ -224,13 +224,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val pdlService = mockk<PdlKlientImpl>()
         val grunnlagClient = mockk<GrunnlagKlient>()
-        val sakService = mockk<SakService>()
+        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
             pdlService,
             grunnlagClient,
-            sakService
+            sakServiceAdressebeskyttelse
         )
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
@@ -301,13 +301,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val pdlService = mockk<PdlKlientImpl>()
         val grunnlagClient = mockk<GrunnlagKlient>()
-        val sakService = mockk<SakService>()
+        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
             pdlService,
             grunnlagClient,
-            sakService
+            sakServiceAdressebeskyttelse
         )
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             UtflyttingsHendelse(
@@ -377,13 +377,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val pdlService = mockk<PdlKlientImpl>()
         val grunnlagClient = mockk<GrunnlagKlient>()
-        val sakService = mockk<SakService>()
+        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
             pdlService,
             grunnlagClient,
-            sakService
+            sakServiceAdressebeskyttelse
         )
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
             ForelderBarnRelasjonHendelse(
@@ -477,13 +477,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagClient = mockk<GrunnlagKlient> {
             coEvery { hentGrunnlag(any()) } returns null
         }
-        val sakService = mockk<SakService>()
+        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
             generellBehandlingService,
             pdlService,
             grunnlagClient,
-            sakService
+            sakServiceAdressebeskyttelse
         )
         grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(minutter)
 

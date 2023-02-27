@@ -186,10 +186,8 @@ class VedtaksvurderingService(
             if (it.vilkaarsvurdering == null && it.behandling.type != BehandlingType.MANUELT_OPPHOER) {
                 throw VedtakKanIkkeFattes(v)
             }
-            val saksbehandler = accessToken.saksbehandler?.ident!!
-
-            val saksbehandlerEnhet = saksbehandlere[saksbehandler]
-                ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
+            val saksbehandler = accessToken.saksbehandlerIdentEllerSystemnavn
+            val saksbehandlerEnhet: String = accessToken.saksbehandlerEnhet(saksbehandlere)
 
             repository.fattVedtak(saksbehandler, saksbehandlerEnhet, behandlingId)
         }
@@ -221,10 +219,8 @@ class VedtaksvurderingService(
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
         }
-        val saksbehandler = accessToken.saksbehandler?.ident!!
-
-        val saksbehandlerEnhet = saksbehandlere[saksbehandler]
-            ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
+        val saksbehandler = accessToken.saksbehandlerIdentEllerSystemnavn
+        val saksbehandlerEnhet: String = accessToken.saksbehandlerEnhet(saksbehandlere)
 
         repository.attesterVedtak(
             saksbehandler,
@@ -270,7 +266,7 @@ class VedtaksvurderingService(
         val vedtakHendelse = VedtakHendelse(
             vedtakId = underkjentVedtak.vedtakId,
             inntruffet = underkjentTid.toNorskTidspunkt(),
-            saksbehandler = accessToken.saksbehandler?.ident!!,
+            saksbehandler = accessToken.saksbehandlerIdentEllerSystemnavn,
             kommentar = begrunnelse.kommentar,
             valgtBegrunnelse = begrunnelse.valgtBegrunnelse
         )
@@ -336,8 +332,6 @@ class VedtaksvurderingService(
             .sortedBy { it.periode.fom }
     }
 }
-
-class SaksbehandlerManglerEnhetException(message: String) : Exception(message)
 
 private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak, tekniskTid: LocalDateTime) =
     JsonMessage.newMessage(

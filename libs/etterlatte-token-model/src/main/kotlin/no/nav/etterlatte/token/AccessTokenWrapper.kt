@@ -6,7 +6,22 @@ data class AccessTokenWrapper(
     val oid: String?,
     val sub: String?
 ) {
+    val saksbehandlerIdentEllerSystemnavn: String =
+        if (erMaskinTilMaskin()) {
+            Fagsaksystem.EY.name
+        } else {
+            saksbehandler!!.ident
+        }
+
     fun erMaskinTilMaskin() = oid == sub
+    fun saksbehandlerEnhet(saksbehandlere: Map<String, String>): String {
+        if (erMaskinTilMaskin()) {
+            return Fagsaksystem.EY.name
+        }
+
+        return saksbehandlere[saksbehandler!!.ident]
+            ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
+    }
 
     init {
         if (!(erMaskinTilMaskin() || saksbehandler != null)) {

@@ -3,7 +3,7 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.EventNames.FATT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.EventNames.TIL_UTBETALING
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -45,7 +45,7 @@ internal class OpprettVedtakforespoersel(
                 logger.info("Opprettet vedtak ${respons.vedtakId}")
             }
 
-            withFeilhaandtering(packet, context, EventNames.FATT_VEDTAK) {
+            withFeilhaandtering(packet, context, FATT_VEDTAK) {
                 val fattetVedtak = vedtak.fattVedtak(behandlingId)
                 logger.info("Fattet vedtak ${fattetVedtak.vedtakId}")
 

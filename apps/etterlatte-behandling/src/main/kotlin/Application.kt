@@ -103,7 +103,6 @@ private fun Route.interceptorWrapper(
     leggTilKontekst()
 }
 
-// wrapper interceptor for denne route extensionen og min.
 private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =

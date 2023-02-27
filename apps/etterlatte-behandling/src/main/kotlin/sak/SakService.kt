@@ -2,8 +2,6 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 interface SakService {
     fun hentSaker(): List<Sak>
@@ -15,7 +13,6 @@ interface SakService {
 }
 
 class RealSakService(private val dao: SakDao) : SakService {
-    val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
     override fun hentSaker(): List<Sak> {
         return dao.hentSaker()

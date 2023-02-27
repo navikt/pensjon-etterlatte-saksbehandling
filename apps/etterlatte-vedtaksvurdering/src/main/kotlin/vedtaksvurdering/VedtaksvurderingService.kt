@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
-import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -170,7 +169,6 @@ class VedtaksvurderingService(
 
     suspend fun fattVedtak(
         behandlingId: UUID,
-        saksbehandler: String,
         accessToken: AccessTokenWrapper
     ): Vedtak {
         if (!behandlingKlient.fattVedtak(behandlingId, accessToken)) {
@@ -188,6 +186,8 @@ class VedtaksvurderingService(
             if (it.vilkaarsvurdering == null && it.behandling.type != BehandlingType.MANUELT_OPPHOER) {
                 throw VedtakKanIkkeFattes(v)
             }
+            val saksbehandler = accessToken.saksbehandler?.ident!!
+
             val saksbehandlerEnhet = saksbehandlere[saksbehandler]
                 ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
 
@@ -211,7 +211,6 @@ class VedtaksvurderingService(
 
     suspend fun attesterVedtak(
         behandlingId: UUID,
-        saksbehandler: String,
         accessToken: AccessTokenWrapper
     ): Vedtak {
         if (!behandlingKlient.attester(behandlingId, accessToken)) {
@@ -222,6 +221,7 @@ class VedtaksvurderingService(
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
         }
+        val saksbehandler = accessToken.saksbehandler?.ident!!
 
         val saksbehandlerEnhet = saksbehandlere[saksbehandler]
             ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
@@ -254,7 +254,6 @@ class VedtaksvurderingService(
     suspend fun underkjennVedtak(
         behandlingId: UUID,
         accessToken: AccessTokenWrapper,
-        saksbehandler: Saksbehandler,
         begrunnelse: UnderkjennVedtakClientRequest
     ): VedtakEntity {
         if (!behandlingKlient.underkjenn(behandlingId, accessToken)) {
@@ -271,7 +270,7 @@ class VedtaksvurderingService(
         val vedtakHendelse = VedtakHendelse(
             vedtakId = underkjentVedtak.vedtakId,
             inntruffet = underkjentTid.toNorskTidspunkt(),
-            saksbehandler = saksbehandler.ident,
+            saksbehandler = accessToken.saksbehandler?.ident!!,
             kommentar = begrunnelse.kommentar,
             valgtBegrunnelse = begrunnelse.valgtBegrunnelse
         )

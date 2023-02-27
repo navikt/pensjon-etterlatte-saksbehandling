@@ -13,7 +13,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.accesstokenWrapper
-import no.nav.etterlatte.libs.ktor.saksbehandler
 import java.time.LocalDate
 import java.util.*
 
@@ -69,7 +68,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         post("vedtak/attester/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                val attestert = service.attesterVedtak(behandlingId, saksbehandler.ident, accesstokenWrapper)
+                val attestert = service.attesterVedtak(behandlingId, accesstokenWrapper)
 
                 call.respond(attestert)
             }
@@ -84,7 +83,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         post("vedtak/fattvedtak/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                val fattetVedtak = service.fattVedtak(behandlingId, saksbehandler.ident, accesstokenWrapper)
+                val fattetVedtak = service.fattVedtak(behandlingId, accesstokenWrapper)
 
                 call.respond(fattetVedtak)
             }
@@ -96,7 +95,6 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             val underkjentVedtak = service.underkjennVedtak(
                 behandlingId,
                 accesstokenWrapper,
-                saksbehandler,
                 begrunnelse
             )
 

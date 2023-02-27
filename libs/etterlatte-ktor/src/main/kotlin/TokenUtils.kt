@@ -6,9 +6,9 @@ import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.auth.principal
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.token.AccessTokenWrapper
 import no.nav.etterlatte.token.Claims
+import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
@@ -35,18 +35,23 @@ fun hentAccessToken(call: ApplicationCall) = call.request.parseAuthorizationHead
 
 inline val PipelineContext<*, ApplicationCall>.accesstokenWrapper: AccessTokenWrapper
     get() {
-        val oidSub = call.principal<TokenValidationContextPrincipal>().let {
+        val principal = call.principal<TokenValidationContextPrincipal>()
+        val oidSub = principal.let {
             val claims = it?.context?.getJwtToken("azure")
                 ?.jwtTokenClaims
             val oid = claims?.getClaim(Claims.oid)
             val sub = claims?.getClaim(Claims.sub)
             Pair(oid, sub)
         }
-        return AccessTokenWrapper(accessToken = hentAccessToken(call), oid = oidSub.first, sub = oidSub.second)
+        val saksbehandler = principal?.context?.getJwtToken("azure")
+            ?.jwtTokenClaims?.getClaim(Claims.NAVident)
+            ?.let { Saksbehandler(it) }
+        return AccessTokenWrapper(
+            accessToken = hentAccessToken(call),
+            oid = oidSub.first,
+            sub = oidSub.second,
+            saksbehandler = saksbehandler
+        )
     }
-
-data class SaksbehandlerProvider(val saksbehandler: (call: ApplicationCall) -> Saksbehandler) {
-    fun invoke(call: ApplicationCall) = saksbehandler.invoke(call)
-}
 
 fun JwtTokenClaims.getClaim(claim: Claims) = getStringClaim(claim.name)

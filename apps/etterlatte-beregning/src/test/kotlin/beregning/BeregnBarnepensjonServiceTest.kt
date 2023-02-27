@@ -11,6 +11,7 @@ import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
+import no.nav.etterlatte.beregning.regler.accessTokenWrapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
@@ -45,13 +46,13 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken`() {
-        val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = grunnlag(soesken = emptyList())
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, "token")
+            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -76,13 +77,13 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken`() {
-        val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = grunnlag(soesken = listOf(FNR_1))
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, "token")
+            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -105,13 +106,13 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - to soesken`() {
-        val behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = grunnlag(soesken = listOf(FNR_1, FNR_2))
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, "token")
+            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -134,7 +135,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon revurdering - ingen soesken`() {
-        val behandling = behandling(BehandlingType.REVURDERING)
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = grunnlag(soesken = emptyList())
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -143,7 +144,7 @@ internal class BeregnBarnepensjonServiceTest {
         }
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, "token")
+            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -166,7 +167,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal opphoere ved revurdering og vilkaarsvurdering ikke oppfylt`() {
-        val behandling = behandling(BehandlingType.REVURDERING)
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = grunnlag(soesken = emptyList())
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -175,7 +176,7 @@ internal class BeregnBarnepensjonServiceTest {
         }
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, "token")
+            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -198,13 +199,13 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal sette beloep til 0 ved manuelt opphoer`() {
-        val behandling = behandling(BehandlingType.MANUELT_OPPHOER)
+        val behandling = mockBehandling(BehandlingType.MANUELT_OPPHOER)
         val grunnlag = grunnlag(soesken = emptyList())
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, "token")
+            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -239,7 +240,7 @@ internal class BeregnBarnepensjonServiceTest {
         )
     ).hentOpplysningsgrunnlag()
 
-    private fun behandling(type: BehandlingType, virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23): DetaljertBehandling =
+    private fun mockBehandling(type: BehandlingType, virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
             every { sak } returns 1

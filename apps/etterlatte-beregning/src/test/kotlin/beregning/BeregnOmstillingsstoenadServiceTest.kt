@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
+import no.nav.etterlatte.beregning.regler.accessTokenWrapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
@@ -35,7 +36,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnOmstillingsstoenadService.beregn(behandling, "token")
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, accessTokenWrapper)
 
             with(beregning) {
                 beregningId shouldNotBe null

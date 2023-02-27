@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.beregning.regler.accessTokenWrapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -43,7 +44,7 @@ internal class BeregningServiceTest {
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns mockk()
 
         runBlocking {
-            beregningService.opprettBeregning(behandling.id, "token")
+            beregningService.opprettBeregning(behandling.id, accessTokenWrapper)
 
             coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
             coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), true) }
@@ -63,7 +64,7 @@ internal class BeregningServiceTest {
 
         runBlocking {
             assertThrows<IllegalStateException> {
-                beregningService.opprettBeregning(behandling.id, "token")
+                beregningService.opprettBeregning(behandling.id, accessTokenWrapper)
             }
 
             coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
@@ -83,7 +84,7 @@ internal class BeregningServiceTest {
         coEvery { beregnOmstillingsstoenadService.beregn(any(), any()) } returns mockk()
 
         runBlocking {
-            beregningService.opprettBeregning(behandling.id, "token")
+            beregningService.opprettBeregning(behandling.id, accessTokenWrapper)
 
             coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
             coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), true) }
@@ -103,7 +104,7 @@ internal class BeregningServiceTest {
 
         runBlocking {
             assertThrows<IllegalStateException> {
-                beregningService.opprettBeregning(behandling.id, "token")
+                beregningService.opprettBeregning(behandling.id, accessTokenWrapper)
             }
 
             coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }

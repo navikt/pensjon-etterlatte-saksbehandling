@@ -19,7 +19,7 @@ class BeregningService(
         return beregningRepository.hent(behandlingId)
     }
 
-    suspend fun lagreBeregning(behandlingId: UUID, bruker: Bruker): Beregning {
+    suspend fun opprettBeregning(behandlingId: UUID, bruker: Bruker): Beregning {
         logger.info("Oppretter beregning for behandlingId=$behandlingId")
         return tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)

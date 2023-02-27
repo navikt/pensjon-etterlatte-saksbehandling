@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
+import no.nav.etterlatte.token.AccessTokenWrapper
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.YearMonth
@@ -35,7 +36,7 @@ class BeregnOmstillingsstoenadService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregnOmstillingsstoenadService::class.java)
 
-    suspend fun beregn(behandling: DetaljertBehandling, accessToken: String): Beregning {
+    suspend fun beregn(behandling: DetaljertBehandling, accessToken: AccessTokenWrapper): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)

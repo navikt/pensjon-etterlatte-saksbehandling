@@ -67,7 +67,7 @@ fun Application.module(beanFactory: BeanFactory) {
             interceptorWrapper(
                 adressebeskyttelse = {
                     adresseBeskyttelseRoute(
-                        canAccessAdressebeskyttelse = { behandlingId ->
+                        ressursHarAdressebeskyttelse = { behandlingId ->
                             sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
                         }
                     )

@@ -2,11 +2,11 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.database.singleOrNull
-import java.sql.Connection
+import javax.sql.DataSource
 
-class SakDaoAdressebeskyttelse(private val connection: Connection) {
+class SakDaoAdressebeskyttelse(private val datasource: DataSource) {
     fun sjekkOmBehandlingHarAdressebeskyttelse(behandlingId: String): AdressebeskyttelseGradering? {
-        return connection.use {
+        return datasource.connection.use {
             val statement = it.prepareStatement(
                 "SELECT adressebeskyttelse FROM behandling b INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid"
             )

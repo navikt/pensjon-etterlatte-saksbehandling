@@ -48,7 +48,6 @@ import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
 import org.slf4j.LoggerFactory
-import java.sql.Connection
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -67,7 +66,7 @@ interface BeanFactory {
     fun oppgaveService(): OppgaveService
     fun omberegningService(): OmberegningService
     fun sakDao(): SakDao
-    fun sakDaoAdressebeskyttelse(connection: Connection): SakDaoAdressebeskyttelse
+    fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse
     fun oppgaveDao(): OppgaveDao
     fun behandlingDao(): BehandlingDao
     fun hendelseDao(): HendelseDao
@@ -143,7 +142,7 @@ abstract class CommonFactory : BeanFactory {
     override fun sakService(): SakService = RealSakService(sakDao())
 
     override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
-        SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource().connection))
+        SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()))
     override fun behandlingsStatusService(): BehandlingStatusService {
         return BehandlingStatusServiceImpl(behandlingDao(), generellBehandlingService())
     }
@@ -187,8 +186,8 @@ abstract class CommonFactory : BeanFactory {
     override fun oppgaveDao(): OppgaveDao = oppgaveDao
     override fun oppgaveService(): OppgaveService = oppgaveService
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
-    override fun sakDaoAdressebeskyttelse(connection: Connection): SakDaoAdressebeskyttelse =
-        SakDaoAdressebeskyttelse(connection)
+    override fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse =
+        SakDaoAdressebeskyttelse(datasource)
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
     override fun hendelseDao(): HendelseDao = HendelseDao { databaseContext().activeTx() }
     override fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao =

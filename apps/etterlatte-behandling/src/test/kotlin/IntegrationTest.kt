@@ -68,7 +68,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    @Test // TODO denne testen bør stykkes opp
+    @Test
     fun verdikjedetest() {
         val fnr = Foedselsnummer.of("08071272487").value
         var behandlingOpprettet: UUID? = null

@@ -37,7 +37,7 @@ import java.util.*
 
 val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
 
-fun Route.adresseBeskyttelseRoute(canAccessAdressebeskyttelse: (id: String) -> Boolean = { false }) {
+fun Route.adresseBeskyttelseRoute(ressursHarAdressebeskyttelse: (id: String) -> Boolean = { false }) {
     logger.info("Route interceptor")
     intercept(Call) {
         val claims = call.principal<TokenValidationContextPrincipal>()
@@ -60,14 +60,14 @@ fun Route.adresseBeskyttelseRoute(canAccessAdressebeskyttelse: (id: String) -> B
 
         logger.info("params behandlingId $behandlingId")
 
-        val canAccess = canAccessAdressebeskyttelse(behandlingId)
-        logger.info("kan se adressebeskyttelse $canAccess")
-        if (canAccessAdressebeskyttelse(behandlingId)) {
-            logger.info("Kan aksesse adressebeskyttelse for behandlingId $behandlingId")
-            return@intercept
+        val canAccess = ressursHarAdressebeskyttelse(behandlingId)
+        logger.info("ressursHarAdressebeskyttelse $canAccess")
+        if (ressursHarAdressebeskyttelse(behandlingId)) {
+            logger.info("Not found ")
+            call.respond(HttpStatusCode.NotFound)
         }
-        logger.info("Not found ")
-        call.respond(HttpStatusCode.NotFound)
+        logger.info("Kan aksessere adressebeskyttelse for behandlingId $behandlingId")
+        return@intercept
     }
 }
 

@@ -44,6 +44,7 @@ data class PersonDTO(
         kontaktadresse = kontaktadresse?.map { it.verdi },
         oppholdsadresse = oppholdsadresse?.map { it.verdi },
         sivilstatus = sivilstatus?.verdi,
+        siviltilstand = null,
         statsborgerskap = statsborgerskap?.verdi,
         utland = utland?.verdi,
         familieRelasjon = familieRelasjon?.verdi,

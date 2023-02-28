@@ -38,6 +38,7 @@ fun personTestData(
     kontaktadresse = opplysningsmap.hentKontaktadresse()?.verdi,
     oppholdsadresse = opplysningsmap.hentOppholdsadresse()?.verdi,
     sivilstatus = opplysningsmap.hentSivilstatus()?.verdi,
+    siviltilstand = null,
     statsborgerskap = opplysningsmap.hentStatsborgerskap()?.verdi,
     utland = opplysningsmap.hentUtland()?.verdi,
     familieRelasjon = opplysningsmap.hentFamilierelasjon()?.verdi,

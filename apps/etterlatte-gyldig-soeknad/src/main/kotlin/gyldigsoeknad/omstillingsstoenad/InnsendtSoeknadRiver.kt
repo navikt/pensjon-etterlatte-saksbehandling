@@ -47,7 +47,8 @@ internal class InnsendtSoeknadRiver(
             try {
                 val soeknad = packet.soeknad()
                 val personGalleri = gyldigOmstillingsSoeknadService.hentPersongalleriFraSoeknad(soeknad)
-                val gyldighetsVurdering = gyldigOmstillingsSoeknadService.vurderGyldighet(personGalleri)
+                val gyldighetsVurdering =
+                    gyldigOmstillingsSoeknadService.vurderGyldighet(personGalleri.innsender, personGalleri.avdoed)
                 logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
 
                 val sakId = behandlingClient.skaffSak(personGalleri.soeker, SakType.OMSTILLINGSSTOENAD.name)

@@ -21,9 +21,9 @@ class BeregningService(
 
     suspend fun opprettBeregning(behandlingId: UUID, bruker: Bruker): Beregning {
         logger.info("Oppretter beregning for behandlingId=$behandlingId")
-        return tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-            val sak = behandlingKlient.hentSak(behandling.sak, accessToken)
+        return tilstandssjekkFoerKjoerning(behandlingId, bruker) {
+            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+            val sak = behandlingKlient.hentSak(behandling.sak, bruker)
 
             val beregning = when (sak.sakType) {
                 SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, bruker)

@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
-import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.YearMonth
@@ -36,8 +36,8 @@ class BeregnOmstillingsstoenadService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregnOmstillingsstoenadService::class.java)
 
-    suspend fun beregn(behandling: DetaljertBehandling, accessToken: AccessTokenWrapper): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
+    suspend fun beregn(behandling: DetaljertBehandling, bruker: Bruker): Beregning {
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
         val beregningsgrunnlag = opprettBeregningsgrunnlagOmstillingsstoenad(FASTSATT_TRYGDETID_I_PILOT)
@@ -49,7 +49,7 @@ class BeregnOmstillingsstoenadService(
                 beregnOmstillingsstoenad(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {
-                val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, accessToken)
+                val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
                     .resultat?.utfall
                     ?: throw Exception("Forventa å ha vilkårsvurderingsresultat for behandlingId=${behandling.id}")
 

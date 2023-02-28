@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
-import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Saksbehandler
 import java.math.RoundingMode
 import java.time.LocalDate
 
@@ -36,4 +36,4 @@ fun Int.toBeregningstall(
     roundingMode: RoundingMode = RoundingMode.UNNECESSARY
 ) = Beregningstall(this).setScale(decimals, roundingMode)
 
-val accessTokenWrapper = AccessTokenWrapper("token", null, null)
+val bruker = Saksbehandler("token", "ident")

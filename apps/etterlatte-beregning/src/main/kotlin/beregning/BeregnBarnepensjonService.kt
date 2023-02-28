@@ -26,7 +26,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
-import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.YearMonth
@@ -39,8 +39,8 @@ class BeregnBarnepensjonService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
-    suspend fun beregn(behandling: DetaljertBehandling, accessToken: AccessTokenWrapper): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, accessToken)
+    suspend fun beregn(behandling: DetaljertBehandling, bruker: Bruker): Beregning {
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
         val beregningsgrunnlag = opprettBeregningsgrunnlag(requireNotNull(grunnlag.sak.hentSoeskenjustering()))
@@ -52,7 +52,7 @@ class BeregnBarnepensjonService(
                 beregnBarnepensjon(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {
-                val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, accessToken)
+                val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
                     .resultat?.utfall
                     ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
 

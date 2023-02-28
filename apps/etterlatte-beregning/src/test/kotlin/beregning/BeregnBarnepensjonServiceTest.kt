@@ -11,7 +11,7 @@ import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
-import no.nav.etterlatte.beregning.regler.accessTokenWrapper
+import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
@@ -52,7 +52,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
+            val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -83,7 +83,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
+            val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -112,7 +112,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
+            val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -144,7 +144,7 @@ internal class BeregnBarnepensjonServiceTest {
         }
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
+            val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -176,7 +176,7 @@ internal class BeregnBarnepensjonServiceTest {
         }
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
+            val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -205,7 +205,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnBarnepensjonService.beregn(behandling, accessTokenWrapper)
+            val beregning = beregnBarnepensjonService.beregn(behandling, bruker)
 
             with(beregning) {
                 beregningId shouldNotBe null

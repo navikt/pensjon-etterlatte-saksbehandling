@@ -36,7 +36,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
-import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.Instant
@@ -111,9 +110,9 @@ internal class BehandlingDaoIntegrationTest {
             persongalleri.soesken,
             opprettetBehandling.persongalleri.soesken
         )
-        assertErInnenforEttSekund(
-            opprettBehandlingMedPersongalleri.opprettet.toTidspunkt(),
-            opprettetBehandling.behandlingOpprettet.toTidspunkt()
+        assertTidspunktErLike(
+            opprettBehandlingMedPersongalleri.opprettet,
+            opprettetBehandling.behandlingOpprettet
         )
     }
 
@@ -144,18 +143,18 @@ internal class BehandlingDaoIntegrationTest {
             opprettBehandling.persongalleri.soesken,
             opprettetBehandling.persongalleri.soesken
         )
-        assertErInnenforEttSekund(
-            opprettBehandling.opprettet.toTidspunkt(),
-            opprettetBehandling.behandlingOpprettet.toTidspunkt()
+        assertTidspunktErLike(
+            opprettBehandling.opprettet,
+            opprettetBehandling.behandlingOpprettet
         )
     }
 
-    private fun assertErInnenforEttSekund(tidspunkt1: Tidspunkt, tidspunkt2: Tidspunkt) {
-        if (tidspunkt1 != tidspunkt2) {
-            LoggerFactory.getLogger(this::class.java)
-                .error("Tidspunkt som skulle vært like er forskjellige: $tidspunkt1, $tidspunkt2")
-        }
-        assertEquals(tidspunkt1, tidspunkt2, "Tidspunkt1: $tidspunkt1, tidspunkt2: $tidspunkt2")
+    private fun assertTidspunktErLike(tidspunkt1: LocalDateTime, tidspunkt2: LocalDateTime) {
+        assertEquals(
+            tidspunkt1.toTidspunkt(),
+            tidspunkt2.toTidspunkt(),
+            "LocalDateTime1: $tidspunkt1, LocalDateTime2: $tidspunkt2, tidspunkt1: ${tidspunkt1.toTidspunkt()}, tidspunkt2: ${tidspunkt2.toTidspunkt()}" // ktlint-disable max-line-length
+        )
     }
 
     @Test

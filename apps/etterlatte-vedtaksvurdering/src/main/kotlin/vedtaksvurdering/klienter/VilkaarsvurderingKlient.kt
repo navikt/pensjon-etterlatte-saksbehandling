@@ -9,12 +9,12 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface VilkaarsvurderingKlient {
-    suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: AccessTokenWrapper): VilkaarsvurderingDto
+    suspend fun hentVilkaarsvurdering(behandlingId: UUID, accessToken: Bruker): VilkaarsvurderingDto
 }
 
 class VilkaarsvurderingKlientException(override val message: String, override val cause: Throwable) :
@@ -30,7 +30,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
 
     override suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
-        accessToken: AccessTokenWrapper
+        accessToken: Bruker
     ): VilkaarsvurderingDto {
         logger.info("Henter vilkaarsvurdering med behandlingid=$behandlingId")
         try {

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.token
 
-data class AccessTokenWrapper(
+data class Bruker(
     val accessToken: String,
     val saksbehandler: Saksbehandler?,
     val oid: String?,

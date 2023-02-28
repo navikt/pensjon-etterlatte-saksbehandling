@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -96,7 +96,7 @@ class VedtaksvurderingService(
         return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)
     }
 
-    suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, accessToken: AccessTokenWrapper): Vedtak {
+    suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, accessToken: Bruker): Vedtak {
         val vedtak = hentVedtak(behandlingId)
         if (vedtak?.vedtakFattet == true) {
             throw KanIkkeEndreFattetVedtak(vedtak)
@@ -130,7 +130,7 @@ class VedtaksvurderingService(
 
     suspend fun hentDataForVedtak(
         behandlingId: UUID,
-        accessToken: AccessTokenWrapper
+        accessToken: Bruker
     ): Triple<Beregningsresultat?, VilkaarsvurderingDto?, DetaljertBehandling> {
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
@@ -169,7 +169,7 @@ class VedtaksvurderingService(
 
     suspend fun fattVedtak(
         behandlingId: UUID,
-        accessToken: AccessTokenWrapper
+        accessToken: Bruker
     ): Vedtak {
         if (!behandlingKlient.fattVedtak(behandlingId, accessToken)) {
             throw BehandlingstilstandException
@@ -209,7 +209,7 @@ class VedtaksvurderingService(
 
     suspend fun attesterVedtak(
         behandlingId: UUID,
-        accessToken: AccessTokenWrapper
+        accessToken: Bruker
     ): Vedtak {
         if (!behandlingKlient.attester(behandlingId, accessToken)) {
             throw BehandlingstilstandException
@@ -249,7 +249,7 @@ class VedtaksvurderingService(
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,
-        accessToken: AccessTokenWrapper,
+        accessToken: Bruker,
         begrunnelse: UnderkjennVedtakClientRequest
     ): VedtakEntity {
         if (!behandlingKlient.underkjenn(behandlingId, accessToken)) {

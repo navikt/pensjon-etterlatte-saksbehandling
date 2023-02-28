@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
-import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -49,7 +49,7 @@ internal class DBTest {
 
     private val sakId = 123L
     private val accessToken =
-        AccessTokenWrapper(
+        Bruker(
             accessToken = "accessToken",
             oid = null,
             sub = null,
@@ -106,7 +106,7 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 uuid,
-                AccessTokenWrapper("access", Saksbehandler("1"), null, null)
+                Bruker("access", Saksbehandler("1"), null, null)
             )
         }
 
@@ -199,11 +199,11 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 behandling1Id,
-                AccessTokenWrapper("access", Saksbehandler("s1"), null, null)
+                Bruker("access", Saksbehandler("s1"), null, null)
             )
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 behandling2Id,
-                AccessTokenWrapper("access", Saksbehandler("s1"), null, null)
+                Bruker("access", Saksbehandler("s1"), null, null)
             )
         }
 

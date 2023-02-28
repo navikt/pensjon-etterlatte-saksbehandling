@@ -15,7 +15,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.contentType
-import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
@@ -26,7 +26,7 @@ class DownstreamResourceClient(
 ) {
     suspend fun get(
         resource: Resource,
-        accessToken: AccessTokenWrapper
+        accessToken: Bruker
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(accessToken, scopes)
@@ -39,7 +39,7 @@ class DownstreamResourceClient(
     }
 
     private suspend fun hentTokenFraAD(
-        accessToken: AccessTokenWrapper,
+        accessToken: Bruker,
         scopes: List<String>
     ): Result<AccessToken, ThrowableErrorMessage> = if (accessToken.erMaskinTilMaskin()) {
         azureAdClient.getAccessTokenForResource(scopes)
@@ -67,7 +67,7 @@ class DownstreamResourceClient(
 
     suspend fun post(
         resource: Resource,
-        accessToken: AccessTokenWrapper,
+        accessToken: Bruker,
         postBody: Any
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")

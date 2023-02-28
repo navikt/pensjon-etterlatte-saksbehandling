@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -48,7 +48,7 @@ internal class VedtaksvurderingServiceTest {
 
     private val sakId = 2L
     private val behandlingId = UUID.randomUUID()
-    private val accessToken = AccessTokenWrapper("sesam sesam", Saksbehandler("1"), null, null)
+    private val accessToken = Bruker("sesam sesam", Saksbehandler("1"), null, null)
 
     private val vedtakSomIkkeErFattet = Vedtak(
         0,

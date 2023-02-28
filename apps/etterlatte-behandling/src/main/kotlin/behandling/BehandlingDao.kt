@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -172,7 +173,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
                 WHERE status not in (${
-                BehandlingStatus.skalIkkeOmberegnesVedGRegulering().joinToString(", ") { "'$it'" }
+            BehandlingStatus.skalIkkeOmberegnesVedGRegulering().joinToString(", ") { "'$it'" }
             })
             """.trimIndent()
         )
@@ -227,7 +228,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
         vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
-        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) }
+        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+        prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
     )
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(

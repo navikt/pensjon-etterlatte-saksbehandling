@@ -1,6 +1,7 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -47,7 +48,8 @@ internal class LoependeYtelserforespoersel(
                     packet[HENDELSE_DATA_KEY] = Omberegningshendelse(
                         sakId = sakId,
                         fradato = it.dato,
-                        aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING
+                        aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING,
+                        prosesstype = Prosesstype.AUTOMATISK
                     )
                     context.publish(packet.toJson())
                     logger.info("Grunnlopesreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")

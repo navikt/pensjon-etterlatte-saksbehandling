@@ -18,8 +18,8 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
+import no.nav.etterlatte.behandling.regulering.ReguleringFactory
+import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus

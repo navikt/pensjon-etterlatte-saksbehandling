@@ -16,14 +16,17 @@ import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.sak.Sak
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -37,8 +40,14 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    @Test
-    fun `kan opprette omberegning paa sak som har foerstegangsbehandling`() {
+    @AfterEach
+    fun beforeEach() {
+        beanFactory.resetDatabase()
+    }
+
+    @ParameterizedTest(name = "Kan opprette {0} omberegningstype paa sak")
+    @EnumSource(Prosesstype::class)
+    fun `kan opprette omberegning paa sak som har foerstegangsbehandling`(prosesstype: Prosesstype) {
         val fnr = "234"
         testApplication {
             environment {
@@ -92,7 +101,9 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                     Omberegningshendelse(
                         1,
                         LocalDate.now(),
-                        RevurderingAarsak.GRUNNBELOEPREGULERING
+                        RevurderingAarsak.GRUNNBELOEPREGULERING,
+                        null,
+                        prosesstype
                     )
                 )
             }.let {

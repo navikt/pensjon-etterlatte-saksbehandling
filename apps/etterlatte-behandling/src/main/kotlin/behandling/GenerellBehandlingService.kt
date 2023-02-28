@@ -13,8 +13,8 @@ import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
+import no.nav.etterlatte.behandling.regulering.ReguleringFactory
+import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingMedGrunnlagsopplysninger
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

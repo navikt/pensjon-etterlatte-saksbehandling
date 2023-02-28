@@ -20,10 +20,10 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omberegning.OmberegningService
-import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
-import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.behandling.regulering.RealRevurderingService
+import no.nav.etterlatte.behandling.regulering.ReguleringFactory
+import no.nav.etterlatte.behandling.regulering.RevurderingFactory
+import no.nav.etterlatte.behandling.regulering.RevurderingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -275,7 +275,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-                Duration.of(1, ChronoUnit.MINUTES).toMillis()
+            Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

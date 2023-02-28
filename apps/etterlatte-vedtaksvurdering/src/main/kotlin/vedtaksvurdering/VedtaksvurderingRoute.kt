@@ -59,7 +59,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             withBehandlingId { behandlingId ->
                 val nyttVedtak = service.opprettEllerOppdaterVedtak(
                     behandlingId = behandlingId,
-                    accessToken = bruker
+                    bruker = bruker
                 )
 
                 call.respond(nyttVedtak)

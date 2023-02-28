@@ -53,7 +53,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/behandlinger/$behandlingId"
                     ),
-                    accessToken = bruker
+                    bruker = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -81,7 +81,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/saker/$sakId"
                     ),
-                    accessToken = bruker
+                    bruker = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -99,7 +99,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         logger.info("Sjekker om behandling med id $behandlingId kan vilkaarsvurdere")
         val response = downstreamResourceClient.get(
             resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/vilkaarsvurder"),
-            accessToken = bruker
+            bruker = bruker
         )
 
         return response.mapBoth(
@@ -119,7 +119,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         logger.info("Committer vilkaarsvurdering på behandling med id $behandlingId")
         val response = downstreamResourceClient.post(
             resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/vilkaarsvurder"),
-            accessToken = bruker,
+            bruker = bruker,
             postBody = TilVilkaarsvurderingJson(utfall)
         )
 
@@ -141,8 +141,8 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/opprett")
 
         val response = when (commit) {
-            false -> downstreamResourceClient.get(resource = resource, accessToken = bruker)
-            true -> downstreamResourceClient.post(resource = resource, accessToken = bruker, postBody = "{}")
+            false -> downstreamResourceClient.get(resource = resource, bruker = bruker)
+            true -> downstreamResourceClient.post(resource = resource, bruker = bruker, postBody = "{}")
         }
 
         return response.mapBoth(

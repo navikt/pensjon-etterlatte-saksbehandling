@@ -26,10 +26,10 @@ class DownstreamResourceClient(
 ) {
     suspend fun get(
         resource: Resource,
-        accessToken: Bruker
+        bruker: Bruker
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(accessToken, scopes)
+        return hentTokenFraAD(bruker, scopes)
             .andThen { oboAccessToken ->
                 fetchFromDownstreamApi(resource, oboAccessToken)
             }
@@ -39,22 +39,22 @@ class DownstreamResourceClient(
     }
 
     private suspend fun hentTokenFraAD(
-        accessToken: Bruker,
+        bruker: Bruker,
         scopes: List<String>
-    ): Result<AccessToken, ThrowableErrorMessage> = if (accessToken.erMaskinTilMaskin()) {
+    ): Result<AccessToken, ThrowableErrorMessage> = if (bruker.erMaskinTilMaskin()) {
         azureAdClient.getAccessTokenForResource(scopes)
     } else {
         azureAdClient
-            .getOnBehalfOfAccessTokenForResource(scopes, accessToken.accessToken)
+            .getOnBehalfOfAccessTokenForResource(scopes, bruker.accessToken)
     }
 
     suspend fun post(
         resource: Resource,
-        accessToken: Bruker,
+        bruker: Bruker,
         postBody: Any
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(accessToken, scopes)
+        return hentTokenFraAD(bruker, scopes)
             .andThen { token ->
                 postToDownstreamApi(resource, token, postBody)
             }

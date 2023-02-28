@@ -47,7 +47,7 @@ internal class DBTest {
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     private val sakId = 123L
-    private val accessToken =
+    private val bruker =
         Bruker.of(
             accessToken = "accessToken",
             oid = null,
@@ -116,7 +116,7 @@ internal class DBTest {
         assert(vedtaket?.sak?.id != null)
         Assertions.assertNotNull(vedtaket?.virk)
 
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, accessToken) }
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, bruker) }
         val fattetVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
@@ -124,16 +124,16 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.underkjennVedtak(
                 uuid,
-                accessToken,
+                bruker,
                 UnderkjennVedtakClientRequest("kommentar", "begrunnelse")
             )
         }
         val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, accessToken) }
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, bruker) }
 
-        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, accessToken) }
+        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, bruker) }
         val attestertVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)
@@ -207,8 +207,8 @@ internal class DBTest {
         }
 
         runBlocking {
-            vedtaksvurderingService.fattVedtak(behandling1Id, accessToken)
-            vedtaksvurderingService.fattVedtak(behandling2Id, accessToken)
+            vedtaksvurderingService.fattVedtak(behandling1Id, bruker)
+            vedtaksvurderingService.fattVedtak(behandling2Id, bruker)
         }
 
         val vedtakene = vedtaksvurderingService.hentVedtakBolk(listOf(behandling1Id, behandling2Id, behandling3Id))

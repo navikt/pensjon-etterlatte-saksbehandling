@@ -40,7 +40,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                         clientId = clientId,
                         url = "$resourceUrl/grunnlag/$sakId"
                     ),
-                    accessToken = bruker
+                    bruker = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

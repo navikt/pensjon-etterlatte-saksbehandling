@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BehandlingKlient {
-    suspend fun hentBehandling(behandlingId: UUID, accessToken: Bruker): DetaljertBehandling
-    suspend fun beregn(behandlingId: UUID, accessToken: Bruker, commit: Boolean): Boolean
+    suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
+    suspend fun beregn(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -31,7 +31,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    override suspend fun hentBehandling(behandlingId: UUID, accessToken: Bruker): DetaljertBehandling {
+    override suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
 
         return retry<DetaljertBehandling> {
@@ -41,7 +41,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/behandlinger/$behandlingId"
                     ),
-                    accessToken = accessToken
+                    bruker = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -60,13 +60,13 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun beregn(behandlingId: UUID, accessToken: Bruker, commit: Boolean): Boolean {
+    override suspend fun beregn(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean {
         logger.info("Sjekker om behandling med behandlingId=$behandlingId kan beregnes")
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/beregn")
 
         val response = when (commit) {
-            false -> downstreamResourceClient.get(resource, accessToken)
-            true -> downstreamResourceClient.post(resource, accessToken, "{}")
+            false -> downstreamResourceClient.get(resource, bruker)
+            true -> downstreamResourceClient.post(resource, bruker, "{}")
         }
 
         return response.mapBoth(

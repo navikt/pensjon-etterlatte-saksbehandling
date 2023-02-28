@@ -47,7 +47,7 @@ internal class VedtaksvurderingServiceTest {
 
     private val sakId = 2L
     private val behandlingId = UUID.randomUUID()
-    private val accessToken = Bruker.of("sesam sesam", "1", null, null)
+    private val bruker = Bruker.of("sesam sesam", "1", null, null)
 
     private val vedtakSomIkkeErFattet = Vedtak(
         0,
@@ -103,13 +103,13 @@ internal class VedtaksvurderingServiceTest {
 
     @Test
     fun `hentDataForVedtak skal hente en beregning om vilkårsvurdering er oppfylt`() {
-        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) } returns VilkaarsvurderingDto(
+        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, bruker) } returns VilkaarsvurderingDto(
             behandlingId,
             emptyList(),
             YearMonth.now(),
             VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, LocalDateTime.now(), "")
         )
-        coEvery { beregningMock.hentBeregning(behandlingId, accessToken) } returns BeregningDTO(
+        coEvery { beregningMock.hentBeregning(behandlingId, bruker) } returns BeregningDTO(
             UUID.randomUUID(),
             behandlingId,
             Beregningstype.BP,
@@ -119,22 +119,22 @@ internal class VedtaksvurderingServiceTest {
         )
 
         runBlocking {
-            service.hentDataForVedtak(behandlingId, accessToken)
-            coVerify(exactly = 1) { beregningMock.hentBeregning(behandlingId, accessToken) }
+            service.hentDataForVedtak(behandlingId, bruker)
+            coVerify(exactly = 1) { beregningMock.hentBeregning(behandlingId, bruker) }
         }
     }
 
     @Test
     fun `hentDataForVedtak skal ikke hente en beregning om vilkårsvurdering ikke er oppfylt`() {
-        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) } returns VilkaarsvurderingDto(
+        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, bruker) } returns VilkaarsvurderingDto(
             behandlingId,
             emptyList(),
             YearMonth.now(),
             VilkaarsvurderingResultat(VilkaarsvurderingUtfall.IKKE_OPPFYLT, null, LocalDateTime.now(), "")
         )
         runBlocking {
-            service.hentDataForVedtak(behandlingId, accessToken)
-            coVerify(exactly = 0) { beregningMock.hentBeregning(behandlingId, accessToken) }
+            service.hentDataForVedtak(behandlingId, bruker)
+            coVerify(exactly = 0) { beregningMock.hentBeregning(behandlingId, bruker) }
         }
     }
 
@@ -177,9 +177,9 @@ internal class VedtaksvurderingServiceTest {
             revurderingsaarsak = null
         )
         runBlocking {
-            service.hentDataForVedtak(behandlingId, accessToken)
-            coVerify(exactly = 0) { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) }
-            coVerify(exactly = 1) { beregningMock.hentBeregning(behandlingId, accessToken) }
+            service.hentDataForVedtak(behandlingId, bruker)
+            coVerify(exactly = 0) { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, bruker) }
+            coVerify(exactly = 1) { beregningMock.hentBeregning(behandlingId, bruker) }
         }
     }
 }

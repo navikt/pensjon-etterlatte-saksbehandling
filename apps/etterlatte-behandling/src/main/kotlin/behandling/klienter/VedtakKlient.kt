@@ -40,7 +40,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
         try {
             return downstreamResourceClient.get(
                 resource = Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/vedtak"),
-                accessToken = bruker
+                bruker = bruker
             ).mapBoth(
                 success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
                 failure = { errorResponse ->

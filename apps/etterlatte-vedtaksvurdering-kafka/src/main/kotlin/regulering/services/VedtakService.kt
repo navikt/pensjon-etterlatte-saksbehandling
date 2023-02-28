@@ -14,6 +14,7 @@ interface VedtakService {
     fun harLoependeYtelserFra(sakId: Long, dato: LocalDate): LoependeYtelseDTO
     fun upsertVedtak(behandlingId: UUID): Vedtak
     fun fattVedtak(behandlingId: UUID): Vedtak
+    fun attesterVedtak(behandlingId: UUID): Vedtak
 }
 
 class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: String) : VedtakService {
@@ -30,5 +31,10 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
     override fun fattVedtak(behandlingId: UUID): Vedtak =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/fattvedtak/$behandlingId").body()
+        }
+
+    override fun attesterVedtak(behandlingId: UUID): Vedtak =
+        runBlocking {
+            vedtakKlient.post("$url/api/vedtak/attester/$behandlingId").body()
         }
 }

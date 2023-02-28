@@ -3,9 +3,9 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.EventNames.FATT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
-import no.nav.etterlatte.rapidsandrivers.EventNames.TIL_UTBETALING
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -42,16 +42,17 @@ internal class OpprettVedtakforespoersel(
             val behandlingId = packet.behandlingId
             withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
                 val respons = vedtak.upsertVedtak(behandlingId)
-                logger.info("Opprettet vedtak ${respons.vedtakId}")
+                logger.info("Opprettet vedtak ${respons.vedtakId} for sak: $sakId og behandling: $behandlingId")
             }
 
             withFeilhaandtering(packet, context, FATT_VEDTAK) {
                 val fattetVedtak = vedtak.fattVedtak(behandlingId)
-                logger.info("Fattet vedtak ${fattetVedtak.vedtakId}")
+                logger.info("Fattet vedtak ${fattetVedtak.vedtakId} for sak: $sakId og behandling: $behandlingId")
+            }
 
-                packet.eventName = TIL_UTBETALING
-                context.publish(packet.toJson())
-                logger.info("Fattet vedtak for ${fattetVedtak.vedtakId} og sendte $TIL_UTBETALING for sak: $sakId og behandling: $behandlingId") // ktlint-disable
+            withFeilhaandtering(packet, context, EventNames.ATTESTER) {
+                val attestert = vedtak.attesterVedtak(behandlingId)
+                logger.info("Attesterte vedtak ${attestert.vedtakId} for sak: $sakId og behandling: $behandlingId")
             }
         }
 }

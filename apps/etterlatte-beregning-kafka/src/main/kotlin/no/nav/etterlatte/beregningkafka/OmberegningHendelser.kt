@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
+import no.nav.etterlatte.rapidsandrivers.EventNames.BEREGN
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -30,7 +30,7 @@ internal class OmberegningHendelser(
     init {
         logger.info("initierer rapid for omberegninghendelser")
         River(rapidsConnection).apply {
-            eventName(OMBEREGNINGSHENDELSE)
+            eventName(BEREGN)
 
             correlationId()
             validate { it.requireKey(OMBEREGNING_ID_KEY) }

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.EventNames.BEREGN
 import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -43,6 +44,7 @@ internal class OmberegningsHendelser(rapidsConnection: RapidsConnection, private
                 runBlocking {
                     val behandling = behandlinger.opprettOmberegning(hendelse).body<UUID>()
                     packet.omberegningId = behandling
+                    packet.eventName = BEREGN
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")

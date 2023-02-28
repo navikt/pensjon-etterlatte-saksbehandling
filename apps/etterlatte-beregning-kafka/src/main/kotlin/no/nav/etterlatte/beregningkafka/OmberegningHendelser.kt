@@ -18,6 +18,7 @@ import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.OMBEREGNING_ID_KEY
 import rapidsandrivers.omberegningId
+import rapidsandrivers.withFeilhaandtering
 
 internal class OmberegningHendelser(
     rapidsConnection: RapidsConnection,
@@ -41,8 +42,8 @@ internal class OmberegningHendelser(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
-            logger.info("Mottatt omberegninghendelse")
-            try {
+            withFeilhaandtering(packet, context, BEREGN) {
+                logger.info("Mottatt omberegninghendelse")
                 val omberegningsId = packet.omberegningId
                 runBlocking {
                     val beregning = beregningService.opprettOmberegning(omberegningsId).body<BeregningDTO>()
@@ -51,8 +52,6 @@ internal class OmberegningHendelser(
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")
-            } catch (e: Exception) {
-                logger.error("Feil oppstod under lesing / sending av hendelse til beregning ", e)
             }
         }
     }

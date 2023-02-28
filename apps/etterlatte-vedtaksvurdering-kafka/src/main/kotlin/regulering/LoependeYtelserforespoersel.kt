@@ -17,6 +17,7 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.dato
 import rapidsandrivers.sakId
+import rapidsandrivers.withFeilhaandtering
 
 internal class LoependeYtelserforespoersel(
     rapidsConnection: RapidsConnection,
@@ -35,20 +36,22 @@ internal class LoependeYtelserforespoersel(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val sakId = packet.sakId
-            logger.info("Leser reguleringsfoerespoersel for sak $sakId")
+            withFeilhaandtering(packet, context, FINN_LOEPENDE_YTELSER) {
+                val sakId = packet.sakId
+                logger.info("Leser reguleringsfoerespoersel for sak $sakId")
 
-            val reguleringsdato = packet.dato
-            val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
-            respons.takeIf { it.erLoepende }?.let {
-                packet.eventName = OMBEREGNINGSHENDELSE
-                packet[HENDELSE_DATA_KEY] = Omberegningshendelse(
-                    sakId = sakId,
-                    fradato = it.dato,
-                    aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING
-                )
-                context.publish(packet.toJson())
-                logger.info("Grunnlopesreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
-            } ?: logger.info("Grunnlopesreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
+                val reguleringsdato = packet.dato
+                val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
+                respons.takeIf { it.erLoepende }?.let {
+                    packet.eventName = OMBEREGNINGSHENDELSE
+                    packet[HENDELSE_DATA_KEY] = Omberegningshendelse(
+                        sakId = sakId,
+                        fradato = it.dato,
+                        aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING
+                    )
+                    context.publish(packet.toJson())
+                    logger.info("Grunnlopesreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
+                } ?: logger.info("Grunnlopesreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
+            }
         }
 }

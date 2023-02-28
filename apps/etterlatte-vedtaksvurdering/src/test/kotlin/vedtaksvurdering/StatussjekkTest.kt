@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.token.Bruker
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -40,7 +39,7 @@ class StatussjekkTest {
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     private val saksbehandler = "saksbehandler"
-    private val accessToken = Bruker("accessToken", Saksbehandler("saksbehandler"), null, null)
+    private val accessToken = Bruker("accessToken", "saksbehandler", null, null)
     private val behandlingId = UUID.randomUUID()
 
     private lateinit var vedtakRepo: VedtaksvurderingRepository

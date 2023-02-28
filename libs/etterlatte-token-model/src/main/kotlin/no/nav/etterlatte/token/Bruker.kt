@@ -2,7 +2,7 @@ package no.nav.etterlatte.token
 
 data class Bruker(
     val accessToken: String,
-    val saksbehandler: Saksbehandler?,
+    val saksbehandler: String?,
     val oid: String?,
     val sub: String?
 ) {
@@ -10,7 +10,7 @@ data class Bruker(
         if (erMaskinTilMaskin()) {
             Fagsaksystem.EY.name
         } else {
-            saksbehandler!!.ident
+            saksbehandler!!
         }
 
     fun erMaskinTilMaskin() = (oid == sub) && (oid != null)
@@ -19,7 +19,7 @@ data class Bruker(
             return Fagsaksystem.EY.name
         }
 
-        return saksbehandlere[saksbehandler!!.ident]
+        return saksbehandlere[saksbehandler!!]
             ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
     }
 
@@ -37,5 +37,3 @@ enum class Claims {
     oid, // ktlint-disable enum-entry-name-case
     sub // ktlint-disable enum-entry-name-case
 }
-
-data class Saksbehandler(val ident: String)

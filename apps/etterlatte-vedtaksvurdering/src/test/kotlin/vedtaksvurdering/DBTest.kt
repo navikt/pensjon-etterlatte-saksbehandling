@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
 import no.nav.etterlatte.token.Bruker
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -53,7 +52,7 @@ internal class DBTest {
             accessToken = "accessToken",
             oid = null,
             sub = null,
-            saksbehandler = Saksbehandler("saksbehandler")
+            saksbehandler = "saksbehandler"
         )
 
     private val saksbehandlereSecret = mapOf("saksbehandler" to "4808", "attestant" to "4808")
@@ -106,7 +105,7 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 uuid,
-                Bruker("access", Saksbehandler("1"), null, null)
+                Bruker("access", "1", null, null)
             )
         }
 
@@ -199,11 +198,11 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 behandling1Id,
-                Bruker("access", Saksbehandler("s1"), null, null)
+                Bruker("access", "s1", null, null)
             )
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 behandling2Id,
-                Bruker("access", Saksbehandler("s1"), null, null)
+                Bruker("access", "s1", null, null)
             )
         }
 

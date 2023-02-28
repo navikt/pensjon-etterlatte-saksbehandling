@@ -27,7 +27,6 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.token.Bruker
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import org.junit.jupiter.api.AfterAll
@@ -55,7 +54,7 @@ internal class VilkaarsvurderingServiceTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val uuid: UUID = UUID.randomUUID()
-    private val accesstoken = Bruker("token", Saksbehandler("s1"), null, null)
+    private val accesstoken = Bruker("token", "s1", null, null)
 
     @BeforeAll
     fun beforeAll() {

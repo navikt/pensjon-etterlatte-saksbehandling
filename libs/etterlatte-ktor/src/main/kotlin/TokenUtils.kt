@@ -8,7 +8,6 @@ import io.ktor.server.auth.principal
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.token.Claims
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
@@ -33,7 +32,6 @@ inline val PipelineContext<*, ApplicationCall>.bruker: Bruker
                 Pair(oid, sub)
             }
         val saksbehandler = claims?.getClaim(Claims.NAVident)
-            ?.let { Saksbehandler(it) }
         return Bruker(
             accessToken = hentAccessToken(call),
             oid = oidSub?.first,

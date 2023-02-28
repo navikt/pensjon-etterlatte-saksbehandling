@@ -48,7 +48,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.UUID
+import java.util.*
 
 internal class VedtaksbrevServiceTest {
 
@@ -94,7 +94,7 @@ internal class VedtaksbrevServiceTest {
                 vedtaksbrevService.oppdaterVedtaksbrev(
                     SAK_ID,
                     BEHANDLING_ID,
-                    Bruker("token", no.nav.etterlatte.token.Saksbehandler("saksbehandler"), null, null)
+                    Bruker("token", "saksbehandler", null, null)
                 )
             }
 
@@ -133,7 +133,7 @@ internal class VedtaksbrevServiceTest {
                 val brev = vedtaksbrevService.oppdaterVedtaksbrev(
                     SAK_ID,
                     BEHANDLING_ID,
-                    Bruker("token", no.nav.etterlatte.token.Saksbehandler("saksbehandler"), null, null)
+                    Bruker("token", "saksbehandler", null, null)
                 )
 
                 assertNotNull(brev)
@@ -171,7 +171,7 @@ internal class VedtaksbrevServiceTest {
                 vedtaksbrevService.oppdaterVedtaksbrev(
                     123,
                     BEHANDLING_ID,
-                    Bruker("token", no.nav.etterlatte.token.Saksbehandler("saksbehandler"), null, null)
+                    Bruker("token", "saksbehandler", null, null)
                 )
             }
 

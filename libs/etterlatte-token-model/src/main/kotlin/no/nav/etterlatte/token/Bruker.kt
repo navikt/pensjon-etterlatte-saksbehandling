@@ -2,9 +2,8 @@ package no.nav.etterlatte.token
 
 sealed class Bruker {
     abstract fun ident(): String
-
     abstract fun erSystembruker(): Boolean
-
+    abstract fun erSaksbehandler(): Boolean
     abstract fun saksbehandlerEnhet(saksbehandlere: Map<String, String>): String
 
     abstract fun accessToken(): String
@@ -28,6 +27,8 @@ sealed class Bruker {
 data class System(val oid: String, val sub: String) : Bruker() {
     override fun erSystembruker() = true
 
+    override fun erSaksbehandler(): Boolean = false
+
     override fun ident() = Fagsaksystem.EY.name
 
     override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = Fagsaksystem.EY.name
@@ -37,7 +38,7 @@ data class System(val oid: String, val sub: String) : Bruker() {
 
 data class Saksbehandler(val accessToken: String, val ident: String) : Bruker() {
     override fun erSystembruker() = false
-
+    override fun erSaksbehandler(): Boolean = true
     override fun ident() = ident
 
     override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = saksbehandlere[ident]

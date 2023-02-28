@@ -39,7 +39,6 @@ import org.junit.jupiter.api.assertAll
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -156,8 +155,7 @@ internal class BehandlingDaoIntegrationTest {
             LoggerFactory.getLogger(this::class.java)
                 .error("Tidspunkt som skulle vært like er forskjellige: $tidspunkt1, $tidspunkt2")
         }
-        val diff = Duration.between(tidspunkt1.instant, tidspunkt2.instant).abs()
-        assertTrue(diff.toMillis() < 1000, "Forventa forskjell mindre enn enn sekund, fikk $diff")
+        assertEquals(tidspunkt1, tidspunkt2, "Tidspunkt1: $tidspunkt1, tidspunkt2: $tidspunkt2")
     }
 
     @Test

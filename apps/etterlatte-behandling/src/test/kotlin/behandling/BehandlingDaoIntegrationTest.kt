@@ -36,6 +36,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
+import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.Duration
@@ -151,6 +152,10 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     private fun assertErInnenforEttSekund(tidspunkt1: Tidspunkt, tidspunkt2: Tidspunkt) {
+        if (tidspunkt1 != tidspunkt2) {
+            LoggerFactory.getLogger(this::class.java)
+                .error("Tidspunkt som skulle vært like er forskjellige: $tidspunkt1, $tidspunkt2")
+        }
         val diff = Duration.between(tidspunkt1.instant, tidspunkt2.instant).abs()
         assertTrue(diff.toMillis() < 1000, "Forventa forskjell mindre enn enn sekund, fikk $diff")
     }

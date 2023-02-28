@@ -32,7 +32,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksbrevRouteTest {
@@ -59,7 +59,7 @@ internal class VedtaksbrevRouteTest {
 
     @Test
     fun `Endepunkt for oppretting eller oppdatering av vedtaksbrev`() {
-        coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any(), any()) } returns opprettBrev()
+        coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any()) } returns opprettBrev()
 
         val sakId = 123456L
         val saksbehandler = "S123456"
@@ -86,7 +86,13 @@ internal class VedtaksbrevRouteTest {
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
-        coVerify(exactly = 1) { vedtaksbrevService.oppdaterVedtaksbrev(sakId, BEHANDLING_ID, saksbehandler, token) }
+        coVerify(exactly = 1) {
+            vedtaksbrevService.oppdaterVedtaksbrev(
+                sakId,
+                BEHANDLING_ID,
+                any()
+            )
+        }
     }
 
     @Test

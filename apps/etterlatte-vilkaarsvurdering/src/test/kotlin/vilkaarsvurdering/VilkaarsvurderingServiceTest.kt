@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import org.junit.jupiter.api.AfterAll
@@ -36,7 +37,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -54,7 +54,7 @@ internal class VilkaarsvurderingServiceTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val uuid: UUID = UUID.randomUUID()
-    private val accesstoken = "token"
+    private val bruker = Bruker.of("token", "s1", null, null)
 
     @BeforeAll
     fun beforeAll() {
@@ -110,7 +110,7 @@ internal class VilkaarsvurderingServiceTest {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         val vilkaarsvurdering = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, accesstoken)
+            service.opprettVilkaarsvurdering(uuid, bruker)
         }
 
         vilkaarsvurdering shouldNotBe null
@@ -146,7 +146,7 @@ internal class VilkaarsvurderingServiceTest {
 
         runBlocking {
             val vilkaarsvurderingOppdatert =
-                service.oppdaterVurderingPaaVilkaar(uuid, accesstoken, vurdertVilkaar)
+                service.oppdaterVurderingPaaVilkaar(uuid, bruker, vurdertVilkaar)
 
             vilkaarsvurderingOppdatert shouldNotBe null
             vilkaarsvurderingOppdatert.vilkaar
@@ -181,7 +181,7 @@ internal class VilkaarsvurderingServiceTest {
         )
 
         runBlocking {
-            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, accesstoken, vurdertVilkaar)
+            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, bruker, vurdertVilkaar)
 
             vilkaarsvurderingOppdatert shouldNotBe null
             vilkaarsvurderingOppdatert.vilkaar
@@ -213,7 +213,7 @@ internal class VilkaarsvurderingServiceTest {
         )
 
         runBlocking {
-            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, accesstoken, vurdertVilkaar)
+            val vilkaarsvurderingOppdatert = service.oppdaterVurderingPaaVilkaar(uuid, bruker, vurdertVilkaar)
 
             vilkaarsvurderingOppdatert shouldNotBe null
             vilkaarsvurderingOppdatert.vilkaar
@@ -246,7 +246,7 @@ internal class VilkaarsvurderingServiceTest {
 
         runBlocking {
             assertThrows<IllegalStateException> {
-                service.oppdaterVurderingPaaVilkaar(uuid, accesstoken, vurdertVilkaar)
+                service.oppdaterVurderingPaaVilkaar(uuid, bruker, vurdertVilkaar)
             }
             val actual = service.hentVilkaarsvurdering(uuid)
             actual shouldBe vilkaarsvurdering
@@ -267,7 +267,7 @@ internal class VilkaarsvurderingServiceTest {
         }
 
         val vilkaarsvurdering = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, accesstoken)
+            service.opprettVilkaarsvurdering(uuid, bruker)
         }
 
         vilkaarsvurdering shouldNotBe null
@@ -280,7 +280,7 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering {
-        return service.opprettVilkaarsvurdering(uuid, accesstoken)
+        return service.opprettVilkaarsvurdering(uuid, bruker)
     }
 
     private fun vilkaarsVurderingData() =

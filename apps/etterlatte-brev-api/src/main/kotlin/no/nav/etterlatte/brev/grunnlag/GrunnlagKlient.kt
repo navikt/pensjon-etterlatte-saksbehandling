@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 
 class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -22,13 +23,13 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("grunnlag.client.id")
     private val baseUrl = config.getString("grunnlag.resource.url")
 
-    suspend fun hentGrunnlag(sakid: Long, accessToken: String): Grunnlag {
+    suspend fun hentGrunnlag(sakid: Long, bruker: Bruker): Grunnlag {
         try {
             logger.info("Henter grunnlag for sak med sakId=$sakid")
 
             return downstreamResourceClient.get(
                 Resource(clientId, "$baseUrl/api/grunnlag/$sakid"),
-                accessToken
+                bruker
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage }

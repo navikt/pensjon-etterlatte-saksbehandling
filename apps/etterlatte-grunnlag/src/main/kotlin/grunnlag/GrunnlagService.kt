@@ -21,7 +21,7 @@ import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.token.Bruker
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -42,8 +42,7 @@ interface GrunnlagService {
     suspend fun lagreSoeskenMedIBeregning(
         behandlingId: UUID,
         soeskenMedIBeregning: List<SoeskenMedIBeregning>,
-        saksbehandlerId: Saksbehandler,
-        accessToken: String
+        bruker: Bruker
     )
 }
 
@@ -94,18 +93,17 @@ class RealGrunnlagService(
     override suspend fun lagreSoeskenMedIBeregning(
         behandlingId: UUID,
         soeskenMedIBeregning: List<SoeskenMedIBeregning>,
-        saksbehandlerId: Saksbehandler,
-        accessToken: String
+        bruker: Bruker
     ) {
         val opplysning: List<Grunnlagsopplysning<JsonNode>> = listOf(
             lagOpplysning(
                 opplysningsType = Opplysningstype.SOESKEN_I_BEREGNINGEN,
-                kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId.ident, Instant.now()),
+                kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Instant.now()),
                 opplysning = Beregningsgrunnlag(soeskenMedIBeregning).toJsonNode()
             )
         )
 
-        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
 
         val sakId = behandling.sak
         lagreNyeSaksopplysninger(sakId, opplysning)

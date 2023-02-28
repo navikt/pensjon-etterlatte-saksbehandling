@@ -27,7 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.token.Bruker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -293,7 +293,6 @@ class RealGenerellBehandlingServiceTest {
         val behandlingMedPersonopplsning = runBlocking {
             service.hentBehandlingMedEnkelPersonopplysning(
                 BEHANDLINGS_ID,
-                Saksbehandler("id"),
                 TOKEN,
                 opplysningstype
             )
@@ -315,7 +314,7 @@ class RealGenerellBehandlingServiceTest {
         val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
 
         val gyldigVirkningstidspunkt = runBlocking {
-            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, Saksbehandler("id"), TOKEN, request)
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
         }
 
         assertTrue(gyldigVirkningstidspunkt)
@@ -333,7 +332,7 @@ class RealGenerellBehandlingServiceTest {
         val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
 
         val gyldigVirkningstidspunkt = runBlocking {
-            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, Saksbehandler("id"), TOKEN, request)
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
         }
 
         assertFalse(gyldigVirkningstidspunkt)
@@ -351,7 +350,7 @@ class RealGenerellBehandlingServiceTest {
         val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
 
         val gyldigVirkningstidspunkt = runBlocking {
-            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, Saksbehandler("id"), TOKEN, request)
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
         }
 
         assertFalse(gyldigVirkningstidspunkt)
@@ -411,6 +410,6 @@ class RealGenerellBehandlingServiceTest {
     companion object {
         const val SAK_ID = 1L
         val BEHANDLINGS_ID: UUID = UUID.randomUUID()
-        const val TOKEN = "token"
+        val TOKEN = Bruker.of("a", "b", null, null)
     }
 }

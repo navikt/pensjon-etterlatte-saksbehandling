@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.token.Bruker
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -47,7 +48,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.UUID
+import java.util.*
 
 internal class VedtaksbrevServiceTest {
 
@@ -57,7 +58,6 @@ internal class VedtaksbrevServiceTest {
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val ident = "Z1234"
-    private val saksbehandlerNavn = "Sak Saksbehandler"
 
     private val vedtaksbrevService =
         VedtaksbrevService(db, pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
@@ -85,13 +85,17 @@ internal class VedtaksbrevServiceTest {
             )
 
             val behandling = opprettBehandling()
-            coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any(), any()) } returns behandling
+            coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns opprettMottaker()
             coEvery { pdfGenerator.genererPdf(any()) } returns "".toByteArray()
             coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
 
             runBlocking {
-                vedtaksbrevService.oppdaterVedtaksbrev(SAK_ID, BEHANDLING_ID, "saksbehandler", "token")
+                vedtaksbrevService.oppdaterVedtaksbrev(
+                    SAK_ID,
+                    BEHANDLING_ID,
+                    Bruker.of("token", "saksbehandler", null, null)
+                )
             }
 
             verify(exactly = 1) {
@@ -100,7 +104,7 @@ internal class VedtaksbrevServiceTest {
             }
             coVerify(exactly = 1) {
                 pdfGenerator.genererPdf(any<InnvilgetBrevRequest>())
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any(), any())
+                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any())
                 adresseService.hentAvsenderOgAttestant(behandling.vedtak)
                 adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
             }
@@ -119,14 +123,18 @@ internal class VedtaksbrevServiceTest {
             )
 
             val behandling = opprettBehandling()
-            coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any(), any()) } returns behandling
+            coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsenderOgAttestant(any()) } returns Pair(mockk(), mockk())
             coEvery { adresseService.hentMottakerAdresse(any()) } returns opprettMottaker()
             coEvery { pdfGenerator.genererPdf(any()) } returns "".toByteArray()
             coEvery { adresseService.hentEnhet(any()) } returns Norg2Enhet()
 
             runBlocking {
-                val brev = vedtaksbrevService.oppdaterVedtaksbrev(SAK_ID, BEHANDLING_ID, "saksbehandler", "token")
+                val brev = vedtaksbrevService.oppdaterVedtaksbrev(
+                    SAK_ID,
+                    BEHANDLING_ID,
+                    Bruker.of("token", "saksbehandler", null, null)
+                )
 
                 assertNotNull(brev)
             }
@@ -137,7 +145,7 @@ internal class VedtaksbrevServiceTest {
             }
             coVerify(exactly = 1) {
                 pdfGenerator.genererPdf(any<InnvilgetBrevRequest>())
-                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any(), any())
+                sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any())
                 adresseService.hentAvsenderOgAttestant(any<ForenkletVedtak>())
                 adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
             }
@@ -160,7 +168,11 @@ internal class VedtaksbrevServiceTest {
             )
 
             runBlocking {
-                vedtaksbrevService.oppdaterVedtaksbrev(123, BEHANDLING_ID, "saksbehandler", "token")
+                vedtaksbrevService.oppdaterVedtaksbrev(
+                    123,
+                    BEHANDLING_ID,
+                    Bruker.of("token", "saksbehandler", null, null)
+                )
             }
 
             verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }

@@ -4,30 +4,30 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class AccessTokenWrapperTest {
+internal class BrukerTest {
 
     @Test
     fun `er maskin-til-maskin viss oid og sub er like`() {
-        assertTrue(AccessTokenWrapper("a", Saksbehandler("b"), "c", "c").erMaskinTilMaskin())
+        assertTrue(Bruker.of("a", "b", "c", "c").erSystembruker())
     }
 
     @Test
     fun `er ikke maskin-til-maskin viss oid og sub er ulike`() {
-        assertFalse(AccessTokenWrapper("a", Saksbehandler("b"), "c", "d").erMaskinTilMaskin())
+        assertFalse(Bruker.of("a", "b", "c", "d").erSystembruker())
     }
 
     @Test
     fun `er ikke maskin-til-maskin viss oid er null, men sub har verdi`() {
-        assertFalse(AccessTokenWrapper("a", Saksbehandler("b"), null, "d").erMaskinTilMaskin())
+        assertFalse(Bruker.of("a", "b", null, "d").erSystembruker())
     }
 
     @Test
     fun `er ikke maskin-til-maskin viss sub er null, men oid har verdi`() {
-        assertFalse(AccessTokenWrapper("a", Saksbehandler("b"), "c", null).erMaskinTilMaskin())
+        assertFalse(Bruker.of("a", "b", "c", null).erSystembruker())
     }
 
     @Test
     fun `er ikke maskin-til-maskin viss både oid og sub er null`() {
-        assertFalse(AccessTokenWrapper("a", Saksbehandler("b"), null, null).erMaskinTilMaskin())
+        assertFalse(Bruker.of("a", "b", null, null).erSystembruker())
     }
 }

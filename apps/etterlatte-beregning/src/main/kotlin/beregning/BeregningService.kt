@@ -29,7 +29,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
-import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.YearMonth
@@ -48,12 +48,12 @@ class BeregningService(
 
     fun hentBeregning(behandlingId: UUID): Beregning? = beregningRepository.hent(behandlingId)
 
-    suspend fun lagreBeregning(behandlingId: UUID, accessToken: AccessTokenWrapper): Beregning {
+    suspend fun lagreBeregning(behandlingId: UUID, bruker: Bruker): Beregning {
         logger.info("Oppretter barnepensjonberegning for behandlingId=$behandlingId")
-        return tilstandssjekkFoerKjoerning(behandlingId, accessToken) {
+        return tilstandssjekkFoerKjoerning(behandlingId, bruker) {
             coroutineScope {
-                val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-                val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, accessToken) }
+                val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+                val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, bruker) }
 
                 val beregning = when (behandling.behandlingType) {
                     BehandlingType.MANUELT_OPPHOER -> beregnManueltOpphoerBarnepensjon(
@@ -64,7 +64,7 @@ class BeregningService(
                     else -> {
                         beregnBarnepensjon(grunnlag.await(), behandling) {
                             runBlocking {
-                                vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
+                                vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
                                     .resultat?.utfall
                                     ?: throw RuntimeException("Forventa å ha resultat for behandling $behandlingId")
                             }
@@ -72,7 +72,7 @@ class BeregningService(
                     }
                 }
                 beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
-                    behandlingKlient.beregn(behandlingId, accessToken, true)
+                    behandlingKlient.beregn(behandlingId, bruker, true)
                 }
             }
         }
@@ -230,10 +230,10 @@ class BeregningService(
 
     private suspend fun tilstandssjekkFoerKjoerning(
         behandlingId: UUID,
-        accessToken: AccessTokenWrapper,
+        bruker: Bruker,
         block: suspend () -> Beregning
     ): Beregning {
-        val kanBeregne = behandlingKlient.beregn(behandlingId, accessToken, false)
+        val kanBeregne = behandlingKlient.beregn(behandlingId, bruker, false)
 
         if (!kanBeregne) {
             throw IllegalStateException("Kunne ikke beregne, er i feil state")

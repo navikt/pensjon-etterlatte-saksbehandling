@@ -19,8 +19,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
-import no.nav.etterlatte.token.AccessTokenWrapper
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -48,12 +47,12 @@ internal class DBTest {
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     private val sakId = 123L
-    private val accessToken =
-        AccessTokenWrapper(
+    private val bruker =
+        Bruker.of(
             accessToken = "accessToken",
             oid = null,
             sub = null,
-            saksbehandler = Saksbehandler("saksbehandler")
+            saksbehandler = "saksbehandler"
         )
 
     private val saksbehandlereSecret = mapOf("saksbehandler" to "4808", "attestant" to "4808")
@@ -106,7 +105,7 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 uuid,
-                AccessTokenWrapper("access", Saksbehandler("1"), null, null)
+                Bruker.of("access", "1", null, null)
             )
         }
 
@@ -117,7 +116,7 @@ internal class DBTest {
         assert(vedtaket?.sak?.id != null)
         Assertions.assertNotNull(vedtaket?.virk)
 
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, accessToken) }
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, bruker) }
         val fattetVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
@@ -125,16 +124,16 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.underkjennVedtak(
                 uuid,
-                accessToken,
+                bruker,
                 UnderkjennVedtakClientRequest("kommentar", "begrunnelse")
             )
         }
         val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, accessToken) }
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, bruker) }
 
-        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, accessToken) }
+        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, bruker) }
         val attestertVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)
@@ -199,17 +198,17 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 behandling1Id,
-                AccessTokenWrapper("access", Saksbehandler("s1"), null, null)
+                Bruker.of("access", "s1", null, null)
             )
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 behandling2Id,
-                AccessTokenWrapper("access", Saksbehandler("s1"), null, null)
+                Bruker.of("access", "s1", null, null)
             )
         }
 
         runBlocking {
-            vedtaksvurderingService.fattVedtak(behandling1Id, accessToken)
-            vedtaksvurderingService.fattVedtak(behandling2Id, accessToken)
+            vedtaksvurderingService.fattVedtak(behandling1Id, bruker)
+            vedtaksvurderingService.fattVedtak(behandling2Id, bruker)
         }
 
         val vedtakene = vedtaksvurderingService.hentVedtakBolk(listOf(behandling1Id, behandling2Id, behandling3Id))

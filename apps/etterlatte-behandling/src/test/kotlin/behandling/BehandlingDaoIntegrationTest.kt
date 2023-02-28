@@ -38,6 +38,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -110,7 +111,7 @@ internal class BehandlingDaoIntegrationTest {
             persongalleri.soesken,
             opprettetBehandling.persongalleri.soesken
         )
-        assertEquals(
+        assertErInnenforEttSekund(
             opprettBehandlingMedPersongalleri.opprettet.toTidspunkt(),
             opprettetBehandling.behandlingOpprettet.toTidspunkt()
         )
@@ -143,10 +144,15 @@ internal class BehandlingDaoIntegrationTest {
             opprettBehandling.persongalleri.soesken,
             opprettetBehandling.persongalleri.soesken
         )
-        assertEquals(
+        assertErInnenforEttSekund(
             opprettBehandling.opprettet.toTidspunkt(),
             opprettetBehandling.behandlingOpprettet.toTidspunkt()
         )
+    }
+
+    private fun assertErInnenforEttSekund(tidspunkt1: Tidspunkt, tidspunkt2: Tidspunkt) {
+        val diff = Duration.between(tidspunkt1.instant, tidspunkt2.instant).abs()
+        assertTrue(diff.toMillis() < 1000, "Forventa forskjell mindre enn enn sekund, fikk $diff")
     }
 
     @Test

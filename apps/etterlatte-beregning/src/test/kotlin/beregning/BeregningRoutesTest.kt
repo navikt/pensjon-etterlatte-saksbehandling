@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -110,11 +109,9 @@ internal class BeregningRoutesTest {
     fun `skal opprette ny beregning for foerstegangsbehandling av barnepensjon`() {
         val behandling = mockBehandling()
         val beregning = beregning()
-        val sak = Sak("ident", SakType.BARNEPENSJON, 1)
 
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns sak
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
@@ -167,6 +164,7 @@ internal class BeregningRoutesTest {
             every { id } returns randomUUID()
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { sak } returns 1
+            every { sakType } returns SakType.BARNEPENSJON
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         }
 

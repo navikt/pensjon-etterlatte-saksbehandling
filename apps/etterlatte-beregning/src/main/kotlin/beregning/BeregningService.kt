@@ -21,31 +21,20 @@ class BeregningService(
 
     suspend fun opprettBeregning(behandlingId: UUID, bruker: Bruker): Beregning {
         logger.info("Oppretter beregning for behandlingId=$behandlingId")
-        return tilstandssjekkFoerKjoerning(behandlingId, bruker) {
+        val kanBeregneYtelse = behandlingKlient.beregn(behandlingId, bruker, commit = false)
+        if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-            val sak = behandlingKlient.hentSak(behandling.sak, bruker)
 
-            val beregning = when (sak.sakType) {
+            val beregning = when (behandling.sakType) {
                 SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, bruker)
                 SakType.OMSTILLINGSSTOENAD -> beregnOmstillingsstoenadService.beregn(behandling, bruker)
             }
 
-            beregningRepository.lagreEllerOppdaterBeregning(beregning).also {
-                behandlingKlient.beregn(behandlingId, bruker, true)
-            }
+            val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
+            behandlingKlient.beregn(behandlingId, bruker, commit = true)
+            return lagretBeregning
+        } else {
+            throw IllegalStateException("Kan ikke beregne behandlingId=$behandlingId, behandling er i feil tilstand")
         }
-    }
-
-    private suspend fun tilstandssjekkFoerKjoerning(
-        behandlingId: UUID,
-        bruker: Bruker,
-        block: suspend () -> Beregning
-    ): Beregning {
-        val kanBeregne = behandlingKlient.beregn(behandlingId, bruker, false)
-
-        if (!kanBeregne) {
-            throw IllegalStateException("Kunne ikke beregne, behandling er i feil state")
-        }
-        return block()
     }
 }

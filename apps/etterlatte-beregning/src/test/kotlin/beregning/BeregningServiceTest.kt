@@ -11,7 +11,6 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -35,11 +34,9 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal beregne barnepensjon og lagre resultatet hvis statussjekk i behandling passerer`() {
-        val behandling = mockBehandling()
-        val sak = Sak("ident", SakType.BARNEPENSJON, 1)
+        val behandling = mockBehandling(SakType.BARNEPENSJON)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns sak
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns mockk()
 
@@ -55,11 +52,9 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal ikke beregne barnepensjon eller lagre noe hvis statussjekk i behandling ikke passerer`() {
-        val behandling = mockBehandling()
-        val sak = Sak("ident", SakType.BARNEPENSJON, 1)
+        val behandling = mockBehandling(SakType.BARNEPENSJON)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns sak
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns false
 
         runBlocking {
@@ -75,11 +70,9 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal beregne omstillingsstoenad og lagre resultatet hvis statussjekk i behandling passerer`() {
-        val behandling = mockBehandling()
-        val sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, 1)
+        val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns sak
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         coEvery { beregnOmstillingsstoenadService.beregn(any(), any()) } returns mockk()
 
@@ -95,11 +88,9 @@ internal class BeregningServiceTest {
 
     @Test
     fun `skal ikke beregne omstillingsstoenad eller lagre noe hvis statussjekk i behandling ikke passerer`() {
-        val behandling = mockBehandling()
-        val sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, 1)
+        val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns sak
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns false
 
         runBlocking {
@@ -113,10 +104,11 @@ internal class BeregningServiceTest {
         }
     }
 
-    private fun mockBehandling(): DetaljertBehandling =
+    private fun mockBehandling(type: SakType): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
             every { sak } returns 1
+            every { sakType } returns type
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         }

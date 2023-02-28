@@ -72,16 +72,8 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
 ) {
     // AuthenticationChecked
     on(AdressebeskyttelseHook) { call ->
-        val claims = call.principal<TokenValidationContextPrincipal>()
-            ?.context
-            ?.getJwtToken("azure")
-            ?.jwtTokenClaims
-
-        val oid = claims?.get("oid").toString()
-        val sub = claims?.get("sub").toString()
-
-        val isMaskinToMaskinRequest: Boolean = oid == sub
-        if (isMaskinToMaskinRequest) {
+        val bruker = call.bruker
+        if (bruker.erSystembruker()) {
             return@on
         }
 

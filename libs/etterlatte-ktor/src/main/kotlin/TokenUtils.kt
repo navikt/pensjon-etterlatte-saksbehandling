@@ -40,4 +40,25 @@ inline val PipelineContext<*, ApplicationCall>.bruker: Bruker
         )
     }
 
+inline val ApplicationCall.bruker: Bruker
+    get() {
+        val claims = this.principal<TokenValidationContextPrincipal>()
+            ?.context
+            ?.getJwtToken("azure")
+            ?.jwtTokenClaims
+        val oidSub = claims
+            ?.let {
+                val oid = it.getClaim(Claims.oid)
+                val sub = it.getClaim(Claims.sub)
+                Pair(oid, sub)
+            }
+        val saksbehandler = claims?.getClaim(Claims.NAVident)
+        return Bruker.of(
+            accessToken = hentAccessToken(this),
+            oid = oidSub?.first,
+            sub = oidSub?.second,
+            saksbehandler = saksbehandler
+        )
+    }
+
 fun JwtTokenClaims.getClaim(claim: Claims) = getStringClaim(claim.name)

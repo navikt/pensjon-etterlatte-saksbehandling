@@ -3,7 +3,7 @@ package no.nav.etterlatte.token
 sealed class Bruker(
     open val accessToken: String
 ) {
-    abstract fun saksbehandlerIdentEllerSystemnavn(): String
+    abstract fun ident(): String
 
     abstract fun erMaskinTilMaskin(): Boolean
 
@@ -28,7 +28,7 @@ sealed class Bruker(
 data class System(override val accessToken: String, val oid: String, val sub: String) : Bruker(accessToken) {
     override fun erMaskinTilMaskin() = true
 
-    override fun saksbehandlerIdentEllerSystemnavn() = Fagsaksystem.EY.name
+    override fun ident() = Fagsaksystem.EY.name
 
     override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = Fagsaksystem.EY.name
 }
@@ -36,7 +36,7 @@ data class System(override val accessToken: String, val oid: String, val sub: St
 data class Saksbehandler(override val accessToken: String, val ident: String) : Bruker(accessToken) {
     override fun erMaskinTilMaskin() = false
 
-    override fun saksbehandlerIdentEllerSystemnavn() = ident
+    override fun ident() = ident
 
     override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = saksbehandlere[ident]
         ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $ident mangler enhet fra secret")

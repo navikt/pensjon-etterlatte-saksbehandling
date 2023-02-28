@@ -38,7 +38,7 @@ class SakOgBehandlingService(
         grunnlag: Grunnlag,
         bruker: Bruker
     ): Behandling {
-        val innloggetSaksbehandlerIdent = bruker.saksbehandlerIdentEllerSystemnavn()
+        val innloggetSaksbehandlerIdent = bruker.ident()
         val innloggetSaksbehandlerEnhet = bruker.saksbehandlerEnhet(saksbehandlere)
 
         val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet

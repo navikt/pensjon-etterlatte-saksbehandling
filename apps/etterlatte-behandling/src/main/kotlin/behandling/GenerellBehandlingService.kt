@@ -241,7 +241,7 @@ class RealGenerellBehandlingService(
             Sporingsrequest(
                 kallendeApplikasjon = "behandling",
                 oppdateringstype = HttpMethod.GET,
-                brukerId = bruker.saksbehandlerIdentEllerSystemnavn(),
+                brukerId = bruker.ident(),
                 hvemBlirSlaattOpp = fnr.value,
                 endepunkt = "behandling",
                 resultat = Decision.Permit,

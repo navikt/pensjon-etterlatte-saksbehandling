@@ -9,8 +9,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation(Jupiter.Api)
-    testImplementation(Jupiter.Engine)
+    testImplementation(libs.test.jupiter.api)
+    testImplementation(libs.test.jupiter.params)
+    testRuntimeOnly(libs.test.jupiter.engine)
 }
 
 tasks {

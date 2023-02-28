@@ -104,7 +104,10 @@ internal class DBTest {
         val uuid = UUID.randomUUID().also { settOpp(it) }
 
         runBlocking {
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, AccessTokenWrapper("access", null, null, null))
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(
+                uuid,
+                AccessTokenWrapper("access", Saksbehandler("1"), null, null)
+            )
         }
 
         val vedtaket: Vedtak? = vedtaksvurderingService.hentFellesvedtak(uuid)

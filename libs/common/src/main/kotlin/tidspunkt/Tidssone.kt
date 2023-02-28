@@ -16,6 +16,8 @@ fun Instant.tilZonedDateTime() = atZone(standardTidssone)
 
 fun Timestamp.tilZonedDateTime() = toLocalDateTime().atZone(standardTidssone)
 
+fun LocalDateTime.tilUTCdefaultTimestamp() = Timestamp.from(this.atZone(standardTidssone).toInstant())
+
 fun LocalDateTime.tilSystemDefaultTimestamp() = Timestamp.from(this.atZone(ZoneId.systemDefault()).toInstant())
 
 fun Timestamp.tilSystemDefaultLocalDateTime() = toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()

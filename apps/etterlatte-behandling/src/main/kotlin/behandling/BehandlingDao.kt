@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilSystemDefaultLocalDateTime
-import no.nav.etterlatte.libs.common.tidspunkt.tilSystemDefaultTimestamp
+import no.nav.etterlatte.libs.common.tidspunkt.tilUTCdefaultTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -423,7 +423,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 }
 
-private fun LocalDateTime.somTimestamp() = tilSystemDefaultTimestamp()
+private fun LocalDateTime.somTimestamp() = tilUTCdefaultTimestamp()
 
 private fun ResultSet.somLocalDateTime(kolonne: String) = getTimestamp(kolonne).tilSystemDefaultLocalDateTime()
 

@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -31,12 +32,13 @@ class OppgaveDao(private val connection: () -> Connection) {
             val stmt = prepareStatement(
                 """
                 |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, status, behandling_opprettet,
-                |behandlingstype, soesken 
+                |behandlingstype, soesken, b.prosesstype
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
-                |WHERE status = ANY(?)
+                |WHERE status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
                 """.trimMargin()
             )
             stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))
+            stmt.setString(2, Prosesstype.AUTOMATISK.toString())
             return stmt.executeQuery().toList {
                 val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
                     ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()

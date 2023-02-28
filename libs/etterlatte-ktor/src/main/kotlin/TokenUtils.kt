@@ -17,14 +17,12 @@ import no.nav.security.token.support.v2.TokenValidationContextPrincipal
     ReplaceWith("accesstokenWrapper")
 )
 inline val PipelineContext<*, ApplicationCall>.saksbehandler: Saksbehandler
-    get() = hentSaksbehandler(call)
-
-fun hentSaksbehandler(call: ApplicationCall) = call.principal<TokenValidationContextPrincipal>().let {
-    val navIdent = it?.context?.getJwtToken("azure")
-        ?.jwtTokenClaims?.getClaim(Claims.NAVident)
-        ?: throw Exception("Navident is null in token, probably missing claim NAVident")
-    Saksbehandler(navIdent)
-}
+    get() = call.principal<TokenValidationContextPrincipal>().let {
+        val navIdent = it?.context?.getJwtToken("azure")
+            ?.jwtTokenClaims?.getClaim(Claims.NAVident)
+            ?: throw Exception("Navident is null in token, probably missing claim NAVident")
+        Saksbehandler(navIdent)
+    }
 
 @Deprecated("bruk heller accesstokenWrapper", ReplaceWith("accesstokenWrapper"))
 inline val PipelineContext<*, ApplicationCall>.accesstoken: String

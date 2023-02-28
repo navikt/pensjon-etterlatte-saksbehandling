@@ -57,7 +57,7 @@ internal class OpprettVedtakforespoerselTest {
     }
 
     @Test
-    fun `skal baade opprette vedtak og fatte det`() {
+    fun `skal baade opprette vedtak og fatte det samt attestere`() {
         val behandlingId = UUID.randomUUID()
         val melding = genererOpprettVedtakforespoersel(behandlingId)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
@@ -69,5 +69,6 @@ internal class OpprettVedtakforespoerselTest {
 
         verify { vedtakServiceMock.upsertVedtak(behandlingId) }
         verify { vedtakServiceMock.fattVedtak(behandlingId) }
+        verify { vedtakServiceMock.attesterVedtak(behandlingId) }
     }
 }

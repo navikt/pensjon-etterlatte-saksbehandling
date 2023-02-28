@@ -48,7 +48,7 @@ internal class DBTest {
 
     private val sakId = 123L
     private val accessToken =
-        Bruker(
+        Bruker.of(
             accessToken = "accessToken",
             oid = null,
             sub = null,
@@ -105,7 +105,7 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 uuid,
-                Bruker("access", "1", null, null)
+                Bruker.of("access", "1", null, null)
             )
         }
 
@@ -198,11 +198,11 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 behandling1Id,
-                Bruker("access", "s1", null, null)
+                Bruker.of("access", "s1", null, null)
             )
             vedtaksvurderingService.opprettEllerOppdaterVedtak(
                 behandling2Id,
-                Bruker("access", "s1", null, null)
+                Bruker.of("access", "s1", null, null)
             )
         }
 

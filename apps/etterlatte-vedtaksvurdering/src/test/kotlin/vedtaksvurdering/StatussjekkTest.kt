@@ -39,7 +39,7 @@ class StatussjekkTest {
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     private val saksbehandler = "saksbehandler"
-    private val accessToken = Bruker("accessToken", "saksbehandler", null, null)
+    private val accessToken = Bruker.of("accessToken", "saksbehandler", null, null)
     private val behandlingId = UUID.randomUUID()
 
     private lateinit var vedtakRepo: VedtaksvurderingRepository

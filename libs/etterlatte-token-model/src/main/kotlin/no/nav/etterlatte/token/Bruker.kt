@@ -30,6 +30,21 @@ data class Bruker(
             )
         }
     }
+
+    companion object {
+        private fun erMaskinTilMaskin(oid: String?, sub: String?) = (oid == sub) && (oid != null)
+        fun of(accessToken: String, saksbehandler: String?, oid: String? = null, sub: String? = null): Bruker {
+            return if (erMaskinTilMaskin(oid = oid, sub = sub)) {
+                Bruker(accessToken, null, oid, sub)
+            } else if (saksbehandler != null) {
+                Bruker(accessToken, saksbehandler, null, null)
+            } else {
+                throw Exception(
+                    "Er ikke maskin-til-maskin, og Navident er null i token, sannsynligvis manglende claim NAVident"
+                )
+            }
+        }
+    }
 }
 
 enum class Claims {

@@ -32,7 +32,7 @@ inline val PipelineContext<*, ApplicationCall>.bruker: Bruker
                 Pair(oid, sub)
             }
         val saksbehandler = claims?.getClaim(Claims.NAVident)
-        return Bruker(
+        return Bruker.of(
             accessToken = hentAccessToken(call),
             oid = oidSub?.first,
             sub = oidSub?.second,

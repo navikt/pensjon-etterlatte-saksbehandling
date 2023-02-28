@@ -207,7 +207,7 @@ internal class SakOgBehandlingServiceTest {
         private val STATISK_UUID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val ACCESS_TOKEN = Bruker("321", SAKSBEHANDLER_IDENT, null, null)
+        private val ACCESS_TOKEN = Bruker.of("321", SAKSBEHANDLER_IDENT, null, null)
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAK_ID = 123L
         private val BREV_BEREGNINGSPERIODE = BrevBeregningsperiode(YearMonth.now().atDay(1), null, 10000, 1, 3063, 10)

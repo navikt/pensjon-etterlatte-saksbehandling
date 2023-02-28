@@ -54,7 +54,7 @@ internal class VilkaarsvurderingServiceTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val uuid: UUID = UUID.randomUUID()
-    private val accesstoken = Bruker("token", "s1", null, null)
+    private val accesstoken = Bruker.of("token", "s1", null, null)
 
     @BeforeAll
     fun beforeAll() {

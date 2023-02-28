@@ -47,7 +47,7 @@ internal class VedtaksvurderingServiceTest {
 
     private val sakId = 2L
     private val behandlingId = UUID.randomUUID()
-    private val accessToken = Bruker("sesam sesam", "1", null, null)
+    private val accessToken = Bruker.of("sesam sesam", "1", null, null)
 
     private val vedtakSomIkkeErFattet = Vedtak(
         0,

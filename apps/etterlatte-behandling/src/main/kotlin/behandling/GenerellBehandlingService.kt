@@ -223,6 +223,7 @@ class RealGenerellBehandlingService(
             DetaljertBehandlingDto(
                 id = detaljertBehandling.id,
                 sak = detaljertBehandling.sak,
+                sakType = detaljertBehandling.sakType,
                 gyldighetsprøving = detaljertBehandling.gyldighetsproeving,
                 kommerBarnetTilgode = detaljertBehandling.kommerBarnetTilgode,
                 saksbehandlerId = vedtak.await()?.saksbehandlerId,

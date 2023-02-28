@@ -8,7 +8,7 @@ import kotlinx.coroutines.channels.SendChannel
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
@@ -101,7 +101,7 @@ class RealRevurderingServiceTest {
 
     @Test
     fun `skal starte revurdering`() {
-        val behandlingOpprettes = slot<Revurdering>()
+        val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
         val forrigeBehandling = foerstegangsbehandling(sak = 1)
         val doedsHendelse = Doedshendelse("12345678911", LocalDate.of(2022, 1, 1), Endringstype.OPPRETTET)
@@ -109,7 +109,7 @@ class RealRevurderingServiceTest {
             revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val behandlingerMock = mockk<BehandlingDao> {
-            every { opprettRevurdering(capture(behandlingOpprettes)) } returns Unit
+            every { opprettBehandling(capture(behandlingOpprettes)) } returns Unit
             every { hentBehandling(capture(behandlingHentes), BehandlingType.REVURDERING) } returns revurdering
         }
         val hendelserMock = mockk<HendelseDao>() {
@@ -142,7 +142,7 @@ class RealRevurderingServiceTest {
             { assertEquals(revurdering.oppgaveStatus, opprettetRevurdering.oppgaveStatus) },
             { assertEquals(revurdering.revurderingsaarsak, opprettetRevurdering.revurderingsaarsak) },
             { assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id) },
-            { assertEquals(1, behandlingOpprettes.captured.sak) },
+            { assertEquals(1, behandlingOpprettes.captured.sakId) },
             { assertEquals(opprettetRevurdering.id, hendelse.captured.first) },
             { assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second) }
         )

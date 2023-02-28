@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.Logger
@@ -28,6 +29,7 @@ internal sealed class TilstandException : IllegalStateException() {
 sealed class Behandling {
     abstract val id: UUID
     abstract val sak: Long
+    abstract val sakType: SakType
     abstract val behandlingOpprettet: LocalDateTime
     abstract val sistEndret: LocalDateTime
     abstract val status: BehandlingStatus
@@ -114,6 +116,7 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
     return DetaljertBehandling(
         id = id,
         sak = sak,
+        sakType = sakType,
         behandlingOpprettet = behandlingOpprettet,
         sistEndret = sistEndret,
         soeknadMottattDato = soeknadMottatDato,

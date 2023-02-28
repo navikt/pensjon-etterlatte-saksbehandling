@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -24,6 +25,7 @@ internal class BehandlingTest {
     private val behandling = Foerstegangsbehandling(
         id = UUID.randomUUID(),
         sak = 1,
+        sakType = SakType.BARNEPENSJON,
         behandlingOpprettet = LocalDateTime.now(),
         sistEndret = LocalDateTime.now(),
         status = BehandlingStatus.OPPRETTET,

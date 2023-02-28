@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.hendelse
 
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.toList
@@ -38,10 +39,10 @@ class HendelseDao(private val connection: () -> Connection) {
         )
     )
 
-    fun behandlingOpprettet(behandling: Behandling) = lagreHendelse(
+    fun behandlingOpprettet(behandling: BehandlingOpprettet) = lagreHendelse(
         UlagretHendelse(
             "BEHANDLING:OPPRETTET",
-            behandling.behandlingOpprettet.toTidspunkt(ZoneId.systemDefault()),
+            behandling.timestamp.toTidspunkt(ZoneId.systemDefault()),
             null,
             behandling.id,
             behandling.sak,

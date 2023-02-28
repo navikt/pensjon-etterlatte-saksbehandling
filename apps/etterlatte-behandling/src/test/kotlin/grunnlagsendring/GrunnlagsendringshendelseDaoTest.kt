@@ -6,13 +6,14 @@ import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
 import no.nav.etterlatte.grunnlagsinformasjonForelderBarnRelasjonHendelse
 import no.nav.etterlatte.grunnlagsinformasjonUtflyttingshendelse
 import no.nav.etterlatte.ikkeSamsvarMellomPdlOgGrunnlagDoed
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.revurdering
+import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.samsvarMellomPdlOgGrunnlagDoed
 import org.junit.jupiter.api.AfterAll
@@ -305,9 +306,13 @@ internal class GrunnlagsendringshendelseDaoTest {
         val hendelseId = UUID.randomUUID()
         val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
         val grunnlagsendringstype = GrunnlagsendringsType.DOEDSFALL
-        val revurderingId = UUID.randomUUID()
-        val revurdering = revurdering(id = revurderingId, sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
-        behandlingRepo.opprettRevurdering(revurdering)
+        val opprettBehandling = opprettBehandling(
+            type = BehandlingType.REVURDERING,
+            sakId = sak1,
+            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+        )
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
         listOf(
             grunnlagsendringshendelseMedSamsvar(
                 id = hendelseId,
@@ -320,9 +325,9 @@ internal class GrunnlagsendringshendelseDaoTest {
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
-        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(hendelseId, revurderingId)
+        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(hendelseId, opprettBehandling.id)
         val lagretHendelse = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(hendelseId)
-        assertEquals(revurderingId, lagretHendelse?.behandlingId)
+        assertEquals(opprettBehandling.id, lagretHendelse?.behandlingId)
     }
 
     @Test

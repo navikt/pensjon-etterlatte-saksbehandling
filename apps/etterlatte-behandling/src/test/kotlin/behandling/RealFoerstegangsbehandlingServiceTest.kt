@@ -9,12 +9,14 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -65,6 +67,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         } returns Foerstegangsbehandling(
             id = id,
             sak = 1,
+            sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = LocalDateTime.now(),
             sistEndret = LocalDateTime.now(),
             status = BehandlingStatus.OPPRETTET,
@@ -93,7 +96,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun startBehandling() {
         val behandlingerMock = mockk<BehandlingDao>()
         val hendelserMock = mockk<HendelseDao>()
-        val behandlingOpprettes = slot<Foerstegangsbehandling>()
+        val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
@@ -102,6 +105,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         val opprettetBehandling = Foerstegangsbehandling(
             id = UUID.randomUUID(),
             sak = 1,
+            sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = datoNaa,
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
@@ -137,7 +141,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             hendleseskanal
         )
 
-        every { behandlingerMock.opprettFoerstegangsbehandling(capture(behandlingOpprettes)) } returns Unit
+        every { behandlingerMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every {
             behandlingerMock.hentBehandling(
                 capture(behandlingHentes),
@@ -159,7 +163,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         assertEquals(opprettetBehandling.id, resultat.id)
         assertEquals(opprettetBehandling.persongalleri.soeker, resultat.persongalleri.soeker)
         assertEquals(opprettetBehandling.behandlingOpprettet, resultat.behandlingOpprettet)
-        assertEquals(1, behandlingOpprettes.captured.sak)
+        assertEquals(1, behandlingOpprettes.captured.sakId)
         assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
         assertEquals(resultat.id, hendelse.captured.first)
         assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second)

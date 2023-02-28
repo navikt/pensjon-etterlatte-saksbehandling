@@ -53,6 +53,7 @@ class StatistikkServiceTest {
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
+            sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = LocalDateTime.now(),
             sistEndret = LocalDateTime.now(),
             soeknadMottattDato = null,
@@ -137,6 +138,7 @@ class StatistikkServiceTest {
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
+            sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = LocalDateTime.now(),
             sistEndret = LocalDateTime.now(),
             soeknadMottattDato = null,

@@ -160,6 +160,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingMock.hentBehandling(any(), any()) } returns DetaljertBehandling(
             id = behandlingId,
             sak = 0,
+            sakType = SakType.BARNEPENSJON,
             behandlingOpprettet = LocalDateTime.now(),
             sistEndret = LocalDateTime.now(),
             soeknadMottattDato = null,

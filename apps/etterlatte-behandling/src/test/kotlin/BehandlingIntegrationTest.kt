@@ -31,6 +31,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
+import java.util.*
 import javax.sql.DataSource
 
 abstract class BehandlingIntegrationTest {
@@ -106,6 +107,16 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "NAVident" to "Saksbehandler01",
                 "roles" to listOf("kan-sette-kilde") // TODO hva brukes dette til?
+            )
+        )
+    }
+
+    protected val systemBruker: String by lazy {
+        val mittsystem = UUID.randomUUID().toString()
+        issueToken(
+            mapOf(
+                "sub" to mittsystem,
+                "oid" to mittsystem
             )
         )
     }

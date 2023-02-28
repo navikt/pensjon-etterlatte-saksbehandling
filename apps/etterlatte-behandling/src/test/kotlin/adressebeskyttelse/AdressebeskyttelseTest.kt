@@ -86,6 +86,12 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
 
             client.get("/behandlinger/foerstegangsbehandling/$behandlingId") {
+                addAuthToken(systemBruker)
+            }.let {
+                Assertions.assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            client.get("/behandlinger/foerstegangsbehandling/$behandlingId") {
                 addAuthToken(tokenSaksbehandler)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -101,11 +107,17 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }.let {
                 Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
             }
-
+            // smoketest
             client.get("/fakeurlwithbehandlingsid/$behandlingId") {
                 addAuthToken(tokenSaksbehandler)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
+            }
+            // systemBruker skal alltid ha tilgang
+            client.get("/behandlinger/foerstegangsbehandling/$behandlingId") {
+                addAuthToken(systemBruker)
+            }.let {
+                Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
         }
     }

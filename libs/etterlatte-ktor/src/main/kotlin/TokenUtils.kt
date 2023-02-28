@@ -36,7 +36,7 @@ fun hentAccessToken(call: ApplicationCall) = call.request.parseAuthorizationHead
     }
 }
 
-inline val PipelineContext<*, ApplicationCall>.accesstokenWrapper: Bruker
+inline val PipelineContext<*, ApplicationCall>.bruker: Bruker
     get() {
         val claims = call.principal<TokenValidationContextPrincipal>()
             ?.context

@@ -1,16 +1,16 @@
 package oppgave
 
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.domain.Regulering
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -100,20 +100,18 @@ internal class OppgaveDaoTest {
         val automatisk = lagRegulering(Prosesstype.AUTOMATISK)
         val manuel = lagRegulering(Prosesstype.MANUELL)
 
-        behandlingDao.opprettRegulering(automatisk)
-        behandlingDao.opprettRegulering(manuel)
+        behandlingDao.opprettBehandling(automatisk)
+        behandlingDao.opprettBehandling(manuel)
 
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(listOf(BehandlingStatus.OPPRETTET))
         assertEquals(oppgaver.size, 1)
         assertEquals(manuel.id, (oppgaver[0] as Oppgave.BehandlingOppgave).behandlingId)
     }
 
-    private fun lagRegulering(prosesstype: Prosesstype): Regulering {
-        return Regulering(
-            id = UUID.randomUUID(),
-            sak = 1,
-            behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
+    private fun lagRegulering(prosesstype: Prosesstype): OpprettBehandling {
+        return OpprettBehandling(
+            type = BehandlingType.OMREGNING,
+            sakId = 1,
             status = BehandlingStatus.OPPRETTET,
             persongalleri = Persongalleri(
                 soeker = fnr,
@@ -122,12 +120,14 @@ internal class OppgaveDaoTest {
                 avdoed = listOf(),
                 gjenlevende = listOf()
             ),
+            soeknadMottattDato = null,
             kommerBarnetTilgode = null,
             vilkaarUtfall = null,
             virkningstidspunkt = null,
-            revurderingsaarsak = RevurderingAarsak.GRUNNBELOEPREGULERING,
+            revurderingsAarsak = null,
+            opphoerAarsaker = listOf(),
+            fritekstAarsak = null,
             prosesstype = prosesstype
-
         )
     }
 }

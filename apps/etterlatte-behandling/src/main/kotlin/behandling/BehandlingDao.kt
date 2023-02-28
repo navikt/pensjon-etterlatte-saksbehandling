@@ -268,8 +268,8 @@ class BehandlingDao(private val connection: () -> Connection) {
                 """
                     INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                     soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt,
-                    kommer_barnet_tilgode, vilkaar_utfall, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    kommer_barnet_tilgode, vilkaar_utfall, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(behandling) {
@@ -299,6 +299,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setString(16, revurderingsAarsak?.name)
             stmt.setString(17, opphoerAarsaker?.toJson())
             stmt.setString(18, fritekstAarsak)
+            stmt.setString(19, prosesstype?.toString())
         }
         require(stmt.executeUpdate() == 1)
     }

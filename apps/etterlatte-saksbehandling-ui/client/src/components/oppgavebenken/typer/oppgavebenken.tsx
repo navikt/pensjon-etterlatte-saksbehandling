@@ -44,14 +44,12 @@ export const oppgaveTypeFilter: Record<OppgaveTypeFilter, IPar> = {
 export enum SoeknadTypeFilter {
   VELG = 'VELG',
   BARNEPENSJON = 'BARNEPENSJON',
-  GJENLEVENDEPENSJON = 'GJENLEVENDEPENSJON',
   OMSTILLINGSSTOENAD = 'OMSTILLINGSSTOENAD',
 }
 
 export const soeknadTypeFilter: Record<SoeknadTypeFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
   BARNEPENSJON: { id: 'BARNEPENSJON', navn: 'Barnepensjon' },
-  GJENLEVENDEPENSJON: { id: 'GJENLEVENDEPENSJON', navn: 'Gjenlevendepensjon' },
   OMSTILLINGSSTOENAD: { id: 'OMSTILLINGSSTOENAD', navn: 'Omstillingsstønad' },
 }
 

@@ -14,21 +14,6 @@
     "antallSoesken": 0
   },
   {
-    "behandlingsId": "9",
-    "sakId": 6,
-    "status": "OPPRETTET",
-    "oppgaveStatus": "NY",
-    "soeknadType": "Gjenlevendepensjon",
-    "oppgaveType": "FØRSTEGANGSBEHANDLING",
-    "regdato": "2019-01-21T05:47:08.644",
-    "fristdato": "2019-01-29T05:47:08.644",
-    "fnr": "29081276127",
-    "beskrivelse": "OPPRETTET",
-    "saksbehandler": "Truls Veileder",
-    "handling": "BEHANDLE",
-    "antallSoesken": 1
-  },
-  {
     "behandlingsId": "10",
     "sakId": 3,
     "status": "TEST",

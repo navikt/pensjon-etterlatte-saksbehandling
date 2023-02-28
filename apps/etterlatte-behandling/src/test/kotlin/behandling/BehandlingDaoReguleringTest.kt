@@ -1,11 +1,12 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -65,12 +66,13 @@ internal class BehandlingDaoReguleringTest {
     @MethodSource("hentMigrerbareStatuses")
     fun `behandlinger som er beregnet maa beregnes paa nytt`(status: BehandlingStatus) {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-        val behandling = foerstegangsbehandling(sak = sak, status = status)
+        val opprettBehandling =
+            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak, status = status)
 
-        behandlingRepo.opprettFoerstegangsbehandling(behandling)
+        behandlingRepo.opprettBehandling(opprettBehandling)
         behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
 
-        with(behandlingRepo.hentBehandling(behandling.id)) {
+        with(behandlingRepo.hentBehandling(opprettBehandling.id)) {
             val expected = BehandlingStatus.VILKAARSVURDERT
             val actual = (this as Foerstegangsbehandling).status
 
@@ -84,12 +86,13 @@ internal class BehandlingDaoReguleringTest {
     @MethodSource("hentStatuser")
     fun `irrelevante behandlinger skal ikke endre status ved migrering`(status: BehandlingStatus) {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-        val behandling = foerstegangsbehandling(sak = sak, status = status)
+        val opprettBehandling =
+            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak, status = status)
 
-        behandlingRepo.opprettFoerstegangsbehandling(behandling)
+        behandlingRepo.opprettBehandling(opprettBehandling)
         behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
 
-        with(behandlingRepo.hentBehandling(behandling.id)) {
+        with(behandlingRepo.hentBehandling(opprettBehandling.id)) {
             val expected = status
             val actual = (this as Foerstegangsbehandling).status
 

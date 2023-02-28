@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -34,8 +35,10 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT * 
-                    FROM behandling where id = ? AND behandlingstype = ?
+                    SELECT b.*, s.sakType 
+                    FROM behandling b
+                    INNER JOIN sak s ON b.sak_id = s.id
+                    WHERE b.id = ? AND b.behandlingstype = ? 
                     """
             )
         stmt.setObject(1, id)
@@ -50,8 +53,10 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT * 
-                    FROM behandling where id = ?
+                    SELECT b.*, s.sakType 
+                    FROM behandling b
+                    INNER JOIN sak s ON b.sak_id = s.id
+                    WHERE b.id = ?
                     """
             )
         stmt.setObject(1, id)
@@ -76,8 +81,10 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT *
-                    FROM behandling where behandlingstype = ?
+                    SELECT b.*, s.sakType 
+                    FROM behandling b
+                    INNER JOIN sak s ON b.sak_id = s.id 
+                    WHERE b.behandlingstype = ?
                 """.trimIndent()
             )
         stmt.setString(1, type.name)
@@ -87,10 +94,10 @@ class BehandlingDao(private val connection: () -> Connection) {
     fun alleBehandlingerISakAvType(sakId: Long, type: BehandlingType): List<Behandling> {
         return connection().prepareStatement(
             """
-                SELECT * 
-                FROM behandling
-                WHERE sak_id = ?
-                    AND behandlingstype = ?
+                SELECT b.*, s.sakType 
+                FROM behandling b
+                INNER JOIN sak s ON b.sak_id = s.id 
+                WHERE b.sak_id = ? AND b.behandlingstype = ?
             """.trimIndent()
         ).let {
             it.setLong(1, sakId)
@@ -103,8 +110,9 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT *
-                    FROM behandling 
+                    SELECT b.*, s.sakType 
+                    FROM behandling b
+                    INNER JOIN sak s ON b.sak_id = s.id 
                 """.trimIndent()
             )
         return stmt.executeQuery().behandlingsListe()
@@ -114,8 +122,10 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT *
-                    FROM behandling where sak_id = ?
+                    SELECT b.*, s.sakType 
+                    FROM behandling b
+                    INNER JOIN sak s ON b.sak_id = s.id
+                    WHERE sak_id = ?
                 """.trimIndent()
             )
         stmt.setLong(1, sakid)
@@ -127,10 +137,10 @@ class BehandlingDao(private val connection: () -> Connection) {
             val stmt =
                 prepareStatement(
                     """
-                        SELECT * 
-                        FROM behandling 
-                        WHERE sak_id = ?
-                            AND status = ANY(?)
+                        SELECT b.*, s.sakType  
+                        FROM behandling b
+                        INNER JOIN sak s ON b.sak_id = s.id
+                        WHERE b.sak_id = ? AND b.status = ANY(?)
                     """.trimIndent()
                 )
             stmt.setLong(1, sakid)
@@ -146,8 +156,10 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT * 
-                    FROM behandling where soeker = ?
+                    SELECT b.*, s.sakType 
+                    FROM behandling b
+                    INNER JOIN sak s ON b.sak_id = s.id
+                    WHERE sak_id = ? AND b.soeker = ?
                 """.trimIndent()
             )
         stmt.setString(1, fnr)
@@ -170,6 +182,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
+        sakType = enumValueOf(rs.getString("saktype")),
         behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         soeknadMottattDato = rs.getTimestamp("soeknad_mottatt_dato").toLocalDateTime(),
@@ -192,6 +205,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asRevurdering(rs: ResultSet) = Revurdering(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
+        sakType = enumValueOf(rs.getString("saktype")),
         behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -205,6 +219,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asRegulering(rs: ResultSet) = Regulering(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
+        sakType = enumValueOf(rs.getString("saktype")),
         behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -218,6 +233,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
+        sakType = enumValueOf(rs.getString("saktype")),
         behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -234,8 +250,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         return connection().prepareStatement(
             """
                 SELECT DISTINCT sak_id FROM behandling
-                    WHERE soeker = ? 
-                    AND  status != 'AVBRUTT'
+                WHERE soeker = ? AND  status != 'AVBRUTT'
             """.trimIndent()
         ).let {
             it.setString(1, fnr)
@@ -245,31 +260,26 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
-    fun opprettFoerstegangsbehandling(foerstegangsbehandling: Foerstegangsbehandling) {
+    fun opprettBehandling(behandling: OpprettBehandling) {
         val stmt =
             connection().prepareStatement(
                 """
-                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt, kommer_barnet_tilgode, vilkaar_utfall)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
+                    soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt,
+                    kommer_barnet_tilgode, vilkaar_utfall, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
-        with(foerstegangsbehandling) {
+        with(behandling) {
             stmt.setObject(1, id)
-            stmt.setLong(2, sak)
-            stmt.setTimestamp(
-                3,
-                behandlingOpprettet.somTimestamp()
-            )
-            stmt.setTimestamp(
-                4,
-                sistEndret.somTimestamp()
-            )
+            stmt.setLong(2, sakId)
+            stmt.setTimestamp(3, opprettet.somTimestamp())
+            stmt.setTimestamp(4, opprettet.somTimestamp())
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
             stmt.setTimestamp(
                 7,
-                soeknadMottattDato.somTimestamp()
+                soeknadMottattDato?.somTimestamp()
             )
             with(persongalleri) {
                 stmt.setString(8, innsender)
@@ -280,131 +290,24 @@ class BehandlingDao(private val connection: () -> Connection) {
             }
             stmt.setString(
                 13,
-                foerstegangsbehandling.virkningstidspunkt?.toJson()
+                virkningstidspunkt?.toJson()
             )
             stmt.setString(14, kommerBarnetTilgode?.toJson())
             stmt.setString(15, vilkaarUtfall?.name)
-        }
-        stmt.executeUpdate()
-    }
-
-    fun opprettRevurdering(revurdering: Revurdering) {
-        val stmt =
-            connection().prepareStatement(
-                """
-                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                    innsender, soeker, gjenlevende, avdoed, soesken, revurdering_aarsak, kommer_barnet_tilgode, 
-                    vilkaar_utfall, virkningstidspunkt)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent()
-            )
-        with(revurdering) {
-            stmt.setObject(1, id)
-            stmt.setLong(2, sak)
-            stmt.setTimestamp(
-                3,
-                behandlingOpprettet.somTimestamp()
-            )
-            stmt.setTimestamp(
-                4,
-                sistEndret.somTimestamp()
-            )
-            stmt.setString(5, status.name)
-            stmt.setString(6, type.name)
-            with(persongalleri) {
-                stmt.setString(7, innsender)
-                stmt.setString(8, soeker)
-                stmt.setString(9, gjenlevende.toJson())
-                stmt.setString(10, avdoed.toJson())
-                stmt.setString(11, soesken.toJson())
-            }
-            stmt.setString(12, revurderingsaarsak.name)
-            stmt.setString(13, kommerBarnetTilgode?.let { objectMapper.writeValueAsString(it) })
-            stmt.setString(14, vilkaarUtfall?.name)
-            stmt.setString(15, virkningstidspunkt?.toJson())
+            stmt.setString(16, revurderingsAarsak?.name)
+            stmt.setString(17, opphoerAarsaker?.toJson())
+            stmt.setString(18, fritekstAarsak)
         }
         require(stmt.executeUpdate() == 1)
-    }
-
-    fun opprettRegulering(regulering: Regulering) {
-        val stmt =
-            connection().prepareStatement(
-                """
-                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                    innsender, soeker, gjenlevende, avdoed, soesken, revurdering_aarsak, kommer_barnet_tilgode, 
-                    vilkaar_utfall, virkningstidspunkt)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent()
-            )
-        with(regulering) {
-            stmt.setObject(1, id)
-            stmt.setLong(2, sak)
-            stmt.setTimestamp(3, behandlingOpprettet.somTimestamp())
-            stmt.setTimestamp(4, sistEndret.somTimestamp())
-            stmt.setString(5, status.name)
-            stmt.setString(6, type.name)
-            with(persongalleri) {
-                stmt.setString(7, innsender)
-                stmt.setString(8, soeker)
-                stmt.setString(9, gjenlevende.toJson())
-                stmt.setString(10, avdoed.toJson())
-                stmt.setString(11, soesken.toJson())
-            }
-            stmt.setString(12, revurderingsaarsak.name)
-            stmt.setString(13, kommerBarnetTilgode?.let { objectMapper.writeValueAsString(it) })
-            stmt.setString(14, vilkaarUtfall?.name)
-            stmt.setString(15, virkningstidspunkt?.toJson())
-        }
-        require(stmt.executeUpdate() == 1)
-    }
-
-    fun opprettManueltOpphoer(manueltOpphoer: ManueltOpphoer): ManueltOpphoer {
-        val stmt =
-            connection().prepareStatement(
-                """
-                    INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                    innsender, soeker, gjenlevende, avdoed, soesken, opphoer_aarsaker, fritekst_aarsak,
-                    virkningstidspunkt)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    RETURNING *
-                """.trimIndent()
-            )
-        with(manueltOpphoer) {
-            stmt.setObject(1, id)
-            stmt.setLong(2, sak)
-            stmt.setTimestamp(
-                3,
-                behandlingOpprettet.somTimestamp()
-            )
-            stmt.setTimestamp(
-                4,
-                sistEndret.somTimestamp()
-            )
-            stmt.setString(5, status.name)
-            stmt.setString(6, type.name)
-            with(persongalleri) {
-                stmt.setString(7, innsender)
-                stmt.setString(8, soeker)
-                stmt.setString(9, gjenlevende.toJson())
-                stmt.setString(10, avdoed.toJson())
-                stmt.setString(11, soesken.toJson())
-            }
-            stmt.setString(12, opphoerAarsaker.toJson())
-            stmt.setString(13, fritekstAarsak)
-            stmt.setString(14, virkningstidspunkt?.toJson())
-        }
-        return stmt.executeQuery().singleOrNull {
-            behandlingAvRettType() as ManueltOpphoer
-        }
-            ?: throw BehandlingNotFoundException("Fant ikke manuelt opphoer med id ${manueltOpphoer.id}")
     }
 
     fun lagreGyldighetsproving(behandling: Foerstegangsbehandling) {
         val stmt =
             connection().prepareStatement(
-                "UPDATE behandling " +
-                    "SET gyldighetssproving = ?, status = ?, sist_endret = ? " +
-                    "WHERE id = ?"
+                """
+                    UPDATE behandling SET gyldighetssproving = ?, status = ?, sist_endret = ?
+                    WHERE id = ?
+                """.trimIndent()
             )
         stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
         stmt.setString(2, behandling.status.name)
@@ -426,20 +329,16 @@ class BehandlingDao(private val connection: () -> Connection) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }
 
-    fun lagreStatus(behandling: UUID, status: BehandlingStatus, sistEndret: LocalDateTime): Behandling {
+    fun lagreStatus(behandling: UUID, status: BehandlingStatus, sistEndret: LocalDateTime) {
         val stmt =
-            connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ? RETURNING *")
+            connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
         stmt.setString(1, status.name)
         stmt.setTimestamp(
             2,
             sistEndret.somTimestamp()
         )
         stmt.setObject(3, behandling)
-        return requireNotNull(
-            stmt.executeQuery().singleOrNull {
-                behandlingAvRettType()
-            }
-        )
+        require(stmt.executeUpdate() == 1)
     }
 
     private fun ResultSet.behandlingsListe(): List<Behandling> =
@@ -455,13 +354,11 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     private fun ResultSet.behandlingAvRettType() = tilBehandling(getString("behandlingstype"))
 
-    fun avbrytBehandling(behandlingId: UUID): Behandling {
-        return this.lagreStatus(
-            behandling = behandlingId,
-            status = BehandlingStatus.AVBRUTT,
-            sistEndret = LocalDateTime.now()
-        )
-    }
+    fun avbrytBehandling(behandlingId: UUID) = this.lagreStatus(
+        behandling = behandlingId,
+        status = BehandlingStatus.AVBRUTT,
+        sistEndret = LocalDateTime.now()
+    )
 
     fun lagreNyttVirkningstidspunkt(behandlingId: UUID, virkningstidspunkt: Virkningstidspunkt) {
         val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
@@ -511,6 +408,17 @@ class BehandlingDao(private val connection: () -> Connection) {
             par.first.split(", ").map {
                 Pair(Saksrolle.enumVedNavnEllerUkjent(it), par.second)
             }
+        }
+    }
+
+    private fun <T> ResultSet.valueOrError(columnName: String, block: (ResultSet) -> T): T {
+        return when (
+            (1..this.metaData.columnCount).map {
+                this.metaData.getColumnName(it)
+            }.contains(columnName)
+        ) {
+            true -> block(this)
+            false -> throw RuntimeException("Manglende $columnName i resultat")
         }
     }
 }

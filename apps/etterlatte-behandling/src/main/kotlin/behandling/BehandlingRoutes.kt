@@ -236,6 +236,7 @@ internal fun Route.behandlingRoutes(
                         DetaljertBehandling(
                             id = it.id,
                             sak = it.sak,
+                            sakType = it.sakType,
                             behandlingOpprettet = it.behandlingOpprettet,
                             sistEndret = it.sistEndret,
                             soeknadMottattDato = it.behandlingOpprettet,

@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
@@ -13,6 +14,7 @@ import java.util.*
 data class ManueltOpphoer(
     override val id: UUID,
     override val sak: Long,
+    override val sakType: SakType,
     override val behandlingOpprettet: LocalDateTime,
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
@@ -25,6 +27,7 @@ data class ManueltOpphoer(
 
     constructor(
         sak: Long,
+        sakType: SakType,
         persongalleri: Persongalleri,
         opphoerAarsaker: List<ManueltOpphoerAarsak>,
         fritekstAarsak: String?,
@@ -32,6 +35,7 @@ data class ManueltOpphoer(
     ) : this(
         id = UUID.randomUUID(),
         sak = sak,
+        sakType = sakType,
         behandlingOpprettet = LocalDateTime.now(),
         sistEndret = LocalDateTime.now(),
         status = BehandlingStatus.OPPRETTET,

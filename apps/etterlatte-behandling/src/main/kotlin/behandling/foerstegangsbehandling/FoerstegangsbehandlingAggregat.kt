@@ -2,6 +2,8 @@ package no.nav.etterlatte.behandling.foerstegangsbehandling
 
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
+import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
@@ -34,23 +36,17 @@ class FoerstegangsbehandlingAggregat(
             hendelser: HendelseDao
         ): FoerstegangsbehandlingAggregat {
             logger.info("Oppretter en behandling på $sak")
-            return Foerstegangsbehandling(
-                id = UUID.randomUUID(),
-                sak = sak,
-                behandlingOpprettet = LocalDateTime.now(),
-                sistEndret = LocalDateTime.now(),
+            return OpprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak,
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = LocalDateTime.parse(mottattDato),
-                persongalleri = persongalleri,
-                gyldighetsproeving = null,
-                virkningstidspunkt = null,
-                kommerBarnetTilgode = null,
-                vilkaarUtfall = null
+                persongalleri = persongalleri
             )
                 .also {
-                    behandlinger.opprettFoerstegangsbehandling(it)
-                    hendelser.behandlingOpprettet(it)
-                    logger.info("Opprettet behandling ${it.id} i sak ${it.sak}")
+                    behandlinger.opprettBehandling(it)
+                    hendelser.behandlingOpprettet(it.toBehandlingOpprettet())
+                    logger.info("Opprettet behandling ${it.id} i sak ${it.sakId}")
                 }
                 .let { FoerstegangsbehandlingAggregat(it.id, behandlinger, hendelser) }
         }

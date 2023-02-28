@@ -1,13 +1,14 @@
 package no.nav.etterlatte.adressebeskyttelse
 
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
@@ -54,8 +55,9 @@ class SakServiceAdressebeskyttelseTest {
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
 
         sakServiceAdressebeskyttelse.setAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-        val foerstegangsbehandling = foerstegangsbehandling(
-            sak = sakId,
+        val opprettBehandling = opprettBehandling(
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            sakId = sakId,
             persongalleri = Persongalleri(
                 soeker = "11111",
                 innsender = "11111",
@@ -64,10 +66,10 @@ class SakServiceAdressebeskyttelseTest {
                 gjenlevende = listOf("11111")
             )
         )
-        behandlingRepo.opprettFoerstegangsbehandling(foerstegangsbehandling)
+        behandlingRepo.opprettBehandling(opprettBehandling)
 
         val behandlingHarAdressebeskyttelse =
-            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(foerstegangsbehandling.id.toString())
+            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(opprettBehandling.id.toString())
 
         Assertions.assertEquals(true, behandlingHarAdressebeskyttelse)
 

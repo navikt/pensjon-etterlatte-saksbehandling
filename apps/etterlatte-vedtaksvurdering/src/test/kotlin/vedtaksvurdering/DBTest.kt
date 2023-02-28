@@ -160,6 +160,7 @@ internal class DBTest {
         coEvery { behandling.hentBehandling(uuid, any()) } returns DetaljertBehandling(
             uuid,
             sakId,
+            SakType.BARNEPENSJON,
             LocalDateTime.now(),
             LocalDateTime.now(),
             LocalDateTime.now(),

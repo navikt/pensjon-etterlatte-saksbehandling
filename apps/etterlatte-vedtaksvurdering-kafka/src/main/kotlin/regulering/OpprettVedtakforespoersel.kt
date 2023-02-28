@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.EventNames.FATT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
-import no.nav.etterlatte.rapidsandrivers.EventNames.TIL_UTBETALING
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -55,9 +54,7 @@ internal class OpprettVedtakforespoersel(
                 val attestert = vedtak.attesterVedtak(behandlingId)
                 logger.info("Attestert ${attestert.vedtakId}")
 
-                packet.eventName = TIL_UTBETALING
-                context.publish(packet.toJson())
-                logger.info("Attesterte ${attestert.vedtakId} og sendte $TIL_UTBETALING for sak: $sakId og behandling: $behandlingId") // ktlint-disable
+                logger.info("Attesterte ${attestert.vedtakId} for sak: $sakId og behandling: $behandlingId")
             }
         }
 }

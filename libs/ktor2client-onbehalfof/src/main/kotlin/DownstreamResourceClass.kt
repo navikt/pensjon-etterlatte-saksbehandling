@@ -65,12 +65,11 @@ class DownstreamResourceClient(
 
     suspend fun delete(
         resource: Resource,
-        accessToken: String,
+        bruker: Bruker,
         postBody: String
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient
-            .getOnBehalfOfAccessTokenForResource(scopes, accessToken)
+        return hentTokenFraAD(bruker, scopes)
             .andThen { oboAccessToken ->
                 deleteToDownstreamApi(resource, oboAccessToken, postBody)
             }

@@ -41,7 +41,7 @@ class DownstreamResourceClient(
     private suspend fun hentTokenFraAD(
         bruker: Bruker,
         scopes: List<String>
-    ): Result<AccessToken, ThrowableErrorMessage> = if (bruker.erMaskinTilMaskin()) {
+    ): Result<AccessToken, ThrowableErrorMessage> = if (bruker.erSystembruker()) {
         azureAdClient.getAccessTokenForResource(scopes)
     } else {
         azureAdClient

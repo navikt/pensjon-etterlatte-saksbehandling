@@ -42,19 +42,17 @@ internal class OpprettVedtakforespoersel(
             val behandlingId = packet.behandlingId
             withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
                 val respons = vedtak.upsertVedtak(behandlingId)
-                logger.info("Opprettet vedtak ${respons.vedtakId}")
+                logger.info("Opprettet vedtak ${respons.vedtakId} for sak: $sakId og behandling: $behandlingId")
             }
 
             withFeilhaandtering(packet, context, FATT_VEDTAK) {
                 val fattetVedtak = vedtak.fattVedtak(behandlingId)
-                logger.info("Fattet vedtak ${fattetVedtak.vedtakId}")
+                logger.info("Fattet vedtak ${fattetVedtak.vedtakId} for sak: $sakId og behandling: $behandlingId")
             }
 
             withFeilhaandtering(packet, context, EventNames.ATTESTER) {
                 val attestert = vedtak.attesterVedtak(behandlingId)
-                logger.info("Attestert ${attestert.vedtakId}")
-
-                logger.info("Attesterte ${attestert.vedtakId} for sak: $sakId og behandling: $behandlingId")
+                logger.info("Attesterte vedtak ${attestert.vedtakId} for sak: $sakId og behandling: $behandlingId")
             }
         }
 }

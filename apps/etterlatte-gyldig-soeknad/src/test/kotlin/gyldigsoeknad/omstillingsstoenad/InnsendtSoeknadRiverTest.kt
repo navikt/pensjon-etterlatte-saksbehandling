@@ -28,7 +28,7 @@ internal class InnsendtSoeknadRiverTest {
     }
 
     @Test
-    fun `skal sjekke om søknad om omstillingsstønad er gyldig fremsatt og returnere resultatet av dette`() {
+    fun `skal sjekke om soknad om omstillingsstonad er gyldig fremsatt og returnere resultatet av dette`() {
         val persongalleri = Persongalleri(
             "soeker",
             "innsender"
@@ -38,7 +38,12 @@ internal class InnsendtSoeknadRiverTest {
         val id = UUID.randomUUID()
 
         every { gyldigOmstillingsSoeknadServiceMock.hentPersongalleriFraSoeknad(any()) } returns persongalleri
-        every { gyldigOmstillingsSoeknadServiceMock.vurderGyldighet(persongalleri) } returns gyldighetsResultat
+        every {
+            gyldigOmstillingsSoeknadServiceMock.vurderGyldighet(
+                persongalleri.innsender,
+                persongalleri.avdoed
+            )
+        } returns gyldighetsResultat
         every { behandlingClientMock.skaffSak(any(), any()) } returns 4
         every { behandlingClientMock.initierBehandling(any(), any(), persongalleri) } returns id
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit

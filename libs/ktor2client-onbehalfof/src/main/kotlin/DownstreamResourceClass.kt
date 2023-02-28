@@ -45,7 +45,7 @@ class DownstreamResourceClient(
         azureAdClient.getAccessTokenForResource(scopes)
     } else {
         azureAdClient
-            .getOnBehalfOfAccessTokenForResource(scopes, bruker.accessToken)
+            .getOnBehalfOfAccessTokenForResource(scopes, bruker.accessToken())
     }
 
     suspend fun post(

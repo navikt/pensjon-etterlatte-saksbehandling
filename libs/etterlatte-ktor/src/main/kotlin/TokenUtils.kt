@@ -12,22 +12,6 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
-@Deprecated(
-    "gå heller via accesstokenWrapper for å få støtte for også automatiske behandlinger",
-    ReplaceWith("accesstokenWrapper")
-)
-inline val PipelineContext<*, ApplicationCall>.saksbehandler: Saksbehandler
-    get() = call.principal<TokenValidationContextPrincipal>().let {
-        val navIdent = it?.context?.getJwtToken("azure")
-            ?.jwtTokenClaims?.getClaim(Claims.NAVident)
-            ?: throw Exception("Navident is null in token, probably missing claim NAVident")
-        Saksbehandler(navIdent)
-    }
-
-@Deprecated("bruk heller accesstokenWrapper", ReplaceWith("accesstokenWrapper"))
-inline val PipelineContext<*, ApplicationCall>.accesstoken: String
-    get() = hentAccessToken(call)
-
 fun hentAccessToken(call: ApplicationCall) = call.request.parseAuthorizationHeader().let {
     if (!(it == null || it !is HttpAuthHeader.Single || it.authScheme != "Bearer")) {
         it.blob

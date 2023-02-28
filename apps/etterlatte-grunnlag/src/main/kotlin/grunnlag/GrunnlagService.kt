@@ -98,7 +98,7 @@ class RealGrunnlagService(
         val opplysning: List<Grunnlagsopplysning<JsonNode>> = listOf(
             lagOpplysning(
                 opplysningsType = Opplysningstype.SOESKEN_I_BEREGNINGEN,
-                kilde = Grunnlagsopplysning.Saksbehandler(bruker.saksbehandlerIdentEllerSystemnavn, Instant.now()),
+                kilde = Grunnlagsopplysning.Saksbehandler(bruker.saksbehandlerIdentEllerSystemnavn(), Instant.now()),
                 opplysning = Beregningsgrunnlag(soeskenMedIBeregning).toJsonNode()
             )
         )

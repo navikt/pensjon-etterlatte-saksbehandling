@@ -186,7 +186,7 @@ class VedtaksvurderingService(
             if (it.vilkaarsvurdering == null && it.behandling.type != BehandlingType.MANUELT_OPPHOER) {
                 throw VedtakKanIkkeFattes(v)
             }
-            val saksbehandler = accessToken.saksbehandlerIdentEllerSystemnavn
+            val saksbehandler = accessToken.saksbehandlerIdentEllerSystemnavn()
             val saksbehandlerEnhet: String = accessToken.saksbehandlerEnhet(saksbehandlere)
 
             repository.fattVedtak(saksbehandler, saksbehandlerEnhet, behandlingId)
@@ -219,7 +219,7 @@ class VedtaksvurderingService(
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
         }
-        val saksbehandler = accessToken.saksbehandlerIdentEllerSystemnavn
+        val saksbehandler = accessToken.saksbehandlerIdentEllerSystemnavn()
         val saksbehandlerEnhet: String = accessToken.saksbehandlerEnhet(saksbehandlere)
 
         repository.attesterVedtak(
@@ -266,7 +266,7 @@ class VedtaksvurderingService(
         val vedtakHendelse = VedtakHendelse(
             vedtakId = underkjentVedtak.vedtakId,
             inntruffet = underkjentTid.toNorskTidspunkt(),
-            saksbehandler = accessToken.saksbehandlerIdentEllerSystemnavn,
+            saksbehandler = accessToken.saksbehandlerIdentEllerSystemnavn(),
             kommentar = begrunnelse.kommentar,
             valgtBegrunnelse = begrunnelse.valgtBegrunnelse
         )

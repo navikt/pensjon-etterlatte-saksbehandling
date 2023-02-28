@@ -64,7 +64,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
         post("/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 val vurdertVilkaarDto = call.receive<VurdertVilkaarDto>()
-                val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(bruker.saksbehandlerIdentEllerSystemnavn)
+                val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(bruker.saksbehandlerIdentEllerSystemnavn())
 
                 logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
                 try {
@@ -115,7 +115,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 withBehandlingId { behandlingId ->
                     val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
                     val vurdertResultat = vurdertResultatDto.toVilkaarsvurderingResultat(
-                        bruker.saksbehandlerIdentEllerSystemnavn
+                        bruker.saksbehandlerIdentEllerSystemnavn()
                     )
 
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")

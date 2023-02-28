@@ -1,29 +1,17 @@
 package no.nav.etterlatte.token
 
 sealed class Bruker(
-    open val accessToken: String,
-    val saksbehandler: String?
+    open val accessToken: String
 ) {
-    val saksbehandlerIdentEllerSystemnavn: String =
-        if (erMaskinTilMaskin()) {
-            Fagsaksystem.EY.name
-        } else {
-            saksbehandler!!
-        }
+    abstract fun saksbehandlerIdentEllerSystemnavn(): String
 
     abstract fun erMaskinTilMaskin(): Boolean
-    fun saksbehandlerEnhet(saksbehandlere: Map<String, String>): String {
-        if (erMaskinTilMaskin()) {
-            return Fagsaksystem.EY.name
-        }
 
-        return saksbehandlere[saksbehandler!!]
-            ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
-    }
+    abstract fun saksbehandlerEnhet(saksbehandlere: Map<String, String>): String
 
     companion object {
         private fun erMaskinTilMaskin(oid: String?, sub: String?) = (oid == sub) && (oid != null)
-        fun of(accessToken: String, saksbehandler: String?, oid: String? = null, sub: String? = null): Bruker {
+        fun of(accessToken: String, saksbehandler: String?, oid: String?, sub: String?): Bruker {
             return if (erMaskinTilMaskin(oid = oid, sub = sub)) {
                 System(accessToken, oid!!, sub!!)
             } else if (saksbehandler != null) {
@@ -37,12 +25,21 @@ sealed class Bruker(
     }
 }
 
-data class System(override val accessToken: String, val oid: String, val sub: String) : Bruker(accessToken, null) {
+data class System(override val accessToken: String, val oid: String, val sub: String) : Bruker(accessToken) {
     override fun erMaskinTilMaskin() = true
+
+    override fun saksbehandlerIdentEllerSystemnavn() = Fagsaksystem.EY.name
+
+    override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = Fagsaksystem.EY.name
 }
 
-data class Saksbehandler(override val accessToken: String, val ident: String) : Bruker(accessToken, ident) {
+data class Saksbehandler(override val accessToken: String, val ident: String) : Bruker(accessToken) {
     override fun erMaskinTilMaskin() = false
+
+    override fun saksbehandlerIdentEllerSystemnavn() = ident
+
+    override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = saksbehandlere[ident]
+        ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $ident mangler enhet fra secret")
 }
 
 enum class Claims {

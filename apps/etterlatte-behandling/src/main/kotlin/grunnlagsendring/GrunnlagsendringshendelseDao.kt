@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.libs.common.tidspunkt.tilUTCLocalDateTime
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCTimestamp
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -175,7 +176,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             id = getObject("id") as UUID,
             sakId = getLong("sak_id"),
             type = GrunnlagsendringsType.valueOf(getString("type")),
-            opprettet = getTimestamp("opprettet").toLocalDateTime(),
+            opprettet = getTimestamp("opprettet").tilUTCLocalDateTime(),
             status = GrunnlagsendringStatus.valueOf(getString("status")),
             behandlingId = getObject("behandling_id")?.let { it as UUID },
             hendelseGjelderRolle = Saksrolle.valueOf(getString("hendelse_gjelder_rolle")),

@@ -184,8 +184,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
         sakType = enumValueOf(rs.getString("saktype")),
-        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
-        sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
+        behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
+        sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
         soeknadMottattDato = rs.getTimestamp("soeknad_mottatt_dato").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
@@ -207,7 +207,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
         sakType = enumValueOf(rs.getString("saktype")),
-        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
+        behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -221,7 +221,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
         sakType = enumValueOf(rs.getString("saktype")),
-        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
+        behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -236,7 +236,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
         sakType = enumValueOf(rs.getString("saktype")),
-        behandlingOpprettet = rs.somLocalDateTime("behandling_opprettet"),
+        behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -275,13 +275,13 @@ class BehandlingDao(private val connection: () -> Connection) {
         with(behandling) {
             stmt.setObject(1, id)
             stmt.setLong(2, sakId)
-            stmt.setTimestamp(3, opprettet.somTimestamp())
-            stmt.setTimestamp(4, opprettet.somTimestamp())
+            stmt.setTimestamp(3, opprettet.somTimestampUTC())
+            stmt.setTimestamp(4, opprettet.somTimestampUTC())
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
             stmt.setTimestamp(
                 7,
-                soeknadMottattDato?.somTimestamp()
+                soeknadMottattDato?.somTimestampUTC()
             )
             with(persongalleri) {
                 stmt.setString(8, innsender)
@@ -316,7 +316,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(2, behandling.status.name)
         stmt.setTimestamp(
             3,
-            behandling.sistEndret.somTimestamp()
+            behandling.sistEndret.somTimestampUTC()
         )
         stmt.setObject(4, behandling.id)
         require(stmt.executeUpdate() == 1)
@@ -338,7 +338,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(1, status.name)
         stmt.setTimestamp(
             2,
-            sistEndret.somTimestamp()
+            sistEndret.somTimestampUTC()
         )
         stmt.setObject(3, behandling)
         require(stmt.executeUpdate() == 1)
@@ -426,9 +426,9 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 }
 
-private fun LocalDateTime.somTimestamp() = tilUTCTimestamp()
+private fun LocalDateTime.somTimestampUTC() = tilUTCTimestamp()
 
-private fun ResultSet.somLocalDateTime(kolonne: String) = getTimestamp(kolonne).tilUTCLocalDateTime()
+private fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTimestamp(kolonne).tilUTCLocalDateTime()
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

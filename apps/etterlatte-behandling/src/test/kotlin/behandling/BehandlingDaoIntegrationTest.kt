@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -41,7 +42,6 @@ import org.testcontainers.junit.jupiter.Container
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -451,7 +451,7 @@ internal class BehandlingDaoIntegrationTest {
             ) as? Foerstegangsbehandling
         assertNotNull(behandlingFoerStatusendring)
 
-        val endretTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
+        val endretTidspunkt = Tidspunkt.now().toLocalDatetimeUTC()
         val behandlingMedNyStatus =
             behandlingFoerStatusendring!!.copy(status = BehandlingStatus.VILKAARSVURDERT, sistEndret = endretTidspunkt)
         behandlingRepo.lagreStatus(behandlingMedNyStatus)

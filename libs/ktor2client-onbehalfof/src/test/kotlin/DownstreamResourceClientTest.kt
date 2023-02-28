@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.token.AccessTokenWrapper
+import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -30,7 +31,7 @@ internal class DownstreamResourceClientTest {
         every { runBlocking { azureAdClient.getAccessTokenForResource(any()) } } returns Ok(mockk())
 
         runBlocking {
-            client.get(resource, AccessTokenWrapper(accessToken = "a", oid = "b", sub = "b"))
+            client.get(resource, AccessTokenWrapper(accessToken = "a", oid = "b", sub = "b", saksbehandler = null))
         }
         verify { runBlocking { azureAdClient.getAccessTokenForResource(any()) } }
         verify(exactly = 0) {
@@ -43,7 +44,10 @@ internal class DownstreamResourceClientTest {
         every { runBlocking { azureAdClient.getOnBehalfOfAccessTokenForResource(any(), any()) } } returns Ok(mockk())
 
         runBlocking {
-            client.get(resource, AccessTokenWrapper(accessToken = "a", oid = "b", sub = "c"))
+            client.get(
+                resource,
+                AccessTokenWrapper(accessToken = "a", oid = "b", sub = "c", saksbehandler = Saksbehandler("s1"))
+            )
         }
         verify { runBlocking { azureAdClient.getOnBehalfOfAccessTokenForResource(any(), "a") } }
         verify(exactly = 0) { runBlocking { azureAdClient.getAccessTokenForResource(any()) } }

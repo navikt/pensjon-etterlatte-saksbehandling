@@ -13,6 +13,7 @@ import java.util.*
 interface VedtakService {
     fun harLoependeYtelserFra(sakId: Long, dato: LocalDate): LoependeYtelseDTO
     fun upsertVedtak(behandlingId: UUID): Vedtak
+    fun fattVedtak(behandlingId: UUID): Vedtak
 }
 
 class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: String) : VedtakService {
@@ -24,5 +25,10 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
     override fun upsertVedtak(behandlingId: UUID): Vedtak =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/upsert/$behandlingId").body()
+        }
+
+    override fun fattVedtak(behandlingId: UUID): Vedtak =
+        runBlocking {
+            vedtakKlient.post("$url/api/vedtak/fattvedtak/$behandlingId").body()
         }
 }

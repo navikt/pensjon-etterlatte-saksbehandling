@@ -11,27 +11,28 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.token.AccessTokenWrapper
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BehandlingKlient {
-    suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
-    suspend fun hentSak(sakId: Long, accessToken: String): Sak
+    suspend fun hentBehandling(behandlingId: UUID, accessToken: AccessTokenWrapper): DetaljertBehandling
+    suspend fun hentSak(sakId: Long, accessToken: AccessTokenWrapper): Sak
 
     suspend fun fattVedtak(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         vedtakHendelse: VedtakHendelse? = null
     ): Boolean
     suspend fun attester(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         vedtakHendelse: VedtakHendelse? = null
     ): Boolean
     suspend fun underkjenn(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         vedtakHendelse: VedtakHendelse? = null
     ): Boolean
 }
@@ -48,7 +49,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    override suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling {
+    override suspend fun hentBehandling(behandlingId: UUID, accessToken: AccessTokenWrapper): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
@@ -68,7 +69,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun hentSak(sakId: Long, accessToken: String): Sak {
+    override suspend fun hentSak(sakId: Long, accessToken: AccessTokenWrapper): Sak {
         logger.info("Henter sak med sakId=$sakId")
         try {
             return downstreamResourceClient
@@ -90,7 +91,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun fattVedtak(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         vedtakHendelse: VedtakHendelse?
     ): Boolean {
         return if (vedtakHendelse == null) {
@@ -102,7 +103,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun attester(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         vedtakHendelse: VedtakHendelse?
     ): Boolean {
         return if (vedtakHendelse == null) {
@@ -114,7 +115,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun underkjenn(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         vedtakHendelse: VedtakHendelse?
     ): Boolean {
         return if (vedtakHendelse == null) {
@@ -126,7 +127,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     private suspend fun statussjekkForBehandling(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         status: BehandlingStatus
     ): Boolean {
         logger.info("Sjekker behandling med behandlingId=$behandlingId til status ${status.name} (commit=false)")
@@ -150,7 +151,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     private suspend fun commitStatussjekkForBehandling(
         behandlingId: UUID,
-        accessToken: String,
+        accessToken: AccessTokenWrapper,
         status: BehandlingStatus,
         vedtakHendelse: VedtakHendelse
     ): Boolean {

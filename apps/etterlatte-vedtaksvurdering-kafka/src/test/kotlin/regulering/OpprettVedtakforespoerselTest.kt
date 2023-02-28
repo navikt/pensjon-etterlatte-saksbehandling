@@ -55,4 +55,19 @@ internal class OpprettVedtakforespoerselTest {
         val sendtMelding = inspector.inspektør.message(0)
         Assertions.assertEquals(TIL_UTBETALING, sendtMelding.get(EVENT_NAME_KEY).asText())
     }
+
+    @Test
+    fun `skal baade opprette vedtak og fatte det`() {
+        val behandlingId = UUID.randomUUID()
+        val melding = genererOpprettVedtakforespoersel(behandlingId)
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        val inspector = TestRapid().apply { OpprettVedtakforespoersel(this, vedtakServiceMock) }
+
+        inspector.sendTestMessage(melding.toJson())
+        val sendtMelding = inspector.inspektør.message(0)
+        Assertions.assertEquals(TIL_UTBETALING, sendtMelding.get(EVENT_NAME_KEY).asText())
+
+        verify { vedtakServiceMock.upsertVedtak(behandlingId) }
+        verify { vedtakServiceMock.fattVedtak(behandlingId) }
+    }
 }

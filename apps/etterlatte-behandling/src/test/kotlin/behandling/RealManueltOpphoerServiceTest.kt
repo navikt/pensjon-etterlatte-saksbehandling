@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.Instant
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class RealManueltOpphoerServiceTest {
 
@@ -59,11 +59,11 @@ internal class RealManueltOpphoerServiceTest {
 
     @Test
     fun `skal hente manuelt opphoer`() {
-        val sak = 1L
+        val sakId = 1L
         val id = UUID.randomUUID()
         val behandlingerMock = mockk<BehandlingDao> {
             every { hentBehandling(id = id, type = BehandlingType.MANUELT_OPPHOER) } returns manueltOpphoer(
-                sak = sak
+                sakId = sakId
             )
         }
         val hendelserMock = mockk<HendelseDao>() {
@@ -76,7 +76,7 @@ internal class RealManueltOpphoerServiceTest {
             hendelserMock
         )
         val manueltOpphoer = sut.hentManueltOpphoer(id)
-        assertEquals(sak, manueltOpphoer?.sak)
+        assertEquals(sakId, manueltOpphoer!!.sak.id)
     }
 
     @Test
@@ -97,7 +97,7 @@ internal class RealManueltOpphoerServiceTest {
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
                 foerstegangsbehandling(
-                    sak = sak,
+                    sakId = sak,
                     virkningstidspunkt = Virkningstidspunkt(
                         dato = YearMonth.of(2022, 8),
                         kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Instant.now()),
@@ -109,7 +109,7 @@ internal class RealManueltOpphoerServiceTest {
             every { opprettBehandling(capture(opprettBehandling_slot)) } just runs
             every { hentBehandling(any()) } answers {
                 manueltOpphoer(
-                    sak = manueltOpphoerRequest.sak,
+                    sakId = manueltOpphoerRequest.sak,
                     behandlingId = firstArg(),
                     opphoerAarsaker = manueltOpphoerRequest.opphoerAarsaker,
                     fritekstAarsak = manueltOpphoerRequest.fritekstAarsak
@@ -161,7 +161,7 @@ internal class RealManueltOpphoerServiceTest {
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(any()) } returns listOf(
                 foerstegangsbehandling(
-                    sak = sakId,
+                    sakId = sakId,
                     status = BehandlingStatus.IVERKSATT,
                     persongalleri = Persongalleri(
                         soeker = brukerFnr
@@ -175,7 +175,7 @@ internal class RealManueltOpphoerServiceTest {
                     )
                 ),
                 revurdering(
-                    sak = sakId,
+                    sakId = sakId,
                     status = BehandlingStatus.IVERKSATT,
                     persongalleri = Persongalleri(soeker = brukerFnr),
                     virkningstidspunkt = Virkningstidspunkt(
@@ -186,7 +186,7 @@ internal class RealManueltOpphoerServiceTest {
                     revurderingAarsak = RevurderingAarsak.SOEKER_DOD
                 ),
                 revurdering(
-                    sak = sakId,
+                    sakId = sakId,
                     status = BehandlingStatus.VILKAARSVURDERT,
                     persongalleri = Persongalleri(soeker = brukerFnr),
                     virkningstidspunkt = Virkningstidspunkt(
@@ -200,7 +200,7 @@ internal class RealManueltOpphoerServiceTest {
             every { opprettBehandling(capture(opprettetManueltOpphoerSlot)) } just runs
             every { hentBehandling(any()) } answers {
                 manueltOpphoer(
-                    sak = manueltOpphoerRequest.sak,
+                    sakId = manueltOpphoerRequest.sak,
                     behandlingId = firstArg(),
                     opphoerAarsaker = manueltOpphoerRequest.opphoerAarsaker,
                     fritekstAarsak = manueltOpphoerRequest.fritekstAarsak
@@ -238,7 +238,7 @@ internal class RealManueltOpphoerServiceTest {
         val alleBehandlingerISak_sak = slot<Long>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
-                manueltOpphoer(sak = sak)
+                manueltOpphoer(sakId = sak)
             )
         }
         val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
@@ -269,7 +269,7 @@ internal class RealManueltOpphoerServiceTest {
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(sak) } returns listOf(
                 foerstegangsbehandling(
-                    sak = sak,
+                    sakId = sak,
                     status = BehandlingStatus.FATTET_VEDTAK,
                     virkningstidspunkt = Virkningstidspunkt(
                         dato = YearMonth.of(2020, 8),
@@ -316,7 +316,7 @@ internal class RealManueltOpphoerServiceTest {
         val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val hendelserMock = mockk<HendelseDao>()
         val opphoer = manueltOpphoer(
-            sak = sakId,
+            sakId = sakId,
             behandlingId = manueltOpphoerId,
             persongalleri = Persongalleri(
                 soeker = soeker,
@@ -331,10 +331,10 @@ internal class RealManueltOpphoerServiceTest {
             every { hentBehandling(manueltOpphoerId, BehandlingType.MANUELT_OPPHOER) } returns opphoer
             every { alleBehandlingerISak(sakId) } returns listOf(
                 opphoer,
-                foerstegangsbehandling(sak = sakId, status = BehandlingStatus.BEREGNET),
-                foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT),
-                foerstegangsbehandling(sak = sakId, status = BehandlingStatus.AVBRUTT),
-                foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT)
+                foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.BEREGNET),
+                foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.IVERKSATT),
+                foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.AVBRUTT),
+                foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.IVERKSATT)
             )
         }
         val service = RealManueltOpphoerService(

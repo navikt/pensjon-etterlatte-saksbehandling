@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 enum class BehandlingHendelseType {
@@ -72,7 +72,6 @@ class BehandlingsHendelser(
     private fun handleEnHendelse(hendelse: Pair<UUID, BehandlingHendelseType>) {
         inTransaction {
             val behandling = requireNotNull(behandlingDao.hentBehandling(hendelse.first))
-            val sak = requireNotNull(sakService.finnSak(behandling.sak))
 
             rapid.publiser(
                 hendelse.first.toString(),
@@ -83,7 +82,7 @@ class BehandlingsHendelser(
                         CORRELATION_ID_KEY to getCorrelationId(),
                         BehandlingGrunnlagEndret.behandlingObjectKey to behandling,
                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak,
-                        BehandlingGrunnlagEndret.sakObjectKey to sak,
+                        BehandlingGrunnlagEndret.sakObjectKey to behandling.sak,
                         BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet
                     )
                 ).also {

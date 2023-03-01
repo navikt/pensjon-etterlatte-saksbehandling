@@ -36,12 +36,13 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 fun opprettBehandling(
     type: BehandlingType,
@@ -71,7 +72,7 @@ fun opprettBehandling(
 
 fun foerstegangsbehandling(
     id: UUID = UUID.randomUUID(),
-    sak: Long,
+    sakId: Long,
     behandlingOpprettet: LocalDateTime = LocalDateTime.now(),
     sistEndret: LocalDateTime = LocalDateTime.now(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -83,8 +84,11 @@ fun foerstegangsbehandling(
     vilkaarStatus: VilkaarsvurderingUtfall? = null
 ) = Foerstegangsbehandling(
     id = id,
-    sak = sak,
-    sakType = SakType.BARNEPENSJON,
+    sak = Sak(
+        ident = persongalleri.soeker,
+        sakType = SakType.BARNEPENSJON,
+        id = sakId
+    ),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -98,7 +102,7 @@ fun foerstegangsbehandling(
 
 fun revurdering(
     id: UUID = UUID.randomUUID(),
-    sak: Long,
+    sakId: Long,
     behandlingOpprettet: LocalDateTime = LocalDateTime.now(),
     sistEndret: LocalDateTime = LocalDateTime.now(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -109,8 +113,11 @@ fun revurdering(
     virkningstidspunkt: Virkningstidspunkt? = null
 ) = Revurdering(
     id = id,
-    sak = sak,
-    sakType = SakType.BARNEPENSJON,
+    sak = Sak(
+        ident = persongalleri.soeker,
+        sakType = SakType.BARNEPENSJON,
+        id = sakId
+    ),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -122,7 +129,7 @@ fun revurdering(
 )
 
 fun manueltOpphoer(
-    sak: Long = 1,
+    sakId: Long = 1,
     behandlingId: UUID = UUID.randomUUID(),
     persongalleri: Persongalleri = persongalleri(),
     opphoerAarsaker: List<ManueltOpphoerAarsak> = listOf(
@@ -133,8 +140,11 @@ fun manueltOpphoer(
     virkningstidspunkt: Virkningstidspunkt? = null
 ) = ManueltOpphoer(
     id = behandlingId,
-    sak = sak,
-    sakType = SakType.BARNEPENSJON,
+    sak = Sak(
+        ident = persongalleri.soeker,
+        sakType = SakType.BARNEPENSJON,
+        id = sakId
+    ),
     behandlingOpprettet = LocalDateTime.now(),
     sistEndret = LocalDateTime.now(),
     status = BehandlingStatus.OPPRETTET,

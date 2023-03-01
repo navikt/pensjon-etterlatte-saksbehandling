@@ -22,7 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 interface ManueltOpphoerService {
     fun hentManueltOpphoer(behandling: UUID): ManueltOpphoer?
@@ -64,7 +64,7 @@ class RealManueltOpphoerService(
         inTransaction {
             val opphoer = behandlinger.hentBehandling(behandling, BehandlingType.MANUELT_OPPHOER) as ManueltOpphoer?
                 ?: return@inTransaction null
-            val andreBehandlinger = behandlinger.alleBehandlingerISak(opphoer.sak)
+            val andreBehandlinger = behandlinger.alleBehandlingerISak(opphoer.sak.id)
                 .filter { it.id != behandling && it.status == BehandlingStatus.IVERKSATT }
             opphoer to andreBehandlinger
         }
@@ -88,7 +88,7 @@ class RealManueltOpphoerService(
             when (forrigeBehandling) {
                 is Foerstegangsbehandling, is Revurdering, is Regulering -> OpprettBehandling(
                     type = BehandlingType.MANUELT_OPPHOER,
-                    sakId = forrigeBehandling.sak,
+                    sakId = forrigeBehandling.sak.id,
                     status = BehandlingStatus.OPPRETTET,
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,

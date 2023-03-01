@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.EventNames.BEREGN
 import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.OMBEREGNING_ID_KEY
 import rapidsandrivers.omberegningId
+import rapidsandrivers.withFeilhaandtering
 import java.util.*
 
 internal class OmberegningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: Behandling) :
@@ -37,17 +39,17 @@ internal class OmberegningsHendelser(rapidsConnection: RapidsConnection, private
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
-            logger.info("Mottatt omberegningshendelse")
-            try {
+            withFeilhaandtering(packet, context, OMBEREGNINGSHENDELSE) {
+                logger.info("Mottatt omberegningshendelse")
+
                 val hendelse: Omberegningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                 runBlocking {
                     val behandling = behandlinger.opprettOmberegning(hendelse).body<UUID>()
                     packet.omberegningId = behandling
+                    packet.eventName = BEREGN
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")
-            } catch (e: Exception) {
-                logger.error("Feil oppstod under lesing / sending av hendelse til behandling ", e)
             }
         }
     }

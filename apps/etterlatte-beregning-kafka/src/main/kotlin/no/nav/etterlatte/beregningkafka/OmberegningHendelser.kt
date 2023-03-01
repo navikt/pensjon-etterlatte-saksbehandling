@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
+import no.nav.etterlatte.rapidsandrivers.EventNames.BEREGN
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -18,6 +18,7 @@ import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.OMBEREGNING_ID_KEY
 import rapidsandrivers.omberegningId
+import rapidsandrivers.withFeilhaandtering
 
 internal class OmberegningHendelser(
     rapidsConnection: RapidsConnection,
@@ -30,7 +31,7 @@ internal class OmberegningHendelser(
     init {
         logger.info("initierer rapid for omberegninghendelser")
         River(rapidsConnection).apply {
-            eventName(OMBEREGNINGSHENDELSE)
+            eventName(BEREGN)
 
             correlationId()
             validate { it.requireKey(OMBEREGNING_ID_KEY) }
@@ -41,8 +42,8 @@ internal class OmberegningHendelser(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
-            logger.info("Mottatt omberegninghendelse")
-            try {
+            withFeilhaandtering(packet, context, BEREGN) {
+                logger.info("Mottatt omberegninghendelse")
                 val omberegningsId = packet.omberegningId
                 runBlocking {
                     val beregning = beregningService.opprettOmberegning(omberegningsId).body<BeregningDTO>()
@@ -51,8 +52,6 @@ internal class OmberegningHendelser(
                     context.publish(packet.toJson())
                 }
                 logger.info("Publiserte oppdatert omberegningshendelse")
-            } catch (e: Exception) {
-                logger.error("Feil oppstod under lesing / sending av hendelse til beregning ", e)
             }
         }
     }

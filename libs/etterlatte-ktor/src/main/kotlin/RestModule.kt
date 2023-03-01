@@ -12,7 +12,6 @@ import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
@@ -28,7 +27,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import no.nav.etterlatte.token.System
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
@@ -36,16 +35,7 @@ import java.util.*
 
 fun Route.adresseBeskyttelseRoute(ressursHarAdressebeskyttelse: (id: String) -> Boolean = { false }) {
     intercept(Call) {
-        val claims = call.principal<TokenValidationContextPrincipal>()
-            ?.context
-            ?.getJwtToken("azure")
-            ?.jwtTokenClaims
-
-        val oid = claims?.get("oid").toString()
-        val sub = claims?.get("sub").toString()
-
-        val isMaskinToMaskinRequest: Boolean = oid == sub
-        if (isMaskinToMaskinRequest) {
+        if (bruker is System) {
             return@intercept
         }
 

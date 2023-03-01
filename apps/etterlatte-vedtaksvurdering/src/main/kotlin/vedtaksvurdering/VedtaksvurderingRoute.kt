@@ -17,10 +17,10 @@ import java.time.LocalDate
 import java.util.*
 
 fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
-    route("api") {
+    route("/api/vedtak") {
         val logger = application.log
 
-        get("behandlinger/{behandlingId}/vedtak") {
+        get("/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 val vedtaksresultat = service.hentVedtak(behandlingId)
                 if (vedtaksresultat == null) {
@@ -31,7 +31,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        get("behandlinger/{behandlingId}/fellesvedtak") {
+        get("/{behandlingId}/fellesvedtak") {
             withBehandlingId { behandlingId ->
                 val vedtaksresultat = service.hentFellesvedtak(
                     behandlingId = behandlingId
@@ -44,7 +44,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        get("vedtak/sammendrag/{behandlingId}") {
+        get("/{behandlingId}/sammendrag/") {
             withBehandlingId { behandlingId ->
                 val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendrag()
                 if (vedtaksresultat == null) {
@@ -55,7 +55,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        post("vedtak/upsert/{behandlingId}") {
+        post("/{behandlingId}/upsert") {
             withBehandlingId { behandlingId ->
                 val nyttVedtak = service.opprettEllerOppdaterVedtak(
                     behandlingId = behandlingId,
@@ -66,7 +66,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        post("vedtak/attester/{behandlingId}") {
+        post("/{behandlingId}/attester") {
             withBehandlingId { behandlingId ->
                 val attestert = service.attesterVedtak(behandlingId, bruker)
 
@@ -74,7 +74,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        post("vedtak/fattvedtak/{behandlingId}") {
+        post("/{behandlingId}/fattvedtak") {
             withBehandlingId { behandlingId ->
                 val fattetVedtak = service.fattVedtak(behandlingId, bruker)
 
@@ -82,7 +82,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        post("vedtak/underkjenn/{behandlingId}") {
+        post("/{behandlingId}/underkjenn") {
             val behandlingId = UUID.fromString(call.parameters["behandlingId"])
             val begrunnelse = call.receive<UnderkjennVedtakClientRequest>()
             val underkjentVedtak = service.underkjennVedtak(
@@ -94,7 +94,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             call.respond(underkjentVedtak)
         }
 
-        get("vedtak/loepende/{sakId}") {
+        get("/loepende/{sakId}") {
             val sakId = call.parameters["sakId"]?.toLong() ?: return@get call.respond(
                 BadRequest,
                 "Sak ID må sendes med som et tall i requesten"

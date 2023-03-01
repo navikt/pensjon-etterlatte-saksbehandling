@@ -25,16 +25,16 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
 
     override fun upsertVedtak(behandlingId: UUID): Vedtak =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/upsert/$behandlingId").body()
+            vedtakKlient.post("$url/api/vedtak/$behandlingId/upsert").body()
         }
 
     override fun fattVedtak(behandlingId: UUID): Vedtak =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/fattvedtak/$behandlingId").body()
+            vedtakKlient.post("$url/api/vedtak/$behandlingId/fattvedtak").body()
         }
 
     override fun attesterVedtak(behandlingId: UUID): Vedtak =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/attester/$behandlingId").body()
+            vedtakKlient.post("$url/api/vedtak/$behandlingId/attester").body()
         }
 }

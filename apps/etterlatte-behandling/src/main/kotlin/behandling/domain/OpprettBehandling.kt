@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -22,7 +23,8 @@ data class OpprettBehandling(
     val virkningstidspunkt: Virkningstidspunkt? = null,
     val revurderingsAarsak: RevurderingAarsak? = null,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
-    val fritekstAarsak: String? = null
+    val fritekstAarsak: String? = null,
+    val prosesstype: Prosesstype? = null
 ) {
     val id: UUID = UUID.randomUUID()
     val opprettet: LocalDateTime = LocalDateTime.now()

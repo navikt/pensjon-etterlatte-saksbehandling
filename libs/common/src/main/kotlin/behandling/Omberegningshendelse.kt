@@ -7,5 +7,6 @@ data class Omberegningshendelse(
     val sakId: Long,
     val fradato: LocalDate,
     val aarsak: RevurderingAarsak,
-    val omberegningsId: UUID? = null
+    val omberegningsId: UUID? = null,
+    val prosesstype: Prosesstype
 )

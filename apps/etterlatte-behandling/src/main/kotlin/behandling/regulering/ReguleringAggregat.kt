@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -31,7 +32,8 @@ class ReguleringAggregat(
             forrigeBehandling: Behandling,
             fradato: LocalDate,
             behandlinger: BehandlingDao,
-            hendelser: HendelseDao
+            hendelser: HendelseDao,
+            prosesstype: Prosesstype
         ): ReguleringAggregat {
             logger.info("Oppretter en behandling på $sak")
             return OpprettBehandling(
@@ -42,7 +44,8 @@ class ReguleringAggregat(
                 kommerBarnetTilgode = forrigeBehandling.kommerBarnetTilgode,
                 vilkaarUtfall = forrigeBehandling.vilkaarUtfall,
                 virkningstidspunkt = fradato.tilVirkningstidspunkt("Regulering"),
-                revurderingsAarsak = RevurderingAarsak.GRUNNBELOEPREGULERING
+                revurderingsAarsak = RevurderingAarsak.GRUNNBELOEPREGULERING,
+                prosesstype = prosesstype
             )
                 .also {
                     behandlinger.opprettBehandling(it)

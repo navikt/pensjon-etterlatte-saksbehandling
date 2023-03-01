@@ -1,8 +1,9 @@
 package no.nav.etterlatte.behandling.omberegning
 
 import no.nav.etterlatte.behandling.GenerellBehandlingService
-import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
+import no.nav.etterlatte.behandling.regulering.ReguleringFactory
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import java.time.LocalDate
 import java.util.*
 
@@ -12,7 +13,8 @@ class OmberegningService(
 ) {
     fun opprettOmberegning(
         sakId: Long,
-        fradato: LocalDate
+        fradato: LocalDate,
+        prosesstype: Prosesstype
     ): UUID {
         val forrigeBehandling = behandlingService.hentBehandlingerISak(sakId)
             .maxByOrNull { it.behandlingOpprettet }
@@ -21,7 +23,8 @@ class OmberegningService(
             reguleringFactory.opprettRegulering(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
-                fradato = fradato
+                fradato = fradato,
+                prosesstype = prosesstype
             )
         }.lagretBehandling.id
     }

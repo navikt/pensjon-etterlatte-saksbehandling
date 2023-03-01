@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.revurdering
+package no.nav.etterlatte.behandling.regulering
 
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking

@@ -21,7 +21,6 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
     private fun aktuelleStatuserForRolleTilSaksbehandler(roller: List<Rolle>) = roller.flatMap {
         when (it) {
             Rolle.SAKSBEHANDLER -> BehandlingStatus.kanEndres()
-
             Rolle.ATTESTANT -> listOf(BehandlingStatus.FATTET_VEDTAK)
         }
     }.distinct()

@@ -170,6 +170,26 @@ class TestBeanFactory(
     private val dataSource: DataSource by lazy { DataSourceBuilder.createDataSource(jdbcUrl, username, password) }
     override fun dataSource(): DataSource = dataSource
 
+    /**
+     * Fjerner all data i databasen og reset:er sequences sån at hver
+     * test starter i samme tilstand.
+     **/
+    fun resetDatabase() {
+        dataSource.connection.use {
+            it.prepareStatement(
+                """
+                TRUNCATE behandling CASCADE;
+                TRUNCATE behandlinghendelse CASCADE;
+                TRUNCATE grunnlagsendringshendelse CASCADE;
+                TRUNCATE sak CASCADE;
+                
+                ALTER SEQUENCE behandlinghendelse_id_seq RESTART WITH 1;
+                ALTER SEQUENCE sak_id_seq RESTART WITH 1;
+                """.trimIndent()
+            ).execute()
+        }
+    }
+
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
 
     override fun vedtakKlient(): VedtakKlient {

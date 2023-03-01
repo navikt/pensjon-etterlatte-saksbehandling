@@ -1,9 +1,9 @@
-package no.nav.etterlatte.behandling.revurdering
+package no.nav.etterlatte.behandling.regulering
 
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.regulering.ReguleringAggregat
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import java.time.LocalDate
 import java.util.*
 
@@ -14,13 +14,15 @@ class ReguleringFactory(private val behandlinger: BehandlingDao, private val hen
     fun opprettRegulering(
         sakId: Long,
         forrigeBehandling: Behandling,
-        fradato: LocalDate
+        fradato: LocalDate,
+        prosesstype: Prosesstype
     ): ReguleringAggregat =
         ReguleringAggregat.opprettRegulering(
             sakId,
             forrigeBehandling,
             fradato,
             behandlinger,
-            hendelser
+            hendelser,
+            prosesstype
         )
 }

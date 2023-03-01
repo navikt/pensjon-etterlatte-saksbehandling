@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -172,7 +173,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
                 WHERE status not in (${
-                BehandlingStatus.skalIkkeOmberegnesVedGRegulering().joinToString(", ") { "'$it'" }
+            BehandlingStatus.skalIkkeOmberegnesVedGRegulering().joinToString(", ") { "'$it'" }
             })
             """.trimIndent()
         )
@@ -227,7 +228,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
         vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
-        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) }
+        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+        prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
     )
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
@@ -266,8 +268,8 @@ class BehandlingDao(private val connection: () -> Connection) {
                 """
                     INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                     soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt,
-                    kommer_barnet_tilgode, vilkaar_utfall, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    kommer_barnet_tilgode, vilkaar_utfall, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(behandling) {
@@ -297,6 +299,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setString(16, revurderingsAarsak?.name)
             stmt.setString(17, opphoerAarsaker?.toJson())
             stmt.setString(18, fritekstAarsak)
+            stmt.setString(19, prosesstype?.toString())
         }
         require(stmt.executeUpdate() == 1)
     }

@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
@@ -28,7 +30,6 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 
@@ -83,7 +84,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             sakId = sakid,
             type = GrunnlagsendringsType.DOEDSFALL,
             fnr = grunnlagsinformasjon.avdoedFnr,
-            opprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
+            opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             samsvarMellomPdlOgGrunnlag = samsvarDoedsdatoer(
                 grunnlagsinformasjon.doedsdato,
                 grunnlagsinformasjon.doedsdato
@@ -155,31 +156,31 @@ internal class GrunnlagsendringshendelseDaoTest {
         listOf(
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
-                opprettet = LocalDateTime.now(),
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
                 samsvarMellomPdlOgGrunnlag = null
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
-                opprettet = LocalDateTime.now().minusMinutes(30),
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
                 fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
                 samsvarMellomPdlOgGrunnlag = null
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
-                opprettet = LocalDateTime.now().minusHours(1), // eldre enn en time
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusHours(1), // eldre enn en time
                 fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
                 samsvarMellomPdlOgGrunnlag = null
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
-                opprettet = LocalDateTime.now().minusDays(4), // eldre enn en time
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4), // eldre enn en time
                 fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
                 samsvarMellomPdlOgGrunnlag = null
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
-                opprettet = LocalDateTime.now().minusYears(1), // eldre enn en time
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1), // eldre enn en time
                 fnr = grunnlagsinformasjonDoedshendelse().avdoedFnr,
                 samsvarMellomPdlOgGrunnlag = null
             )
@@ -192,7 +193,13 @@ internal class GrunnlagsendringshendelseDaoTest {
         assertAll(
             "henter kun grunnlagsendringshendelser som er eldre enn 1 time",
             { assertEquals(3, hendelserEldreEnn1Time.size) },
-            { assertTrue { hendelserEldreEnn1Time.all { it.opprettet <= LocalDateTime.now().minusHours(1) } } }
+            {
+                assertTrue {
+                    hendelserEldreEnn1Time.all {
+                        it.opprettet <= Tidspunkt.now().toLocalDatetimeUTC().minusHours(1)
+                    }
+                }
+            }
         )
     }
 

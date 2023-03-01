@@ -8,15 +8,15 @@ import java.time.ZoneOffset
 
 val norskTidssone: ZoneId = ZoneId.of("Europe/Oslo")
 
-val standardTidssone = ZoneOffset.UTC
+val standardTidssoneUTC = ZoneOffset.UTC
 
-fun LocalDateTime.tilInstant() = toInstant(standardTidssone)
+fun LocalDateTime.tilInstant() = toInstant(standardTidssoneUTC)
 
-fun Instant.tilZonedDateTime() = atZone(standardTidssone)
+fun Instant.tilZonedDateTime() = atZone(standardTidssoneUTC)
 
-fun Timestamp.tilZonedDateTime() = toLocalDateTime().atZone(standardTidssone)
+fun Timestamp.tilZonedDateTime() = toLocalDateTime().atZone(standardTidssoneUTC)
 
-fun LocalDateTime.tilSystemDefaultTimestamp() =
-    Timestamp.from(this.atZone(ZoneId.systemDefault()).toTidspunkt().instant)
+fun LocalDateTime.tilUTCTimestamp() =
+    Timestamp.from(this.atZone(standardTidssoneUTC).toTidspunkt().instant)
 
-fun Timestamp.tilSystemDefaultLocalDateTime() = toTidspunkt().instant.atZone(ZoneId.systemDefault()).toLocalDateTime()
+fun Timestamp.tilUTCLocalDateTime() = toTidspunkt().instant.atZone(standardTidssoneUTC).toLocalDateTime()

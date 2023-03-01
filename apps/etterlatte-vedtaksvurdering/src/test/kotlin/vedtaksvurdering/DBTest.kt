@@ -13,7 +13,9 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -30,7 +32,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -151,7 +152,7 @@ internal class DBTest {
             uuid,
             Beregningstype.BP,
             listOf(),
-            LocalDateTime.now().toTidspunkt(
+            Tidspunkt.now().toLocalDatetimeUTC().toTidspunkt(
                 norskTidssone
             ),
             Metadata(1L, 1L)
@@ -161,9 +162,9 @@ internal class DBTest {
             uuid,
             sakId,
             SakType.BARNEPENSJON,
-            LocalDateTime.now(),
-            LocalDateTime.now(),
-            LocalDateTime.now(),
+            Tidspunkt.now().toLocalDatetimeUTC(),
+            Tidspunkt.now().toLocalDatetimeUTC(),
+            Tidspunkt.now().toLocalDatetimeUTC(),
             null,
             "1231245",
             null,

@@ -29,7 +29,6 @@ import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -210,7 +209,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             with(grunnlagsinformasjonDoedshendelse()) {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
-                    opprettet = LocalDateTime.now(),
+                    opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                     fnr = this.avdoedFnr,
                     samsvarMellomPdlOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
                 )
@@ -218,7 +217,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             with(grunnlagsinformasjonDoedshendelse()) {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
-                    opprettet = LocalDateTime.now().minusMinutes(30),
+                    opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
                     fnr = this.avdoedFnr,
                     samsvarMellomPdlOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
                 )
@@ -230,7 +229,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             ) {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
-                    opprettet = LocalDateTime.now().minusDays(4),
+                    opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4),
                     fnr = this.avdoedFnr,
                     samsvarMellomPdlOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
                 )
@@ -242,7 +241,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             ) {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
-                    opprettet = LocalDateTime.now().minusYears(1),
+                    opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
                     fnr = this.avdoedFnr,
                     samsvarMellomPdlOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato)
                 )

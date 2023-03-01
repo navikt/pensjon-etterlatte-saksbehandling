@@ -11,6 +11,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.getClientAccessToken
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
@@ -20,7 +22,6 @@ import no.nav.etterlatte.testdata.JsonMessage
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.usernameFraToken
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -235,7 +236,7 @@ fun opprettSkjemaInfo(
             gjenlevendeFnr
         )
     }
-    val mottatt_dato = LocalDateTime.now()
+    val mottatt_dato = Tidspunkt.now().toLocalDatetimeUTC()
     return """
     {
       "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",

@@ -8,6 +8,8 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.util.*
@@ -27,7 +29,7 @@ data class OpprettBehandling(
     val prosesstype: Prosesstype? = null
 ) {
     val id: UUID = UUID.randomUUID()
-    val opprettet: LocalDateTime = LocalDateTime.now()
+    val opprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC()
 }
 
 data class BehandlingOpprettet(

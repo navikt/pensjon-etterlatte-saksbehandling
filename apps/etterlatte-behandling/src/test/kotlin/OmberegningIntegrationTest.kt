@@ -19,6 +19,8 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidLocalDateTime
 import no.nav.etterlatte.sak.Sak
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -28,7 +30,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -86,7 +87,7 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                     BehandlingsBehov(
                         1,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                        LocalDateTime.now().toString()
+                        Tidspunkt.now().toNorskTidLocalDateTime().toString()
                     )
                 )
             }.let {

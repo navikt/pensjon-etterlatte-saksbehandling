@@ -20,8 +20,10 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCLocalDateTime
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCTimestamp
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -174,7 +176,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
                 WHERE status not in (${
-            BehandlingStatus.skalIkkeOmberegnesVedGRegulering().joinToString(", ") { "'$it'" }
+                BehandlingStatus.skalIkkeOmberegnesVedGRegulering().joinToString(", ") { "'$it'" }
             })
             """.trimIndent()
         )
@@ -186,7 +188,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
-        soeknadMottattDato = rs.getTimestamp("soeknad_mottatt_dato").toLocalDateTime(),
+        soeknadMottattDato = rs.somLocalDateTimeUTC("soeknad_mottatt_dato"),
         persongalleri = hentPersongalleri(rs),
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
@@ -207,7 +209,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         id = rs.getObject("id") as UUID,
         sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
-        sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
+        sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
@@ -220,7 +222,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         id = rs.getObject("id") as UUID,
         sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
-        sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
+        sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
@@ -234,7 +236,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         id = rs.getObject("id") as UUID,
         sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
-        sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
+        sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
@@ -363,7 +365,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     fun avbrytBehandling(behandlingId: UUID) = this.lagreStatus(
         behandling = behandlingId,
         status = BehandlingStatus.AVBRUTT,
-        sistEndret = LocalDateTime.now()
+        sistEndret = Tidspunkt.now().toLocalDatetimeUTC()
     )
 
     fun lagreNyttVirkningstidspunkt(behandlingId: UUID, virkningstidspunkt: Virkningstidspunkt) {

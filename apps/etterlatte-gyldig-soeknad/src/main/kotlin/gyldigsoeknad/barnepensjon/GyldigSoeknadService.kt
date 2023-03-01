@@ -15,8 +15,9 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 
 class OpplysningKanIkkeHentesUt : IllegalStateException()
 
@@ -67,7 +68,7 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
         )
 
         val gyldighetResultat = setVurdering(vurderingsliste)
-        val vurdertDato = LocalDateTime.now()
+        val vurdertDato = Tidspunkt.now().toLocalDatetimeUTC()
 
         return GyldighetsResultat(gyldighetResultat, vurderingsliste, vurdertDato)
     }

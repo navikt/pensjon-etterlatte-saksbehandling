@@ -10,11 +10,12 @@ import io.ktor.server.routing.get
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.batch.payload
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.JsonMessage
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -29,7 +30,7 @@ object StandardMeldingFeature : TestDataFeature {
         get() = {
             get {
                 sendMelding(
-                    payload(aremark_person, LocalDateTime.now()),
+                    payload(aremark_person, Tidspunkt.now().toLocalDatetimeUTC()),
                     producer
                 )
 

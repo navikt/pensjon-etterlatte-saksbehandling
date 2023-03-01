@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
@@ -70,7 +71,7 @@ class VedtaksvurderingService(
 
     fun lagreIverksattVedtak(behandlingId: UUID) {
         repository.hentVedtak(behandlingId)?.also {
-            val iverksattTidspunkt = LocalDateTime.now()
+            val iverksattTidspunkt = Tidspunkt.now().toLocalDatetimeUTC()
             repository.lagreIverksattVedtak(behandlingId)
             val detaljertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
             val statistikkMelding = lagStatistikkMelding(
@@ -262,7 +263,7 @@ class VedtaksvurderingService(
         }
         repository.underkjennVedtak(behandlingId)
         val underkjentVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-        val underkjentTid = LocalDateTime.now()
+        val underkjentTid = Tidspunkt.now().toLocalDatetimeUTC()
         val vedtakHendelse = VedtakHendelse(
             vedtakId = underkjentVedtak.vedtakId,
             inntruffet = underkjentTid.toNorskTidspunkt(),

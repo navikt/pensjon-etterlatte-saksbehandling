@@ -24,6 +24,8 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,7 +34,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class GrunnlagsendringshendelseServiceTest {
@@ -108,7 +109,14 @@ internal class GrunnlagsendringshendelseServiceTest {
             { assertEquals(1, lagredeGrunnlagsendringshendelser.size) },
             { assertEquals(sakId, opprettGrunnlagsendringshendelse.captured.sakId) },
             { assertEquals(GrunnlagsendringsType.DOEDSFALL, opprettGrunnlagsendringshendelse.captured.type) },
-            { assertTrue(opprettGrunnlagsendringshendelse.captured.opprettet >= LocalDateTime.now().minusSeconds(10)) },
+            {
+                assertTrue(
+                    opprettGrunnlagsendringshendelse.captured.opprettet >=
+                        Tidspunkt.now().toLocalDatetimeUTC().minusSeconds(
+                            10
+                        )
+                )
+            },
             { assertEquals(1, lagredeGrunnlagsendringshendelser.size) },
             { assertEquals(grunnlagsendringshendelse, lagredeGrunnlagsendringshendelser.first()) }
         )
@@ -434,7 +442,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagsendringshendelseMedSamsvar(
                 id = grlg_id,
                 sakId = sakId,
-                opprettet = LocalDateTime.now().minusHours(1),
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusHours(1),
                 fnr = avdoedFnr,
                 hendelseGjelderRolle = rolle,
                 samsvarMellomPdlOgGrunnlag = null

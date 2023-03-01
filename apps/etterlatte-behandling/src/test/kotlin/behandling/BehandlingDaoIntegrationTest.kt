@@ -40,7 +40,6 @@ import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.YearMonth
 import javax.sql.DataSource
 
@@ -216,7 +215,7 @@ internal class BehandlingDaoIntegrationTest {
                         basertPaaOpplysninger = "innsenderfnr"
                     )
                 ),
-                vurdertDato = LocalDateTime.now()
+                vurdertDato = Tidspunkt.now().toLocalDatetimeUTC()
             ),
             status = BehandlingStatus.OPPRETTET
         )
@@ -739,7 +738,11 @@ internal class BehandlingDaoIntegrationTest {
 
         val kommerBarnetTilgode = KommerBarnetTilgode(JaNeiVetIkke.JA, "", saksbehandler)
         val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "")
-        val gyldighetsResultat = GyldighetsResultat(VurderingsResultat.OPPFYLT, listOf(), LocalDateTime.now())
+        val gyldighetsResultat = GyldighetsResultat(
+            VurderingsResultat.OPPFYLT,
+            listOf(),
+            Tidspunkt.now().toLocalDatetimeUTC()
+        )
 
         foerstegangsbehandling!!
             .oppdaterKommerBarnetTilgode(kommerBarnetTilgode)

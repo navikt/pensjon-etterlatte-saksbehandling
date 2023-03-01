@@ -10,12 +10,13 @@ import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
-import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -34,7 +35,11 @@ internal class InnsendtSoeknadRiverTest {
             "innsender"
         )
 
-        val gyldighetsResultat = GyldighetsResultat(VurderingsResultat.OPPFYLT, listOf(), LocalDateTime.now())
+        val gyldighetsResultat = GyldighetsResultat(
+            VurderingsResultat.OPPFYLT,
+            listOf(),
+            Tidspunkt.now().toLocalDatetimeUTC()
+        )
         val id = UUID.randomUUID()
 
         every { gyldigOmstillingsSoeknadServiceMock.hentPersongalleriFraSoeknad(any()) } returns persongalleri

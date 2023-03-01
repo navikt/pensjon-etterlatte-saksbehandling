@@ -6,10 +6,11 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class ReguleringTest {
 
@@ -17,8 +18,11 @@ internal class ReguleringTest {
     fun `regulering kan endre tilstander`() {
         Regulering(
             id = UUID.randomUUID(),
-            sak = 1,
-            sakType = SakType.BARNEPENSJON,
+            sak = Sak(
+                ident = "",
+                sakType = SakType.BARNEPENSJON,
+                id = 1
+            ),
             behandlingOpprettet = LocalDateTime.now(),
             sistEndret = LocalDateTime.now(),
             status = BehandlingStatus.OPPRETTET,

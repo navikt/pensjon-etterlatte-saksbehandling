@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -18,14 +19,17 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class BehandlingTest {
 
     private val behandling = Foerstegangsbehandling(
         id = UUID.randomUUID(),
-        sak = 1,
-        sakType = SakType.BARNEPENSJON,
+        sak = Sak(
+            ident = "",
+            sakType = SakType.BARNEPENSJON,
+            id = 1
+        ),
         behandlingOpprettet = LocalDateTime.now(),
         sistEndret = LocalDateTime.now(),
         status = BehandlingStatus.OPPRETTET,

@@ -13,13 +13,13 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal sealed class TilstandException : IllegalStateException() {
     internal object UgyldigtTilstand : TilstandException()
@@ -28,8 +28,7 @@ internal sealed class TilstandException : IllegalStateException() {
 
 sealed class Behandling {
     abstract val id: UUID
-    abstract val sak: Long
-    abstract val sakType: SakType
+    abstract val sak: Sak
     abstract val behandlingOpprettet: LocalDateTime
     abstract val sistEndret: LocalDateTime
     abstract val status: BehandlingStatus
@@ -115,8 +114,8 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
 
     return DetaljertBehandling(
         id = id,
-        sak = sak,
-        sakType = sakType,
+        sak = sak.id,
+        sakType = sak.sakType,
         behandlingOpprettet = behandlingOpprettet,
         sistEndret = sistEndret,
         soeknadMottattDato = soeknadMottatDato,
@@ -139,7 +138,7 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
 
 fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
     id = this.id,
-    sak = this.sak,
+    sak = this.sak.id,
     status = this.status,
     soeknadMottattDato = if (this is Foerstegangsbehandling) {
         this.soeknadMottattDato

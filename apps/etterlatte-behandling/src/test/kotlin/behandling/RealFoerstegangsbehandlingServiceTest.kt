@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,7 +27,7 @@ import java.sql.Connection
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class RealFoerstegangsbehandlingServiceTest {
 
@@ -66,8 +67,11 @@ internal class RealFoerstegangsbehandlingServiceTest {
             )
         } returns Foerstegangsbehandling(
             id = id,
-            sak = 1,
-            sakType = SakType.BARNEPENSJON,
+            sak = Sak(
+                ident = "Ola Olsen",
+                sakType = SakType.BARNEPENSJON,
+                id = 1
+            ),
             behandlingOpprettet = LocalDateTime.now(),
             sistEndret = LocalDateTime.now(),
             status = BehandlingStatus.OPPRETTET,
@@ -104,8 +108,11 @@ internal class RealFoerstegangsbehandlingServiceTest {
 
         val opprettetBehandling = Foerstegangsbehandling(
             id = UUID.randomUUID(),
-            sak = 1,
-            sakType = SakType.BARNEPENSJON,
+            sak = Sak(
+                ident = "Soeker",
+                sakType = SakType.BARNEPENSJON,
+                id = 1
+            ),
             behandlingOpprettet = datoNaa,
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,

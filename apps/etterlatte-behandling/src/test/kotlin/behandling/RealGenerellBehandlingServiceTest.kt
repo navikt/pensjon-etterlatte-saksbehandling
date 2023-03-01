@@ -68,10 +68,10 @@ class RealGenerellBehandlingServiceTest {
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlinger() } returns listOf(
-                revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                foerstegangsbehandling(sak = 2),
-                revurdering(sak = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                foerstegangsbehandling(sak = 4)
+                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                foerstegangsbehandling(sakId = 2),
+                revurdering(sakId = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                foerstegangsbehandling(sakId = 4)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
@@ -129,8 +129,8 @@ class RealGenerellBehandlingServiceTest {
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(1) } returns listOf(
-                revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                foerstegangsbehandling(sak = 1)
+                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                foerstegangsbehandling(sakId = 1)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
@@ -161,10 +161,10 @@ class RealGenerellBehandlingServiceTest {
     @Test
     fun `avbrytBehandling sjekker om behandlingsstatusen er gyldig for avbrudd`() {
         val sakId = 1L
-        val avbruttBehandling = foerstegangsbehandling(sak = sakId, status = BehandlingStatus.AVBRUTT)
-        val attestertBehandling = foerstegangsbehandling(sak = sakId, status = BehandlingStatus.ATTESTERT)
-        val iverksattBehandling = foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT)
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sak = sakId)
+        val avbruttBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.AVBRUTT)
+        val attestertBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.ATTESTERT)
+        val iverksattBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.IVERKSATT)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(avbruttBehandling.id) } returns avbruttBehandling
@@ -203,7 +203,7 @@ class RealGenerellBehandlingServiceTest {
     @Test
     fun `avbrytBehandling registrer en avbruddshendelse`() {
         val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sak = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
@@ -229,7 +229,7 @@ class RealGenerellBehandlingServiceTest {
     @Test
     fun `avbrytBehandling sender en kafka-melding`() {
         val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sak = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
@@ -269,7 +269,7 @@ class RealGenerellBehandlingServiceTest {
         val soeknadMottatDato = LocalDateTime.parse("2020-01-01T00:00:00")
         val behandling = foerstegangsbehandling(
             id = BEHANDLINGS_ID,
-            sak = SAK_ID,
+            sakId = SAK_ID,
             soeknadMottattDato = soeknadMottatDato
         )
         val opplysningstype = Opplysningstype.AVDOED_PDL_V1
@@ -359,7 +359,11 @@ class RealGenerellBehandlingServiceTest {
         doedsdato: LocalDate?,
         soeknadMottatt: LocalDateTime
     ): RealGenerellBehandlingService {
-        val behandling = foerstegangsbehandling(id = BEHANDLINGS_ID, sak = SAK_ID, soeknadMottattDato = soeknadMottatt)
+        val behandling = foerstegangsbehandling(
+            id = BEHANDLINGS_ID,
+            sakId = SAK_ID,
+            soeknadMottattDato = soeknadMottatt
+        )
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
 

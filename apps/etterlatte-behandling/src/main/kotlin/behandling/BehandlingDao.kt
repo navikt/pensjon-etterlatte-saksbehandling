@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCLocalDateTime
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -28,7 +29,7 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class BehandlingDao(private val connection: () -> Connection) {
 
@@ -36,7 +37,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType 
+                    SELECT b.*, s.sakType, s.fnr 
                     FROM behandling b
                     INNER JOIN sak s ON b.sak_id = s.id
                     WHERE b.id = ? AND b.behandlingstype = ? 
@@ -54,7 +55,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType 
+                    SELECT b.*, s.sakType, s.fnr 
                     FROM behandling b
                     INNER JOIN sak s ON b.sak_id = s.id
                     WHERE b.id = ?
@@ -82,7 +83,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType 
+                    SELECT b.*, s.sakType, s.fnr 
                     FROM behandling b
                     INNER JOIN sak s ON b.sak_id = s.id 
                     WHERE b.behandlingstype = ?
@@ -95,7 +96,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     fun alleBehandlingerISakAvType(sakId: Long, type: BehandlingType): List<Behandling> {
         return connection().prepareStatement(
             """
-                SELECT b.*, s.sakType 
+                SELECT b.*, s.sakType, s.fnr 
                 FROM behandling b
                 INNER JOIN sak s ON b.sak_id = s.id 
                 WHERE b.sak_id = ? AND b.behandlingstype = ?
@@ -111,7 +112,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType 
+                    SELECT b.*, s.sakType, s.fnr 
                     FROM behandling b
                     INNER JOIN sak s ON b.sak_id = s.id 
                 """.trimIndent()
@@ -123,7 +124,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType 
+                    SELECT b.*, s.sakType, s.fnr 
                     FROM behandling b
                     INNER JOIN sak s ON b.sak_id = s.id
                     WHERE sak_id = ?
@@ -138,7 +139,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             val stmt =
                 prepareStatement(
                     """
-                        SELECT b.*, s.sakType  
+                        SELECT b.*, s.sakType, s.fnr  
                         FROM behandling b
                         INNER JOIN sak s ON b.sak_id = s.id
                         WHERE b.sak_id = ? AND b.status = ANY(?)
@@ -157,7 +158,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType 
+                    SELECT b.*, s.sakType, s.fnr 
                     FROM behandling b
                     INNER JOIN sak s ON b.sak_id = s.id
                     WHERE sak_id = ? AND b.soeker = ?
@@ -182,8 +183,7 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(
         id = rs.getObject("id") as UUID,
-        sak = rs.getLong("sak_id"),
-        sakType = enumValueOf(rs.getString("saktype")),
+        sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
         soeknadMottattDato = rs.getTimestamp("soeknad_mottatt_dato").toLocalDateTime(),
@@ -205,8 +205,7 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     private fun asRevurdering(rs: ResultSet) = Revurdering(
         id = rs.getObject("id") as UUID,
-        sak = rs.getLong("sak_id"),
-        sakType = enumValueOf(rs.getString("saktype")),
+        sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -219,8 +218,7 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     private fun asRegulering(rs: ResultSet) = Regulering(
         id = rs.getObject("id") as UUID,
-        sak = rs.getLong("sak_id"),
-        sakType = enumValueOf(rs.getString("saktype")),
+        sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -234,8 +232,7 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
         id = rs.getObject("id") as UUID,
-        sak = rs.getLong("sak_id"),
-        sakType = enumValueOf(rs.getString("saktype")),
+        sak = mapSak(rs),
         behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         persongalleri = hentPersongalleri(rs),
@@ -243,6 +240,12 @@ class BehandlingDao(private val connection: () -> Connection) {
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
         fritekstAarsak = rs.getString("fritekst_aarsak")
+    )
+
+    private fun mapSak(rs: ResultSet) = Sak(
+        id = rs.getLong("sak_id"),
+        sakType = enumValueOf(rs.getString("saktype")),
+        ident = rs.getString("fnr")
     )
 
     private fun ResultSet.asRolleSak() =

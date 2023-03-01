@@ -13,7 +13,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelse
-import java.util.*
+import java.util.UUID
 
 interface RevurderingService {
     fun hentRevurdering(behandling: UUID): Revurdering?
@@ -59,25 +59,25 @@ class RealRevurderingService(
         return inTransaction {
             when (forrigeBehandling) {
                 is Foerstegangsbehandling -> revurderingFactory.opprettRevurdering(
-                    forrigeBehandling.sak,
+                    forrigeBehandling.sak.id,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )
 
                 is Revurdering -> revurderingFactory.opprettRevurdering(
-                    forrigeBehandling.sak,
+                    forrigeBehandling.sak.id,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )
 
                 is ManueltOpphoer -> revurderingFactory.opprettRevurdering(
-                    forrigeBehandling.sak,
+                    forrigeBehandling.sak.id,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )
 
                 is Regulering -> revurderingFactory.opprettRevurdering(
-                    forrigeBehandling.sak,
+                    forrigeBehandling.sak.id,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )

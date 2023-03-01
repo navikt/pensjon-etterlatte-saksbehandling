@@ -52,7 +52,7 @@ class RealRevurderingServiceTest {
         val behandlingerMock = mockk<BehandlingDao> {
             every { hentBehandling(id = id, type = BehandlingType.REVURDERING) } returns revurdering(
                 id = id,
-                sak = 1,
+                sakId = 1,
                 revurderingAarsak = RevurderingAarsak.SOEKER_DOD
             )
         }
@@ -77,11 +77,11 @@ class RealRevurderingServiceTest {
     fun `skal hente alle revurderinger`() {
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerAvType(type = BehandlingType.REVURDERING) } returns listOf(
-                revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                revurdering(sak = 2, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                revurdering(sak = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                revurdering(sak = 4, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                revurdering(sak = 5, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
+                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sakId = 2, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sakId = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sakId = 4, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sakId = 5, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
@@ -103,10 +103,10 @@ class RealRevurderingServiceTest {
     fun `skal starte revurdering`() {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val forrigeBehandling = foerstegangsbehandling(sak = 1)
+        val forrigeBehandling = foerstegangsbehandling(sakId = 1)
         val doedsHendelse = Doedshendelse("12345678911", LocalDate.of(2022, 1, 1), Endringstype.OPPRETTET)
         val revurdering =
-            revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
+            revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { opprettBehandling(capture(behandlingOpprettes)) } returns Unit

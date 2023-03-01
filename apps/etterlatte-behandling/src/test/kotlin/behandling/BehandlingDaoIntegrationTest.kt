@@ -151,12 +151,12 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal opprette manuelt opphoer`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val sakId = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
         val virkDato = YearMonth.of(2022, 8)
 
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.MANUELT_OPPHOER,
-            sakId = sak1,
+            sakId = sakId,
             persongalleri = persongalleri(),
             virkningstidspunkt = Virkningstidspunkt(
                 virkDato,
@@ -180,7 +180,7 @@ internal class BehandlingDaoIntegrationTest {
             )
         ) as ManueltOpphoer
 
-        assertEquals(sak1, opprettetBehandling.sak)
+        assertEquals(sakId, opprettetBehandling.sak.id)
         assertEquals(persongalleri(), opprettetBehandling.persongalleri)
         assertTrue(ManueltOpphoerAarsak.SOESKEN_DOED in opprettetBehandling.opphoerAarsaker)
         assertTrue(ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED in opprettetBehandling.opphoerAarsaker)

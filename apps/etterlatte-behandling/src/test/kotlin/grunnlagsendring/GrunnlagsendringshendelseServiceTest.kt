@@ -60,8 +60,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = 1L
         val fnr = "Soeker"
         val foerstegangsbehandlinger = listOf(
-            foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT),
-            foerstegangsbehandling(sak = sakId, status = BehandlingStatus.FATTET_VEDTAK)
+            foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.IVERKSATT),
+            foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.FATTET_VEDTAK)
         )
         val grunnlagsendringshendelse = grunnlagsendringshendelseMedSamsvar(
             id = UUID.randomUUID(),

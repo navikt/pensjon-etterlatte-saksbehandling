@@ -48,7 +48,7 @@ import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
@@ -157,7 +157,7 @@ internal fun Route.behandlingRoutes(
                 generellBehandlingService.hentBehandlinger().map {
                     BehandlingSammendrag(
                         it.id,
-                        it.sak,
+                        it.sak.id,
                         it.status,
                         if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                         it.behandlingOpprettet,
@@ -235,8 +235,8 @@ internal fun Route.behandlingRoutes(
                     revurderingService.hentRevurdering(behandlingsId)?.let {
                         DetaljertBehandling(
                             id = it.id,
-                            sak = it.sak,
-                            sakType = it.sakType,
+                            sak = it.sak.id,
+                            sakType = it.sak.sakType,
                             behandlingOpprettet = it.behandlingOpprettet,
                             sistEndret = it.sistEndret,
                             soeknadMottattDato = it.behandlingOpprettet,
@@ -298,7 +298,7 @@ internal fun Route.behandlingRoutes(
                 generellBehandlingService.hentBehandlingerISak(sakId).map {
                     BehandlingSammendrag(
                         id = it.id,
-                        sak = it.sak,
+                        sak = it.sak.id,
                         status = it.status,
                         soeknadMottattDato = if (it is Foerstegangsbehandling) {
                             it.soeknadMottattDato

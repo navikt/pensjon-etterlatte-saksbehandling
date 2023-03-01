@@ -23,7 +23,7 @@ fun registrerVedtakHendelseFelles(
 
     hendelser.vedtakHendelse(
         lagretBehandling.id,
-        lagretBehandling.sak,
+        lagretBehandling.sak.id,
         vedtakId,
         hendelse,
         inntruffet,

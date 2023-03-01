@@ -27,6 +27,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.token.System
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
@@ -34,9 +35,7 @@ import java.util.*
 
 fun Route.adresseBeskyttelseRoute(ressursHarAdressebeskyttelse: (id: String) -> Boolean = { false }) {
     intercept(Call) {
-        val bruker = bruker
-
-        if (bruker.erSystembruker()) {
+        if (bruker is System) {
             return@intercept
         }
 

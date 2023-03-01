@@ -11,9 +11,10 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfo
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfoMedSiviltilstand
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.standardTidssoneUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.Clock
-import java.time.LocalDateTime
 
 class GyldigOmstillingsSoeknadService(
     private val pdlClient: PdlClient,
@@ -53,7 +54,7 @@ class GyldigOmstillingsSoeknadService(
         return GyldighetsResultat(
             resultat,
             vurderinger,
-            LocalDateTime.ofInstant(clock.instant(), standardTidssoneUTC)
+            Tidspunkt.now().toLocalDatetimeUTC()
         )
     }
 

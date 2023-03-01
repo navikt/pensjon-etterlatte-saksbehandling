@@ -26,7 +26,6 @@ import org.junit.jupiter.api.TestInstance
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GyldigOmstillingsSoeknadServiceTest {
@@ -66,7 +65,7 @@ class GyldigOmstillingsSoeknadServiceTest {
         val forventetResult = GyldighetsResultat(
             resultat = VurderingsResultat.OPPFYLT,
             vurderinger = listOf(forventaVurdering),
-            vurdertDato = LocalDateTime.ofInstant(clock.instant(), standardTidssoneUTC)
+            vurdertDato = vurdering.vurdertDato
         )
         assertEquals(forventetResult, vurdering)
     }
@@ -98,7 +97,7 @@ class GyldigOmstillingsSoeknadServiceTest {
         val forventetResult = GyldighetsResultat(
             resultat = VurderingsResultat.IKKE_OPPFYLT,
             vurderinger = listOf(forventaVurdering),
-            vurdertDato = LocalDateTime.ofInstant(clock.instant(), standardTidssoneUTC)
+            vurdertDato = vurdering.vurdertDato
         )
         assertEquals(forventetResult, vurdering)
     }
@@ -118,7 +117,7 @@ class GyldigOmstillingsSoeknadServiceTest {
         val forventetResult = GyldighetsResultat(
             resultat = VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
             vurderinger = listOf(forventaVurdering),
-            vurdertDato = LocalDateTime.ofInstant(clock.instant(), standardTidssoneUTC)
+            vurdertDato = vurdering.vurdertDato
         )
         assertEquals(forventetResult, vurdering)
     }

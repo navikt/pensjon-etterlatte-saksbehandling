@@ -81,7 +81,7 @@ class BehandlingsHendelser(
                         "behandlingId" to behandling.id,
                         CORRELATION_ID_KEY to getCorrelationId(),
                         BehandlingGrunnlagEndret.behandlingObjectKey to behandling,
-                        BehandlingGrunnlagEndret.sakIdKey to behandling.sak,
+                        BehandlingGrunnlagEndret.sakIdKey to behandling.sak.id,
                         BehandlingGrunnlagEndret.sakObjectKey to behandling.sak,
                         BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet
                     )

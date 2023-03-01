@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
@@ -70,15 +69,11 @@ internal class VilkaarsvurderingServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk<DetaljertBehandling>().apply {
             every { id } returns UUID.randomUUID()
             every { sak } returns 1L
+            every { sakType } returns SakType.BARNEPENSJON
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { soeker } returns "10095512345"
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
             every { revurderingsaarsak } returns null
-        }
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns mockk<Sak>().apply {
-            every { id } returns 1L
-            every { ident } returns "ident"
-            every { sakType } returns SakType.BARNEPENSJON
         }
 
         repository = VilkaarsvurderingRepository(ds)
@@ -260,6 +255,7 @@ internal class VilkaarsvurderingServiceTest {
         coEvery { behandlingKlient.hentBehandling(uuid, any()) } returns mockk<DetaljertBehandling>().apply {
             every { id } returns uuid
             every { sak } returns 1L
+            every { sakType } returns SakType.BARNEPENSJON
             every { behandlingType } returns BehandlingType.REVURDERING
             every { soeker } returns "10095512345"
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()

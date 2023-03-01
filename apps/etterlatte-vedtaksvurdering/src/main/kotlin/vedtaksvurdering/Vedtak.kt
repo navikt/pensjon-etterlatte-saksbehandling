@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.tilZonedDateTime
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -15,6 +16,7 @@ import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.BilagMedSammendrag
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -109,6 +111,20 @@ data class VedtakSammendrag(
     val id: String,
     val behandlingId: UUID,
     val datoAttestert: LocalDateTime?
+)
+
+data class VedtakHendelse(
+    val vedtakId: Long,
+    val inntruffet: Tidspunkt,
+    val saksbehandler: String? = null,
+    val kommentar: String? = null,
+    val valgtBegrunnelse: String? = null
+)
+
+data class OpprettUtbetalingsperiode(
+    val periode: Periode,
+    val beloep: BigDecimal?,
+    val type: UtbetalingsperiodeType
 )
 
 fun Instant?.toLocalDateTime() = this?.let { LocalDateTime.ofInstant(it, norskTidssone) }

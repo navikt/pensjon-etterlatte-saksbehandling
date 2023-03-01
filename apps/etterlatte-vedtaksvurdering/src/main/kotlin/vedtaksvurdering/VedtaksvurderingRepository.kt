@@ -152,7 +152,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         saksbehandlerEnhet: String,
         behandlingsId: UUID,
         vedtakId: Long,
-        utbetalingsperioder: List<Utbetalingsperiode>
+        utbetalingsperioder: List<OpprettUtbetalingsperiode>
     ) {
         utbetalingsperioder.map {
             mapOf<String, Serializable?>(

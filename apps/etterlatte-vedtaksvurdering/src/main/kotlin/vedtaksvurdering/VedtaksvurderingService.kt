@@ -10,10 +10,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -274,59 +271,20 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)!!
     }
 
-    private fun utbetalingsperioderFraVedtak(vedtak: Vedtak) =
-        utbetalingsperioderFraVedtak(vedtak.type, vedtak.virk, vedtak.beregning?.sammendrag ?: emptyList())
-
-    fun utbetalingsperioderFraVedtak(
-        vedtakType: VedtakType,
-        virk: Periode,
-        beregning: List<Beregningsperiode>
-    ): List<Utbetalingsperiode> {
-        if (vedtakType != VedtakType.INNVILGELSE) {
-            return listOf(
-                Utbetalingsperiode(
-                    0,
-                    virk.copy(tom = null),
-                    null,
-                    UtbetalingsperiodeType.OPPHOER
-                )
-            )
+    private fun utbetalingsperioderFraVedtak(
+        vedtak: Vedtak
+    ): List<OpprettUtbetalingsperiode> {
+        val beregningsperioder = vedtak.beregning?.sammendrag ?: emptyList()
+        // TODO vi må se mer på konseptet rundt beregningsperioder ved feks opphør. Bør opphør hoppe over beregning?
+        return when (vedtak.type) {
+            VedtakType.INNVILGELSE ->
+                beregningsperioder
+                    .map { OpprettUtbetalingsperiode(it.periode, it.beloep, UtbetalingsperiodeType.UTBETALING) }
+                    .sortedBy { it.periode.fom }
+            VedtakType.OPPHOER -> listOf(OpprettUtbetalingsperiode(vedtak.virk, null, UtbetalingsperiodeType.OPPHOER))
+            VedtakType.AVSLAG -> emptyList()
+            VedtakType.ENDRING -> throw Exception("VedtakType ENDRING er ikke støttet")
         }
-
-        val perioderFraBeregning =
-            beregning.map { Utbetalingsperiode(0, it.periode, it.beloep, UtbetalingsperiodeType.UTBETALING) }
-                .sortedBy { it.periode.fom }
-
-        val manglendePerioderMellomBeregninger = perioderFraBeregning
-            .map { it.periode }
-            .zipWithNext()
-            .map { requireNotNull(it.first.tom).plusMonths(1) to it.second.fom.minusMonths(1) }
-            .filter { !it.second!!.isBefore(it.first) }
-            .map { Periode(it.first, it.second) }
-            .map { Utbetalingsperiode(0, it, null, UtbetalingsperiodeType.OPPHOER) }
-        val fomBeregninger = perioderFraBeregning.firstOrNull()?.periode?.fom
-        val manglendeStart = if (fomBeregninger == null || virk.fom.isBefore(fomBeregninger)) {
-            Utbetalingsperiode(
-                0,
-                Periode(virk.fom, fomBeregninger?.minusMonths(1)),
-                null,
-                UtbetalingsperiodeType.OPPHOER
-            )
-        } else {
-            null
-        }
-        val manglendeSlutt = perioderFraBeregning.lastOrNull()?.periode?.tom?.let {
-            Utbetalingsperiode(
-                0,
-                Periode(it.plusMonths(1), null),
-                null,
-                UtbetalingsperiodeType.OPPHOER
-            )
-        }
-
-        return (perioderFraBeregning + manglendePerioderMellomBeregninger + manglendeStart + manglendeSlutt)
-            .filterNotNull()
-            .sortedBy { it.periode.fom }
     }
 }
 
@@ -338,11 +296,3 @@ private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedt
             TEKNISK_TID_KEY to tekniskTid
         )
     ).toJson()
-
-data class VedtakHendelse(
-    val vedtakId: Long,
-    val inntruffet: Tidspunkt,
-    val saksbehandler: String? = null,
-    val kommentar: String? = null,
-    val valgtBegrunnelse: String? = null
-)

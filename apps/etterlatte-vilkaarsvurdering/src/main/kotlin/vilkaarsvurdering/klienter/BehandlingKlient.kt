@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -20,7 +19,6 @@ import java.util.*
 
 interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
-    suspend fun hentSak(sakId: Long, bruker: Bruker): Sak
     suspend fun kanSetteBehandlingStatusVilkaarsvurdert(behandlingId: UUID, bruker: Bruker): Boolean
     suspend fun settBehandlingStatusOpprettet(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean
     suspend fun settBehandlingStatusVilkaarsvurdert(
@@ -69,26 +67,6 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     )
                 }
             }
-        }
-    }
-
-    override suspend fun hentSak(sakId: Long, bruker: Bruker): Sak {
-        logger.info("Henter sak med id $sakId")
-        try {
-            return downstreamResourceClient
-                .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/saker/$sakId"
-                    ),
-                    bruker = bruker
-                )
-                .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
-                )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Henting av sak med sakId=$sakId fra behandling feilet", e)
         }
     }
 

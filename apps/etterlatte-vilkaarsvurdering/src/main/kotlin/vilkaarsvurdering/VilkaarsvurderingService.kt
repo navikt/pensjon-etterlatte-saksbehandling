@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.token.Bruker
@@ -93,18 +92,18 @@ class VilkaarsvurderingService(
                 throw IllegalArgumentException("Vilkårsvurdering finnes allerede for behandling $behandlingId")
             }
 
-            val (behandling, grunnlag, sak) = hentDataForVilkaarsvurdering(behandlingId, bruker)
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, bruker)
             val virkningstidspunkt = behandling.virkningstidspunkt
                 ?: throw VirkningstidspunktIkkeSattException(
                     "Virkningstidspunkt ikke satt for behandling $behandlingId"
                 )
 
             logger.info(
-                "Oppretter vilkårsvurdering for behandling ($behandlingId) med sakType ${sak.sakType} og " +
+                "Oppretter vilkårsvurdering for behandling ($behandlingId) med sakType ${behandling.sakType} og " +
                     "behandlingType ${behandling.behandlingType}"
             )
 
-            val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, sak, grunnlag, virkningstidspunkt)
+            val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, grunnlag, virkningstidspunkt)
 
             vilkaarsvurderingRepository.opprettVilkaarsvurdering(
                 Vilkaarsvurdering(
@@ -118,10 +117,9 @@ class VilkaarsvurderingService(
 
     private fun finnVilkaarForNyVilkaarsvurdering(
         behandling: DetaljertBehandling,
-        sak: Sak,
         grunnlag: Grunnlag,
         virkningstidspunkt: Virkningstidspunkt
-    ): List<Vilkaar> = when (sak.sakType) {
+    ): List<Vilkaar> = when (behandling.sakType) {
         SakType.BARNEPENSJON ->
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
@@ -161,13 +159,12 @@ class VilkaarsvurderingService(
     private suspend fun hentDataForVilkaarsvurdering(
         behandlingId: UUID,
         bruker: Bruker
-    ): Triple<DetaljertBehandling, Grunnlag, Sak> {
+    ): Pair<DetaljertBehandling, Grunnlag> {
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
             val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, bruker) }
-            val sak = async { behandlingKlient.hentSak(behandling.sak, bruker) }
 
-            Triple(behandling, grunnlag.await(), sak.await())
+            Pair(behandling, grunnlag.await())
         }
     }
 

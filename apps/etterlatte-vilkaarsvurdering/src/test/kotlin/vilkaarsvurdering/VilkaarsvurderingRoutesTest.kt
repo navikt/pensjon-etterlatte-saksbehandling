@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -84,7 +83,6 @@ internal class VilkaarsvurderingRoutesTest {
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any(), VilkaarsvurderingUtfall.OPPFYLT)
         } returns true
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
@@ -445,7 +443,6 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -468,7 +465,6 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns false
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -493,7 +489,6 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns false
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -520,7 +515,6 @@ internal class VilkaarsvurderingRoutesTest {
             true,
             false
         )
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -563,16 +557,11 @@ internal class VilkaarsvurderingRoutesTest {
     private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
         every { id } returns UUID.randomUUID()
         every { sak } returns 1L
+        every { sakType } returns SakType.BARNEPENSJON
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { soeker } returns "10095512345"
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
         every { revurderingsaarsak } returns null
-    }
-
-    private fun lagSak() = mockk<Sak>().apply {
-        every { id } returns 1L
-        every { ident } returns "ident"
-        every { sakType } returns SakType.BARNEPENSJON
     }
 
     private companion object {

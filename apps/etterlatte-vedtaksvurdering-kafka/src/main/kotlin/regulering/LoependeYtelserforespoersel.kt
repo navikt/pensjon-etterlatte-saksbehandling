@@ -2,7 +2,6 @@ package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -48,7 +47,6 @@ internal class LoependeYtelserforespoersel(
                     packet[HENDELSE_DATA_KEY] = Omregningshendelse(
                         sakId = sakId,
                         fradato = it.dato,
-                        aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING,
                         prosesstype = Prosesstype.AUTOMATISK
                     )
                     context.publish(packet.toJson())

@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -62,7 +61,6 @@ internal class LoependeYtelserforespoerselTest {
             Omregningshendelse(
                 sakId = sakId,
                 fradato = fraDato,
-                aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING,
                 prosesstype = Prosesstype.AUTOMATISK
             ),
             objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omregningshendelse::class.java)

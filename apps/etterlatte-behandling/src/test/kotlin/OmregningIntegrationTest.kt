@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -102,7 +101,6 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                     Omregningshendelse(
                         1,
                         LocalDate.now(),
-                        RevurderingAarsak.GRUNNBELOEPREGULERING,
                         null,
                         prosesstype
                     )

@@ -311,7 +311,7 @@ internal fun Route.behandlingRoutes(
                             is Foerstegangsbehandling -> "SOEKNAD"
                             is Revurdering -> it.revurderingsaarsak.name
                             is ManueltOpphoer -> "MANUELT OPPHOER"
-                            is Regulering -> it.revurderingsaarsak.name
+                            is Regulering -> "REGULERING"
                         },
                         virkningstidspunkt = it.virkningstidspunkt,
                         vilkaarsvurderingUtfall = it.vilkaarUtfall

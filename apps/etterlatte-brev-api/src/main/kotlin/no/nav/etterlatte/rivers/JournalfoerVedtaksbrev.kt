@@ -28,7 +28,12 @@ internal class JournalfoerVedtaksbrev(
         River(rapidsConnection).apply {
             eventName(KafkaHendelseType.ATTESTERT.toString())
             validate { it.requireKey("vedtak") }
-            validate { it.rejectValue("vedtak.behandling.type", BehandlingType.MANUELT_OPPHOER.name) }
+            validate {
+                it.rejectValues(
+                    "vedtak.behandling.type",
+                    listOf(BehandlingType.MANUELT_OPPHOER.name, BehandlingType.OMREGNING.name)
+                )
+            }
         }.register(this)
     }
 

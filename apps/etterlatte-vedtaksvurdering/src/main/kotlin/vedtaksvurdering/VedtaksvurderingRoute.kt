@@ -114,5 +114,3 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 }
 
 data class UnderkjennVedtakClientRequest(val kommentar: String, val valgtBegrunnelse: String)
-private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
-private data class VedtakBolkResponse(val vedtak: List<Vedtak>)

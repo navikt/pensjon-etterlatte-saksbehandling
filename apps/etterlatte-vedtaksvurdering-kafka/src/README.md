@@ -3,7 +3,7 @@
 Vedtaksvurdering-Kafka er en Rapid app.
 
 Appen har ansvar for å lytte etter saker som skal reguleres. Den sjekker opp mot vedtaksappen om en sak har en løpende
-ytelse. Dersom den har det, så sendes meldingen videre til Omberegning
+ytelse. Dersom den har det, så sendes meldingen videre til Omregning
 
 ## Konsepter
 

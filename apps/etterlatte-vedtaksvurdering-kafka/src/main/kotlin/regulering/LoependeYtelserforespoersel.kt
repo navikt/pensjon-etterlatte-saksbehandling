@@ -1,13 +1,13 @@
 package no.nav.etterlatte.regulering
 
-import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
-import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
+import no.nav.etterlatte.rapidsandrivers.EventNames.OMREGNINGSHENDELSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -44,8 +44,8 @@ internal class LoependeYtelserforespoersel(
                 val reguleringsdato = packet.dato
                 val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
                 respons.takeIf { it.erLoepende }?.let {
-                    packet.eventName = OMBEREGNINGSHENDELSE
-                    packet[HENDELSE_DATA_KEY] = Omberegningshendelse(
+                    packet.eventName = OMREGNINGSHENDELSE
+                    packet[HENDELSE_DATA_KEY] = Omregningshendelse(
                         sakId = sakId,
                         fradato = it.dato,
                         aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING,

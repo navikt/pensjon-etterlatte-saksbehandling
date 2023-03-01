@@ -16,11 +16,11 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.OMBEREGNING_ID_KEY
-import rapidsandrivers.omberegningId
+import rapidsandrivers.OMREGNING_ID_KEY
+import rapidsandrivers.omregningId
 import rapidsandrivers.withFeilhaandtering
 
-internal class OmberegningHendelser(
+internal class OmregningHendelser(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService
 ) :
@@ -29,12 +29,12 @@ internal class OmberegningHendelser(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        logger.info("initierer rapid for omberegninghendelser")
+        logger.info("initierer rapid for omregninghendelser")
         River(rapidsConnection).apply {
             eventName(BEREGN)
 
             correlationId()
-            validate { it.requireKey(OMBEREGNING_ID_KEY) }
+            validate { it.requireKey(OMREGNING_ID_KEY) }
             validate { it.rejectKey(BEREGNING_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }.register(this)
@@ -43,15 +43,15 @@ internal class OmberegningHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
             withFeilhaandtering(packet, context, BEREGN) {
-                logger.info("Mottatt omberegninghendelse")
-                val omberegningsId = packet.omberegningId
+                logger.info("Mottatt omregninghendelse")
+                val omregningsId = packet.omregningId
                 runBlocking {
-                    val beregning = beregningService.opprettOmberegning(omberegningsId).body<BeregningDTO>()
+                    val beregning = beregningService.opprettOmregning(omregningsId).body<BeregningDTO>()
                     packet[BEREGNING_KEY] = beregning
                     packet[EVENT_NAME_KEY] = OPPRETT_VEDTAK
                     context.publish(packet.toJson())
                 }
-                logger.info("Publiserte oppdatert omberegningshendelse")
+                logger.info("Publiserte oppdatert omregningshendelse")
             }
         }
     }

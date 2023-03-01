@@ -5,22 +5,22 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingsService
-import no.nav.etterlatte.OmberegningsHendelser
-import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
+import no.nav.etterlatte.OmregningsHendelser
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.OMBEREGNING_ID_KEY
+import rapidsandrivers.OMREGNING_ID_KEY
 import java.util.*
 
-internal class OmberegningsHendelserTest {
+internal class OmregningsHendelserTest {
 
     private val behandlingService = mockk<BehandlingsService>()
-    private val inspector = TestRapid().apply { OmberegningsHendelser(this, behandlingService) }
+    private val inspector = TestRapid().apply { OmregningsHendelser(this, behandlingService) }
 
     @Test
-    fun `skal opprette omberegning`() {
-        val omberegningshendelseSlot = slot<Omberegningshendelse>()
+    fun `skal opprette omregning`() {
+        val omregningshendelseSlot = slot<Omregningshendelse>()
         val uuid = UUID.randomUUID()
 
         val returnValue = mockk<HttpResponse>().also {
@@ -28,18 +28,18 @@ internal class OmberegningsHendelserTest {
                 runBlocking { it.body<UUID>() }
             } returns uuid
         }
-        every { behandlingService.opprettOmberegning(capture(omberegningshendelseSlot)) }.returns(returnValue)
+        every { behandlingService.opprettOmregning(capture(omregningshendelseSlot)) }.returns(returnValue)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 
         inspector.sendTestMessage(fullMelding)
 
-        Assertions.assertEquals(1, omberegningshendelseSlot.captured.sakId)
+        Assertions.assertEquals(1, omregningshendelseSlot.captured.sakId)
         Assertions.assertEquals(2, inspector.inspektør.size)
-        Assertions.assertEquals(uuid.toString(), inspector.inspektør.message(1).get(OMBEREGNING_ID_KEY).asText())
+        Assertions.assertEquals(uuid.toString(), inspector.inspektør.message(1).get(OMREGNING_ID_KEY).asText())
     }
 
     companion object {
-        val fullMelding = readFile("/omberegningshendelse.json")
+        val fullMelding = readFile("/omregningshendelse.json")
     }
 }

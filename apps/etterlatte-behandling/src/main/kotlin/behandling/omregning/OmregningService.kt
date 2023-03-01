@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.omberegning
+package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.regulering.ReguleringFactory
@@ -7,11 +7,11 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import java.time.LocalDate
 import java.util.*
 
-class OmberegningService(
+class OmregningService(
     private val reguleringFactory: ReguleringFactory,
     private val behandlingService: GenerellBehandlingService
 ) {
-    fun opprettOmberegning(
+    fun opprettOmregning(
         sakId: Long,
         fradato: LocalDate,
         prosesstype: Prosesstype

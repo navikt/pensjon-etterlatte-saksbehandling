@@ -12,8 +12,7 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.sql.Types
-import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
 class HendelseDao(private val connection: () -> Connection) {
     companion object {
@@ -42,7 +41,7 @@ class HendelseDao(private val connection: () -> Connection) {
     fun behandlingOpprettet(behandling: BehandlingOpprettet) = lagreHendelse(
         UlagretHendelse(
             "BEHANDLING:OPPRETTET",
-            behandling.timestamp.toTidspunkt(ZoneId.systemDefault()),
+            behandling.timestamp.toTidspunkt(),
             null,
             behandling.id,
             behandling.sak,

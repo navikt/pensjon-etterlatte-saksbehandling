@@ -74,13 +74,6 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        post("vedtak") {
-            logger.debug("Request om vedtak bolk")
-            val request = call.receive<VedtakBolkRequest>()
-            val vedtak = service.hentVedtakBolk(request.behandlingsidenter.map { UUID.fromString(it) })
-            call.respond(VedtakBolkResponse(vedtak))
-        }
-
         post("vedtak/fattvedtak/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 val fattetVedtak = service.fattVedtak(behandlingId, bruker)
@@ -121,5 +114,3 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 }
 
 data class UnderkjennVedtakClientRequest(val kommentar: String, val valgtBegrunnelse: String)
-private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
-private data class VedtakBolkResponse(val vedtak: List<Vedtak>)

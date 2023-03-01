@@ -188,31 +188,4 @@ internal class DBTest {
         coEvery { behandling.attester(uuid, any(), any()) } returns true
         coEvery { behandling.underkjenn(uuid, any(), any()) } returns true
     }
-
-    @Test
-    fun `kan hente vedtak i bolk`() {
-        val vedtaksvurderingService = settOppService()
-        val behandling1Id = UUID.randomUUID().also { settOpp(it) }
-        val behandling2Id = UUID.randomUUID().also { settOpp(it) }
-        val behandling3Id = UUID.randomUUID().also { settOpp(it) }
-
-        runBlocking {
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(
-                behandling1Id,
-                Bruker.of("access", "s1", null, null)
-            )
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(
-                behandling2Id,
-                Bruker.of("access", "s1", null, null)
-            )
-        }
-
-        runBlocking {
-            vedtaksvurderingService.fattVedtak(behandling1Id, bruker)
-            vedtaksvurderingService.fattVedtak(behandling2Id, bruker)
-        }
-
-        val vedtakene = vedtaksvurderingService.hentVedtakBolk(listOf(behandling1Id, behandling2Id, behandling3Id))
-        Assertions.assertEquals(2, vedtakene.map { it.id }.distinct().size)
-    }
 }

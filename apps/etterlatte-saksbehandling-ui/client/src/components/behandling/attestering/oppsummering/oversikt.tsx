@@ -4,6 +4,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import {
   formaterBehandlingstype,
   formaterEnumTilLesbarString,
+  formaterSakstype,
   formaterStringDato,
   formaterStringTidspunkt,
 } from '~utils/formattering'
@@ -39,7 +40,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       <TagList>
         <li>
           <Tag variant={tagColors[ISaksType.BARNEPENSJON]} size={'small'}>
-            {formaterEnumTilLesbarString(ISaksType.BARNEPENSJON)}
+            {formaterSakstype(ISaksType.BARNEPENSJON)}
           </Tag>
         </li>
         <li>

@@ -13,15 +13,17 @@ import { Alert, BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea 
 import { svarTilTotalResultat } from './utils'
 import { Delete } from '@navikt/ds-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { ISvar } from '~shared/types/ISvar'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 type Props = {
   virkningstidspunktDato: string | undefined
+  sakstype: ISaksType
   vilkaarsvurdering: IVilkaarsvurdering
   oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string
@@ -30,6 +32,7 @@ type Props = {
 
 export const Resultat: React.FC<Props> = ({
   virkningstidspunktDato,
+  sakstype,
   vilkaarsvurdering,
   oppdaterVilkaar,
   behandlingId,
@@ -75,7 +78,6 @@ export const Resultat: React.FC<Props> = ({
     setKommentar('')
   }
 
-  const sakType = 'Barnepensjon' // TODO finnes pr for å gjøre dette tilgjengelig fra behandling (EY-1804)
   const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'
   const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
   return (
@@ -84,7 +86,7 @@ export const Resultat: React.FC<Props> = ({
         <VilkaarsvurderingContent>
           <HeadingWrapper>
             <Heading size="small" level={'2'}>
-              Er vilkårene for {sakType.toLowerCase()} oppfylt?
+              Er vilkårene for {formaterSakstype(sakstype).toLowerCase()} oppfylt?
             </Heading>
           </HeadingWrapper>
           {vilkaarsvurdering.resultat && (
@@ -94,7 +96,8 @@ export const Resultat: React.FC<Props> = ({
               </TekstWrapper>
               {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
                 <BodyShort>
-                  {sakType} er innvilget f.o.m {formaterStringDato(vilkaarsvurdering.virkningstidspunkt)}
+                  {formaterSakstype(sakstype)} er innvilget f.o.m{' '}
+                  {formaterStringDato(vilkaarsvurdering.virkningstidspunkt)}
                 </BodyShort>
               )}
               {vilkaarsvurdering?.resultat?.kommentar && (

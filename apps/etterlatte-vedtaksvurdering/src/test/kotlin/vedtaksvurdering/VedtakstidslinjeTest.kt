@@ -1,16 +1,21 @@
-
+package vedtaksvurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.standardTidssoneUTC
 import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 internal class VedtakstidslinjeTest {
@@ -218,18 +223,22 @@ private fun lagVedtak(
         sakId = 1L,
         sakType = SakType.BARNEPENSJON,
         behandlingId = UUID.randomUUID(),
-        saksbehandlerId = "saksbehandler01",
-        beregningsResultat = null,
-        vilkaarsResultat = null,
-        vedtakFattet = null,
-        fnr = null,
-        datoFattet = null,
-        datoattestert = datoAttestert,
-        attestant = null,
-        virkningsDato = virkningsDato,
-        vedtakStatus = vedtakStatus,
+        beregning = null,
+        vilkaarsvurdering = null,
+        soeker = Foedselsnummer.of(FNR_1),
+        virkningstidspunkt = virkningsDato.let { YearMonth.from(it) },
+        status = vedtakStatus,
         behandlingType = behandlingType,
-        attestertVedtakEnhet = null,
-        fattetVedtakEnhet = null
+        vedtakFattet = VedtakFattet(
+            ansvarligSaksbehandler = "saksbehandler1",
+            ansvarligEnhet = "enhet1",
+            tidspunkt = datoAttestert.atZone(standardTidssoneUTC)
+        ),
+        attestasjon = Attestasjon(
+            attestant = "saksbehandler2",
+            attesterendeEnhet = "enhet2",
+            tidspunkt = datoAttestert.atZone(standardTidssoneUTC)
+        ),
+        utbetalingsperioder = emptyList()
     )
 }

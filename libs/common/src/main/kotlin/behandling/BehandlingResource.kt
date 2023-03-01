@@ -28,7 +28,7 @@ data class DetaljertBehandling(
     val sistEndret: LocalDateTime,
     val soeknadMottattDato: LocalDateTime?,
     val innsender: String?,
-    val soeker: String?,
+    val soeker: String,
     val gjenlevende: List<String>?,
     val avdoed: List<String>?,
     val soesken: List<String>?,

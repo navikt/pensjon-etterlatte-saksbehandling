@@ -13,7 +13,6 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.Vedtak
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
@@ -23,6 +22,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -136,7 +136,7 @@ abstract class BehandlingIntegrationTest {
 }
 
 class VedtakKlientTest : VedtakKlient {
-    override suspend fun hentVedtak(behandlingId: String, bruker: Bruker): Vedtak? {
+    override suspend fun hentVedtak(behandlingId: String, bruker: Bruker): VedtakDto? {
         TODO("Not yet implemented")
     }
 }

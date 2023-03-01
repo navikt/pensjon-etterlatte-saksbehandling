@@ -2,10 +2,7 @@
   "@event_name": "VEDTAK:ATTESTERT",
   "vedtak": {
     "vedtakId": 1,
-    "virk": {
-      "fom": "2022-01",
-      "tom": "2022-02"
-    },
+    "virkningstidspunkt":  "2022-01",
     "sak": {
       "ident": "05126307952",
       "sakType": "BARNEPENSJON",
@@ -16,10 +13,7 @@
       "id": "e89c6e25-4f22-48b3-b975-4c868d830913"
     },
     "type": "INNVILGELSE",
-    "grunnlag": [],
-    "vilkaarsvurdering": null,
-    "beregning": null,
-    "pensjonTilUtbetaling": [
+    "utbetalingsperioder": [
       {
         "id": 1,
         "periode": {

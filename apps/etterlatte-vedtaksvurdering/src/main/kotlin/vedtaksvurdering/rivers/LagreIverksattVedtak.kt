@@ -60,7 +60,7 @@ internal class LagreIverksattVedtak(
                 when (respons.status) {
                     UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
                         respons.behandlingId?.also { behandlingId ->
-                            vedtaksvurderingService.lagreIverksattVedtak(behandlingId)
+                            vedtaksvurderingService.iverksattVedtak(behandlingId)
                             requireNotNull(vedtaksvurderingService.hentVedtak(behandlingId)).also { vedtak ->
                                 postTilBehandling(behandlingId, vedtak.id)
                             }

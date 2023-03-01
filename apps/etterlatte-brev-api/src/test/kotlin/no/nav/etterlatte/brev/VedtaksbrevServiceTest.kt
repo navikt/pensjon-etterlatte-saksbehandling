@@ -32,7 +32,7 @@ import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.Bruker
@@ -331,7 +331,7 @@ internal class VedtaksbrevServiceTest {
         }
     }
 
-    private fun opprettVedtak() = mockk<Vedtak> {
+    private fun opprettVedtak() = mockk<VedtakDto> {
         every { behandling.id } returns BEHANDLING_ID
         every { sak.ident } returns "ident"
         every { vedtakFattet } returns VedtakFattet("Z12345", "ansvarlig enhet", ZonedDateTime.now())

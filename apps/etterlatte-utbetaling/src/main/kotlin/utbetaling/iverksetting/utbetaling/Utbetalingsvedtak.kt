@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -14,12 +14,12 @@ data class Utbetalingsvedtak(
     val attestasjon: Attestasjon
 ) {
     companion object {
-        fun fra(vedtak: Vedtak) =
+        fun fra(vedtakDto: VedtakDto) =
             Utbetalingsvedtak(
-                vedtakId = vedtak.vedtakId,
-                sak = Sak(vedtak.sak.ident, vedtak.sak.id, Saktype.fraString(vedtak.sak.sakType.toString())),
-                behandling = Behandling(type = vedtak.behandling.type, id = vedtak.behandling.id),
-                pensjonTilUtbetaling = vedtak.pensjonTilUtbetaling!!.map {
+                vedtakId = vedtakDto.vedtakId,
+                sak = Sak(vedtakDto.sak.ident, vedtakDto.sak.id, Saktype.fraString(vedtakDto.sak.sakType.toString())),
+                behandling = Behandling(type = vedtakDto.behandling.type, id = vedtakDto.behandling.id),
+                pensjonTilUtbetaling = vedtakDto.utbetalingsperioder.map {
                     Utbetalingsperiode(
                         id = it.id,
                         periode = Periode(
@@ -30,13 +30,13 @@ data class Utbetalingsvedtak(
                         type = it.type.toUtbetalingsperiodeType()
                     )
                 },
-                vedtakFattet = vedtak.vedtakFattet?.let {
+                vedtakFattet = vedtakDto.vedtakFattet?.let {
                     VedtakFattet(
                         ansvarligSaksbehandler = it.ansvarligSaksbehandler,
                         ansvarligEnhet = it.ansvarligEnhet
                     )
                 } ?: throw Exception("Mangler saksbehandler og enhet på vedtak"),
-                attestasjon = vedtak.attestasjon?.let {
+                attestasjon = vedtakDto.attestasjon?.let {
                     Attestasjon(
                         attestant = it.attestant,
                         attesterendeEnhet = it.attesterendeEnhet

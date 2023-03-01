@@ -1,9 +1,10 @@
-package no.nav.etterlatte.vedtaksvurdering
+package vedtaksvurdering.rivers
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
+import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -31,7 +32,7 @@ internal class LesIverksattVedtakmeldingTest {
         val sakIdVal = 1234L
         val vedtakIdVal = 1L
         val behandlingIdSlot = slot<UUID>()
-        every { vedtaksvurderingServiceMock.lagreIverksattVedtak(capture(behandlingIdSlot)) } returns Unit
+        every { vedtaksvurderingServiceMock.iverksattVedtak(capture(behandlingIdSlot)) } returns mockk()
         every { vedtaksvurderingServiceMock.hentVedtak(behandlingIdVal) } returns mockk {
             every { sakId } returns sakIdVal
             every { behandlingId } returns behandlingIdVal

@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
@@ -100,8 +100,8 @@ class VedtakMottaker(
 
     private fun lesVedtak(packet: JsonMessage): Utbetalingsvedtak =
         try {
-            val vedtak: Vedtak = objectMapper.readValue(packet["vedtak"].toJson())
-            Utbetalingsvedtak.fra(vedtak)
+            val vedtakDto: VedtakDto = objectMapper.readValue(packet["vedtak"].toJson())
+            Utbetalingsvedtak.fra(vedtakDto)
         } catch (e: Exception) {
             throw KunneIkkeLeseVedtakException(e)
         }

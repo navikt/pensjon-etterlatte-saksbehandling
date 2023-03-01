@@ -25,8 +25,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
@@ -77,18 +76,17 @@ internal class JournalfoerVedtaksbrevTest {
 
         val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        val vedtakCapture = slot<Vedtak>()
-        verify(exactly = 1) { vedtaksbrevService.journalfoerVedtaksbrev(capture(vedtakCapture)) }
+        val vedtakDtoCapture = slot<VedtakDto>()
+        verify(exactly = 1) { vedtaksbrevService.journalfoerVedtaksbrev(capture(vedtakDtoCapture)) }
 
-        val vedtakActual = vedtakCapture.captured
+        val vedtakActual = vedtakDtoCapture.captured
 
         assertEquals(vedtak.vedtakId, vedtakActual.vedtakId)
-        assertEquals(vedtak.virk, vedtakActual.virk)
+        assertEquals(vedtak.virkningstidspunkt, vedtakActual.virkningstidspunkt)
         assertEquals(vedtak.sak, vedtakActual.sak)
         assertEquals(vedtak.behandling, vedtakActual.behandling)
         assertEquals(vedtak.type, vedtakActual.type)
-        assertEquals(vedtak.grunnlag, vedtakActual.grunnlag)
-        assertEquals(vedtak.pensjonTilUtbetaling, vedtakActual.pensjonTilUtbetaling)
+        assertEquals(vedtak.utbetalingsperioder, vedtakActual.utbetalingsperioder)
         assertEquals(vedtak.vedtakFattet!!.ansvarligSaksbehandler, vedtakActual.vedtakFattet!!.ansvarligSaksbehandler)
         assertEquals(vedtak.vedtakFattet!!.ansvarligEnhet, vedtakActual.vedtakFattet!!.ansvarligEnhet)
         assertEquals(vedtak.attestasjon!!.attestant, vedtakActual.attestasjon!!.attestant)
@@ -118,17 +116,14 @@ internal class JournalfoerVedtaksbrevTest {
         verify { vedtaksbrevService wasNot Called }
     }
 
-    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): Vedtak {
-        return Vedtak(
+    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {
+        return VedtakDto(
             vedtakId = 1L,
-            virk = Periode(YearMonth.now(), YearMonth.now().plusYears(2)),
+            virkningstidspunkt = YearMonth.now(),
             sak = Sak("Z123456", SakType.BARNEPENSJON, 2L),
             behandling = Behandling(behandlingType, UUID.randomUUID()),
             type = VedtakType.INNVILGELSE,
-            grunnlag = emptyList(),
-            vilkaarsvurdering = null,
-            beregning = null,
-            pensjonTilUtbetaling = emptyList(),
+            utbetalingsperioder = emptyList(),
             vedtakFattet = VedtakFattet("Z00000", "1234", nowNorskTid()),
             attestasjon = Attestasjon("Z00000", "1234", nowNorskTid())
         )

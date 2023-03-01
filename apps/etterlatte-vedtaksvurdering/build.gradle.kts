@@ -29,5 +29,6 @@ dependencies {
 
     testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
 }

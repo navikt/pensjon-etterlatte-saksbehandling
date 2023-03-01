@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
@@ -72,8 +72,8 @@ class VedtaksbrevService(
         }
     }
 
-    fun journalfoerVedtaksbrev(vedtak: Vedtak): Pair<Brev, JournalpostResponse> {
-        val behandlingId = vedtak.behandling.id
+    fun journalfoerVedtaksbrev(vedtakDto: VedtakDto): Pair<Brev, JournalpostResponse> {
+        val behandlingId = vedtakDto.behandling.id
 
         val vedtaksbrev = hentVedtaksbrev(behandlingId)
             ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
@@ -82,7 +82,7 @@ class VedtaksbrevService(
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
 
-        val response = dokarkivService.journalfoer(vedtaksbrev, vedtak)
+        val response = dokarkivService.journalfoer(vedtaksbrev, vedtakDto)
 
         db.setJournalpostId(vedtaksbrev.id, response.journalpostId)
         db.oppdaterStatus(vedtaksbrev.id, Status.JOURNALFOERT, response.toJson())

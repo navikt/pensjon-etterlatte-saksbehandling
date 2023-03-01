@@ -1,20 +1,25 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
+import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -23,41 +28,13 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
+import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
+import java.time.ZonedDateTime
 import java.util.*
-import no.nav.etterlatte.vedtaksvurdering.Vedtak as VedtakEntity
-
-class KanIkkeEndreFattetVedtak(vedtak: VedtakEntity) :
-    Exception("Vedtak ${vedtak.id} kan ikke oppdateres fordi det allerede er fattet") {
-    val vedtakId: Long = vedtak.id
-}
-
-class VedtakKanIkkeFattes(vedtak: VedtakEntity) : Exception("Vedtak ${vedtak.id} kan ikke fattes") {
-    val vedtakId: Long = vedtak.id
-}
-
-class VedtakKanIkkeAttesteresAlleredeAttestert(vedtak: Vedtak) :
-    Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det allerede er attestert") {
-    val vedtakId: Long = vedtak.vedtakId
-}
-
-class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: Vedtak) :
-    Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det ikke er fattet") {
-    val vedtakId: Long = vedtak.vedtakId
-}
-
-class VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak: VedtakEntity) :
-    Exception("Vedtak ${vedtak.id} kan ikke underkjennes da det ikke er fattet") {
-    val vedtakId: Long = vedtak.id
-}
-
-class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: VedtakEntity) :
-    Exception("Vedtak ${vedtak.id} kan ikke underkjennes da det allerede er attestert") {
-    val vedtakId: Long = vedtak.id
-}
-
-object BehandlingstilstandException : IllegalStateException("Statussjekk for behandling feilet")
 
 class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository,
@@ -67,281 +44,352 @@ class VedtaksvurderingService(
     private val sendToRapid: (String, UUID) -> Unit,
     private val saksbehandlere: Map<String, String>
 ) {
+    private val logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
 
-    fun lagreIverksattVedtak(behandlingId: UUID) {
-        repository.hentVedtak(behandlingId)?.also {
-            val iverksattTidspunkt = Tidspunkt.now().toLocalDatetimeUTC()
-            repository.lagreIverksattVedtak(behandlingId)
-            val detaljertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-            val statistikkMelding = lagStatistikkMelding(
-                vedtakhendelse = KafkaHendelseType.IVERKSATT,
-                vedtak = detaljertVedtak,
-                tekniskTid = iverksattTidspunkt
-            )
-            sendToRapid(statistikkMelding, behandlingId)
-        }
-    }
-
-    fun hentVedtak(behandlingId: UUID): VedtakEntity? {
+    fun hentVedtak(behandlingId: UUID): Vedtak? {
+        logger.info("Henter vedtak for behandling med behandlingId=$behandlingId")
         return repository.hentVedtak(behandlingId)
     }
 
-    fun vedtakErLoependePaaDato(sakId: Long, dato: LocalDate): LoependeYtelseDTO {
-        val alleVedtakForSak = repository.hentVedtakForSak(sakId)
+    private fun hentVedtakNonNull(behandlingId: UUID): Vedtak {
+        return requireNotNull(hentVedtak(behandlingId)) { "Vedtak for behandling $behandlingId finnes ikke" }
+    }
 
+    fun sjekkOmVedtakErLoependePaaDato(sakId: Long, dato: LocalDate): LoependeYtelseDTO {
+        logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
+        val alleVedtakForSak = repository.hentVedtakForSak(sakId)
         return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)
     }
 
     suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, bruker: Bruker): Vedtak {
         val vedtak = hentVedtak(behandlingId)
-        if (vedtak?.vedtakFattet == true) {
-            throw KanIkkeEndreFattetVedtak(vedtak)
-        }
+        if (vedtak?.isVedtakFattet() == true) throw KanIkkeEndreFattetVedtak(vedtak)
 
         val (beregning, vilkaarsvurdering, behandling) = hentDataForVedtak(behandlingId, bruker)
-        val virk = vilkaarsvurdering?.virkningstidspunkt?.atDay(1) ?: behandling.virkningstidspunkt!!.dato.atDay(1)
+        val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato) {
+            "Behandling med behandlingId=$behandlingId mangler virkningstidspunkt"
+        }
 
-        if (vedtak == null) {
-            val sak = behandlingKlient.hentSak(behandling.sak, bruker)
-            repository.opprettVedtak(
-                behandlingId,
-                behandling.sak,
-                behandling.soeker!!,
-                sak.sakType,
-                behandling.behandlingType,
-                virk,
-                beregning,
-                vilkaarsvurdering
-            )
+        return if (vedtak == null) {
+            logger.info("Oppretter vedtak for behandling med behandlingId=$behandlingId")
+            opprettVedtak(behandling, virkningstidspunkt, beregning, vilkaarsvurdering)
         } else {
-            repository.oppdaterVedtak(
-                behandlingId,
-                beregning,
-                vilkaarsvurdering,
-                virk
-            )
-        }
-        return hentFellesVedtakMedUtbetalingsperioder(behandlingId)!!
-    }
-
-    suspend fun hentDataForVedtak(
-        behandlingId: UUID,
-        bruker: Bruker
-    ): Triple<Beregningsresultat?, VilkaarsvurderingDto?, DetaljertBehandling> {
-        return coroutineScope {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-            if (behandling.behandlingType.trengerIkkeVilkaarsvurdering()) {
-                val beregningDTO = beregningKlient.hentBeregning(behandlingId, bruker)
-                val beregningsresultat = Beregningsresultat.fraDto(beregningDTO)
-                return@coroutineScope Triple(beregningsresultat, null, behandling)
-            }
-
-            val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
-
-            when (vilkaarsvurdering?.resultat?.utfall) {
-                VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(null, vilkaarsvurdering, behandling)
-                VilkaarsvurderingUtfall.OPPFYLT -> {
-                    val beregningDTO = beregningKlient.hentBeregning(behandlingId, bruker)
-                    val beregningsResultat = Beregningsresultat.fraDto(beregningDTO)
-                    Triple(beregningsResultat, vilkaarsvurdering, behandling)
-                }
-
-                null -> throw IllegalArgumentException(
-                    "Resultat av vilkårsvurdering er null for behandling $behandlingId"
-                )
-            }
+            // TODO bør denne oppdatere utbetalingslinjer også?
+            logger.info("Oppdaterer vedtak for behandling med behandlingId=$behandlingId")
+            oppdaterVedtak(vedtak, virkningstidspunkt, beregning, vilkaarsvurdering)
         }
     }
 
-    fun hentFellesvedtak(behandlingId: UUID): Vedtak? {
-        return hentFellesVedtakMedUtbetalingsperioder(behandlingId)
-    }
+    suspend fun fattVedtak(behandlingId: UUID, bruker: Bruker): Vedtak {
+        logger.info("Fatter vedtak for behandling med behandlingId=$behandlingId")
+        val vedtak = hentVedtakNonNull(behandlingId)
 
-    private fun hentFellesVedtakMedUtbetalingsperioder(behandlingId: UUID): Vedtak? {
-        return repository.hentVedtak(behandlingId)?.let {
-            it.toDTO(repository.hentUtbetalingsPerioder(it.id))
-        }
-    }
+        val harUgyldigBehandlingTilstand = !behandlingKlient.fattVedtak(behandlingId, bruker)
+        if (harUgyldigBehandlingTilstand) throw BehandlingstilstandException(vedtak)
 
-    suspend fun fattVedtak(
-        behandlingId: UUID,
-        bruker: Bruker
-    ): Vedtak {
-        if (!behandlingKlient.fattVedtak(behandlingId, bruker)) {
-            throw BehandlingstilstandException
-        }
+        val vedtakErAlleredeFattet = vedtak.isVedtakFattet()
+        if (vedtakErAlleredeFattet) throw VedtakKanIkkeFattesAlleredeFattet(vedtak)
 
-        val v = requireNotNull(hentVedtak(behandlingId)).also {
-            if (it.vedtakFattet == true) throw KanIkkeEndreFattetVedtak(it)
-        }
+        val innvilgetVedtakManglerBeregning =
+            vedtak.vedtakType() == VedtakType.INNVILGELSE && vedtak.beregning == null
+        if (innvilgetVedtakManglerBeregning) throw VedtakKanIkkeFattes(vedtak)
 
-        requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId)).also {
-            if (it.type == VedtakType.INNVILGELSE) {
-                if (it.beregning == null) throw VedtakKanIkkeFattes(v)
-            }
-            if (it.vilkaarsvurdering == null && !it.behandling.type.trengerIkkeVilkaarsvurdering()) {
-                throw VedtakKanIkkeFattes(v)
-            }
-            val saksbehandler = bruker.ident()
-            val saksbehandlerEnhet: String = bruker.saksbehandlerEnhet(saksbehandlere)
+        val vedtakManglerVilkaarsvurdering =
+            vedtak.vilkaarsvurdering == null && vedtak.behandlingType != BehandlingType.MANUELT_OPPHOER
+        if (vedtakManglerVilkaarsvurdering) throw VedtakKanIkkeFattes(vedtak)
 
-            repository.fattVedtak(saksbehandler, saksbehandlerEnhet, behandlingId)
-        }
-
-        val fattetVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-        val vedtakHendelse = VedtakHendelse(
-            vedtakId = fattetVedtak.vedtakId,
-            inntruffet = fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
-            saksbehandler = fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
+        val fattetVedtak = repository.fattVedtak(
+            behandlingId,
+            VedtakFattet(bruker.ident(), bruker.saksbehandlerEnhet(saksbehandlere), ZonedDateTime.now())
         )
-        behandlingKlient.fattVedtak(behandlingId, bruker, vedtakHendelse)
 
-        val fattetTid = fattetVedtak.vedtakFattet?.tidspunkt?.toLocalDateTime()!!
-        val statistikkmelding = lagStatistikkMelding(KafkaHendelseType.FATTET, fattetVedtak, fattetTid)
-        sendToRapid(statistikkmelding, behandlingId)
+        behandlingKlient.fattVedtak(
+            behandlingId = behandlingId,
+            bruker = bruker,
+            vedtakHendelse = VedtakHendelse(
+                vedtakId = fattetVedtak.id,
+                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
+                saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler
+            )
+        )
+
+        sendToRapid(
+            lagStatistikkMelding(
+                vedtakhendelse = KafkaHendelseType.FATTET,
+                vedtak = fattetVedtak,
+                tekniskTid = fattetVedtak.vedtakFattet.tidspunkt.toLocalDateTime()
+            ),
+            behandlingId
+        )
 
         return fattetVedtak
     }
 
-    suspend fun attesterVedtak(
-        behandlingId: UUID,
-        bruker: Bruker
-    ): Vedtak {
-        if (!behandlingKlient.attester(behandlingId, bruker)) {
-            throw BehandlingstilstandException
-        }
+    suspend fun attesterVedtak(behandlingId: UUID, bruker: Bruker): Vedtak {
+        logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
+        val vedtak = hentVedtakNonNull(behandlingId)
 
-        val vedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId)).also {
-            requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
-            requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
-        }
-        val saksbehandler = bruker.ident()
-        val saksbehandlerEnhet: String = bruker.saksbehandlerEnhet(saksbehandlere)
+        val harUgyldigBehandlingTilstand = !behandlingKlient.attester(behandlingId, bruker)
+        if (harUgyldigBehandlingTilstand) throw BehandlingstilstandException(vedtak)
 
-        repository.attesterVedtak(
-            saksbehandler,
-            saksbehandlerEnhet,
+        val vedtakErIkkeFattet = !vedtak.isVedtakFattet()
+        if (vedtakErIkkeFattet) throw VedtakKanIkkeAttesteresFoerDetFattes(vedtak)
+
+        val vedtakErAlleredeAttestert = vedtak.isVedtakAttestert()
+        if (vedtakErAlleredeAttestert) throw VedtakKanIkkeAttesteresAlleredeAttestert(vedtak)
+
+        val attestertVedtak = repository.attesterVedtak(
             behandlingId,
-            vedtak.vedtakId,
-            utbetalingsperioderFraVedtak(vedtak)
+            Attestasjon(bruker.ident(), bruker.saksbehandlerEnhet(saksbehandlere), ZonedDateTime.now())
         )
-        val attestertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-        val vedtakHendelse = VedtakHendelse(
-            vedtakId = attestertVedtak.vedtakId,
-            inntruffet = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!,
-            saksbehandler = attestertVedtak.attestasjon?.attestant!!
+
+        behandlingKlient.attester(
+            behandlingId,
+            bruker,
+            VedtakHendelse(
+                vedtakId = attestertVedtak.id,
+                inntruffet = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!,
+                saksbehandler = attestertVedtak.attestasjon.attestant
+            )
         )
-        behandlingKlient.attester(behandlingId, bruker, vedtakHendelse)
-        val attestertTid = attestertVedtak.attestasjon?.tidspunkt?.toLocalDateTime()!!
-        val message = lagStatistikkMelding(KafkaHendelseType.ATTESTERT, attestertVedtak, attestertTid)
-        sendToRapid(message, behandlingId)
+
+        sendToRapid(
+            lagStatistikkMelding(
+                vedtakhendelse = KafkaHendelseType.ATTESTERT,
+                vedtak = attestertVedtak,
+                tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDateTime()
+            ),
+            behandlingId
+        )
 
         return attestertVedtak
-    }
-
-    private fun requireThat(b: Boolean, function: () -> Exception) {
-        if (!b) throw function()
     }
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,
         bruker: Bruker,
-        begrunnelse: UnderkjennVedtakClientRequest
-    ): VedtakEntity {
-        if (!behandlingKlient.underkjenn(behandlingId, bruker)) {
-            throw BehandlingstilstandException
-        }
+        begrunnelse: UnderkjennVedtakDto
+    ): Vedtak {
+        logger.info("Underkjenner vedtak for behandling med behandlingId=$behandlingId")
+        val vedtak = hentVedtakNonNull(behandlingId)
 
-        requireNotNull(hentVedtak(behandlingId)).also {
-            require(it.vedtakFattet == true) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
-            require(it.attestant == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
-        }
-        repository.underkjennVedtak(behandlingId)
-        val underkjentVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
+        val harUgyldigBehandlingTilstand = !behandlingKlient.underkjenn(behandlingId, bruker)
+        if (harUgyldigBehandlingTilstand) throw BehandlingstilstandException(vedtak)
+
+        val vedtakErIkkeFattet = !vedtak.isVedtakFattet()
+        if (vedtakErIkkeFattet) throw VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak)
+
+        val vedtakErAlleredeAttestert = vedtak.isVedtakAttestert()
+        if (vedtakErAlleredeAttestert) throw VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak)
+
+        // TODO hvor blir det av begrunnelsen? bør ikke den lagres her et sted?
+        val underkjentVedtak = repository.underkjennVedtak(behandlingId)
+
         val underkjentTid = Tidspunkt.now().toLocalDatetimeUTC()
-        val vedtakHendelse = VedtakHendelse(
-            vedtakId = underkjentVedtak.vedtakId,
-            inntruffet = underkjentTid.toNorskTidspunkt(),
-            saksbehandler = bruker.ident(),
-            kommentar = begrunnelse.kommentar,
-            valgtBegrunnelse = begrunnelse.valgtBegrunnelse
+
+        behandlingKlient.underkjenn(
+            behandlingId,
+            bruker,
+            VedtakHendelse(
+                vedtakId = underkjentVedtak.id,
+                inntruffet = underkjentTid.toNorskTidspunkt(),
+                saksbehandler = bruker.ident(),
+                kommentar = begrunnelse.kommentar,
+                valgtBegrunnelse = begrunnelse.valgtBegrunnelse
+            )
         )
 
-        behandlingKlient.underkjenn(behandlingId, bruker, vedtakHendelse)
-        val message = lagStatistikkMelding(KafkaHendelseType.UNDERKJENT, underkjentVedtak, underkjentTid)
-        sendToRapid(message, behandlingId)
+        sendToRapid(lagStatistikkMelding(KafkaHendelseType.UNDERKJENT, underkjentVedtak, underkjentTid), behandlingId)
+
         return repository.hentVedtak(behandlingId)!!
     }
 
-    private fun utbetalingsperioderFraVedtak(vedtak: Vedtak) =
-        utbetalingsperioderFraVedtak(vedtak.type, vedtak.virk, vedtak.beregning?.sammendrag ?: emptyList())
+    fun iverksattVedtak(behandlingId: UUID): Vedtak {
+        logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
+        val vedtak = hentVedtakNonNull(behandlingId)
 
-    fun utbetalingsperioderFraVedtak(
-        vedtakType: VedtakType,
-        virk: Periode,
-        beregning: List<Beregningsperiode>
-    ): List<Utbetalingsperiode> {
-        if (vedtakType != VedtakType.INNVILGELSE) {
-            return listOf(
-                Utbetalingsperiode(
-                    0,
-                    virk.copy(tom = null),
-                    null,
-                    UtbetalingsperiodeType.OPPHOER
-                )
-            )
-        }
+        // TODO ingen pre-sjekker mot behandling på denne?
 
-        val perioderFraBeregning =
-            beregning.map { Utbetalingsperiode(0, it.periode, it.beloep, UtbetalingsperiodeType.UTBETALING) }
-                .sortedBy { it.periode.fom }
+        val vedtakErIkkeAttestert = !vedtak.isVedtakAttestert()
+        if (vedtakErIkkeAttestert) throw VedtakKanIkkeSettesTilIverksattFoerDetAttesteres(vedtak)
 
-        val manglendePerioderMellomBeregninger = perioderFraBeregning
-            .map { it.periode }
-            .zipWithNext()
-            .map { requireNotNull(it.first.tom).plusMonths(1) to it.second.fom.minusMonths(1) }
-            .filter { !it.second!!.isBefore(it.first) }
-            .map { Periode(it.first, it.second) }
-            .map { Utbetalingsperiode(0, it, null, UtbetalingsperiodeType.OPPHOER) }
-        val fomBeregninger = perioderFraBeregning.firstOrNull()?.periode?.fom
-        val manglendeStart = if (fomBeregninger == null || virk.fom.isBefore(fomBeregninger)) {
-            Utbetalingsperiode(
-                0,
-                Periode(virk.fom, fomBeregninger?.minusMonths(1)),
-                null,
-                UtbetalingsperiodeType.OPPHOER
-            )
-        } else {
-            null
-        }
-        val manglendeSlutt = perioderFraBeregning.lastOrNull()?.periode?.tom?.let {
-            Utbetalingsperiode(
-                0,
-                Periode(it.plusMonths(1), null),
-                null,
-                UtbetalingsperiodeType.OPPHOER
-            )
-        }
+        val vedtakErAlleredeIverksatt = vedtak.isVedtakIverksatt()
+        if (vedtakErAlleredeIverksatt) throw VedtakKanIkkeSettesTilIverksattAlleredeIverksatt(vedtak)
 
-        return (perioderFraBeregning + manglendePerioderMellomBeregninger + manglendeStart + manglendeSlutt)
-            .filterNotNull()
-            .sortedBy { it.periode.fom }
+        val iverksattVedtak = repository.iverksattVedtak(behandlingId)
+
+        sendToRapid(
+            lagStatistikkMelding(
+                vedtakhendelse = KafkaHendelseType.IVERKSATT,
+                vedtak = iverksattVedtak,
+                tekniskTid = Tidspunkt.now().toLocalDatetimeUTC()
+            ),
+            behandlingId
+        )
+
+        return iverksattVedtak
     }
+
+    private fun opprettVedtak(
+        behandling: DetaljertBehandling,
+        virkningstidspunkt: YearMonth,
+        beregning: BeregningDTO?,
+        vilkaarsvurdering: VilkaarsvurderingDto?
+    ): Vedtak {
+        val opprettetVedtak = OpprettVedtak(
+            soeker = behandling.soeker.let { Foedselsnummer.of(it) },
+            sakId = behandling.sak,
+            sakType = behandling.sakType,
+            behandlingId = behandling.id,
+            behandlingType = behandling.behandlingType,
+            virkningstidspunkt = virkningstidspunkt,
+            status = VedtakStatus.OPPRETTET,
+            beregning = beregning?.toObjectNode(),
+            vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
+            utbetalingsperioder = opprettUtbetalingsperioder(
+                behandlingType = behandling.behandlingType,
+                virkningstidspunkt = virkningstidspunkt,
+                vilkaarsvurdering = vilkaarsvurdering,
+                beregning = beregning
+            )
+        )
+
+        return repository.opprettVedtak(opprettetVedtak)
+    }
+
+    private fun oppdaterVedtak(
+        vedtak: Vedtak,
+        virkningstidspunkt: YearMonth,
+        beregning: BeregningDTO?,
+        vilkaarsvurdering: VilkaarsvurderingDto?
+    ): Vedtak {
+        val oppdatertVedtak = vedtak.copy(
+            virkningstidspunkt = virkningstidspunkt,
+            beregning = beregning?.toObjectNode(),
+            vilkaarsvurdering = vilkaarsvurdering?.toObjectNode()
+        )
+        return repository.oppdaterVedtak(oppdatertVedtak)
+    }
+
+    private fun vedtakType(
+        vilkaarsvurdering: VilkaarsvurderingDto?,
+        behandlingType: BehandlingType
+    ): VedtakType {
+        return when (behandlingType) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                when (requireNotNull(vilkaarsvurdering?.resultat?.utfall) { "Mangler vilkårsvurdering" }) {
+                    VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.INNVILGELSE
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.AVSLAG
+                }
+            }
+            BehandlingType.REVURDERING -> {
+                when (requireNotNull(vilkaarsvurdering?.resultat?.utfall) { "Mangler vilkårsvurdering" }) {
+                    VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.INNVILGELSE
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.OPPHOER
+                }
+            }
+            BehandlingType.MANUELT_OPPHOER -> VedtakType.OPPHOER
+            BehandlingType.OMREGNING -> VedtakType.INNVILGELSE
+        }
+    }
+
+    private fun opprettUtbetalingsperioder(
+        behandlingType: BehandlingType,
+        virkningstidspunkt: YearMonth,
+        vilkaarsvurdering: VilkaarsvurderingDto?,
+        beregning: BeregningDTO?
+    ): List<Utbetalingsperiode> {
+        val vedtakType = vedtakType(vilkaarsvurdering, behandlingType)
+        return when (vedtakType) {
+            VedtakType.INNVILGELSE -> {
+                val nonNullBeregning = requireNotNull(beregning) { "Mangler beregning" }
+                nonNullBeregning.beregningsperioder.map {
+                    Utbetalingsperiode(
+                        id = 0,
+                        periode = Periode(it.datoFOM, it.datoTOM),
+                        beloep = it.utbetaltBeloep.toBigDecimal(),
+                        type = UtbetalingsperiodeType.UTBETALING
+                    )
+                }
+            }
+            VedtakType.OPPHOER ->
+                listOf(
+                    Utbetalingsperiode(
+                        id = 0,
+                        periode = Periode(virkningstidspunkt, null),
+                        beloep = BigDecimal.ZERO,
+                        type = UtbetalingsperiodeType.OPPHOER
+                    )
+                )
+            VedtakType.AVSLAG -> emptyList()
+            VedtakType.ENDRING -> throw NotImplementedError("VedtakType.ENDRING er ikke støttet")
+        }
+    }
+
+    private suspend fun hentDataForVedtak(
+        behandlingId: UUID,
+        bruker: Bruker
+    ): Triple<BeregningDTO?, VilkaarsvurderingDto?, DetaljertBehandling> {
+        return coroutineScope {
+            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+
+            when (behandling.behandlingType) {
+                BehandlingType.MANUELT_OPPHOER -> {
+                    val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
+                    Triple(beregning, null, behandling)
+                }
+                else -> {
+                    val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
+                    when (vilkaarsvurdering.resultat?.utfall) {
+                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(null, vilkaarsvurdering, behandling)
+                        VilkaarsvurderingUtfall.OPPFYLT -> {
+                            val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
+                            Triple(beregning, vilkaarsvurdering, behandling)
+                        }
+                        null -> throw IllegalArgumentException(
+                            "Resultat av vilkårsvurdering er null for behandling $behandlingId"
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak, tekniskTid: LocalDateTime) =
+        JsonMessage.newMessage(
+            mapOf(
+                EVENT_NAME_KEY to vedtakhendelse.toString(),
+                "vedtak" to vedtak.toDto(),
+                TEKNISK_TID_KEY to tekniskTid
+            )
+        ).toJson()
 }
 
-private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak, tekniskTid: LocalDateTime) =
-    JsonMessage.newMessage(
-        mapOf(
-            EVENT_NAME_KEY to vedtakhendelse.toString(),
-            "vedtak" to vedtak,
-            TEKNISK_TID_KEY to tekniskTid
-        )
-    ).toJson()
+class KanIkkeEndreFattetVedtak(vedtak: Vedtak) :
+    Exception("Vedtak ${vedtak.id} kan ikke oppdateres fordi det allerede er fattet")
 
-data class VedtakHendelse(
-    val vedtakId: Long,
-    val inntruffet: Tidspunkt,
-    val saksbehandler: String? = null,
-    val kommentar: String? = null,
-    val valgtBegrunnelse: String? = null
-)
+class VedtakKanIkkeFattes(vedtak: Vedtak) : Exception("Vedtak ${vedtak.id} kan ikke fattes")
+
+class VedtakKanIkkeFattesAlleredeFattet(vedtak: Vedtak) :
+    Exception("Vedtak ${vedtak.id} kan ikke fattes da det allerede er fattet")
+
+class VedtakKanIkkeAttesteresAlleredeAttestert(vedtak: Vedtak) :
+    Exception("Vedtak ${vedtak.id} kan ikke attesteres da det allerede er attestert")
+
+class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: Vedtak) :
+    Exception("Vedtak ${vedtak.id} kan ikke attesteres da det ikke er fattet")
+
+class VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak: Vedtak) :
+    Exception("Vedtak ${vedtak.id} kan ikke underkjennes da det ikke er fattet")
+
+class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: Vedtak) :
+    Exception("Vedtak ${vedtak.id} kan ikke underkjennes da det allerede er attestert")
+
+class VedtakKanIkkeSettesTilIverksattFoerDetAttesteres(vedtak: Vedtak) :
+    Exception("Vedtak ${vedtak.id} kan ikke settes til iverksatt da det ikke er attestert")
+
+class VedtakKanIkkeSettesTilIverksattAlleredeIverksatt(vedtak: Vedtak) :
+    Exception("Vedtak ${vedtak.id} kan ikke settes til iverksatt da det allerede er satt til iverksatt")
+
+class BehandlingstilstandException(vedtak: Vedtak) :
+    IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")

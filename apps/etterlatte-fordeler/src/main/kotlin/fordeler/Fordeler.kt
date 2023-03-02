@@ -76,8 +76,10 @@ internal class Fordeler(
                     "Feil under deserialisering av søknad, soeknadId: ${packet.soeknadId()}" +
                         ". Sjekk sikkerlogg for detaljer."
                 )
+                throw e
             } catch (e: Exception) {
                 logger.error("Uhåndtert feilsituasjon soeknadId: ${packet.soeknadId()}", e)
+                throw e
             }
         }
 

@@ -52,18 +52,10 @@ class BehandlinghendelseRiver(
         withLogContext(packet.correlationId) {
             try {
                 val behandling: DetaljertBehandling = objectMapper.treeToValue(packet["behandling"])
-                val internBehandling: BehandlingIntern = BehandlingIntern(
-                    id = behandling.id,
-                    sakId = behandling.sak,
-                    behandlingOpprettet = behandling.behandlingOpprettet,
-                    sistEndret = behandling.sistEndret,
-                    status = behandling.status,
-                    type = behandling.behandlingType,
-                    persongalleri = behandling.toPersongalleri()
-                )
+                val behandlingIntern: BehandlingIntern = behandling.toInternBehandling()
                 val hendelse: BehandlingHendelse = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
                 val tekniskTid = parseTekniskTid(packet, logger)
-                service.registrerStatistikkForBehandlinghendelse(internBehandling, hendelse, tekniskTid)
+                service.registrerStatistikkForBehandlinghendelse(behandlingIntern, hendelse, tekniskTid)
                     ?.also {
                         context.publish(
                             mapOf(
@@ -95,6 +87,17 @@ data class BehandlingIntern(
     val type: BehandlingType,
     val persongalleri: Persongalleri
 )
+
+private fun DetaljertBehandling.toInternBehandling() =
+    BehandlingIntern(
+        id = id,
+        sakId = sak,
+        behandlingOpprettet = behandlingOpprettet,
+        sistEndret = sistEndret,
+        status = status,
+        type = behandlingType,
+        persongalleri = toPersongalleri()
+    )
 
 enum class BehandlingHendelse {
     OPPRETTET, AVBRUTT

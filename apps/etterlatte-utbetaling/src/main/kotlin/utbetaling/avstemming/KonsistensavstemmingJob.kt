@@ -56,7 +56,7 @@ class KonsistensavstemmingJob(
 
         fun run() {
             withLogContext {
-                val idag = LocalDate.now(norskKlokke(clock))
+                val idag = LocalDate.now(clock.norskKlokke())
                 kjoereplan.find { dato -> dato == idag }?.let {
                     if (leaderElection.isLeader()) {
                         log.info("Starter $jobbNavn")

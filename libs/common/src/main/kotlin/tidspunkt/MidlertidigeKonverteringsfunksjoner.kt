@@ -1,0 +1,1 @@
+package no.nav.etterlatte.libs.common.tidspunkt

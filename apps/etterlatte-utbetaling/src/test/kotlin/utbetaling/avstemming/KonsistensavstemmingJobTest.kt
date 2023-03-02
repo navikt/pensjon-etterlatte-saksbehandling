@@ -4,13 +4,13 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.utbetaling.common.februar
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.Clock
 import java.time.temporal.ChronoUnit
 
 internal class KonsistensavstemmingJobTest {
@@ -24,7 +24,7 @@ internal class KonsistensavstemmingJobTest {
         kjoereplan = setOf(datoEksekvering),
         leaderElection = leaderElection,
         jobbNavn = "jobb",
-        clock = Clock.fixed(datoEksekvering.atStartOfDay(norskTidssone).toInstant(), norskTidssone)
+        clock = fixedNorskTid(datoEksekvering.atStartOfDay(norskTidssone).toInstant())
     )
 
     @Test
@@ -65,7 +65,7 @@ internal class KonsistensavstemmingJobTest {
             kjoereplan = setOf(datoEksekvering),
             leaderElection = leaderElection,
             jobbNavn = "jobb",
-            clock = Clock.fixed(dagForTestMinusFemDager, norskTidssone)
+            clock = fixedNorskTid(dagForTestMinusFemDager)
         )
 
         konsistensavstemming.run()

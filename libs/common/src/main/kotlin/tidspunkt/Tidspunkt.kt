@@ -66,3 +66,4 @@ fun Tidspunkt.toNorskTid(): ZonedDateTime = ZonedDateTime.ofInstant(this.instant
 fun Tidspunkt.toTimestamp(): Timestamp = Timestamp.from(this.instant)
 fun Timestamp.toTidspunkt(): Tidspunkt = Tidspunkt(this.toInstant())
 fun Tidspunkt.toLocalDatetimeUTC(): LocalDateTime = LocalDateTime.ofInstant(this.instant, standardTidssoneUTC)
+fun Tidspunkt.toLocalDatetimeNorskTid(): LocalDateTime = LocalDateTime.ofInstant(this.instant, norskTidssone)

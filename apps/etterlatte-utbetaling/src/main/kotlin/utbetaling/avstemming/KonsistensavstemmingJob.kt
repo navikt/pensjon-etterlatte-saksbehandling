@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.slf4j.LoggerFactory
@@ -56,7 +56,7 @@ class KonsistensavstemmingJob(
 
         fun run() {
             withLogContext {
-                val idag = LocalDate.now(clock.withZone(norskTidssone))
+                val idag = LocalDate.now(norskKlokke(clock))
                 kjoereplan.find { dato -> dato == idag }?.let {
                     if (leaderElection.isLeader()) {
                         log.info("Starter $jobbNavn")

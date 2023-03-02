@@ -20,3 +20,5 @@ fun LocalDateTime.tilUTCTimestamp() =
     Timestamp.from(this.atZone(standardTidssoneUTC).toTidspunkt().instant)
 
 fun Timestamp.tilUTCLocalDateTime() = toTidspunkt().instant.atZone(standardTidssoneUTC).toLocalDateTime()
+
+fun Instant?.toLocalDateTimeNorskTid() = this?.let { LocalDateTime.ofInstant(it, norskTidssone) }

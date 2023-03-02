@@ -2,7 +2,7 @@ package no.nav.etterlatte.utbetaling.common
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.klokke
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import java.time.Clock
@@ -62,7 +62,7 @@ fun sisteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atEndOfMonth()
 
 fun LocalDate.toXMLDate(): XMLGregorianCalendar {
     return DatatypeFactory.newInstance()
-        .newXMLGregorianCalendar(GregorianCalendar.from(atStartOfDay(norskTidssone))).apply {
+        .newXMLGregorianCalendar(GregorianCalendar.from(midnattNorskTid())).apply {
             timezone = DatatypeConstants.FIELD_UNDEFINED
         }
 }

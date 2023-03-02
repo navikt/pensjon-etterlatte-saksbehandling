@@ -1,8 +1,8 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.common.tidsstempelMikroOppdrag
@@ -31,7 +31,7 @@ internal class AvstemmingsdataJaxbTest {
     fun `skal konvertere konsistensavstemmingsdata til gyldig xml`() {
         val idag = LocalDate.now()
         val konsistensavstemmingId = UUIDBase64()
-        val tidspunktAvstemmingTom = idag.minusDays(1).atTime(LocalTime.MAX).toTidspunkt(norskTidssone)
+        val tidspunktAvstemmingTom = idag.minusDays(1).atTime(LocalTime.MAX).toNorskTidspunkt()
         val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
         val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer)
         val konsistensavstemming = mockKonsistensavstemming(

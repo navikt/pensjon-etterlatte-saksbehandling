@@ -1,8 +1,7 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
@@ -258,7 +257,7 @@ internal class GrensesnittavstemmingDataMapperTest {
             14,
             0,
             0
-        ).minusDays(1).toTidspunkt(norskTidssone)
+        ).minusDays(1).toNorskTidspunkt()
 
         val til = LocalDateTime.of(
             2022,
@@ -267,7 +266,7 @@ internal class GrensesnittavstemmingDataMapperTest {
             22,
             0,
             0
-        ).plusHours(1).toTidspunkt(norskTidssone)
+        ).plusHours(1).toNorskTidspunkt()
 
         val utbetalinger = listOf(
             utbetaling(
@@ -278,7 +277,7 @@ internal class GrensesnittavstemmingDataMapperTest {
                     14,
                     0,
                     0
-                ).toTidspunkt(norskTidssone)
+                ).toNorskTidspunkt()
             ),
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
@@ -288,7 +287,7 @@ internal class GrensesnittavstemmingDataMapperTest {
                     14,
                     0,
                     0
-                ).plusDays(1).toTidspunkt(norskTidssone)
+                ).plusDays(1).toNorskTidspunkt()
             ),
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
@@ -298,7 +297,7 @@ internal class GrensesnittavstemmingDataMapperTest {
                     22,
                     0,
                     0
-                ).toTidspunkt(norskTidssone)
+                ).toNorskTidspunkt()
             ),
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
@@ -308,7 +307,7 @@ internal class GrensesnittavstemmingDataMapperTest {
                     14,
                     0,
                     0
-                ).plusHours(1).toTidspunkt(norskTidssone)
+                ).plusHours(1).toNorskTidspunkt()
             ),
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
@@ -319,7 +318,7 @@ internal class GrensesnittavstemmingDataMapperTest {
                     0,
                     0
                 )
-                    .plusMinutes(2).toTidspunkt(norskTidssone)
+                    .plusMinutes(2).toNorskTidspunkt()
             )
         )
 

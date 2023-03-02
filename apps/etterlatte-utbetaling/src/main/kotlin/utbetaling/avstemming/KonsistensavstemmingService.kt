@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZonedDateTime
 
 class KonsistensavstemmingService(
     private val utbetalingDao: UtbetalingDao,
@@ -185,7 +184,7 @@ class KonsistensavstemmingService(
 fun gjeldendeLinjerForEnDato(utbetalingslinjer: List<Utbetalingslinje>, dato: LocalDate): List<Utbetalingslinje> {
     val linjerSomErOpprettetOgIkkeAvsluttetPaaDato = utbetalingslinjer
         .filter {
-            it.opprettet.instant <= ZonedDateTime.of(dato, LocalTime.MIN, norskTidssone).toInstant()
+            it.opprettet.instant <= dato.midnattNorskTid().toInstant()
         } // 1
         .filter { (it.periode.til ?: dato) >= dato } // 2
 

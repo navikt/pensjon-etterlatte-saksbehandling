@@ -96,8 +96,7 @@ abstract class CommonFactory : BeanFactory {
         BehandlingsHendelser(
             rapid(),
             behandlingDao(),
-            dataSource(),
-            sakService()
+            dataSource()
         )
     }
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory by lazy {

@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
@@ -22,7 +23,6 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
-import no.nav.etterlatte.sak.SakService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -35,8 +35,7 @@ enum class BehandlingHendelseType {
 class BehandlingsHendelser(
     private val rapid: KafkaProdusent<String, String>,
     private val behandlingDao: BehandlingDao,
-    private val datasource: DataSource,
-    private val sakService: SakService
+    private val datasource: DataSource
 ) {
     private val kanal: Channel<Pair<UUID, BehandlingHendelseType>> = Channel(Channel.UNLIMITED)
     val nyHendelse: SendChannel<Pair<UUID, BehandlingHendelseType>> get() = kanal
@@ -80,7 +79,7 @@ class BehandlingsHendelser(
                     mapOf(
                         "behandlingId" to behandling.id,
                         CORRELATION_ID_KEY to getCorrelationId(),
-                        BehandlingGrunnlagEndret.behandlingObjectKey to behandling,
+                        BehandlingGrunnlagEndret.behandlingObjectKey to behandling.toDetaljertBehandling(),
                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak.id,
                         BehandlingGrunnlagEndret.sakObjectKey to behandling.sak,
                         BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet

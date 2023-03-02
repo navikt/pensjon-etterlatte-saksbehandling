@@ -73,6 +73,11 @@ class BehandlinghendelseRiver(
                     """.trimIndent(),
                     e
                 )
+                logger.error(
+                    """
+                    Feilet på behandlingid ${packet["behandling.id"]}
+                    """.trimIndent()
+                )
                 throw e
             }
         }

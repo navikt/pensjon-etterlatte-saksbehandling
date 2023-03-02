@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidLocalDateTime
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.module
 import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.sak.Saker
@@ -78,7 +78,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     BehandlingsBehov(
                         sak.id,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                        Tidspunkt.now().toNorskTidLocalDateTime().toString()
+                        Tidspunkt.now().toLocalDatetimeUTC().toString()
                     )
                 )
             }.let {

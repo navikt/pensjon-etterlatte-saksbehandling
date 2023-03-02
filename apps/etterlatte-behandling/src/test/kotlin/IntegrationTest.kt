@@ -44,7 +44,6 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidLocalDateTime
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
@@ -112,7 +111,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                     BehandlingsBehov(
                         1,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                        Tidspunkt.now().toNorskTidLocalDateTime().toString()
+                        Tidspunkt.now().toLocalDatetimeUTC().toString()
                     )
                 )
             }.let {

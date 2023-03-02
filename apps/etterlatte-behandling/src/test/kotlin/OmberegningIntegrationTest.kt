@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidLocalDateTime
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.sak.Sak
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -87,7 +87,7 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                     BehandlingsBehov(
                         1,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                        Tidspunkt.now().toNorskTidLocalDateTime().toString()
+                        Tidspunkt.now().toLocalDatetimeUTC().toString()
                     )
                 )
             }.let {

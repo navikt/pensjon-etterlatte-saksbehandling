@@ -13,7 +13,8 @@ fun buildTestApplicationConfigurationForOauth(port: Int, issuerId: String, clien
                         "issuer_name" to issuerId,
                         "accepted_audience" to clientId
                     )
-                )
+                ),
+                "AZUREAD_SAKSBEHANDLER_GROUPID" to "12345"
             )
         )
     )

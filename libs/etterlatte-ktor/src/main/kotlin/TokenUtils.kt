@@ -19,12 +19,14 @@ fun hentAccessToken(call: ApplicationCall) = call.request.parseAuthorizationHead
     }
 }
 
+inline val PipelineContext<*, ApplicationCall>.claims: JwtTokenClaims?
+    get() = call.principal<TokenValidationContextPrincipal>()
+        ?.context
+        ?.getJwtToken("azure")
+        ?.jwtTokenClaims
+
 inline val PipelineContext<*, ApplicationCall>.bruker: Bruker
     get() {
-        val claims = call.principal<TokenValidationContextPrincipal>()
-            ?.context
-            ?.getJwtToken("azure")
-            ?.jwtTokenClaims
         val oidSub = claims
             ?.let {
                 val oid = it.getClaim(Claims.oid)
@@ -40,4 +42,12 @@ inline val PipelineContext<*, ApplicationCall>.bruker: Bruker
         )
     }
 
-fun JwtTokenClaims.getClaim(claim: Claims) = getStringClaim(claim.name)
+enum class Group(val key: String) {
+    SAKSBEHANDLER("AZUREAD_SAKSBEHANDLER_GROUPID"),
+    ATTESTANT("AZUREAD_SAKSBEHANDLER_GROUPID")
+}
+
+fun PipelineContext<*, ApplicationCall>.harGruppetilgang(group: Group): Boolean =
+    claims?.containsClaim("groups", Tilgangsgrupper.get()[group]) ?: false
+
+fun JwtTokenClaims.getClaim(claim: Claims): String? = getStringClaim(claim.name)

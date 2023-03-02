@@ -13,6 +13,7 @@ import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.config.ApplicationConfig
+import io.ktor.server.config.tryGetString
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
@@ -25,6 +26,9 @@ import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.withContext
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
@@ -92,6 +96,7 @@ fun Application.restModule(
     routing {
         healthApi()
         authenticate {
+            attachContekst(grupper(config))
             route(routePrefix ?: "") {
                 routes()
             }
@@ -101,10 +106,25 @@ fun Application.restModule(
     }
 }
 
+fun grupper(config: ApplicationConfig): Map<Group, String> {
+    return mapOf(Group.SAKSBEHANDLER to config.tryGetString(Group.SAKSBEHANDLER.key)!!)
+}
+
 internal fun Throwable.erDeserialiseringsException(): Boolean {
     if (this is JacksonException) {
         return true
     }
 
     return this.cause?.erDeserialiseringsException() ?: false
+}
+
+object Tilgangsgrupper : ThreadLocal<Map<Group, String>>()
+
+private fun Route.attachContekst(groups: Map<Group, String>) {
+    intercept(Call) {
+        withContext(Dispatchers.Default + Tilgangsgrupper.asContextElement(value = groups)) {
+            proceed()
+        }
+        Tilgangsgrupper.remove()
+    }
 }

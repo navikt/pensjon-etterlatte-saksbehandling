@@ -105,7 +105,8 @@ internal class VilkaarsvurderingRoutesTest {
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01"
+                "NAVident" to "Saksbehandler01",
+                "groups" to listOf("12345")
             )
         ).serialize()
     }

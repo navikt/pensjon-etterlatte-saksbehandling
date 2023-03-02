@@ -15,8 +15,12 @@ import java.time.temporal.TemporalAdjuster
 import java.time.temporal.TemporalUnit
 
 abstract class TruncatedInstant(
+    /* TODO: På sikt bør denne bli protected.
+        At vi bruker instant som underliggjande representasjonsdetalj som ikkje skal lekke ut i resten av applikasjonen.
+        Vi har dog ein del opprydding å gjera før vi kan gjera den endringa
+     */
     @JsonValue
-    protected val instant: Instant
+    val instant: Instant
 ) : Temporal by instant,
     TemporalAdjuster by instant,
     Comparable<Instant> by instant,
@@ -31,7 +35,7 @@ abstract class TruncatedInstant(
  * Purpose is to unify the level of precision such that comparison of time behaves as expected on all levels (code/db).
  * Scenarios to avoid includes cases where timestamps of db-queries wraps around to the next day at different times
  * based on the precision at hand - which may lead to rows not being picked up as expected. This case is especially
- * relevant i.e when combining timestamp-db-fields (truncated by db) with Instants stored as json (not truncated by db).
+ * relevant i.e. when combining timestamp-db-fields (truncated by db) with Instants stored as json (not truncated by db).
  */
 class Tidspunkt
 @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

@@ -10,6 +10,7 @@ include(
     "apps:etterlatte-gyldig-soeknad",
     "apps:etterlatte-opplysninger-fra-soeknad",
     "apps:etterlatte-opplysninger-fra-pdl",
+    "apps:etterlatte-egne-ansatte-lytter",
     "apps:etterlatte-testdata",
     "apps:etterlatte-utbetaling",
     "apps:etterlatte-oppdater-behandling",

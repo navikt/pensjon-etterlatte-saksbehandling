@@ -1,0 +1,45 @@
+name: etterlatte-egne-ansatte-lytter
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+    inputs:
+      deploy-prod:
+        description: 'Deploy til produksjon'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
+  push:
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-egne-ansatte-lytter/**
+      - libs/common/**
+      - gradle/libs.versions.toml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-egne-ansatte-lytter/**
+      - libs/common/**
+      - gradle/libs.versions.toml
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.test.yaml
+    secrets: inherit
+
+  build:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/.build.yaml
+    secrets: inherit
+
+  deploy:
+    needs: build
+    uses: ./.github/workflows/.deploy.yaml
+    with:
+      image: ${{ needs.build.outputs.image }}
+    secrets: inherit

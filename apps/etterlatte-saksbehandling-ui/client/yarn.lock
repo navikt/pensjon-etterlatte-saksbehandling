@@ -396,28 +396,28 @@
   resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.4.0.tgz#779ef27cb0b5108da571b17407ae5b949d13efd8"
   integrity sha512-xhCwcejE9/6uGlvhKA5YGJXyTFmAN5J4jEr/M/nmib2dXZTNAILpY8vExGrs05BqAnsuYVqUy+2TBSwv5irhWA==
 
-"@navikt/ds-icons@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-icons/-/ds-icons-2.4.0.tgz#3878e7930fe35a9a569204a07a0b5514fe9971b4"
-  integrity sha512-FEEX0qFkaYHT5SMHkRcnX+pSeDxPALbf+GcmJI0k0mshb2bE336PsfM3peAECr+PQV/2axjgMl448I1sAll3Sg==
+"@navikt/ds-icons@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-icons/-/ds-icons-2.6.0.tgz#0b6155d61669d9817708bfb703c4b57b23e1754b"
+  integrity sha512-//0sXWPL8TmjP4pcfcPn+tzm4t0gafLhUqs0WRGf/jCQTWO16yHod4PPEc7jXTJeisZpWkcjjsGlasIU5wMMdg==
 
-"@navikt/ds-react-internal@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react-internal/-/ds-react-internal-2.4.0.tgz#9f5698fe4d50ed008d1a655a492a2b094d8680e9"
-  integrity sha512-ifHFFYCafDjnDaqGRvgGNMdfk+CsDK00d2COKNgxGqFlXX8gn8Hq7Od43lsEPIqy3SAfyisjsIZm/peT1O6wFA==
+"@navikt/ds-react-internal@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react-internal/-/ds-react-internal-2.6.0.tgz#d85ace866a5e22e6de1ae0e2f4c79c7833a90f72"
+  integrity sha512-IHhbEExKqfKeHusgD0d2U93jwpKNgtB7/AHT49g1eWIDmSuiPym94M5xrk9FQnZUqzFydIHMP1UIsDF4781w0w==
   dependencies:
-    "@navikt/ds-icons" "^2.4.0"
-    "@navikt/ds-react" "^2.4.0"
+    "@navikt/ds-icons" "^2.6.0"
+    "@navikt/ds-react" "^2.6.0"
     clsx "^1.1.1"
     copy-to-clipboard "^3.3.1"
 
-"@navikt/ds-react@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-2.4.0.tgz#f5703e68829b27994805860026c323054d46591f"
-  integrity sha512-H9ou7/bb2D/El3BqgpGETVnkSFDEuwKJ5QamXoWNUL+UaM5hqv3Mgri9UcA19eqiPW5dwy84+Dz1mYHnn09ruA==
+"@navikt/ds-react@^2.4.0", "@navikt/ds-react@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-2.6.0.tgz#e086a6763da9890fc99c69f14b9b80e1c964bf42"
+  integrity sha512-wRf8SzP2b84FM8nZmsQJWWpclG0EVH4m6YaptUoU+KurAuVkLnIPMf0PYL+NqUVxG+9Q08WInzy2tn46f7NJ/A==
   dependencies:
     "@floating-ui/react" "0.17.0"
-    "@navikt/ds-icons" "^2.4.0"
+    "@navikt/ds-icons" "^2.6.0"
     "@radix-ui/react-tabs" "1.0.0"
     "@radix-ui/react-toggle-group" "1.0.0"
     clsx "^1.2.1"

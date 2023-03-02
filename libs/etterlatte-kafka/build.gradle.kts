@@ -13,8 +13,7 @@ dependencies {
     api(kotlin("reflect"))
 
     api(libs.bundles.jackson)
-    implementation(project(mapOf("path" to ":libs:common")))
-
+    implementation(project(":libs:common"))
     compileOnly(libs.logging.slf4japi)
 
     testImplementation(libs.test.jupiter.api)

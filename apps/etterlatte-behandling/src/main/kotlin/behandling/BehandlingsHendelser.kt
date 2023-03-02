@@ -71,14 +71,14 @@ class BehandlingsHendelser(
     private fun handleEnHendelse(hendelse: Pair<UUID, BehandlingHendelseType>) {
         inTransaction {
             val behandling = requireNotNull(behandlingDao.hentBehandling(hendelse.first))
-
+            val correlationId = getCorrelationId()
             rapid.publiser(
                 hendelse.first.toString(),
                 JsonMessage.newMessage(
                     "BEHANDLING:${hendelse.second.name}",
                     mapOf(
                         "behandlingId" to behandling.id,
-                        CORRELATION_ID_KEY to getCorrelationId(),
+                        CORRELATION_ID_KEY to correlationId,
                         BehandlingGrunnlagEndret.behandlingObjectKey to behandling.toDetaljertBehandling(),
                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak.id,
                         BehandlingGrunnlagEndret.sakObjectKey to behandling.sak,
@@ -110,8 +110,8 @@ class BehandlingsHendelser(
                 }.toJson()
             ).also {
                 logger.info(
-                    "Posted event ${hendelse.second.name} for behandling ${hendelse.first} to partiton ${it.first}, " +
-                        "offset ${it.second}"
+                    "Posted event BEHANDLING:${hendelse.second.name} for behandling ${hendelse.first}" +
+                        " to partiton ${it.first}, offset ${it.second} correlationid: $correlationId"
                 )
             }
         }

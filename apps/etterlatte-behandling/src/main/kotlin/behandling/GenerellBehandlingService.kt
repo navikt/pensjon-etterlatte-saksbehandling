@@ -19,6 +19,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingMedGrunnlagsopplysninger
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -202,15 +203,20 @@ class RealGenerellBehandlingService(
             val avdoed = async {
                 grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, bruker)
             }
-            val gjenlevende = async {
-                grunnlagKlient.finnPersonOpplysning(
-                    sakId,
-                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
-                    bruker
-                )
-            }
+
             val soeker = async {
                 grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, bruker)
+            }
+            val gjenlevende = if (detaljertBehandling.sakType == SakType.OMSTILLINGSSTOENAD) {
+                soeker
+            } else {
+                async {
+                    grunnlagKlient.finnPersonOpplysning(
+                        sakId,
+                        Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                        bruker
+                    )
+                }
             }
 
             DetaljertBehandlingDto(

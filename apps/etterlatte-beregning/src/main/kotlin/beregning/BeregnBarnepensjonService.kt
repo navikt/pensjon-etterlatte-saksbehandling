@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentSoeskenjustering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
@@ -49,7 +50,7 @@ class BeregnBarnepensjonService(
 
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.OMREGNING ->
-                beregnBarnepensjon(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+                beregnBarnepensjon(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
@@ -58,18 +59,18 @@ class BeregnBarnepensjonService(
 
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.OPPFYLT ->
-                        beregnBarnepensjon(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+                        beregnBarnepensjon(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
-                        opphoer(behandling, grunnlag, virkningstidspunkt)
+                        opphoer(behandling.id, grunnlag, virkningstidspunkt)
                 }
             }
 
-            BehandlingType.MANUELT_OPPHOER -> opphoer(behandling, grunnlag, virkningstidspunkt)
+            BehandlingType.MANUELT_OPPHOER -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
         }
     }
 
     private fun beregnBarnepensjon(
-        behandling: DetaljertBehandling,
+        behandlingId: UUID,
         grunnlag: Grunnlag,
         beregningsgrunnlag: BarnepensjonGrunnlag,
         virkningstidspunkt: YearMonth
@@ -82,8 +83,8 @@ class BeregnBarnepensjonService(
         return when (resultat) {
             is RegelkjoeringResultat.Suksess ->
                 beregning(
-                    behandling = behandling,
-                    grunnlag = grunnlag,
+                    behandlingId = behandlingId,
+                    grunnlagMetadata = grunnlag.metadata,
                     beregningsperioder = resultat.periodiserteResultater.map { periodisertResultat ->
                         logger.info(
                             "Beregnet barnepensjon for periode fra={} til={} og beløp={} med regler={}",
@@ -119,15 +120,15 @@ class BeregnBarnepensjonService(
     }
 
     private fun opphoer(
-        behandling: DetaljertBehandling,
+        behandlingId: UUID,
         grunnlag: Grunnlag,
         virkningstidspunkt: YearMonth
     ): Beregning {
         val grunnbeloep = grunnbeloepRepository.hentGjeldendeGrunnbeloep(virkningstidspunkt)
 
         return beregning(
-            behandling = behandling,
-            grunnlag = grunnlag,
+            behandlingId = behandlingId,
+            grunnlagMetadata = grunnlag.metadata,
             beregningsperioder = listOf(
                 Beregningsperiode(
                     datoFOM = virkningstidspunkt,
@@ -143,16 +144,16 @@ class BeregnBarnepensjonService(
     }
 
     private fun beregning(
-        behandling: DetaljertBehandling,
-        grunnlag: Grunnlag,
+        behandlingId: UUID,
+        grunnlagMetadata: Metadata,
         beregningsperioder: List<Beregningsperiode>
     ) = Beregning(
         beregningId = UUID.randomUUID(),
-        behandlingId = behandling.id,
+        behandlingId = behandlingId,
         type = Beregningstype.BP,
         beregningsperioder = beregningsperioder,
         beregnetDato = Tidspunkt.now(),
-        grunnlagMetadata = grunnlag.metadata
+        grunnlagMetadata = grunnlagMetadata
     )
 
     private fun opprettBeregningsgrunnlag(

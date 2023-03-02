@@ -27,6 +27,7 @@ import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.YearMonth
+import java.util.*
 import java.util.UUID.randomUUID
 
 class BeregnOmstillingsstoenadService(
@@ -46,7 +47,7 @@ class BeregnOmstillingsstoenadService(
 
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.OMREGNING ->
-                beregnOmstillingsstoenad(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+                beregnOmstillingsstoenad(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
@@ -55,19 +56,19 @@ class BeregnOmstillingsstoenadService(
 
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.OPPFYLT ->
-                        beregnOmstillingsstoenad(behandling, grunnlag, beregningsgrunnlag, virkningstidspunkt)
+                        beregnOmstillingsstoenad(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
-                        opphoer(behandling, grunnlag, virkningstidspunkt)
+                        opphoer(behandling.id, grunnlag, virkningstidspunkt)
                 }
             }
 
-            BehandlingType.MANUELT_OPPHOER -> opphoer(behandling, grunnlag, virkningstidspunkt)
+            BehandlingType.MANUELT_OPPHOER -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
         }
     }
 
     private fun beregnOmstillingsstoenad(
-        behandling: DetaljertBehandling,
+        behandlingId: UUID,
         grunnlag: Grunnlag,
         beregningsgrunnlag: OmstillingstoenadGrunnlag,
         virkningstidspunkt: YearMonth
@@ -81,7 +82,7 @@ class BeregnOmstillingsstoenadService(
             is RegelkjoeringResultat.Suksess ->
                 Beregning(
                     beregningId = randomUUID(),
-                    behandlingId = behandling.id,
+                    behandlingId = behandlingId,
                     type = Beregningstype.OMS,
                     beregnetDato = Tidspunkt.now(),
                     grunnlagMetadata = grunnlag.metadata,
@@ -119,7 +120,7 @@ class BeregnOmstillingsstoenadService(
     }
 
     private fun opphoer(
-        behandling: DetaljertBehandling,
+        behandlingId: UUID,
         grunnlag: Grunnlag,
         virkningstidspunkt: YearMonth
     ): Beregning {
@@ -127,7 +128,7 @@ class BeregnOmstillingsstoenadService(
 
         return Beregning(
             beregningId = randomUUID(),
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             type = Beregningstype.OMS,
             beregnetDato = Tidspunkt.now(),
             grunnlagMetadata = grunnlag.metadata,

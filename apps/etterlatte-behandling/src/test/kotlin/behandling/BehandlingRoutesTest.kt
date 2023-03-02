@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 
@@ -68,7 +67,7 @@ internal class BehandlingRoutesTest {
 
     @Test
     fun `kan lagre virkningstidspunkt hvis det er gyldig`() {
-        val bodyVirkningstidspunkt = Instant.parse("2017-02-01T00:00:00Z")
+        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 
         mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
@@ -117,7 +116,7 @@ internal class BehandlingRoutesTest {
 
     @Test
     fun `faar bad request hvis virkningstidspunkt ikke er gyldig`() {
-        val bodyVirkningstidspunkt = Instant.parse("2017-02-01T00:00:00Z")
+        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 
         mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
@@ -165,9 +164,9 @@ internal class BehandlingRoutesTest {
         }
     }
 
-    private fun mockBehandlingService(bodyVirkningstidspunkt: Instant, bodyBegrunnelse: String) {
+    private fun mockBehandlingService(bodyVirkningstidspunkt: Tidspunkt, bodyBegrunnelse: String) {
         val parsetVirkningstidspunkt = YearMonth.from(
-            bodyVirkningstidspunkt.toLocalDateTimeNorskTid()!!.let {
+            bodyVirkningstidspunkt.toLocalDatetimeNorskTid().let {
                 YearMonth.of(it.year, it.month)
             }
         )

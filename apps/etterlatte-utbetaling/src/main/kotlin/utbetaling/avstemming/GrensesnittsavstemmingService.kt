@@ -8,7 +8,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import org.slf4j.LoggerFactory
 import java.time.Clock
-import java.time.Instant
 
 class GrensesnittsavstemmingService(
     private val avstemmingsdataSender: AvstemmingsdataSender,
@@ -62,6 +61,6 @@ class GrensesnittsavstemmingService(
     }
 
     companion object {
-        private val MIN_INSTANT = Tidspunkt(Instant.EPOCH)
+        private val MIN_INSTANT = Tidspunkt.min()
     }
 }

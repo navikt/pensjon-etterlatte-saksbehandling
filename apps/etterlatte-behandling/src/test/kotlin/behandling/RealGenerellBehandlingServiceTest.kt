@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.token.Bruker
@@ -39,7 +40,6 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.sql.Connection
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -303,7 +303,7 @@ class RealGenerellBehandlingServiceTest {
 
     @Test
     fun `erGyldigVirkningstidspunkt hvis tidspunkt er maaned etter doedsfall og maks tre aar foer mottatt soeknad`() {
-        val bodyVirkningstidspunkt = Instant.parse("2017-02-01T00:00:00Z")
+        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
 
@@ -321,7 +321,7 @@ class RealGenerellBehandlingServiceTest {
 
     @Test
     fun `erGyldigVirkningstidspunkt er false hvis tidspunkt er foer en maaned etter doedsfall`() {
-        val bodyVirkningstidspunkt = Instant.parse("2020-01-01T00:00:00Z")
+        val bodyVirkningstidspunkt = Tidspunkt.parse("2020-01-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
 
@@ -339,7 +339,7 @@ class RealGenerellBehandlingServiceTest {
 
     @Test
     fun `erGyldigVirkningstidspunkt hvis tidspunkt er tre aar foer mottatt soeknad`() {
-        val bodyVirkningstidspunkt = Instant.parse("2017-01-01T00:00:00Z")
+        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-01-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
 

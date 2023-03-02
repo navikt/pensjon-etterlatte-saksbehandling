@@ -1,16 +1,15 @@
 package no.nav.etterlatte.libs.sporingslogg
 
-import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
 
 internal class SporingsloggerTest {
 
-    private val timestamp = LocalDateTime.of(LocalDate.of(2020, Month.FEBRUARY, 1), LocalTime.NOON).tilInstant()
+    private val timestamp = Tidspunkt.of(LocalDate.of(2020, Month.FEBRUARY, 1), LocalTime.NOON)
 
     @Test
     fun `skal logge i CEF-format`() {

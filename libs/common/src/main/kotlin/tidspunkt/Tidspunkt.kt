@@ -5,20 +5,25 @@ import com.fasterxml.jackson.annotation.JsonValue
 import java.io.Serializable
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.Temporal
+import java.time.temporal.TemporalAccessor
 import java.time.temporal.TemporalAdjuster
 import java.time.temporal.TemporalUnit
 
 abstract class TruncatedInstant(
     @JsonValue
-    val instant: Instant
+    protected val instant: Instant
 ) : Temporal by instant,
     TemporalAdjuster by instant,
     Comparable<Instant> by instant,
     Serializable by instant {
 
     override fun toString() = instant.toString()
+    fun toEpochMilli() = instant.toEpochMilli()
 }
 
 /**
@@ -37,6 +42,12 @@ constructor(
     companion object {
         val unit: ChronoUnit = ChronoUnit.MICROS
         fun now(clock: Clock = klokke()) = Tidspunkt(Instant.now(clock))
+        fun parse(text: CharSequence): Tidspunkt = Tidspunkt(Instant.parse(text))
+
+        fun from(temporal: TemporalAccessor): Tidspunkt = Tidspunkt(Instant.from(temporal))
+
+        fun min() = Tidspunkt(Instant.EPOCH)
+        fun of(date: LocalDate, time: LocalTime) = from(LocalDateTime.of(date, time).atZone(standardTidssoneUTC))
     }
 
     /**
@@ -53,4 +64,5 @@ constructor(
     override fun plus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.plus(amount, unit).toTidspunkt()
     override fun minus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.minus(amount, unit).toTidspunkt()
     fun isBefore(other: Tidspunkt) = instant.isBefore(other.instant)
+    fun isAfter(other: Tidspunkt) = instant.isAfter(other.instant)
 }

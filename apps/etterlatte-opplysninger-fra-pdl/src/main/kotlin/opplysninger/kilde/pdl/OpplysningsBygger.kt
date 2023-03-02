@@ -30,10 +30,9 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.Instant
 import java.time.YearMonth
 
-class Opplysningsbolk(private val fnr: Foedselsnummer, private val innhentetTidspunkt: Instant) {
+class Opplysningsbolk(private val fnr: Foedselsnummer, private val innhentetTidspunkt: Tidspunkt) {
     private val opplysninger = mutableListOf<Grunnlagsopplysning<out Any>>()
     fun leggTilOpplysninger(
         opplysningstype: Opplysningstype,
@@ -69,7 +68,7 @@ fun lagEnkelopplysningerFraPDL(
     opplysningsbehov: Opplysningstype, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1
     fnr: Foedselsnummer
 ): List<Grunnlagsopplysning<*>> {
-    val tidspunktForInnhenting = Tidspunkt.now().instant
+    val tidspunktForInnhenting = Tidspunkt.now()
     val opplysningsbolk = Opplysningsbolk(fnr, tidspunktForInnhenting)
     val personRolle = behovNameTilPersonRolle(opplysningsbehov)
 

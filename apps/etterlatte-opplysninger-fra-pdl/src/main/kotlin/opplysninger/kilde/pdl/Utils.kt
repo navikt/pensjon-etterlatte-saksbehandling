@@ -6,17 +6,17 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import java.time.Instant
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
 fun <T> lagPdlOpplysning(
     opplysningsType: Opplysningstype,
     opplysning: T,
-    tidspunktForInnhenting: Instant
+    tidspunktForInnhenting: Tidspunkt
 ): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(
         UUID.randomUUID(),
-        Grunnlagsopplysning.Pdl("pdl", tidspunktForInnhenting, null, null),
+        Grunnlagsopplysning.Pdl("pdl", tidspunktForInnhenting.instant, null, null),
         opplysningsType,
         objectMapper.createObjectNode(),
         opplysning
@@ -24,7 +24,7 @@ fun <T> lagPdlOpplysning(
 }
 
 fun <T> lagPdlPersonopplysning(
-    tidspunktForInnhenting: Instant,
+    tidspunktForInnhenting: Tidspunkt,
     opplysningsType: Opplysningstype,
     opplysning: OpplysningDTO<T>,
     fnr: Foedselsnummer,
@@ -34,7 +34,7 @@ fun <T> lagPdlPersonopplysning(
         id = UUID.randomUUID(),
         kilde = Grunnlagsopplysning.Pdl(
             navn = "pdl",
-            tidspunktForInnhenting = tidspunktForInnhenting,
+            tidspunktForInnhenting = tidspunktForInnhenting.instant,
             registersReferanse = null,
             opplysningId = opplysning.opplysningsid.toString()
         ),

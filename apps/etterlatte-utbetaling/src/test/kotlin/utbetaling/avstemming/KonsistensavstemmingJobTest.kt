@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.utbetaling.common.februar
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -24,7 +25,7 @@ internal class KonsistensavstemmingJobTest {
         kjoereplan = setOf(datoEksekvering),
         leaderElection = leaderElection,
         jobbNavn = "jobb",
-        clock = datoEksekvering.midnattNorskTid().toInstant().fixedNorskTid()
+        clock = datoEksekvering.midnattNorskTid().toTidspunkt().fixedNorskTid()
     )
 
     @Test
@@ -58,7 +59,7 @@ internal class KonsistensavstemmingJobTest {
     fun `skal ikke konsistensavstemme for barnepensjon naar datoen ikke er en del av kjoereplan`() {
         every { leaderElection.isLeader() } returns true
 
-        val dagForTestMinusFemDager = datoEksekvering.midnattNorskTid().toInstant().minus(5, ChronoUnit.DAYS)
+        val dagForTestMinusFemDager = datoEksekvering.midnattNorskTid().minus(5, ChronoUnit.DAYS).toTidspunkt()
 
         val konsistensavstemming = KonsistensavstemmingJob.Konsistensavstemming(
             konsistensavstemmingService = konsistensavstemmingService,

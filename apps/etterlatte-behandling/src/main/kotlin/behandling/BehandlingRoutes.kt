@@ -41,12 +41,11 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -383,9 +382,9 @@ data class ManueltOpphoerResponse(val behandlingId: String)
 
 data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String, val begrunnelse: String?) {
     val dato: YearMonth = try {
-        LocalDate.ofInstant(Instant.parse(_dato), norskTidssone).let {
+        Instant.parse(_dato).toLocalDateTimeNorskTid()?.let {
             YearMonth.of(it.year, it.month)
-        }
+        } ?: throw IllegalArgumentException("Dato $_dato må være definert")
     } catch (e: Exception) {
         throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
     }

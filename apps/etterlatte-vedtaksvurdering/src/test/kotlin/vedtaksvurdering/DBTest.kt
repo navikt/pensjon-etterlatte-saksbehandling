@@ -14,9 +14,8 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -152,9 +151,7 @@ internal class DBTest {
             uuid,
             Beregningstype.BP,
             listOf(),
-            Tidspunkt.now().toLocalDatetimeUTC().toTidspunkt(
-                norskTidssone
-            ),
+            Tidspunkt.now().toLocalDatetimeUTC().toNorskTidspunkt(),
             Metadata(1L, 1L)
         )
         coEvery { beregning.hentBeregning(uuid, any()) } returns beregningDTO

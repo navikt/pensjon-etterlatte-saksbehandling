@@ -3,12 +3,8 @@ package no.nav.etterlatte.libs.common.tidspunkt
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import java.io.Serializable
-import java.sql.Timestamp
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.Temporal
 import java.time.temporal.TemporalAdjuster
@@ -57,13 +53,3 @@ constructor(
     override fun plus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.plus(amount, unit).toTidspunkt()
     override fun minus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.minus(amount, unit).toTidspunkt()
 }
-
-fun Instant.toTidspunkt() = Tidspunkt(this)
-fun ZonedDateTime.toTidspunkt() = toInstant().toTidspunkt()
-fun LocalDateTime.toTidspunkt(zoneId: ZoneId = standardTidssoneUTC) = atZone(zoneId).toTidspunkt()
-fun LocalDateTime.toNorskTidspunkt() = atZone(norskTidssone).toTidspunkt()
-fun Tidspunkt.toNorskTid(): ZonedDateTime = ZonedDateTime.ofInstant(this.instant, norskTidssone)
-fun Tidspunkt.toNorskTidLocalDateTime(): LocalDateTime = LocalDateTime.ofInstant(this.instant, norskTidssone)
-fun Tidspunkt.toTimestamp(): Timestamp = Timestamp.from(this.instant)
-fun Timestamp.toTidspunkt(): Tidspunkt = Tidspunkt(this.toInstant())
-fun Tidspunkt.toLocalDatetimeUTC(): LocalDateTime = LocalDateTime.ofInstant(this.instant, standardTidssoneUTC)

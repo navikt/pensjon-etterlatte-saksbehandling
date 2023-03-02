@@ -12,13 +12,10 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfo
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.standardTidssoneUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import java.time.Clock
 
 class GyldigOmstillingsSoeknadService(
-    private val pdlClient: PdlClient,
-    private val clock: Clock = Clock.system(standardTidssoneUTC)
+    private val pdlClient: PdlClient
 ) {
     fun hentPersongalleriFraSoeknad(soeknad: Omstillingsstoenad): Persongalleri {
         // TODO Må tilpasse persongalleri eller bruke noe annet?

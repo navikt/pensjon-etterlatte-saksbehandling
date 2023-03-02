@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.config
 
 import no.nav.etterlatte.libs.common.tidspunkt.klokke
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.nowNorskTid
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -34,7 +34,6 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Duration
 import java.time.LocalTime
-import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
@@ -100,7 +99,7 @@ class ApplicationContext(
         GrensesnittsavstemmingJob(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
-            starttidspunkt = ZonedDateTime.now(norskTidssone).next(LocalTime.of(3, 0, 0)),
+            starttidspunkt = nowNorskTid().next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS)
         )
 

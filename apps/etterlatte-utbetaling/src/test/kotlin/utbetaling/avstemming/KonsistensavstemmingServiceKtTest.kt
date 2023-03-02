@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
@@ -121,10 +121,10 @@ internal class KonsistensavstemmingServiceKtTest {
         val idag = LocalDate.now()
         every {
             utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-                idag.atStartOfDay().toTidspunkt(norskTidssone),
+                idag.atStartOfDay().toNorskTidspunkt(),
                 idag.minusDays(1).atTime(
                     LocalTime.MAX
-                ).toTidspunkt(norskTidssone),
+                ).toNorskTidspunkt(),
                 Saktype.BARNEPENSJON
             )
         } returns emptyList()
@@ -144,10 +144,10 @@ internal class KonsistensavstemmingServiceKtTest {
         val idag = LocalDate.now()
         every {
             utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-                idag.atStartOfDay().toTidspunkt(norskTidssone),
+                idag.atStartOfDay().toNorskTidspunkt(),
                 idag.minusDays(1).atTime(
                     LocalTime.MAX
-                ).toTidspunkt(norskTidssone),
+                ).toNorskTidspunkt(),
                 Saktype.BARNEPENSJON
             )
         } returns listOf(
@@ -200,7 +200,7 @@ internal class KonsistensavstemmingServiceKtTest {
             opprettet = LocalDate.of(1998, 9, 1).toTidspunkt()
         )
 
-        val opprettet = LocalDateTime.of(1997, 12, 1, 0, 0).toTidspunkt(norskTidssone)
+        val opprettet = LocalDateTime.of(1997, 12, 1, 0, 0).toNorskTidspunkt()
 
         val utbetaling1 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
         val utbetaling2 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
@@ -272,7 +272,7 @@ internal class KonsistensavstemmingServiceKtTest {
             type = Utbetalingslinjetype.OPPHOER
         )
 
-        val opprettet = LocalDateTime.of(1997, 12, 1, 0, 0).toTidspunkt(norskTidssone)
+        val opprettet = LocalDateTime.of(1997, 12, 1, 0, 0).toNorskTidspunkt()
 
         val utbetaling1 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
         val utbetaling2 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
@@ -610,6 +610,6 @@ internal class KonsistensavstemmingServiceKtTest {
         assertEquals(listOf(linje2Sak1.id), linjerCase4)
     }
 
-    private fun LocalDate.toTidspunkt(): Tidspunkt = this.atStartOfDay().toTidspunkt(norskTidssone)
-    private fun Tidspunkt.toLocalDate(): LocalDate = LocalDate.ofInstant(this.instant, norskTidssone)
+    private fun LocalDate.toTidspunkt(): Tidspunkt = this.atStartOfDay().toNorskTidspunkt()
+    private fun Tidspunkt.toLocalDate(): LocalDate = toLocalDatetimeNorskTid().toLocalDate()
 }

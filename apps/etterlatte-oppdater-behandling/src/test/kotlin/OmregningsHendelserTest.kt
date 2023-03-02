@@ -1,3 +1,4 @@
+
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.mockk.every
@@ -10,7 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.OMREGNING_ID_KEY
+import rapidsandrivers.BEHANDLING_ID_KEY
 import java.util.*
 
 internal class OmregningsHendelserTest {
@@ -36,7 +37,7 @@ internal class OmregningsHendelserTest {
 
         Assertions.assertEquals(1, omregningshendelseSlot.captured.sakId)
         Assertions.assertEquals(2, inspector.inspektør.size)
-        Assertions.assertEquals(uuid.toString(), inspector.inspektør.message(1).get(OMREGNING_ID_KEY).asText())
+        Assertions.assertEquals(uuid.toString(), inspector.inspektør.message(1).get(BEHANDLING_ID_KEY).asText())
     }
 
     companion object {

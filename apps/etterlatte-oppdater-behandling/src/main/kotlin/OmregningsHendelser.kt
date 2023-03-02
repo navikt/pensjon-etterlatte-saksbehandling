@@ -15,9 +15,9 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.OMREGNING_ID_KEY
-import rapidsandrivers.omregningId
+import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 import java.util.*
 
@@ -32,7 +32,7 @@ internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private v
             eventName(OMREGNINGSHENDELSE)
 
             correlationId()
-            validate { it.rejectKey(OMREGNING_ID_KEY) }
+            validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }.register(this)
     }
@@ -45,7 +45,7 @@ internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private v
                 val hendelse: Omregningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                 runBlocking {
                     val behandling = behandlinger.opprettOmregning(hendelse).body<UUID>()
-                    packet.omregningId = behandling
+                    packet.behandlingId = behandling
                     packet.eventName = BEREGN
                     context.publish(packet.toJson())
                 }

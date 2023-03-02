@@ -172,7 +172,7 @@ class StatistikkServiceTest {
 
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
         val registrertStatistikk = service.registrerStatistikkForBehandlinghendelse(
-            behandling = behandling(id = behandlingId, sakId = sakId),
+            behandlingIntern = behandling(id = behandlingId, sakId = sakId),
             hendelse = BehandlingHendelse.OPPRETTET,
             tekniskTid = tekniskTidForHendelse
         ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
@@ -229,9 +229,9 @@ fun behandling(
     soesken: List<String> = emptyList(),
     avdoed: List<String> = emptyList(),
     gjenlevende: List<String> = emptyList()
-): no.nav.etterlatte.statistikk.river.Behandling = no.nav.etterlatte.statistikk.river.Behandling(
+): no.nav.etterlatte.statistikk.river.BehandlingIntern = no.nav.etterlatte.statistikk.river.BehandlingIntern(
     id = id,
-    sak = sakId,
+    sakId = sakId,
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,

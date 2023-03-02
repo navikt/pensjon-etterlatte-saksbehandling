@@ -20,8 +20,8 @@ import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SoeknadFormat
 import no.nav.etterlatte.statistikk.domain.StoenadRad
-import no.nav.etterlatte.statistikk.river.Behandling
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
+import no.nav.etterlatte.statistikk.river.BehandlingIntern
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -181,27 +181,27 @@ class StatistikkService(
     }
 
     private fun behandlingTilSakRad(
-        behandling: Behandling,
+        behandlingIntern: BehandlingIntern,
         behandlingHendelse: BehandlingHendelse,
         tekniskTid: LocalDateTime
     ): SakRad {
-        val sak = hentSak(behandling.sak)
+        val sak = hentSak(behandlingIntern.sakId)
         val fellesRad = SakRad(
             id = -1,
-            behandlingId = behandling.id,
-            sakId = behandling.sak,
-            mottattTidspunkt = behandling.behandlingOpprettet.toTidspunkt(),
-            registrertTidspunkt = behandling.behandlingOpprettet.toTidspunkt(),
+            behandlingId = behandlingIntern.id,
+            sakId = behandlingIntern.sakId,
+            mottattTidspunkt = behandlingIntern.behandlingOpprettet.toTidspunkt(),
+            registrertTidspunkt = behandlingIntern.behandlingOpprettet.toTidspunkt(),
             ferdigbehandletTidspunkt = null,
             vedtakTidspunkt = null,
-            behandlingType = behandling.type,
+            behandlingType = behandlingIntern.type,
             behandlingStatus = behandlingHendelse.name,
             behandlingResultat = null,
             resultatBegrunnelse = null,
             behandlingMetode = null,
             opprettetAv = null,
             ansvarligBeslutter = null,
-            aktorId = behandling.persongalleri.soeker,
+            aktorId = behandlingIntern.persongalleri.soeker,
             datoFoersteUtbetaling = null,
             tekniskTid = tekniskTid.toTidspunkt(),
             sakYtelse = sak.sakType.name,
@@ -215,7 +215,7 @@ class StatistikkService(
         )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(
-                ferdigbehandletTidspunkt = behandling.sistEndret.toTidspunkt(),
+                ferdigbehandletTidspunkt = behandlingIntern.sistEndret.toTidspunkt(),
                 behandlingResultat = BehandlingResultat.AVBRUTT
             )
         }
@@ -223,11 +223,11 @@ class StatistikkService(
     }
 
     fun registrerStatistikkForBehandlinghendelse(
-        behandling: Behandling,
+        behandlingIntern: BehandlingIntern,
         hendelse: BehandlingHendelse,
         tekniskTid: LocalDateTime
     ): SakRad? {
-        return sakRepository.lagreRad(behandlingTilSakRad(behandling, hendelse, tekniskTid))
+        return sakRepository.lagreRad(behandlingTilSakRad(behandlingIntern, hendelse, tekniskTid))
     }
 }
 

@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
@@ -80,7 +81,7 @@ class BehandlingsHendelser(
                     mapOf(
                         "behandlingId" to behandling.id,
                         CORRELATION_ID_KEY to getCorrelationId(),
-                        BehandlingGrunnlagEndret.behandlingObjectKey to behandling,
+                        BehandlingGrunnlagEndret.behandlingObjectKey to behandling.toDetaljertBehandling(),
                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak.id,
                         BehandlingGrunnlagEndret.sakObjectKey to behandling.sak,
                         BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet

@@ -38,6 +38,8 @@ import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.Instant
 import java.time.LocalDate
@@ -49,7 +51,7 @@ fun opprettBehandling(
     sakId: Long,
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     persongalleri: Persongalleri = persongalleri(),
-    soeknadMottattDato: LocalDateTime = LocalDateTime.now(),
+    soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     vilkaarUtfall: VilkaarsvurderingUtfall? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
@@ -73,10 +75,10 @@ fun opprettBehandling(
 fun foerstegangsbehandling(
     id: UUID = UUID.randomUUID(),
     sakId: Long,
-    behandlingOpprettet: LocalDateTime = LocalDateTime.now(),
-    sistEndret: LocalDateTime = LocalDateTime.now(),
+    behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
+    sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-    soeknadMottattDato: LocalDateTime = LocalDateTime.now(),
+    soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
@@ -103,8 +105,8 @@ fun foerstegangsbehandling(
 fun revurdering(
     id: UUID = UUID.randomUUID(),
     sakId: Long,
-    behandlingOpprettet: LocalDateTime = LocalDateTime.now(),
-    sistEndret: LocalDateTime = LocalDateTime.now(),
+    behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
+    sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     persongalleri: Persongalleri = persongalleri(),
     revurderingAarsak: RevurderingAarsak,
@@ -145,8 +147,8 @@ fun manueltOpphoer(
         sakType = SakType.BARNEPENSJON,
         id = sakId
     ),
-    behandlingOpprettet = LocalDateTime.now(),
-    sistEndret = LocalDateTime.now(),
+    behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+    sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
     status = BehandlingStatus.OPPRETTET,
     persongalleri = persongalleri,
     opphoerAarsaker = opphoerAarsaker,
@@ -180,7 +182,7 @@ fun grunnlagsendringshendelseMedSamsvar(
     id: UUID = UUID.randomUUID(),
     sakId: Long = 1,
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
-    opprettet: LocalDateTime = LocalDateTime.now(),
+    opprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     fnr: String,
     status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     behandlingId: UUID? = null,
@@ -300,7 +302,7 @@ fun mockPerson(
                 poststed = null,
                 land = "NOR",
                 kilde = "FREG",
-                gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+                gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
                 gyldigTilOgMed = null
             ),
             UUID.randomUUID().toString()

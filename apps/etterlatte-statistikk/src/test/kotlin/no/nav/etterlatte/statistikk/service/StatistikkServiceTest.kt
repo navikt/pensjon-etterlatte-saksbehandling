@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -54,8 +55,8 @@ class StatistikkServiceTest {
             id = behandlingId,
             sak = sakId,
             sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = null,
@@ -139,8 +140,8 @@ class StatistikkServiceTest {
             id = behandlingId,
             sak = sakId,
             sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = null,
@@ -219,8 +220,8 @@ fun vedtak(
 fun behandling(
     id: UUID = UUID.randomUUID(),
     sakId: Long = 1L,
-    behandlingOpprettet: LocalDateTime = LocalDateTime.now(),
-    sistEndret: LocalDateTime = LocalDateTime.now(),
+    behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
+    sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     soeker: String = "12312312312",

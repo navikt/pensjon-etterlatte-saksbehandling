@@ -9,12 +9,13 @@ import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 class BesvarOpplysningsbehovTest {
@@ -49,7 +50,7 @@ class BesvarOpplysningsbehovTest {
                         poststed = null,
                         land = "NOR",
                         kilde = "FREG",
-                        gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+                        gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
                         gyldigTilOgMed = null
                     ),
                     UUID.randomUUID().toString()

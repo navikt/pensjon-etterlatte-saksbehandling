@@ -45,7 +45,7 @@ protocol IdenthendelseProto {
     string hendelseId;                                            // Alltids UUID.randomUuid().toString(). Unik identifikator for hendelsen
     string personident;                                           // Subjektet for identhendelsen, f.eks gjeldende ident når vi får fra FREG
     string master;                                                // Hittil kun FREG eller PDL, men sier hvem som eier opplysningen
-    timestamp_ms opprettet;                                       // LocalDateTime.now()
+    timestamp_ms opprettet;                                       // Tidspunkt.now().toLocalDatetimeUTC()
     string opplysningstype;                                       // Opplysningstype i tekstlig format, f.eks UTENLANDSK_ID_V1. Skal være enum fra Opplysningstype java objektet
     Endringstype endringstype;                                    // Den faglige aksjonen.
     union { null, string } tidligereHendelseId = null;            // Peker til en tidligere identhendelse som denne erstatter. Brukt i forbindelse med korrigering, opphør og annullering.

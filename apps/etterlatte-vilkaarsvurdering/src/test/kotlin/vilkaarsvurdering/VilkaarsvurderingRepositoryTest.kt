@@ -2,6 +2,8 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -20,7 +22,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -122,7 +123,7 @@ internal class VilkaarsvurderingRepositoryTest {
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
                 kommentar = "En test",
-                tidspunkt = LocalDateTime.now(),
+                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
                 saksbehandler = "saksbehandler1"
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
@@ -159,7 +160,7 @@ internal class VilkaarsvurderingRepositoryTest {
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
                 kommentar = "En test",
-                tidspunkt = LocalDateTime.now(),
+                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
                 saksbehandler = "saksbehandler1"
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
@@ -197,7 +198,7 @@ internal class VilkaarsvurderingRepositoryTest {
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
                 kommentar = "En test",
-                tidspunkt = LocalDateTime.now(),
+                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
                 saksbehandler = "saksbehandler1"
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
@@ -215,7 +216,7 @@ internal class VilkaarsvurderingRepositoryTest {
             vilkaarId = vilkaar.id,
             vurdering = VilkaarVurderingData(
                 kommentar = "En test",
-                tidspunkt = LocalDateTime.now(),
+                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
                 saksbehandler = "saksbehandler1"
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
@@ -242,7 +243,7 @@ internal class VilkaarsvurderingRepositoryTest {
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
                 kommentar = "En test",
-                tidspunkt = LocalDateTime.now(),
+                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
                 saksbehandler = "saksbehandler1"
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
@@ -275,7 +276,7 @@ internal class VilkaarsvurderingRepositoryTest {
         val vilkaarsvurderingResultat = VilkaarsvurderingResultat(
             utfall = VilkaarsvurderingUtfall.OPPFYLT,
             kommentar = "Alt ser bra ut",
-            tidspunkt = LocalDateTime.now(),
+            tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
             saksbehandler = "saksbehandler1"
         )
     }

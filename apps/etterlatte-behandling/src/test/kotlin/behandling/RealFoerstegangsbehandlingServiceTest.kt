@@ -20,12 +20,13 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -72,10 +73,10 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 id = 1
             ),
-            behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = LocalDateTime.now(),
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
             persongalleri = Persongalleri(
                 soeker = "Ola Olsen",
                 "Soeker",
@@ -104,7 +105,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         val behandlingHentes = slot<UUID>()
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
-        val datoNaa = LocalDateTime.now()
+        val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         val opprettetBehandling = Foerstegangsbehandling(
             id = UUID.randomUUID(),
@@ -116,7 +117,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             behandlingOpprettet = datoNaa,
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = LocalDateTime.now(),
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
             persongalleri = Persongalleri(
                 "Innsender",
                 "Soeker",

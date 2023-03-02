@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -107,7 +107,7 @@ internal class VedtaksvurderingServiceTest {
             behandlingId,
             emptyList(),
             YearMonth.now(),
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, LocalDateTime.now(), "")
+            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, Tidspunkt.now().toLocalDatetimeUTC(), "")
         )
         coEvery { beregningMock.hentBeregning(behandlingId, bruker) } returns BeregningDTO(
             UUID.randomUUID(),
@@ -130,7 +130,12 @@ internal class VedtaksvurderingServiceTest {
             behandlingId,
             emptyList(),
             YearMonth.now(),
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.IKKE_OPPFYLT, null, LocalDateTime.now(), "")
+            VilkaarsvurderingResultat(
+                VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+                null,
+                Tidspunkt.now().toLocalDatetimeUTC(),
+                ""
+            )
         )
         runBlocking {
             service.hentDataForVedtak(behandlingId, bruker)
@@ -162,8 +167,8 @@ internal class VedtaksvurderingServiceTest {
             id = behandlingId,
             sak = 0,
             sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = null,

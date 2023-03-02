@@ -13,6 +13,8 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.oppgave.OppgaveDao
@@ -25,7 +27,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -68,7 +69,7 @@ internal class OppgaveDaoTest {
             id = UUID.randomUUID(),
             sakId = sakid,
             type = GrunnlagsendringsType.DOEDSFALL,
-            opprettet = LocalDateTime.now().minusDays(2),
+            opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(2),
             status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             behandlingId = null,
             hendelseGjelderRolle = Saksrolle.SOEKER,
@@ -79,7 +80,7 @@ internal class OppgaveDaoTest {
             id = UUID.randomUUID(),
             sakId = sakid,
             type = GrunnlagsendringsType.DOEDSFALL,
-            opprettet = LocalDateTime.now().minusDays(3),
+            opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(3),
             status = GrunnlagsendringStatus.FORKASTET,
             behandlingId = null,
             hendelseGjelderRolle = Saksrolle.SOESKEN,

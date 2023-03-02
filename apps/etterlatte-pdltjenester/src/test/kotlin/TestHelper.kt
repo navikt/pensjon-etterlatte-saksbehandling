@@ -11,8 +11,9 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 object TestHelper
@@ -51,7 +52,7 @@ fun mockPerson(
                 poststed = null,
                 land = "NOR",
                 kilde = "FREG",
-                gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+                gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
                 gyldigTilOgMed = null
             ),
             UUID.randomUUID().toString()

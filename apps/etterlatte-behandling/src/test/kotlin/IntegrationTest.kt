@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
@@ -55,7 +56,6 @@ import org.junit.jupiter.api.TestInstance
 import java.lang.Thread.sleep
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -111,7 +111,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                     BehandlingsBehov(
                         1,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                        LocalDateTime.now().toString()
+                        Tidspunkt.now().toLocalDatetimeUTC().toString()
                     )
                 )
             }.let {
@@ -143,7 +143,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                                 "innsenderFnr"
                             )
                         ),
-                        LocalDateTime.now()
+                        Tidspunkt.now().toLocalDatetimeUTC()
                     )
                 )
             }.let {
@@ -374,7 +374,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                     BehandlingsBehov(
                         1,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                        LocalDateTime.now().toString()
+                        Tidspunkt.now().toLocalDatetimeUTC().toString()
                     )
 
                 )

@@ -62,7 +62,6 @@ internal class VedtaksbrevRouteTest {
         coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any()) } returns opprettBrev()
 
         val sakId = 123456L
-        val saksbehandler = "S123456"
         val token = accessToken
 
         testApplication {

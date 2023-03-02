@@ -18,6 +18,8 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.module
 import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.sak.Saker
@@ -26,7 +28,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -77,7 +78,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     BehandlingsBehov(
                         sak.id,
                         Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                        LocalDateTime.now().toString()
+                        Tidspunkt.now().toLocalDatetimeUTC().toString()
                     )
                 )
             }.let {

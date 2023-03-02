@@ -13,11 +13,11 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -30,8 +30,8 @@ internal class BehandlingTest {
             sakType = SakType.BARNEPENSJON,
             id = 1
         ),
-        behandlingOpprettet = LocalDateTime.now(),
-        sistEndret = LocalDateTime.now(),
+        behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+        sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
         status = BehandlingStatus.OPPRETTET,
         persongalleri = Persongalleri(
             soeker = "",
@@ -42,7 +42,7 @@ internal class BehandlingTest {
         ),
         kommerBarnetTilgode = null,
         virkningstidspunkt = null,
-        soeknadMottattDato = LocalDateTime.now(),
+        soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
         gyldighetsproeving = null,
         vilkaarUtfall = null
     )
@@ -51,7 +51,11 @@ internal class BehandlingTest {
 
     private val kommerBarnetTilgode = KommerBarnetTilgode(JaNeiVetIkke.JA, "", saksbehandler)
     private val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "begrunnelse")
-    private val gyldighetsResultat = GyldighetsResultat(VurderingsResultat.OPPFYLT, listOf(), LocalDateTime.now())
+    private val gyldighetsResultat = GyldighetsResultat(
+        VurderingsResultat.OPPFYLT,
+        listOf(),
+        Tidspunkt.now().toLocalDatetimeUTC()
+    )
 
     @Test
     fun `kan oppdatere behandling når den er OPPRETTET`() {

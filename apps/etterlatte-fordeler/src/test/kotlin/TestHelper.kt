@@ -12,6 +12,8 @@ import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.io.FileNotFoundException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -71,13 +73,13 @@ fun mockNorskAdresse(adresseLinje1: String = "Testveien 4", gyldigTilOgMed: Loca
     poststed = null,
     land = null,
     kilde = "FREG",
-    gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+    gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
     gyldigTilOgMed = gyldigTilOgMed
 )
 
 fun mockUgyldigAdresse(
     type: AdresseType = AdresseType.UKJENT_BOSTED,
-    gyldigFraOgMed: LocalDateTime = LocalDateTime.now().minusYears(1),
+    gyldigFraOgMed: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
     gyldigTilOgMed: LocalDateTime? = null
 ) = Adresse(
     type = type,

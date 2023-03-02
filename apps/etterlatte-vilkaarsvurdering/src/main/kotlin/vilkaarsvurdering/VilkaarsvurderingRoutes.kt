@@ -11,13 +11,14 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.bruker
-import java.time.LocalDateTime
 import java.util.*
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
@@ -159,7 +160,7 @@ private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
         unntaksvilkaar = unntaksvilkaar,
         vurdering = VilkaarVurderingData(
             kommentar = kommentar,
-            tidspunkt = LocalDateTime.now(),
+            tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
             saksbehandler = saksbehandler
         )
     )
@@ -168,7 +169,7 @@ private fun VurdertVilkaarsvurderingResultatDto.toVilkaarsvurderingResultat(saks
     VilkaarsvurderingResultat(
         utfall = resultat,
         kommentar = kommentar,
-        tidspunkt = LocalDateTime.now(),
+        tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
         saksbehandler = saksbehandler
     )
 

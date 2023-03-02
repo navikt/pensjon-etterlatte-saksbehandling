@@ -1,8 +1,6 @@
 package no.nav.etterlatte.behandlingfrasoknad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import io.mockk.every
-import io.mockk.mockkStatic
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
@@ -10,7 +8,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerOmstillingSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
 import no.nav.etterlatte.libs.common.objectMapper
@@ -19,7 +16,6 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
 import org.junit.jupiter.api.Assertions
@@ -28,7 +24,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import soeknad.InnsendtSoeknadTestData
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Month
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -36,13 +31,8 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
 
     @Test
     fun `alle opplysninger skal ha innsender som kilde`() {
-        val kilde = Grunnlagsopplysning.Privatperson(
-            "03108718357",
-            LocalDateTime.parse("2022-02-14T14:37:24.573612786").tilInstant()
-        )
         opplysninger.forEach {
-            assertEquals(kilde.fnr, (it.kilde as Grunnlagsopplysning.Privatperson).fnr)
-            assertEquals(kilde.mottatDato, (it.kilde as Grunnlagsopplysning.Privatperson).mottatDato)
+            assertEquals("03108718357", (it.kilde as Grunnlagsopplysning.Privatperson).fnr)
         }
     }
 
@@ -119,14 +109,6 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
     }
 
     @Test
-    fun `skal hente opplysning om mottatt dato`() {
-        consumeSingle<SoeknadMottattDato>(Opplysningstype.SOEKNAD_MOTTATT_DATO)
-            .apply {
-                assertEquals(LocalDateTime.parse("2022-02-14T14:37:24.573612786"), mottattDato)
-            }
-    }
-
-    @Test
     fun `skal hente opplysning om soeknadstype`() {
         consumeSingle<SoeknadstypeOpplysning>(Opplysningstype.SOEKNADSTYPE_V1).apply {
             assertEquals(SoeknadType.OMSTILLINGSSTOENAD, this.type)
@@ -158,8 +140,6 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
             SoeknadType.OMSTILLINGSSTOENAD
         )
         private fun lagMelding(): String {
-            mockkStatic(LocalDateTime::class)
-            every { LocalDateTime.now() } returns LocalDateTime.parse("2022-02-14T14:37:24.573612786")
             val soeknad = InnsendtSoeknadTestData.omstillingsSoeknad()
             return """
             {

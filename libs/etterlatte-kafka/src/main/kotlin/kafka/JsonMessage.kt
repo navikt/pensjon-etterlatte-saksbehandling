@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.net.InetAddress
 import java.time.LocalDateTime
 import java.util.*
@@ -95,7 +97,7 @@ open class JsonMessage(
         id = json.path("@id").takeUnless { it.isMissingOrNull() }?.asText() ?: idGenerator.generateId().also {
             set("@id", it)
         }
-        val opprettet = LocalDateTime.now()
+        val opprettet = Tidspunkt.now().toLocalDatetimeUTC()
         if (!json.hasNonNull("@opprettet")) set(OpprettetKey, opprettet)
         set(ReadCountKey, json.path(ReadCountKey).asInt(-1) + 1)
         initializeOrSetParticipatingServices(json, id, opprettet)

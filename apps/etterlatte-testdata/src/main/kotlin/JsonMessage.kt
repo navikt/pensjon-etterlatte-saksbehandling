@@ -7,8 +7,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.net.InetAddress
-import java.time.LocalDateTime
 
 // Stripped down version of JsonMessage from rapids and rivers
 open class JsonMessage(
@@ -41,7 +42,7 @@ open class JsonMessage(
             val entry = mapOf(
                 "service" to serviceName,
                 "instance" to serviceHostname,
-                "time" to LocalDateTime.now()
+                "time" to Tidspunkt.now().toLocalDatetimeUTC()
             )
             if (json.path(ParticipatingServicesKey).isMissingOrNull()) {
                 set(ParticipatingServicesKey, listOf(entry))

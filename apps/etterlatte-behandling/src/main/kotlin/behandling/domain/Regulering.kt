@@ -8,6 +8,8 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.util.UUID
@@ -42,5 +44,5 @@ data class Regulering(
     override fun tilIverksatt() = endreTilStatus(BehandlingStatus.IVERKSATT)
 
     private fun endreTilStatus(status: BehandlingStatus) =
-        this.copy(status = status, sistEndret = LocalDateTime.now())
+        this.copy(status = status, sistEndret = Tidspunkt.now().toLocalDatetimeUTC())
 }

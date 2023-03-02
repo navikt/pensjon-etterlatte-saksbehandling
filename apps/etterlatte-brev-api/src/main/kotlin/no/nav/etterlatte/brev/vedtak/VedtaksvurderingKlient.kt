@@ -30,7 +30,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
             logger.info("Henter vedtaksvurdering behandling med behandlingId=$behandlingId")
 
             return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/fellesvedtak"),
+                Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId/fellesvedtak"),
                 bruker
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },

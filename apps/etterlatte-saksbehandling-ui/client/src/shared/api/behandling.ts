@@ -33,15 +33,15 @@ export const hentManueltOpphoerDetaljer = async (
 }
 
 export const fattVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/fattvedtak/${behandlingsId}`, {})
+  return apiClient.post(`/vedtak/${behandlingsId}/fattvedtak`, {})
 }
 
 export const upsertVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/upsert/${behandlingsId}`, {})
+  return apiClient.post(`/vedtak/${behandlingsId}/upsert`, {})
 }
 
 export const attesterVedtak = async (behandlingId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/attester/${behandlingId}`, {})
+  return apiClient.post(`/vedtak/${behandlingId}/attester`, {})
 }
 
 export const underkjennVedtak = async (
@@ -49,7 +49,7 @@ export const underkjennVedtak = async (
   kommentar: string,
   valgtBegrunnelse: string
 ): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/underkjenn/${behandlingId}`, { kommentar, valgtBegrunnelse })
+  return apiClient.post(`/vedtak/${behandlingId}/underkjenn`, { kommentar, valgtBegrunnelse })
 }
 
 export const lagreBegrunnelseKommerBarnetTilgode = async (args: {

@@ -18,14 +18,14 @@ import rapidsandrivers.BEREGNING_KEY
 import java.io.FileNotFoundException
 import java.util.*
 
-internal class OmberegningsHendelserTest {
+internal class OmregningsHendelserTest {
 
     private val behandlingService = mockk<BeregningService>()
-    private val inspector = TestRapid().apply { OmberegningHendelser(this, behandlingService) }
+    private val inspector = TestRapid().apply { OmregningHendelser(this, behandlingService) }
 
     @Test
-    fun `skal opprette omberegning`() {
-        val omberegningsid = slot<UUID>()
+    fun `skal opprette omregning`() {
+        val omregningsid = slot<UUID>()
         val beregningDTO = BeregningDTO(
             beregningId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
@@ -40,13 +40,13 @@ internal class OmberegningsHendelserTest {
                 runBlocking { it.body<BeregningDTO>() }
             } returns beregningDTO
         }
-        every { behandlingService.opprettOmberegning(capture(omberegningsid)) }.returns(returnValue)
+        every { behandlingService.opprettOmregning(capture(omregningsid)) }.returns(returnValue)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 
         inspector.sendTestMessage(fullMelding)
 
-        Assertions.assertEquals(UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31"), omberegningsid.captured)
+        Assertions.assertEquals(UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31"), omregningsid.captured)
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             beregningDTO.toJson(),
@@ -55,9 +55,9 @@ internal class OmberegningsHendelserTest {
     }
 
     companion object {
-        val fullMelding = readFile("/omberegningshendelse.json")
+        val fullMelding = readFile("/omregningshendelse.json")
     }
 }
 
-fun readFile(file: String) = OmberegningsHendelserTest::class.java.getResource(file)?.readText()
+fun readFile(file: String) = OmregningsHendelserTest::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")

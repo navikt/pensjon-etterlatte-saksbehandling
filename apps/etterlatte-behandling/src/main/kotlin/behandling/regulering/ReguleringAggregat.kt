@@ -12,7 +12,6 @@ import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
@@ -44,7 +43,6 @@ class ReguleringAggregat(
                 kommerBarnetTilgode = forrigeBehandling.kommerBarnetTilgode,
                 vilkaarUtfall = forrigeBehandling.vilkaarUtfall,
                 virkningstidspunkt = fradato.tilVirkningstidspunkt("Regulering"),
-                revurderingsAarsak = RevurderingAarsak.GRUNNBELOEPREGULERING,
                 prosesstype = prosesstype
             )
                 .also {

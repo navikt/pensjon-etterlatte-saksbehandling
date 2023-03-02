@@ -14,10 +14,9 @@ import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
-import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -33,7 +32,7 @@ import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OmberegningIntegrationTest : BehandlingIntegrationTest() {
+class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
     @BeforeAll
     fun start() = startServer()
@@ -46,9 +45,9 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
         beanFactory.resetDatabase()
     }
 
-    @ParameterizedTest(name = "Kan opprette {0} omberegningstype paa sak")
+    @ParameterizedTest(name = "Kan opprette {0} omregningstype paa sak")
     @EnumSource(Prosesstype::class)
-    fun `kan opprette omberegning paa sak som har foerstegangsbehandling`(prosesstype: Prosesstype) {
+    fun `kan opprette omregning paa sak som har foerstegangsbehandling`(prosesstype: Prosesstype) {
         val fnr = "234"
         testApplication {
             environment {
@@ -95,14 +94,13 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                 UUID.fromString(it.body())
             }
 
-            val omberegning = client.post("/omberegning") {
+            val omregning = client.post("/omregning") {
                 addAuthToken(tokenServiceUser)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    Omberegningshendelse(
+                    Omregningshendelse(
                         1,
                         LocalDate.now(),
-                        RevurderingAarsak.GRUNNBELOEPREGULERING,
                         null,
                         prosesstype
                     )
@@ -119,7 +117,7 @@ class OmberegningIntegrationTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 it.body<BehandlingListe>().also { liste ->
                     Assertions.assertEquals(foerstegangsbehandling, liste.behandlinger[0].id)
-                    Assertions.assertEquals(omberegning, liste.behandlinger[1].id)
+                    Assertions.assertEquals(omregning, liste.behandlinger[1].id)
                 }
             }.also {
                 Assertions.assertEquals(2, it.behandlinger.size)

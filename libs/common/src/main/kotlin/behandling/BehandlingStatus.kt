@@ -34,6 +34,6 @@ enum class BehandlingStatus {
 
         fun ikkeAvbrutt() = iverksattEllerAttestert() + underBehandling()
 
-        fun skalIkkeOmberegnesVedGRegulering() = listOf(IVERKSATT, AVBRUTT, ATTESTERT, OPPRETTET, VILKAARSVURDERT)
+        fun skalIkkeOmregnesVedGRegulering() = listOf(IVERKSATT, AVBRUTT, ATTESTERT, OPPRETTET, VILKAARSVURDERT)
     }
 }

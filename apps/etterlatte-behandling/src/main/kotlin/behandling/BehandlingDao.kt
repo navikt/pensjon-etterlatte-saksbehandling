@@ -176,7 +176,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
                 WHERE status not in (${
-                BehandlingStatus.skalIkkeOmberegnesVedGRegulering().joinToString(", ") { "'$it'" }
+                BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
             })
             """.trimIndent()
         )
@@ -225,7 +225,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
         vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },

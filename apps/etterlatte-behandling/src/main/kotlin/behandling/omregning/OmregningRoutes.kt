@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.omberegning
+package no.nav.etterlatte.behandling.omregning
 
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -6,20 +6,20 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 
-fun Route.omberegningRoutes(
-    omberegningService: OmberegningService
+fun Route.omregningRoutes(
+    omregningService: OmregningService
 ) {
-    route("/omberegning") {
+    route("/omregning") {
         post {
-            val request = call.receive<Omberegningshendelse>()
-            val omberegning = omberegningService.opprettOmberegning(
+            val request = call.receive<Omregningshendelse>()
+            val omregning = omregningService.opprettOmregning(
                 sakId = request.sakId,
                 fradato = request.fradato,
                 prosesstype = request.prosesstype
             )
-            call.respond(omberegning)
+            call.respond(omregning)
         }
     }
 }

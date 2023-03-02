@@ -12,8 +12,8 @@ class BeregningService(
     private val behandling_app: HttpClient,
     private val url: String
 ) {
-    fun opprettOmberegning(omberegningsid: UUID): HttpResponse = runBlocking {
-        behandling_app.post("$url/api/beregning/$omberegningsid") {
+    fun opprettOmregning(omregningsid: UUID): HttpResponse = runBlocking {
+        behandling_app.post("$url/api/beregning/$omregningsid") {
             contentType(ContentType.Application.Json)
         }
     }

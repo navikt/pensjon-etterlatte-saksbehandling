@@ -58,7 +58,7 @@ internal class BehandlingDaoReguleringTest {
     }
 
     private fun hentMigrerbareStatuses() =
-        BehandlingStatus.values().toList() - BehandlingStatus.skalIkkeOmberegnesVedGRegulering().toSet()
+        BehandlingStatus.values().toList() - BehandlingStatus.skalIkkeOmregnesVedGRegulering().toSet()
 
     @ParameterizedTest(
         name = "behandling med status {0} skal endres til aa vaere VILKAARSVURDERT"
@@ -80,7 +80,7 @@ internal class BehandlingDaoReguleringTest {
         }
     }
 
-    private fun hentStatuser() = BehandlingStatus.skalIkkeOmberegnesVedGRegulering()
+    private fun hentStatuser() = BehandlingStatus.skalIkkeOmregnesVedGRegulering()
 
     @ParameterizedTest(name = "behandling med status {0} skal fortsette aa ha samme status ved migrering")
     @MethodSource("hentStatuser")

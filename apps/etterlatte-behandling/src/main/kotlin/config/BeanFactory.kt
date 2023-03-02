@@ -19,7 +19,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
-import no.nav.etterlatte.behandling.omberegning.OmberegningService
+import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.regulering.RealRevurderingService
 import no.nav.etterlatte.behandling.regulering.ReguleringFactory
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
@@ -64,7 +64,7 @@ interface BeanFactory {
     fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService
     fun manueltOpphoerService(): ManueltOpphoerService
     fun oppgaveService(): OppgaveService
-    fun omberegningService(): OmberegningService
+    fun omregningService(): OmregningService
     fun sakDao(): SakDao
     fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse
     fun oppgaveDao(): OppgaveDao
@@ -222,8 +222,8 @@ abstract class CommonFactory : BeanFactory {
 
     override fun sporingslogg(): Sporingslogg = Sporingslogg()
 
-    override fun omberegningService(): OmberegningService =
-        OmberegningService(reguleringFactory = reguleringFactory(), behandlingService = generellBehandlingService())
+    override fun omregningService(): OmregningService =
+        OmregningService(reguleringFactory = reguleringFactory(), behandlingService = generellBehandlingService())
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
@@ -275,7 +275,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-            Duration.of(1, ChronoUnit.MINUTES).toMillis()
+                Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

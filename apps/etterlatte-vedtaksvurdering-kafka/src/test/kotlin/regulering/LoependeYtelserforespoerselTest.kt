@@ -3,14 +3,13 @@ package regulering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
-import no.nav.etterlatte.rapidsandrivers.EventNames.OMBEREGNINGSHENDELSE
+import no.nav.etterlatte.rapidsandrivers.EventNames.OMREGNINGSHENDELSE
 import no.nav.etterlatte.regulering.LoependeYtelserforespoersel
 import no.nav.etterlatte.regulering.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -57,15 +56,14 @@ internal class LoependeYtelserforespoerselTest {
 
         inspector.sendTestMessage(melding.toJson())
         val sendtMelding = inspector.inspektør.message(0)
-        Assertions.assertEquals(OMBEREGNINGSHENDELSE, sendtMelding.get(EVENT_NAME_KEY).asText())
+        Assertions.assertEquals(OMREGNINGSHENDELSE, sendtMelding.get(EVENT_NAME_KEY).asText())
         Assertions.assertEquals(
-            Omberegningshendelse(
+            Omregningshendelse(
                 sakId = sakId,
                 fradato = fraDato,
-                aarsak = RevurderingAarsak.GRUNNBELOEPREGULERING,
                 prosesstype = Prosesstype.AUTOMATISK
             ),
-            objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omberegningshendelse::class.java)
+            objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omregningshendelse::class.java)
         )
     }
 

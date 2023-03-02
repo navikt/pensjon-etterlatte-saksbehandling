@@ -4,7 +4,6 @@ import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -31,7 +30,6 @@ internal class ReguleringTest {
             kommerBarnetTilgode = null,
             vilkaarUtfall = null,
             virkningstidspunkt = null,
-            RevurderingAarsak.GRUNNBELOEPREGULERING,
             Prosesstype.AUTOMATISK
         ).tilReturnert().tilOpprettet().tilVilkaarsvurdert(VilkaarsvurderingUtfall.IKKE_OPPFYLT).tilBeregnet()
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilBeregnet().tilFattetVedtak().tilAttestert()

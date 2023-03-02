@@ -11,7 +11,7 @@ import { ferdigstillBrev, hentBrevForBehandling, Mottaker, slettBrev } from '~sh
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import { Journalpost } from '../types'
-import { formaterBehandlingstype, formaterDato, formaterEnumTilLesbarString } from '~utils/formattering'
+import { formaterBehandlingstype, formaterDato, formaterSakstype } from '~utils/formattering'
 import InnkommendeBrevModal from './innkommende-brev-modal'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
@@ -145,7 +145,7 @@ export const Brev = () => {
               </li>
               <li>
                 <Tag variant={tagColors[ISaksType.BARNEPENSJON]} size={'small'}>
-                  {formaterEnumTilLesbarString(ISaksType.BARNEPENSJON)}
+                  {formaterSakstype(ISaksType.BARNEPENSJON)}
                 </Tag>
               </li>
             </TagList>

@@ -5,10 +5,12 @@ import { IKriterie } from '~shared/types/Kriterie'
 import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import { Utfall } from '~shared/types/Utfall'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export interface IDetaljertBehandling {
   id: string
   sak: number
+  sakType: ISaksType
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   saksbehandlerId?: string

@@ -28,6 +28,8 @@ abstract class TruncatedInstant(
 
     override fun toString() = instant.toString()
     fun toEpochMilli() = instant.toEpochMilli()
+    fun isBefore(other: TruncatedInstant) = instant.isBefore(other.instant)
+    fun isAfter(other: TruncatedInstant) = instant.isAfter(other.instant)
 }
 
 /**
@@ -65,8 +67,6 @@ constructor(
     }
 
     override fun hashCode() = instant.hashCode()
-    override fun plus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.plus(amount, unit).toTidspunkt()
-    override fun minus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.minus(amount, unit).toTidspunkt()
-    fun isBefore(other: Tidspunkt) = instant.isBefore(other.instant)
-    fun isAfter(other: Tidspunkt) = instant.isAfter(other.instant)
+    override fun plus(amount: Long, unit: TemporalUnit): Tidspunkt = Tidspunkt(instant.plus(amount, unit))
+    override fun minus(amount: Long, unit: TemporalUnit): Tidspunkt = Tidspunkt(instant.minus(amount, unit))
 }

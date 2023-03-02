@@ -33,7 +33,6 @@ import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZonedDateTime
@@ -79,7 +78,7 @@ class StatistikkServiceTest {
             beregningId = UUID.randomUUID(),
             behandlingId = behandlingId,
             type = Beregningstype.BP,
-            beregnetDato = Tidspunkt(instant = Instant.now()),
+            beregnetDato = Tidspunkt(instant = Tidspunkt.now().instant),
             beregningsperioder = listOf()
         )
         val beregningKlient = mockk<BeregningKlient>()

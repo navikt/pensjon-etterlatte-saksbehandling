@@ -39,7 +39,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.Instant
 import java.time.YearMonth
 import javax.sql.DataSource
 
@@ -618,7 +617,7 @@ internal class BehandlingDaoIntegrationTest {
 
         assertNotNull(behandling)
 
-        val saksbehandler = Grunnlagsopplysning.Saksbehandler("navIdent", Instant.now())
+        val saksbehandler = Grunnlagsopplysning.Saksbehandler("navIdent", Tidspunkt.now().instant)
         val nyDato = YearMonth.of(2021, 2)
         behandling!!.oppdaterVirkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse").let {
             behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.virkningstidspunkt!!)
@@ -645,7 +644,7 @@ internal class BehandlingDaoIntegrationTest {
         val kommerBarnetTilgode = KommerBarnetTilgode(
             JaNeiVetIkke.JA,
             "begrunnelse",
-            Grunnlagsopplysning.Saksbehandler("navIdent", Instant.now())
+            Grunnlagsopplysning.Saksbehandler("navIdent", Tidspunkt.now().instant)
         )
         behandlingRepo.lagreKommerBarnetTilgode(opprettBehandling.id, kommerBarnetTilgode)
 

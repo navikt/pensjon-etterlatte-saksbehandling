@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.temporal.ChronoUnit
@@ -25,7 +24,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `skal opprette avstemming fra utbetaling med startmelding, datamelding og sluttmelding`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger =
@@ -43,7 +42,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `skal skal splitte opp datameldinger slik at de kun inneholder et gitt antall detaljer`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
@@ -67,7 +66,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `skal kun inneholde grunnadata, total og periode i forste datamelding`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
@@ -95,7 +94,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `skal returnere riktig totalantall, totalbelop og fortegn`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
@@ -118,7 +117,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `skal returnere riktig totalantall, totalbelop og fortegn ved opphor`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(utbetalingMedOpphoer())
@@ -135,7 +134,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `antall i grunnlagsdata skal telles opp korrekt for godkjent, varsel, avvist og mangler`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
@@ -179,7 +178,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `antall i grunnlagsdata skal vaere 0 for alle statuser naar det er ingen utbetalinger aa avstemme`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger = emptyList<Utbetaling>()
@@ -204,7 +203,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `antall meldinger skal vaere satt til 0 naar det er ingen utbetalinger aa avstemme`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger = emptyList<Utbetaling>()
@@ -223,7 +222,7 @@ internal class GrensesnittavstemmingDataMapperTest {
 
     @Test
     fun `nokkelTom og nokkelFom er satt til 0 naar det er ingen utbetalinger aa avstemme`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger = emptyList<Utbetaling>()

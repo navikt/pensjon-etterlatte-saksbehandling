@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
-import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -64,7 +63,7 @@ internal class AvstemmingsdataSenderIntegrationTest {
 
     @Test
     fun `skal sende grensesnittavstemmingsmeldinger paa koeen`() {
-        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(

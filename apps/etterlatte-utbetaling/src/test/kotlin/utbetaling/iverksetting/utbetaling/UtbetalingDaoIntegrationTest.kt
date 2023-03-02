@@ -30,6 +30,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 
@@ -79,22 +80,22 @@ internal class UtbetalingDaoIntegrationTest {
             {
                 assertTrue(
                     opprettetUtbetaling?.opprettet!!.instant.isAfter(
-                        Instant.now().minusSeconds(10)
-                    ) and opprettetUtbetaling.opprettet.instant.isBefore(Instant.now())
+                        Tidspunkt.now().minus(10, ChronoUnit.SECONDS).instant
+                    ) and opprettetUtbetaling.opprettet.isBefore(Tidspunkt.now())
                 )
             },
             {
                 assertTrue(
                     opprettetUtbetaling!!.endret.instant.isAfter(
-                        Instant.now().minusSeconds(10)
-                    ) and opprettetUtbetaling.endret.instant.isBefore(Instant.now())
+                        Tidspunkt.now().minus(10, ChronoUnit.SECONDS).instant
+                    ) and opprettetUtbetaling.endret.isBefore(Tidspunkt.now())
                 )
             },
             {
                 assertTrue(
                     opprettetUtbetaling!!.avstemmingsnoekkel.instant.isAfter(
-                        Instant.now().minusSeconds(10)
-                    ) and opprettetUtbetaling.avstemmingsnoekkel.instant.isBefore(Instant.now())
+                        Tidspunkt.now().minus(10, ChronoUnit.SECONDS).instant
+                    ) and opprettetUtbetaling.avstemmingsnoekkel.isBefore(Tidspunkt.now())
                 )
             },
             { assertEquals(utbetaling.stoenadsmottaker.value, opprettetUtbetaling?.stoenadsmottaker?.value) },

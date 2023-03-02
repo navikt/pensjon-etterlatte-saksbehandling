@@ -47,7 +47,7 @@ import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
@@ -72,7 +72,7 @@ internal fun Route.behandlingRoutes(
             val kommerBarnetTilgode = KommerBarnetTilgode(
                 body.svar,
                 body.begrunnelse,
-                Grunnlagsopplysning.Saksbehandler(navIdent, Instant.now())
+                Grunnlagsopplysning.Saksbehandler(navIdent, Tidspunkt.now().instant)
             )
 
             try {

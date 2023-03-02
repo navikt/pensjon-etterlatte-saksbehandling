@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.saksbehandlerToken
@@ -33,9 +34,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.time.Instant
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class RealManueltOpphoerServiceTest {
 
@@ -100,7 +100,7 @@ internal class RealManueltOpphoerServiceTest {
                     sakId = sak,
                     virkningstidspunkt = Virkningstidspunkt(
                         dato = YearMonth.of(2022, 8),
-                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Instant.now()),
+                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Tidspunkt.now().instant),
                         begrunnelse = ""
                     ),
                     status = BehandlingStatus.IVERKSATT
@@ -273,7 +273,7 @@ internal class RealManueltOpphoerServiceTest {
                     status = BehandlingStatus.FATTET_VEDTAK,
                     virkningstidspunkt = Virkningstidspunkt(
                         dato = YearMonth.of(2020, 8),
-                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Instant.now()),
+                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Tidspunkt.now().instant),
                         begrunnelse = "dab on the haters"
                     )
                 )

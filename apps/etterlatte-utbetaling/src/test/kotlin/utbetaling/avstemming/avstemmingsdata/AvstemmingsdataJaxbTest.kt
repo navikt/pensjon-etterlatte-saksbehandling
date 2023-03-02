@@ -3,7 +3,6 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.common.tidsstempelMikroOppdrag
 import no.nav.etterlatte.utbetaling.common.tidsstempelTimeOppdrag
@@ -19,7 +18,6 @@ import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -166,9 +164,9 @@ internal class AvstemmingsdataJaxbTest {
 
     @Test
     fun `skal konvertere grensesnittavstemmingsdata til gyldig xml`() {
-        val now = Instant.now()
-        val fraOgMed = now.minus(1, ChronoUnit.DAYS).toTidspunkt()
-        val til = now.toTidspunkt()
+        val now = Tidspunkt.now()
+        val fraOgMed = now.minus(1, ChronoUnit.DAYS)
+        val til = now
 
         val uuid = UUIDBase64()
         val utbetalingId = UUID.randomUUID()

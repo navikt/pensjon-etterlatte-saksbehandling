@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
@@ -36,7 +37,6 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
@@ -75,7 +75,7 @@ class IntegrationTest {
                     "1",
                     listOf("1234567"),
                     "",
-                    Instant.now(),
+                    Tidspunkt.now().instant,
                     "DOEDSFALL_V1",
                     Endringstype.OPPRETTET,
                     null,
@@ -116,7 +116,7 @@ class IntegrationTest {
                     "1",
                     listOf("1234567"),
                     "",
-                    Instant.now(),
+                    Tidspunkt.now().instant,
                     "UTFLYTTING_FRA_NORGE",
                     Endringstype.OPPRETTET,
                     null,
@@ -155,7 +155,7 @@ class IntegrationTest {
                     "1",
                     listOf("1234567"),
                     "",
-                    Instant.now(),
+                    Tidspunkt.now().instant,
                     "FORELDERBARNRELASJON_V1",
                     Endringstype.OPPRETTET,
                     null,

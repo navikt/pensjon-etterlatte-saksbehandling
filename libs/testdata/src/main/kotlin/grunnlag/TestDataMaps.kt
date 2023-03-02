@@ -27,14 +27,14 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID.randomUUID
 
-val kilde = Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, "opplysningsId1")
+val kilde = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now().instant, null, "opplysningsId1")
 val statiskUuid = randomUUID()!!
 
 val AVDOED_FOEDSELSNUMMER = Foedselsnummer.of("01448203510")

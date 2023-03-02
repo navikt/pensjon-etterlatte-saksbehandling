@@ -24,7 +24,6 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -79,8 +78,8 @@ internal class VedtaksvurderingServiceTest {
         vilkaarsResultat = null,
         vedtakFattet = null,
         fnr = "12312312312",
-        datoFattet = Instant.now(),
-        datoattestert = Instant.now(),
+        datoFattet = Tidspunkt.now().instant,
+        datoattestert = Tidspunkt.now().instant,
         attestant = "Attestant",
         virkningsDato = LocalDate.now(),
         vedtakStatus = null,

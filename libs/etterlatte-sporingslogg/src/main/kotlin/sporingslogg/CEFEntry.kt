@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.sporingslogg
 
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.Instant
 
 enum class Format {
@@ -46,7 +47,7 @@ data class CEFEntry(
 }
 
 data class Extension(
-    val endTime: Instant = Instant.now(),
+    val endTime: Instant = Tidspunkt.now().instant,
     val sourceUserId: String, // merk: Vi støtter pr i dag ikke Azure AD ID’er, og vil ha behov for vanlig NAV ID.
     val destinationUserId: String,
     val request: String? = null,

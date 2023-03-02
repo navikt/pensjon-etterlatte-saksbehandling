@@ -15,7 +15,6 @@ import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Clock
-import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 internal class GrensesnittavstemmingServiceTest {
@@ -35,7 +34,7 @@ internal class GrensesnittavstemmingServiceTest {
     @Test
     fun `skal opprette avstemming og sende til oppdrag`() {
         val periode = Avstemmingsperiode(
-            fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
+            fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS),
             til = Tidspunkt.now()
         )
         val utbetaling =

@@ -9,13 +9,13 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
@@ -163,7 +163,7 @@ internal class GrunnlagHelperKtTest {
     companion object {
         val KILDE = Grunnlagsopplysning.Pdl(
             navn = "pdl",
-            tidspunktForInnhenting = Instant.now(),
+            tidspunktForInnhenting = Tidspunkt.now().instant,
             registersReferanse = null,
             opplysningId = "opplysningsId1"
         )

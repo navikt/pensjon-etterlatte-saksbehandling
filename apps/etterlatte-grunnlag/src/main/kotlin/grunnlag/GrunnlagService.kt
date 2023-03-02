@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.sporingslogg.Decision
@@ -24,7 +25,6 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.token.Bruker
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.util.*
 
 interface GrunnlagService {
@@ -98,7 +98,7 @@ class RealGrunnlagService(
         val opplysning: List<Grunnlagsopplysning<JsonNode>> = listOf(
             lagOpplysning(
                 opplysningsType = Opplysningstype.SOESKEN_I_BEREGNINGEN,
-                kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Instant.now()),
+                kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now().instant),
                 opplysning = Beregningsgrunnlag(soeskenMedIBeregning).toJsonNode()
             )
         )

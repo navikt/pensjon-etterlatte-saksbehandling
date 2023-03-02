@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.Instant
 import java.time.YearMonth
 
@@ -68,7 +69,7 @@ fun lagEnkelopplysningerFraPDL(
     opplysningsbehov: Opplysningstype, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1
     fnr: Foedselsnummer
 ): List<Grunnlagsopplysning<*>> {
-    val tidspunktForInnhenting = Instant.now()
+    val tidspunktForInnhenting = Tidspunkt.now().instant
     val opplysningsbolk = Opplysningsbolk(fnr, tidspunktForInnhenting)
     val personRolle = behovNameTilPersonRolle(opplysningsbehov)
 

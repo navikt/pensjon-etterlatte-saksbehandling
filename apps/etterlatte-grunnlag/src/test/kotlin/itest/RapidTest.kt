@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -35,7 +36,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.Instant
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -77,7 +77,7 @@ internal class RapidTest {
     }
 
     private val fnr = Foedselsnummer.of("18057404783")
-    private val tidspunkt = Instant.now()
+    private val tidspunkt = Tidspunkt.now().instant
     private val kilde = Grunnlagsopplysning.Pdl("pdl", tidspunkt, null, null)
     private val nyOpplysning = Grunnlagsopplysning(
         id = statiskUuid,

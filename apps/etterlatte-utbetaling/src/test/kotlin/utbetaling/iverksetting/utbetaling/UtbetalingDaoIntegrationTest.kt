@@ -2,7 +2,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
-import no.nav.etterlatte.libs.common.tidspunkt.standardTidssoneUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.utbetaling.TestContainers
@@ -27,6 +27,8 @@ import org.testcontainers.junit.jupiter.Container
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
@@ -368,9 +370,7 @@ internal class UtbetalingDaoIntegrationTest {
         )
 
         val utbetalingerFraDao = utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-            aktivFraOgMed = Tidspunkt(
-                instant = LocalDate.EPOCH.atStartOfDay(standardTidssoneUTC).toInstant()
-            ),
+            aktivFraOgMed = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT).toTidspunkt(),
             opprettetFramTilOgMed = Tidspunkt.now(),
             saktype = Saktype.BARNEPENSJON
         )

@@ -18,21 +18,17 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Siviltilstand
-import no.nav.etterlatte.libs.common.tidspunkt.standardTidssoneUTC
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.Clock
-import java.time.Instant
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GyldigOmstillingsSoeknadServiceTest {
 
     private val pdlClient = mockk<PdlClient>()
-    private val clock = Clock.fixed(Instant.now(), standardTidssoneUTC)
-    private val service = GyldigOmstillingsSoeknadService(pdlClient, clock)
+    private val service = GyldigOmstillingsSoeknadService(pdlClient)
 
     @BeforeAll
     fun setup() {

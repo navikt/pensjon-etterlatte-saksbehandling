@@ -8,7 +8,7 @@ import java.time.ZoneOffset
 
 val norskTidssone: ZoneId = ZoneId.of("Europe/Oslo")
 
-val standardTidssoneUTC = ZoneOffset.UTC
+internal val standardTidssoneUTC = ZoneOffset.UTC
 
 fun LocalDateTime.tilInstant() = toInstant(standardTidssoneUTC)
 

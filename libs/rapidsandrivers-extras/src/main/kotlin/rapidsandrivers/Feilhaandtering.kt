@@ -21,7 +21,7 @@ private fun <T> innerFeilhaandtering(
     return try {
         block()
     } catch (e: Exception) {
-        feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila.", e)
+        feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
         packet.eventName = EventNames.FEILA
         packet.feilendeSteg = feilendeSteg
         context.publish(packet.toJson())

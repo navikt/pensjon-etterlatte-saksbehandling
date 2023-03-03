@@ -30,7 +30,7 @@ fun Route.beregning(beregningService: BeregningService) {
         post("/{behandlingId}") {
             withBehandlingId {
                 logger.info("Oppretter beregning for behandlingId=$it")
-                val beregning = beregningService.lagreBeregning(it, bruker)
+                val beregning = beregningService.opprettBeregning(it, bruker)
                 call.respond(beregning.toDTO())
             }
         }

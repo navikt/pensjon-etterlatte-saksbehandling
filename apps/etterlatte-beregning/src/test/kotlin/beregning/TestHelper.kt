@@ -1,9 +1,12 @@
 package no.nav.etterlatte.beregning.regler
 
+import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
+import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
+import no.nav.etterlatte.token.Saksbehandler
 import java.math.RoundingMode
 import java.time.LocalDate
 
@@ -32,3 +35,5 @@ fun Int.toBeregningstall(
     decimals: Int = Beregningstall.DESIMALER_DELBEREGNING,
     roundingMode: RoundingMode = RoundingMode.UNNECESSARY
 ) = Beregningstall(this).setScale(decimals, roundingMode)
+
+val bruker = Saksbehandler("token", "ident")

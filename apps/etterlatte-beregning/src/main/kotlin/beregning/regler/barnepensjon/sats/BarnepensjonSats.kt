@@ -1,10 +1,10 @@
-package no.nav.etterlatte.beregning.regler.sats
+package no.nav.etterlatte.beregning.regler.barnepensjon.sats
 
 import no.nav.etterlatte.beregning.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
-import no.nav.etterlatte.beregning.regler.BP_1967_DATO
-import no.nav.etterlatte.beregning.regler.BarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.Beregningstall
+import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
+import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta

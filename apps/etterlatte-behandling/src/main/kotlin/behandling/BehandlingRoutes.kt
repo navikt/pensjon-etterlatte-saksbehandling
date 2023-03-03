@@ -28,6 +28,7 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.regulering.RevurderingService
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -37,6 +38,7 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -56,7 +58,7 @@ internal fun Route.behandlingRoutes(
     manueltOpphoerService: ManueltOpphoerService
 ) {
     val logger = application.log
-    route("/api/behandling/{behandlingsid}") {
+    route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
         get {
             val detaljertBehandlingDTO =
                 generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, bruker)
@@ -169,7 +171,7 @@ internal fun Route.behandlingRoutes(
             )
         }
 
-        route("/{behandlingsid}") {
+        route("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             get {
                 logger.info("Henter detaljert behandling for behandling med id=$behandlingsId")
                 when (val behandling = generellBehandlingService.hentDetaljertBehandling(behandlingsId)) {
@@ -200,7 +202,7 @@ internal fun Route.behandlingRoutes(
             }
         }
 
-        route("/foerstegangsbehandling/{behandlingsId}") {
+        route("/foerstegangsbehandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
             get {
                 call.respond(
                     foerstegangsbehandlingService.hentFoerstegangsbehandling(behandlingsId)?.toDetaljertBehandling()
@@ -209,7 +211,7 @@ internal fun Route.behandlingRoutes(
             }
         }
 
-        route("/foerstegangsbehandling") {
+        route("/foerstegangsbehandling") { // Obsolete?
             get {
                 call.respond(
                     foerstegangsbehandlingService.hentFoerstegangsbehandling(behandlingsId)?.toDetaljertBehandling()
@@ -350,11 +352,6 @@ private fun ManueltOpphoer.toManueltOpphoerOppsummmering(
         opphoerAarsaker = this.opphoerAarsaker,
         fritekstAarsak = this.fritekstAarsak,
         andreBehandlinger = andreBehandlinger
-    )
-
-inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
-    get() = call.parameters["behandlingsid"]?.let { UUID.fromString(it) } ?: throw NullPointerException(
-        "BehandlingsId er ikke i path params"
     )
 
 inline val PipelineContext<*, ApplicationCall>.sakId

@@ -11,6 +11,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
@@ -25,7 +26,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
     route("/api/vilkaarsvurdering") {
         val logger = application.log
 
-        get("/{behandlingId}") {
+        get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
@@ -42,7 +43,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             }
         }
 
-        post("/{behandlingId}/opprett") {
+        post("/{$BEHANDLINGSID_CALL_PARAMETER}/opprett") {
             withBehandlingId { behandlingId ->
                 try {
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
@@ -62,7 +63,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             }
         }
 
-        post("/{behandlingId}") {
+        post("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId { behandlingId ->
                 val vurdertVilkaarDto = call.receive<VurdertVilkaarDto>()
                 val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(bruker.ident())
@@ -88,8 +89,8 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             }
         }
 
-        delete("/{behandlingId}/{vilkaarId}") {
-            withParam("behandlingId", "vilkaarId") { behandlingId, vilkaarId ->
+        delete("/{$BEHANDLINGSID_CALL_PARAMETER}/{vilkaarId}") {
+            withParam(BEHANDLINGSID_CALL_PARAMETER, "vilkaarId") { behandlingId, vilkaarId ->
                 logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
                 try {
                     val vilkaarsvurdering =
@@ -112,7 +113,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
         }
 
         route("/resultat") {
-            post("/{behandlingId}") {
+            post("/{$BEHANDLINGSID_CALL_PARAMETER}") {
                 withBehandlingId { behandlingId ->
                     val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
                     val vurdertResultat = vurdertResultatDto.toVilkaarsvurderingResultat(
@@ -134,7 +135,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 }
             }
 
-            delete("/{behandlingId}") {
+            delete("/{$BEHANDLINGSID_CALL_PARAMETER}") {
                 withBehandlingId { behandlingId ->
                     logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
                     try {

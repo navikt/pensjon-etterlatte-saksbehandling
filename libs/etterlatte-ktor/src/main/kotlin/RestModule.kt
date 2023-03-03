@@ -25,6 +25,7 @@ import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.token.System
@@ -39,7 +40,7 @@ fun Route.adresseBeskyttelseRoute(ressursHarAdressebeskyttelse: (id: String) -> 
             return@intercept
         }
 
-        val behandlingId = call.parameters["behandlingsid"] ?: return@intercept
+        val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER] ?: return@intercept
 
         if (ressursHarAdressebeskyttelse(behandlingId)) {
             call.respond(HttpStatusCode.NotFound)

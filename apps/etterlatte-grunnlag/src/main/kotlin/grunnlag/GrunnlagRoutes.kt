@@ -11,6 +11,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -71,7 +72,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
                 )
             }
         }
-        post("/beregningsgrunnlag/{behandlingId}") {
+        post("/beregningsgrunnlag/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId { behandlingId ->
                 val body = call.receive<SoeskenMedIBeregningDTO>()
                 grunnlagService.lagreSoeskenMedIBeregning(

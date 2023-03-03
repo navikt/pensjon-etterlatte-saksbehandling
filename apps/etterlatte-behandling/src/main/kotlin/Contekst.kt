@@ -32,7 +32,7 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
 
 class Saksbehandler(
     identifiedBy: TokenValidationContext,
-    val saksbehandlerGroupIdsByKey: Map<String, String>
+    val saksbehandlerGroupIdsByKey: Map<String, String?>
 ) :
     ExternalUser(identifiedBy) {
     init {
@@ -45,13 +45,20 @@ class Saksbehandler(
     fun harRolleSaksbehandler(): Boolean {
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
             "groups",
-            saksbehandlerGroupIdsByKey["AZUREAD_SAKSBEHANDLER_GROUPID"]
+            saksbehandlerGroupIdsByKey["AZUREAD_SAKSBEHANDLER_GROUPID"] ?: ""
         )
     }
     fun harRolleAttestant(): Boolean {
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
             "groups",
-            saksbehandlerGroupIdsByKey["AZUREAD_ATTESTANT_GROUPID"]
+            saksbehandlerGroupIdsByKey["AZUREAD_ATTESTANT_GROUPID"] ?: ""
+        )
+    }
+
+    fun harRolleStrengtFortrolig(): Boolean {
+        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
+            "groups",
+            saksbehandlerGroupIdsByKey["AZUREAD_STRENGT_FORTROLIG_GROUPID"] ?: ""
         )
     }
 }
@@ -64,7 +71,7 @@ class Kunde(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
 
 fun decideUser(
     principal: TokenValidationContextPrincipal,
-    saksbehandlerGroupIdsByKey: Map<String, String>
+    saksbehandlerGroupIdsByKey: Map<String, String?>
 ): ExternalUser {
     return if (principal.context.issuers.contains("tokenx")) {
         Kunde(principal.context)

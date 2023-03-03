@@ -159,7 +159,7 @@ class TestBeanFactory(
     private val azureAdSaksbehandlerClaim: String,
     private val azureAdAttestantClaim: String
 ) : CommonFactory() {
-    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> =
+    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String?> =
         mapOf(
             "AZUREAD_ATTESTANT_GROUPID" to azureAdAttestantClaim,
             "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim

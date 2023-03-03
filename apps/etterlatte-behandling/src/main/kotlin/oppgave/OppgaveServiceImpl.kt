@@ -15,15 +15,17 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
     private fun finnAktuelleRoller(bruker: Saksbehandler): List<Rolle> =
         listOfNotNull(
             Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
-            Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() }
+            Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() },
+            Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
         )
 
     private fun aktuelleStatuserForRolleTilSaksbehandler(roller: List<Rolle>) = roller.flatMap {
         when (it) {
             Rolle.SAKSBEHANDLER -> BehandlingStatus.kanEndres()
             Rolle.ATTESTANT -> listOf(BehandlingStatus.FATTET_VEDTAK)
-        }
-    }.distinct()
+            Rolle.STRENGT_FORTROLIG -> BehandlingStatus.underBehandling()
+        }.distinct()
+    }
 
     override fun finnOppgaverForBruker(bruker: Saksbehandler): List<Oppgave> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker)
@@ -31,7 +33,7 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
 
         val alleOppgaver = inTransaction {
             listOf(
-                oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller),
+                oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller, rollerSomBrukerHar),
                 oppgaveDao.finnOppgaverFraGrunnlagsendringshendelser()
             ).flatten()
         }

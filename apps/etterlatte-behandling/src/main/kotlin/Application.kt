@@ -63,12 +63,13 @@ fun Application.module(beanFactory: BeanFactory) {
         val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
 
         val sakServiceAdressebeskyttelse = sakServiceAdressebeskyttelse()
+        val sakService = sakService()
         restModule(sikkerLogg, harAdressebeskyttelseFunc = { behandlingId ->
             sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
         }) {
             attachContekst(dataSource(), beanFactory)
             sakRoutes(
-                sakService = sakService(),
+                sakService = sakService,
                 generellBehandlingService = generellBehandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService
             )

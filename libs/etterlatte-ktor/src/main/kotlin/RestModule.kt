@@ -17,7 +17,6 @@ import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
@@ -35,7 +34,7 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import no.nav.etterlatte.token.System
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -53,10 +52,7 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit
     ) {
-        /*
-        Skal bli gjort automatisk i authentication plugin, men ligger ikke i pipelinen her
-        selvom den blir lagt til i AuthenticationHook pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AuthenticatePhase)
-         */
+        // Inspirasjon AuthenticationChecked
         pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AuthenticatePhase)
         pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
         pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)
@@ -70,7 +66,6 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
     name = "Adressebeskyttelsesplugin",
     createConfiguration = ::PluginConfiguration
 ) {
-    // AuthenticationChecked
     on(AdressebeskyttelseHook) { call ->
         val bruker = call.bruker
         if (bruker is System) {

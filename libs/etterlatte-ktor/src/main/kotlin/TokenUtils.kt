@@ -21,23 +21,7 @@ fun hentAccessToken(call: ApplicationCall) = call.request.parseAuthorizationHead
 
 inline val PipelineContext<*, ApplicationCall>.bruker: Bruker
     get() {
-        val claims = call.principal<TokenValidationContextPrincipal>()
-            ?.context
-            ?.getJwtToken("azure")
-            ?.jwtTokenClaims
-        val oidSub = claims
-            ?.let {
-                val oid = it.getClaim(Claims.oid)
-                val sub = it.getClaim(Claims.sub)
-                Pair(oid, sub)
-            }
-        val saksbehandler = claims?.getClaim(Claims.NAVident)
-        return Bruker.of(
-            accessToken = hentAccessToken(call),
-            oid = oidSub?.first,
-            sub = oidSub?.second,
-            saksbehandler = saksbehandler
-        )
+        return call.bruker
     }
 
 inline val ApplicationCall.bruker: Bruker

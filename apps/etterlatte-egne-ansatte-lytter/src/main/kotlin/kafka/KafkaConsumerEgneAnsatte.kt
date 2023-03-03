@@ -2,6 +2,7 @@ package no.nav.etterlatte.kafka
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import no.nav.etterlatte.BehandlingKlient
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -36,12 +37,13 @@ class KafkaConsumerEgneAnsatte(
                     throw e
                 }
                 antallMeldinger = meldinger.count()
-
+                logger.info("En runde med $antallMeldinger")
                 if (antallMeldinger == 0) {
                     runBlocking {
                         delay(500)
                     }
                 }
+                yield()
             }
         }
     }

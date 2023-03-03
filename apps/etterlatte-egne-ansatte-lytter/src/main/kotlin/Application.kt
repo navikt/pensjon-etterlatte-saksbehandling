@@ -22,7 +22,7 @@ fun main() {
     Server().run()
 }
 
-class Server() {
+class Server {
     private val engine = embeddedServer(
         factory = io.ktor.server.cio.CIO,
         environment = applicationEngineEnvironment {

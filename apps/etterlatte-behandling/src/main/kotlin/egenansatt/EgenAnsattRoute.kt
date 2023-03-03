@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 internal fun Route.egenAnsattRoute(egenAnsattService: EgenAnsattService) {
     val logger = application.log
 
-    route("egenansatt") {
+    route("/egenansatt") {
         post {
             val skjermetHendelse = call.receive<SkjermetHendelse>()
             logger.info("Mottar en egen ansatt hendelse fra skjermingsløsningen")

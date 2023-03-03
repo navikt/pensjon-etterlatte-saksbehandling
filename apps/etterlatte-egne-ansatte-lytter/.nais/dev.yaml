@@ -28,7 +28,7 @@ spec:
   env:
     - name: KAFKA_RESET_POLICY
       value: earliest
-    - name: SKJERMING_GROUP_ID #TODO: sjekkopp
+    - name: SKJERMING_GROUP_ID
       value: "etterlatte-v1"
     - name: SKJERMING_TOPIC
       value: "nom.skjermede-personer-status-v1"

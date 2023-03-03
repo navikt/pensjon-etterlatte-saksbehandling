@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -131,20 +130,15 @@ class VedtaksvurderingService(
     ): Triple<Beregningsresultat?, VilkaarsvurderingDto?, DetaljertBehandling> {
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
-            if (behandling.behandlingType == BehandlingType.MANUELT_OPPHOER) {
+            if (behandling.behandlingType.trengerIkkeVilkaarsvurdering()) {
                 val beregningDTO = beregningKlient.hentBeregning(behandlingId, bruker)
                 val beregningsresultat = Beregningsresultat.fraDto(beregningDTO)
                 return@coroutineScope Triple(beregningsresultat, null, behandling)
             }
 
             val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
-            if (vilkaarsvurdering == null) { // Omregning
-                val beregningDTO = beregningKlient.hentBeregning(behandlingId, bruker)
-                val beregningsResultat = Beregningsresultat.fraDto(beregningDTO)
-                return@coroutineScope Triple(beregningsResultat, null, behandling)
-            }
 
-            when (vilkaarsvurdering.resultat?.utfall) {
+            when (vilkaarsvurdering?.resultat?.utfall) {
                 VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(null, vilkaarsvurdering, behandling)
                 VilkaarsvurderingUtfall.OPPFYLT -> {
                     val beregningDTO = beregningKlient.hentBeregning(behandlingId, bruker)
@@ -185,7 +179,7 @@ class VedtaksvurderingService(
             if (it.type == VedtakType.INNVILGELSE) {
                 if (it.beregning == null) throw VedtakKanIkkeFattes(v)
             }
-            if (it.vilkaarsvurdering == null && it.behandling.type != BehandlingType.MANUELT_OPPHOER) {
+            if (it.vilkaarsvurdering == null && !it.behandling.type.trengerIkkeVilkaarsvurdering()) {
                 throw VedtakKanIkkeFattes(v)
             }
             val saksbehandler = bruker.ident()

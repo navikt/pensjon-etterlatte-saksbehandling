@@ -139,7 +139,7 @@ class VedtaksvurderingService(
 
             val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
 
-            when (vilkaarsvurdering.resultat?.utfall) {
+            when (vilkaarsvurdering?.resultat?.utfall) {
                 VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(null, vilkaarsvurdering, behandling)
                 VilkaarsvurderingUtfall.OPPFYLT -> {
                     val beregningDTO = beregningKlient.hentBeregning(behandlingId, bruker)

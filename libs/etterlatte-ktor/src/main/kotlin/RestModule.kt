@@ -96,7 +96,7 @@ fun Application.restModule(
     routing {
         healthApi()
         authenticate {
-            attachContekst(grupper(config))
+            leggGrupperPaaContext(lesGrupperFraConfig(config))
             route(routePrefix ?: "") {
                 routes()
             }
@@ -104,10 +104,6 @@ fun Application.restModule(
 
         metrics()
     }
-}
-
-fun grupper(config: ApplicationConfig): Map<Group, String> {
-    return mapOf(Group.SAKSBEHANDLER to config.tryGetString(Group.SAKSBEHANDLER.key)!!)
 }
 
 internal fun Throwable.erDeserialiseringsException(): Boolean {
@@ -118,11 +114,17 @@ internal fun Throwable.erDeserialiseringsException(): Boolean {
     return this.cause?.erDeserialiseringsException() ?: false
 }
 
-object Tilgangsgrupper : ThreadLocal<Map<Group, String>>()
+fun lesGrupperFraConfig(config: ApplicationConfig): Grupper = Group.values().associateWith { gruppe ->
+    config.tryGetString(gruppe.key) ?: throw NullPointerException("Mangler id for gruppe: ${gruppe.key}")
+}
 
-private fun Route.attachContekst(groups: Map<Group, String>) {
+typealias Grupper = Map<Group, String>
+
+object Tilgangsgrupper : ThreadLocal<Grupper>()
+
+private fun Route.leggGrupperPaaContext(grupper: Grupper) {
     intercept(Call) {
-        withContext(Dispatchers.Default + Tilgangsgrupper.asContextElement(value = groups)) {
+        withContext(Dispatchers.Default + Tilgangsgrupper.asContextElement(value = grupper)) {
             proceed()
         }
         Tilgangsgrupper.remove()

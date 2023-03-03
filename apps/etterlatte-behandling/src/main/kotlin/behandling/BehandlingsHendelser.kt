@@ -29,7 +29,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 enum class BehandlingHendelseType {
-    OPPRETTET, GRUNNLAGENDRET, AVBRUTT, GYLDIG_FREMSATT
+    OPPRETTET, AVBRUTT, GYLDIG_FREMSATT
 }
 
 class BehandlingsHendelser(

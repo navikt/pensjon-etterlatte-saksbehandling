@@ -2,7 +2,6 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -34,7 +33,6 @@ class GrunnlagHendelser(
             validate { it.interestedIn("fnr") }
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sakId") }
-            validate { it.rejectKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
         }.register(this)
     }
 
@@ -42,10 +40,10 @@ class GrunnlagHendelser(
         val opplysningsTyper = Opplysningstype.values().map { it.name }
 
         if ((packet[EVENT_NAME_KEY].asText() == "OPPLYSNING:NY") || (
-            opplysningsTyper.contains(
+                opplysningsTyper.contains(
                     packet[BEHOV_NAME_KEY].asText()
                 )
-            )
+                )
         ) {
             withLogContext(packet.correlationId) {
                 try {

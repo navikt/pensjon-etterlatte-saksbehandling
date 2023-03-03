@@ -30,7 +30,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.token.Bruker
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 interface GenerellBehandlingService {
 
@@ -40,7 +40,6 @@ interface GenerellBehandlingService {
     fun hentBehandlingerISak(sakid: Long): List<Behandling>
     fun slettBehandlingerISak(sak: Long)
     fun avbrytBehandling(behandlingId: UUID, saksbehandler: String)
-    fun grunnlagISakEndret(sak: Long)
     fun registrerVedtakHendelse(
         behandlingId: UUID,
         vedtakHendelse: VedtakHendelse,
@@ -122,18 +121,6 @@ class RealGenerellBehandlingService(
                 hendelser.behandlingAvbrutt(behandling, saksbehandler)
                 runBlocking {
                     behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
-                }
-            }
-        }
-    }
-
-    override fun grunnlagISakEndret(sak: Long) {
-        inTransaction {
-            behandlinger.alleAktiveBehandlingerISak(sak)
-        }.also {
-            runBlocking {
-                it.forEach {
-                    behandlingHendelser.send(it.id to BehandlingHendelseType.GRUNNLAGENDRET)
                 }
             }
         }

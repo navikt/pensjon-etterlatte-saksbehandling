@@ -10,7 +10,6 @@ fun main() {
             RapidApplication.create(env)
                 .also {
                     val behandlingservice = ab.createBehandlingService()
-                    OppdaterBehandling(it, behandlingservice)
                     PdlHendelser(it, behandlingservice)
                     OmregningsHendelser(it, behandlingservice)
                     Reguleringsforespoersel(it, behandlingservice)

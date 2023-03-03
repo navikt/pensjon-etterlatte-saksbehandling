@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
-import no.nav.etterlatte.grunnlag.BehandlingEndretHendelse
 import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -19,7 +18,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -52,7 +51,6 @@ class ApplicationBuilder {
         .build().apply {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)
-            BehandlingEndretHendelse(this, grunnlagService)
         }
 
     private fun publiser(melding: String, key: UUID) {

@@ -1,3 +1,4 @@
+
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.mockk.every
@@ -11,7 +12,8 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import rapidsandrivers.OMREGNING_ID_KEY
-import java.util.*
+import java.io.FileNotFoundException
+import java.util.UUID
 
 internal class OmregningsHendelserTest {
 
@@ -43,3 +45,6 @@ internal class OmregningsHendelserTest {
         val fullMelding = readFile("/omregningshendelse.json")
     }
 }
+
+fun readFile(file: String) = OmregningsHendelserTest::class.java.getResource(file)?.readText()
+    ?: throw FileNotFoundException("Fant ikke filen $file")

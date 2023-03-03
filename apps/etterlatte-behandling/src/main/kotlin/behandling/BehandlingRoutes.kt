@@ -324,11 +324,6 @@ internal fun Route.behandlingRoutes(
             call.respond(HttpStatusCode.OK)
         }
     }
-
-    post("/saker/{sakid}/hendelse/grunnlagendret") { // Søk
-        generellBehandlingService.grunnlagISakEndret(sakId)
-        call.respond(HttpStatusCode.OK)
-    }
 }
 
 data class ManueltOpphoerOppsummeringDto(

@@ -15,10 +15,10 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
-import no.nav.etterlatte.behandling.KommerBarnetTilgodeJson
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
+import no.nav.etterlatte.behandling.VurderingMedBegrunnelseJson
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
@@ -183,7 +183,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.post("/api/behandling/$behandlingId/kommerbarnettilgode") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(KommerBarnetTilgodeJson(JaNeiVetIkke.JA, "begrunnelse"))
+                setBody(VurderingMedBegrunnelseJson(JaNeiVetIkke.JA, "begrunnelse"))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }

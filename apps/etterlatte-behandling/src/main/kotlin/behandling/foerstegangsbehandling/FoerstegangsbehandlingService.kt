@@ -9,9 +9,19 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
+import no.nav.etterlatte.libs.common.gyldigSoeknad.ManuellVurdering
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.tidspunkt.klokke
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
+import java.time.Clock
 import java.time.YearMonth
 import java.util.*
 
@@ -22,6 +32,13 @@ interface FoerstegangsbehandlingService {
         persongalleri: Persongalleri,
         mottattDato: String
     ): Foerstegangsbehandling
+
+    fun lagreGyldighetsproeving(
+        behandling: UUID,
+        navIdent: String,
+        svar: JaNeiVetIkke,
+        begrunnelse: String
+    ): GyldighetsResultat
 
     fun lagreGyldighetsproeving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun lagreVirkningstidspunkt(
@@ -44,7 +61,8 @@ interface FoerstegangsbehandlingService {
 class RealFoerstegangsbehandlingService(
     private val behandlinger: BehandlingDao,
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
-    private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>
+    private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>,
+    private val klokke: Clock = klokke()
 ) : FoerstegangsbehandlingService {
     private val logger = LoggerFactory.getLogger(RealFoerstegangsbehandlingService::class.java)
 
@@ -71,6 +89,35 @@ class RealFoerstegangsbehandlingService(
                 behandlingHendelser.send(it.lagretBehandling.id to BehandlingHendelseType.OPPRETTET)
             }
         }.serialiserbarUtgave()
+    }
+
+    override fun lagreGyldighetsproeving(
+        behandling: UUID,
+        navIdent: String,
+        svar: JaNeiVetIkke,
+        begrunnelse: String
+    ): GyldighetsResultat {
+        return inTransaction {
+            val resultat =
+                if (svar == JaNeiVetIkke.JA) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
+            val gyldighetsResultat = GyldighetsResultat(
+                resultat = resultat,
+                vurderinger = listOf(
+                    VurdertGyldighet(
+                        navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
+                        resultat = resultat,
+                        basertPaaOpplysninger = ManuellVurdering(
+                            begrunnelse = begrunnelse,
+                            kilde = Grunnlagsopplysning.Saksbehandler(navIdent, klokke.norskKlokke().instant())
+                        )
+                    )
+                ),
+                vurdertDato = klokke.instant().toLocalDateTimeNorskTid()!!
+            )
+            val foerstegangsbehandlingAggregat = foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
+            foerstegangsbehandlingAggregat.lagreGyldighetproeving(gyldighetsResultat)
+            gyldighetsResultat
+        }
     }
 
     override fun lagreGyldighetsproeving(behandling: UUID, gyldighetsproeving: GyldighetsResultat) {

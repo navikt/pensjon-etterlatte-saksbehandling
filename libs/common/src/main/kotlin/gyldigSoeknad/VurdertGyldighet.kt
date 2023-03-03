@@ -1,11 +1,17 @@
 package no.nav.etterlatte.libs.common.gyldigSoeknad
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDateTime
 
 data class VurdertGyldighet(
     val navn: GyldighetsTyper,
     val resultat: VurderingsResultat,
     val basertPaaOpplysninger: Any?
+)
+
+data class ManuellVurdering(
+    val begrunnelse: String,
+    val kilde: Grunnlagsopplysning.Saksbehandler
 )
 
 data class GyldighetsResultat(

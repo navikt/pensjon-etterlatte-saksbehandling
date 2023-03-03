@@ -10,6 +10,7 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
+import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingAggregat
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -19,8 +20,16 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
+import no.nav.etterlatte.libs.common.gyldigSoeknad.ManuellVurdering
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -175,5 +184,41 @@ internal class RealFoerstegangsbehandlingServiceTest {
         assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
         assertEquals(resultat.id, hendelse.captured.first)
         assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second)
+    }
+
+    @Test
+    fun `lagring av gyldighetsproeving skal lagre og returnere gyldighetsresultat for innsender er gjenlevende`() {
+        val id = UUID.randomUUID()
+        val naaTid = Instant.now()
+        val forventetResultat = GyldighetsResultat(
+            resultat = VurderingsResultat.OPPFYLT,
+            vurderinger = listOf(
+                VurdertGyldighet(
+                    navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
+                    resultat = VurderingsResultat.OPPFYLT,
+                    basertPaaOpplysninger = ManuellVurdering(
+                        begrunnelse = "begrunnelse",
+                        kilde = Grunnlagsopplysning.Saksbehandler("saksbehandler", naaTid)
+                    )
+                )
+            ),
+            vurdertDato = naaTid.toLocalDateTimeNorskTid()!!
+        )
+
+        val foerstegangsbehandlingFactory = mockk<FoerstegangsbehandlingFactory>()
+        val foerstegangsbehandlingAggregat = mockk<FoerstegangsbehandlingAggregat>()
+        every { foerstegangsbehandlingFactory.hentFoerstegangsbehandling(id) } returns foerstegangsbehandlingAggregat
+        every { foerstegangsbehandlingAggregat.lagreGyldighetproeving(any()) } returns Unit
+
+        val service =
+            RealFoerstegangsbehandlingService(
+                mockk<BehandlingDao>(),
+                foerstegangsbehandlingFactory,
+                mockk(),
+                naaTid.fixedNorskTid()
+            )
+        val resultat = service.lagreGyldighetsproeving(id, "saksbehandler", JaNeiVetIkke.JA, "begrunnelse")
+
+        assertEquals(forventetResultat, resultat)
     }
 }

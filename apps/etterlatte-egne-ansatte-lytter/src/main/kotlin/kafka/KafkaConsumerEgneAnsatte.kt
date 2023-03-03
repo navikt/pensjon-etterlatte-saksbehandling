@@ -1,6 +1,7 @@
 package no.nav.etterlatte.kafka
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingKlient
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -39,7 +40,9 @@ class KafkaConsumerEgneAnsatte(
                 antallMeldinger = meldinger.count()
 
                 if (antallMeldinger == 0) {
-                    delay(500)
+                    runBlocking {
+                        delay(500)
+                    }
                 }
             }
         }

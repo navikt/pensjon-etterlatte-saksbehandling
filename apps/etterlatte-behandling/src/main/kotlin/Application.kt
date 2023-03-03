@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.database.migrate
@@ -63,7 +64,7 @@ fun Application.module(beanFactory: BeanFactory) {
         val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
 
         val sakServiceAdressebeskyttelse = sakServiceAdressebeskyttelse()
-
+        val sakService = sakService()
         restModule(sikkerLogg) {
             interceptorWrapper(
                 adressebeskyttelse = {
@@ -76,7 +77,7 @@ fun Application.module(beanFactory: BeanFactory) {
                 leggTilKontekst = { attachContekst(dataSource(), beanFactory) }
             )
             sakRoutes(
-                sakService = sakService(),
+                sakService = sakService,
                 generellBehandlingService = generellBehandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService
             )
@@ -92,7 +93,7 @@ fun Application.module(beanFactory: BeanFactory) {
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())
             oppgaveRoutes(service = beanFactory.oppgaveService())
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
-            egenAnsattRoute()
+            egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService))
         }
     }
 }

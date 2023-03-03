@@ -70,7 +70,7 @@ class SakDao(private val connection: () -> Connection) {
             .prepareStatement(
                 """
                 UPDATE sak 
-                set skjerming = ? 
+                set erSkjermet = ? 
                 where id in (${sakIder.joinToString(", ") { "'$it'" }}) 
                 """.trimIndent()
             )

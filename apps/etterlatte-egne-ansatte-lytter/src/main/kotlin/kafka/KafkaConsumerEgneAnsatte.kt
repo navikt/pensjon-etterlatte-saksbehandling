@@ -16,11 +16,9 @@ class KafkaConsumerEgneAnsatte(
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
     private val kafkaProperties: Properties = kafkaEnvironment.generateKafkaConsumerProperties(env)
-    private val consumer: KafkaConsumer<String, String> = KafkaConsumer<String, String>(kafkaProperties).also {
-        it.subscribe(listOf("nom.skjermede-personer-status-v1"))
-    }
-    private var antallMeldinger = 0
     private val skjermingTopic: String = env["SKJERMING_TOPIC"]!!
+    private val consumer: KafkaConsumer<String, String> = KafkaConsumer<String, String>(kafkaProperties)
+    private var antallMeldinger = 0
 
     suspend fun poll() {
         consumer.use {

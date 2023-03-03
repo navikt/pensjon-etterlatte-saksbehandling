@@ -10,6 +10,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.HttpStatusCode.Companion.Forbidden
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.server.application.call
 import io.ktor.server.application.log
@@ -23,6 +24,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.withSaksbehandlertilgang
 import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -33,6 +35,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
+import testsupport.saksbehandlerGruppeIdEnhetsTest
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RestModuleTest {
@@ -46,6 +50,18 @@ class RestModuleTest {
             claims = mapOf(
                 "navn" to "John Doe",
                 "NAVident" to "Saksbehandler01"
+            )
+        ).serialize()
+    }
+
+    private val saksbehandlerToken: String by lazy {
+        server.issueToken(
+            issuerId = ISSUER_ID,
+            audience = CLIENT_ID,
+            claims = mapOf(
+                "navn" to "John Doe",
+                "NAVident" to "Saksbehandler01",
+                "groups" to listOf(saksbehandlerGruppeIdEnhetsTest)
             )
         ).serialize()
     }
@@ -146,6 +162,27 @@ class RestModuleTest {
     }
 
     @Test
+    fun `skal svare med forbidden dersom bruker ikke har nok rettigheter`() {
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application { restModule(this.log) { route3() } }.also { setReady() }
+
+            client.get("/test3/${UUID.randomUUID()}") {
+                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+            }.let {
+                assertEquals(OK, it.status)
+            }
+            client.get("/test3/${UUID.randomUUID()}") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let {
+                assertEquals(Forbidden, it.status)
+            }
+        }
+    }
+
+    @Test
     fun `Skal finne deserialiseringsexceptions i nestede exceptions`() {
         assertFalse(Exception("Hello").erDeserialiseringsException())
         assertFalse(Exception("Hello", OutOfMemoryError()).erDeserialiseringsException())
@@ -195,6 +232,16 @@ class RestModuleTest {
         route("/test2") {
             get("/") {
                 call.respond(OK)
+            }
+        }
+    }
+
+    private fun Route.route3() {
+        route("/test3") {
+            get("{behandlingId}") {
+                withSaksbehandlertilgang {
+                    call.respond(OK)
+                }
             }
         }
     }

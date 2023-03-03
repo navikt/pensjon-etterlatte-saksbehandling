@@ -46,6 +46,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
+import testsupport.saksbehandlerGruppeIdEnhetsTest
 import java.util.*
 import javax.sql.DataSource
 
@@ -106,7 +107,7 @@ internal class VilkaarsvurderingRoutesTest {
             claims = mapOf(
                 "navn" to "John Doe",
                 "NAVident" to "Saksbehandler01",
-                "groups" to listOf("12345")
+                "groups" to listOf(saksbehandlerGruppeIdEnhetsTest)
             )
         ).serialize()
     }

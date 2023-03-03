@@ -14,8 +14,10 @@ fun buildTestApplicationConfigurationForOauth(port: Int, issuerId: String, clien
                         "accepted_audience" to clientId
                     )
                 ),
-                "AZUREAD_SAKSBEHANDLER_GROUPID" to "12345"
+                "AZUREAD_SAKSBEHANDLER_GROUPID" to saksbehandlerGruppeIdEnhetsTest
             )
         )
     )
 }
+
+const val saksbehandlerGruppeIdEnhetsTest = "SAKSBEHANDLER_GRUPPE_ID"

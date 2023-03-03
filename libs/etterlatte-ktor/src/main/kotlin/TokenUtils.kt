@@ -42,12 +42,12 @@ inline val PipelineContext<*, ApplicationCall>.bruker: Bruker
         )
     }
 
-enum class Group(val key: String) {
+enum class ADGroup(val key: String) {
     SAKSBEHANDLER("AZUREAD_SAKSBEHANDLER_GROUPID"),
     ATTESTANT("AZUREAD_SAKSBEHANDLER_GROUPID")
 }
 
-fun PipelineContext<*, ApplicationCall>.harGruppetilgang(group: Group): Boolean =
+fun PipelineContext<*, ApplicationCall>.harGruppetilgang(group: ADGroup): Boolean =
     claims?.containsClaim("groups", Tilgangsgrupper.get()[group]) ?: false
 
 fun JwtTokenClaims.getClaim(claim: Claims): String? = getStringClaim(claim.name)

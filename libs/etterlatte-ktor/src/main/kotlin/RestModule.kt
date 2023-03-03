@@ -114,11 +114,11 @@ internal fun Throwable.erDeserialiseringsException(): Boolean {
     return this.cause?.erDeserialiseringsException() ?: false
 }
 
-fun lesGrupperFraConfig(config: ApplicationConfig): Grupper = Group.values().associateWith { gruppe ->
+fun lesGrupperFraConfig(config: ApplicationConfig): Grupper = ADGroup.values().associateWith { gruppe ->
     config.tryGetString(gruppe.key) ?: throw NullPointerException("Mangler id for gruppe: ${gruppe.key}")
 }
 
-typealias Grupper = Map<Group, String>
+typealias Grupper = Map<ADGroup, String>
 
 object Tilgangsgrupper : ThreadLocal<Grupper>()
 

@@ -5,7 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.ktor.Group
+import no.nav.etterlatte.libs.ktor.ADGroup
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.libs.ktor.harGruppetilgang
 import no.nav.etterlatte.token.Saksbehandler
@@ -38,7 +38,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSaksbehandlertilgang(
     withBehandlingId { behandlingId ->
         when (bruker) {
             is Saksbehandler -> {
-                if (harGruppetilgang(Group.SAKSBEHANDLER)) {
+                if (harGruppetilgang(ADGroup.SAKSBEHANDLER)) {
                     // todo: Oppslag mot behandling for å sjekke tilgang (adressebeskyttelse, skjerming).
                     onSuccess(behandlingId)
                 }

@@ -82,6 +82,7 @@ spec:
         - application: etterlatte-vedtaksvurdering
     inbound:
       rules:
+        - application: etterlatte-egne-ansatte-lytter
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal

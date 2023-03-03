@@ -27,12 +27,12 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient) {
 
     fun postTilBehandling(fnr: String, skjermet: Boolean) = runBlocking {
         behandlingHttpClient.post(
-            "http://etterlatte-behandling/behandlinger/egenansatt"
+            "http://etterlatte-behandling/egenansatt"
         ) {
             contentType(ContentType.Application.Json)
             setBody(
                 EgenAnsattSkjermet(
-                    ident = fnr,
+                    fnr = fnr,
                     inntruffet = Tidspunkt.now(),
                     skjermet = skjermet
                 )
@@ -42,7 +42,7 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient) {
 }
 
 data class EgenAnsattSkjermet(
-    val ident: String,
+    val fnr: String,
     val inntruffet: Tidspunkt,
     val skjermet: Boolean
 )

@@ -67,29 +67,3 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
         call.respond(HttpStatusCode.BadRequest, "$param var null, forventet en UUID")
     }
 }
-
-suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
-    param1: String,
-    param2: String,
-    onSuccess: (value1: UUID, value2: UUID) -> Unit
-) {
-    val value1 = call.parameters[param1]
-    val value2 = call.parameters[param2]
-    if (value1 != null && value2 != null) {
-        val (uuidParam1, uuidParam2) = try {
-            UUID.fromString(value1) to UUID.fromString(value2)
-        } catch (e: IllegalArgumentException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                "$param1 og $param2 må være UUID (fikk $param1=$value1 og $param2=$value2)"
-            )
-            return
-        }
-        onSuccess(uuidParam1, uuidParam2)
-    } else {
-        call.respond(
-            HttpStatusCode.BadRequest,
-            "$param1 eller $param2 var null, men de må være UUID (fikk $param1=$value1 og $param2=$value2)"
-        )
-    }
-}

@@ -73,7 +73,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
     // AuthenticationChecked
     on(AdressebeskyttelseHook) { call ->
         val bruker = call.bruker
-        if (bruker.erSystembruker()) {
+        if (bruker is System) {
             return@on
         }
 

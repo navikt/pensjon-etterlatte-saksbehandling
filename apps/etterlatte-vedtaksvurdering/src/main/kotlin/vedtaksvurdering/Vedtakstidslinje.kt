@@ -1,8 +1,8 @@
 package no.nav.etterlatte.vedtaksvurdering
 
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 
 class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
@@ -11,7 +11,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     fun erLoependePaa(dato: LocalDate): LoependeYtelseDTO {
         if (iverksatteVedtak.isEmpty()) return LoependeYtelseDTO(false, dato)
 
-        val erLoepende = hentSenesteVedtakPaaDato(dato)?.tolkVedtak() == TolketVedtak.INNVILGET
+        val erLoepende = hentSenesteVedtakPaaDato(dato)?.vedtakType == VedtakType.INNVILGELSE
         return LoependeYtelseDTO(
             erLoepende = erLoepende,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato
@@ -30,19 +30,4 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
         }.virkningstidspunkt.atDay(1)
         return maxOf(foersteVirkningsdato, fraDato)
     }
-}
-
-internal enum class TolketVedtak {
-    INNVILGET,
-    OPPHOER
-}
-
-/**
- * TODO ai 10.02.2023: Se på denne logikken og fiks tolking av vedtak
- * */
-internal fun Vedtak.tolkVedtak(): TolketVedtak = when (this.behandlingType) {
-    BehandlingType.FØRSTEGANGSBEHANDLING -> TolketVedtak.INNVILGET
-    BehandlingType.OMREGNING -> TolketVedtak.INNVILGET
-    BehandlingType.REVURDERING -> TolketVedtak.OPPHOER
-    BehandlingType.MANUELT_OPPHOER -> TolketVedtak.OPPHOER
 }

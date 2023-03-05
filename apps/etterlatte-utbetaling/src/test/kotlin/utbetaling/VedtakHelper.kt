@@ -77,11 +77,7 @@ fun ugyldigVedtakTilUtbetaling(
     ),
     type = VedtakType.INNVILGELSE,
     virkningstidspunkt = YearMonth.of(2022, 1),
-    vedtakFattet = VedtakFattet(
-        ansvarligSaksbehandler = "12345678",
-        ansvarligEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
-    ),
+    vedtakFattet = null,
     utbetalingsperioder = listOf(
         Utbetalingsperiode(
             1,

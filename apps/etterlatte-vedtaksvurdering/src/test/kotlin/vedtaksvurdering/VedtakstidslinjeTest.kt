@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -60,7 +61,8 @@ internal class VedtakstidslinjeTest {
         val iverksattDato = lagVedtak(
             id = 1,
             virkningsDato = LocalDate.of(2023, 1, 1),
-            vedtakStatus = VedtakStatus.IVERKSATT
+            vedtakStatus = VedtakStatus.IVERKSATT,
+            vedtakType = VedtakType.INNVILGELSE
         )
 
         val actual = Vedtakstidslinje(listOf(iverksattDato)).erLoependePaa(fraOgMed)
@@ -81,6 +83,7 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 1, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
+            vedtakType = VedtakType.INNVILGELSE,
             datoAttestert = attesteringsdato.tilInstant()
         )
         val opphoertDato = lagVedtak(
@@ -88,6 +91,7 @@ internal class VedtakstidslinjeTest {
             virkningsDato = LocalDate.of(2023, 4, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
             behandlingType = BehandlingType.REVURDERING,
+            vedtakType = VedtakType.OPPHOER,
             datoAttestert = attesteringsdato.plusDays(1).tilInstant()
         )
 
@@ -114,6 +118,7 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 1, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
+            vedtakType = VedtakType.INNVILGELSE,
             datoAttestert = attesteringsdato.tilInstant()
         )
         val opphoertDato = lagVedtak(
@@ -121,6 +126,7 @@ internal class VedtakstidslinjeTest {
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
             behandlingType = BehandlingType.REVURDERING,
+            vedtakType = VedtakType.OPPHOER,
             datoAttestert = attesteringsdato.plusDays(1).tilInstant()
         )
 
@@ -146,6 +152,7 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
+            vedtakType = VedtakType.INNVILGELSE,
             datoAttestert = attesteringsdato.tilInstant()
         )
 
@@ -167,6 +174,7 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
+            vedtakType = VedtakType.INNVILGELSE,
             datoAttestert = attesteringsdato.tilInstant()
         )
         val opphoertDato = lagVedtak(
@@ -174,6 +182,7 @@ internal class VedtakstidslinjeTest {
             virkningsDato = LocalDate.of(2023, 7, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
             behandlingType = BehandlingType.REVURDERING,
+            vedtakType = VedtakType.OPPHOER,
             datoAttestert = attesteringsdato.plusDays(1).tilInstant()
         )
 
@@ -195,6 +204,7 @@ internal class VedtakstidslinjeTest {
             id = 1,
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
+            vedtakType = VedtakType.INNVILGELSE,
             datoAttestert = attesteringsdato.tilInstant()
         )
         val opphoertDato = lagVedtak(
@@ -202,6 +212,7 @@ internal class VedtakstidslinjeTest {
             virkningsDato = LocalDate.of(2023, 6, 1),
             vedtakStatus = VedtakStatus.IVERKSATT,
             behandlingType = BehandlingType.REVURDERING,
+            vedtakType = VedtakType.OPPHOER,
             datoAttestert = attesteringsdato.plusDays(1).tilInstant()
         )
 
@@ -216,7 +227,8 @@ private fun lagVedtak(
     virkningsDato: LocalDate,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     vedtakStatus: VedtakStatus,
-    datoAttestert: Instant = Instant.now()
+    datoAttestert: Instant = Instant.now(),
+    vedtakType: VedtakType = VedtakType.INNVILGELSE
 ): Vedtak {
     return Vedtak(
         id = id,
@@ -228,15 +240,16 @@ private fun lagVedtak(
         soeker = Foedselsnummer.of(FNR_1),
         virkningstidspunkt = virkningsDato.let { YearMonth.from(it) },
         status = vedtakStatus,
+        vedtakType = vedtakType,
         behandlingType = behandlingType,
         vedtakFattet = VedtakFattet(
-            ansvarligSaksbehandler = "saksbehandler1",
-            ansvarligEnhet = "enhet1",
+            ansvarligSaksbehandler = SAKSBEHANDLER_1,
+            ansvarligEnhet = ENHET_1,
             tidspunkt = datoAttestert.atZone(standardTidssoneUTC)
         ),
         attestasjon = Attestasjon(
-            attestant = "saksbehandler2",
-            attesterendeEnhet = "enhet2",
+            attestant = SAKSBEHANDLER_2,
+            attesterendeEnhet = ENHET_2,
             tidspunkt = datoAttestert.atZone(standardTidssoneUTC)
         ),
         utbetalingsperioder = emptyList()

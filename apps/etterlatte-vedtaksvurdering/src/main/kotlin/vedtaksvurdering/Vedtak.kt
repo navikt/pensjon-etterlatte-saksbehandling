@@ -13,12 +13,11 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-data class OpprettVedtak(
+data class NyttVedtak(
     val soeker: Foedselsnummer,
     val sakId: Long,
     val sakType: SakType,
@@ -26,6 +25,7 @@ data class OpprettVedtak(
     val behandlingType: BehandlingType,
     val virkningstidspunkt: YearMonth,
     val status: VedtakStatus = VedtakStatus.OPPRETTET,
+    val vedtakType: VedtakType,
     val beregning: ObjectNode?,
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>
@@ -40,36 +40,19 @@ data class Vedtak(
     val behandlingType: BehandlingType,
     val virkningstidspunkt: YearMonth,
     val status: VedtakStatus,
+    val vedtakType: VedtakType,
     val beregning: ObjectNode?,
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>,
     val vedtakFattet: VedtakFattet? = null,
     val attestasjon: Attestasjon? = null
 ) {
-    fun isVedtakFattet() = vedtakFattet != null
-    fun isVedtakAttestert() = attestasjon != null
-    fun isVedtakIverksatt() = isVedtakFattet() && isVedtakAttestert() && status == VedtakStatus.IVERKSATT
-
-    fun vedtakType(): VedtakType {
-        return if (vilkaarsvurderingOppfylt()) {
-            VedtakType.INNVILGELSE
-        } else if (behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.MANUELT_OPPHOER)) {
-            VedtakType.OPPHOER
-        } else {
-            VedtakType.AVSLAG
-        }
-    }
-
-    // TODO trenger denne kun for å utlede vedtaktype - kanskje vi kan lagre vedtaktype i stedet?
-    private fun vilkaarsvurderingOppfylt() =
-        vilkaarsvurdering?.get("resultat")?.get("utfall")?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
-
     fun toDto() = VedtakDto(
         vedtakId = id,
         virkningstidspunkt = virkningstidspunkt,
         sak = Sak(soeker.value, sakType, sakId),
         behandling = Behandling(behandlingType, behandlingId),
-        type = vedtakType(),
+        type = vedtakType,
         utbetalingsperioder = utbetalingsperioder,
         vedtakFattet = vedtakFattet,
         attestasjon = attestasjon
@@ -93,5 +76,5 @@ data class VedtakHendelse(
 fun Vedtak.toVedtakSammendrag() = VedtakSammendrag(
     id = id.toString(),
     behandlingId = behandlingId,
-    datoAttestert = attestasjon?.tidspunkt?.toLocalDateTime() // TODO fix tid
+    datoAttestert = attestasjon?.tidspunkt?.toLocalDateTime()
 )

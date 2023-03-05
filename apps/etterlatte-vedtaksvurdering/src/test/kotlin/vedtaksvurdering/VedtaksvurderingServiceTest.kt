@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -164,7 +163,7 @@ internal class VedtaksvurderingServiceTest {
                 )
             )
 
-            assertThrows<KanIkkeEndreFattetVedtak> {
+            assertThrows<VedtakTilstandException> {
                 service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
             }
         }
@@ -265,49 +264,7 @@ internal class VedtaksvurderingServiceTest {
                 )
             )
 
-            assertThrows<VedtakKanIkkeFattesAlleredeFattet> {
-                service.fattVedtak(behandlingId, saksbehandler)
-            }
-        }
-    }
-
-    @Test
-    fun `skal ikke fatte vedtak naar innvilget vedtak mangler beregning`() {
-        val behandlingId = randomUUID()
-
-        every { repository.hentVedtak(behandlingId) } returns mockk {
-            every { id } returns 1
-            every { vedtakType() } returns VedtakType.INNVILGELSE
-            every { isVedtakFattet() } returns false
-            every { beregning } returns null
-        }
-
-        coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
-
-        runBlocking {
-            assertThrows<VedtakKanIkkeFattes> {
-                service.fattVedtak(behandlingId, saksbehandler)
-            }
-        }
-    }
-
-    @Test
-    fun `skal ikke fatte vedtak naar vedtak mangler vilkaarsvurdering og ikke er manuelt opphoer`() {
-        val behandlingId = randomUUID()
-
-        every { repository.hentVedtak(behandlingId) } returns mockk {
-            every { id } returns 1
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-            every { vedtakType() } returns VedtakType.INNVILGELSE
-            every { isVedtakFattet() } returns false
-            every { beregning } returns mockk(relaxed = true)
-            every { vilkaarsvurdering } returns null
-        }
-
-        coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
-
-        runBlocking {
-            assertThrows<VedtakKanIkkeFattes> {
+            assertThrows<VedtakTilstandException> {
                 service.fattVedtak(behandlingId, saksbehandler)
             }
         }
@@ -375,7 +332,7 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
 
-            assertThrows<VedtakKanIkkeAttesteresFoerDetFattes> {
+            assertThrows<VedtakTilstandException> {
                 service.attesterVedtak(behandlingId, saksbehandler)
             }
         }
@@ -393,7 +350,7 @@ internal class VedtaksvurderingServiceTest {
             service.fattVedtak(behandlingId, saksbehandler)
             service.attesterVedtak(behandlingId, attestant)
 
-            assertThrows<VedtakKanIkkeAttesteresAlleredeAttestert> {
+            assertThrows<VedtakTilstandException> {
                 service.attesterVedtak(behandlingId, attestant)
             }
         }
@@ -440,7 +397,7 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
 
-            assertThrows<VedtakKanIkkeSettesTilIverksattFoerDetAttesteres> {
+            assertThrows<VedtakTilstandException> {
                 service.iverksattVedtak(behandlingId)
             }
         }
@@ -459,7 +416,7 @@ internal class VedtaksvurderingServiceTest {
             service.attesterVedtak(behandlingId, attestant)
             service.iverksattVedtak(behandlingId)
 
-            assertThrows<VedtakKanIkkeSettesTilIverksattAlleredeIverksatt> {
+            assertThrows<VedtakTilstandException> {
                 service.iverksattVedtak(behandlingId)
             }
         }
@@ -521,7 +478,7 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
 
-            assertThrows<VedtakKanIkkeUnderkjennesFoerDetFattes> {
+            assertThrows<VedtakTilstandException> {
                 service.underkjennVedtak(behandlingId, saksbehandler, underkjennVedtakBegrunnelse())
             }
         }
@@ -540,7 +497,7 @@ internal class VedtaksvurderingServiceTest {
             service.fattVedtak(behandlingId, saksbehandler)
             service.attesterVedtak(behandlingId, attestant)
 
-            assertThrows<VedtakKanIkkeUnderkjennesAlleredeAttestert> {
+            assertThrows<VedtakTilstandException> {
                 service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())
             }
         }

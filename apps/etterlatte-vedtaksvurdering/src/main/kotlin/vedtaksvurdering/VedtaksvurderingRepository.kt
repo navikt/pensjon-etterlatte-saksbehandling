@@ -2,6 +2,9 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
@@ -14,13 +17,14 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import java.sql.Date
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-class VedtaksvurderingRepository(datasource: DataSource) {
+class VedtaksvurderingRepository(val datasource: DataSource) {
 
     private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(datasource)
 
@@ -28,58 +32,51 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
     }
 
-    fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak {
-        repositoryWrapper.opprett(
-            query = """
-            INSERT INTO vedtak(
-                behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom, 
-                beregningsresultat, vilkaarsresultat)
-            VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :datovirkfom, 
-                :beregningsresultat, :vilkaarsresultat)
-            """,
-            params = mapOf(
-                "behandlingId" to opprettVedtak.behandlingId,
-                "behandlingtype" to opprettVedtak.behandlingType.name,
-                "sakid" to opprettVedtak.sakId,
-                "saktype" to opprettVedtak.sakType.name,
-                "fnr" to opprettVedtak.soeker.value,
-                "vedtakstatus" to opprettVedtak.status.name,
-                "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
-                "beregningsresultat" to opprettVedtak.beregning?.toJson(),
-                "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson()
-            ),
-            loggtekst = "Oppretter vedtak for behandling ${opprettVedtak.behandlingId} med sakid ${opprettVedtak.sakId}"
-        )
+    fun opprettVedtak(nyttVedtak: NyttVedtak): Vedtak {
+        return using(sessionOf(datasource, returnGeneratedKey = true)) { session ->
+            session.transaction { tx ->
+                val vedtakId = queryOf(
+                    statement = """
+                        INSERT INTO vedtak(
+                            behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, vedtaktype, datovirkfom, 
+                            beregningsresultat, vilkaarsresultat)
+                        VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :vedtaktype, 
+                            :datovirkfom, :beregningsresultat, :vilkaarsresultat)
+                        RETURNING id
+                        """,
+                    mapOf(
+                        "behandlingId" to nyttVedtak.behandlingId,
+                        "behandlingtype" to nyttVedtak.behandlingType.name,
+                        "sakid" to nyttVedtak.sakId,
+                        "saktype" to nyttVedtak.sakType.name,
+                        "fnr" to nyttVedtak.soeker.value,
+                        "vedtakstatus" to nyttVedtak.status.name,
+                        "vedtaktype" to nyttVedtak.vedtakType.name,
+                        "datovirkfom" to nyttVedtak.virkningstidspunkt.atDay(1),
+                        "beregningsresultat" to nyttVedtak.beregning?.toJson(),
+                        "vilkaarsresultat" to nyttVedtak.vilkaarsvurdering?.toJson()
+                    )
+                ).let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
 
-        // TODO stygt som f - bør løses med returnering eller noe tilsvarende, men det støttes ikke i denne wrapperen
-        val vedtakId: Long? = repositoryWrapper.hentMedKotliquery(
-            query = "SELECT id FROM vedtak WHERE behandlingId = :behandlingId",
-            params = mapOf(
-                "behandlingId" to opprettVedtak.behandlingId
-            )
-        ) {
-            it.long("id")
+                nyttVedtak.utbetalingsperioder.forEach {
+                    queryOf(
+                        statement = """
+                            INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) 
+                            VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)
+                            """,
+                        mapOf(
+                            "vedtakid" to vedtakId,
+                            "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
+                            "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
+                            "type" to it.type.name,
+                            "beloep" to it.beloep
+                        )
+                    ).let { query -> tx.run(query.asUpdate) }
+                }
+            }.let {
+                hentVedtak(nyttVedtak.behandlingId) ?: throw Exception("Kunne ikke opprette vedtak")
+            }
         }
-
-        // TODO vi trenger transaksjon her - støttes ikke med denne wrapperen
-        opprettVedtak.utbetalingsperioder.map {
-            mapOf(
-                "vedtakid" to vedtakId,
-                "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
-                "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
-                "type" to it.type.name,
-                "beloep" to it.beloep
-            )
-        }.let {
-            repositoryWrapper.opprettFlere(
-                query = "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) " +
-                    "VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)",
-                params = it,
-                loggtekst = "Oppretter ${it.size} utbetalingsperioder"
-            )
-        }
-
-        return hentVedtak(opprettVedtak.behandlingId) ?: throw Exception("Kunne ikke opprette vedtak")
     }
 
     fun oppdaterVedtak(vedtak: Vedtak): Vedtak = repositoryWrapper.oppdater(
@@ -105,7 +102,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
             query = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet 
+                attestertVedtakEnhet, fattetVedtakEnhet, vedtaktype  
             FROM vedtak 
             WHERE behandlingId = :behandlingId
             """,
@@ -122,7 +119,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet 
+                attestertVedtakEnhet, fattetVedtakEnhet, vedtaktype  
             FROM vedtak  
             WHERE sakId = :sakId
             """
@@ -184,8 +181,8 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         repositoryWrapper.oppdater(
             """
             UPDATE vedtak 
-            SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, 
-                vedtakstatus = :vedtakstatus 
+            SET attestant = null, datoAttestert = null, attestertVedtakEnhet = null, saksbehandlerId = null, 
+                vedtakfattet = false, datoFattet = null, fattetVedtakEnhet = null, vedtakstatus = :vedtakstatus 
             WHERE behandlingId = :behandlingId
             """,
             params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
@@ -210,6 +207,7 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         behandlingType = BehandlingType.valueOf(string("behandlingtype")),
         soeker = string("fnr").let { Foedselsnummer.of(it) },
         status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
+        vedtakType = string("vedtaktype").let { VedtakType.valueOf(it) },
         virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
         vilkaarsvurdering = stringOrNull("vilkaarsresultat")?.let { objectMapper.readValue(it) },
         beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },

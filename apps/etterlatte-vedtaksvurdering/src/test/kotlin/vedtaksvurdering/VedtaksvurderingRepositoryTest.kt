@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
@@ -13,6 +14,7 @@ import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
@@ -69,9 +71,10 @@ internal class VedtaksvurderingRepositoryTest {
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
             behandlingType shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
+            vedtakType shouldBe VedtakType.INNVILGELSE
             virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
-            vilkaarsvurdering shouldBe null
-            beregning shouldBe null
+            vilkaarsvurdering shouldBe objectMapper.createObjectNode()
+            beregning shouldBe objectMapper.createObjectNode()
             utbetalingsperioder.first().let { utbetalingsperiode ->
                 utbetalingsperiode.id shouldNotBe null
                 utbetalingsperiode.periode shouldBe Periode(YearMonth.of(2023, Month.JANUARY), null)

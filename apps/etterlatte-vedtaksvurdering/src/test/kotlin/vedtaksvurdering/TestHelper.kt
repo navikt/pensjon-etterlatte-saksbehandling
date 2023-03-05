@@ -3,18 +3,14 @@ package vedtaksvurdering
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.vedtaksvurdering.OpprettVedtak
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
+import no.nav.etterlatte.vedtaksvurdering.NyttVedtak
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
@@ -35,13 +31,14 @@ fun nyttVedtak(
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode()
-) = OpprettVedtak(
+) = NyttVedtak(
     soeker = Foedselsnummer.of(FNR_1),
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt = virkningstidspunkt,
+    vedtakType = VedtakType.INNVILGELSE,
     beregning = beregning,
     vilkaarsvurdering = vilkaarsvurdering,
     utbetalingsperioder = listOf(
@@ -51,40 +48,5 @@ fun nyttVedtak(
             beloep = BigDecimal.valueOf(100),
             type = UtbetalingsperiodeType.UTBETALING
         )
-    )
-)
-
-fun opprettetVedtak(
-    virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
-    sakId: Long = 1L,
-    behandlingId: UUID = UUID.randomUUID(),
-    vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
-    beregning: ObjectNode? = objectMapper.createObjectNode()
-) = Vedtak(
-    id = 1L,
-    soeker = Foedselsnummer.of(FNR_1),
-    sakId = sakId,
-    sakType = SakType.BARNEPENSJON,
-    behandlingId = behandlingId,
-    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    status = VedtakStatus.OPPRETTET,
-    virkningstidspunkt = virkningstidspunkt,
-    beregning = beregning,
-    vilkaarsvurdering = vilkaarsvurdering,
-    utbetalingsperioder = listOf(
-        Utbetalingsperiode(
-            id = 0,
-            periode = Periode(virkningstidspunkt, null),
-            beloep = BigDecimal.valueOf(100),
-            type = UtbetalingsperiodeType.UTBETALING
-        )
-    )
-)
-
-fun fattetVedtak() = opprettetVedtak().copy(
-    vedtakFattet = VedtakFattet(
-        ansvarligSaksbehandler = SAKSBEHANDLER_1,
-        ansvarligEnhet = ENHET_1,
-        tidspunkt = Tidspunkt.now().toNorskTid()
     )
 )

@@ -132,7 +132,7 @@ internal class OppgaveDaoTest {
         val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON)
         val manuel = lagRegulering(Prosesstype.MANUELL, fnr, sak.id)
         behandlingDao.opprettBehandling(manuel)
-        sakDaoAdressebeskyttelse.setAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val alleBehandlingsStatuser = BehandlingStatus.values().asList()
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
@@ -142,14 +142,17 @@ internal class OppgaveDaoTest {
         )
         assertEquals(1, strengtFortroligOppgaver.size)
 
-        sakDaoAdressebeskyttelse.setAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
+        sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
         assertEquals(1, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
         assertEquals(
             0,
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(alleBehandlingsStatuser).size
         )
 
-        sakDaoAdressebeskyttelse.setAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)
+        sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(
+            sak.id,
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
+        )
         assertEquals(0, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
         assertEquals(
             1,

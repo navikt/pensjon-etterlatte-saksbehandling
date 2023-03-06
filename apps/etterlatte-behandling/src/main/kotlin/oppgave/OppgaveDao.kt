@@ -26,9 +26,42 @@ class OppgaveDao(private val connection: () -> Connection) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun finnOppgaverMedStatuser(statuser: List<BehandlingStatus>, roller: List<Rolle>): List<Oppgave> {
+    fun finnOppgaverForStrengtFortrolig(statuser: List<BehandlingStatus>): List<Oppgave> {
+        with(connection()) {
+            val stmt = prepareStatement(
+                """
+                |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, status, behandling_opprettet,
+                |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
+                |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
+                |WHERE adressebeskyttelse = ?
+                | AND status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
+                """.trimMargin()
+            )
+            stmt.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
+            stmt.setArray(2, createArrayOf("text", statuser.toTypedArray()))
+            stmt.setString(3, Prosesstype.AUTOMATISK.toString())
+            return stmt.executeQuery().toList {
+                val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
+                    ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
+                    ?: throw IllegalStateException(
+                        "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
+                    )
+                Oppgave.BehandlingOppgave(
+                    behandlingId = getObject("id") as UUID,
+                    behandlingStatus = BehandlingStatus.valueOf(getString("status")),
+                    sakId = getLong("sak_id"),
+                    sakType = enumValueOf(getString("sakType")),
+                    fnr = Foedselsnummer.of(getString("fnr")),
+                    registrertDato = mottattDato,
+                    behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
+                    antallSoesken = antallSoesken(getString("soesken"))
+                )
+            }
+        }
+    }
+
+    fun finnOppgaverMedStatuser(statuser: List<BehandlingStatus>): List<Oppgave> {
         if (statuser.isEmpty()) return emptyList()
-        val strengtFortroligRolle = roller.find { it.equals(Rolle.STRENGT_FORTROLIG) }
 
         with(connection()) {
             val stmt = prepareStatement(
@@ -44,8 +77,7 @@ class OppgaveDao(private val connection: () -> Connection) {
             val oppgaver = stmt.executeQuery().toList {
                 val adressebeskyttelse = getString("adressebeskyttelse")
                 if (adressebeskyttelse != null &&
-                    adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString() &&
-                    strengtFortroligRolle == null
+                    adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString()
                 ) {
                     null
                 } else {

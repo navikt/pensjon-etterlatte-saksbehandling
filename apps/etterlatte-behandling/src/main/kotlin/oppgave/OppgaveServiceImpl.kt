@@ -15,15 +15,14 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
     private fun finnAktuelleRoller(bruker: Saksbehandler): List<Rolle> =
         listOfNotNull(
             Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
-            Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() },
-            Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() }
+            Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() }
         )
 
     private fun aktuelleStatuserForRolleTilSaksbehandler(roller: List<Rolle>) = roller.flatMap {
         when (it) {
             Rolle.SAKSBEHANDLER -> BehandlingStatus.kanEndres()
             Rolle.ATTESTANT -> listOf(BehandlingStatus.FATTET_VEDTAK)
-            Rolle.STRENGT_FORTROLIG -> BehandlingStatus.underBehandling()
+            Rolle.STRENGT_FORTROLIG -> BehandlingStatus.values().toList()
         }.distinct()
     }
 
@@ -31,12 +30,17 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker)
         val aktuelleStatuserForRoller = aktuelleStatuserForRolleTilSaksbehandler(rollerSomBrukerHar)
 
-        val alleOppgaver = inTransaction {
-            listOf(
-                oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller, rollerSomBrukerHar),
-                oppgaveDao.finnOppgaverFraGrunnlagsendringshendelser()
-            ).flatten()
+        return if (bruker.harRolleStrengtFortrolig()) {
+            inTransaction {
+                oppgaveDao.finnOppgaverForStrengtFortrolig(aktuelleStatuserForRoller)
+            }
+        } else {
+            inTransaction {
+                listOf(
+                    oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller),
+                    oppgaveDao.finnOppgaverFraGrunnlagsendringshendelser()
+                ).flatten()
+            }.sortedByDescending { it.registrertDato }
         }
-        return alleOppgaver.sortedByDescending { it.registrertDato }
     }
 }

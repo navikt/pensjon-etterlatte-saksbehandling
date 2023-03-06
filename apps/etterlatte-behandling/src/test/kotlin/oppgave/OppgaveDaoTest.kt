@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.oppgave.OppgaveDao
-import no.nav.etterlatte.oppgave.Rolle
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
@@ -121,7 +120,7 @@ internal class OppgaveDaoTest {
         behandlingDao.opprettBehandling(automatisk)
         behandlingDao.opprettBehandling(manuel)
 
-        val oppgaver = oppgaveDao.finnOppgaverMedStatuser(listOf(BehandlingStatus.OPPRETTET), listOf())
+        val oppgaver = oppgaveDao.finnOppgaverMedStatuser(listOf(BehandlingStatus.OPPRETTET))
         assertEquals(1, oppgaver.size)
         assertEquals(manuel.id, (oppgaver[0] as Oppgave.BehandlingOppgave).behandlingId)
     }
@@ -136,17 +135,10 @@ internal class OppgaveDaoTest {
         sakDaoAdressebeskyttelse.setAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val alleBehandlingsStatuser = BehandlingStatus.values().asList()
-        val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser, listOf(Rolle.SAKSBEHANDLER))
+        val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
         assertEquals(0, oppgaver.size)
-        val oppgaverAttestant = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser, listOf(Rolle.ATTESTANT))
-        assertEquals(0, oppgaverAttestant.size)
-        val oppgaverUtenRoller = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser, listOf())
-        assertEquals(0, oppgaverUtenRoller.size)
-        val oppgaverStrengtFortrolig = oppgaveDao.finnOppgaverMedStatuser(
-            alleBehandlingsStatuser,
-            listOf(Rolle.STRENGT_FORTROLIG)
-        )
-        assertEquals(1, oppgaverStrengtFortrolig.size)
+        val strengtFortroligOppgaver = oppgaveDao.finnOppgaverForStrengtFortrolig(alleBehandlingsStatuser)
+        assertEquals(1, strengtFortroligOppgaver.size)
     }
 
     private fun lagRegulering(prosesstype: Prosesstype, fnr: String, sakId: Long): OpprettBehandling {

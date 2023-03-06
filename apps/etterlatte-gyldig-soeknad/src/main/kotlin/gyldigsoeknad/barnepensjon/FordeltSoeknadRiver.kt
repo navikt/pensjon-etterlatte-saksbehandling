@@ -28,11 +28,12 @@ internal class FordeltSoeknadRiver(
 
     init {
         River(rapidsConnection).apply {
-            eventName(FordelerFordelt.eventName)
+            eventName("soeknad_innsendt")
             correlationId()
             validate { it.demandValue(FordelerFordelt.soeknadFordeltKey, true) }
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
+            validate { it.rejectKey(GyldigSoeknadVurdert.sakIdKey) }
         }.register(this)
     }
 
@@ -53,7 +54,6 @@ internal class FordeltSoeknadRiver(
 
                 context.publish(
                     packet.apply {
-                        set(EVENT_NAME_KEY, GyldigSoeknadVurdert.eventName)
                         set(GyldigSoeknadVurdert.sakIdKey, sakId)
                         set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
                         set(GyldigSoeknadVurdert.gyldigInnsenderKey, gyldighetsVurdering.resultat == OPPFYLT)

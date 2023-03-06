@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
@@ -183,7 +184,7 @@ class KonsistensavstemmingService(
 fun gjeldendeLinjerForEnDato(utbetalingslinjer: List<Utbetalingslinje>, dato: LocalDate): List<Utbetalingslinje> {
     val linjerSomErOpprettetOgIkkeAvsluttetPaaDato = utbetalingslinjer
         .filter {
-            it.opprettet.instant <= dato.midnattNorskTid().toInstant()
+            it.opprettet <= dato.midnattNorskTid().toTidspunkt()
         } // 1
         .filter { (it.periode.til ?: dato) >= dato } // 2
 

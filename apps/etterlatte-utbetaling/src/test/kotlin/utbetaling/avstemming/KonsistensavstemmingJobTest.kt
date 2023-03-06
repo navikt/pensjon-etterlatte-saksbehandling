@@ -58,7 +58,7 @@ internal class KonsistensavstemmingJobTest {
     fun `skal ikke konsistensavstemme for barnepensjon naar datoen ikke er en del av kjoereplan`() {
         every { leaderElection.isLeader() } returns true
 
-        val dagForTestMinusFemDager = datoEksekvering.midnattNorskTid().toInstant().minus(5, ChronoUnit.DAYS)
+        val dagForTestMinusFemDager = datoEksekvering.midnattNorskTid().minus(5, ChronoUnit.DAYS)
 
         val konsistensavstemming = KonsistensavstemmingJob.Konsistensavstemming(
             konsistensavstemmingService = konsistensavstemmingService,

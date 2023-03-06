@@ -21,7 +21,6 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.KildeType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
 import java.math.BigDecimal
-import java.time.Instant
 
 class GrensesnittavstemmingDataMapper(
     private val utbetalinger: List<Utbetaling>,
@@ -61,13 +60,9 @@ class GrensesnittavstemmingDataMapper(
                 mottakendeKomponentKode = OppdragDefaults.MOTTAKENDE_KOMPONENTKODE
                 underkomponentKode = fagomraade
                 nokkelFom =
-                    avstemmingsperiode?.start?.let {
-                        Tidspunkt(it).toNorskTid()
-                    }?.format(tidsstempelMikroOppdrag) ?: "0"
+                    avstemmingsperiode?.start?.toNorskTid()?.format(tidsstempelMikroOppdrag) ?: "0"
                 nokkelTom =
-                    avstemmingsperiode?.endInclusive?.let {
-                        Tidspunkt(it).toNorskTid()
-                    }?.format(tidsstempelMikroOppdrag) ?: "0"
+                    avstemmingsperiode?.endInclusive?.toNorskTid()?.format(tidsstempelMikroOppdrag) ?: "0"
                 avleverendeAvstemmingId = avstemmingId.value
                 brukerId = fagomraade
             }
@@ -162,13 +157,13 @@ class GrensesnittavstemmingDataMapper(
             datoAvstemtTom = periodeTil.toNorskTid().minusHours(1).format(tidsstempelTimeOppdrag)
         }
 
-    private fun periode(liste: List<Utbetaling>): ClosedRange<Instant>? {
+    private fun periode(liste: List<Utbetaling>): ClosedRange<Tidspunkt>? {
         return if (liste.isEmpty()) {
             null
         } else {
-            object : ClosedRange<Instant> {
-                override val start = liste.minOf { it.avstemmingsnoekkel.instant }
-                override val endInclusive = liste.maxOf { it.avstemmingsnoekkel.instant }
+            object : ClosedRange<Tidspunkt> {
+                override val start = liste.minOf { it.avstemmingsnoekkel }
+                override val endInclusive = liste.maxOf { it.avstemmingsnoekkel }
             }
         }
     }

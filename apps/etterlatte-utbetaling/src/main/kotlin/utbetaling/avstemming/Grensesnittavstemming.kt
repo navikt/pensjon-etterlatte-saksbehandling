@@ -21,7 +21,7 @@ data class Avstemmingsperiode(
     val til: Tidspunkt
 ) {
     init {
-        require(fraOgMed.instant.isBefore(til.instant)) { "fraOgMed-tidspunkt maa vaere foer til-tidspunkt" }
+        require(fraOgMed.isBefore(til)) { "fraOgMed-tidspunkt maa vaere foer til-tidspunkt" }
     }
 }
 

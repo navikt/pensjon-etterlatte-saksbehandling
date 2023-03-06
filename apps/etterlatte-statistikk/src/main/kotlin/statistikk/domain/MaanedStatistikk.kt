@@ -36,7 +36,7 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
         val vedtakPerSak = stoenadRader.groupBy { it.sakId }
 
         rader = vedtakPerSak.mapNotNull { (_, vedtakPaaSak) ->
-            val sisteVedtak = vedtakPaaSak.maxBy { it.tekniskTid.instant }
+            val sisteVedtak = vedtakPaaSak.maxBy { it.tekniskTid }
 
             // finn aktuell utbetalingsperiode for dette vedtaket
             val aktuellPeriode = when (val beregning = sisteVedtak.beregning) {

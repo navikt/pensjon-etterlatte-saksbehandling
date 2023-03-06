@@ -92,7 +92,7 @@ class UtbetalingMapper(
             UtbetalingStatus.GODKJENT,
             UtbetalingStatus.GODKJENT_MED_FEIL
         )
-    }.maxByOrNull { it.opprettet.instant }?.utbetalingslinjer?.last()?.id
+    }.maxByOrNull { it.opprettet }?.utbetalingslinjer?.last()?.id
 
     private fun indeksForUtbetalingslinje(utbetalingslinjeId: Long) =
         utbetalingsperioder.indexOfFirst { it.id == utbetalingslinjeId }

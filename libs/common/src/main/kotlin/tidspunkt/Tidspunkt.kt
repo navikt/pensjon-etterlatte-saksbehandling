@@ -20,6 +20,8 @@ abstract class TruncatedInstant(
 
     override fun toString() = instant.toString()
     override fun compareTo(other: TruncatedInstant) = this.instant.compareTo(other.instant)
+    fun isBefore(other: TruncatedInstant) = this.instant.isBefore(other.instant)
+    fun isAfter(other: TruncatedInstant) = this.instant.isAfter(other.instant)
 }
 
 /**

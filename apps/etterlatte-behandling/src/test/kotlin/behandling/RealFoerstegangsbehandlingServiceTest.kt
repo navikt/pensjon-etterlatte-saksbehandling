@@ -15,7 +15,6 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -71,10 +70,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         val id = UUID.randomUUID()
 
         every {
-            behandlingerMock.hentBehandling(
-                id,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            behandlingerMock.hentBehandling(id)
         } returns Foerstegangsbehandling(
             id = id,
             sak = Sak(
@@ -160,10 +156,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
 
         every { behandlingerMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every {
-            behandlingerMock.hentBehandling(
-                capture(behandlingHentes),
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            behandlingerMock.hentBehandling(capture(behandlingHentes))
         } returns opprettetBehandling
         every { hendelserMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingerMock.lagreGyldighetsproving(any()) } returns Unit

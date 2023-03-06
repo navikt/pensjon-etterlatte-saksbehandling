@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class RevurderingAggregat(
     id: UUID,
@@ -51,8 +51,7 @@ class RevurderingAggregat(
         }
     }
 
-    var lagretBehandling: Revurdering =
-        requireNotNull(behandlinger.hentBehandling(id, BehandlingType.REVURDERING) as Revurdering)
+    var lagretBehandling = requireNotNull(behandlinger.hentBehandling(id) as Revurdering)
 
     fun registrerVedtakHendelse(
         vedtakId: Long,

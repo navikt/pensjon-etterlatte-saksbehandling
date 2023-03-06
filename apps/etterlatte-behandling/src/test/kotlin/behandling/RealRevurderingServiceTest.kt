@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.sql.Connection
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 class RealRevurderingServiceTest {
 
@@ -50,7 +50,7 @@ class RealRevurderingServiceTest {
     fun `skal hente revurdering`() {
         val id = UUID.randomUUID()
         val behandlingerMock = mockk<BehandlingDao> {
-            every { hentBehandling(id = id, type = BehandlingType.REVURDERING) } returns revurdering(
+            every { hentBehandling(id) } returns revurdering(
                 id = id,
                 sakId = 1,
                 revurderingAarsak = RevurderingAarsak.SOEKER_DOD
@@ -110,7 +110,7 @@ class RealRevurderingServiceTest {
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { opprettBehandling(capture(behandlingOpprettes)) } returns Unit
-            every { hentBehandling(capture(behandlingHentes), BehandlingType.REVURDERING) } returns revurdering
+            every { hentBehandling(capture(behandlingHentes)) } returns revurdering
         }
         val hendelserMock = mockk<HendelseDao>() {
             every { behandlingOpprettet(any()) } returns Unit

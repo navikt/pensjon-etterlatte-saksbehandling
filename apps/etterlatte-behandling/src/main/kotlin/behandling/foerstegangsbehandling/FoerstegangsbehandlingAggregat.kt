@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 class FoerstegangsbehandlingAggregat(
     id: UUID,
@@ -52,8 +52,7 @@ class FoerstegangsbehandlingAggregat(
         }
     }
 
-    var lagretBehandling: Foerstegangsbehandling =
-        requireNotNull(behandlinger.hentBehandling(id, BehandlingType.FØRSTEGANGSBEHANDLING) as Foerstegangsbehandling)
+    var lagretBehandling = requireNotNull(behandlinger.hentBehandling(id) as Foerstegangsbehandling)
 
     fun lagreGyldighetproeving(gyldighetsproeving: GyldighetsResultat) {
         lagretBehandling = lagretBehandling.oppdaterGyldighetsproeving(gyldighetsproeving)

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
+import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
@@ -22,6 +23,7 @@ import no.nav.etterlatte.statistikk.domain.SoeknadFormat
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import no.nav.etterlatte.statistikk.river.BehandlingIntern
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -32,6 +34,8 @@ class StatistikkService(
     private val behandlingKlient: BehandlingKlient,
     private val beregningKlient: BeregningKlient
 ) {
+
+    private val logger = LoggerFactory.getLogger(this.javaClass)
 
     fun registrerStatistikkForVedtak(
         vedtak: Vedtak,
@@ -228,6 +232,29 @@ class StatistikkService(
         tekniskTid: LocalDateTime
     ): SakRad? {
         return sakRepository.lagreRad(behandlingTilSakRad(behandlingIntern, hendelse, tekniskTid))
+    }
+
+    fun statistikkProdusertForMaaned(maaned: YearMonth): KjoertStatus {
+        return stoenadRepository.kjoertStatusForMaanedsstatistikk(maaned)
+    }
+
+    fun lagreMaanedsstatistikk(maanedsstatistikkk: MaanedStatistikk) {
+        var raderMedFeil = 0L
+        var raderRegistrert = 0L
+        maanedsstatistikkk.rader.forEach {
+            try {
+                stoenadRepository.lagreMaanedStatistikkRad(it)
+                raderRegistrert += 1
+            } catch (e: Exception) {
+                logger.warn("Maanedsstatistikk for sak med id=${it.sakId} kunne ikke lagres", e)
+                raderMedFeil += 1
+            }
+        }
+        stoenadRepository.lagreMaanedJobUtfoert(
+            maanedsstatistikkk.maaned,
+            raderMedFeil,
+            raderRegistrert
+        )
     }
 }
 

@@ -65,6 +65,10 @@ class StoenadRepositoryTest {
             it.prepareStatement("TRUNCATE TABLE stoenad")
                 .executeUpdate()
         }
+        dataSource.connection.use {
+            it.prepareStatement("TRUNCATE TABLE maanedsstatistikk_job")
+                .executeUpdate()
+        }
     }
 
     @Test
@@ -248,5 +252,65 @@ class StoenadRepositoryTest {
         Assertions.assertNull(lagretRad?.beregning)
         Assertions.assertNull(repo.datapakke()[0].beregning)
         Assertions.assertNull(repo.datapakke()[0].vedtakType)
+    }
+
+    @Test
+    fun `lagreMaanedJobUtfoert lagrer ned kjøring for en maaned riktig`() {
+        val maaned = YearMonth.of(2022, 8)
+        val repo = StoenadRepository.using(dataSource)
+        repo.lagreMaanedJobUtfoert(
+            maaned = maaned,
+            raderMedFeil = 0,
+            raderRegistrert = 20
+        )
+
+        val kjoertStatus = repo.kjoertStatusForMaanedsstatistikk(maaned = maaned)
+        Assertions.assertEquals(KjoertStatus.INGEN_FEIL, kjoertStatus)
+    }
+
+    @Test
+    fun `kjoertStatusForMaanedsstatistikk henter ut med preferanse INGEN_FEIL`() {
+        val maaned = YearMonth.of(2022, 8)
+        val repo = StoenadRepository.using(dataSource)
+        repo.lagreMaanedJobUtfoert(
+            maaned = maaned,
+            raderMedFeil = 7,
+            raderRegistrert = 20
+        )
+
+        repo.lagreMaanedJobUtfoert(
+            maaned = maaned,
+            raderMedFeil = 0,
+            raderRegistrert = 20
+        )
+
+        val kjoertStatus = repo.kjoertStatusForMaanedsstatistikk(maaned = maaned)
+        Assertions.assertEquals(KjoertStatus.INGEN_FEIL, kjoertStatus)
+    }
+
+    @Test
+    fun `kjoertStatusForMaanedsstatistikk gir status FEIL hvis kun feil er registrert for maaned`() {
+        val maaned = YearMonth.of(2022, 8)
+        val repo = StoenadRepository.using(dataSource)
+        repo.lagreMaanedJobUtfoert(
+            maaned = maaned,
+            raderMedFeil = 1,
+            raderRegistrert = 20
+        )
+        val kjoertStatus = repo.kjoertStatusForMaanedsstatistikk(maaned)
+        Assertions.assertEquals(KjoertStatus.FEIL, kjoertStatus)
+    }
+
+    @Test
+    fun `kjoertStatusForMaanedsstatistikk gir IKKE_KJOERT hvis ingen registrering finnes for måned`() {
+        val maaned = YearMonth.of(2022, 8)
+        val repo = StoenadRepository.using(dataSource)
+        repo.lagreMaanedJobUtfoert(
+            maaned = maaned,
+            raderMedFeil = 1,
+            raderRegistrert = 20
+        )
+        val kjoertStatus = repo.kjoertStatusForMaanedsstatistikk(maaned.plusMonths(1))
+        Assertions.assertEquals(KjoertStatus.IKKE_KJOERT, kjoertStatus)
     }
 }

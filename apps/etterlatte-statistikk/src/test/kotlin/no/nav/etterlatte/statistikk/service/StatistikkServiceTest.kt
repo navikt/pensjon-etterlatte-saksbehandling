@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -27,6 +28,7 @@ import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
+import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import org.junit.jupiter.api.Assertions
@@ -186,6 +188,27 @@ class StatistikkServiceTest {
         Assertions.assertNull(registrertStatistikk.ansvarligBeslutter)
         Assertions.assertNull(registrertStatistikk.ansvarligEnhet)
         Assertions.assertNull(registrertStatistikk.saksbehandler)
+    }
+
+    @Test
+    fun `lagreMaanedligStoenadstatistikk lagrer ting riktig`() {
+        val stoenadRepository: StoenadRepository = mockk(relaxed = true)
+
+        val sakRepository: SakRepository = mockk()
+        val behandlingKlient: BehandlingKlient = mockk()
+        val beregningKlient: BeregningKlient = mockk()
+
+        val service = StatistikkService(
+            stoenadRepository = stoenadRepository,
+            sakRepository = sakRepository,
+            behandlingKlient = behandlingKlient,
+            beregningKlient = beregningKlient
+        )
+
+        service.lagreMaanedsstatistikk(MaanedStatistikk(YearMonth.of(2022, 8), emptyList()))
+        verify {
+            stoenadRepository.lagreMaanedJobUtfoert(YearMonth.of(2022, 8), 0, 0)
+        }
     }
 }
 

@@ -3,6 +3,7 @@ package no.nav.etterlatte.statistikk.config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
@@ -10,11 +11,14 @@ import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
+import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 class ApplicationContext {
@@ -50,24 +54,43 @@ class ApplicationContext {
         BeregningKlientImpl(beregningHttpClient, "http://etterlatte-beregning")
     }
 
+    val maanedligStatistikkJob: MaanedligStatistikkJob by lazy {
+        MaanedligStatistikkJob(
+            statistikkService,
+            leaderElection,
+            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(4, ChronoUnit.HOURS)
+        )
+    }
+
+    private val leaderElection: LeaderElection by lazy {
+        LeaderElection(env.requireEnvValue("ELECTOR_PATH"))
+    }
+
     private val beregningHttpClient: HttpClient by lazy {
         httpClientClientCredentials(
-            azureAppClientId = requireNotNull(env["AZURE_APP_CLIENT_ID"]),
-            azureAppJwk = requireNotNull(env["AZURE_APP_JWK"]),
-            azureAppWellKnownUrl = requireNotNull(env["AZURE_APP_WELL_KNOWN_URL"]),
-            azureAppScope = requireNotNull(env["BEREGNING_AZURE_SCOPE"])
+            azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
+            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
+            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppScope = env.requireEnvValue("BEREGNING_AZURE_SCOPE")
         )
     }
 
     private val behandlingHttpClient: HttpClient by lazy {
         httpClientClientCredentials(
-            azureAppClientId = requireNotNull(env["AZURE_APP_CLIENT_ID"]),
-            azureAppJwk = requireNotNull(env["AZURE_APP_JWK"]),
-            azureAppWellKnownUrl = requireNotNull(env["AZURE_APP_WELL_KNOWN_URL"]),
-            azureAppScope = requireNotNull(env["BEHANDLING_AZURE_SCOPE"])
+            azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
+            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
+            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppScope = env.requireEnvValue("BEHANDLING_AZURE_SCOPE")
         )
     }
 }
+
+private fun Map<String, String>.requireEnvValue(key: String) =
+    when (val value = this[key]) {
+        null -> throw IllegalArgumentException("app env is missing required key $key")
+        else -> value
+    }
 
 private fun Map<String, String>.withConsumerGroupId() =
     this.toMutableMap().apply {

@@ -36,6 +36,7 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  leaderElection: true
   kafka:
     pool: nav-prod
   replicas:

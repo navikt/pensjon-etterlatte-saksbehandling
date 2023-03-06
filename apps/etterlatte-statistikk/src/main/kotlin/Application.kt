@@ -5,8 +5,13 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 
 fun main() {
     with(ApplicationContext()) {
+        jobs(this)
         rapidApplication(this).start()
     }
+}
+
+fun jobs(applicationContext: ApplicationContext) {
+    applicationContext.maanedligStatistikkJob.schedule()
 }
 
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =

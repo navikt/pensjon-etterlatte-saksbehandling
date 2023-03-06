@@ -26,20 +26,21 @@ class OppgaveDao(private val connection: () -> Connection) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun finnOppgaverForStrengtFortrolig(statuser: List<BehandlingStatus>): List<Oppgave> {
+    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(statuser: List<BehandlingStatus>): List<Oppgave> {
         with(connection()) {
             val stmt = prepareStatement(
                 """
                 |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, status, behandling_opprettet,
                 |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
-                |WHERE adressebeskyttelse = ?
+                |WHERE ((adressebeskyttelse = ?) OR (adressebeskyttelse = ?)) 
                 | AND status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
                 """.trimMargin()
             )
             stmt.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
-            stmt.setArray(2, createArrayOf("text", statuser.toTypedArray()))
-            stmt.setString(3, Prosesstype.AUTOMATISK.toString())
+            stmt.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
+            stmt.setArray(3, createArrayOf("text", statuser.toTypedArray()))
+            stmt.setString(4, Prosesstype.AUTOMATISK.toString())
             return stmt.executeQuery().toList {
                 val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
                     ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()

@@ -9,12 +9,14 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 
 internal fun Route.behandlingsstatusRoutes(
     behandlingsstatusService: BehandlingStatusService
 ) {
-    route("/behandlinger/{behandlingsid}") {
+    route("/behandlinger/{$BEHANDLINGSID_CALL_PARAMETER}") {
         get("/opprett") {
             /* Kalles kun av vilkårsvurdering når total-vurdering slettes */
             haandterStatusEndring(call) {

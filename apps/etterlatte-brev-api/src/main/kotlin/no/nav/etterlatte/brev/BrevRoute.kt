@@ -18,6 +18,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.adresse.BrregService
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
@@ -54,13 +55,13 @@ fun Route.brevRoute(service: BrevService, brregService: BrregService) {
             call.respond(statsforvaltere + personer)
         }
 
-        get("behandling/{behandlingId}") {
+        get("behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId { behandlingId ->
                 call.respond(service.hentAlleBrev(behandlingId))
             }
         }
 
-        post("behandling/{behandlingId}") {
+        post("behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId { behandlingId ->
                 val request = call.receive<OpprettBrevRequest>()
 
@@ -79,7 +80,7 @@ fun Route.brevRoute(service: BrevService, brregService: BrregService) {
             call.respond(brev.data)
         }
 
-        post("pdf/{behandlingId}") {
+        post("pdf/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId { behandlingId ->
                 try {
                     val mp = call.receiveMultipart().readAllParts()

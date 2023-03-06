@@ -7,8 +7,15 @@ import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import java.util.*
 
+const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
+
+inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
+    get() = call.parameters[BEHANDLINGSID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
+        "BehandlingsId er ikke i path params"
+    )
+
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSuccess: (id: UUID) -> Unit) =
-    withParam("behandlingId", onSuccess)
+    withParam(BEHANDLINGSID_CALL_PARAMETER, onSuccess)
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     param: String,

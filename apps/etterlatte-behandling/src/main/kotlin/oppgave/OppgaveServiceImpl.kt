@@ -32,7 +32,7 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
 
         return if (bruker.harRolleStrengtFortrolig()) {
             inTransaction {
-                oppgaveDao.finnOppgaverForStrengtFortrolig(aktuelleStatuserForRoller)
+                oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleStatuserForRoller)
             }
         } else {
             inTransaction {

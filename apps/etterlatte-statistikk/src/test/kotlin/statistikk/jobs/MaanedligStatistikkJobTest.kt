@@ -3,7 +3,6 @@ package statistikk.jobs
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
@@ -11,10 +10,14 @@ import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import org.junit.jupiter.api.Test
 import java.time.Clock
+import java.time.Month
 import java.time.YearMonth
+import java.time.ZoneId
 import java.time.ZoneOffset
 
 class MaanedligStatistikkJobTest {
+
+    private val norskTidssone = ZoneId.of("Europe/Oslo")
 
     @Test
     fun `run stopper hvis den ikke er leader`() {
@@ -36,7 +39,7 @@ class MaanedligStatistikkJobTest {
 
     @Test
     fun `ingen statistikk lagres hvis kjoertStatus for maaneden er INGEN_FEIL`() {
-        val maanedProdusert = YearMonth.of(2022, 8)
+        val maanedProdusert = YearMonth.of(2022, Month.AUGUST)
 
         val leaderElection: LeaderElection = mockk()
         every { leaderElection.isLeader() } returns true
@@ -65,7 +68,7 @@ class MaanedligStatistikkJobTest {
 
     @Test
     fun `ingen statistikk lagres hvis kjoertStatus for maaneden er FEIL`() {
-        val maanedFeil = YearMonth.of(2022, 9)
+        val maanedFeil = YearMonth.of(2022, Month.SEPTEMBER)
 
         val leaderElection: LeaderElection = mockk()
         every { leaderElection.isLeader() } returns true
@@ -94,7 +97,7 @@ class MaanedligStatistikkJobTest {
 
     @Test
     fun `statistikk hentes og lagres hvis kjoertStatus for maaneden er IKKE_KJOERT`() {
-        val maanedIkkeKjoert = YearMonth.of(2022, 9)
+        val maanedIkkeKjoert = YearMonth.of(2022, Month.SEPTEMBER)
         val mockMaanedStatistikk: MaanedStatistikk = mockk()
 
         val leaderElection: LeaderElection = mockk()

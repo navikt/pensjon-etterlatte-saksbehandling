@@ -246,7 +246,7 @@ class StatistikkService(
                 stoenadRepository.lagreMaanedStatistikkRad(it)
                 raderRegistrert += 1
             } catch (e: Exception) {
-                logger.warn("Maanedsstatistikk for sak med id=${it.sakId} kunne ikke lagres")
+                logger.warn("Maanedsstatistikk for sak med id=${it.sakId} kunne ikke lagres", e)
                 raderMedFeil += 1
             }
         }

@@ -16,7 +16,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -132,7 +131,7 @@ class KonsistensavstemmingService(
         return Konsistensavstemming(
             id = UUIDBase64(),
             sakType = saktype,
-            opprettet = Tidspunkt(instant = Instant.now()),
+            opprettet = Tidspunkt.now(),
             avstemmingsdata = null,
             loependeFraOgMed = loependeYtelseFom,
             opprettetTilOgMed = registrertFoerTom,

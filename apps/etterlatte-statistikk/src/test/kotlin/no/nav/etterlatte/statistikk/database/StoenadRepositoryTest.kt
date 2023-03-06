@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -52,7 +51,7 @@ class StoenadRepositoryTest {
         beregningId = UUID.randomUUID(),
         behandlingId = UUID.randomUUID(),
         type = Beregningstype.BP,
-        beregnetDato = Tidspunkt(instant = Instant.now()),
+        beregnetDato = Tidspunkt.now(),
         beregningsperioder = listOf()
     )
 

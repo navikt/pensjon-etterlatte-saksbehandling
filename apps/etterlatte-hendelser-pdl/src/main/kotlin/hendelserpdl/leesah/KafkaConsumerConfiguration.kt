@@ -18,7 +18,7 @@ interface KafkaConsumerConfiguration {
 
 class KafkaEnvironment : KafkaConsumerConfiguration {
     override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {
-        val maxPollInterval = Duration.of(5, ChronoUnit.MINUTES).toMillis()
+        val maxPollInterval = Duration.of(5, ChronoUnit.MINUTES).toMillis().toInt()
         val properties = Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env["KAFKA_BROKERS"])
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)

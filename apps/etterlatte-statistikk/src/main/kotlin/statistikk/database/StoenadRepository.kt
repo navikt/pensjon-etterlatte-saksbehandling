@@ -244,6 +244,6 @@ private fun ResultSet.asStoenadRad(): StoenadRad = StoenadRad(
     attestant = getString("attestant"),
     vedtakLoependeFom = getDate("vedtakLoependeFom").toLocalDate(),
     vedtakLoependeTom = getDate("vedtakLoependeTom")?.toLocalDate(),
-    beregning = objectMapper.readValue(getString("beregning")),
+    beregning = getString("beregning")?.let { objectMapper.readValue(it) },
     vedtakType = getString("vedtakType")?.let { enumValueOf<VedtakType>(it) }
 )

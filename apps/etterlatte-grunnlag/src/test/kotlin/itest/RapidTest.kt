@@ -2,7 +2,6 @@ package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
-import lagGrunnlagsopplysning
 import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -12,9 +11,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -94,15 +90,6 @@ internal class RapidTest {
         ).toJson()
 
         @Test
-        fun `ny enkeltopplysning sender ut melding om at grunnlaget er endret`() {
-            inspector.sendTestMessage(melding)
-            Assertions.assertEquals(
-                "GRUNNLAG:GRUNNLAGENDRET",
-                inspector.inspektør.message(0)[EVENT_NAME_KEY].textValue()
-            )
-        }
-
-        @Test
         fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
             assertOpplysningBlirLagret(melding = melding, expectedOpplysning = nyOpplysning)
         }
@@ -120,47 +107,9 @@ internal class RapidTest {
         ).toJson()
 
         @Test
-        fun `svar på opplysningsbehov sender ut melding om at grunnlaget er endret`() {
-            inspector.sendTestMessage(melding)
-            Assertions.assertEquals(
-                "GRUNNLAG:GRUNNLAGENDRET",
-                inspector.inspektør.message(0)[EVENT_NAME_KEY].textValue()
-            )
-        }
-
-        @Test
         fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
             assertOpplysningBlirLagret(melding = melding, expectedOpplysning = nyOpplysning)
         }
-    }
-
-    @Test
-    fun `melding om ny opplysning sender ut melding om at grunnlaget er endret`() {
-        val personRolleOpplysning = lagGrunnlagsopplysning(
-            opplysningstype = Opplysningstype.PERSONROLLE,
-            kilde = kilde,
-            uuid = statiskUuid,
-            verdi = PersonRolle.BARN.toJsonNode(),
-            fnr = fnr
-        )
-        val nyOpplysningMelding = JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to "OPPLYSNING:NY",
-                "opplysning" to listOf(
-                    nyOpplysning,
-                    personRolleOpplysning
-                ),
-                "fnr" to fnr,
-                "sakId" to 1
-            )
-        ).toJson()
-
-        inspector.sendTestMessage(nyOpplysningMelding)
-
-        val packet = inspector.inspektør.message(0)
-
-        Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET".toJson(), packet[EVENT_NAME_KEY].toJson())
-        Assertions.assertEquals(1, packet["sakId"].longValue())
     }
 
     private fun assertOpplysningBlirLagret(melding: String, expectedOpplysning: Grunnlagsopplysning<JsonNode>) {

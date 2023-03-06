@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.toJson
@@ -37,14 +36,10 @@ class GrunnlagHendelser(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val opplysningsTyper = Opplysningstype.values().map { it.name }
+        val eventName = packet[EVENT_NAME_KEY].asText()
+        val opplysningType = packet[BEHOV_NAME_KEY].asText()
 
-        if ((packet[EVENT_NAME_KEY].asText() == "OPPLYSNING:NY") || (
-                opplysningsTyper.contains(
-                    packet[BEHOV_NAME_KEY].asText()
-                )
-                )
-        ) {
+        if (eventName == "OPPLYSNING:NY" || opplysningType in OPPLYSNING_TYPER) {
             withLogContext(packet.correlationId) {
                 try {
                     val sakId = packet["sakId"].asLong()
@@ -64,18 +59,14 @@ class GrunnlagHendelser(
                             opplysninger
                         )
                     }
-
-                    JsonMessage.newMessage(
-                        eventName = "GRUNNLAG:GRUNNLAGENDRET",
-                        map = mapOf(CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY], "sakId" to sakId)
-                    ).also {
-                        context.publish(it.toJson())
-                        logger.info("Lagt ut melding om grunnlagsendring")
-                    }
                 } catch (e: Exception) {
                     logger.error("Spiser en melding på grunn av feil", e)
                 }
             }
         }
+    }
+
+    companion object {
+        private val OPPLYSNING_TYPER = Opplysningstype.values().map { it.name }
     }
 }

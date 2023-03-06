@@ -12,7 +12,7 @@ import java.time.temporal.TemporalUnit
 
 abstract class TruncatedInstant(
     @JsonValue
-    val instant: Instant
+    internal val instant: Instant
 ) : Temporal by instant,
     TemporalAdjuster by instant,
     Comparable<TruncatedInstant>,

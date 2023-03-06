@@ -287,7 +287,9 @@ class StoenadRepositoryTest {
             statistikkMaaned = YearMonth.of(2023, Month.FEBRUARY)
         )
 
-        repo.lagreMaanedStatistikkRad(maanedStoenadRad)
+        Assertions.assertDoesNotThrow {
+            repo.lagreMaanedStatistikkRad(maanedStoenadRad)
+        }
     }
 
     @Test

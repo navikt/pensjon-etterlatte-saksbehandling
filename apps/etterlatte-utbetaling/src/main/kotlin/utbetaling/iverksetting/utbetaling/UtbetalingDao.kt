@@ -9,13 +9,14 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
-import java.sql.Timestamp
 import java.util.*
 import javax.sql.DataSource
 
@@ -43,9 +44,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     "behandlingIdTilOppdrag" to utbetaling.behandlingId.shortValue.value.param(),
                     "sakId" to utbetaling.sakId.value.param(),
                     "vedtak" to utbetaling.vedtak.toJson().param(),
-                    "opprettet" to Timestamp.from(utbetaling.opprettet.instant).param(),
-                    "avstemmingsnoekkel" to Timestamp.from(utbetaling.avstemmingsnoekkel.instant).param(),
-                    "endret" to Timestamp.from(utbetaling.endret.instant).param(),
+                    "opprettet" to utbetaling.opprettet.toTimestamp().param(),
+                    "avstemmingsnoekkel" to utbetaling.avstemmingsnoekkel.toTimestamp().param(),
+                    "endret" to utbetaling.endret.toTimestamp().param(),
                     "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param(),
                     "saksbehandler" to utbetaling.saksbehandler.value.param(),
                     "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet.param(),
@@ -84,7 +85,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 "type" to utbetalingslinje.type.name.param(),
                 "utbetaling_id" to utbetalingslinje.utbetalingId.param(),
                 "erstatter_id" to utbetalingslinje.erstatterId?.value.param(),
-                "opprettet" to Timestamp.from(utbetalingslinje.opprettet.instant).param(),
+                "opprettet" to utbetalingslinje.opprettet.toTimestamp().param(),
                 "sak_id" to utbetalingslinje.sakId.value.param(),
                 "periode_fra" to utbetalingslinje.periode.fra.param(),
                 "periode_til" to utbetalingslinje.periode.til.param(),
@@ -117,7 +118,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             paramMap = mapOf(
                 "id" to utbetalingshendelse.id.param(),
                 "utbetalingId" to utbetalingshendelse.utbetalingId.param(),
-                "tidspunkt" to Timestamp.from(utbetalingshendelse.tidspunkt.instant).param(),
+                "tidspunkt" to utbetalingshendelse.tidspunkt.toTimestamp().param(),
                 "status" to utbetalingshendelse.status.name.param()
             )
         ).let { tx.run(it.asUpdate) }
@@ -217,8 +218,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 AND u.saktype = :saktype
             """.trimIndent(),
             paramMap = mapOf(
-                "loependeFom" to Timestamp.from(aktivFraOgMed.instant).param(),
-                "opprettetTom" to Timestamp.from(opprettetFramTilOgMed.instant).param(),
+                "loependeFom" to aktivFraOgMed.toTimestamp().param(),
+                "opprettetTom" to opprettetFramTilOgMed.toTimestamp().param(),
                 "saktype" to saktype.name.param()
             )
         ).let {
@@ -248,8 +249,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     AND saktype = :saktype
                     """,
             paramMap = mapOf(
-                "fraOgMed" to Timestamp.from(fraOgMed.instant).param(),
-                "til" to Timestamp.from(til.instant).param(),
+                "fraOgMed" to fraOgMed.toTimestamp().param(),
+                "til" to til.toTimestamp().param(),
                 "saktype" to saktype.name.param()
             )
         ).let {
@@ -305,7 +306,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         "beskrivelse" to oppdragMedKvittering.mmel.beskrMelding.param(),
                         "alvorlighetsgrad" to oppdragMedKvittering.mmel.alvorlighetsgrad.param(),
                         "kode" to oppdragMedKvittering.mmel.kodeMelding.param(),
-                        "endret" to Timestamp.from(endret.instant).param(),
+                        "endret" to endret.toTimestamp().param(),
                         "vedtakId" to oppdragMedKvittering.vedtakId().param()
                     )
                 ).let { tx.run(it.asUpdate) }
@@ -340,9 +341,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 shortValue = UUID30(string("behandling_id_til_oppdrag"))
             ),
             vedtakId = VedtakId(long("vedtak_id")),
-            opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
-            endret = Tidspunkt(sqlTimestamp("endret").toInstant()),
-            avstemmingsnoekkel = Tidspunkt(sqlTimestamp("avstemmingsnoekkel").toInstant()),
+            opprettet = sqlTimestamp("opprettet").toTidspunkt(),
+            endret = sqlTimestamp("endret").toTidspunkt(),
+            avstemmingsnoekkel = sqlTimestamp("avstemmingsnoekkel").toTidspunkt(),
             stoenadsmottaker = Foedselsnummer(string("stoenadsmottaker")),
             saksbehandler = NavIdent(string("saksbehandler")),
             saksbehandlerEnhet = string("saksbehandler_enhet"),
@@ -369,7 +370,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             type = string("type").let { Utbetalingslinjetype.valueOf(it) },
             utbetalingId = uuid("utbetaling_id"),
             erstatterId = longOrNull("erstatter_id")?.let { UtbetalingslinjeId(it) },
-            opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
+            opprettet = sqlTimestamp("opprettet").toTidspunkt(),
             sakId = SakId(long("sak_id")),
             periode = PeriodeForUtbetaling(
                 fra = localDate("periode_fra"),
@@ -384,7 +385,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         Utbetalingshendelse(
             id = uuid("id"),
             utbetalingId = uuid("utbetaling_id"),
-            tidspunkt = Tidspunkt(sqlTimestamp("tidspunkt").toInstant()),
+            tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
             status = string("status").let(UtbetalingStatus::valueOf)
         )
     }

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class BehandlingTest {
 
@@ -47,7 +47,7 @@ internal class BehandlingTest {
         vilkaarUtfall = null
     )
 
-    private val saksbehandler = Grunnlagsopplysning.Saksbehandler("saksbehandler01", Tidspunkt.now().instant)
+    private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
 
     private val kommerBarnetTilgode = KommerBarnetTilgode(JaNeiVetIkke.JA, "", saksbehandler)
     private val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "begrunnelse")

@@ -24,7 +24,6 @@ import no.nav.etterlatte.behandling.regulering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -173,7 +172,7 @@ internal class BehandlingRoutesTest {
         )
         val virkningstidspunkt = Virkningstidspunkt(
             parsetVirkningstidspunkt,
-            Grunnlagsopplysning.Saksbehandler(NAVident, Tidspunkt.now().instant),
+            Grunnlagsopplysning.Saksbehandler.create(NAVident),
             bodyBegrunnelse
         )
         every {

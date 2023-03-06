@@ -197,6 +197,9 @@ class RealGenerellBehandlingService(
     ): DetaljertBehandlingDto {
         val detaljertBehandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
         val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
+        val kommerBarnetTilgode =
+            detaljertBehandling.kommerBarnetTilgode.takeIf { detaljertBehandling.sakType == SakType.BARNEPENSJON }
+
         val sakId = detaljertBehandling.sak
         return coroutineScope {
             val vedtak = async { vedtakKlient.hentVedtak(behandlingId.toString(), bruker) }
@@ -224,7 +227,7 @@ class RealGenerellBehandlingService(
                 sak = detaljertBehandling.sak,
                 sakType = detaljertBehandling.sakType,
                 gyldighetsprøving = detaljertBehandling.gyldighetsproeving,
-                kommerBarnetTilgode = detaljertBehandling.kommerBarnetTilgode,
+                kommerBarnetTilgode = kommerBarnetTilgode,
                 saksbehandlerId = vedtak.await()?.saksbehandlerId,
                 datoFattet = vedtak.await()?.datoFattet,
                 datoattestert = vedtak.await()?.datoattestert,

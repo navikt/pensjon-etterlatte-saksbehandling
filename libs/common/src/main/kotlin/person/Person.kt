@@ -22,7 +22,7 @@ data class Person(
     var kontaktadresse: List<Adresse>?,
     var oppholdsadresse: List<Adresse>?,
     val sivilstatus: Sivilstatus?,
-    val siviltilstand: List<Siviltilstand>?,
+    val siviltilstand: List<Siviltilstand>? = null,
     val statsborgerskap: String?,
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?,

@@ -189,7 +189,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     @Test
     fun `lagring av gyldighetsproeving skal lagre og returnere gyldighetsresultat for innsender er gjenlevende`() {
         val id = UUID.randomUUID()
-        val naaTid = Instant.now()
+        val naaTid = Tidspunkt.now().instant
         val forventetResultat = GyldighetsResultat(
             resultat = VurderingsResultat.OPPFYLT,
             vurderinger = listOf(

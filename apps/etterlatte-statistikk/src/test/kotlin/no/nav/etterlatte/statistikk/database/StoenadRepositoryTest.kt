@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
+import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.domain.stoenadRad
 import org.junit.jupiter.api.AfterAll
@@ -19,6 +20,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
@@ -258,6 +260,34 @@ class StoenadRepositoryTest {
         val maanedsrader = repo.hentRaderInnenforMaaned(maaned)
         Assertions.assertEquals(maanedsrader.size, 3)
         Assertions.assertEquals(maanedsrader.map { it.sakId }.toSet(), setOf(1L))
+    }
+
+    @Test
+    fun `maanedsstatistikk lagrer ned en rad riktig`() {
+        val repo = StoenadRepository.using(dataSource)
+        val maanedStoenadRad = MaanedStoenadRad(
+            id = -1,
+            fnrSoeker = "123",
+            fnrForeldre = listOf("321"),
+            fnrSoesken = listOf(),
+            anvendtTrygdetid = "40",
+            nettoYtelse = "4",
+            beregningType = "Moro",
+            anvendtSats = "1",
+            behandlingId = UUID.randomUUID(),
+            sakId = 0,
+            sakNummer = 0,
+            tekniskTid = Tidspunkt.now(),
+            sakYtelse = "",
+            versjon = "",
+            saksbehandler = "",
+            attestant = null,
+            vedtakLoependeFom = LocalDate.of(2022, 8, 1),
+            vedtakLoependeTom = null,
+            statistikkMaaned = YearMonth.of(2023, Month.FEBRUARY)
+        )
+
+        repo.lagreMaanedStatistikkRad(maanedStoenadRad)
     }
 
     @Test

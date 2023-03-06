@@ -51,9 +51,9 @@ class StoenadRepository(private val datasource: DataSource) {
                 """
                 INSERT INTO maaned_stoenad(
                     fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
-                    behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
+                    behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                     vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             ).apply {
                 setString(1, maanedStatistikkRad.fnrSoeker)
@@ -65,15 +65,14 @@ class StoenadRepository(private val datasource: DataSource) {
                 setString(7, maanedStatistikkRad.anvendtSats)
                 setObject(8, maanedStatistikkRad.behandlingId)
                 setLong(9, maanedStatistikkRad.sakId)
-                setLong(10, maanedStatistikkRad.sakId)
-                setTimestamp(11, maanedStatistikkRad.tekniskTid.toTimestamp())
-                setString(12, maanedStatistikkRad.sakYtelse)
-                setString(13, maanedStatistikkRad.versjon)
-                setString(14, maanedStatistikkRad.saksbehandler)
-                setString(15, maanedStatistikkRad.attestant)
-                setDate(16, Date.valueOf(maanedStatistikkRad.vedtakLoependeFom))
-                setDate(17, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
-                setString(18, maanedStatistikkRad.statistikkMaaned.toString())
+                setTimestamp(10, maanedStatistikkRad.tekniskTid.toTimestamp())
+                setString(11, maanedStatistikkRad.sakYtelse)
+                setString(12, maanedStatistikkRad.versjon)
+                setString(13, maanedStatistikkRad.saksbehandler)
+                setString(14, maanedStatistikkRad.attestant)
+                setDate(15, Date.valueOf(maanedStatistikkRad.vedtakLoependeFom))
+                setDate(16, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
+                setString(17, maanedStatistikkRad.statistikkMaaned.toString())
             }.executeUpdate()
         }
     }

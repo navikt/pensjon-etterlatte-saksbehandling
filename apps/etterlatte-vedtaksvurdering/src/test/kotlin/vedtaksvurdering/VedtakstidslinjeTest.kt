@@ -4,9 +4,9 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.standardTidssoneUTC
 import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -245,12 +245,12 @@ private fun lagVedtak(
         vedtakFattet = VedtakFattet(
             ansvarligSaksbehandler = SAKSBEHANDLER_1,
             ansvarligEnhet = ENHET_1,
-            tidspunkt = datoAttestert.atZone(standardTidssoneUTC)
+            tidspunkt = Tidspunkt.now().toNorskTid()
         ),
         attestasjon = Attestasjon(
             attestant = SAKSBEHANDLER_2,
             attesterendeEnhet = ENHET_2,
-            tidspunkt = datoAttestert.atZone(standardTidssoneUTC)
+            tidspunkt = Tidspunkt.now().toNorskTid()
         ),
         utbetalingsperioder = emptyList()
     )

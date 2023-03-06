@@ -272,19 +272,19 @@ class VedtaksvurderingService(
     ): VedtakType {
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                when (requireNotNull(vilkaarsvurdering?.resultat?.utfall) { "Behandling mangler vilkårsvurdering" }) {
+                when (vilkaarsvurderingUtfallNonNull(vilkaarsvurdering?.resultat?.utfall)) {
                     VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.INNVILGELSE
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.AVSLAG
                 }
             }
             BehandlingType.REVURDERING -> {
-                when (requireNotNull(vilkaarsvurdering?.resultat?.utfall) { "Behandling mangler vilkårsvurdering" }) {
-                    VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.INNVILGELSE
+                when (vilkaarsvurderingUtfallNonNull(vilkaarsvurdering?.resultat?.utfall)) {
+                    VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.ENDRING
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.OPPHOER
                 }
             }
+            BehandlingType.OMREGNING -> VedtakType.ENDRING
             BehandlingType.MANUELT_OPPHOER -> VedtakType.OPPHOER
-            BehandlingType.OMREGNING -> VedtakType.INNVILGELSE
         }
     }
 
@@ -294,7 +294,7 @@ class VedtaksvurderingService(
         beregning: BeregningDTO?
     ): List<Utbetalingsperiode> {
         return when (vedtakType) {
-            VedtakType.INNVILGELSE -> {
+            VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
                 val nonNullBeregning = requireNotNull(beregning) { "Mangler beregning" }
                 nonNullBeregning.beregningsperioder.map {
                     Utbetalingsperiode(
@@ -313,7 +313,6 @@ class VedtaksvurderingService(
                     )
                 )
             VedtakType.AVSLAG -> emptyList()
-            VedtakType.ENDRING -> throw NotImplementedError("${VedtakType.ENDRING} er ikke støttet")
         }
     }
 
@@ -328,7 +327,7 @@ class VedtaksvurderingService(
                 BehandlingType.MANUELT_OPPHOER -> Triple(null, null, behandling)
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING, BehandlingType.OMREGNING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
-                    when (vilkaarsvurdering.resultat?.utfall) {
+                    when (vilkaarsvurdering?.resultat?.utfall) {
                         VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(null, vilkaarsvurdering, behandling)
                         VilkaarsvurderingUtfall.OPPFYLT -> {
                             val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
@@ -340,6 +339,9 @@ class VedtaksvurderingService(
             }
         }
     }
+
+    private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
+        requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
     private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak, tekniskTid: LocalDateTime) =
         JsonMessage.newMessage(

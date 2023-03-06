@@ -1,5 +1,7 @@
 package oppgave
 
+import no.nav.etterlatte.STOR_SNERK
+import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -13,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -20,6 +23,8 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -32,7 +37,6 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppgaveDaoTest {
-    val fnr = "02458201458"
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
@@ -41,7 +45,8 @@ internal class OppgaveDaoTest {
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var grunnlagsendringshendelsesRepo: GrunnlagsendringshendelseDao
     private lateinit var behandlingDao: BehandlingDao
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakDao: SakDao
+    private lateinit var sakDaoAdressebeskyttelse: SakDaoAdressebeskyttelse
 
     @BeforeAll
     fun beforeAll() {
@@ -57,14 +62,24 @@ internal class OppgaveDaoTest {
 
         val connection = dataSource.connection
         oppgaveDao = OppgaveDao { connection }
-        sakRepo = SakDao { connection }
+        sakDao = SakDao { connection }
         grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao { connection }
         behandlingDao = BehandlingDao { connection }
+        sakDaoAdressebeskyttelse = SakDaoAdressebeskyttelse(dataSource)
+    }
+
+    @AfterEach
+    fun afterEach() {
+        dataSource.connection.use {
+            it.prepareStatement("TRUNCATE sak CASCADE;").execute()
+        }
     }
 
     @Test
     fun `uhaandterteGrunnlagsendringshendelser hentes som oppgaver hvis de har gyldig status`() {
-        val sakid = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
+        val fnr = "02458201458"
+
+        val sakid = sakDao.opprettSak(fnr, SakType.BARNEPENSJON).id
         val hendelse = Grunnlagsendringshendelse(
             id = UUID.randomUUID(),
             sakId = sakid,
@@ -97,22 +112,47 @@ internal class OppgaveDaoTest {
 
     @Test
     fun `manuelle reguleringer vises i oppgavelisten men ikke automatiske`() {
-        sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
-        val automatisk = lagRegulering(Prosesstype.AUTOMATISK)
-        val manuel = lagRegulering(Prosesstype.MANUELL)
+        val fnr = TRIVIELL_MIDTPUNKT.value
+        val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON)
+        val automatisk = lagRegulering(Prosesstype.AUTOMATISK, fnr, sak.id)
+        val manuel = lagRegulering(Prosesstype.MANUELL, fnr, sak.id)
 
         behandlingDao.opprettBehandling(automatisk)
         behandlingDao.opprettBehandling(manuel)
 
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(listOf(BehandlingStatus.OPPRETTET))
-        assertEquals(oppgaver.size, 1)
+        assertEquals(1, oppgaver.size)
         assertEquals(manuel.id, (oppgaver[0] as Oppgave.BehandlingOppgave).behandlingId)
     }
 
-    private fun lagRegulering(prosesstype: Prosesstype): OpprettBehandling {
+    @Test
+    fun `skal ikke returnere strengt fortrolig oppgave for annen enn rolle som har strengt fortrolig`() {
+        val fnr = STOR_SNERK.value
+
+        val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON)
+        val manuel = lagRegulering(Prosesstype.MANUELL, fnr, sak.id)
+        behandlingDao.opprettBehandling(manuel)
+        sakDaoAdressebeskyttelse.setAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        val alleBehandlingsStatuser = BehandlingStatus.values().asList()
+        val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
+        assertEquals(0, oppgaver.size)
+        val strengtFortroligOppgaver = oppgaveDao.finnOppgaverForStrengtFortrolig(alleBehandlingsStatuser)
+        assertEquals(1, strengtFortroligOppgaver.size)
+
+        sakDaoAdressebeskyttelse.setAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
+        assertEquals(1, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
+        assertEquals(0, oppgaveDao.finnOppgaverForStrengtFortrolig(alleBehandlingsStatuser).size)
+
+        sakDaoAdressebeskyttelse.setAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)
+        assertEquals(0, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
+        assertEquals(0, oppgaveDao.finnOppgaverForStrengtFortrolig(alleBehandlingsStatuser).size)
+    }
+
+    private fun lagRegulering(prosesstype: Prosesstype, fnr: String, sakId: Long): OpprettBehandling {
         return OpprettBehandling(
             type = BehandlingType.OMREGNING,
-            sakId = 1,
+            sakId = sakId,
             status = BehandlingStatus.OPPRETTET,
             persongalleri = Persongalleri(
                 soeker = fnr,

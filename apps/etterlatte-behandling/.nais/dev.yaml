@@ -71,6 +71,8 @@ spec:
       value: 63f46f74-84a8-4d1c-87a8-78532ab3ae60
     - name: AZUREAD_SAKSBEHANDLER_GROUPID
       value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
+    - name: AZUREAD_STRENGT_FORTROLIG_GROUPID
+      value: 5ef775f2-61f8-4283-bf3d-8d03f428aa14
   accessPolicy:
     outbound:
       rules:

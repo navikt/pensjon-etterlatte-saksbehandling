@@ -22,19 +22,25 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
         when (it) {
             Rolle.SAKSBEHANDLER -> BehandlingStatus.kanEndres()
             Rolle.ATTESTANT -> listOf(BehandlingStatus.FATTET_VEDTAK)
-        }
-    }.distinct()
+            Rolle.STRENGT_FORTROLIG -> BehandlingStatus.values().toList()
+        }.distinct()
+    }
 
     override fun finnOppgaverForBruker(bruker: Saksbehandler): List<Oppgave> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker)
         val aktuelleStatuserForRoller = aktuelleStatuserForRolleTilSaksbehandler(rollerSomBrukerHar)
 
-        val alleOppgaver = inTransaction {
-            listOf(
-                oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller),
-                oppgaveDao.finnOppgaverFraGrunnlagsendringshendelser()
-            ).flatten()
+        return if (bruker.harRolleStrengtFortrolig()) {
+            inTransaction {
+                oppgaveDao.finnOppgaverForStrengtFortrolig(aktuelleStatuserForRoller)
+            }
+        } else {
+            inTransaction {
+                listOf(
+                    oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller),
+                    oppgaveDao.finnOppgaverFraGrunnlagsendringshendelser()
+                ).flatten()
+            }.sortedByDescending { it.registrertDato }
         }
-        return alleOppgaver.sortedByDescending { it.registrertDato }
     }
 }

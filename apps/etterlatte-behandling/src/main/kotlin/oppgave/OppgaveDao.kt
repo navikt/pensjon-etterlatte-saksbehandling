@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.tilZonedDateTime
 import no.nav.etterlatte.libs.database.toList
@@ -18,27 +19,27 @@ import java.sql.Connection
 import java.util.*
 
 enum class Rolle {
-    SAKSBEHANDLER, ATTESTANT
+    SAKSBEHANDLER, ATTESTANT, STRENGT_FORTROLIG
 }
 
 class OppgaveDao(private val connection: () -> Connection) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun finnOppgaverMedStatuser(statuser: List<BehandlingStatus>): List<Oppgave> {
-        if (statuser.isEmpty()) return emptyList()
-
+    fun finnOppgaverForStrengtFortrolig(statuser: List<BehandlingStatus>): List<Oppgave> {
         with(connection()) {
             val stmt = prepareStatement(
                 """
                 |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, status, behandling_opprettet,
-                |behandlingstype, soesken, b.prosesstype
+                |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
-                |WHERE status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
+                |WHERE adressebeskyttelse = ?
+                | AND status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
                 """.trimMargin()
             )
-            stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))
-            stmt.setString(2, Prosesstype.AUTOMATISK.toString())
+            stmt.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
+            stmt.setArray(2, createArrayOf("text", statuser.toTypedArray()))
+            stmt.setString(3, Prosesstype.AUTOMATISK.toString())
             return stmt.executeQuery().toList {
                 val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
                     ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
@@ -55,11 +56,57 @@ class OppgaveDao(private val connection: () -> Connection) {
                     behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
                     antallSoesken = antallSoesken(getString("soesken"))
                 )
-            }.also {
-                logger.info(
-                    "Hentet behandlingsoppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver"
-                )
             }
+        }
+    }
+
+    fun finnOppgaverMedStatuser(statuser: List<BehandlingStatus>): List<Oppgave> {
+        if (statuser.isEmpty()) return emptyList()
+
+        with(connection()) {
+            val stmt = prepareStatement(
+                """
+                |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, status, behandling_opprettet,
+                |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
+                |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
+                |WHERE status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
+                """.trimMargin()
+            )
+            stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))
+            stmt.setString(2, Prosesstype.AUTOMATISK.toString())
+            val oppgaver = stmt.executeQuery().toList {
+                val adressebeskyttelse = getString("adressebeskyttelse")
+                if (adressebeskyttelse != null &&
+                    (
+                        adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString() ||
+                            adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString()
+                        )
+                ) {
+                    null
+                } else {
+                    val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
+                        ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
+                        ?: throw IllegalStateException(
+                            "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
+                        )
+                    Oppgave.BehandlingOppgave(
+                        behandlingId = getObject("id") as UUID,
+                        behandlingStatus = BehandlingStatus.valueOf(getString("status")),
+                        sakId = getLong("sak_id"),
+                        sakType = enumValueOf(getString("sakType")),
+                        fnr = Foedselsnummer.of(getString("fnr")),
+                        registrertDato = mottattDato,
+                        behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
+                        antallSoesken = antallSoesken(getString("soesken"))
+                    )
+                }
+            }
+            return oppgaver.filterNotNull()
+                .also {
+                    logger.info(
+                        "Hentet behandlingsoppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver"
+                    )
+                }
         }
     }
 

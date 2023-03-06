@@ -112,6 +112,46 @@ class StoenadRepositoryTest {
     }
 
     @Test
+    fun `datapakke henter ut null for beregning riktig`() {
+        val repo = StoenadRepository.using(dataSource)
+        repo.lagreStoenadsrad(
+            StoenadRad(
+                id = -1,
+                fnrSoeker = "123",
+                fnrForeldre = listOf("23427249697", "18458822782"),
+                fnrSoesken = listOf(),
+                anvendtTrygdetid = "40",
+                nettoYtelse = "1000",
+                beregningType = "FOLKETRYGD",
+                anvendtSats = "1G",
+                behandlingId = UUID.randomUUID(),
+                sakId = 5,
+                sakNummer = 5,
+                tekniskTid = Tidspunkt.now(),
+                sakYtelse = "BP",
+                versjon = "42",
+                saksbehandler = "Berit Behandler",
+                attestant = "Arne Attestant",
+                vedtakLoependeFom = LocalDate.now(),
+                vedtakLoependeTom = null,
+                beregning = null,
+                vedtakType = VedtakType.INNVILGELSE
+            )
+        )
+        repo.datapakke().also {
+            Assertions.assertEquals(1, it.size)
+            val stoenadRad = it.first()
+            Assertions.assertEquals(5, stoenadRad.sakId)
+            Assertions.assertEquals(
+                stoenadRad.fnrForeldre,
+                listOf("23427249697", "18458822782")
+            )
+            Assertions.assertNull(stoenadRad.beregning)
+            Assertions.assertEquals(stoenadRad.vedtakType, VedtakType.INNVILGELSE)
+        }
+    }
+
+    @Test
     fun `hentRaderInnenforMaaned ignorerer rader som ikke er aktive innenfor maaneden`() {
         val repo = StoenadRepository.using(dataSource)
         val maaned = YearMonth.of(2022, 8)

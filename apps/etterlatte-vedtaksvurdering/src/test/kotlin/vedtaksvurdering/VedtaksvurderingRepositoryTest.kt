@@ -1,5 +1,6 @@
 package vedtaksvurdering
 
+import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -91,11 +93,30 @@ internal class VedtaksvurderingRepositoryTest {
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
         val nyttVirkningstidspunkt = YearMonth.of(2023, Month.MARCH)
-        val oppdatertVedtak = vedtak.copy(virkningstidspunkt = nyttVirkningstidspunkt)
-        repository.oppdaterVedtak(vedtak)
+
+        val oppdatertVedtak = repository.oppdaterVedtak(
+            vedtak.copy(
+                virkningstidspunkt = nyttVirkningstidspunkt,
+                vedtakType = VedtakType.OPPHOER,
+                utbetalingsperioder = listOf(
+                    Utbetalingsperiode(
+                        periode = Periode(nyttVirkningstidspunkt, null),
+                        beloep = null,
+                        type = UtbetalingsperiodeType.OPPHOER
+                    )
+                )
+            )
+        )
 
         oppdatertVedtak shouldNotBe null
         oppdatertVedtak.virkningstidspunkt shouldBe nyttVirkningstidspunkt
+        oppdatertVedtak.vedtakType shouldBe VedtakType.OPPHOER
+        oppdatertVedtak.utbetalingsperioder.first().let {
+            it.id shouldBeGreaterThan 0
+            it.periode shouldBe Periode(nyttVirkningstidspunkt, null)
+            it.beloep shouldBe null
+            it.type shouldBe UtbetalingsperiodeType.OPPHOER
+        }
     }
 
     @Test

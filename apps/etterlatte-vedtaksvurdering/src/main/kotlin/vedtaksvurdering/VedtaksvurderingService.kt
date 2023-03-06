@@ -69,17 +69,17 @@ class VedtaksvurderingService(
         }
 
         val (beregning, vilkaarsvurdering, behandling) = hentDataForVedtak(behandlingId, bruker)
+        val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato) {
             "Behandling med behandlingId=$behandlingId mangler virkningstidspunkt"
         }
 
         return if (vedtak != null) {
             logger.info("Oppdaterer vedtak for behandling med behandlingId=$behandlingId")
-            // TODO bør denne oppdatere utbetalingslinjer også?
-            oppdaterVedtak(vedtak, virkningstidspunkt, beregning, vilkaarsvurdering)
+            oppdaterVedtak(vedtak, vedtakType, virkningstidspunkt, beregning, vilkaarsvurdering)
         } else {
             logger.info("Oppretter vedtak for behandling med behandlingId=$behandlingId")
-            opprettVedtak(behandling, virkningstidspunkt, beregning, vilkaarsvurdering)
+            opprettVedtak(behandling, vedtakType, virkningstidspunkt, beregning, vilkaarsvurdering)
         }
     }
 
@@ -220,11 +220,11 @@ class VedtaksvurderingService(
 
     private fun opprettVedtak(
         behandling: DetaljertBehandling,
+        vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
         beregning: BeregningDTO?,
         vilkaarsvurdering: VilkaarsvurderingDto?
     ): Vedtak {
-        val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val opprettetVedtak = NyttVedtak(
             soeker = behandling.soeker.let { Foedselsnummer.of(it) },
             sakId = behandling.sak,
@@ -247,15 +247,21 @@ class VedtaksvurderingService(
     }
 
     private fun oppdaterVedtak(
-        vedtak: Vedtak,
+        eksisterendeVedtak: Vedtak,
+        vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
         beregning: BeregningDTO?,
         vilkaarsvurdering: VilkaarsvurderingDto?
     ): Vedtak {
-        val oppdatertVedtak = vedtak.copy(
+        val oppdatertVedtak = eksisterendeVedtak.copy(
             virkningstidspunkt = virkningstidspunkt,
             beregning = beregning?.toObjectNode(),
-            vilkaarsvurdering = vilkaarsvurdering?.toObjectNode()
+            vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
+            utbetalingsperioder = opprettUtbetalingsperioder(
+                vedtakType = vedtakType,
+                virkningstidspunkt = virkningstidspunkt,
+                beregning = beregning
+            )
         )
         return repository.oppdaterVedtak(oppdatertVedtak)
     }

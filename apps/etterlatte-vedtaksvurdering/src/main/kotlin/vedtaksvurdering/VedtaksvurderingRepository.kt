@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -32,10 +33,10 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
     }
 
-    fun opprettVedtak(nyttVedtak: NyttVedtak): Vedtak {
-        return using(sessionOf(datasource, returnGeneratedKey = true)) { session ->
+    fun opprettVedtak(nyttVedtak: NyttVedtak): Vedtak =
+        using(sessionOf(datasource, returnGeneratedKey = true)) { session ->
             session.transaction { tx ->
-                val vedtakId = queryOf(
+                queryOf(
                     statement = """
                         INSERT INTO vedtak(
                             behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, vedtaktype, datovirkfom, 
@@ -56,46 +57,75 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                         "beregningsresultat" to nyttVedtak.beregning?.toJson(),
                         "vilkaarsresultat" to nyttVedtak.vilkaarsvurdering?.toJson()
                     )
-                ).let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
-
-                nyttVedtak.utbetalingsperioder.forEach {
-                    queryOf(
-                        statement = """
-                            INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) 
-                            VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)
-                            """,
-                        mapOf(
-                            "vedtakid" to vedtakId,
-                            "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
-                            "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
-                            "type" to it.type.name,
-                            "beloep" to it.beloep
-                        )
-                    ).let { query -> tx.run(query.asUpdate) }
-                }
+                )
+                    .let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
+                    ?.let { vedtakId ->
+                        opprettUtbetalingsperioder(vedtakId, nyttVedtak.utbetalingsperioder, tx)
+                    } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${nyttVedtak.behandlingId}")
             }.let {
-                hentVedtak(nyttVedtak.behandlingId) ?: throw Exception("Kunne ikke opprette vedtak")
+                hentVedtak(nyttVedtak.behandlingId)
+                    ?: throw Exception("Kunne ikke opprette vedtak for behandling ${nyttVedtak.behandlingId}")
             }
         }
-    }
 
-    fun oppdaterVedtak(vedtak: Vedtak): Vedtak = repositoryWrapper.oppdater(
-        query = """
-            UPDATE vedtak 
-            SET datovirkfom = :datovirkfom, beregningsresultat = :beregningsresultat, 
-                vilkaarsresultat = :vilkaarsresultat 
-            WHERE behandlingId = :behandlingid
-        """,
-        params = mapOf(
-            "datovirkfom" to vedtak.virkningstidspunkt.atDay(1),
-            "beregningsresultat" to vedtak.beregning?.toJson(),
-            "vilkaarsresultat" to vedtak.vilkaarsvurdering?.toJson(),
-            "behandlingid" to vedtak.behandlingId
-        ),
-        loggtekst = "Oppdaterer vedtak behandlingid: ${vedtak.behandlingId}"
-    )
-        .also { require(it == 1) }
-        .let { hentVedtak(vedtak.behandlingId) ?: throw Exception("Kunne ikke opprette vedtak") }
+    fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak =
+        using(sessionOf(datasource)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = """
+                        UPDATE vedtak 
+                        SET datovirkfom = :datovirkfom, vedtaktype = :vedtaktype, 
+                            beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat 
+                        WHERE behandlingId = :behandlingid
+                        """,
+                    mapOf(
+                        "datovirkfom" to oppdatertVedtak.virkningstidspunkt.atDay(1),
+                        "vedtaktype" to oppdatertVedtak.vedtakType.name,
+                        "beregningsresultat" to oppdatertVedtak.beregning?.toJson(),
+                        "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
+                        "behandlingid" to oppdatertVedtak.behandlingId
+                    )
+                ).let { query -> tx.run(query.asUpdate) }
+
+                slettUtbetalingsperioder(oppdatertVedtak.id, tx)
+                opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.utbetalingsperioder, tx)
+            }.let {
+                hentVedtak(oppdatertVedtak.behandlingId)
+                    ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
+            }
+        }
+
+    private fun slettUtbetalingsperioder(vedtakId: Long, tx: TransactionalSession) =
+        queryOf(
+            statement = """
+                DELETE FROM utbetalingsperiode
+                WHERE vedtakid = :vedtakid
+                """,
+            paramMap = mapOf(
+                "vedtakid" to vedtakId
+            )
+        ).let { query -> tx.run(query.asUpdate) }
+
+    private fun opprettUtbetalingsperioder(
+        vedtakId: Long,
+        utbetalingsperioder: List<Utbetalingsperiode>,
+        tx: TransactionalSession
+    ) =
+        utbetalingsperioder.forEach {
+            queryOf(
+                statement = """
+                    INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) 
+                    VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)
+                    """,
+                paramMap = mapOf(
+                    "vedtakid" to vedtakId,
+                    "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
+                    "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
+                    "type" to it.type.name,
+                    "beloep" to it.beloep
+                )
+            ).let { query -> tx.run(query.asUpdate) }
+        }
 
     fun hentVedtak(behandlingId: UUID): Vedtak? =
         repositoryWrapper.hentMedKotliquery(

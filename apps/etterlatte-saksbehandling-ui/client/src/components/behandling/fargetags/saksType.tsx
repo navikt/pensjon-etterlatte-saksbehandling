@@ -1,4 +1,4 @@
 export enum ISaksType {
-  BARNEPENSJON = 'barnepensjon',
-  GJENLEVENDEPENSJON = 'gjenlevendeperson',
+  BARNEPENSJON = 'BARNEPENSJON',
+  OMSTILLINGSSTOENAD = 'OMSTILLINGSTOENAD',
 }

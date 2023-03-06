@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.nowNorskTid
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.*
 
 internal class JournalfoerVedtaksbrevTest {
@@ -130,8 +129,8 @@ internal class JournalfoerVedtaksbrevTest {
             vilkaarsvurdering = null,
             beregning = null,
             pensjonTilUtbetaling = emptyList(),
-            vedtakFattet = VedtakFattet("Z00000", "1234", ZonedDateTime.now(norskTidssone)),
-            attestasjon = Attestasjon("Z00000", "1234", ZonedDateTime.now(norskTidssone))
+            vedtakFattet = VedtakFattet("Z00000", "1234", nowNorskTid()),
+            attestasjon = Attestasjon("Z00000", "1234", nowNorskTid())
         )
     }
 

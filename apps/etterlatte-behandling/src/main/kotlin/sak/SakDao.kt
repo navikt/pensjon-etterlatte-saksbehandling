@@ -1,7 +1,6 @@
 package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
@@ -64,12 +63,5 @@ class SakDao(private val connection: () -> Connection) {
         val statement = connection().prepareStatement("DELETE from sak where id = ?")
         statement.setLong(1, id)
         statement.executeUpdate()
-    }
-
-    fun setAdresseBeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {
-        val statement = connection().prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
-        statement.setString(1, adressebeskyttelseGradering.toString())
-        statement.setLong(2, id)
-        return statement.executeUpdate()
     }
 }

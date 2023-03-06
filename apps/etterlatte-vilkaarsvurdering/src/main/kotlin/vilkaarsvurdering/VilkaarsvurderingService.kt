@@ -8,9 +8,9 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar
@@ -32,10 +32,10 @@ class VilkaarsvurderingService(
 
     suspend fun oppdaterTotalVurdering(
         behandlingId: UUID,
-        accessToken: String,
+        bruker: Bruker,
         resultat: VilkaarsvurderingResultat
-    ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, accessToken) {
-        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, accessToken).let {
+    ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, bruker) {
+        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, bruker).let {
             it.virkningstidspunkt?.dato?.atDay(1)
         } ?: throw IllegalStateException("Virkningstidspunkt må være satt for å sette en vurdering")
         val vilkaarsvurdering = vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
@@ -44,14 +44,14 @@ class VilkaarsvurderingService(
             resultat = resultat
         )
         val utfall = vilkaarsvurdering.resultat?.utfall ?: throw IllegalStateException("Utfall kan ikke vaere null")
-        behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, accessToken, utfall)
+        behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker, utfall)
         vilkaarsvurdering
     }
 
-    suspend fun slettTotalVurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering {
-        if (behandlingKlient.settBehandlingStatusOpprettet(behandlingId, accessToken, false)) {
+    suspend fun slettTotalVurdering(behandlingId: UUID, bruker: Bruker): Vilkaarsvurdering {
+        if (behandlingKlient.settBehandlingStatusOpprettet(behandlingId, bruker, false)) {
             val vilkaarsvurdering = vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(behandlingId)
-            behandlingKlient.settBehandlingStatusOpprettet(behandlingId, accessToken, true)
+            behandlingKlient.settBehandlingStatusOpprettet(behandlingId, bruker, true)
 
             return vilkaarsvurdering
         }
@@ -61,9 +61,9 @@ class VilkaarsvurderingService(
 
     suspend fun oppdaterVurderingPaaVilkaar(
         behandlingId: UUID,
-        accessToken: String,
+        bruker: Bruker,
         vurdertVilkaar: VurdertVilkaar
-    ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, accessToken) {
+    ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, bruker) {
         if (vilkaarsvurderingRepository.hent(behandlingId)?.resultat != null) {
             throw VilkaarsvurderingTilstandException(
                 "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering som har et resultat"
@@ -74,9 +74,9 @@ class VilkaarsvurderingService(
 
     suspend fun slettVurderingPaaVilkaar(
         behandlingId: UUID,
-        accessToken: String,
+        bruker: Bruker,
         vilkaarId: UUID
-    ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, accessToken) {
+    ): Vilkaarsvurdering = tilstandssjekkFoerKjoering(behandlingId, bruker) {
         if (vilkaarsvurderingRepository.hent(behandlingId)?.resultat != null) {
             throw VilkaarsvurderingTilstandException(
                 "Kan ikke slette et vilkår ($vilkaarId) på en vilkårsvurdering som har et resultat"
@@ -86,24 +86,24 @@ class VilkaarsvurderingService(
         vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
     }
 
-    suspend fun opprettVilkaarsvurdering(behandlingId: UUID, accessToken: String): Vilkaarsvurdering =
-        tilstandssjekkFoerKjoering(behandlingId, accessToken) {
+    suspend fun opprettVilkaarsvurdering(behandlingId: UUID, bruker: Bruker): Vilkaarsvurdering =
+        tilstandssjekkFoerKjoering(behandlingId, bruker) {
             vilkaarsvurderingRepository.hent(behandlingId)?.let {
                 throw IllegalArgumentException("Vilkårsvurdering finnes allerede for behandling $behandlingId")
             }
 
-            val (behandling, grunnlag, sak) = hentDataForVilkaarsvurdering(behandlingId, accessToken)
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, bruker)
             val virkningstidspunkt = behandling.virkningstidspunkt
                 ?: throw VirkningstidspunktIkkeSattException(
                     "Virkningstidspunkt ikke satt for behandling $behandlingId"
                 )
 
             logger.info(
-                "Oppretter vilkårsvurdering for behandling ($behandlingId) med sakType ${sak.sakType} og " +
+                "Oppretter vilkårsvurdering for behandling ($behandlingId) med sakType ${behandling.sakType} og " +
                     "behandlingType ${behandling.behandlingType}"
             )
 
-            val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, sak, grunnlag, virkningstidspunkt)
+            val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, grunnlag, virkningstidspunkt)
 
             vilkaarsvurderingRepository.opprettVilkaarsvurdering(
                 Vilkaarsvurdering(
@@ -117,10 +117,9 @@ class VilkaarsvurderingService(
 
     private fun finnVilkaarForNyVilkaarsvurdering(
         behandling: DetaljertBehandling,
-        sak: Sak,
         grunnlag: Grunnlag,
         virkningstidspunkt: Virkningstidspunkt
-    ): List<Vilkaar> = when (sak.sakType) {
+    ): List<Vilkaar> = when (behandling.sakType) {
         SakType.BARNEPENSJON ->
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
@@ -145,10 +144,10 @@ class VilkaarsvurderingService(
 
     private suspend fun tilstandssjekkFoerKjoering(
         behandlingId: UUID,
-        accessToken: String,
+        bruker: Bruker,
         block: suspend () -> Vilkaarsvurdering
     ): Vilkaarsvurdering {
-        val kanVilkaarsvurdere = behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(behandlingId, accessToken)
+        val kanVilkaarsvurdere = behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
 
         if (!kanVilkaarsvurdere) {
             throw BehandlingstilstandException
@@ -159,14 +158,13 @@ class VilkaarsvurderingService(
 
     private suspend fun hentDataForVilkaarsvurdering(
         behandlingId: UUID,
-        accessToken: String
-    ): Triple<DetaljertBehandling, Grunnlag, Sak> {
+        bruker: Bruker
+    ): Pair<DetaljertBehandling, Grunnlag> {
         return coroutineScope {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-            val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, accessToken) }
-            val sak = async { behandlingKlient.hentSak(behandling.sak, accessToken) }
+            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+            val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, bruker) }
 
-            Triple(behandling, grunnlag.await(), sak.await())
+            Pair(behandling, grunnlag.await())
         }
     }
 
@@ -177,8 +175,6 @@ class VilkaarsvurderingService(
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )
-
-            RevurderingAarsak.GRUNNBELOEPREGULERING -> throw IllegalArgumentException("Skal ikke revurdere regulering")
         }
     }
 }

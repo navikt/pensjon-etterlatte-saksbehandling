@@ -163,6 +163,7 @@ private fun mockPerson(
     kontaktadresse = null,
     oppholdsadresse = null,
     sivilstatus = null,
+    siviltilstand = null,
     statsborgerskap = null,
     utland = null,
     familieRelasjon = FamilieRelasjon(null, null, null),

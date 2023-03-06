@@ -10,12 +10,13 @@ import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
-import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -28,17 +29,26 @@ internal class InnsendtSoeknadRiverTest {
     }
 
     @Test
-    fun `skal sjekke om søknad om omstillingsstønad er gyldig fremsatt og returnere resultatet av dette`() {
+    fun `skal sjekke om soknad om omstillingsstonad er gyldig fremsatt og returnere resultatet av dette`() {
         val persongalleri = Persongalleri(
             "soeker",
             "innsender"
         )
 
-        val gyldighetsResultat = GyldighetsResultat(VurderingsResultat.OPPFYLT, listOf(), LocalDateTime.now())
+        val gyldighetsResultat = GyldighetsResultat(
+            VurderingsResultat.OPPFYLT,
+            listOf(),
+            Tidspunkt.now().toLocalDatetimeUTC()
+        )
         val id = UUID.randomUUID()
 
         every { gyldigOmstillingsSoeknadServiceMock.hentPersongalleriFraSoeknad(any()) } returns persongalleri
-        every { gyldigOmstillingsSoeknadServiceMock.vurderGyldighet(persongalleri) } returns gyldighetsResultat
+        every {
+            gyldigOmstillingsSoeknadServiceMock.vurderGyldighet(
+                persongalleri.innsender,
+                persongalleri.avdoed
+            )
+        } returns gyldighetsResultat
         every { behandlingClientMock.skaffSak(any(), any()) } returns 4
         every { behandlingClientMock.initierBehandling(any(), any(), persongalleri) } returns id
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit

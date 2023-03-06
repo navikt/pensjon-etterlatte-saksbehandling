@@ -23,6 +23,7 @@ data class BehandlingSammendrag(
 data class DetaljertBehandling(
     val id: UUID,
     val sak: Long,
+    val sakType: SakType,
     val behandlingOpprettet: LocalDateTime,
     val sistEndret: LocalDateTime,
     val soeknadMottattDato: LocalDateTime?,

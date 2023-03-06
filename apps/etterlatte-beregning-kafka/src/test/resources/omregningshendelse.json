@@ -1,0 +1,10 @@
+{
+  "system_read_count": 0,
+  "@event_name": "BEREGN",
+  "hendelse_data": {
+    "sakId": 1,
+    "fradato": "2023-02-08",
+    "aarsak": "GRUNNBELOEPREGULERING"
+  },
+  "omregningId": "11bf9683-4edb-403c-99da-b6ec6ff7fc31"
+}

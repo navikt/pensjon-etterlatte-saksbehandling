@@ -26,11 +26,13 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.token.Bruker
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
+import java.util.*
 import javax.sql.DataSource
 
 abstract class BehandlingIntegrationTest {
@@ -83,6 +85,7 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "navn" to "John Doe",
                 "NAVident" to "Saksbehandler01"
+
             )
         )
     }
@@ -109,6 +112,16 @@ abstract class BehandlingIntegrationTest {
         )
     }
 
+    protected val systemBruker: String by lazy {
+        val mittsystem = UUID.randomUUID().toString()
+        issueToken(
+            mapOf(
+                "sub" to mittsystem,
+                "oid" to mittsystem
+            )
+        )
+    }
+
     private fun issueToken(claims: Map<String, Any>) =
         server.issueToken(
             issuerId = ISSUER_ID,
@@ -123,7 +136,7 @@ abstract class BehandlingIntegrationTest {
 }
 
 class VedtakKlientTest : VedtakKlient {
-    override suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak? {
+    override suspend fun hentVedtak(behandlingId: String, bruker: Bruker): Vedtak? {
         TODO("Not yet implemented")
     }
 }
@@ -132,7 +145,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstype,
-        accessToken: String
+        bruker: Bruker
     ): Grunnlagsopplysning<Person>? {
         val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)
@@ -152,9 +165,30 @@ class TestBeanFactory(
             "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim
         )
 
-    val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
-    override fun dataSource(): DataSource =
-        DataSourceBuilder.createDataSource(jdbcUrl, username, password)
+    val rapidSingleton: TestProdusent<String, String> by lazy() { TestProdusent() }
+
+    private val dataSource: DataSource by lazy { DataSourceBuilder.createDataSource(jdbcUrl, username, password) }
+    override fun dataSource(): DataSource = dataSource
+
+    /**
+     * Fjerner all data i databasen og reset:er sequences sån at hver
+     * test starter i samme tilstand.
+     **/
+    fun resetDatabase() {
+        dataSource.connection.use {
+            it.prepareStatement(
+                """
+                TRUNCATE behandling CASCADE;
+                TRUNCATE behandlinghendelse CASCADE;
+                TRUNCATE grunnlagsendringshendelse CASCADE;
+                TRUNCATE sak CASCADE;
+                
+                ALTER SEQUENCE behandlinghendelse_id_seq RESTART WITH 1;
+                ALTER SEQUENCE sak_id_seq RESTART WITH 1;
+                """.trimIndent()
+            ).execute()
+        }
+    }
 
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
 

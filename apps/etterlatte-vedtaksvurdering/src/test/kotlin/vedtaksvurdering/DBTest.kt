@@ -13,13 +13,14 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.Saksbehandler
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.vilkaarsvurdering.VilkaarsvurderingTestData
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -30,7 +31,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -47,7 +47,13 @@ internal class DBTest {
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     private val sakId = 123L
-    private val accessToken = "accessToken"
+    private val bruker =
+        Bruker.of(
+            accessToken = "accessToken",
+            oid = null,
+            sub = null,
+            saksbehandler = "saksbehandler"
+        )
 
     private val saksbehandlereSecret = mapOf("saksbehandler" to "4808", "attestant" to "4808")
 
@@ -97,7 +103,10 @@ internal class DBTest {
         val uuid = UUID.randomUUID().also { settOpp(it) }
 
         runBlocking {
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(uuid, "access")
+            vedtaksvurderingService.opprettEllerOppdaterVedtak(
+                uuid,
+                Bruker.of("access", "1", null, null)
+            )
         }
 
         val vedtaket: Vedtak? = vedtaksvurderingService.hentFellesvedtak(uuid)
@@ -107,7 +116,7 @@ internal class DBTest {
         assert(vedtaket?.sak?.id != null)
         Assertions.assertNotNull(vedtaket?.virk)
 
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, bruker) }
         val fattetVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
@@ -115,17 +124,16 @@ internal class DBTest {
         runBlocking {
             vedtaksvurderingService.underkjennVedtak(
                 uuid,
-                accessToken,
-                Saksbehandler("saksbehandler"),
+                bruker,
                 UnderkjennVedtakClientRequest("kommentar", "begrunnelse")
             )
         }
         val underkjentVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
-        runBlocking { vedtaksvurderingService.fattVedtak(uuid, "saksbehandler", accessToken) }
+        runBlocking { vedtaksvurderingService.fattVedtak(uuid, bruker) }
 
-        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, "attestant", accessToken) }
+        runBlocking { vedtaksvurderingService.attesterVedtak(uuid, bruker) }
         val attestertVedtak = vedtaksvurderingService.hentVedtak(uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)
@@ -143,18 +151,17 @@ internal class DBTest {
             uuid,
             Beregningstype.BP,
             listOf(),
-            LocalDateTime.now().toTidspunkt(
-                norskTidssone
-            ),
+            Tidspunkt.now().toLocalDatetimeUTC().toNorskTidspunkt(),
             Metadata(1L, 1L)
         )
         coEvery { beregning.hentBeregning(uuid, any()) } returns beregningDTO
         coEvery { behandling.hentBehandling(uuid, any()) } returns DetaljertBehandling(
             uuid,
             sakId,
-            LocalDateTime.now(),
-            LocalDateTime.now(),
-            LocalDateTime.now(),
+            SakType.BARNEPENSJON,
+            Tidspunkt.now().toLocalDatetimeUTC(),
+            Tidspunkt.now().toLocalDatetimeUTC(),
+            Tidspunkt.now().toLocalDatetimeUTC(),
             null,
             "1231245",
             null,
@@ -178,26 +185,5 @@ internal class DBTest {
         coEvery { behandling.fattVedtak(uuid, any(), any()) } returns true
         coEvery { behandling.attester(uuid, any(), any()) } returns true
         coEvery { behandling.underkjenn(uuid, any(), any()) } returns true
-    }
-
-    @Test
-    fun `kan hente vedtak i bolk`() {
-        val vedtaksvurderingService = settOppService()
-        val behandling1Id = UUID.randomUUID().also { settOpp(it) }
-        val behandling2Id = UUID.randomUUID().also { settOpp(it) }
-        val behandling3Id = UUID.randomUUID().also { settOpp(it) }
-
-        runBlocking {
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandling1Id, "access")
-            vedtaksvurderingService.opprettEllerOppdaterVedtak(behandling2Id, "access")
-        }
-
-        runBlocking {
-            vedtaksvurderingService.fattVedtak(behandling1Id, "saksbehandler", accessToken)
-            vedtaksvurderingService.fattVedtak(behandling2Id, "saksbehandler", accessToken)
-        }
-
-        val vedtakene = vedtaksvurderingService.hentVedtakBolk(listOf(behandling1Id, behandling2Id, behandling3Id))
-        Assertions.assertEquals(2, vedtakene.map { it.id }.distinct().size)
     }
 }

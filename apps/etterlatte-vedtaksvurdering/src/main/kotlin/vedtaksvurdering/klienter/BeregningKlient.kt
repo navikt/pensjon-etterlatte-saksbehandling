@@ -9,11 +9,12 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BeregningKlient {
-    suspend fun hentBeregning(behandlingId: UUID, accessToken: String): BeregningDTO
+    suspend fun hentBeregning(behandlingId: UUID, bruker: Bruker): BeregningDTO
 }
 
 class BeregningKlientException(override val message: String, override val cause: Throwable) :
@@ -28,7 +29,7 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
     private val clientId = config.getString("beregning.client.id")
     private val resourceUrl = config.getString("beregning.resource.url")
 
-    override suspend fun hentBeregning(behandlingId: UUID, accessToken: String): BeregningDTO {
+    override suspend fun hentBeregning(behandlingId: UUID, bruker: Bruker): BeregningDTO {
         logger.info("Henter beregning for behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
@@ -37,7 +38,7 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                         clientId = clientId,
                         url = "$resourceUrl/api/beregning/$behandlingId"
                     ),
-                    accessToken = accessToken
+                    bruker = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

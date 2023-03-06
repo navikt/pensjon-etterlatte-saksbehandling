@@ -1,5 +1,3 @@
-import Logging.Slf4jApi
-
 plugins {
     kotlin("jvm")
 }
@@ -12,18 +10,16 @@ dependencies {
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
 
-    api(Jackson.DatatypeJsr310)
-    api(Jackson.DatatypeJdk8)
-    api(Jackson.ModuleKotlin)
-    api(NavFelles.RapidAndRiversKtor2)
+    api(libs.bundles.jackson)
+    api(libs.navfelles.rapidandriversktor2)
 
-    compileOnly(Slf4jApi)
+    compileOnly(libs.logging.slf4japi)
 
-    testImplementation(MockK.MockK)
-    testImplementation(Jupiter.Api)
-    testImplementation(Jupiter.Params)
-    testRuntimeOnly(Jupiter.Engine)
-    testImplementation(Kotest.AssertionsCore)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.test.jupiter.api)
+    testImplementation(libs.test.jupiter.params)
+    testRuntimeOnly(libs.test.jupiter.engine)
+    testImplementation(libs.test.kotest.assertionscore)
 }
 
 tasks {

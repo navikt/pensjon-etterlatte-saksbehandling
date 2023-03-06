@@ -11,6 +11,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.objectMapper
@@ -93,10 +95,19 @@ private fun opprettSoeknadJson(ytelse: String, gjenlevendeFnr: String, avdoedFnr
     val soeker: String
     if (erOmstilling) {
         soeker = gjenlevendeFnr
-        skjemaInfo = opprettSkjemaInfoOmstillingsstoenad(gjenlevendeFnr, avdoedFnr, LocalDateTime.now())
+        skjemaInfo = opprettSkjemaInfoOmstillingsstoenad(
+            gjenlevendeFnr,
+            avdoedFnr,
+            Tidspunkt.now().toLocalDatetimeUTC()
+        )
     } else {
         soeker = barnFnr
-        skjemaInfo = opprettSkjemaInfoBarnepensjon(gjenlevendeFnr, barnFnr, avdoedFnr, LocalDateTime.now())
+        skjemaInfo = opprettSkjemaInfoBarnepensjon(
+            gjenlevendeFnr,
+            barnFnr,
+            avdoedFnr,
+            Tidspunkt.now().toLocalDatetimeUTC()
+        )
     }
     return JsonMessage.newMessage(
         mutableMapOf(

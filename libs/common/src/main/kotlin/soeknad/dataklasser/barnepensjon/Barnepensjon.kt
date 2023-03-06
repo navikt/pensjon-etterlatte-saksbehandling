@@ -13,6 +13,8 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.UtbetalingsInformasjon
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,7 +30,7 @@ data class Barnepensjon(
 ) : InnsendtSoeknad {
     override val versjon = "2"
     override val type = SoeknadType.BARNEPENSJON
-    override val mottattDato: LocalDateTime = LocalDateTime.now()
+    override val mottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC()
 
     init {
         requireNotNull(versjon) { "Versjon av søknaden må være satt" }

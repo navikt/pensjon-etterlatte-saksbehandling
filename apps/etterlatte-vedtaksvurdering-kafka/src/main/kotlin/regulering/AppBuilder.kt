@@ -12,8 +12,9 @@ import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.security.ktor.clientCredential
+import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(private val props: Map<String, String>) {
+class AppBuilder(props: Map<String, String>) : RapidsAndRiversAppBuilder(props) {
     private val vedtakHttpKlient = vedtakHttpKlient()
     private val vedtakUrl = requireNotNull(props["ETTERLATTE_VEDTAK_URL"])
 

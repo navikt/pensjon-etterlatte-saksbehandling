@@ -4,6 +4,8 @@ import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.util.*
@@ -91,7 +93,7 @@ class BehandlingStatusServiceImpl constructor(
     override fun settIverksattVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse) {
         val behandling = hentBehandling(behandlingId)
         inTransaction {
-            lagreNyBehandlingStatus(behandling.tilIverksatt(), LocalDateTime.now())
+            lagreNyBehandlingStatus(behandling.tilIverksatt(), Tidspunkt.now().toLocalDatetimeUTC())
             registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
         }
     }

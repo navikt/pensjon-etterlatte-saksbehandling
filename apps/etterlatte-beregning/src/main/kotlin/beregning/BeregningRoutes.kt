@@ -10,7 +10,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.ktor.accesstokenWrapper
+import no.nav.etterlatte.libs.ktor.bruker
 
 fun Route.beregning(beregningService: BeregningService) {
     route("/api/beregning") {
@@ -30,7 +30,7 @@ fun Route.beregning(beregningService: BeregningService) {
         post("/{behandlingId}") {
             withBehandlingId {
                 logger.info("Oppretter beregning for behandlingId=$it")
-                val beregning = beregningService.lagreBeregning(it, accesstokenWrapper)
+                val beregning = beregningService.opprettBeregning(it, bruker)
                 call.respond(beregning.toDTO())
             }
         }

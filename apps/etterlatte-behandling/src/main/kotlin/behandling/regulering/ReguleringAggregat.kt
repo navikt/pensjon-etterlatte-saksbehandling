@@ -2,18 +2,20 @@ package no.nav.etterlatte.behandling.regulering
 
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Regulering
+import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingAggregat
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 class ReguleringAggregat(
@@ -29,24 +31,24 @@ class ReguleringAggregat(
             forrigeBehandling: Behandling,
             fradato: LocalDate,
             behandlinger: BehandlingDao,
-            hendelser: HendelseDao
+            hendelser: HendelseDao,
+            prosesstype: Prosesstype
         ): ReguleringAggregat {
             logger.info("Oppretter en behandling på $sak")
-            return Regulering(
-                id = UUID.randomUUID(),
-                sak = sak,
-                behandlingOpprettet = LocalDateTime.now(),
-                sistEndret = LocalDateTime.now(),
+            return OpprettBehandling(
+                type = BehandlingType.OMREGNING,
+                sakId = sak,
                 status = BehandlingStatus.OPPRETTET,
                 persongalleri = forrigeBehandling.persongalleri,
                 kommerBarnetTilgode = forrigeBehandling.kommerBarnetTilgode,
                 vilkaarUtfall = forrigeBehandling.vilkaarUtfall,
-                virkningstidspunkt = fradato.tilVirkningstidspunkt("Regulering")
+                virkningstidspunkt = fradato.tilVirkningstidspunkt("Regulering"),
+                prosesstype = prosesstype
             )
                 .also {
-                    behandlinger.opprettRegulering(it)
-                    hendelser.behandlingOpprettet(it)
-                    logger.info("Opprettet regulering ${it.id} i sak ${it.sak}")
+                    behandlinger.opprettBehandling(it)
+                    hendelser.behandlingOpprettet(it.toBehandlingOpprettet())
+                    logger.info("Opprettet regulering ${it.id} i sak ${it.sakId}")
                 }
                 .let { ReguleringAggregat(it.id, behandlinger, hendelser) }
         }

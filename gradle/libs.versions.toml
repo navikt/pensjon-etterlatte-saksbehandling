@@ -1,0 +1,102 @@
+[plugins]
+avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.6.0" }
+analyze = { id = "com.faire.gradle.analyze", version = "1.0.9" }
+cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.0" }
+
+[versions]
+jackson-version = "2.13.5"
+jupiter-version = "5.9.2"
+kotlinx-version = "1.6.4"
+ktor2-version = "2.2.2"
+navfelles-token-version = "3.0.2"
+prometheus-version = "0.16.0"
+testcontainer-version = "1.17.3"
+
+[libraries]
+cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.1" }
+
+database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.0.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "8.5.13" }
+database-postgresql = { module = "org.postgresql:postgresql", version = "42.3.8" }
+database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.7.0" }
+
+jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }
+jackson-datatypejdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson-version" }
+jackson-modulekotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-version" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-version" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-version" }
+jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml", version.ref = "jackson-version" }
+
+jakartabind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "2.3.3" }
+jakartabind-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version = "2.3.7" }
+
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.3.2" }
+kafka-avro = { module = "org.apache.avro:avro", version = "1.11.1" }
+kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.3.1" }
+kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.2" }
+
+kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "1.1.16" }
+
+
+kotlinx-coroutinescore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-version" }
+kotlinx-coroutinestest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-version" }
+
+ktor2-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor2-version" }
+ktor2-clientcore = { module = "io.ktor:ktor-client-core", version.ref = "ktor2-version" }
+ktor2-clientloggingjvm = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor2-version" }
+ktor2-clientauth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor2-version" }
+ktor2-clientjackson = { module = "io.ktor:ktor-client-jackson", version.ref = "ktor2-version" }
+ktor2-clientlogging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor2-version" }
+ktor2-clientciojvm = { module = "io.ktor:ktor-client-cio-jvm", version.ref = "ktor2-version" }
+ktor2-servercore = { module = "io.ktor:ktor-server-core", version.ref = "ktor2-version" }
+ktor2-servercio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor2-version" }
+ktor2-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor2-version" }
+ktor2-authjwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor2-version" }
+ktor2-servercontentnegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor2-version" }
+ktor2-clientcontentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor2-version" }
+ktor2-serverhtmlbuilder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor2-version" }
+ktor2-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor2-version" }
+ktor2-calllogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor2-version" }
+ktor2-callid = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor2-version" }
+ktor2-statuspages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor2-version" }
+ktor2-metricsmicrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor2-version" }
+ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2-version" }
+ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
+ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
+
+logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "1.7.30" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.5" }
+logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "6.6" }
+
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.10.3" }
+metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
+metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
+
+messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.0" }
+
+mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.2.0" }
+
+navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2022122313141671797650.f806f770805a" }
+navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version = "1.4201aa" }
+navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon", version = "1.4201aa" }
+navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version = "2589.e85bf84" }
+navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
+navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "0.5.7" }
+
+test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
+test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
+test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
+test-jupiter-root = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter-version" }
+test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.5.4" }
+test-mockk = { module = "io.mockk:mockk", version = "1.13.4" }
+test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
+test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
+test-wiremock = { module = "com.github.tomakehurst:wiremock-jre8", version = "2.35.0" }
+
+unleash-client = { module = "io.getunleash:unleash-client-java", version = "7.1.0" }
+
+[bundles]
+jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]
+navfelles-token = ["navfelles-tokenclientcore", "navfelles-tokenvalidationktor2"]
+

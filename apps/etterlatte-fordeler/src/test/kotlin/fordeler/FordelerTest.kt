@@ -1,7 +1,9 @@
 package no.nav.etterlatte.fordeler
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
@@ -21,7 +23,7 @@ internal class FordelerTest {
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
         every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling
-
+        every { fordelerMetricLogger.logMetricFordelt() } just runs
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
         assertEquals(FordelerFordelt.eventName, inspector.message(0).get(EVENT_NAME_KEY).asText())
@@ -44,7 +46,7 @@ internal class FordelerTest {
     fun `skal ikke fordele soknad som ikke oppfyller alle kriterier til behandling`() {
         every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
             FordelerResultat.IkkeGyldigForBehandling(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
-
+        every { fordelerMetricLogger.logMetricIkkeFordelt(any()) } just runs
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
         assertEquals(0, inspector.size)

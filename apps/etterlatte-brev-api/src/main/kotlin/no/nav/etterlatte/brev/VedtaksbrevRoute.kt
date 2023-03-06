@@ -8,9 +8,9 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.ktor.saksbehandler
+import no.nav.etterlatte.libs.ktor.bruker
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
@@ -20,7 +20,7 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
             val (sakId, behandlingId) = call.receive<OpprettVedtaksbrevRequest>()
 
             logger.info("Genererer vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
-            val brev = service.oppdaterVedtaksbrev(sakId, behandlingId, saksbehandler.ident, getAccessToken(call))
+            val brev = service.oppdaterVedtaksbrev(sakId, behandlingId, bruker)
 
             call.respond(brev)
         }

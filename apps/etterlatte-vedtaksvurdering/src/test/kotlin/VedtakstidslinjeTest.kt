@@ -2,14 +2,15 @@
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class VedtakstidslinjeTest {
@@ -70,7 +71,7 @@ internal class VedtakstidslinjeTest {
      * */
     @Test
     fun `sak som blir opphoert foer fraOgMed er ikke loepende`() {
-        val attesteringsdato = LocalDateTime.now()
+        val attesteringsdato = Tidspunkt.now().toLocalDatetimeUTC()
         val iverksattDato = lagVedtak(
             id = 1,
             virkningsDato = LocalDate.of(2023, 1, 1),
@@ -103,7 +104,7 @@ internal class VedtakstidslinjeTest {
      * */
     @Test
     fun `sak som blir opphoert maaneden etter fraOgMed er loepende`() {
-        val attesteringsdato = LocalDateTime.now()
+        val attesteringsdato = Tidspunkt.now().toLocalDatetimeUTC()
         val iverksattDato = lagVedtak(
             id = 1,
             virkningsDato = LocalDate.of(2023, 1, 1),
@@ -135,7 +136,7 @@ internal class VedtakstidslinjeTest {
      * */
     @Test
     fun `sak som er iverksatt maanaden etter fraOgMed-datoen er loepende`() {
-        val attesteringsdato = LocalDateTime.now()
+        val attesteringsdato = Tidspunkt.now().toLocalDatetimeUTC()
         val iverksattDato = lagVedtak(
             id = 1,
             virkningsDato = LocalDate.of(2023, 6, 1),
@@ -156,7 +157,7 @@ internal class VedtakstidslinjeTest {
      * */
     @Test
     fun `sak som er iverksatt etter fraOgMed og opphoert etterpaa er loepende`() {
-        val attesteringsdato = LocalDateTime.now()
+        val attesteringsdato = Tidspunkt.now().toLocalDatetimeUTC()
         val iverksattDato = lagVedtak(
             id = 1,
             virkningsDato = LocalDate.of(2023, 6, 1),
@@ -184,7 +185,7 @@ internal class VedtakstidslinjeTest {
      * */
     @Test
     fun `sak som er iverksatt maanaden etter fraOgMed og opphoert samme maanad er ikke loepende`() {
-        val attesteringsdato = LocalDateTime.now()
+        val attesteringsdato = Tidspunkt.now().toLocalDatetimeUTC()
         val iverksattDato = lagVedtak(
             id = 1,
             virkningsDato = LocalDate.of(2023, 6, 1),

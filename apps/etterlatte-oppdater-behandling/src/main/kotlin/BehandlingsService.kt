@@ -9,7 +9,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.behandling.Omberegningshendelse
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
@@ -26,7 +26,7 @@ interface Behandling {
 
     fun hentAlleSaker(): Saker
 
-    fun opprettOmberegning(omberegningshendelse: Omberegningshendelse): HttpResponse
+    fun opprettOmregning(omregningshendelse: Omregningshendelse): HttpResponse
     fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
 }
 
@@ -76,11 +76,11 @@ class BehandlingsService(
         }
     }
 
-    override fun opprettOmberegning(omberegningshendelse: Omberegningshendelse): HttpResponse {
+    override fun opprettOmregning(omregningshendelse: Omregningshendelse): HttpResponse {
         return runBlocking {
-            behandling_app.post("$url/omberegning") {
+            behandling_app.post("$url/omregning") {
                 contentType(ContentType.Application.Json)
-                setBody(omberegningshendelse)
+                setBody(omregningshendelse)
             }
         }
     }

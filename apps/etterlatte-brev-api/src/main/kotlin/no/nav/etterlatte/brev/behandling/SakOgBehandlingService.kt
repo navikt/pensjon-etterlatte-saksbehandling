@@ -8,7 +8,8 @@ import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import java.util.UUID
+import no.nav.etterlatte.token.Bruker
+import java.util.*
 
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -20,30 +21,25 @@ class SakOgBehandlingService(
     suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,
-        innloggetSaksbehandlerIdent: String,
-        accessToken: String
+        bruker: Bruker
     ): Behandling = coroutineScope {
-        val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, accessToken) }
-        val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, accessToken) }
+        val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, bruker) }
+        val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, bruker) }
 
         mapBehandling(
             vedtak.await(),
             grunnlag.await(),
-            innloggetSaksbehandlerIdent,
-            accessToken
+            bruker
         )
     }
 
     private suspend fun mapBehandling(
         vedtak: Vedtak,
         grunnlag: Grunnlag,
-        innloggetSaksbehandlerIdent: String,
-        accessToken: String
+        bruker: Bruker
     ): Behandling {
-        val innloggetSaksbehandlerEnhet = saksbehandlere[innloggetSaksbehandlerIdent]
-            ?: throw SaksbehandlerManglerEnhetException(
-                "Saksbehandler $innloggetSaksbehandlerIdent mangler enhet fra secret"
-            )
+        val innloggetSaksbehandlerIdent = bruker.ident()
+        val innloggetSaksbehandlerEnhet = bruker.saksbehandlerEnhet(saksbehandlere)
 
         val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
@@ -72,12 +68,12 @@ class SakOgBehandlingService(
                 ),
                 attestant
             ),
-            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virk, accessToken)
+            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virk, bruker)
         )
     }
 
-    private suspend fun finnUtbetalingsinfo(behandlingId: UUID, virk: Periode, accessToken: String): Utbetalingsinfo {
-        val beregning = beregningKlient.hentBeregning(behandlingId, accessToken)
+    private suspend fun finnUtbetalingsinfo(behandlingId: UUID, virk: Periode, bruker: Bruker): Utbetalingsinfo {
+        val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
 
         val virkningstidspunkt = virk.fom.atDay(1)
 

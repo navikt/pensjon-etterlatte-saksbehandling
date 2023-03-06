@@ -74,6 +74,7 @@ export const Vilkaarsvurdering = () => {
 
           <Resultat
             virkningstidspunktDato={behandling.virkningstidspunkt?.dato}
+            sakstype={behandling.sakType}
             vilkaarsvurdering={vilkaarsvurdering}
             oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
             behandlingId={behandlingId}

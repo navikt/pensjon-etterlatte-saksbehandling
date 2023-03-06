@@ -2,7 +2,8 @@ package no.nav.etterlatte.utbetaling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
@@ -214,13 +215,13 @@ fun mockKonsistensavstemming(
     dag: LocalDate = LocalDate.now(),
     loependeUtbetalinger: List<OppdragForKonsistensavstemming>,
     id: UUIDBase64 = UUIDBase64(),
-    opprettTilOgMed: Tidspunkt = dag.minusDays(1).atTime(LocalTime.MAX).toTidspunkt(norskTidssone)
+    opprettTilOgMed: Tidspunkt = dag.minusDays(1).atTime(LocalTime.MAX).toNorskTidspunkt()
 ) = Konsistensavstemming(
     id = id,
     sakType = Saktype.BARNEPENSJON,
     opprettet = Tidspunkt.now(),
     avstemmingsdata = null,
-    loependeFraOgMed = dag.atStartOfDay().toTidspunkt(norskTidssone),
+    loependeFraOgMed = dag.midnattNorskTid().toTidspunkt(),
     opprettetTilOgMed = opprettTilOgMed,
     loependeUtbetalinger = loependeUtbetalinger
 )

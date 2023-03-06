@@ -7,10 +7,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -39,7 +39,7 @@ class StatussjekkTest {
     private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     private val saksbehandler = "saksbehandler"
-    private val accessToken = "accessToken"
+    private val bruker = Bruker.of("accessToken", "saksbehandler", null, null)
     private val behandlingId = UUID.randomUUID()
 
     private lateinit var vedtakRepo: VedtaksvurderingRepository
@@ -103,12 +103,12 @@ class StatussjekkTest {
         opprettVedtak()
 
         runBlocking {
-            vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, accessToken)
+            vedtaksvurderingService.fattVedtak(behandlingId, bruker)
         }
 
         coVerifyOrder {
-            behandling.fattVedtak(behandlingId, accessToken)
-            behandling.fattVedtak(behandlingId, accessToken, any())
+            behandling.fattVedtak(behandlingId, bruker)
+            behandling.fattVedtak(behandlingId, bruker, any())
         }
     }
 
@@ -125,15 +125,15 @@ class StatussjekkTest {
         )
         coEvery { behandling.fattVedtak(any(), any(), any()) } returns true
         opprettVedtak()
-        vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
+        vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret[saksbehandler]!!, behandlingId)
 
         runBlocking {
             assertThrows<KanIkkeEndreFattetVedtak> {
-                vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler, accessToken)
+                vedtaksvurderingService.fattVedtak(behandlingId, bruker)
             }
         }
 
-        coVerify(exactly = 1) { behandling.fattVedtak(behandlingId, accessToken) }
+        coVerify(exactly = 1) { behandling.fattVedtak(behandlingId, bruker) }
     }
 
     @Test
@@ -149,15 +149,15 @@ class StatussjekkTest {
             saksbehandlereSecret
         )
         opprettVedtak()
-        vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
+        vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret[saksbehandler]!!, behandlingId)
 
         runBlocking {
-            vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, accessToken)
+            vedtaksvurderingService.attesterVedtak(behandlingId, bruker)
         }
 
         coVerifyOrder {
-            behandling.attester(behandlingId, accessToken)
-            behandling.attester(behandlingId, accessToken, any())
+            behandling.attester(behandlingId, bruker)
+            behandling.attester(behandlingId, bruker, any())
         }
     }
 
@@ -177,11 +177,11 @@ class StatussjekkTest {
 
         runBlocking {
             assertThrows<VedtakKanIkkeAttesteresFoerDetFattes> {
-                vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler, accessToken)
+                vedtaksvurderingService.attesterVedtak(behandlingId, bruker)
             }
         }
 
-        coVerify(exactly = 1) { behandling.attester(behandlingId, accessToken, any()) }
+        coVerify(exactly = 1) { behandling.attester(behandlingId, bruker, any()) }
     }
 
     @Test
@@ -197,20 +197,19 @@ class StatussjekkTest {
             saksbehandlereSecret
         )
         opprettVedtak()
-        vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret.get(saksbehandler)!!, behandlingId)
+        vedtakRepo.fattVedtak(saksbehandler, saksbehandlereSecret[saksbehandler]!!, behandlingId)
 
         runBlocking {
             vedtaksvurderingService.underkjennVedtak(
                 behandlingId,
-                accessToken,
-                Saksbehandler("saksbehandler"),
+                bruker,
                 UnderkjennVedtakClientRequest("kommentar", "begrunnelse")
             )
         }
 
         coVerifyOrder {
-            behandling.underkjenn(behandlingId, accessToken)
-            behandling.underkjenn(behandlingId, accessToken, any())
+            behandling.underkjenn(behandlingId, bruker)
+            behandling.underkjenn(behandlingId, bruker, any())
         }
     }
 
@@ -232,13 +231,12 @@ class StatussjekkTest {
             assertThrows<BehandlingstilstandException> {
                 vedtaksvurderingService.underkjennVedtak(
                     behandlingId,
-                    accessToken,
-                    Saksbehandler(saksbehandler),
+                    bruker,
                     UnderkjennVedtakClientRequest("kommentar", "begrunnelse")
                 )
             }
         }
 
-        coVerify(exactly = 1) { behandling.underkjenn(behandlingId, accessToken, any()) }
+        coVerify(exactly = 1) { behandling.underkjenn(behandlingId, bruker, any()) }
     }
 }

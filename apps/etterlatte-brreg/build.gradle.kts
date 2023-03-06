@@ -1,4 +1,3 @@
-
 plugins {
     id("etterlatte.common")
 }
@@ -8,23 +7,23 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:etterlatte-helsesjekk"))
 
-    implementation(Ktor2.ClientCore)
-    implementation(Ktor2.ClientLoggingJvm)
-    implementation(Ktor2.ClientAuth)
-    implementation(Ktor2.ClientJackson)
-    implementation(Ktor2.ClientContentNegotiation)
-    implementation(Ktor2.Jackson)
-    implementation(Ktor2.OkHttp)
-    implementation(Ktor2.ServerCore)
-    implementation(Ktor2.ServerCio)
-    implementation(Ktor2.ServerContentNegotiation)
-    implementation(Ktor2.CallLogging)
-    implementation(Ktor2.StatusPages)
+    implementation(libs.ktor2.clientcore)
+    implementation(libs.ktor2.clientloggingjvm)
+    implementation(libs.ktor2.clientauth)
+    implementation(libs.ktor2.clientjackson)
+    implementation(libs.ktor2.clientcontentnegotiation)
+    implementation(libs.ktor2.jackson)
+    implementation(libs.ktor2.okhttp)
+    implementation(libs.ktor2.servercore)
+    implementation(libs.ktor2.servercio)
+    implementation(libs.ktor2.servercontentnegotiation)
+    implementation(libs.ktor2.calllogging)
+    implementation(libs.ktor2.statuspages)
 
-    implementation(NavFelles.TokenClientCore)
-    implementation(NavFelles.TokenValidationKtor2)
+    implementation(libs.navfelles.tokenclientcore)
+    implementation(libs.navfelles.tokenvalidationktor2)
 
-    testImplementation(Ktor2.ClientMock)
-    testImplementation(MockK.MockK)
-    testImplementation(Kotlinx.CoroutinesCore)
+    testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.kotlinx.coroutinescore)
 }

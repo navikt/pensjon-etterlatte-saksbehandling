@@ -3,7 +3,9 @@ package no.nav.etterlatte.behandling
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
@@ -16,8 +18,8 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
+import no.nav.etterlatte.behandling.regulering.ReguleringFactory
+import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -25,9 +27,9 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
+import no.nav.etterlatte.token.Bruker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -66,10 +68,10 @@ class RealGenerellBehandlingServiceTest {
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlinger() } returns listOf(
-                revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                foerstegangsbehandling(sak = 2),
-                revurdering(sak = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                foerstegangsbehandling(sak = 4)
+                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                foerstegangsbehandling(sakId = 2),
+                revurdering(sakId = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                foerstegangsbehandling(sakId = 4)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
@@ -127,8 +129,8 @@ class RealGenerellBehandlingServiceTest {
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(1) } returns listOf(
-                revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                foerstegangsbehandling(sak = 1)
+                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                foerstegangsbehandling(sakId = 1)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
@@ -159,18 +161,17 @@ class RealGenerellBehandlingServiceTest {
     @Test
     fun `avbrytBehandling sjekker om behandlingsstatusen er gyldig for avbrudd`() {
         val sakId = 1L
-        val avbruttBehandling = foerstegangsbehandling(sak = sakId, status = BehandlingStatus.AVBRUTT)
-        val attestertBehandling = foerstegangsbehandling(sak = sakId, status = BehandlingStatus.ATTESTERT)
-        val iverksattBehandling = foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT)
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sak = sakId)
+        val avbruttBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.AVBRUTT)
+        val attestertBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.ATTESTERT)
+        val iverksattBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.IVERKSATT)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(avbruttBehandling.id) } returns avbruttBehandling
             every { hentBehandling(attestertBehandling.id) } returns attestertBehandling
             every { hentBehandling(iverksattBehandling.id) } returns iverksattBehandling
             every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-            every { avbrytBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                .copy(status = BehandlingStatus.AVBRUTT)
+            every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
         }
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
@@ -202,12 +203,11 @@ class RealGenerellBehandlingServiceTest {
     @Test
     fun `avbrytBehandling registrer en avbruddshendelse`() {
         val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sak = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-            every { avbrytBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                .copy(status = BehandlingStatus.AVBRUTT)
+            every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
         }
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
@@ -229,12 +229,11 @@ class RealGenerellBehandlingServiceTest {
     @Test
     fun `avbrytBehandling sender en kafka-melding`() {
         val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sak = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-            every { avbrytBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                .copy(status = BehandlingStatus.AVBRUTT)
+            every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
         }
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
@@ -270,7 +269,7 @@ class RealGenerellBehandlingServiceTest {
         val soeknadMottatDato = LocalDateTime.parse("2020-01-01T00:00:00")
         val behandling = foerstegangsbehandling(
             id = BEHANDLINGS_ID,
-            sak = SAK_ID,
+            sakId = SAK_ID,
             soeknadMottattDato = soeknadMottatDato
         )
         val opplysningstype = Opplysningstype.AVDOED_PDL_V1
@@ -293,7 +292,6 @@ class RealGenerellBehandlingServiceTest {
         val behandlingMedPersonopplsning = runBlocking {
             service.hentBehandlingMedEnkelPersonopplysning(
                 BEHANDLINGS_ID,
-                Saksbehandler("id"),
                 TOKEN,
                 opplysningstype
             )
@@ -315,7 +313,7 @@ class RealGenerellBehandlingServiceTest {
         val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
 
         val gyldigVirkningstidspunkt = runBlocking {
-            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, Saksbehandler("id"), TOKEN, request)
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
         }
 
         assertTrue(gyldigVirkningstidspunkt)
@@ -333,7 +331,7 @@ class RealGenerellBehandlingServiceTest {
         val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
 
         val gyldigVirkningstidspunkt = runBlocking {
-            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, Saksbehandler("id"), TOKEN, request)
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
         }
 
         assertFalse(gyldigVirkningstidspunkt)
@@ -351,7 +349,7 @@ class RealGenerellBehandlingServiceTest {
         val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
 
         val gyldigVirkningstidspunkt = runBlocking {
-            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, Saksbehandler("id"), TOKEN, request)
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
         }
 
         assertFalse(gyldigVirkningstidspunkt)
@@ -361,7 +359,11 @@ class RealGenerellBehandlingServiceTest {
         doedsdato: LocalDate?,
         soeknadMottatt: LocalDateTime
     ): RealGenerellBehandlingService {
-        val behandling = foerstegangsbehandling(id = BEHANDLINGS_ID, sak = SAK_ID, soeknadMottattDato = soeknadMottatt)
+        val behandling = foerstegangsbehandling(
+            id = BEHANDLINGS_ID,
+            sakId = SAK_ID,
+            soeknadMottattDato = soeknadMottatt
+        )
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
 
@@ -411,6 +413,6 @@ class RealGenerellBehandlingServiceTest {
     companion object {
         const val SAK_ID = 1L
         val BEHANDLINGS_ID: UUID = UUID.randomUUID()
-        const val TOKEN = "token"
+        val TOKEN = Bruker.of("a", "b", null, null)
     }
 }

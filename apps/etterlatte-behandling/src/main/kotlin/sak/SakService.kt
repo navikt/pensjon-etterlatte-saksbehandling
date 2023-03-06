@@ -2,7 +2,6 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 
 interface SakService {
     fun hentSaker(): List<Sak>
@@ -11,10 +10,10 @@ interface SakService {
     fun finnSak(person: String, type: SakType): Sak?
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
-    fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int
 }
 
 class RealSakService(private val dao: SakDao) : SakService {
+
     override fun hentSaker(): List<Sak> {
         return dao.hentSaker()
     }
@@ -42,9 +41,5 @@ class RealSakService(private val dao: SakDao) : SakService {
 
     override fun finnSak(id: Long): Sak? {
         return dao.hentSak(id)
-    }
-
-    override fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {
-        return dao.setAdresseBeskyttelse(id, adressebeskyttelseGradering)
     }
 }

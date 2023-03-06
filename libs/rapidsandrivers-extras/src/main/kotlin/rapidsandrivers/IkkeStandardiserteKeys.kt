@@ -8,7 +8,7 @@ import java.util.*
 
 const val SAK_ID_KEY = "sakId"
 const val BEHANDLING_ID_KEY = "behandlingId"
-const val OMBEREGNING_ID_KEY = "omberegningId"
+const val OMREGNING_ID_KEY = "omregningId"
 const val BEREGNING_KEY = "beregning"
 const val DATO_KEY = "dato"
 const val HENDELSE_DATA_KEY = "hendelse_data"
@@ -25,10 +25,10 @@ var JsonMessage.behandlingId: UUID
         this[BEHANDLING_ID_KEY] = name
     }
 
-var JsonMessage.omberegningId: UUID
-    get() = this[OMBEREGNING_ID_KEY].asText().toUUID()
+var JsonMessage.omregningId: UUID
+    get() = this[OMREGNING_ID_KEY].asText().toUUID()
     set(name) {
-        this[OMBEREGNING_ID_KEY] = name
+        this[OMREGNING_ID_KEY] = name
     }
 
 var JsonMessage.dato: LocalDate

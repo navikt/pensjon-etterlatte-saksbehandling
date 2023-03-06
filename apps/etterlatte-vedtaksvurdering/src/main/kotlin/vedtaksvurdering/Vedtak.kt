@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tidspunkt.tilZonedDateTime
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
@@ -111,13 +111,11 @@ data class VedtakSammendrag(
     val datoAttestert: LocalDateTime?
 )
 
-fun Instant?.toLocalDateTime() = this?.let { LocalDateTime.ofInstant(it, norskTidssone) }
-
 fun no.nav.etterlatte.vedtaksvurdering.Vedtak?.toVedtakSammendrag() = when (this) {
     null -> null
     else -> VedtakSammendrag(
         id = this.id.toString(),
         behandlingId = this.behandlingId,
-        datoAttestert = this.datoattestert.toLocalDateTime()
+        datoAttestert = this.datoattestert.toLocalDateTimeNorskTid()
     )
 }

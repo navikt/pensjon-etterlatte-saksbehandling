@@ -15,11 +15,12 @@ import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
-import no.nav.etterlatte.behandling.omberegning.omberegningRoutes
+import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
+import no.nav.etterlatte.libs.ktor.adresseBeskyttelseRoute
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
@@ -60,8 +61,19 @@ fun Application.module(beanFactory: BeanFactory) {
         val generellBehandlingService = generellBehandlingService()
         val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
 
+        val sakServiceAdressebeskyttelse = sakServiceAdressebeskyttelse()
+
         restModule(sikkerLogg) {
-            attachContekst(dataSource(), beanFactory)
+            interceptorWrapper(
+                adressebeskyttelse = {
+                    adresseBeskyttelseRoute(
+                        ressursHarAdressebeskyttelse = { behandlingId ->
+                            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
+                        }
+                    )
+                },
+                leggTilKontekst = { attachContekst(dataSource(), beanFactory) }
+            )
             sakRoutes(
                 sakService = sakService(),
                 generellBehandlingService = generellBehandlingService,
@@ -73,14 +85,22 @@ fun Application.module(beanFactory: BeanFactory) {
                 revurderingService = revurderingService(),
                 manueltOpphoerService = manueltOpphoerService()
             )
-            omberegningRoutes(
-                omberegningService = omberegningService()
+            omregningRoutes(
+                omregningService = omregningService()
             )
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())
             oppgaveRoutes(service = beanFactory.oppgaveService())
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
         }
     }
+}
+
+private fun Route.interceptorWrapper(
+    adressebeskyttelse: () -> Unit,
+    leggTilKontekst: () -> Unit
+) {
+    adressebeskyttelse()
+    leggTilKontekst()
 }
 
 private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {

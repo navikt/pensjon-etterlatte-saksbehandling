@@ -1,4 +1,3 @@
-
 plugins {
     kotlin("jvm")
 }
@@ -17,25 +16,25 @@ dependencies {
     implementation(project(":libs:etterlatte-token-model"))
     implementation(project(":libs:etterlatte-helsesjekk"))
 
-    implementation(Ktor2.ServerCore)
-    implementation(Ktor2.ServerCio)
-    implementation(Ktor2.Auth)
-    implementation(Ktor2.Jackson)
-    implementation(Ktor2.CallLogging)
-    implementation(Ktor2.CallId)
-    implementation(Ktor2.StatusPages)
-    implementation(Ktor2.ServerContentNegotiation)
-    implementation(Ktor2.OkHttp)
-    implementation(Ktor2.ClientContentNegotiation)
+    implementation(libs.ktor2.servercore)
+    implementation(libs.ktor2.servercio)
+    implementation(libs.ktor2.auth)
+    implementation(libs.ktor2.jackson)
+    implementation(libs.ktor2.calllogging)
+    implementation(libs.ktor2.callid)
+    implementation(libs.ktor2.statuspages)
+    implementation(libs.ktor2.servercontentnegotiation)
+    implementation(libs.ktor2.okhttp)
+    implementation(libs.ktor2.clientcontentnegotiation)
 
-    implementation(NavFelles.TokenValidationKtor2)
+    implementation(libs.navfelles.tokenvalidationktor2)
 
-    implementation(Prometheus.SimpleClientCommon)
-    implementation(Prometheus.SimpleClientHotspot)
+    implementation(libs.metrics.prometheus.simpleclientcommon)
+    implementation(libs.metrics.prometheus.simpleclienthotspot)
 
-    testImplementation(Jupiter.Engine)
-    testImplementation(Ktor2.ServerTests)
-    testImplementation(NavFelles.MockOauth2Server)
+    testImplementation(libs.test.jupiter.engine)
+    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.navfelles.mockoauth2server)
 
     tasks {
         withType<Test> {

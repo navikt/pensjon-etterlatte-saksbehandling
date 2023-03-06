@@ -7,5 +7,5 @@ repositories {
 }
 
 dependencies {
-    implementation(Unleash.unleash)
+    implementation(libs.unleash.client)
 }

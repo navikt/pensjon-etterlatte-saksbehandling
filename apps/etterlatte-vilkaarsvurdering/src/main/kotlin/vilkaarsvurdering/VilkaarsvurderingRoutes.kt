@@ -11,14 +11,14 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
-import no.nav.etterlatte.libs.ktor.accesstoken
-import no.nav.etterlatte.libs.ktor.saksbehandler
-import java.time.LocalDateTime
+import no.nav.etterlatte.libs.ktor.bruker
 import java.util.*
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
@@ -46,7 +46,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             withBehandlingId { behandlingId ->
                 try {
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
-                    val vilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, accesstoken)
+                    val vilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, bruker)
 
                     call.respond(vilkaarsvurdering.toDto())
                 } catch (e: VirkningstidspunktIkkeSattException) {
@@ -65,12 +65,12 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
         post("/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 val vurdertVilkaarDto = call.receive<VurdertVilkaarDto>()
-                val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(saksbehandler.ident)
+                val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(bruker.ident())
 
                 logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
                 try {
                     val vilkaarsvurdering =
-                        vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(behandlingId, accesstoken, vurdertVilkaar)
+                        vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(behandlingId, bruker, vurdertVilkaar)
                     call.respond(vilkaarsvurdering.toDto())
                 } catch (e: BehandlingstilstandException) {
                     logger.error(
@@ -93,7 +93,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
                 try {
                     val vilkaarsvurdering =
-                        vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, accesstoken, vilkaarId)
+                        vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, bruker, vilkaarId)
                     call.respond(vilkaarsvurdering.toDto())
                 } catch (e: BehandlingstilstandException) {
                     logger.error(
@@ -115,12 +115,14 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             post("/{behandlingId}") {
                 withBehandlingId { behandlingId ->
                     val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
-                    val vurdertResultat = vurdertResultatDto.toVilkaarsvurderingResultat(saksbehandler.ident)
+                    val vurdertResultat = vurdertResultatDto.toVilkaarsvurderingResultat(
+                        bruker.ident()
+                    )
 
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
                     try {
                         val vilkaarsvurdering =
-                            vilkaarsvurderingService.oppdaterTotalVurdering(behandlingId, accesstoken, vurdertResultat)
+                            vilkaarsvurderingService.oppdaterTotalVurdering(behandlingId, bruker, vurdertResultat)
                         call.respond(vilkaarsvurdering.toDto())
                     } catch (e: BehandlingstilstandException) {
                         logger.error(
@@ -136,7 +138,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 withBehandlingId { behandlingId ->
                     logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
                     try {
-                        val vilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId, accesstoken)
+                        val vilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId, bruker)
                         call.respond(vilkaarsvurdering.toDto())
                     } catch (e: BehandlingstilstandException) {
                         logger.error(
@@ -158,7 +160,7 @@ private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
         unntaksvilkaar = unntaksvilkaar,
         vurdering = VilkaarVurderingData(
             kommentar = kommentar,
-            tidspunkt = LocalDateTime.now(),
+            tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
             saksbehandler = saksbehandler
         )
     )
@@ -167,7 +169,7 @@ private fun VurdertVilkaarsvurderingResultatDto.toVilkaarsvurderingResultat(saks
     VilkaarsvurderingResultat(
         utfall = resultat,
         kommentar = kommentar,
-        tidspunkt = LocalDateTime.now(),
+        tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
         saksbehandler = saksbehandler
     )
 

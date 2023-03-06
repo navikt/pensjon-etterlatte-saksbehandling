@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.LocalDate
@@ -19,7 +20,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 interface VedtakKlient {
-    suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak?
+    suspend fun hentVedtak(behandlingId: String, bruker: Bruker): Vedtak?
 }
 
 class VedtakKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -33,13 +34,13 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
 
-    override suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak? {
+    override suspend fun hentVedtak(behandlingId: String, bruker: Bruker): Vedtak? {
         logger.info("Henter vedtak for behandling med behandlingId=$behandlingId")
 
         try {
             return downstreamResourceClient.get(
-                resource = Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/vedtak"),
-                accessToken = accessToken
+                resource = Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId"),
+                bruker = bruker
             ).mapBoth(
                 success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
                 failure = { errorResponse ->

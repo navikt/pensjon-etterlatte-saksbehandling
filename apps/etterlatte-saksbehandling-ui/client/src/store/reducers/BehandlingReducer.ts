@@ -9,10 +9,12 @@ import {
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { Soeskenjusteringsgrunnlag } from '~shared/types/Grunnlagsopplysning'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export const detaljertBehandlingInitialState: IBehandlingReducer = {
   id: '',
   sak: 0,
+  sakType: ISaksType.BARNEPENSJON,
   status: IBehandlingStatus.OPPRETTET, //test
   saksbehandlerId: '',
   attestant: '',

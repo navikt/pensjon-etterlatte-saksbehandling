@@ -11,12 +11,10 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-ktor"))
 
-    implementation(Ktor2.ClientCore)
+    implementation(libs.ktor2.clientcore)
 
-    implementation(Jackson.DatatypeJsr310)
-    implementation(Jackson.DatatypeJdk8)
-    implementation(Jackson.ModuleKotlin)
+    implementation(libs.bundles.jackson)
 
-    testImplementation(MockK.MockK)
-    testImplementation(Kotlinx.CoroutinesCore)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.kotlinx.coroutinescore)
 }

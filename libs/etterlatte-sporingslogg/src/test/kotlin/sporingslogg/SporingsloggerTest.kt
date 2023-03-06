@@ -1,21 +1,16 @@
 package no.nav.etterlatte.libs.sporingslogg
 
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
-import java.time.ZonedDateTime
 
 internal class SporingsloggerTest {
 
-    private val timestamp =
-        ZonedDateTime.of(
-            LocalDate.of(2020, Month.FEBRUARY, 1),
-            LocalTime.NOON,
-            norskTidssone
-        ).toInstant()
+    private val timestamp = LocalDateTime.of(LocalDate.of(2020, Month.FEBRUARY, 1), LocalTime.NOON).tilInstant()
 
     @Test
     fun `skal logge i CEF-format`() {
@@ -33,7 +28,7 @@ internal class SporingsloggerTest {
             )
         )
         assertEquals(
-            "CEF:0|pensjon|etterlatte-vilkaarsvurdering|1.0|audit:access|On-behalf-of access|INFO|end=1580554800000 suid=U123456 duid=10458210115 flexString1Label=Decision flexString1=Permit msg=Internbruker sjekker barnepensjon for innbygger", // ktlint-disable max-line-length
+            "CEF:0|pensjon|etterlatte-vilkaarsvurdering|1.0|audit:access|On-behalf-of access|INFO|end=1580558400000 suid=U123456 duid=10458210115 flexString1Label=Decision flexString1=Permit msg=Internbruker sjekker barnepensjon for innbygger", // ktlint-disable max-line-length
             entry.format()
         )
     }
@@ -54,7 +49,7 @@ internal class SporingsloggerTest {
             )
         )
         assertEquals(
-            "CEF:0|pensjon|etterlatte-vilkaarsvurdering|1.0|audit:update|On-behalf-of access|WARN|end=1580554800000 suid=U123456 duid=10458210115 flexString1Label=Decision flexString1=Deny msg=Internbruker oppdaterer barnepensjon for innbygger", // ktlint-disable max-line-length
+            "CEF:0|pensjon|etterlatte-vilkaarsvurdering|1.0|audit:update|On-behalf-of access|WARN|end=1580558400000 suid=U123456 duid=10458210115 flexString1Label=Decision flexString1=Deny msg=Internbruker oppdaterer barnepensjon for innbygger", // ktlint-disable max-line-length
             entry.format()
         )
     }

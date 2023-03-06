@@ -15,8 +15,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.ktor.accesstoken
-import no.nav.etterlatte.libs.ktor.saksbehandler
+import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
@@ -78,8 +77,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
                 grunnlagService.lagreSoeskenMedIBeregning(
                     behandlingId,
                     body.soeskenMedIBeregning,
-                    saksbehandler,
-                    accesstoken
+                    bruker
                 )
                 call.respond(HttpStatusCode.OK)
             }

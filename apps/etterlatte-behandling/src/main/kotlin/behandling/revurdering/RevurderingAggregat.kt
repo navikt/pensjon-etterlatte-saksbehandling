@@ -1,7 +1,9 @@
-package no.nav.etterlatte.behandling.revurdering
+package no.nav.etterlatte.behandling.regulering
 
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingAggregat
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
@@ -12,7 +14,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.*
 
 class RevurderingAggregat(
@@ -31,22 +32,20 @@ class RevurderingAggregat(
             hendelser: HendelseDao
         ): RevurderingAggregat {
             logger.info("Oppretter en behandling på $sak")
-            return Revurdering(
-                id = UUID.randomUUID(),
-                sak = sak,
-                behandlingOpprettet = LocalDateTime.now(),
-                sistEndret = LocalDateTime.now(),
+            return OpprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak,
                 status = BehandlingStatus.OPPRETTET,
                 persongalleri = persongalleri,
-                revurderingsaarsak = revurderingAarsak,
+                revurderingsAarsak = revurderingAarsak,
                 kommerBarnetTilgode = null,
                 vilkaarUtfall = null,
                 virkningstidspunkt = null
             )
                 .also {
-                    behandlinger.opprettRevurdering(it)
-                    hendelser.behandlingOpprettet(it)
-                    logger.info("Opprettet revurdering ${it.id} i sak ${it.sak}")
+                    behandlinger.opprettBehandling(it)
+                    hendelser.behandlingOpprettet(it.toBehandlingOpprettet())
+                    logger.info("Opprettet revurdering ${it.id} i sak ${it.sakId}")
                 }
                 .let { RevurderingAggregat(it.id, behandlinger, hendelser) }
         }

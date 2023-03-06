@@ -27,7 +27,7 @@ import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.behandling.regulering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -41,15 +41,13 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.accesstoken
-import no.nav.etterlatte.libs.ktor.saksbehandler
+import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.Instant
-import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
@@ -61,7 +59,7 @@ internal fun Route.behandlingRoutes(
     route("/api/behandling/{behandlingsid}") {
         get {
             val detaljertBehandlingDTO =
-                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, saksbehandler, accesstoken)
+                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, bruker)
             call.respond(detaljertBehandlingDTO)
         }
 
@@ -126,8 +124,7 @@ internal fun Route.behandlingRoutes(
 
             val erGyldigVirkningstidspunkt = generellBehandlingService.erGyldigVirkningstidspunkt(
                 behandlingsId,
-                saksbehandler,
-                accesstoken,
+                bruker,
                 body
             )
             if (!erGyldigVirkningstidspunkt) {
@@ -159,7 +156,7 @@ internal fun Route.behandlingRoutes(
                 generellBehandlingService.hentBehandlinger().map {
                     BehandlingSammendrag(
                         it.id,
-                        it.sak,
+                        it.sak.id,
                         it.status,
                         if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                         it.behandlingOpprettet,
@@ -203,6 +200,15 @@ internal fun Route.behandlingRoutes(
             }
         }
 
+        route("/foerstegangsbehandling/{behandlingsId}") {
+            get {
+                call.respond(
+                    foerstegangsbehandlingService.hentFoerstegangsbehandling(behandlingsId)?.toDetaljertBehandling()
+                        ?: HttpStatusCode.NotFound
+                )
+            }
+        }
+
         route("/foerstegangsbehandling") {
             get {
                 call.respond(
@@ -228,7 +234,8 @@ internal fun Route.behandlingRoutes(
                     revurderingService.hentRevurdering(behandlingsId)?.let {
                         DetaljertBehandling(
                             id = it.id,
-                            sak = it.sak,
+                            sak = it.sak.id,
+                            sakType = it.sak.sakType,
                             behandlingOpprettet = it.behandlingOpprettet,
                             sistEndret = it.sistEndret,
                             soeknadMottattDato = it.behandlingOpprettet,
@@ -290,7 +297,7 @@ internal fun Route.behandlingRoutes(
                 generellBehandlingService.hentBehandlingerISak(sakId).map {
                     BehandlingSammendrag(
                         id = it.id,
-                        sak = it.sak,
+                        sak = it.sak.id,
                         status = it.status,
                         soeknadMottattDato = if (it is Foerstegangsbehandling) {
                             it.soeknadMottattDato
@@ -303,7 +310,7 @@ internal fun Route.behandlingRoutes(
                             is Foerstegangsbehandling -> "SOEKNAD"
                             is Revurdering -> it.revurderingsaarsak.name
                             is ManueltOpphoer -> "MANUELT OPPHOER"
-                            is Regulering -> it.revurderingsaarsak.name
+                            is Regulering -> "REGULERING"
                         },
                         virkningstidspunkt = it.virkningstidspunkt,
                         vilkaarsvurderingUtfall = it.vilkaarUtfall
@@ -375,9 +382,9 @@ data class ManueltOpphoerResponse(val behandlingId: String)
 
 data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String, val begrunnelse: String?) {
     val dato: YearMonth = try {
-        LocalDate.ofInstant(Instant.parse(_dato), norskTidssone).let {
+        Instant.parse(_dato).toLocalDateTimeNorskTid()?.let {
             YearMonth.of(it.year, it.month)
-        }
+        } ?: throw IllegalArgumentException("Dato $_dato må være definert")
     } catch (e: Exception) {
         throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
     }

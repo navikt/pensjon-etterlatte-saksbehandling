@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export const capitalize = (s?: string) => {
   if (!s) return ''
@@ -38,5 +39,14 @@ export const formaterBehandlingstype = (behandlingstype: IBehandlingsType): stri
       return 'Manuelt opphør'
     case IBehandlingsType.OMREGNING:
       return 'Omregning'
+  }
+}
+
+export const formaterSakstype = (sakstype: ISaksType): string => {
+  switch (sakstype) {
+    case ISaksType.BARNEPENSJON:
+      return 'Barnepensjon'
+    case ISaksType.OMSTILLINGSSTOENAD:
+      return 'Omstillingsstønad'
   }
 }

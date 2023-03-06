@@ -3,8 +3,9 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.EventNames.FATT_VEDTAK
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
-import no.nav.etterlatte.rapidsandrivers.EventNames.TIL_UTBETALING
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -15,6 +16,7 @@ import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.sakId
+import rapidsandrivers.withFeilhaandtering
 
 internal class OpprettVedtakforespoersel(
     rapidsConnection: RapidsConnection,
@@ -38,10 +40,19 @@ internal class OpprettVedtakforespoersel(
             logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
 
             val behandlingId = packet.behandlingId
-            val respons = vedtak.upsertVedtak(behandlingId)
+            withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
+                val respons = vedtak.upsertVedtak(behandlingId)
+                logger.info("Opprettet vedtak ${respons.vedtakId} for sak: $sakId og behandling: $behandlingId")
+            }
 
-            packet.eventName = TIL_UTBETALING
-            context.publish(packet.toJson())
-            logger.info("Opprettet vedtak ${respons.vedtakId} og sendte $TIL_UTBETALING for sak: $sakId og behandling: $behandlingId") // ktlint-disable
+            withFeilhaandtering(packet, context, FATT_VEDTAK) {
+                val fattetVedtak = vedtak.fattVedtak(behandlingId)
+                logger.info("Fattet vedtak ${fattetVedtak.vedtakId} for sak: $sakId og behandling: $behandlingId")
+            }
+
+            withFeilhaandtering(packet, context, EventNames.ATTESTER) {
+                val attestert = vedtak.attesterVedtak(behandlingId)
+                logger.info("Attesterte vedtak ${attestert.vedtakId} for sak: $sakId og behandling: $behandlingId")
+            }
         }
 }

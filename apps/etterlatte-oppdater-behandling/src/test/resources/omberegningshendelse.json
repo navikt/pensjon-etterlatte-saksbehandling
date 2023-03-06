@@ -1,9 +1,0 @@
-{
-  "system_read_count": 0,
-  "@event_name": "OMBEREGNINGSHENDELSE",
-  "hendelse_data": {
-    "sakId": 1,
-    "fradato": "2023-02-08",
-    "aarsak": "GRUNNBELOEPREGULERING"
-  }
-}

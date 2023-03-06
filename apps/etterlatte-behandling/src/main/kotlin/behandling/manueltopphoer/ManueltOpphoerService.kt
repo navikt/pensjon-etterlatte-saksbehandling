@@ -7,8 +7,10 @@ import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
@@ -20,7 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 interface ManueltOpphoerService {
     fun hentManueltOpphoer(behandling: UUID): ManueltOpphoer?
@@ -62,7 +64,7 @@ class RealManueltOpphoerService(
         inTransaction {
             val opphoer = behandlinger.hentBehandling(behandling, BehandlingType.MANUELT_OPPHOER) as ManueltOpphoer?
                 ?: return@inTransaction null
-            val andreBehandlinger = behandlinger.alleBehandlingerISak(opphoer.sak)
+            val andreBehandlinger = behandlinger.alleBehandlingerISak(opphoer.sak.id)
                 .filter { it.id != behandling && it.status == BehandlingStatus.IVERKSATT }
             opphoer to andreBehandlinger
         }
@@ -84,8 +86,10 @@ class RealManueltOpphoerService(
             }
 
             when (forrigeBehandling) {
-                is Foerstegangsbehandling, is Revurdering, is Regulering -> ManueltOpphoer(
-                    sak = forrigeBehandling.sak,
+                is Foerstegangsbehandling, is Revurdering, is Regulering -> OpprettBehandling(
+                    type = BehandlingType.MANUELT_OPPHOER,
+                    sakId = forrigeBehandling.sak.id,
+                    status = BehandlingStatus.OPPRETTET,
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak,
@@ -102,9 +106,11 @@ class RealManueltOpphoerService(
                     null
                 }
             }?.let {
-                behandlinger.opprettManueltOpphoer(it).also { lagretManueltOpphoer ->
-                    hendelser.behandlingOpprettet(lagretManueltOpphoer)
-                }
+                behandlinger.opprettBehandling(it)
+                hendelser.behandlingOpprettet(it.toBehandlingOpprettet())
+                it.id
+            }?.let { id ->
+                behandlinger.hentBehandling(id) as ManueltOpphoer
             }
         }?.also { lagretManueltOpphoer ->
             runBlocking {

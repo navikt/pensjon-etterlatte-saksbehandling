@@ -9,11 +9,12 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BehandlingKlient {
-    suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling
+    suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -27,7 +28,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    override suspend fun hentBehandling(behandlingId: UUID, accessToken: String): DetaljertBehandling {
+    override suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
@@ -36,7 +37,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/behandlinger/$behandlingId"
                     ),
-                    accessToken = accessToken
+                    bruker = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

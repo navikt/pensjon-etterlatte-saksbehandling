@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -55,8 +56,9 @@ class StatistikkServiceTest {
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
-            behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
+            sakType = SakType.BARNEPENSJON,
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = null,
@@ -139,8 +141,9 @@ class StatistikkServiceTest {
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
             id = behandlingId,
             sak = sakId,
-            behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
+            sakType = SakType.BARNEPENSJON,
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = null,
@@ -171,7 +174,7 @@ class StatistikkServiceTest {
 
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
         val registrertStatistikk = service.registrerStatistikkForBehandlinghendelse(
-            behandling = behandling(id = behandlingId, sakId = sakId),
+            behandlingIntern = behandling(id = behandlingId, sakId = sakId),
             hendelse = BehandlingHendelse.OPPRETTET,
             tekniskTid = tekniskTidForHendelse
         ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
@@ -240,8 +243,8 @@ fun vedtak(
 fun behandling(
     id: UUID = UUID.randomUUID(),
     sakId: Long = 1L,
-    behandlingOpprettet: LocalDateTime = LocalDateTime.now(),
-    sistEndret: LocalDateTime = LocalDateTime.now(),
+    behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
+    sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     soeker: String = "12312312312",
@@ -249,9 +252,9 @@ fun behandling(
     soesken: List<String> = emptyList(),
     avdoed: List<String> = emptyList(),
     gjenlevende: List<String> = emptyList()
-): no.nav.etterlatte.statistikk.river.Behandling = no.nav.etterlatte.statistikk.river.Behandling(
+): no.nav.etterlatte.statistikk.river.BehandlingIntern = no.nav.etterlatte.statistikk.river.BehandlingIntern(
     id = id,
-    sak = sakId,
+    sakId = sakId,
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,

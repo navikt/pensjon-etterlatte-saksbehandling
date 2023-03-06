@@ -12,16 +12,15 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.ktor.accesstoken
-import no.nav.etterlatte.libs.ktor.saksbehandler
+import no.nav.etterlatte.libs.ktor.bruker
 import java.time.LocalDate
 import java.util.*
 
 fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
-    route("api") {
+    route("/api/vedtak") {
         val logger = application.log
 
-        get("behandlinger/{behandlingId}/vedtak") {
+        get("/{behandlingId}") {
             withBehandlingId { behandlingId ->
                 val vedtaksresultat = service.hentVedtak(behandlingId)
                 if (vedtaksresultat == null) {
@@ -32,7 +31,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        get("behandlinger/{behandlingId}/fellesvedtak") {
+        get("/{behandlingId}/fellesvedtak") {
             withBehandlingId { behandlingId ->
                 val vedtaksresultat = service.hentFellesvedtak(
                     behandlingId = behandlingId
@@ -45,7 +44,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        get("vedtak/sammendrag/{behandlingId}") {
+        get("/{behandlingId}/sammendrag/") {
             withBehandlingId { behandlingId ->
                 val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendrag()
                 if (vedtaksresultat == null) {
@@ -56,54 +55,46 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
             }
         }
 
-        post("vedtak/upsert/{behandlingId}") {
+        post("/{behandlingId}/upsert") {
             withBehandlingId { behandlingId ->
                 val nyttVedtak = service.opprettEllerOppdaterVedtak(
                     behandlingId = behandlingId,
-                    accessToken = accesstoken
+                    bruker = bruker
                 )
 
                 call.respond(nyttVedtak)
             }
         }
 
-        post("vedtak/attester/{behandlingId}") {
+        post("/{behandlingId}/attester") {
             withBehandlingId { behandlingId ->
-                val attestert = service.attesterVedtak(behandlingId, saksbehandler.ident, accesstoken)
+                val attestert = service.attesterVedtak(behandlingId, bruker)
 
                 call.respond(attestert)
             }
         }
 
-        post("vedtak") {
-            logger.debug("Request om vedtak bolk")
-            val request = call.receive<VedtakBolkRequest>()
-            val vedtak = service.hentVedtakBolk(request.behandlingsidenter.map { UUID.fromString(it) })
-            call.respond(VedtakBolkResponse(vedtak))
-        }
-
-        post("vedtak/fattvedtak/{behandlingId}") {
+        post("/{behandlingId}/fattvedtak") {
             withBehandlingId { behandlingId ->
-                val fattetVedtak = service.fattVedtak(behandlingId, saksbehandler.ident, accesstoken)
+                val fattetVedtak = service.fattVedtak(behandlingId, bruker)
 
                 call.respond(fattetVedtak)
             }
         }
 
-        post("vedtak/underkjenn/{behandlingId}") {
+        post("/{behandlingId}/underkjenn") {
             val behandlingId = UUID.fromString(call.parameters["behandlingId"])
             val begrunnelse = call.receive<UnderkjennVedtakClientRequest>()
             val underkjentVedtak = service.underkjennVedtak(
                 behandlingId,
-                accesstoken,
-                saksbehandler,
+                bruker,
                 begrunnelse
             )
 
             call.respond(underkjentVedtak)
         }
 
-        get("vedtak/loepende/{sakId}") {
+        get("/loepende/{sakId}") {
             val sakId = call.parameters["sakId"]?.toLong() ?: return@get call.respond(
                 BadRequest,
                 "Sak ID må sendes med som et tall i requesten"
@@ -123,5 +114,3 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 }
 
 data class UnderkjennVedtakClientRequest(val kommentar: String, val valgtBegrunnelse: String)
-private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
-private data class VedtakBolkResponse(val vedtak: List<Vedtak>)

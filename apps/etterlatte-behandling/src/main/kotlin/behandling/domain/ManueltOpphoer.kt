@@ -6,13 +6,16 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class ManueltOpphoer(
     override val id: UUID,
-    override val sak: Long,
+    override val sak: Sak,
     override val behandlingOpprettet: LocalDateTime,
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
@@ -24,7 +27,7 @@ data class ManueltOpphoer(
     override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER
 
     constructor(
-        sak: Long,
+        sak: Sak,
         persongalleri: Persongalleri,
         opphoerAarsaker: List<ManueltOpphoerAarsak>,
         fritekstAarsak: String?,
@@ -32,8 +35,8 @@ data class ManueltOpphoer(
     ) : this(
         id = UUID.randomUUID(),
         sak = sak,
-        behandlingOpprettet = LocalDateTime.now(),
-        sistEndret = LocalDateTime.now(),
+        behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+        sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
         status = BehandlingStatus.OPPRETTET,
         persongalleri = persongalleri,
         opphoerAarsaker = opphoerAarsaker,
@@ -85,5 +88,8 @@ data class ManueltOpphoer(
         endreTilStatus(BehandlingStatus.IVERKSATT)
     }
 
-    private fun endreTilStatus(status: BehandlingStatus) = this.copy(status = status, sistEndret = LocalDateTime.now())
+    private fun endreTilStatus(status: BehandlingStatus) = this.copy(
+        status = status,
+        sistEndret = Tidspunkt.now().toLocalDatetimeUTC()
+    )
 }

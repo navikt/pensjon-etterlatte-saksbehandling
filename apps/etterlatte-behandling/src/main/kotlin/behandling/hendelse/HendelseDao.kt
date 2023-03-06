@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.hendelse
 
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.toList
@@ -11,7 +12,6 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.sql.Types
-import java.time.ZoneId
 import java.util.*
 
 class HendelseDao(private val connection: () -> Connection) {
@@ -30,7 +30,7 @@ class HendelseDao(private val connection: () -> Connection) {
             inntruffet = Tidspunkt.now(),
             vedtakId = null,
             behandlingId = behandling.id,
-            sakId = behandling.sak,
+            sakId = behandling.sak.id,
             ident = saksbehandler,
             identType = "SAKSBEHANDLER",
             kommentar = kommentar,
@@ -38,10 +38,10 @@ class HendelseDao(private val connection: () -> Connection) {
         )
     )
 
-    fun behandlingOpprettet(behandling: Behandling) = lagreHendelse(
+    fun behandlingOpprettet(behandling: BehandlingOpprettet) = lagreHendelse(
         UlagretHendelse(
             "BEHANDLING:OPPRETTET",
-            behandling.behandlingOpprettet.toTidspunkt(ZoneId.systemDefault()),
+            behandling.timestamp.toTidspunkt(),
             null,
             behandling.id,
             behandling.sak,

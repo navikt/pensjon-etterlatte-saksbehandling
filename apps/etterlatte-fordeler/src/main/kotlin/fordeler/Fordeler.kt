@@ -72,9 +72,14 @@ internal class Fordeler(
                 }
             } catch (e: JsonMappingException) {
                 sikkerLogg.error("Feil under deserialisering", e)
-                logger.error("Feil under deserialisering. Sjekk sikkerlogg for detaljer")
+                logger.error(
+                    "Feil under deserialisering av søknad, soeknadId: ${packet.soeknadId()}" +
+                        ". Sjekk sikkerlogg for detaljer."
+                )
+                throw e
             } catch (e: Exception) {
-                logger.error("Uhåndtert feilsituasjon", e)
+                logger.error("Uhåndtert feilsituasjon soeknadId: ${packet.soeknadId()}", e)
+                throw e
             }
         }
 

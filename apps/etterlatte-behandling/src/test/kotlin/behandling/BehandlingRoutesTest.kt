@@ -20,12 +20,12 @@ import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.behandling.regulering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.Instant
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
@@ -75,7 +74,7 @@ internal class BehandlingRoutesTest {
         mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
 
         coEvery {
-            generellBehandlingService.erGyldigVirkningstidspunkt(any(), any(), any(), any())
+            generellBehandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
         } returns true
 
         testApplication {
@@ -124,7 +123,7 @@ internal class BehandlingRoutesTest {
         mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
 
         coEvery {
-            generellBehandlingService.erGyldigVirkningstidspunkt(any(), any(), any(), any())
+            generellBehandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
         } returns false
 
         testApplication {
@@ -168,7 +167,7 @@ internal class BehandlingRoutesTest {
 
     private fun mockBehandlingService(bodyVirkningstidspunkt: Instant, bodyBegrunnelse: String) {
         val parsetVirkningstidspunkt = YearMonth.from(
-            LocalDate.ofInstant(bodyVirkningstidspunkt, norskTidssone).let {
+            bodyVirkningstidspunkt.toLocalDateTimeNorskTid()!!.let {
                 YearMonth.of(it.year, it.month)
             }
         )

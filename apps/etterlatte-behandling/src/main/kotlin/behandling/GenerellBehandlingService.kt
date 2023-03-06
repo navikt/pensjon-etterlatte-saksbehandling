@@ -13,21 +13,22 @@ import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
+import no.nav.etterlatte.behandling.regulering.ReguleringFactory
+import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingMedGrunnlagsopplysninger
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
+import no.nav.etterlatte.token.Bruker
 import java.time.YearMonth
 import java.util.*
 
@@ -52,23 +53,20 @@ interface GenerellBehandlingService {
     fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
     suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
-        saksbehandler: Saksbehandler,
-        accessToken: String
+        bruker: Bruker
     ): DetaljertBehandlingDto
 
     fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
 
     suspend fun hentBehandlingMedEnkelPersonopplysning(
         behandlingId: UUID,
-        saksbehandler: Saksbehandler,
-        accessToken: String,
+        bruker: Bruker,
         opplysningstype: Opplysningstype
     ): BehandlingMedGrunnlagsopplysninger<Person>
 
     suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
-        saksbehandler: Saksbehandler,
-        accessToken: String,
+        bruker: Bruker,
         request: VirkningstidspunktRequest
     ): Boolean
 }
@@ -147,8 +145,7 @@ class RealGenerellBehandlingService(
 
     override suspend fun hentBehandlingMedEnkelPersonopplysning(
         behandlingId: UUID,
-        saksbehandler: Saksbehandler,
-        accessToken: String,
+        bruker: Bruker,
         opplysningstype: Opplysningstype
     ): BehandlingMedGrunnlagsopplysninger<Person> {
         val behandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
@@ -156,21 +153,20 @@ class RealGenerellBehandlingService(
         val personopplysning = grunnlagKlient.finnPersonOpplysning(
             sakId,
             opplysningstype,
-            accessToken
+            bruker
         )
         return BehandlingMedGrunnlagsopplysninger(
             id = behandling.id,
             soeknadMottattDato = behandling.soeknadMottattDato,
             personopplysning = personopplysning
         ).also {
-            personopplysning?.fnr?.let { loggRequest(saksbehandler, it) }
+            personopplysning?.fnr?.let { loggRequest(bruker, it) }
         }
     }
 
     override suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
-        saksbehandler: Saksbehandler,
-        accessToken: String,
+        bruker: Bruker,
         request: VirkningstidspunktRequest
     ): Boolean {
         val virkningstidspunkt = request.dato
@@ -179,8 +175,7 @@ class RealGenerellBehandlingService(
 
         val behandlingMedDoedsdato = hentBehandlingMedEnkelPersonopplysning(
             behandlingId,
-            saksbehandler,
-            accessToken,
+            bruker,
             Opplysningstype.AVDOED_PDL_V1
         )
         val doedsdato = YearMonth.from(behandlingMedDoedsdato.personopplysning?.opplysning?.doedsdato)
@@ -198,31 +193,36 @@ class RealGenerellBehandlingService(
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
-        saksbehandler: Saksbehandler,
-        accessToken: String
+        bruker: Bruker
     ): DetaljertBehandlingDto {
         val detaljertBehandling = hentBehandling(behandlingId)?.toDetaljertBehandling()!!
         val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
         val sakId = detaljertBehandling.sak
         return coroutineScope {
-            val vedtak = async { vedtakKlient.hentVedtak(behandlingId.toString(), accessToken) }
+            val vedtak = async { vedtakKlient.hentVedtak(behandlingId.toString(), bruker) }
             val avdoed = async {
-                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, accessToken)
+                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, bruker)
             }
-            val gjenlevende = async {
-                grunnlagKlient.finnPersonOpplysning(
-                    sakId,
-                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
-                    accessToken
-                )
-            }
+
             val soeker = async {
-                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, accessToken)
+                grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, bruker)
+            }
+            val gjenlevende = if (detaljertBehandling.sakType == SakType.OMSTILLINGSSTOENAD) {
+                soeker
+            } else {
+                async {
+                    grunnlagKlient.finnPersonOpplysning(
+                        sakId,
+                        Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                        bruker
+                    )
+                }
             }
 
             DetaljertBehandlingDto(
                 id = detaljertBehandling.id,
                 sak = detaljertBehandling.sak,
+                sakType = detaljertBehandling.sakType,
                 gyldighetsprøving = detaljertBehandling.gyldighetsproeving,
                 kommerBarnetTilgode = detaljertBehandling.kommerBarnetTilgode,
                 saksbehandlerId = vedtak.await()?.saksbehandlerId,
@@ -237,18 +237,18 @@ class RealGenerellBehandlingService(
                 behandlingType = detaljertBehandling.behandlingType,
                 søker = soeker.await()?.opplysning
             ).also {
-                gjenlevende.await()?.fnr?.let { loggRequest(saksbehandler, it) }
-                soeker.await()?.fnr?.let { loggRequest(saksbehandler, it) }
+                gjenlevende.await()?.fnr?.let { loggRequest(bruker, it) }
+                soeker.await()?.fnr?.let { loggRequest(bruker, it) }
             }
         }
     }
 
-    private fun loggRequest(saksbehandler: Saksbehandler, fnr: Foedselsnummer) =
+    private fun loggRequest(bruker: Bruker, fnr: Foedselsnummer) =
         sporingslogg.logg(
             Sporingsrequest(
                 kallendeApplikasjon = "behandling",
                 oppdateringstype = HttpMethod.GET,
-                brukerId = saksbehandler.ident,
+                brukerId = bruker.ident(),
                 hvemBlirSlaattOpp = fnr.value,
                 endepunkt = "behandling",
                 resultat = Decision.Permit,

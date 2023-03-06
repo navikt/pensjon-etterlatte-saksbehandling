@@ -7,15 +7,15 @@ repositories {
 }
 
 dependencies {
-    implementation(Ktor2.ClientCore)
-    implementation(Ktor2.ClientContentNegotiation)
-    implementation(Ktor2.Jackson)
+    implementation(libs.ktor2.clientcore)
+    implementation(libs.ktor2.clientcontentnegotiation)
+    implementation(libs.ktor2.jackson)
 
-    compileOnly(Logging.Slf4jApi)
+    compileOnly(libs.logging.slf4japi)
 
-    testImplementation(Jupiter.Engine)
-    testImplementation(Ktor2.ClientMock)
-    testImplementation(MockK.MockK)
+    testImplementation(libs.test.jupiter.engine)
+    testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.test.mockk)
 }
 tasks {
     withType<Test> {

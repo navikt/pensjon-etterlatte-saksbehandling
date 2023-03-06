@@ -1,11 +1,10 @@
 package no.nav.etterlatte.utbetaling.common
 
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
-import java.time.Clock
 import java.time.Instant
 import java.time.Month
 import java.time.YearMonth
@@ -15,7 +14,7 @@ internal class UtilsTest {
 
     @Test
     fun `skal returnere Tidspunkt-objekt for midnatt i dag for norsk vintertid`() {
-        val statiskKlokke = Clock.fixed(Instant.parse("2022-01-01T21:14:29.4839104Z"), norskTidssone)
+        val statiskKlokke = Instant.parse("2022-01-01T21:14:29.4839104Z").fixedNorskTid()
         val midnatt = tidspunktMidnattIdag(statiskKlokke)
 
         assertEquals("2021-12-31T23:00:00Z", midnatt.instant.toString())
@@ -23,7 +22,7 @@ internal class UtilsTest {
 
     @Test
     fun `skal returnere Tidspunkt-objekt for midnatt i dag for norsk sommertid`() {
-        val statiskKlokke = Clock.fixed(Instant.parse("2022-06-01T21:14:29.4839104Z"), norskTidssone)
+        val statiskKlokke = Instant.parse("2022-06-01T21:14:29.4839104Z").fixedNorskTid()
         val midnatt = tidspunktMidnattIdag(statiskKlokke)
 
         assertEquals("2022-05-31T22:00:00Z", midnatt.instant.toString())

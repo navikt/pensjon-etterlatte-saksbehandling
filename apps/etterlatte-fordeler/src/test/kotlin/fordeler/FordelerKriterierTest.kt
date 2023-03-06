@@ -13,6 +13,8 @@ import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.mockUgyldigAdresse
@@ -42,7 +44,7 @@ internal class FordelerKriterierTest {
             fnr = FNR_2,
             doedsdato = LocalDate.now().plusMonths(11),
             bostedsadresse = mockNorskAdresse(
-                gyldigTilOgMed = LocalDateTime.now().plusMonths(11)
+                gyldigTilOgMed = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(11)
             ),
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(barn.foedselsnummer),

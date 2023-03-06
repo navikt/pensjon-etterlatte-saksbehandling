@@ -14,9 +14,11 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -24,7 +26,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -46,7 +47,7 @@ internal class VedtaksvurderingServiceTest {
 
     private val sakId = 2L
     private val behandlingId = UUID.randomUUID()
-    private val accessToken = "sesam sesam"
+    private val bruker = Bruker.of("sesam sesam", "1", null, null)
 
     private val vedtakSomIkkeErFattet = Vedtak(
         0,
@@ -102,13 +103,13 @@ internal class VedtaksvurderingServiceTest {
 
     @Test
     fun `hentDataForVedtak skal hente en beregning om vilkårsvurdering er oppfylt`() {
-        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) } returns VilkaarsvurderingDto(
+        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, bruker) } returns VilkaarsvurderingDto(
             behandlingId,
             emptyList(),
             YearMonth.now(),
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, LocalDateTime.now(), "")
+            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, Tidspunkt.now().toLocalDatetimeUTC(), "")
         )
-        coEvery { beregningMock.hentBeregning(behandlingId, accessToken) } returns BeregningDTO(
+        coEvery { beregningMock.hentBeregning(behandlingId, bruker) } returns BeregningDTO(
             UUID.randomUUID(),
             behandlingId,
             Beregningstype.BP,
@@ -118,22 +119,27 @@ internal class VedtaksvurderingServiceTest {
         )
 
         runBlocking {
-            service.hentDataForVedtak(behandlingId, accessToken)
-            coVerify(exactly = 1) { beregningMock.hentBeregning(behandlingId, accessToken) }
+            service.hentDataForVedtak(behandlingId, bruker)
+            coVerify(exactly = 1) { beregningMock.hentBeregning(behandlingId, bruker) }
         }
     }
 
     @Test
     fun `hentDataForVedtak skal ikke hente en beregning om vilkårsvurdering ikke er oppfylt`() {
-        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) } returns VilkaarsvurderingDto(
+        coEvery { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, bruker) } returns VilkaarsvurderingDto(
             behandlingId,
             emptyList(),
             YearMonth.now(),
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.IKKE_OPPFYLT, null, LocalDateTime.now(), "")
+            VilkaarsvurderingResultat(
+                VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+                null,
+                Tidspunkt.now().toLocalDatetimeUTC(),
+                ""
+            )
         )
         runBlocking {
-            service.hentDataForVedtak(behandlingId, accessToken)
-            coVerify(exactly = 0) { beregningMock.hentBeregning(behandlingId, accessToken) }
+            service.hentDataForVedtak(behandlingId, bruker)
+            coVerify(exactly = 0) { beregningMock.hentBeregning(behandlingId, bruker) }
         }
     }
 
@@ -160,8 +166,9 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingMock.hentBehandling(any(), any()) } returns DetaljertBehandling(
             id = behandlingId,
             sak = 0,
-            behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
+            sakType = SakType.BARNEPENSJON,
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             soeknadMottattDato = null,
             innsender = null,
             soeker = null,
@@ -176,9 +183,9 @@ internal class VedtaksvurderingServiceTest {
             revurderingsaarsak = null
         )
         runBlocking {
-            service.hentDataForVedtak(behandlingId, accessToken)
-            coVerify(exactly = 0) { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, accessToken) }
-            coVerify(exactly = 1) { beregningMock.hentBeregning(behandlingId, accessToken) }
+            service.hentDataForVedtak(behandlingId, bruker)
+            coVerify(exactly = 0) { vilkaarsvurderingMock.hentVilkaarsvurdering(behandlingId, bruker) }
+            coVerify(exactly = 1) { beregningMock.hentBeregning(behandlingId, bruker) }
         }
     }
 }

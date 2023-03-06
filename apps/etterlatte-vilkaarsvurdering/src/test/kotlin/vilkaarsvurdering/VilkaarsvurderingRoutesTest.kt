@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -32,6 +31,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -83,7 +83,6 @@ internal class VilkaarsvurderingRoutesTest {
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any(), VilkaarsvurderingUtfall.OPPFYLT)
         } returns true
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
@@ -444,7 +443,6 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -467,7 +465,6 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns false
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -492,7 +489,6 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns false
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -519,7 +515,6 @@ internal class VilkaarsvurderingRoutesTest {
             true,
             false
         )
-        coEvery { behandlingKlient.hentSak(any(), any()) } returns lagSak()
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -562,21 +557,16 @@ internal class VilkaarsvurderingRoutesTest {
     private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
         every { id } returns UUID.randomUUID()
         every { sak } returns 1L
+        every { sakType } returns SakType.BARNEPENSJON
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { soeker } returns "10095512345"
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
         every { revurderingsaarsak } returns null
     }
 
-    private fun lagSak() = mockk<Sak>().apply {
-        every { id } returns 1L
-        every { ident } returns "ident"
-        every { sakType } returns SakType.BARNEPENSJON
-    }
-
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        const val oboToken = "token"
+        val oboToken = Bruker.of("token", "s1", null, null)
         const val ISSUER_ID = "azure"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }

@@ -6,8 +6,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
-import no.nav.etterlatte.libs.common.sak.Saksbehandler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -70,7 +71,7 @@ class VedtaksvurderingService(
 
     fun lagreIverksattVedtak(behandlingId: UUID) {
         repository.hentVedtak(behandlingId)?.also {
-            val iverksattTidspunkt = LocalDateTime.now()
+            val iverksattTidspunkt = Tidspunkt.now().toLocalDatetimeUTC()
             repository.lagreIverksattVedtak(behandlingId)
             val detaljertVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
             val statistikkMelding = lagStatistikkMelding(
@@ -80,10 +81,6 @@ class VedtaksvurderingService(
             )
             sendToRapid(statistikkMelding, behandlingId)
         }
-    }
-
-    fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<VedtakEntity> {
-        return repository.hentVedtakBolk(behandlingsidenter)
     }
 
     fun hentVedtak(behandlingId: UUID): VedtakEntity? {
@@ -96,17 +93,17 @@ class VedtaksvurderingService(
         return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)
     }
 
-    suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, accessToken: String): Vedtak {
+    suspend fun opprettEllerOppdaterVedtak(behandlingId: UUID, bruker: Bruker): Vedtak {
         val vedtak = hentVedtak(behandlingId)
         if (vedtak?.vedtakFattet == true) {
             throw KanIkkeEndreFattetVedtak(vedtak)
         }
 
-        val (beregning, vilkaarsvurdering, behandling) = hentDataForVedtak(behandlingId, accessToken)
+        val (beregning, vilkaarsvurdering, behandling) = hentDataForVedtak(behandlingId, bruker)
         val virk = vilkaarsvurdering?.virkningstidspunkt?.atDay(1) ?: behandling.virkningstidspunkt!!.dato.atDay(1)
 
         if (vedtak == null) {
-            val sak = behandlingKlient.hentSak(behandling.sak, accessToken)
+            val sak = behandlingKlient.hentSak(behandling.sak, bruker)
             repository.opprettVedtak(
                 behandlingId,
                 behandling.sak,
@@ -130,22 +127,22 @@ class VedtaksvurderingService(
 
     suspend fun hentDataForVedtak(
         behandlingId: UUID,
-        accessToken: String
+        bruker: Bruker
     ): Triple<Beregningsresultat?, VilkaarsvurderingDto?, DetaljertBehandling> {
         return coroutineScope {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
             if (behandling.behandlingType == BehandlingType.MANUELT_OPPHOER) {
-                val beregningDTO = beregningKlient.hentBeregning(behandlingId, accessToken)
+                val beregningDTO = beregningKlient.hentBeregning(behandlingId, bruker)
                 val beregningsresultat = Beregningsresultat.fraDto(beregningDTO)
                 return@coroutineScope Triple(beregningsresultat, null, behandling)
             }
 
-            val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, accessToken)
+            val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
 
             when (vilkaarsvurdering.resultat?.utfall) {
                 VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(null, vilkaarsvurdering, behandling)
                 VilkaarsvurderingUtfall.OPPFYLT -> {
-                    val beregningDTO = beregningKlient.hentBeregning(behandlingId, accessToken)
+                    val beregningDTO = beregningKlient.hentBeregning(behandlingId, bruker)
                     val beregningsResultat = Beregningsresultat.fraDto(beregningDTO)
                     Triple(beregningsResultat, vilkaarsvurdering, behandling)
                 }
@@ -169,10 +166,9 @@ class VedtaksvurderingService(
 
     suspend fun fattVedtak(
         behandlingId: UUID,
-        saksbehandler: String,
-        accessToken: String
+        bruker: Bruker
     ): Vedtak {
-        if (!behandlingKlient.fattVedtak(behandlingId, accessToken)) {
+        if (!behandlingKlient.fattVedtak(behandlingId, bruker)) {
             throw BehandlingstilstandException
         }
 
@@ -187,8 +183,8 @@ class VedtaksvurderingService(
             if (it.vilkaarsvurdering == null && it.behandling.type != BehandlingType.MANUELT_OPPHOER) {
                 throw VedtakKanIkkeFattes(v)
             }
-            val saksbehandlerEnhet = saksbehandlere[saksbehandler]
-                ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
+            val saksbehandler = bruker.ident()
+            val saksbehandlerEnhet: String = bruker.saksbehandlerEnhet(saksbehandlere)
 
             repository.fattVedtak(saksbehandler, saksbehandlerEnhet, behandlingId)
         }
@@ -199,7 +195,7 @@ class VedtaksvurderingService(
             inntruffet = fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
             saksbehandler = fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
         )
-        behandlingKlient.fattVedtak(behandlingId, accessToken, vedtakHendelse)
+        behandlingKlient.fattVedtak(behandlingId, bruker, vedtakHendelse)
 
         val fattetTid = fattetVedtak.vedtakFattet?.tidspunkt?.toLocalDateTime()!!
         val statistikkmelding = lagStatistikkMelding(KafkaHendelseType.FATTET, fattetVedtak, fattetTid)
@@ -210,10 +206,9 @@ class VedtaksvurderingService(
 
     suspend fun attesterVedtak(
         behandlingId: UUID,
-        saksbehandler: String,
-        accessToken: String
+        bruker: Bruker
     ): Vedtak {
-        if (!behandlingKlient.attester(behandlingId, accessToken)) {
+        if (!behandlingKlient.attester(behandlingId, bruker)) {
             throw BehandlingstilstandException
         }
 
@@ -221,9 +216,8 @@ class VedtaksvurderingService(
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
         }
-
-        val saksbehandlerEnhet = saksbehandlere[saksbehandler]
-            ?: throw SaksbehandlerManglerEnhetException("Saksbehandler $saksbehandler mangler enhet fra secret")
+        val saksbehandler = bruker.ident()
+        val saksbehandlerEnhet: String = bruker.saksbehandlerEnhet(saksbehandlere)
 
         repository.attesterVedtak(
             saksbehandler,
@@ -238,7 +232,7 @@ class VedtaksvurderingService(
             inntruffet = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!,
             saksbehandler = attestertVedtak.attestasjon?.attestant!!
         )
-        behandlingKlient.attester(behandlingId, accessToken, vedtakHendelse)
+        behandlingKlient.attester(behandlingId, bruker, vedtakHendelse)
         val attestertTid = attestertVedtak.attestasjon?.tidspunkt?.toLocalDateTime()!!
         val message = lagStatistikkMelding(KafkaHendelseType.ATTESTERT, attestertVedtak, attestertTid)
         sendToRapid(message, behandlingId)
@@ -252,11 +246,10 @@ class VedtaksvurderingService(
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,
-        accessToken: String,
-        saksbehandler: Saksbehandler,
+        bruker: Bruker,
         begrunnelse: UnderkjennVedtakClientRequest
     ): VedtakEntity {
-        if (!behandlingKlient.underkjenn(behandlingId, accessToken)) {
+        if (!behandlingKlient.underkjenn(behandlingId, bruker)) {
             throw BehandlingstilstandException
         }
 
@@ -266,16 +259,16 @@ class VedtaksvurderingService(
         }
         repository.underkjennVedtak(behandlingId)
         val underkjentVedtak = requireNotNull(hentFellesVedtakMedUtbetalingsperioder(behandlingId))
-        val underkjentTid = LocalDateTime.now()
+        val underkjentTid = Tidspunkt.now().toLocalDatetimeUTC()
         val vedtakHendelse = VedtakHendelse(
             vedtakId = underkjentVedtak.vedtakId,
             inntruffet = underkjentTid.toNorskTidspunkt(),
-            saksbehandler = saksbehandler.ident,
+            saksbehandler = bruker.ident(),
             kommentar = begrunnelse.kommentar,
             valgtBegrunnelse = begrunnelse.valgtBegrunnelse
         )
 
-        behandlingKlient.underkjenn(behandlingId, accessToken, vedtakHendelse)
+        behandlingKlient.underkjenn(behandlingId, bruker, vedtakHendelse)
         val message = lagStatistikkMelding(KafkaHendelseType.UNDERKJENT, underkjentVedtak, underkjentTid)
         sendToRapid(message, behandlingId)
         return repository.hentVedtak(behandlingId)!!
@@ -336,8 +329,6 @@ class VedtaksvurderingService(
             .sortedBy { it.periode.fom }
     }
 }
-
-class SaksbehandlerManglerEnhetException(message: String) : Exception(message)
 
 private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak, tekniskTid: LocalDateTime) =
     JsonMessage.newMessage(

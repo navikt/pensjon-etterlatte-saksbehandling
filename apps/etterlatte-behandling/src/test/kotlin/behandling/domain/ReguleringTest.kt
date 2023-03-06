@@ -3,27 +3,36 @@ package behandling.domain
 import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class ReguleringTest {
 
     @Test
     fun `regulering kan endre tilstander`() {
         Regulering(
-            UUID.randomUUID(), 1, LocalDateTime.now(), LocalDateTime.now(), BehandlingStatus.OPPRETTET,
-            Persongalleri(""), null, null, null
-        )
-            .tilReturnert()
-            .tilOpprettet()
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.IKKE_OPPFYLT)
-            .tilBeregnet()
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
-            .tilBeregnet()
-            .tilFattetVedtak()
-            .tilAttestert()
+            id = UUID.randomUUID(),
+            sak = Sak(
+                ident = "",
+                sakType = SakType.BARNEPENSJON,
+                id = 1
+            ),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+            status = BehandlingStatus.OPPRETTET,
+            persongalleri = Persongalleri(""),
+            kommerBarnetTilgode = null,
+            vilkaarUtfall = null,
+            virkningstidspunkt = null,
+            Prosesstype.AUTOMATISK
+        ).tilReturnert().tilOpprettet().tilVilkaarsvurdert(VilkaarsvurderingUtfall.IKKE_OPPFYLT).tilBeregnet()
+            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilBeregnet().tilFattetVedtak().tilAttestert()
             .tilIverksatt()
     }
 }

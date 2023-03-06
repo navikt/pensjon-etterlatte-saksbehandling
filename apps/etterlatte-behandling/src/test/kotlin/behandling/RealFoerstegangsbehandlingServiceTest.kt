@@ -9,22 +9,26 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class RealFoerstegangsbehandlingServiceTest {
 
@@ -64,11 +68,15 @@ internal class RealFoerstegangsbehandlingServiceTest {
             )
         } returns Foerstegangsbehandling(
             id = id,
-            sak = 1,
-            behandlingOpprettet = LocalDateTime.now(),
-            sistEndret = LocalDateTime.now(),
+            sak = Sak(
+                ident = "Ola Olsen",
+                sakType = SakType.BARNEPENSJON,
+                id = 1
+            ),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = LocalDateTime.now(),
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
             persongalleri = Persongalleri(
                 soeker = "Ola Olsen",
                 "Soeker",
@@ -93,19 +101,23 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun startBehandling() {
         val behandlingerMock = mockk<BehandlingDao>()
         val hendelserMock = mockk<HendelseDao>()
-        val behandlingOpprettes = slot<Foerstegangsbehandling>()
+        val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
-        val datoNaa = LocalDateTime.now()
+        val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         val opprettetBehandling = Foerstegangsbehandling(
             id = UUID.randomUUID(),
-            sak = 1,
+            sak = Sak(
+                ident = "Soeker",
+                sakType = SakType.BARNEPENSJON,
+                id = 1
+            ),
             behandlingOpprettet = datoNaa,
             sistEndret = datoNaa,
             status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = LocalDateTime.now(),
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
             persongalleri = Persongalleri(
                 "Innsender",
                 "Soeker",
@@ -137,7 +149,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             hendleseskanal
         )
 
-        every { behandlingerMock.opprettFoerstegangsbehandling(capture(behandlingOpprettes)) } returns Unit
+        every { behandlingerMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every {
             behandlingerMock.hentBehandling(
                 capture(behandlingHentes),
@@ -159,7 +171,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         assertEquals(opprettetBehandling.id, resultat.id)
         assertEquals(opprettetBehandling.persongalleri.soeker, resultat.persongalleri.soeker)
         assertEquals(opprettetBehandling.behandlingOpprettet, resultat.behandlingOpprettet)
-        assertEquals(1, behandlingOpprettes.captured.sak)
+        assertEquals(1, behandlingOpprettes.captured.sakId)
         assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
         assertEquals(resultat.id, hendelse.captured.first)
         assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second)

@@ -10,5 +10,5 @@ repositories {
 dependencies {
     implementation(project(":libs:common"))
 
-    testImplementation(Jupiter.Engine)
+    testImplementation(libs.test.jupiter.engine)
 }

@@ -18,8 +18,9 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 class VedtaksbrevService(
     private val db: BrevRepository,
@@ -33,8 +34,7 @@ class VedtaksbrevService(
     suspend fun oppdaterVedtaksbrev(
         sakId: Long,
         behandlingId: UUID,
-        saksbehandler: String,
-        accessToken: String = ""
+        bruker: Bruker
     ): Brev {
         val vedtaksbrev = hentVedtaksbrev(behandlingId)
 
@@ -46,7 +46,7 @@ class VedtaksbrevService(
             return vedtaksbrev
         }
 
-        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, saksbehandler, accessToken)
+        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, bruker)
         val nyttBrev = opprettEllerOppdater(behandling)
 
         return if (vedtaksbrev == null) {

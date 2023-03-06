@@ -1,38 +1,38 @@
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("etterlatte.rapids-and-rivers-ktor2")
     id("etterlatte.common")
     id("etterlatte.kafka")
-    id("com.faire.gradle.analyze") version "1.0.9"
+    alias(libs.plugins.analyze)
 }
+
 dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:etterlatte-jobs"))
     implementation(project(":libs:etterlatte-database"))
 
-    implementation(Ktor2.OkHttp)
-    implementation(Ktor2.ClientCore)
-    implementation(Ktor2.ClientContentNegotiation)
-    implementation(Ktor2.Jackson)
+    implementation(libs.ktor2.okhttp)
+    implementation(libs.ktor2.clientcore)
+    implementation(libs.ktor2.clientcontentnegotiation)
+    implementation(libs.ktor2.jackson)
 
-    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.3.2.0")
-    implementation("org.messaginghub:pooled-jms:3.1.0")
-    implementation(
-        "com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon:1.4201aa"
-    )
-    implementation("com.github.navikt.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:1.4201aa")
+    implementation(libs.mq.jakarta.client)
+    implementation(libs.messaginghub.pooled.jms)
+    implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsbehandling)
+    implementation(libs.navfelles.tjenestespesifikasjoner.avstemming)
 
-    implementation(JakartaBind.api)
-    implementation(JakartaBind.impl)
+    implementation(libs.jakartabind.api)
+    implementation(libs.jakartabind.impl)
 
-    implementation(Database.HikariCP)
-    implementation(Database.FlywayDB)
-    implementation(Database.Postgresql)
-    implementation(Database.KotliQuery)
+    implementation(libs.database.hikaricp)
+    implementation(libs.database.flywaydb)
+    implementation(libs.database.postgresql)
+    implementation(libs.database.kotliquery)
 
-    testImplementation(Ktor2.ClientMock)
-    testImplementation(MockK.MockK)
-    testImplementation(Kotlinx.CoroutinesCore)
-    testImplementation(WireMock.WireMock)
-    testImplementation(TestContainer.Jupiter)
-    testImplementation(TestContainer.Postgresql)
+    testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.test.wiremock)
+    testImplementation(libs.test.testcontainer.jupiter)
+    testImplementation(libs.test.testcontainer.postgresql)
 }

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import kotliquery.Row
-import kotliquery.Session
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
@@ -76,16 +75,6 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingsId),
         loggtekst = "Lagrer iverksatt vedtak"
     ).also { require(it == 1) }
-
-    fun hentVedtakBolk(behandlingsidenter: List<UUID>) = repositoryWrapper.hentListeMedKotliquery(
-        query = """SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat,
-            vedtakfattet, id, fnr, datoFattet, datoattestert, attestant,
-            datoVirkFom, vedtakstatus, saktype, behandlingtype, attestertVedtakEnhet, fattetVedtakEnhet 
-            FROM vedtak where behandlingId = ANY(:behandlingId)""",
-        { session: Session -> mapOf("behandlingId" to session.createArrayOf("uuid", behandlingsidenter)) }
-    ) {
-        it.toVedtak()
-    }
 
     fun hentVedtak(behandlingsId: UUID): Vedtak? {
         val hentVedtak =

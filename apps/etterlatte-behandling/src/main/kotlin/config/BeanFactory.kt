@@ -19,11 +19,11 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
-import no.nav.etterlatte.behandling.omberegning.OmberegningService
-import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
-import no.nav.etterlatte.behandling.revurdering.ReguleringFactory
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.behandling.omregning.OmregningService
+import no.nav.etterlatte.behandling.regulering.RealRevurderingService
+import no.nav.etterlatte.behandling.regulering.ReguleringFactory
+import no.nav.etterlatte.behandling.regulering.RevurderingFactory
+import no.nav.etterlatte.behandling.regulering.RevurderingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -43,7 +43,10 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
+import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -54,14 +57,16 @@ interface BeanFactory {
     val config: Config
     fun dataSource(): DataSource
     fun sakService(): SakService
+    fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse
     fun foerstegangsbehandlingService(): FoerstegangsbehandlingService
     fun revurderingService(): RevurderingService
     fun generellBehandlingService(): GenerellBehandlingService
     fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService
     fun manueltOpphoerService(): ManueltOpphoerService
     fun oppgaveService(): OppgaveService
-    fun omberegningService(): OmberegningService
+    fun omregningService(): OmregningService
     fun sakDao(): SakDao
+    fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse
     fun oppgaveDao(): OppgaveDao
     fun behandlingDao(): BehandlingDao
     fun hendelseDao(): HendelseDao
@@ -91,8 +96,7 @@ abstract class CommonFactory : BeanFactory {
         BehandlingsHendelser(
             rapid(),
             behandlingDao(),
-            dataSource(),
-            sakService()
+            dataSource()
         )
     }
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory by lazy {
@@ -135,6 +139,9 @@ abstract class CommonFactory : BeanFactory {
     }
 
     override fun sakService(): SakService = RealSakService(sakDao())
+
+    override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
+        SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()))
 
     override fun behandlingsStatusService(): BehandlingStatusService {
         return BehandlingStatusServiceImpl(behandlingDao(), generellBehandlingService())
@@ -179,6 +186,8 @@ abstract class CommonFactory : BeanFactory {
     override fun oppgaveDao(): OppgaveDao = oppgaveDao
     override fun oppgaveService(): OppgaveService = oppgaveService
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
+    override fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse =
+        SakDaoAdressebeskyttelse(datasource)
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
     override fun hendelseDao(): HendelseDao = HendelseDao { databaseContext().activeTx() }
     override fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao =
@@ -198,7 +207,7 @@ abstract class CommonFactory : BeanFactory {
             generellBehandlingService(),
             pdlKlient(),
             grunnlagKlientClientCredentials(),
-            sakService()
+            sakServiceAdressebeskyttelse()
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(
@@ -212,8 +221,8 @@ abstract class CommonFactory : BeanFactory {
 
     override fun sporingslogg(): Sporingslogg = Sporingslogg()
 
-    override fun omberegningService(): OmberegningService =
-        OmberegningService(reguleringFactory = reguleringFactory(), behandlingService = generellBehandlingService())
+    override fun omregningService(): OmregningService =
+        OmregningService(reguleringFactory = reguleringFactory(), behandlingService = generellBehandlingService())
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
@@ -265,7 +274,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-                Duration.of(1, ChronoUnit.MINUTES).toMillis()
+            Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

@@ -12,7 +12,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
         if (iverksatteVedtak.isEmpty()) return LoependeYtelseDTO(false, dato)
 
         val erLoepende =
-            hentSenesteVedtakPaaDato(dato)?.vedtakType in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
+            hentSenesteVedtakPaaDato(dato)?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
         return LoependeYtelseDTO(
             erLoepende = erLoepende,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato

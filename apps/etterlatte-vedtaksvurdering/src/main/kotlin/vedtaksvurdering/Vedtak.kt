@@ -18,7 +18,7 @@ import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.*
 
-data class NyttVedtak(
+data class OpprettVedtak(
     val soeker: Foedselsnummer,
     val sakId: Long,
     val sakType: SakType,
@@ -26,7 +26,7 @@ data class NyttVedtak(
     val behandlingType: BehandlingType,
     val virkningstidspunkt: YearMonth,
     val status: VedtakStatus = VedtakStatus.OPPRETTET,
-    val vedtakType: VedtakType,
+    val type: VedtakType,
     val beregning: ObjectNode?,
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>
@@ -41,7 +41,7 @@ data class Vedtak(
     val behandlingType: BehandlingType,
     val virkningstidspunkt: YearMonth,
     val status: VedtakStatus,
-    val vedtakType: VedtakType,
+    val type: VedtakType,
     val beregning: ObjectNode?,
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>,
@@ -53,7 +53,7 @@ data class Vedtak(
         virkningstidspunkt = virkningstidspunkt,
         sak = Sak(soeker.value, sakType, sakId),
         behandling = Behandling(behandlingType, behandlingId),
-        type = vedtakType,
+        type = type,
         utbetalingsperioder = utbetalingsperioder,
         vedtakFattet = vedtakFattet,
         attestasjon = attestasjon

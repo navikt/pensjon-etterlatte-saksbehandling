@@ -33,38 +33,38 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
     }
 
-    fun opprettVedtak(nyttVedtak: NyttVedtak): Vedtak =
+    fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak =
         using(sessionOf(datasource, returnGeneratedKey = true)) { session ->
             session.transaction { tx ->
                 queryOf(
                     statement = """
                         INSERT INTO vedtak(
-                            behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, vedtaktype, datovirkfom, 
+                            behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, type, datovirkfom, 
                             beregningsresultat, vilkaarsresultat)
-                        VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :vedtaktype, 
+                        VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :type, 
                             :datovirkfom, :beregningsresultat, :vilkaarsresultat)
                         RETURNING id
                         """,
                     mapOf(
-                        "behandlingId" to nyttVedtak.behandlingId,
-                        "behandlingtype" to nyttVedtak.behandlingType.name,
-                        "sakid" to nyttVedtak.sakId,
-                        "saktype" to nyttVedtak.sakType.name,
-                        "fnr" to nyttVedtak.soeker.value,
-                        "vedtakstatus" to nyttVedtak.status.name,
-                        "vedtaktype" to nyttVedtak.vedtakType.name,
-                        "datovirkfom" to nyttVedtak.virkningstidspunkt.atDay(1),
-                        "beregningsresultat" to nyttVedtak.beregning?.toJson(),
-                        "vilkaarsresultat" to nyttVedtak.vilkaarsvurdering?.toJson()
+                        "behandlingId" to opprettVedtak.behandlingId,
+                        "behandlingtype" to opprettVedtak.behandlingType.name,
+                        "sakid" to opprettVedtak.sakId,
+                        "saktype" to opprettVedtak.sakType.name,
+                        "fnr" to opprettVedtak.soeker.value,
+                        "vedtakstatus" to opprettVedtak.status.name,
+                        "type" to opprettVedtak.type.name,
+                        "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
+                        "beregningsresultat" to opprettVedtak.beregning?.toJson(),
+                        "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson()
                     )
                 )
                     .let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
                     ?.let { vedtakId ->
-                        opprettUtbetalingsperioder(vedtakId, nyttVedtak.utbetalingsperioder, tx)
-                    } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${nyttVedtak.behandlingId}")
+                        opprettUtbetalingsperioder(vedtakId, opprettVedtak.utbetalingsperioder, tx)
+                    } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
             }.let {
-                hentVedtak(nyttVedtak.behandlingId)
-                    ?: throw Exception("Kunne ikke opprette vedtak for behandling ${nyttVedtak.behandlingId}")
+                hentVedtak(opprettVedtak.behandlingId)
+                    ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
             }
         }
 
@@ -74,13 +74,13 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
                 queryOf(
                     statement = """
                         UPDATE vedtak 
-                        SET datovirkfom = :datovirkfom, vedtaktype = :vedtaktype, 
+                        SET datovirkfom = :datovirkfom, type = :type, 
                             beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat 
                         WHERE behandlingId = :behandlingid
                         """,
                     mapOf(
                         "datovirkfom" to oppdatertVedtak.virkningstidspunkt.atDay(1),
-                        "vedtaktype" to oppdatertVedtak.vedtakType.name,
+                        "type" to oppdatertVedtak.type.name,
                         "beregningsresultat" to oppdatertVedtak.beregning?.toJson(),
                         "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
                         "behandlingid" to oppdatertVedtak.behandlingId
@@ -132,7 +132,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             query = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, vedtaktype  
+                attestertVedtakEnhet, fattetVedtakEnhet, type  
             FROM vedtak 
             WHERE behandlingId = :behandlingId
             """,
@@ -149,7 +149,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, vedtaktype  
+                attestertVedtakEnhet, fattetVedtakEnhet, type  
             FROM vedtak  
             WHERE sakId = :sakId
             """
@@ -237,7 +237,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         behandlingType = BehandlingType.valueOf(string("behandlingtype")),
         soeker = string("fnr").let { Foedselsnummer.of(it) },
         status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
-        vedtakType = string("vedtaktype").let { VedtakType.valueOf(it) },
+        type = string("type").let { VedtakType.valueOf(it) },
         virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
         vilkaarsvurdering = stringOrNull("vilkaarsresultat")?.let { objectMapper.readValue(it) },
         beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },

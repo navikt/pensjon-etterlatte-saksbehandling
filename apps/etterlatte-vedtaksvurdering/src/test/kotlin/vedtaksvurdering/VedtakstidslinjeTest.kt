@@ -267,7 +267,7 @@ private fun lagVedtak(
         soeker = Foedselsnummer.of(FNR_1),
         virkningstidspunkt = virkningsDato.let { YearMonth.from(it) },
         status = vedtakStatus,
-        vedtakType = vedtakType,
+        type = vedtakType,
         behandlingType = behandlingType,
         vedtakFattet = VedtakFattet(
             ansvarligSaksbehandler = SAKSBEHANDLER_1,

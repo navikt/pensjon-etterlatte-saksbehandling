@@ -223,7 +223,7 @@ class VedtaksvurderingService(
         beregning: BeregningDTO?,
         vilkaarsvurdering: VilkaarsvurderingDto?
     ): Vedtak {
-        val opprettetVedtak = NyttVedtak(
+        val opprettetVedtak = OpprettVedtak(
             soeker = behandling.soeker.let { Foedselsnummer.of(it) },
             sakId = behandling.sak,
             sakType = behandling.sakType,
@@ -231,7 +231,7 @@ class VedtaksvurderingService(
             behandlingType = behandling.behandlingType,
             virkningstidspunkt = virkningstidspunkt,
             status = VedtakStatus.OPPRETTET,
-            vedtakType = vedtakType,
+            type = vedtakType,
             beregning = beregning?.toObjectNode(),
             vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
             utbetalingsperioder = opprettUtbetalingsperioder(

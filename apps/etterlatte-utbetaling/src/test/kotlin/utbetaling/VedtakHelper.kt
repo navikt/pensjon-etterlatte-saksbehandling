@@ -98,7 +98,7 @@ fun revurderingVedtak(
     nyttBeloep: BigDecimal = BigDecimal(vedtak.utbetalingsperioder.first().beloep!!.longValueExact() - 1000),
     utbetalingsperioder: List<Utbetalingsperiode> = listOf(
         Utbetalingsperiode(
-            id = vedtak.utbetalingsperioder.last().id + 1,
+            id = vedtak.utbetalingsperioder.last().id!! + 1,
             periode = Periode(fom = vedtak.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
             beloep = nyttBeloep,
             type = UtbetalingsperiodeType.UTBETALING
@@ -144,8 +144,8 @@ fun opphoersVedtak(
     ),
     utbetalingsperioder = listOf(
         Utbetalingsperiode(
-            id = vedtak.utbetalingsperioder!!.last().id + 1,
-            periode = Periode(fom = vedtak.utbetalingsperioder!!.first().periode.fom.plusMonths(1), null),
+            id = vedtak.utbetalingsperioder.last().id!! + 1,
+            periode = Periode(fom = vedtak.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
             beloep = null,
             type = UtbetalingsperiodeType.OPPHOER
         )
@@ -215,9 +215,9 @@ fun main() {
         utbetalingsperioder = genererEtterfolgendeUtbetalingsperioder(
             antall = 2,
             intervallMnd = 6,
-            forrigeId = vedtak.utbetalingsperioder!!.last().id,
-            startPeriode = vedtak.utbetalingsperioder!!.last().periode.fom.plusMonths(1),
-            startBelop = vedtak.utbetalingsperioder!!.last().beloep!!
+            forrigeId = vedtak.utbetalingsperioder.last().id!!,
+            startPeriode = vedtak.utbetalingsperioder.last().periode.fom.plusMonths(1),
+            startBelop = vedtak.utbetalingsperioder.last().beloep!!
         )
     )
     val revurderingsvedtakEvent = vedtakEvent(revurderingsvedtak)

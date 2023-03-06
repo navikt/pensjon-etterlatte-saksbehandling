@@ -21,7 +21,7 @@ data class Utbetalingsvedtak(
                 behandling = Behandling(type = vedtak.behandling.type, id = vedtak.behandling.id),
                 pensjonTilUtbetaling = vedtak.utbetalingsperioder.map {
                     Utbetalingsperiode(
-                        id = it.id,
+                        id = it.id!!,
                         periode = Periode(
                             fom = it.periode.fom,
                             tom = it.periode.tom

@@ -59,7 +59,7 @@ internal class VedtaksvurderingRepositoryTest {
 
     @Test
     fun `skal opprette vedtak`() {
-        val nyttVedtak = nyttVedtak()
+        val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
@@ -72,7 +72,7 @@ internal class VedtaksvurderingRepositoryTest {
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
             behandlingType shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
-            vedtakType shouldBe VedtakType.INNVILGELSE
+            type shouldBe VedtakType.INNVILGELSE
             virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
             vilkaarsvurdering shouldBe objectMapper.createObjectNode()
             beregning shouldBe objectMapper.createObjectNode()
@@ -87,7 +87,7 @@ internal class VedtaksvurderingRepositoryTest {
 
     @Test
     fun `skal oppdatere vedtak`() {
-        val nyttVedtak = nyttVedtak()
+        val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
@@ -96,7 +96,7 @@ internal class VedtaksvurderingRepositoryTest {
         val oppdatertVedtak = repository.oppdaterVedtak(
             vedtak.copy(
                 virkningstidspunkt = nyttVirkningstidspunkt,
-                vedtakType = VedtakType.OPPHOER,
+                type = VedtakType.OPPHOER,
                 utbetalingsperioder = listOf(
                     Utbetalingsperiode(
                         periode = Periode(nyttVirkningstidspunkt, null),
@@ -109,9 +109,9 @@ internal class VedtaksvurderingRepositoryTest {
 
         oppdatertVedtak shouldNotBe null
         oppdatertVedtak.virkningstidspunkt shouldBe nyttVirkningstidspunkt
-        oppdatertVedtak.vedtakType shouldBe VedtakType.OPPHOER
+        oppdatertVedtak.type shouldBe VedtakType.OPPHOER
         oppdatertVedtak.utbetalingsperioder.first().let {
-            it.id shouldBeGreaterThan 0
+            it.id!! shouldBeGreaterThan 0
             it.periode shouldBe Periode(nyttVirkningstidspunkt, null)
             it.beloep shouldBe null
             it.type shouldBe UtbetalingsperiodeType.OPPHOER
@@ -120,7 +120,7 @@ internal class VedtaksvurderingRepositoryTest {
 
     @Test
     fun `skal opprette og hente vedtak`() {
-        val nyttVedtak = nyttVedtak()
+        val nyttVedtak = opprettVedtak()
 
         repository.opprettVedtak(nyttVedtak)
 
@@ -131,7 +131,7 @@ internal class VedtaksvurderingRepositoryTest {
 
     @Test
     fun `skal fatte vedtak`() {
-        val nyttVedtak = nyttVedtak()
+        val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
@@ -151,7 +151,7 @@ internal class VedtaksvurderingRepositoryTest {
 
     @Test
     fun `skal attestere vedtak`() {
-        val nyttVedtak = nyttVedtak()
+        val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
@@ -176,7 +176,7 @@ internal class VedtaksvurderingRepositoryTest {
 
     @Test
     fun `skal sette vedtak iverksatt`() {
-        val nyttVedtak = nyttVedtak()
+        val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
@@ -198,7 +198,7 @@ internal class VedtaksvurderingRepositoryTest {
 
     @Test
     fun `skal underkjenne vedtak`() {
-        val nyttVedtak = nyttVedtak()
+        val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
@@ -221,10 +221,10 @@ internal class VedtaksvurderingRepositoryTest {
     fun `skal hente vedtak for sak`() {
         val sakId = 1L
         val nyeVedtak = listOf(
-            nyttVedtak(sakId = sakId),
-            nyttVedtak(sakId = 2),
-            nyttVedtak(sakId = sakId),
-            nyttVedtak(sakId = sakId)
+            opprettVedtak(sakId = sakId),
+            opprettVedtak(sakId = 2),
+            opprettVedtak(sakId = sakId),
+            opprettVedtak(sakId = sakId)
         )
         nyeVedtak.forEach { repository.opprettVedtak(it) }
 

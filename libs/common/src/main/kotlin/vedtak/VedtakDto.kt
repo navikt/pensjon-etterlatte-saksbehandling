@@ -46,7 +46,7 @@ data class Attestasjon(
 )
 
 data class Utbetalingsperiode(
-    val id: Long = 0L,
+    val id: Long? = null,
     val periode: Periode,
     val beloep: BigDecimal?,
     val type: UtbetalingsperiodeType

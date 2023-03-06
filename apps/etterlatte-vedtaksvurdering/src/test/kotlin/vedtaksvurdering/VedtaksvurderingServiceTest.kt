@@ -43,7 +43,7 @@ import vedtaksvurdering.FNR_1
 import vedtaksvurdering.SAKSBEHANDLER_1
 import vedtaksvurdering.SAKSBEHANDLER_2
 import vedtaksvurdering.attestant
-import vedtaksvurdering.nyttVedtak
+import vedtaksvurdering.opprettVedtak
 import vedtaksvurdering.saksbehandler
 import java.time.Instant
 import java.time.Month
@@ -152,7 +152,7 @@ internal class VedtaksvurderingServiceTest {
         val behandlingId = randomUUID()
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             repository.fattVedtak(
                 behandlingId,
                 VedtakFattet(
@@ -186,7 +186,7 @@ internal class VedtaksvurderingServiceTest {
 
         val oppdatertVedtak = runBlocking {
             val nyttVedtak = repository.opprettVedtak(
-                nyttVedtak(
+                opprettVedtak(
                     virkningstidspunkt = virkningstidspunkt2023,
                     behandlingId = behandlingId
                 )
@@ -217,7 +217,9 @@ internal class VedtaksvurderingServiceTest {
         )
 
         val fattetVedtak = runBlocking {
-            repository.opprettVedtak(nyttVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId))
+            repository.opprettVedtak(
+                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+            )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
         }
 
@@ -240,7 +242,7 @@ internal class VedtaksvurderingServiceTest {
 
         runBlocking {
             assertThrows<BehandlingstilstandException> {
-                repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+                repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
                 service.fattVedtak(behandlingId, saksbehandler)
             }
         }
@@ -253,7 +255,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             repository.fattVedtak(
                 behandlingId,
                 VedtakFattet(
@@ -289,7 +291,9 @@ internal class VedtaksvurderingServiceTest {
         )
 
         val attestertVedtak = runBlocking {
-            repository.opprettVedtak(nyttVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId))
+            repository.opprettVedtak(
+                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+            )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
             service.attesterVedtak(behandlingId, attestant)
         }
@@ -313,7 +317,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns false
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
 
             assertThrows<BehandlingstilstandException> {
@@ -329,7 +333,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
             assertThrows<VedtakTilstandException> {
                 service.attesterVedtak(behandlingId, saksbehandler)
@@ -345,7 +349,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
             service.attesterVedtak(behandlingId, attestant)
 
@@ -375,7 +379,9 @@ internal class VedtaksvurderingServiceTest {
         )
 
         val iverksattVedtak = runBlocking {
-            repository.opprettVedtak(nyttVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId))
+            repository.opprettVedtak(
+                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+            )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
             service.attesterVedtak(behandlingId, attestant)
             service.iverksattVedtak(behandlingId)
@@ -394,7 +400,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
             assertThrows<VedtakTilstandException> {
                 service.iverksattVedtak(behandlingId)
@@ -410,7 +416,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.attester(any(), any(), any()) } returns true
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
             service.attesterVedtak(behandlingId, attestant)
             service.iverksattVedtak(behandlingId)
@@ -440,7 +446,9 @@ internal class VedtaksvurderingServiceTest {
         )
 
         val underkjentVedtak = runBlocking {
-            repository.opprettVedtak(nyttVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId))
+            repository.opprettVedtak(
+                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+            )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
             service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())
         }
@@ -459,7 +467,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.underkjenn(any(), any(), any()) } returns false
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
 
             assertThrows<BehandlingstilstandException> {
@@ -475,7 +483,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.underkjenn(any(), any(), any()) } returns true
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
             assertThrows<VedtakTilstandException> {
                 service.underkjennVedtak(behandlingId, saksbehandler, underkjennVedtakBegrunnelse())
@@ -492,7 +500,7 @@ internal class VedtaksvurderingServiceTest {
         coEvery { behandlingKlientMock.underkjenn(any(), any(), any()) } returns true
 
         runBlocking {
-            repository.opprettVedtak(nyttVedtak(behandlingId = behandlingId))
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
             service.attesterVedtak(behandlingId, attestant)
 

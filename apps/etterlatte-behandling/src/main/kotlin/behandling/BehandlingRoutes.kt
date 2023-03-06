@@ -211,14 +211,7 @@ internal fun Route.behandlingRoutes(
             }
         }
 
-        route("/foerstegangsbehandling") { // Obsolete?
-            get {
-                call.respond(
-                    foerstegangsbehandlingService.hentFoerstegangsbehandling(behandlingsId)?.toDetaljertBehandling()
-                        ?: HttpStatusCode.NotFound
-                )
-            }
-
+        route("/foerstegangsbehandling") {
             post {
                 val behandlingsBehov = call.receive<BehandlingsBehov>()
 

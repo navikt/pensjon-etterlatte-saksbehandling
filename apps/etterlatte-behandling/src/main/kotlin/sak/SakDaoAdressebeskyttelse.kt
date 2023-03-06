@@ -6,7 +6,7 @@ import javax.sql.DataSource
 
 class SakDaoAdressebeskyttelse(private val datasource: DataSource) {
 
-    fun setAdresseBeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {
+    fun oppdaterAdresseBeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {
         datasource.connection.use {
             val statement = it.prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
             statement.setString(1, adressebeskyttelseGradering.toString())

@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -75,27 +74,12 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    fun opprettAdressebeskyttelseHendelse(
+    fun oppdaterAdressebeskyttelseHendelse(
         adressebeskyttelse: Adressebeskyttelse
-    ): List<Grunnlagsendringshendelse> {
-        val grunnlagsendringsType = when (adressebeskyttelse.adressebeskyttelseGradering) {
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND ->
-                GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG
-            AdressebeskyttelseGradering.FORTROLIG -> GrunnlagsendringsType.ADRESSEBESKYTTELSE_FORTROLIG
-            else -> throw RuntimeException(
-                "Tom eller feil gradering mottatt ${adressebeskyttelse.adressebeskyttelseGradering}"
-            )
-        }
-
-        val grunnlagsendringshendelseList = opprettHendelseAvTypeForPerson(
-            adressebeskyttelse.fnr,
-            grunnlagsendringsType,
-            GrunnlagsendringStatus.SJEKKET_AV_JOBB
-        )
-
-        grunnlagsendringshendelseList.map { it.sakId }.distinct().forEach { sakId ->
-            val oppdaterAdressebeskyttelse = sakServiceAdressebeskyttelse.setAdressebeskyttelse(
+    ) {
+        val sakIder = finnSakIdForFnr(adressebeskyttelse.fnr).distinct()
+        sakIder.forEach { sakId ->
+            val oppdaterAdressebeskyttelse = sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
                 sakId,
                 adressebeskyttelse.adressebeskyttelseGradering
             )
@@ -104,8 +88,12 @@ class GrunnlagsendringshendelseService(
                     "antall: $oppdaterAdressebeskyttelse"
             )
         }
+    }
 
-        return grunnlagsendringshendelseList
+    private fun finnSakIdForFnr(fnr: String): List<Long> {
+        return generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(fnr).map {
+            it.second
+        }
     }
 
     private fun opprettHendelseAvTypeForPerson(
@@ -233,27 +221,6 @@ class GrunnlagsendringshendelseService(
                         barnGrunnlag = grunnlag?.barn(rolle)
                     )
                 }
-            }
-
-            GrunnlagsendringsType.ADRESSEBESKYTTELSE_FORTROLIG -> {
-                throw IllegalArgumentException(
-                    "Statusen ${GrunnlagsendringsType.ADRESSEBESKYTTELSE_FORTROLIG} " +
-                        "skal ikke forekomme her, da den blir opprettet automatisk"
-                )
-            }
-
-            GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG -> {
-                throw IllegalArgumentException(
-                    "Statusen ${GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG} " +
-                        "skal ikke forekomme her, da den blir opprettet automatisk"
-                )
-            }
-
-            GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND -> {
-                throw IllegalArgumentException(
-                    "Statusen ${GrunnlagsendringsType.ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND} " +
-                        "skal ikke forekomme her, da den blir opprettet automatisk"
-                )
             }
         }
     }

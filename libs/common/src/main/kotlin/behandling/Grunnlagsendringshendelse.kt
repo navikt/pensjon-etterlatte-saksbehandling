@@ -26,17 +26,7 @@ data class Grunnlagsendringshendelse(
 enum class GrunnlagsendringsType {
     DOEDSFALL,
     UTFLYTTING,
-    FORELDER_BARN_RELASJON,
-    ADRESSEBESKYTTELSE_FORTROLIG,
-    ADRESSEBESKYTTELSE_STRENGT_FORTROLIG,
-    ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND;
-
-    fun isAdresseBeskyttelse() =
-        this in listOf(
-            ADRESSEBESKYTTELSE_FORTROLIG,
-            ADRESSEBESKYTTELSE_STRENGT_FORTROLIG,
-            ADRESSEBESKYTTELSE_STRENGT_FORTROLIG_UTLAND
-        )
+    FORELDER_BARN_RELASJON
 }
 
 enum class GrunnlagsendringStatus {

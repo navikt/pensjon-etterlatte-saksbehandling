@@ -98,7 +98,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            beanFactory.sakServiceAdressebeskyttelse().setAdressebeskyttelse(
+            beanFactory.sakServiceAdressebeskyttelse().oppdaterAdressebeskyttelse(
                 sak.id,
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG
             )

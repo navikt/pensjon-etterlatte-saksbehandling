@@ -48,7 +48,7 @@ internal fun Route.grunnlagsendringshendelseRoute(
         post("/adressebeskyttelse") {
             val adressebeskyttelse = call.receive<Adressebeskyttelse>()
             logger.info("Mottar en adressebeskyttelse-hendelse fra PDL")
-            grunnlagsendringshendelseService.opprettAdressebeskyttelseHendelse(adressebeskyttelse)
+            grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
             call.respond(HttpStatusCode.OK)
         }
 

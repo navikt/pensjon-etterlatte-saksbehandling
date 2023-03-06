@@ -79,7 +79,7 @@ class KonsistensavstemmingService(
          * Inspirasjon og takk rettes mot su-se-bakover's implementasjon av tilsvarende
          */
         val loependeUtbetalinger: List<OppdragForKonsistensavstemming> = relevanteUtbetalinger
-            .filter { it.opprettet <= registrertFoerTom.instant } // 1
+            .filter { it.opprettet <= registrertFoerTom } // 1
             .groupBy { it.sakId } // 2
             .mapValues { entry -> // 3
                 entry.value.map { utbetaling ->

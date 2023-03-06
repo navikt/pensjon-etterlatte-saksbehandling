@@ -1,7 +1,7 @@
 import { IGyldighetproving } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { InfoWrapper } from '../../styled'
-import { Info } from '../../Info'
+import { InfoWrapper } from '../../../styled'
+import { Info } from '../../../Info'
 
 interface Props {
   ingenAnnenVergeEnnForelder: IGyldighetproving | undefined

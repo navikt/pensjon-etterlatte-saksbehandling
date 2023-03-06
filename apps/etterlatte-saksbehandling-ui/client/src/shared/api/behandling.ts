@@ -1,4 +1,9 @@
-import { IDetaljertBehandling, IKommerBarnetTilgode, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import {
+  IDetaljertBehandling,
+  IGyldighetResultat,
+  IKommerBarnetTilgode,
+  Virkningstidspunkt,
+} from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 
@@ -23,7 +28,10 @@ export const fastsettVirkningstidspunkt = async (args: {
   dato: Date
   begrunnelse: string
 }): Promise<ApiResponse<Virkningstidspunkt>> => {
-  return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, { dato: args.dato, begrunnelse: args.begrunnelse })
+  return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, {
+    dato: args.dato,
+    begrunnelse: args.begrunnelse,
+  })
 }
 
 export const hentManueltOpphoerDetaljer = async (
@@ -51,7 +59,16 @@ export const underkjennVedtak = async (
 ): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/vedtak/${behandlingId}/underkjenn`, { kommentar, valgtBegrunnelse })
 }
-
+export const lagreGyldighetsproeving = async (args: {
+  behandlingId: string
+  svar: string
+  begrunnelse: string
+}): Promise<ApiResponse<IGyldighetResultat>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/gyldigfremsatt`, {
+    svar: args.svar,
+    begrunnelse: args.begrunnelse,
+  })
+}
 export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
   behandlingId: string
   begrunnelse: string

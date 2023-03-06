@@ -65,12 +65,27 @@ internal fun Route.behandlingRoutes(
             call.respond(detaljertBehandlingDTO)
         }
 
+        post("/gyldigfremsatt") {
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for vurdering av ytelsen søkand gyldig framsatt"
+            )
+            val body = call.receive<VurderingMedBegrunnelseJson>()
+            val lagretGyldighetsResultat = foerstegangsbehandlingService.lagreGyldighetsproeving(
+                behandlingsId,
+                navIdent,
+                body.svar,
+                body.begrunnelse
+            )
+            call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
+        }
+
         post("/kommerbarnettilgode") {
             val navIdent = navIdentFraToken() ?: return@post call.respond(
                 HttpStatusCode.Unauthorized,
                 "Kunne ikke hente ut navident for vurdering av ytelsen kommer barnet tilgode"
             )
-            val body = call.receive<KommerBarnetTilgodeJson>()
+            val body = call.receive<VurderingMedBegrunnelseJson>()
             val kommerBarnetTilgode = KommerBarnetTilgode(
                 body.svar,
                 body.begrunnelse,
@@ -389,4 +404,4 @@ internal data class FastsettVirkningstidspunktResponse(
     }
 }
 
-internal data class KommerBarnetTilgodeJson(val svar: JaNeiVetIkke, val begrunnelse: String)
+internal data class VurderingMedBegrunnelseJson(val svar: JaNeiVetIkke, val begrunnelse: String)

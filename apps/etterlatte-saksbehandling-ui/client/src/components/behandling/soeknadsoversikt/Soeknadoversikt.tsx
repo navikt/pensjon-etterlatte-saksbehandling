@@ -29,7 +29,7 @@ export const Soeknadsoversikt = () => {
         <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
       </ContentHeader>
       <Innhold>
-        <OversiktGyldigFramsatt gyldigFramsatt={behandling.gyldighetsprøving} />
+        <OversiktGyldigFramsatt gyldigFramsatt={behandling.gyldighetsprøving} sakType={behandling.sakType} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
             <OversiktKommerBarnetTilgode

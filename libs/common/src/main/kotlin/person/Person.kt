@@ -22,7 +22,6 @@ data class Person(
     var kontaktadresse: List<Adresse>?,
     var oppholdsadresse: List<Adresse>?,
     val sivilstatus: Sivilstatus?,
-    val siviltilstand: List<Siviltilstand>? = null,
     val statsborgerskap: String?,
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?,
@@ -62,11 +61,6 @@ data class Adresse(
     val kilde: String,
     val gyldigFraOgMed: LocalDateTime? = null,
     val gyldigTilOgMed: LocalDateTime? = null
-)
-
-data class Siviltilstand(
-    val sivilstatus: Sivilstatus?,
-    val relatertVedSiviltilstand: Foedselsnummer?
 )
 
 enum class Sivilstatus {

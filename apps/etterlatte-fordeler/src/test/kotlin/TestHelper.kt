@@ -55,7 +55,6 @@ fun mockPerson(
     statsborgerskap = statsborgerskap,
     foedeland = foedeland,
     sivilstatus = sivilstatus,
-    siviltilstand = null,
     utland = utland,
     familieRelasjon = familieRelasjon,
     avdoedesBarn = null,

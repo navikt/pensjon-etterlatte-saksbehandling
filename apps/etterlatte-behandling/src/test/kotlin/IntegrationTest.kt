@@ -54,7 +54,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.lang.Thread.sleep
-import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -172,7 +171,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
 
                 val expected = FastsettVirkningstidspunktResponse(
                     YearMonth.of(2022, 2),
-                    Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Instant.now()),
+                    Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
                     "En begrunnelse"
                 )
                 assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)

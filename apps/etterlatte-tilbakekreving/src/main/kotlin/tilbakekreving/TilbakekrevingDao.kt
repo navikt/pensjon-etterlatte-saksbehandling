@@ -8,6 +8,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.BehandlingId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag
@@ -38,7 +39,7 @@ class TilbakekrevingDao(
                             "sak_id" to sakId.value.param<Long>(),
                             "behandling_id" to behandlingId.value.param<UUID>(),
                             "kravgrunnlag_id" to kravgrunnlagId.value.param<Long>(),
-                            "opprettet" to Timestamp.from(mottattKravgrunnlag.opprettet.instant).param<Timestamp>(),
+                            "opprettet" to mottattKravgrunnlag.opprettet.toTimestamp().param<Timestamp>(),
                             "kravgrunnlag" to kravgrunnlag.toJson().param<String>()
                         )
                     }

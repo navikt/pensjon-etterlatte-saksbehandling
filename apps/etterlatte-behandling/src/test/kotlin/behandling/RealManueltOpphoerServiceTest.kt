@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.time.Instant
 import java.time.YearMonth
 import java.util.UUID
 
@@ -100,7 +99,7 @@ internal class RealManueltOpphoerServiceTest {
                     sakId = sak,
                     virkningstidspunkt = Virkningstidspunkt(
                         dato = YearMonth.of(2022, 8),
-                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Instant.now()),
+                        kilde = Grunnlagsopplysning.Saksbehandler.create(ident = ""),
                         begrunnelse = ""
                     ),
                     status = BehandlingStatus.IVERKSATT
@@ -273,7 +272,7 @@ internal class RealManueltOpphoerServiceTest {
                     status = BehandlingStatus.FATTET_VEDTAK,
                     virkningstidspunkt = Virkningstidspunkt(
                         dato = YearMonth.of(2020, 8),
-                        kilde = Grunnlagsopplysning.Saksbehandler(ident = "", tidspunkt = Instant.now()),
+                        kilde = Grunnlagsopplysning.Saksbehandler.create(ident = ""),
                         begrunnelse = "dab on the haters"
                     )
                 )

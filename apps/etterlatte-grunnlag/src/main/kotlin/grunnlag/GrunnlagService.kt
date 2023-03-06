@@ -21,8 +21,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
@@ -94,7 +93,7 @@ class RealGrunnlagService(
         val opplysning: List<Grunnlagsopplysning<JsonNode>> = listOf(
             lagOpplysning(
                 opplysningsType = Opplysningstype.SOESKEN_I_BEREGNINGEN,
-                kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Instant.now()),
+                kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
                 opplysning = Beregningsgrunnlag(soeskenMedIBeregning).toJsonNode()
             )
         )

@@ -26,9 +26,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.time.Instant
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class RealFoerstegangsbehandlingServiceTest {
 
@@ -87,7 +86,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler("ident", Instant.now()),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
             kommerBarnetTilgode = null,
@@ -128,7 +127,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             gyldighetsproeving = null,
             virkningstidspunkt = Virkningstidspunkt(
                 YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler("ident", Instant.now()),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
             kommerBarnetTilgode = null,

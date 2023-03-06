@@ -44,7 +44,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 fun opprettBehandling(
     type: BehandlingType,
@@ -271,7 +271,7 @@ fun personOpplysning(
 fun kommerBarnetTilgode(
     svar: JaNeiVetIkke = JaNeiVetIkke.JA,
     begrunnelse: String = "En begrunnelse",
-    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("S01", Instant.now())
+    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("S01")
 ) = KommerBarnetTilgode(svar, begrunnelse, kilde)
 
 val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")

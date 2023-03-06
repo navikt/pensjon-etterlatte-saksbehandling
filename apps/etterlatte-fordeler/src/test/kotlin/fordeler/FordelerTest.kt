@@ -26,7 +26,7 @@ internal class FordelerTest {
         every { fordelerMetricLogger.logMetricFordelt() } just runs
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
-        assertEquals(FordelerFordelt.eventName, inspector.message(0).get(EVENT_NAME_KEY).asText())
+        assertEquals("soeknad_innsendt", inspector.message(0).get(EVENT_NAME_KEY).asText())
         assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
 
         verify { fordelerMetricLogger.logMetricFordelt() }
@@ -49,7 +49,8 @@ internal class FordelerTest {
         every { fordelerMetricLogger.logMetricIkkeFordelt(any()) } just runs
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
-        assertEquals(0, inspector.size)
+        assertEquals(1, inspector.size)
+        assertEquals(false, inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asBoolean())
 
         verify(exactly = 1) {
             fordelerMetricLogger.logMetricIkkeFordelt(

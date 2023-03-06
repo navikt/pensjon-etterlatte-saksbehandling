@@ -55,7 +55,7 @@ internal class InnsendtSoeknadRiverTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        assertEquals(GyldigSoeknadVurdert.eventName, inspector.first().get(EVENT_NAME_KEY).asText())
+        assertEquals("soeknad_innsendt", inspector.first().get(EVENT_NAME_KEY).asText())
         assertEquals(4, inspector.first().get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals(id.toString(), inspector.first().get(GyldigSoeknadVurdert.behandlingIdKey).asText())
         assertEquals(true, inspector.first().get(GyldigSoeknadVurdert.gyldigInnsenderKey).asBoolean())

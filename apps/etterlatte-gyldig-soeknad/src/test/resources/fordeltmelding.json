@@ -1,5 +1,5 @@
 {
-  "@event_name": "FORDELER:FORDELT",
+  "@event_name": "soeknad_innsendt",
   "@skjema_info": {
     "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
     "spraak": "nb",

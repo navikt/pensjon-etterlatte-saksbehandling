@@ -4,6 +4,4 @@ interface IFordelerFordelt {
     val soeknadFordeltKey get() = "soeknadFordelt"
 }
 
-object FordelerFordelt : ISoeknadInnsendt, IFordelerFordelt {
-    val eventName: String get() = "FORDELER:FORDELT"
-}
+object FordelerFordelt : ISoeknadInnsendt, IFordelerFordelt

@@ -10,6 +10,7 @@ interface SakService {
     fun finnSak(person: String, type: SakType): Sak?
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
+    fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean)
 }
 
 class RealSakService(private val dao: SakDao) : SakService {
@@ -28,6 +29,12 @@ class RealSakService(private val dao: SakDao) : SakService {
 
     override fun slettSak(id: Long) {
         dao.slettSak(id)
+    }
+
+    override fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean) {
+        inTransaction {
+            dao.markerSakerMedSkjerming(sakIder, skjermet)
+        }
     }
 
     override fun finnEllerOpprettSak(person: String, type: SakType): Sak {

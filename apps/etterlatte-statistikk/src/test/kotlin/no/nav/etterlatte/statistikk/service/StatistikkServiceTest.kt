@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.*
 
 class StatistikkServiceTest {
@@ -91,11 +90,11 @@ class StatistikkServiceTest {
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
 
         val (registrertSakRad, registrertStoenadRad) = service.registrerStatistikkForVedtak(
-            vedtakDto = vedtak(
+            vedtak = vedtak(
                 sakId = sakId,
                 behandlingId = behandlingId,
-                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", ZonedDateTime.now()),
-                attestasjon = Attestasjon("Attestant", "attestantEnhet", ZonedDateTime.now())
+                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", Tidspunkt.now()),
+                attestasjon = Attestasjon("Attestant", "attestantEnhet", Tidspunkt.now())
             ),
             vedtakHendelse = VedtakHendelse.IVERKSATT,
             tekniskTid = tekniskTidForHendelse

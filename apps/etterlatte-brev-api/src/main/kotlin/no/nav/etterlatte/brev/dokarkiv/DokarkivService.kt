@@ -17,10 +17,10 @@ import no.nav.etterlatte.libs.common.journalpost.Sak
 import no.nav.etterlatte.libs.common.journalpost.Sakstype
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import org.slf4j.LoggerFactory
-import java.util.Base64
+import java.util.*
 
 interface DokarkivService {
-    fun journalfoer(vedtaksbrev: Brev, vedtakDto: VedtakDto): JournalpostResponse
+    fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakDto): JournalpostResponse
 }
 
 class DokarkivServiceImpl(
@@ -29,13 +29,13 @@ class DokarkivServiceImpl(
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override fun journalfoer(vedtaksbrev: Brev, vedtakDto: VedtakDto): JournalpostResponse = runBlocking {
+    override fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakDto): JournalpostResponse = runBlocking {
         logger.info("Oppretter journalpost for brev med id=${vedtaksbrev.id}")
 
         val innhold = db.hentBrevInnhold(vedtaksbrev.id)
         logger.info("Oppretter journalpost med brevinnhold", innhold)
 
-        val request = mapTilJournalpostRequest(vedtaksbrev, vedtakDto, innhold.data)
+        val request = mapTilJournalpostRequest(vedtaksbrev, vedtak, innhold.data)
         logger.info("Oppretter journalpost med request", innhold)
 
         client.opprettJournalpost(request, true)
@@ -43,7 +43,7 @@ class DokarkivServiceImpl(
 
     private fun mapTilJournalpostRequest(
         vedtaksbrev: Brev,
-        vedtakDto: VedtakDto,
+        vedtak: VedtakDto,
         dokumentInnhold: ByteArray
     ): JournalpostRequest {
         return JournalpostRequest(
@@ -51,13 +51,13 @@ class DokarkivServiceImpl(
             journalpostType = JournalPostType.UTGAAENDE,
             behandlingstema = BEHANDLINGSTEMA_BP,
             avsenderMottaker = vedtaksbrev.mottaker.tilAvsenderMottaker(),
-            bruker = Bruker(vedtakDto.sak.ident),
+            bruker = Bruker(vedtak.sak.ident),
             eksternReferanseId = "${vedtaksbrev.behandlingId}.${vedtaksbrev.id}",
             sak = Sak(Sakstype.FAGSAK, vedtaksbrev.behandlingId.toString()),
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(vedtaksbrev.tittel)),
             tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
-            journalfoerendeEnhet = vedtakDto.vedtakFattet!!.ansvarligEnhet
+            journalfoerendeEnhet = vedtak.vedtakFattet!!.ansvarligEnhet
         )
     }
 

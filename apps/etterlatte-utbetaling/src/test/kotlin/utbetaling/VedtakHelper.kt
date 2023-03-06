@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -16,7 +17,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.*
 
 fun vedtak(
@@ -50,12 +50,12 @@ fun vedtak(
     vedtakFattet = VedtakFattet(
         ansvarligSaksbehandler = "12345678",
         ansvarligEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     ),
     attestasjon = Attestasjon(
         attestant = "87654321",
         attesterendeEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     ),
     utbetalingsperioder = utbetalingsperioder
 )
@@ -89,63 +89,63 @@ fun ugyldigVedtakTilUtbetaling(
     attestasjon = Attestasjon(
         attestant = "87654321",
         attesterendeEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     )
 )
 
 fun revurderingVedtak(
-    vedtakDto: VedtakDto,
-    nyttBeloep: BigDecimal = BigDecimal(vedtakDto.utbetalingsperioder.first().beloep!!.longValueExact() - 1000),
+    vedtak: VedtakDto,
+    nyttBeloep: BigDecimal = BigDecimal(vedtak.utbetalingsperioder.first().beloep!!.longValueExact() - 1000),
     utbetalingsperioder: List<Utbetalingsperiode> = listOf(
         Utbetalingsperiode(
-            id = vedtakDto.utbetalingsperioder.last().id + 1,
-            periode = Periode(fom = vedtakDto.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
+            id = vedtak.utbetalingsperioder.last().id + 1,
+            periode = Periode(fom = vedtak.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
             beloep = nyttBeloep,
             type = UtbetalingsperiodeType.UTBETALING
         )
     )
 ): VedtakDto = VedtakDto(
-    vedtakId = vedtakDto.vedtakId + 1,
+    vedtakId = vedtak.vedtakId + 1,
     behandling = Behandling(
         id = UUID.randomUUID(),
         type = BehandlingType.REVURDERING
     ),
-    sak = vedtakDto.sak,
+    sak = vedtak.sak,
     type = VedtakType.ENDRING,
     virkningstidspunkt = YearMonth.of(2022, 1),
     vedtakFattet = VedtakFattet(
         ansvarligSaksbehandler = "12345678",
         ansvarligEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     ),
     utbetalingsperioder = utbetalingsperioder,
     attestasjon = Attestasjon(
         attestant = "87654321",
         attesterendeEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     )
 )
 
 fun opphoersVedtak(
-    vedtakDto: VedtakDto
+    vedtak: VedtakDto
 ): VedtakDto = VedtakDto(
-    vedtakId = vedtakDto.vedtakId + 1,
+    vedtakId = vedtak.vedtakId + 1,
     behandling = Behandling(
         id = UUID.randomUUID(),
         type = BehandlingType.REVURDERING
     ),
-    sak = vedtakDto.sak,
+    sak = vedtak.sak,
     type = VedtakType.OPPHOER,
     virkningstidspunkt = YearMonth.of(2022, 1),
     vedtakFattet = VedtakFattet(
         ansvarligSaksbehandler = "12345678",
         ansvarligEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     ),
     utbetalingsperioder = listOf(
         Utbetalingsperiode(
-            id = vedtakDto.utbetalingsperioder!!.last().id + 1,
-            periode = Periode(fom = vedtakDto.utbetalingsperioder!!.first().periode.fom.plusMonths(1), null),
+            id = vedtak.utbetalingsperioder!!.last().id + 1,
+            periode = Periode(fom = vedtak.utbetalingsperioder!!.first().periode.fom.plusMonths(1), null),
             beloep = null,
             type = UtbetalingsperiodeType.OPPHOER
         )
@@ -153,7 +153,7 @@ fun opphoersVedtak(
     attestasjon = Attestasjon(
         attestant = "87654321",
         attesterendeEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     )
 )
 
@@ -211,7 +211,7 @@ fun main() {
     val vedtakEvent = vedtakEvent(vedtak)
 
     val revurderingsvedtak = revurderingVedtak(
-        vedtakDto = vedtak,
+        vedtak = vedtak,
         utbetalingsperioder = genererEtterfolgendeUtbetalingsperioder(
             antall = 2,
             intervallMnd = 6,

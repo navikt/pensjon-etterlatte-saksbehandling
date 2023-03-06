@@ -40,12 +40,12 @@ internal class JournalfoerVedtaksbrev(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         try {
             withLogContext {
-                val vedtakDto: VedtakDto = deserialize(packet["vedtak"].toJson())
-                logger.info("Nytt vedtak med id ${vedtakDto.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
+                val vedtak: VedtakDto = deserialize(packet["vedtak"].toJson())
+                logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
 
-                val (brev, response) = service.journalfoerVedtaksbrev(vedtakDto)
+                val (brev, response) = service.journalfoerVedtaksbrev(vedtak)
 
-                logger.info("Vedtaksbrev for vedtak med id ${vedtakDto.vedtakId} er journalfoert OK")
+                logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")
 
                 rapidsConnection.svarSuksess(
                     packet,

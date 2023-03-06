@@ -72,8 +72,8 @@ class VedtaksbrevService(
         }
     }
 
-    fun journalfoerVedtaksbrev(vedtakDto: VedtakDto): Pair<Brev, JournalpostResponse> {
-        val behandlingId = vedtakDto.behandling.id
+    fun journalfoerVedtaksbrev(vedtak: VedtakDto): Pair<Brev, JournalpostResponse> {
+        val behandlingId = vedtak.behandling.id
 
         val vedtaksbrev = hentVedtaksbrev(behandlingId)
             ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
@@ -82,7 +82,7 @@ class VedtaksbrevService(
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
 
-        val response = dokarkivService.journalfoer(vedtaksbrev, vedtakDto)
+        val response = dokarkivService.journalfoer(vedtaksbrev, vedtak)
 
         db.setJournalpostId(vedtaksbrev.id, response.journalpostId)
         db.oppdaterStatus(vedtaksbrev.id, Status.JOURNALFOERT, response.toJson())

@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -47,7 +48,6 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import java.util.*
 
 internal class VedtaksbrevServiceTest {
@@ -334,7 +334,7 @@ internal class VedtaksbrevServiceTest {
     private fun opprettVedtak() = mockk<VedtakDto> {
         every { behandling.id } returns BEHANDLING_ID
         every { sak.ident } returns "ident"
-        every { vedtakFattet } returns VedtakFattet("Z12345", "ansvarlig enhet", ZonedDateTime.now())
+        every { vedtakFattet } returns VedtakFattet("Z12345", "ansvarlig enhet", Tidspunkt.now())
     }
 
     private fun opprettBehandling() = Behandling(

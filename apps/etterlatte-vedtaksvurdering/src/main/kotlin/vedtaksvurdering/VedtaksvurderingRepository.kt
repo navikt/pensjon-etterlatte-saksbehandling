@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.tidspunkt.tilZonedDateTime
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -245,14 +245,14 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             VedtakFattet(
                 ansvarligSaksbehandler = string("saksbehandlerid"),
                 ansvarligEnhet = string("fattetVedtakEnhet"),
-                tidspunkt = sqlTimestamp("datofattet").toInstant().tilZonedDateTime()
+                tidspunkt = sqlTimestamp("datofattet").toTidspunkt()
             )
         },
         attestasjon = stringOrNull("attestant")?.let {
             Attestasjon(
                 attestant = string("attestant"),
                 attesterendeEnhet = string("attestertVedtakEnhet"),
-                tidspunkt = sqlTimestamp("datoattestert").toInstant().tilZonedDateTime()
+                tidspunkt = sqlTimestamp("datoattestert").toTidspunkt()
             )
         },
         utbetalingsperioder = utbetalingsperioder

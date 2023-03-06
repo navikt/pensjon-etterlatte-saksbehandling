@@ -11,8 +11,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
@@ -92,7 +90,7 @@ class VedtaksvurderingService(
 
         val fattetVedtak = repository.fattVedtak(
             behandlingId,
-            VedtakFattet(bruker.ident(), bruker.saksbehandlerEnhet(saksbehandlere), Tidspunkt.now(clock).toNorskTid())
+            VedtakFattet(bruker.ident(), bruker.saksbehandlerEnhet(saksbehandlere), Tidspunkt.now(clock))
         )
 
         behandlingKlient.fattVedtak(
@@ -100,7 +98,7 @@ class VedtaksvurderingService(
             bruker = bruker,
             vedtakHendelse = VedtakHendelse(
                 vedtakId = fattetVedtak.id,
-                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
+                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
                 saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler
             )
         )
@@ -109,7 +107,7 @@ class VedtaksvurderingService(
             lagStatistikkMelding(
                 vedtakhendelse = KafkaHendelseType.FATTET,
                 vedtak = fattetVedtak,
-                tekniskTid = fattetVedtak.vedtakFattet.tidspunkt.toLocalDateTime()
+                tekniskTid = fattetVedtak.vedtakFattet.tidspunkt.toLocalDatetimeUTC()
             ),
             behandlingId
         )
@@ -126,7 +124,7 @@ class VedtaksvurderingService(
 
         val attestertVedtak = repository.attesterVedtak(
             behandlingId,
-            Attestasjon(bruker.ident(), bruker.saksbehandlerEnhet(saksbehandlere), Tidspunkt.now(clock).toNorskTid())
+            Attestasjon(bruker.ident(), bruker.saksbehandlerEnhet(saksbehandlere), Tidspunkt.now(clock))
         )
 
         behandlingKlient.attester(
@@ -134,7 +132,7 @@ class VedtaksvurderingService(
             bruker,
             VedtakHendelse(
                 vedtakId = attestertVedtak.id,
-                inntruffet = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!,
+                inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
                 saksbehandler = attestertVedtak.attestasjon.attestant
             )
         )
@@ -143,7 +141,7 @@ class VedtaksvurderingService(
             lagStatistikkMelding(
                 vedtakhendelse = KafkaHendelseType.ATTESTERT,
                 vedtak = attestertVedtak,
-                tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDateTime()
+                tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDatetimeUTC()
             ),
             behandlingId
         )

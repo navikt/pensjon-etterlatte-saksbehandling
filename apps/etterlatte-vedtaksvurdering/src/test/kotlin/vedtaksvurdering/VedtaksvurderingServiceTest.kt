@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -159,7 +158,7 @@ internal class VedtaksvurderingServiceTest {
                 VedtakFattet(
                     ansvarligSaksbehandler = SAKSBEHANDLER_1,
                     ansvarligEnhet = ENHET_1,
-                    tidspunkt = Tidspunkt.now().toNorskTid()
+                    tidspunkt = Tidspunkt.now()
                 )
             )
 
@@ -260,7 +259,7 @@ internal class VedtaksvurderingServiceTest {
                 VedtakFattet(
                     ansvarligSaksbehandler = SAKSBEHANDLER_1,
                     ansvarligEnhet = ENHET_1,
-                    tidspunkt = Tidspunkt.now().toNorskTid()
+                    tidspunkt = Tidspunkt.now()
                 )
             )
 

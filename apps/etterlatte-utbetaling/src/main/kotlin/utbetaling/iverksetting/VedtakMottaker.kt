@@ -100,8 +100,8 @@ class VedtakMottaker(
 
     private fun lesVedtak(packet: JsonMessage): Utbetalingsvedtak =
         try {
-            val vedtakDto: VedtakDto = objectMapper.readValue(packet["vedtak"].toJson())
-            Utbetalingsvedtak.fra(vedtakDto)
+            val vedtak: VedtakDto = objectMapper.readValue(packet["vedtak"].toJson())
+            Utbetalingsvedtak.fra(vedtak)
         } catch (e: Exception) {
             throw KunneIkkeLeseVedtakException(e)
         }

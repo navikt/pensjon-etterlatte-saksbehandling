@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.nowNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -76,10 +76,10 @@ internal class JournalfoerVedtaksbrevTest {
 
         val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        val vedtakDtoCapture = slot<VedtakDto>()
-        verify(exactly = 1) { vedtaksbrevService.journalfoerVedtaksbrev(capture(vedtakDtoCapture)) }
+        val vedtakCapture = slot<VedtakDto>()
+        verify(exactly = 1) { vedtaksbrevService.journalfoerVedtaksbrev(capture(vedtakCapture)) }
 
-        val vedtakActual = vedtakDtoCapture.captured
+        val vedtakActual = vedtakCapture.captured
 
         assertEquals(vedtak.vedtakId, vedtakActual.vedtakId)
         assertEquals(vedtak.virkningstidspunkt, vedtakActual.virkningstidspunkt)
@@ -124,8 +124,8 @@ internal class JournalfoerVedtaksbrevTest {
             behandling = Behandling(behandlingType, UUID.randomUUID()),
             type = VedtakType.INNVILGELSE,
             utbetalingsperioder = emptyList(),
-            vedtakFattet = VedtakFattet("Z00000", "1234", nowNorskTid()),
-            attestasjon = Attestasjon("Z00000", "1234", nowNorskTid())
+            vedtakFattet = VedtakFattet("Z00000", "1234", Tidspunkt.now()),
+            attestasjon = Attestasjon("Z00000", "1234", Tidspunkt.now())
         )
     }
 

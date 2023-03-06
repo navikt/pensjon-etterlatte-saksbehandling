@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -36,7 +37,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.*
 import no.nav.etterlatte.brev.behandling.Beregningsperiode as BrevBeregningsperiode
 
@@ -160,8 +160,8 @@ internal class SakOgBehandlingServiceTest {
         every { vedtakId } returns 123L
         every { type } returns VedtakType.INNVILGELSE
         every { virkningstidspunkt } returns YearMonth.now()
-        every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, "Ansvarlig enhet", ZonedDateTime.now())
-        every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, "Attestant enhet", ZonedDateTime.now())
+        every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, "Ansvarlig enhet", Tidspunkt.now())
+        every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, "Attestant enhet", Tidspunkt.now())
     }
 
     private fun opprettGrunnlag() = GrunnlagTestData(

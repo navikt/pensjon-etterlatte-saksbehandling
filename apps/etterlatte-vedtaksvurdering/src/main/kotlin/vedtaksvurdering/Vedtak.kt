@@ -7,14 +7,15 @@ import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.ZonedDateTime
 import java.util.*
 
 data class NyttVedtak(
@@ -62,7 +63,7 @@ data class Vedtak(
 data class VedtakSammendrag(
     val id: String,
     val behandlingId: UUID,
-    val datoAttestert: LocalDateTime?
+    val datoAttestert: ZonedDateTime?
 )
 
 data class VedtakHendelse(
@@ -76,5 +77,5 @@ data class VedtakHendelse(
 fun Vedtak.toVedtakSammendrag() = VedtakSammendrag(
     id = id.toString(),
     behandlingId = behandlingId,
-    datoAttestert = attestasjon?.tidspunkt?.toLocalDateTime()
+    datoAttestert = attestasjon?.tidspunkt?.toNorskTid()
 )

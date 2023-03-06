@@ -34,25 +34,25 @@ class SakOgBehandlingService(
     }
 
     private suspend fun mapBehandling(
-        vedtakDto: VedtakDto,
+        vedtak: VedtakDto,
         grunnlag: Grunnlag,
         bruker: Bruker
     ): Behandling {
         val innloggetSaksbehandlerIdent = bruker.ident()
         val innloggetSaksbehandlerEnhet = bruker.saksbehandlerEnhet(saksbehandlere)
 
-        val saksbehandlerEnhet = vedtakDto.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet
-        val saksbehandlerIdent = vedtakDto.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
-        val attestant = vedtakDto.vedtakFattet?.let {
+        val saksbehandlerEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: innloggetSaksbehandlerEnhet
+        val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
+        val attestant = vedtak.vedtakFattet?.let {
             Attestant(
-                vedtakDto.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
-                vedtakDto.attestasjon?.attesterendeEnhet ?: innloggetSaksbehandlerEnhet
+                vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent,
+                vedtak.attestasjon?.attesterendeEnhet ?: innloggetSaksbehandlerEnhet
             )
         }
 
         return Behandling(
-            sakId = vedtakDto.sak.id,
-            behandlingId = vedtakDto.behandling.id,
+            sakId = vedtak.sak.id,
+            behandlingId = vedtak.behandling.id,
             spraak = grunnlag.mapSpraak(),
             persongalleri = Persongalleri(
                 innsender = grunnlag.mapInnsender(),
@@ -60,15 +60,15 @@ class SakOgBehandlingService(
                 avdoed = grunnlag.mapAvdoed()
             ),
             vedtak = ForenkletVedtak(
-                vedtakDto.vedtakId,
-                vedtakDto.type,
+                vedtak.vedtakId,
+                vedtak.type,
                 Saksbehandler(
                     saksbehandlerIdent,
                     saksbehandlerEnhet
                 ),
                 attestant
             ),
-            utbetalingsinfo = finnUtbetalingsinfo(vedtakDto.behandling.id, vedtakDto.virkningstidspunkt, bruker)
+            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, bruker)
         )
     }
 

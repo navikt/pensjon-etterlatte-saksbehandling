@@ -14,12 +14,12 @@ data class Utbetalingsvedtak(
     val attestasjon: Attestasjon
 ) {
     companion object {
-        fun fra(vedtakDto: VedtakDto) =
+        fun fra(vedtak: VedtakDto) =
             Utbetalingsvedtak(
-                vedtakId = vedtakDto.vedtakId,
-                sak = Sak(vedtakDto.sak.ident, vedtakDto.sak.id, Saktype.fraString(vedtakDto.sak.sakType.toString())),
-                behandling = Behandling(type = vedtakDto.behandling.type, id = vedtakDto.behandling.id),
-                pensjonTilUtbetaling = vedtakDto.utbetalingsperioder.map {
+                vedtakId = vedtak.vedtakId,
+                sak = Sak(vedtak.sak.ident, vedtak.sak.id, Saktype.fraString(vedtak.sak.sakType.toString())),
+                behandling = Behandling(type = vedtak.behandling.type, id = vedtak.behandling.id),
+                pensjonTilUtbetaling = vedtak.utbetalingsperioder.map {
                     Utbetalingsperiode(
                         id = it.id,
                         periode = Periode(
@@ -30,13 +30,13 @@ data class Utbetalingsvedtak(
                         type = it.type.toUtbetalingsperiodeType()
                     )
                 },
-                vedtakFattet = vedtakDto.vedtakFattet?.let {
+                vedtakFattet = vedtak.vedtakFattet?.let {
                     VedtakFattet(
                         ansvarligSaksbehandler = it.ansvarligSaksbehandler,
                         ansvarligEnhet = it.ansvarligEnhet
                     )
                 } ?: throw Exception("Mangler saksbehandler og enhet på vedtak"),
-                attestasjon = vedtakDto.attestasjon?.let {
+                attestasjon = vedtak.attestasjon?.let {
                     Attestasjon(
                         attestant = it.attestant,
                         attesterendeEnhet = it.attesterendeEnhet

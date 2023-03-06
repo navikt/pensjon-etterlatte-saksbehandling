@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -138,7 +137,7 @@ internal class VedtaksvurderingRepositoryTest {
 
         val fattetVedtak = repository.fattVedtak(
             vedtak.behandlingId,
-            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now().toNorskTid())
+            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
         )
 
         fattetVedtak.vedtakFattet shouldNotBe null
@@ -158,12 +157,12 @@ internal class VedtaksvurderingRepositoryTest {
 
         repository.fattVedtak(
             vedtak.behandlingId,
-            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now().toNorskTid())
+            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
         )
 
         val attestertVedtak = repository.attesterVedtak(
             vedtak.behandlingId,
-            Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now().toNorskTid())
+            Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now())
         )
 
         attestertVedtak.attestasjon shouldNotBe null
@@ -183,12 +182,12 @@ internal class VedtaksvurderingRepositoryTest {
 
         repository.fattVedtak(
             vedtak.behandlingId,
-            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now().toNorskTid())
+            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
         )
 
         repository.attesterVedtak(
             vedtak.behandlingId,
-            Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now().toNorskTid())
+            Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now())
         )
 
         val iverksattVedtak = repository.iverksattVedtak(vedtak.behandlingId)
@@ -205,7 +204,7 @@ internal class VedtaksvurderingRepositoryTest {
 
         repository.fattVedtak(
             vedtak.behandlingId,
-            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now().toNorskTid())
+            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())
         )
 
         val underkjentVedtak = repository.underkjennVedtak(

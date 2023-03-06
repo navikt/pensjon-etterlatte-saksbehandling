@@ -2,9 +2,9 @@ package no.nav.etterlatte.libs.common.vedtak
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.*
 import java.util.Objects.isNull
 
@@ -36,13 +36,13 @@ data class Periode(
 data class VedtakFattet(
     val ansvarligSaksbehandler: String,
     val ansvarligEnhet: String,
-    val tidspunkt: ZonedDateTime
+    val tidspunkt: Tidspunkt
 )
 
 data class Attestasjon(
     val attestant: String,
     val attesterendeEnhet: String,
-    val tidspunkt: ZonedDateTime
+    val tidspunkt: Tidspunkt
 )
 
 data class Utbetalingsperiode(

@@ -216,8 +216,8 @@ class RealGenerellBehandlingService(
                 gyldighetsprøving = detaljertBehandling.gyldighetsproeving,
                 kommerBarnetTilgode = kommerBarnetTilgode,
                 saksbehandlerId = vedtak.await()?.vedtakFattet?.ansvarligSaksbehandler,
-                datoFattet = vedtak.await()?.vedtakFattet?.tidspunkt?.toInstant(),
-                datoattestert = vedtak.await()?.attestasjon?.tidspunkt?.toInstant(),
+                datoFattet = vedtak.await()?.vedtakFattet?.tidspunkt?.instant, // TODO burde ikke være instant
+                datoattestert = vedtak.await()?.attestasjon?.tidspunkt?.instant, // TODO burde ikke være instant
                 attestant = vedtak.await()?.attestasjon?.attestant,
                 soeknadMottattDato = detaljertBehandling.soeknadMottattDato,
                 virkningstidspunkt = detaljertBehandling.virkningstidspunkt,

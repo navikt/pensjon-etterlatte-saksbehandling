@@ -66,15 +66,17 @@ class SakDao(private val connection: () -> Connection) {
     }
 
     fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean) {
-        val statement = connection()
-            .prepareStatement(
+        with(connection()) {
+            val statement = prepareStatement(
                 """
                 UPDATE sak 
                 set erSkjermet = ? 
-                where id in (${sakIder.joinToString(", ") { "'$it'" }}) 
+                where id = any(?)
                 """.trimIndent()
             )
-        statement.setBoolean(1, skjermet)
-        statement.executeUpdate()
+            statement.setBoolean(1, skjermet)
+            statement.setArray(2, createArrayOf("bigserial", sakIder.toTypedArray()))
+            statement.executeUpdate()
+        }
     }
 }

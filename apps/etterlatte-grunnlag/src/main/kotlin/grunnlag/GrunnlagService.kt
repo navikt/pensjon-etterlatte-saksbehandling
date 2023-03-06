@@ -45,7 +45,6 @@ interface GrunnlagService {
 
 class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
-    private val sendToRapid: (String, UUID) -> Unit,
     private val behandlingKlient: BehandlingKlient,
     private val sporingslogg: Sporingslogg
 ) : GrunnlagService {
@@ -106,7 +105,7 @@ class RealGrunnlagService(
         lagreNyeSaksopplysninger(sakId, opplysning)
     }
 
-    fun <T> lagOpplysning(
+    private fun <T> lagOpplysning(
         opplysningsType: Opplysningstype,
         kilde: Grunnlagsopplysning.Kilde,
         opplysning: T,

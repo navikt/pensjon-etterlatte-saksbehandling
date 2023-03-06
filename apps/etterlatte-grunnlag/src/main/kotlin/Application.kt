@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -40,7 +39,7 @@ class ApplicationBuilder {
     private val config: Config = ConfigFactory.load()
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    private val grunnlagService = RealGrunnlagService(opplysningDao, ::publiser, behandlingKlient, Sporingslogg())
+    private val grunnlagService = RealGrunnlagService(opplysningDao, behandlingKlient, Sporingslogg())
 
     private val rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
         .withKtorModule {
@@ -53,8 +52,5 @@ class ApplicationBuilder {
             BehandlingHendelser(this)
         }
 
-    private fun publiser(melding: String, key: UUID) {
-        rapidsConnection.publish(message = melding, key = key.toString())
-    }
     fun start() = setReady().also { rapidsConnection.start() }
 }

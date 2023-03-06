@@ -20,7 +20,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
+import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import org.slf4j.Logger
@@ -79,32 +79,32 @@ class BehandlingsHendelser(
                     mapOf(
                         "behandlingId" to behandling.id,
                         CORRELATION_ID_KEY to correlationId,
-                        BehandlingGrunnlagEndret.behandlingObjectKey to behandling.toDetaljertBehandling(),
-                        BehandlingGrunnlagEndret.sakIdKey to behandling.sak.id,
-                        BehandlingGrunnlagEndret.sakObjectKey to behandling.sak,
-                        BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet
+                        BehandlingRiverKey.behandlingObjectKey to behandling.toDetaljertBehandling(),
+                        BehandlingRiverKey.sakIdKey to behandling.sak.id,
+                        BehandlingRiverKey.sakObjectKey to behandling.sak,
+                        BehandlingRiverKey.behandlingOpprettetKey to behandling.behandlingOpprettet
                     )
                 ).also {
                     when (behandling) {
                         is Foerstegangsbehandling -> {
-                            it[BehandlingGrunnlagEndret.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
+                            it[BehandlingRiverKey.fnrSoekerKey] = behandling.persongalleri.soeker
+                            it[BehandlingRiverKey.persongalleriKey] = behandling.persongalleri
                         }
                         is Revurdering -> {
-                            it[BehandlingGrunnlagEndret.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
-                            it[BehandlingGrunnlagEndret.revurderingAarsakKey] = behandling.revurderingsaarsak
+                            it[BehandlingRiverKey.fnrSoekerKey] = behandling.persongalleri.soeker
+                            it[BehandlingRiverKey.persongalleriKey] = behandling.persongalleri
+                            it[BehandlingRiverKey.revurderingAarsakKey] = behandling.revurderingsaarsak
                         }
                         is ManueltOpphoer -> {
-                            it[BehandlingGrunnlagEndret.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
-                            it[BehandlingGrunnlagEndret.manueltOpphoerAarsakKey] = behandling.opphoerAarsaker
-                            it[BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey] =
+                            it[BehandlingRiverKey.fnrSoekerKey] = behandling.persongalleri.soeker
+                            it[BehandlingRiverKey.persongalleriKey] = behandling.persongalleri
+                            it[BehandlingRiverKey.manueltOpphoerAarsakKey] = behandling.opphoerAarsaker
+                            it[BehandlingRiverKey.manueltOpphoerfritekstAarsakKey] =
                                 behandling.fritekstAarsak ?: ""
                         }
                         is Regulering -> {
-                            it[BehandlingGrunnlagEndret.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
+                            it[BehandlingRiverKey.fnrSoekerKey] = behandling.persongalleri.soeker
+                            it[BehandlingRiverKey.persongalleriKey] = behandling.persongalleri
                         }
                     }
                 }.toJson()

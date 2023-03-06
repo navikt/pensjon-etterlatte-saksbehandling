@@ -9,8 +9,12 @@ import org.slf4j.LoggerFactory
 
 val feilhaandteringLogger = LoggerFactory.getLogger("feilhaandtering-kafka")
 
-fun withFeilhaandtering(packet: JsonMessage, context: MessageContext, feilendeSteg: String, block: () -> Unit): Unit? =
-    innerFeilhaandtering(packet, context, feilendeSteg, block)
+fun withFeilhaandtering(packet: JsonMessage, context: MessageContext, feilendeSteg: String, block: () -> Unit): Status =
+    if (innerFeilhaandtering(packet, context, feilendeSteg, block) != null) {
+        Status.SUKSESS
+    } else {
+        Status.FEIL
+    }
 
 private fun <T> innerFeilhaandtering(
     packet: JsonMessage,
@@ -21,10 +25,15 @@ private fun <T> innerFeilhaandtering(
     return try {
         block()
     } catch (e: Exception) {
-        feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila.", e)
+        feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
         packet.eventName = EventNames.FEILA
         packet.feilendeSteg = feilendeSteg
         context.publish(packet.toJson())
         null
     }
+}
+
+enum class Status {
+    SUKSESS,
+    FEIL
 }

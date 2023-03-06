@@ -14,9 +14,11 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
+import rapidsandrivers.Status
 import rapidsandrivers.behandlingId
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
+import java.util.*
 
 internal class OpprettVedtakforespoersel(
     rapidsConnection: RapidsConnection,
@@ -44,15 +46,37 @@ internal class OpprettVedtakforespoersel(
                 val respons = vedtak.upsertVedtak(behandlingId)
                 logger.info("Opprettet vedtak ${respons.vedtakId} for sak: $sakId og behandling: $behandlingId")
             }
-
-            withFeilhaandtering(packet, context, FATT_VEDTAK) {
-                val fattetVedtak = vedtak.fattVedtak(behandlingId)
-                logger.info("Fattet vedtak ${fattetVedtak.vedtakId} for sak: $sakId og behandling: $behandlingId")
-            }
-
-            withFeilhaandtering(packet, context, EventNames.ATTESTER) {
-                val attestert = vedtak.attesterVedtak(behandlingId)
-                logger.info("Attesterte vedtak ${attestert.vedtakId} for sak: $sakId og behandling: $behandlingId")
-            }
+                .takeIf { it == Status.SUKSESS }
+                .let {
+                    fattVedtak(packet, context, behandlingId, sakId)
+                        .takeIf { it == Status.SUKSESS }
+                        .let { attester(packet, context, behandlingId, sakId) }
+                }
         }
+
+    private fun fattVedtak(
+        packet: JsonMessage,
+        context: MessageContext,
+        behandlingId: UUID,
+        sakId: Long
+    ) = withFeilhaandtering(packet, context, FATT_VEDTAK) {
+        val fattetVedtak = vedtak.fattVedtak(behandlingId)
+        logger.info(
+            "Fattet vedtak ${fattetVedtak.vedtakId} for sak: $sakId og behandling: $behandlingId"
+        )
+    }
+
+    private fun attester(
+        packet: JsonMessage,
+        context: MessageContext,
+        behandlingId: UUID,
+        sakId: Long
+    ) {
+        withFeilhaandtering(packet, context, EventNames.ATTESTER) {
+            val attestert = vedtak.attesterVedtak(behandlingId)
+            logger.info(
+                "Attesterte vedtak ${attestert.vedtakId} for sak: $sakId og behandling: $behandlingId"
+            )
+        }
+    }
 }

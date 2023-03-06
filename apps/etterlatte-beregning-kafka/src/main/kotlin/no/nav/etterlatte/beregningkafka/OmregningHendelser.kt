@@ -14,10 +14,10 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.OMREGNING_ID_KEY
-import rapidsandrivers.omregningId
+import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 
 internal class OmregningHendelser(
@@ -34,7 +34,7 @@ internal class OmregningHendelser(
             eventName(BEREGN)
 
             correlationId()
-            validate { it.requireKey(OMREGNING_ID_KEY) }
+            validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.rejectKey(BEREGNING_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }.register(this)
@@ -44,9 +44,9 @@ internal class OmregningHendelser(
         withLogContext(packet.correlationId) {
             withFeilhaandtering(packet, context, BEREGN) {
                 logger.info("Mottatt omregninghendelse")
-                val omregningsId = packet.omregningId
+                val behandlingId = packet.behandlingId
                 runBlocking {
-                    val beregning = beregningService.opprettOmregning(omregningsId).body<BeregningDTO>()
+                    val beregning = beregningService.opprettOmregning(behandlingId).body<BeregningDTO>()
                     packet[BEREGNING_KEY] = beregning
                     packet[EVENT_NAME_KEY] = OPPRETT_VEDTAK
                     context.publish(packet.toJson())

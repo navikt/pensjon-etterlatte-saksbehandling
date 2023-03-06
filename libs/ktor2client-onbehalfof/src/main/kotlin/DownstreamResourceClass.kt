@@ -14,6 +14,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.token.System
@@ -35,7 +36,10 @@ class DownstreamResourceClient(
                 fetchFromDownstreamApi(resource, oboAccessToken)
             }
             .andThen { response ->
-                Ok(resource.addResponse(response))
+                when (response) {
+                    null -> Ok(resource)
+                    else -> Ok(resource.addResponse(response))
+                }
             }
     }
 
@@ -82,7 +86,7 @@ class DownstreamResourceClient(
     private suspend fun fetchFromDownstreamApi(
         resource: Resource,
         oboAccessToken: AccessToken
-    ): Result<JsonNode, ThrowableErrorMessage> =
+    ): Result<JsonNode?, ThrowableErrorMessage> =
 
         runCatching {
             httpClient.get(resource.url) {
@@ -94,7 +98,10 @@ class DownstreamResourceClient(
             }
             .fold(
                 onSuccess = { result ->
-                    Ok(result.body())
+                    when (result.status) {
+                        HttpStatusCode.NoContent -> Ok(null)
+                        else -> Ok(result.body())
+                    }
                 },
                 onFailure = { error ->
                     error.toErr(resource.url)

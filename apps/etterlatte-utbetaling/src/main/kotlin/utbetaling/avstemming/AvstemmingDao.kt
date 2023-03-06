@@ -8,10 +8,10 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
-import java.sql.Timestamp
 import javax.sql.DataSource
 
 class AvstemmingDao(private val dataSource: DataSource) {
@@ -27,9 +27,9 @@ class AvstemmingDao(private val dataSource: DataSource) {
                     """,
                 paramMap = mapOf(
                     "id" to konsistensavstemming.id.value.param(),
-                    "opprettet" to Timestamp.from(konsistensavstemming.opprettet.instant).param(),
-                    "loepende_fom" to Timestamp.from(konsistensavstemming.loependeFraOgMed.instant).param(),
-                    "opprettet_tom" to Timestamp.from(konsistensavstemming.opprettetTilOgMed.instant).param(),
+                    "opprettet" to konsistensavstemming.opprettet.toTimestamp().param(),
+                    "loepende_fom" to konsistensavstemming.loependeFraOgMed.toTimestamp().param(),
+                    "opprettet_tom" to konsistensavstemming.opprettetTilOgMed.toTimestamp().param(),
                     "avstemmingsdata" to konsistensavstemming.avstemmingsdata.param(),
                     "avstemmingtype" to Avstemmingtype.KONSISTENSAVSTEMMING.name.param(),
                     "saktype" to konsistensavstemming.sakType.name.param(),
@@ -82,9 +82,9 @@ class AvstemmingDao(private val dataSource: DataSource) {
                     """,
                 paramMap = mapOf(
                     "id" to grensesnittavstemming.id.value.param(),
-                    "opprettet" to Timestamp.from(grensesnittavstemming.opprettet.instant).param(),
-                    "periode_fra" to Timestamp.from(grensesnittavstemming.periode.fraOgMed.instant).param(),
-                    "periode_til" to Timestamp.from(grensesnittavstemming.periode.til.instant).param(),
+                    "opprettet" to grensesnittavstemming.opprettet.toTimestamp().param(),
+                    "periode_fra" to grensesnittavstemming.periode.fraOgMed.toTimestamp().param(),
+                    "periode_til" to grensesnittavstemming.periode.til.toTimestamp().param(),
                     "antall_oppdrag" to grensesnittavstemming.antallOppdrag.param(),
                     "avstemmingsdata" to grensesnittavstemming.avstemmingsdata.param(),
                     "avstemmingtype" to Avstemmingtype.GRENSESNITTAVSTEMMING.name.param(),

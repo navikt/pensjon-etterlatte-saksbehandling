@@ -7,16 +7,16 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCLocalDateTime
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCTimestamp
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.postgresql.util.PGobject
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.sql.Timestamp
-import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
 
@@ -135,7 +135,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                    AND status = ?
                 """.trimIndent()
             ).use {
-                it.setTimestamp(1, Timestamp.from(Instant.now().minus(minutter, ChronoUnit.MINUTES)))
+                it.setTimestamp(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES).toTimestamp())
                 it.setString(2, GrunnlagsendringStatus.VENTER_PAA_JOBB.name)
                 return it.executeQuery().toList { asGrunnlagsendringshendelse() }
             }

@@ -6,6 +6,4 @@ interface IGyldigSoeknadVurdert {
     val gyldigInnsenderKey get() = "gyldigInnsender"
 }
 
-object GyldigSoeknadVurdert : ISoeknadInnsendt, IFordelerFordelt, IGyldigSoeknadVurdert {
-    val eventName: String get() = "GYLDIG_SOEKNAD:VURDERT"
-}
+object GyldigSoeknadVurdert : ISoeknadInnsendt, IFordelerFordelt, IGyldigSoeknadVurdert

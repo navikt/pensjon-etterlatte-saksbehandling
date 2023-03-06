@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 interface VilkaarsvurderingKlient {
-    suspend fun hentVilkaarsvurdering(behandlingId: UUID, bruker: Bruker): VilkaarsvurderingDto
+    suspend fun hentVilkaarsvurdering(behandlingId: UUID, bruker: Bruker): VilkaarsvurderingDto?
 }
 
 class VilkaarsvurderingKlientException(override val message: String, override val cause: Throwable) :
@@ -31,7 +31,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
     override suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
         bruker: Bruker
-    ): VilkaarsvurderingDto {
+    ): VilkaarsvurderingDto? {
         logger.info("Henter vilkaarsvurdering med behandlingid=$behandlingId")
         try {
             return downstreamResourceClient
@@ -43,7 +43,7 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
                     bruker = bruker
                 )
                 .mapBoth(
-                    success = { json -> json.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { json -> json.response?.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage }
                 )
         } catch (e: Exception) {

@@ -8,12 +8,14 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregn
 import no.nav.etterlatte.libs.common.beregning.Beregningstype as CommonBeregningstype
 
 enum class Beregningstype {
-    BP;
+    BP,
+    OMS;
 
     companion object {
 
         fun fraDtoType(dto: CommonBeregningstype) = when (dto) {
             CommonBeregningstype.BP -> BP
+            CommonBeregningstype.OMS -> OMS
         }
     }
 }

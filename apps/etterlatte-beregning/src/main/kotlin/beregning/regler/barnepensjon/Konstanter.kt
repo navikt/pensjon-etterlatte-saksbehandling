@@ -1,4 +1,4 @@
-package no.nav.etterlatte.beregning.regler
+package no.nav.etterlatte.beregning.regler.barnepensjon
 
 import java.time.LocalDate
 

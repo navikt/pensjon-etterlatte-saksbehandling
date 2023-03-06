@@ -53,15 +53,7 @@ data class Vedtak(
         ), // må få inn dette på toppnivå?
         sak = Sak(this.fnr!!, this.sakType!!, this.sakId!!),
         behandling = Behandling(this.behandlingType, behandlingId),
-        type = if (
-            this.vilkaarsResultat?.get("resultat")?.get("utfall")?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
-        ) {
-            VedtakType.INNVILGELSE
-        } else if (this.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.MANUELT_OPPHOER)) {
-            VedtakType.OPPHOER
-        } else {
-            VedtakType.AVSLAG
-        }, // Hvor skal vi bestemme vedtakstype?
+        type = finnVedtakstype(), // Hvor skal vi bestemme vedtakstype?
         grunnlag = emptyList(), // Ikke lenger aktuell
         vilkaarsvurdering = this.vilkaarsResultat, // Bør periodiseres
         beregning = this.beregningsResultat?.let { bres ->
@@ -103,6 +95,18 @@ data class Vedtak(
             )
         }
     )
+
+    private fun finnVedtakstype() = if (
+        this.vilkaarsResultat?.get("resultat")?.get("utfall")?.textValue() == VilkaarsvurderingUtfall.OPPFYLT.name
+    ) {
+        VedtakType.INNVILGELSE
+    } else if (this.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.MANUELT_OPPHOER)) {
+        VedtakType.OPPHOER
+    } else if (this.behandlingType == BehandlingType.OMREGNING) {
+        VedtakType.ENDRING
+    } else {
+        VedtakType.AVSLAG
+    }
 }
 
 data class VedtakSammendrag(

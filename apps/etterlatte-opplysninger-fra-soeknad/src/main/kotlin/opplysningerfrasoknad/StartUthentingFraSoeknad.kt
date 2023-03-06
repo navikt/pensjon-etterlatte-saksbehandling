@@ -23,7 +23,7 @@ internal class StartUthentingFraSoeknad(
 
     init {
         River(rapidsConnection).apply {
-            eventName(GyldigSoeknadVurdert.eventName)
+            eventName("soeknad_innsendt")
             correlationId()
             validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }

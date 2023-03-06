@@ -38,3 +38,5 @@ jobs:
           docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker build --tag ${IMAGE} jobs/${JOB_NAME}
           docker push ${IMAGE}
+      - name: Print docker tag
+        run: echo 'Docker-tag er ${{ env.image }} ' >> $GITHUB_STEP_SUMMARY

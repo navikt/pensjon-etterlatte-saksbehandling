@@ -1,30 +1,11 @@
 package no.nav.etterlatte.beregning
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.YearMonth
 import java.util.*
-
-data class BeregningsperiodeDAO(
-    val beregningId: UUID,
-    val behandlingId: UUID,
-    val type: Beregningstype,
-    val beregnetDato: Tidspunkt,
-    val datoFOM: YearMonth,
-    val datoTOM: YearMonth?,
-    val utbetaltBeloep: Int,
-    val soeskenFlokk: List<String>?,
-    val grunnbelopMnd: Int,
-    val grunnbelop: Int,
-    val grunnlagMetadata: Metadata,
-    val trygdetid: Int,
-    val regelResultat: JsonNode? = null,
-    val regelVersjon: String? = null
-)
 
 data class Beregning(
     val beregningId: UUID,

@@ -14,6 +14,11 @@ import java.time.Clock
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
+enum class Vedtaksloesning {
+    DOFFEN, PESYS
+}
+data class Fordeling(val soeknadId: Long, val fordeltTil: Vedtaksloesning, val kriterier: List<FordelerKriterie>)
+
 sealed class FordelerResultat {
     object GyldigForBehandling : FordelerResultat()
     class UgyldigHendelse(val message: String) : FordelerResultat()
@@ -23,30 +28,57 @@ sealed class FordelerResultat {
 class FordelerService(
     private val fordelerKriterier: FordelerKriterier,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
-    private val klokke: Clock = klokke()
+    private val fordelerRepository: FordelerRepository,
+    private val klokke: Clock = klokke(),
+    private val maxFordelingTilDoffen: Long
 ) {
-
     fun sjekkGyldighetForBehandling(event: FordelerEvent): FordelerResultat = runBlocking {
+        if (ugyldigHendelse(event)) {
+            UgyldigHendelse(
+                "Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})"
+            )
+        } else {
+            fordelSoekand(event).let {
+                when (it.fordeltTil) {
+                    Vedtaksloesning.DOFFEN -> GyldigForBehandling
+                    Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
+                }
+            }
+        }
+    }
+
+    private fun fordelSoekand(event: FordelerEvent): Fordeling {
+        return finnEksisterendeFordeling(event.soeknadId) ?: nyFordeling(event).apply { lagre() }
+    }
+
+    private fun finnEksisterendeFordeling(soeknadId: Long): Fordeling? =
+        fordelerRepository
+            .finnFordeling(soeknadId)
+            ?.let {
+                Fordeling(
+                    it.soeknadId,
+                    Vedtaksloesning.valueOf(it.fordeling),
+                    fordelerRepository.finnKriterier(it.soeknadId).map { FordelerKriterie.valueOf(it) }
+                )
+            }
+
+    private fun Fordeling.lagre() {
+        fordelerRepository.lagreFordeling(FordeltTransient(soeknadId, fordeltTil.name, kriterier.map { it.name }))
+    }
+    private fun nyFordeling(event: FordelerEvent): Fordeling = runBlocking {
         val soeknad: Barnepensjon = event.soeknad
 
-        when {
-            ugyldigHendelse(event) ->
-                UgyldigHendelse(
-                    "Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})"
-                )
+        val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad))
+        val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
+        val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
 
-            else -> {
-                val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad))
-                val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
-                val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
-
-                fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
-                    if (it.kandidat) {
-                        GyldigForBehandling
-                    } else {
-                        IkkeGyldigForBehandling(it.forklaring)
-                    }
-                }
+        fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
+            if (it.kandidat &&
+                fordelerRepository.antallFordeltTil(Vedtaksloesning.DOFFEN.name) < maxFordelingTilDoffen
+            ) {
+                Fordeling(event.soeknadId, Vedtaksloesning.DOFFEN, emptyList())
+            } else {
+                Fordeling(event.soeknadId, Vedtaksloesning.PESYS, it.forklaring)
             }
         }
     }

@@ -20,9 +20,8 @@ val hendelseTyper = listOf("DOEDSFALL_V1", "UTFLYTTING_FRA_NORGE", "FORELDERBARN
 internal class PdlHendelser(
     rapidsConnection: RapidsConnection,
     private val behandlinger: Behandling
-
 ) : River.PacketListener {
-    private val logger = LoggerFactory.getLogger(OppdaterBehandling::class.java)
+    private val logger = LoggerFactory.getLogger(PdlHendelser::class.java)
 
     init {
         logger.info("initierer rapid for pdlHendelser")

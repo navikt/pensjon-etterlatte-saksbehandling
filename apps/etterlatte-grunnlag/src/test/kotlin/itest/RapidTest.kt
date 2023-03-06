@@ -2,25 +2,15 @@ package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
-import lagGrunnlagsopplysning
-import no.nav.etterlatte.grunnlag.BehandlingEndretHendelse
 import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.Metadata
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -36,7 +26,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RapidTest {
@@ -63,11 +53,10 @@ internal class RapidTest {
         dataSource.migrate()
 
         opplysningRepo = OpplysningDao(dataSource)
-        grunnlagService = RealGrunnlagService(opplysningRepo, sendToRapid, behandlingKlient, mockk())
+        grunnlagService = RealGrunnlagService(opplysningRepo, behandlingKlient, mockk())
         inspector = TestRapid().apply {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)
-            BehandlingEndretHendelse(this, grunnlagService)
         }
     }
 
@@ -101,15 +90,6 @@ internal class RapidTest {
         ).toJson()
 
         @Test
-        fun `ny enkeltopplysning sender ut melding om at grunnlaget er endret`() {
-            inspector.sendTestMessage(melding)
-            Assertions.assertEquals(
-                "GRUNNLAG:GRUNNLAGENDRET",
-                inspector.inspektør.message(0)[EVENT_NAME_KEY].textValue()
-            )
-        }
-
-        @Test
         fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
             assertOpplysningBlirLagret(melding = melding, expectedOpplysning = nyOpplysning)
         }
@@ -127,94 +107,9 @@ internal class RapidTest {
         ).toJson()
 
         @Test
-        fun `svar på opplysningsbehov sender ut melding om at grunnlaget er endret`() {
-            inspector.sendTestMessage(melding)
-            Assertions.assertEquals(
-                "GRUNNLAG:GRUNNLAGENDRET",
-                inspector.inspektør.message(0)[EVENT_NAME_KEY].textValue()
-            )
-        }
-
-        @Test
         fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
             assertOpplysningBlirLagret(melding = melding, expectedOpplysning = nyOpplysning)
         }
-    }
-
-    @Test
-    fun `lagrer og sender ut nytt grunnlag`() {
-        val personRolleOpplysning = lagGrunnlagsopplysning(
-            opplysningstype = Opplysningstype.PERSONROLLE,
-            kilde = kilde,
-            uuid = statiskUuid,
-            verdi = PersonRolle.BARN.toJsonNode(),
-            fnr = fnr
-        )
-        val nyOpplysningMelding = JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to "OPPLYSNING:NY",
-                "opplysning" to listOf(
-                    nyOpplysning,
-                    personRolleOpplysning
-                ),
-                "fnr" to fnr,
-                "sakId" to 1
-            )
-        ).toJson()
-        val behandlingEndretMelding = JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to "BEHANDLING:GRUNNLAGENDRET",
-                "opplysning" to listOf(
-                    nyOpplysningMelding,
-                    lagGrunnlagsopplysning(
-                        opplysningstype = Opplysningstype.PERSONROLLE,
-                        kilde = kilde,
-                        uuid = statiskUuid,
-                        verdi = PersonRolle.BARN.toJsonNode(),
-                        fnr = fnr
-                    )
-                ),
-                "persongalleri" to Persongalleri(
-                    soeker = fnr.value,
-                    innsender = null,
-                    soesken = listOf(),
-                    avdoed = listOf(),
-                    gjenlevende = listOf()
-                ).toJsonNode(),
-                "fnr" to fnr,
-                "sakId" to 1
-            )
-        ).toJson()
-
-        inspector.sendTestMessage(nyOpplysningMelding)
-        inspector.sendTestMessage(behandlingEndretMelding)
-
-        val packet = inspector.inspektør.message(1)
-
-        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET".toJson(), packet[EVENT_NAME_KEY].toJson())
-        Assertions.assertEquals(
-            Grunnlag(
-                soeker = mapOf(
-                    Opplysningstype.NAVN to Opplysning.Konstant(
-                        statiskUuid,
-                        nyOpplysning.kilde,
-                        nyOpplysning.opplysning
-                    ),
-                    Opplysningstype.PERSONROLLE to Opplysning.Konstant(
-                        statiskUuid,
-                        personRolleOpplysning.kilde,
-                        personRolleOpplysning.opplysning
-                    )
-                ),
-                familie = listOf(),
-                sak = mapOf(),
-                metadata = Metadata(
-                    sakId = 1,
-                    versjon = 2
-                )
-            ).toJson(),
-            packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey].toJson()
-        )
     }
 
     private fun assertOpplysningBlirLagret(melding: String, expectedOpplysning: Grunnlagsopplysning<JsonNode>) {

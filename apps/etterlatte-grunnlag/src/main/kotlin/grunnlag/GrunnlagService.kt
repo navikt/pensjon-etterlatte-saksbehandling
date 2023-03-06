@@ -10,11 +10,9 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnla
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.sporingslogg.Decision
@@ -22,10 +20,9 @@ import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.token.Bruker
-import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
@@ -48,7 +45,6 @@ interface GrunnlagService {
 
 class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
-    private val sendToRapid: (String, UUID) -> Unit,
     private val behandlingKlient: BehandlingKlient,
     private val sporingslogg: Sporingslogg
 ) : GrunnlagService {
@@ -107,15 +103,9 @@ class RealGrunnlagService(
 
         val sakId = behandling.sak
         lagreNyeSaksopplysninger(sakId, opplysning)
-        val grunnlagEndretMessage = JsonMessage.newMessage(
-            eventName = "GRUNNLAG:GRUNNLAGENDRET",
-            map = mapOf(CORRELATION_ID_KEY to getCorrelationId(), "sakId" to sakId)
-        )
-        sendToRapid(grunnlagEndretMessage.toJson(), behandlingId)
-        logger.info("Lagt ut melding om grunnlagsendring for behandling $behandlingId")
     }
 
-    fun <T> lagOpplysning(
+    private fun <T> lagOpplysning(
         opplysningsType: Opplysningstype,
         kilde: Grunnlagsopplysning.Kilde,
         opplysning: T,

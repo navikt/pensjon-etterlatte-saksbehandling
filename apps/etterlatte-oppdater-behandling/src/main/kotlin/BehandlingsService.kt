@@ -17,8 +17,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.sak.Saker
 
 interface Behandling {
-    fun grunnlagEndretISak(sak: Long)
-
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
@@ -34,12 +32,6 @@ class BehandlingsService(
     private val behandling_app: HttpClient,
     private val url: String
 ) : Behandling {
-    override fun grunnlagEndretISak(sak: Long) {
-        runBlocking {
-            behandling_app.post("$url/saker/$sak/hendelse/grunnlagendret") {}
-        }
-    }
-
     override fun sendDoedshendelse(doedshendelse: Doedshendelse) {
         runBlocking {
             behandling_app.post("$url/grunnlagsendringshendelse/doedshendelse") {

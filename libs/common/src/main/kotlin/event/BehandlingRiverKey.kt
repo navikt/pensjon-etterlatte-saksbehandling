@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.common.event
 
-interface IBehandlingGrunnlagEndret {
-    val eventName get() = "BEHANDLING:GRUNNLAGENDRET"
+interface IBehandlingRiverKey {
     val behandlingObjectKey get() = "behandling"
     val sakObjectKey get() = "sak"
     val behandlingIdKey get() = "behandling.id"
@@ -14,9 +13,4 @@ interface IBehandlingGrunnlagEndret {
     val manueltOpphoerfritekstAarsakKey get() = "manueltOpphoerFritekstAarsak"
 }
 
-interface IMedGrunnlag {
-    val grunnlagKey get() = "grunnlag"
-}
-
-object BehandlingGrunnlagEndret : IBehandlingGrunnlagEndret
-object BehandlingGrunnlagEndretMedGrunnlag : IBehandlingGrunnlagEndret, IMedGrunnlag
+object BehandlingRiverKey : IBehandlingRiverKey

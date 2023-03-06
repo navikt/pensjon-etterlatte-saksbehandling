@@ -32,13 +32,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
-    private val grunnlagService = RealGrunnlagService(opplysningerMock, sendToRapid, behandlingKlient, mockk())
+    private val grunnlagService = RealGrunnlagService(opplysningerMock, behandlingKlient, mockk())
 
     private val testData = GrunnlagTestData()
 

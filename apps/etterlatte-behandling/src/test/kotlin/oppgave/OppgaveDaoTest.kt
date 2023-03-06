@@ -139,6 +139,14 @@ internal class OppgaveDaoTest {
         assertEquals(0, oppgaver.size)
         val strengtFortroligOppgaver = oppgaveDao.finnOppgaverForStrengtFortrolig(alleBehandlingsStatuser)
         assertEquals(1, strengtFortroligOppgaver.size)
+
+        sakDaoAdressebeskyttelse.setAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
+        assertEquals(1, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
+        assertEquals(0, oppgaveDao.finnOppgaverForStrengtFortrolig(alleBehandlingsStatuser).size)
+
+        sakDaoAdressebeskyttelse.setAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)
+        assertEquals(0, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
+        assertEquals(0, oppgaveDao.finnOppgaverForStrengtFortrolig(alleBehandlingsStatuser).size)
     }
 
     private fun lagRegulering(prosesstype: Prosesstype, fnr: String, sakId: Long): OpprettBehandling {

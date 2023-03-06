@@ -77,7 +77,10 @@ class OppgaveDao(private val connection: () -> Connection) {
             val oppgaver = stmt.executeQuery().toList {
                 val adressebeskyttelse = getString("adressebeskyttelse")
                 if (adressebeskyttelse != null &&
-                    adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString()
+                    (
+                        adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString() ||
+                            adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString()
+                        )
                 ) {
                     null
                 } else {

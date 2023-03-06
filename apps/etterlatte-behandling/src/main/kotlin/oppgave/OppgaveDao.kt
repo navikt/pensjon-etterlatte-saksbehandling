@@ -84,8 +84,6 @@ class OppgaveDao(private val connection: () -> Connection) {
                     grunnlagsendringsType = GrunnlagsendringsType.valueOf(getString("type")),
                     gjelderRolle = Saksrolle.enumVedNavnEllerUkjent(getString("hendelse_gjelder_rolle"))
                 )
-            }.filter {
-                !it.grunnlagsendringsType.isAdresseBeskyttelse()
             }.also {
                 logger.info("Hentet grunnlagsoppgaveliste for saksbehandler. Fant ${it.size} oppgaver")
             }

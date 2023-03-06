@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 
 interface SakServiceAdressebeskyttelse {
     fun behandlingHarAdressebeskyttelse(behandlingId: String): Boolean
-    fun setAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int
+    fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int
 }
 
 class SakServiceAdressebeskyttelseImpl(private val dao: SakDaoAdressebeskyttelse) : SakServiceAdressebeskyttelse {
@@ -23,7 +23,7 @@ class SakServiceAdressebeskyttelseImpl(private val dao: SakDaoAdressebeskyttelse
         }
     }
 
-    override fun setAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {
-        return dao.setAdresseBeskyttelse(id, adressebeskyttelseGradering)
+    override fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {
+        return dao.oppdaterAdresseBeskyttelse(id, adressebeskyttelseGradering)
     }
 }

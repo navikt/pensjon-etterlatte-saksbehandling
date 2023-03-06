@@ -54,7 +54,7 @@ class SakServiceAdressebeskyttelseTest {
         val fnr = Foedselsnummer.of("08071272487").value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
 
-        sakServiceAdressebeskyttelse.setAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             sakId = sakId,

@@ -21,10 +21,8 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.util.*
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class SkjermingslesingTest {
 
     companion object {
@@ -39,7 +37,7 @@ class SkjermingslesingTest {
     }
 
     @Test
-    fun testSkjermingshendelse() {
+    fun `Les skjermingshendelse og post det til behandlingsapp`() {
         val skjermingsProducer: KafkaProducer<String, String> = generateSkjermingsProducer()
         val fnr = "70078749472"
         skjermingsProducer.send(ProducerRecord(pdlPersonTopic, fnr, "value"))

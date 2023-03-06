@@ -32,7 +32,9 @@ class RealSakService(private val dao: SakDao) : SakService {
     }
 
     override fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean) {
-        dao.markerSakerMedSkjerming(sakIder, skjermet)
+        inTransaction {
+            dao.markerSakerMedSkjerming(sakIder, skjermet)
+        }
     }
 
     override fun finnEllerOpprettSak(person: String, type: SakType): Sak {

@@ -2,7 +2,7 @@ package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
@@ -145,7 +145,7 @@ class KonsistensavstemmingService(
             hentSisteKonsistensavstemming(saktype)?.opprettet
 
         val datoForSisteKonsistensavstemming =
-            tidspunktForSisteKonsistensavstemming?.toLocalDatetimeNorskTid()?.toLocalDate()
+            tidspunktForSisteKonsistensavstemming?.toNorskTid()?.toLocalDate()
 
         return datoForSisteKonsistensavstemming == idag
     }

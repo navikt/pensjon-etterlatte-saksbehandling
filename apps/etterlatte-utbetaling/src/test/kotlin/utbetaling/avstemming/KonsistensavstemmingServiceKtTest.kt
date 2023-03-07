@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
@@ -611,5 +610,4 @@ internal class KonsistensavstemmingServiceKtTest {
     }
 
     private fun LocalDate.toTidspunkt(): Tidspunkt = this.atStartOfDay().toNorskTidspunkt()
-    private fun Tidspunkt.toLocalDate(): LocalDate = toLocalDatetimeNorskTid().toLocalDate()
 }

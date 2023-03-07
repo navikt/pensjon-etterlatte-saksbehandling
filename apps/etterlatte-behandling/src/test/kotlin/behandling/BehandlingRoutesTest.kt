@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -166,7 +166,7 @@ internal class BehandlingRoutesTest {
 
     private fun mockBehandlingService(bodyVirkningstidspunkt: Tidspunkt, bodyBegrunnelse: String) {
         val parsetVirkningstidspunkt = YearMonth.from(
-            bodyVirkningstidspunkt.toLocalDatetimeNorskTid().let {
+            bodyVirkningstidspunkt.toNorskTid().let {
                 YearMonth.of(it.year, it.month)
             }
         )

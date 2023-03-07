@@ -43,7 +43,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
@@ -381,7 +381,7 @@ data class ManueltOpphoerResponse(val behandlingId: String)
 
 data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String, val begrunnelse: String?) {
     val dato: YearMonth = try {
-        Tidspunkt.parse(_dato).toLocalDatetimeNorskTid().let {
+        Tidspunkt.parse(_dato).toNorskTid().let {
             YearMonth.of(it.year, it.month)
         } ?: throw IllegalArgumentException("Dato $_dato må være definert")
     } catch (e: Exception) {

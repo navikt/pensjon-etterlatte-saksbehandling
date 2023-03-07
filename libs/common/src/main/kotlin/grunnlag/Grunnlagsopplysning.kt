@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 
@@ -92,7 +91,7 @@ open class Grunnlagsopplysning<T>(
         }
     }
 
-    data class RegelKilde(val navn: String, val ts: Instant, val versjon: String) : Kilde("regel") {
+    data class RegelKilde(val navn: String, val ts: Tidspunkt, val versjon: String) : Kilde("regel") {
         override fun toString(): String {
             return "beregningsregel  $navn"
         }

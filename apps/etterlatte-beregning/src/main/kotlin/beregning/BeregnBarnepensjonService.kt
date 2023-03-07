@@ -29,7 +29,6 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 
@@ -166,7 +165,7 @@ class BeregnBarnepensjonService(
         ),
         avdoedForelder = FaktumNode(
             verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_I_PILOT)),
-            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Instant.now(), "1"),
+            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
             beskrivelse = "Trygdetid avdøed forelder"
         )
     )

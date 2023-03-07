@@ -41,7 +41,6 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -236,7 +235,7 @@ fun grunnlagsOpplysningMedPersonopplysning(
     personopplysning: Person
 ) = Grunnlagsopplysning(
     id = UUID.randomUUID(),
-    kilde = Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, "opplysningsId1"),
+    kilde = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, "opplysningsId1"),
     opplysningType = Opplysningstype.DOEDSDATO,
     meta = ObjectMapper().createObjectNode(),
     opplysning = personopplysning,

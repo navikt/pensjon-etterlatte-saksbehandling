@@ -8,11 +8,11 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -106,7 +106,7 @@ internal class BehandlingTest {
     private fun opprettOpplysning(jsonNode: JsonNode) =
         Opplysning.Konstant(
             UUID.randomUUID(),
-            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, null),
+            Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, null),
             jsonNode
         )
 }

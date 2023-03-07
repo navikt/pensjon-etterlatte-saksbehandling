@@ -79,11 +79,11 @@ open class Grunnlagsopplysning<T>(
         }
     }
 
-    data class Privatperson(val fnr: String, val mottatDato: Instant) : Kilde("privatperson")
+    data class Privatperson(val fnr: String, val mottatDato: Tidspunkt) : Kilde("privatperson")
 
     data class Pdl(
         val navn: String,
-        val tidspunktForInnhenting: Instant,
+        val tidspunktForInnhenting: Tidspunkt,
         val registersReferanse: String?,
         val opplysningId: String?
     ) : Kilde("pdl") {

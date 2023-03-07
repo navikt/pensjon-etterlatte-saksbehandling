@@ -71,20 +71,14 @@ class OppgaveDao(private val connection: () -> Connection) {
                 |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
+                |AND ((adressebeskyttelse != ?) OR (adressebeskyttelse != ?)) 
                 """.trimMargin()
             )
             stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))
             stmt.setString(2, Prosesstype.AUTOMATISK.toString())
-            val oppgaver = stmt.executeQuery().toList {
-                /*val adressebeskyttelse = getString("adressebeskyttelse")
-                if (adressebeskyttelse != null &&
-                    (
-                        adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString() ||
-                            adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString()
-                        )
-                ) {
-                    null
-                } else {*/
+            stmt.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
+            stmt.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
+            return stmt.executeQuery().toList {
                 val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
                     ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
                     ?: throw IllegalStateException(
@@ -102,16 +96,9 @@ class OppgaveDao(private val connection: () -> Connection) {
                 )
             }.also {
                 logger.info(
-                    "Hentet behandlingsoppgaveliste før filternonnull for bruker med statuser $statuser." +
-                        " Fant ${it.size} oppgaver"
+                    "Hentet behandlingsoppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver"
                 )
             }
-            return oppgaver.filterNotNull()
-                .also {
-                    logger.info(
-                        "Hentet behandlingsoppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver"
-                    )
-                }
         }
     }
 

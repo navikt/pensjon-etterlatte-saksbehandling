@@ -1,5 +1,6 @@
 package oppgave
 
+import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -14,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -123,19 +125,20 @@ internal class OppgaveDaoTest {
         assertEquals(manuel.id, (oppgaver[0] as Oppgave.BehandlingOppgave).behandlingId)
     }
 
-    /*@Test
-    @Ignore
+    @Test
     fun `skal ikke returnere strengt fortrolig oppgave for annen enn rolle som har strengt fortrolig`() {
         val fnr = STOR_SNERK.value
 
         val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON)
-        val manuel = lagRegulering(Prosesstype.MANUELL, fnr, sak.id)
-        behandlingDao.opprettBehandling(manuel)
+        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, fnr, sak.id))
         sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        val sakk = sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
+        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, TRIVIELL_MIDTPUNKT.value, sakk.id))
 
         val alleBehandlingsStatuser = BehandlingStatus.values().asList()
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
-        assertEquals(0, oppgaver.size)
+        assertEquals(1, oppgaver.size)
         val strengtFortroligOppgaver = oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(
             alleBehandlingsStatuser
         )
@@ -152,12 +155,12 @@ internal class OppgaveDaoTest {
             sak.id,
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
         )
-        assertEquals(0, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
+        assertEquals(1, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
         assertEquals(
             1,
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(alleBehandlingsStatuser).size
         )
-    }*/
+    }
 
     private fun lagRegulering(prosesstype: Prosesstype, fnr: String, sakId: Long): OpprettBehandling {
         return OpprettBehandling(

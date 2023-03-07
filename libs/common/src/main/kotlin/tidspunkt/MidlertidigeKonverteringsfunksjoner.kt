@@ -13,9 +13,6 @@ sia målet er å gå over til å bruke Tidspunkt ganske konsekvent
  */
 fun Instant.tilZonedDateTime() = atZone(standardTidssoneUTC)
 
-fun LocalDateTime.tilUTCTimestamp() =
-    Timestamp.from(this.atZone(standardTidssoneUTC).toTidspunkt().instant)
-
 fun Timestamp.tilUTCLocalDateTime() = toTidspunkt().instant.atZone(standardTidssoneUTC).toLocalDateTime()
 
 fun Instant?.toLocalDateTimeNorskTid() = this?.let { LocalDateTime.ofInstant(it, norskTidssone) }

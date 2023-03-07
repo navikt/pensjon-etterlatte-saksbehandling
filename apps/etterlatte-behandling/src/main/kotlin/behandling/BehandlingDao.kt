@@ -23,8 +23,8 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCLocalDateTime
-import no.nav.etterlatte.libs.common.tidspunkt.tilUTCTimestamp
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -284,10 +284,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setTidspunkt(4, opprettet)
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
-            stmt.setTimestamp(
-                7,
-                soeknadMottattDato?.tilUTCTimestamp()
-            )
+            stmt.setTidspunkt(7, soeknadMottattDato?.toTidspunkt())
             with(persongalleri) {
                 stmt.setString(8, innsender)
                 stmt.setString(9, soeker)
@@ -319,10 +316,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             )
         stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
         stmt.setString(2, behandling.status.name)
-        stmt.setTimestamp(
-            3,
-            behandling.sistEndret.tilUTCTimestamp()
-        )
+        stmt.setTidspunkt(3, behandling.sistEndret.toTidspunkt())
         stmt.setObject(4, behandling.id)
         require(stmt.executeUpdate() == 1)
     }
@@ -341,10 +335,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
         stmt.setString(1, status.name)
-        stmt.setTimestamp(
-            2,
-            sistEndret.tilUTCTimestamp()
-        )
+        stmt.setTidspunkt(2, sistEndret.toTidspunkt())
         stmt.setObject(3, behandling)
         require(stmt.executeUpdate() == 1)
     }

@@ -217,7 +217,7 @@ class RealGenerellBehandlingService(
                 kommerBarnetTilgode = kommerBarnetTilgode,
                 saksbehandlerId = vedtak.await()?.vedtakFattet?.ansvarligSaksbehandler,
                 datoFattet = vedtak.await()?.vedtakFattet?.tidspunkt,
-                datoattestert = vedtak.await()?.attestasjon?.tidspunkt,
+                datoAttestert = vedtak.await()?.attestasjon?.tidspunkt,
                 attestant = vedtak.await()?.attestasjon?.attestant,
                 soeknadMottattDato = detaljertBehandling.soeknadMottattDato,
                 virkningstidspunkt = detaljertBehandling.virkningstidspunkt,

@@ -76,7 +76,7 @@ class OppgaveDao(private val connection: () -> Connection) {
             stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))
             stmt.setString(2, Prosesstype.AUTOMATISK.toString())
             val oppgaver = stmt.executeQuery().toList {
-                val adressebeskyttelse = getString("adressebeskyttelse")
+                /*val adressebeskyttelse = getString("adressebeskyttelse")
                 if (adressebeskyttelse != null &&
                     (
                         adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString() ||
@@ -84,23 +84,22 @@ class OppgaveDao(private val connection: () -> Connection) {
                         )
                 ) {
                     null
-                } else {
-                    val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
-                        ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
-                        ?: throw IllegalStateException(
-                            "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
-                        )
-                    Oppgave.BehandlingOppgave(
-                        behandlingId = getObject("id") as UUID,
-                        behandlingStatus = BehandlingStatus.valueOf(getString("status")),
-                        sakId = getLong("sak_id"),
-                        sakType = enumValueOf(getString("sakType")),
-                        fnr = Foedselsnummer.of(getString("fnr")),
-                        registrertDato = mottattDato,
-                        behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
-                        antallSoesken = antallSoesken(getString("soesken"))
+                } else {*/
+                val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
+                    ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
+                    ?: throw IllegalStateException(
+                        "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
                     )
-                }
+                Oppgave.BehandlingOppgave(
+                    behandlingId = getObject("id") as UUID,
+                    behandlingStatus = BehandlingStatus.valueOf(getString("status")),
+                    sakId = getLong("sak_id"),
+                    sakType = enumValueOf(getString("sakType")),
+                    fnr = Foedselsnummer.of(getString("fnr")),
+                    registrertDato = mottattDato,
+                    behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
+                    antallSoesken = antallSoesken(getString("soesken"))
+                )
             }.also {
                 logger.info(
                     "Hentet behandlingsoppgaveliste før filternonnull for bruker med statuser $statuser." +

@@ -1,6 +1,5 @@
 package oppgave
 
-import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -15,7 +14,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -125,7 +123,8 @@ internal class OppgaveDaoTest {
         assertEquals(manuel.id, (oppgaver[0] as Oppgave.BehandlingOppgave).behandlingId)
     }
 
-    @Test
+    /*@Test
+    @Ignore
     fun `skal ikke returnere strengt fortrolig oppgave for annen enn rolle som har strengt fortrolig`() {
         val fnr = STOR_SNERK.value
 
@@ -158,7 +157,7 @@ internal class OppgaveDaoTest {
             1,
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(alleBehandlingsStatuser).size
         )
-    }
+    }*/
 
     private fun lagRegulering(prosesstype: Prosesstype, fnr: String, sakId: Long): OpprettBehandling {
         return OpprettBehandling(

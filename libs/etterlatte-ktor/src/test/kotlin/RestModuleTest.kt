@@ -22,6 +22,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.withSaksbehandlertilgang
@@ -238,7 +239,7 @@ class RestModuleTest {
 
     private fun Route.route3() {
         route("/test3") {
-            get("{behandlingId}") {
+            get("{$BEHANDLINGSID_CALL_PARAMETER}") {
                 withSaksbehandlertilgang {
                     call.respond(OK)
                 }

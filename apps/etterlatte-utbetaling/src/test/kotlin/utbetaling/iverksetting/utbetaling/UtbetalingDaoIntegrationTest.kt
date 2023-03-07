@@ -166,12 +166,12 @@ internal class UtbetalingDaoIntegrationTest {
 
     @Test
     fun `skal hente alle utbetalinger mellom to tidspunkter`() {
-        val jan1 = Tidspunkt(Instant.parse("2022-01-01T00:00:00Z"))
-        val jan2 = Tidspunkt(Instant.parse("2022-02-01T00:00:00Z"))
-        val jan3 = Tidspunkt(Instant.parse("2022-03-01T00:00:00Z"))
-        val jan4 = Tidspunkt(Instant.parse("2022-04-01T00:00:00Z"))
-        val jan5 = Tidspunkt(Instant.parse("2022-05-01T00:00:00Z"))
-        val jan6 = Tidspunkt(Instant.parse("2022-06-01T00:00:00Z"))
+        val jan1 = Tidspunkt.parse("2022-01-01T00:00:00Z")
+        val jan2 = Tidspunkt.parse("2022-02-01T00:00:00Z")
+        val jan3 = Tidspunkt.parse("2022-03-01T00:00:00Z")
+        val jan4 = Tidspunkt.parse("2022-04-01T00:00:00Z")
+        val jan5 = Tidspunkt.parse("2022-05-01T00:00:00Z")
+        val jan6 = Tidspunkt.parse("2022-06-01T00:00:00Z")
 
         utbetalingDao.opprettUtbetaling(
             opprettUtbetaling(

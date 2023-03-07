@@ -42,6 +42,7 @@ constructor(
         fun now(clock: Clock = klokke()) = Tidspunkt(Instant.now(clock))
 
         fun from(clock: Clock = klokke()) = clock.instant().toTidspunkt()
+        fun parse(text: String) = Tidspunkt(Instant.parse(text))
     }
 
     /**

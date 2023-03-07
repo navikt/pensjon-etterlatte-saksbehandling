@@ -45,7 +45,7 @@ constructor(
         val MIN = Tidspunkt(Instant.EPOCH)
         fun now(clock: Clock = klokke()) = Tidspunkt(Instant.now(clock))
 
-        fun from(clock: Clock = klokke()) = clock.instant().toTidspunkt()
+        fun from(clock: Clock = klokke()) = Tidspunkt(clock.instant())
         fun parse(text: String) = Tidspunkt(Instant.parse(text))
     }
 
@@ -60,6 +60,6 @@ constructor(
     }
 
     override fun hashCode() = instant.hashCode()
-    override fun plus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.plus(amount, unit).toTidspunkt()
-    override fun minus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.minus(amount, unit).toTidspunkt()
+    override fun plus(amount: Long, unit: TemporalUnit): Tidspunkt = Tidspunkt(instant.plus(amount, unit))
+    override fun minus(amount: Long, unit: TemporalUnit): Tidspunkt = Tidspunkt(instant.minus(amount, unit))
 }

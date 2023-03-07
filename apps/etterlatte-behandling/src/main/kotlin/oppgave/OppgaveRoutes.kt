@@ -13,13 +13,22 @@ import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.oppgave.domain.Handling
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import no.nav.etterlatte.oppgave.domain.OppgaveType
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal fun Route.oppgaveRoutes(service: OppgaveService) {
+    val logger = LoggerFactory.getLogger(this::class.java)
+
     route("/api/oppgaver") {
         get {
             when (val bruker = Kontekst.get().AppUser) {
-                is Saksbehandler -> call.respond(tilOppgaveListeDto(service.finnOppgaverForBruker(bruker)))
+                is Saksbehandler -> {
+                    val finnOppgaverForBruker = service.finnOppgaverForBruker(bruker)
+                    logger.info("Antall oppgaver totalt: ${finnOppgaverForBruker.size}")
+                    val tilOppgaveListeDto = tilOppgaveListeDto(finnOppgaverForBruker)
+                    logger.info("Antall oppgaver etter mapping: ${finnOppgaverForBruker.size}")
+                    call.respond(tilOppgaveListeDto)
+                }
                 else -> call.respond(HttpStatusCode.Forbidden)
             }
         }

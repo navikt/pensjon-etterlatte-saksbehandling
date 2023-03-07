@@ -36,10 +36,8 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
             }
         } else {
             inTransaction {
-                listOf(
-                    oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller),
+                oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller) +
                     oppgaveDao.finnOppgaverFraGrunnlagsendringshendelser()
-                ).flatten()
             }.sortedByDescending { it.registrertDato }
         }
     }

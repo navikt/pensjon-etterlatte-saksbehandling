@@ -101,6 +101,11 @@ class OppgaveDao(private val connection: () -> Connection) {
                         antallSoesken = antallSoesken(getString("soesken"))
                     )
                 }
+            }.also {
+                logger.info(
+                    "Hentet behandlingsoppgaveliste før filternonnull for bruker med statuser $statuser." +
+                        " Fant ${it.size} oppgaver"
+                )
             }
             return oppgaver.filterNotNull()
                 .also {

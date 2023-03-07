@@ -8,9 +8,9 @@ import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCLocalDateTime
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCTimestamp
-import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.postgresql.util.PGobject
@@ -135,7 +135,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                    AND status = ?
                 """.trimIndent()
             ).use {
-                it.setTimestamp(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES).toTimestamp())
+                it.setTidspunkt(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES))
                 it.setString(2, GrunnlagsendringStatus.VENTER_PAA_JOBB.name)
                 return it.executeQuery().toList { asGrunnlagsendringshendelse() }
             }

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.oppgave
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.hendelse.getTidspunkt
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -12,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import org.slf4j.LoggerFactory

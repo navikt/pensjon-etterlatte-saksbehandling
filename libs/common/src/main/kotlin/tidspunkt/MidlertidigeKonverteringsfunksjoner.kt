@@ -11,6 +11,7 @@ import java.time.ZonedDateTime
 Denne fila samlar extension functions for tidskonvertering vi forhåpentlegvis ikkje treng på sikt,
 sia målet er å gå over til å bruke Tidspunkt ganske konsekvent
  */
+fun Instant.tilZonedDateTime() = atZone(standardTidssoneUTC)
 
 fun LocalDateTime.tilUTCTimestamp() =
     Timestamp.from(this.atZone(standardTidssoneUTC).toTidspunkt().instant)
@@ -27,7 +28,5 @@ fun ZonedDateTime.toTidspunkt() = toInstant().toTidspunkt()
 fun LocalDateTime.toTidspunkt(zoneId: ZoneId = standardTidssoneUTC) = atZone(zoneId).toTidspunkt()
 fun LocalDateTime.toNorskTidspunkt() = toTidspunkt(zoneId = norskTidssone)
 fun Tidspunkt.toNorskTid(): ZonedDateTime = ZonedDateTime.ofInstant(this.instant, norskTidssone)
-fun Tidspunkt.toTimestamp(): Timestamp = Timestamp.from(this.instant)
-fun Timestamp.toTidspunkt(): Tidspunkt = Tidspunkt(this.toInstant())
 fun Tidspunkt.toLocalDatetimeUTC(): LocalDateTime = LocalDateTime.ofInstant(this.instant, standardTidssoneUTC)
 fun Tidspunkt.toLocalDatetimeNorskTid(): LocalDateTime = LocalDateTime.ofInstant(this.instant, norskTidssone)

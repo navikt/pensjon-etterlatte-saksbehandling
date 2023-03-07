@@ -14,7 +14,7 @@ import java.io.FileNotFoundException
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class LesIverksattVedtakmeldingTest {
+internal class LagreIverksattVedtakTest {
 
     companion object {
         val melding = readFile("/utbetalingsmelding.json")

@@ -66,7 +66,7 @@ class VedtaksvurderingService(
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
 
-        val (beregning, vilkaarsvurdering, behandling) = hentDataForVedtak(behandlingId, bruker)
+        val (behandling, vilkaarsvurdering, beregning) = hentDataForVedtak(behandlingId, bruker)
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato) {
             "Behandling med behandlingId=$behandlingId mangler virkningstidspunkt"
@@ -317,19 +317,25 @@ class VedtaksvurderingService(
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,
         bruker: Bruker
-    ): Triple<BeregningDTO?, VilkaarsvurderingDto?, DetaljertBehandling> {
+    ): Triple<DetaljertBehandling, VilkaarsvurderingDto?, BeregningDTO?> {
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
 
             when (behandling.behandlingType) {
-                BehandlingType.MANUELT_OPPHOER -> Triple(null, null, behandling)
-                BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING, BehandlingType.OMREGNING -> {
+                BehandlingType.MANUELT_OPPHOER -> Triple(behandling, null, null)
+
+                BehandlingType.OMREGNING -> {
+                    val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
+                    Triple(behandling, null, beregning)
+                }
+
+                BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
                     when (vilkaarsvurdering?.resultat?.utfall) {
-                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(null, vilkaarsvurdering, behandling)
+                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> Triple(behandling, vilkaarsvurdering, null)
                         VilkaarsvurderingUtfall.OPPFYLT -> {
                             val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
-                            Triple(beregning, vilkaarsvurdering, behandling)
+                            Triple(behandling, vilkaarsvurdering, beregning)
                         }
                         null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
                     }

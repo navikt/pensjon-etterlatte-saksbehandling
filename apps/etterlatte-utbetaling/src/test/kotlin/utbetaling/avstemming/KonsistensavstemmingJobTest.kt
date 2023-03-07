@@ -4,6 +4,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -24,7 +25,7 @@ internal class KonsistensavstemmingJobTest {
         kjoereplan = setOf(datoEksekvering),
         leaderElection = leaderElection,
         jobbNavn = "jobb",
-        clock = datoEksekvering.midnattNorskTid().fixedNorskTid()
+        clock = Tidspunkt(datoEksekvering.midnattNorskTid().toInstant()).fixedNorskTid()
     )
 
     @Test
@@ -65,7 +66,7 @@ internal class KonsistensavstemmingJobTest {
             kjoereplan = setOf(datoEksekvering),
             leaderElection = leaderElection,
             jobbNavn = "jobb",
-            clock = dagForTestMinusFemDager.fixedNorskTid()
+            clock = Tidspunkt(dagForTestMinusFemDager.toInstant()).fixedNorskTid()
         )
 
         konsistensavstemming.run()

@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -42,7 +41,7 @@ class HendelseDao(private val connection: () -> Connection) {
     fun behandlingOpprettet(behandling: BehandlingOpprettet) = lagreHendelse(
         UlagretHendelse(
             "BEHANDLING:OPPRETTET",
-            behandling.timestamp.toTidspunkt(),
+            behandling.timestamp,
             null,
             behandling.id,
             behandling.sak,

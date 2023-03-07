@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCLocalDateTime
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCTimestamp
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -279,8 +280,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         with(behandling) {
             stmt.setObject(1, id)
             stmt.setLong(2, sakId)
-            stmt.setTimestamp(3, opprettet.tilUTCTimestamp())
-            stmt.setTimestamp(4, opprettet.tilUTCTimestamp())
+            stmt.setTidspunkt(3, opprettet)
+            stmt.setTidspunkt(4, opprettet)
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
             stmt.setTimestamp(

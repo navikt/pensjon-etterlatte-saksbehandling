@@ -109,7 +109,7 @@ internal class BehandlingDaoIntegrationTest {
             opprettetBehandling.persongalleri.soesken
         )
         assertEquals(
-            opprettBehandlingMedPersongalleri.opprettet.toTidspunkt(),
+            opprettBehandlingMedPersongalleri.opprettet,
             opprettetBehandling.behandlingOpprettet.toTidspunkt()
         )
     }
@@ -142,7 +142,7 @@ internal class BehandlingDaoIntegrationTest {
             opprettetBehandling.persongalleri.soesken
         )
         assertEquals(
-            opprettBehandling.opprettet.toTidspunkt(),
+            opprettBehandling.opprettet,
             opprettetBehandling.behandlingOpprettet.toTidspunkt()
         )
     }

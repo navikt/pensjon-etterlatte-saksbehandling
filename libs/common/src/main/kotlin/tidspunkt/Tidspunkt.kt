@@ -22,6 +22,7 @@ abstract class TruncatedInstant(
     override fun compareTo(other: TruncatedInstant) = this.instant.compareTo(other.instant)
     fun isBefore(other: TruncatedInstant) = this.instant.isBefore(other.instant)
     fun isAfter(other: TruncatedInstant) = this.instant.isAfter(other.instant)
+    fun toEpochMilli() = instant.toEpochMilli()
 }
 
 /**
@@ -39,6 +40,7 @@ constructor(
 
     companion object {
         val unit: ChronoUnit = ChronoUnit.MICROS
+        val MIN = Tidspunkt(Instant.EPOCH)
         fun now(clock: Clock = klokke()) = Tidspunkt(Instant.now(clock))
 
         fun from(clock: Clock = klokke()) = clock.instant().toTidspunkt()

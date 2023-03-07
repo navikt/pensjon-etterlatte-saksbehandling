@@ -176,7 +176,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
                 WHERE status not in (${
-            BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
+                BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
             })
             """.trimIndent()
         )
@@ -279,13 +279,13 @@ class BehandlingDao(private val connection: () -> Connection) {
         with(behandling) {
             stmt.setObject(1, id)
             stmt.setLong(2, sakId)
-            stmt.setTimestamp(3, opprettet.somTimestampUTC())
-            stmt.setTimestamp(4, opprettet.somTimestampUTC())
+            stmt.setTimestamp(3, opprettet.tilUTCTimestamp())
+            stmt.setTimestamp(4, opprettet.tilUTCTimestamp())
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
             stmt.setTimestamp(
                 7,
-                soeknadMottattDato?.somTimestampUTC()
+                soeknadMottattDato?.tilUTCTimestamp()
             )
             with(persongalleri) {
                 stmt.setString(8, innsender)
@@ -320,7 +320,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(2, behandling.status.name)
         stmt.setTimestamp(
             3,
-            behandling.sistEndret.somTimestampUTC()
+            behandling.sistEndret.tilUTCTimestamp()
         )
         stmt.setObject(4, behandling.id)
         require(stmt.executeUpdate() == 1)
@@ -342,7 +342,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(1, status.name)
         stmt.setTimestamp(
             2,
-            sistEndret.somTimestampUTC()
+            sistEndret.tilUTCTimestamp()
         )
         stmt.setObject(3, behandling)
         require(stmt.executeUpdate() == 1)
@@ -429,8 +429,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 }
-
-private fun LocalDateTime.somTimestampUTC() = tilUTCTimestamp()
 
 private fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTimestamp(kolonne).tilUTCLocalDateTime()
 

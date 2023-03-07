@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
@@ -38,14 +38,16 @@ class StatistikkService(
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     fun registrerStatistikkForVedtak(
-        vedtak: Vedtak,
+        vedtak: VedtakDto,
         vedtakHendelse: VedtakHendelse,
         tekniskTid: LocalDateTime
     ): Pair<SakRad?, StoenadRad?> {
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakHendelse, tekniskTid)
         if (vedtakHendelse == VedtakHendelse.IVERKSATT) {
             val stoenadRad = when (vedtak.type) {
-                VedtakType.INNVILGELSE -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
+                VedtakType.INNVILGELSE -> stoenadRepository.lagreStoenadsrad(
+                    vedtakTilStoenadsrad(vedtak, tekniskTid)
+                )
                 VedtakType.AVSLAG -> null
                 VedtakType.ENDRING -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
                 VedtakType.OPPHOER -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
@@ -61,7 +63,7 @@ class StatistikkService(
     }
 
     private fun registrerSakStatistikkForVedtak(
-        vedtak: Vedtak,
+        vedtak: VedtakDto,
         hendelse: VedtakHendelse,
         tekniskTid: LocalDateTime
     ): SakRad? {
@@ -76,7 +78,11 @@ class StatistikkService(
         }
     }
 
-    private fun vedtakshendelseTilSakRad(vedtak: Vedtak, hendelse: VedtakHendelse, tekniskTid: LocalDateTime): SakRad {
+    private fun vedtakshendelseTilSakRad(
+        vedtak: VedtakDto,
+        hendelse: VedtakHendelse,
+        tekniskTid: LocalDateTime
+    ): SakRad {
         val detaljertBehandling = hentDetaljertBehandling(vedtak.behandling.id)
         val mottattTid = detaljertBehandling.soeknadMottattDato ?: detaljertBehandling.behandlingOpprettet
         val beregning = if (hendelse in listOf(
@@ -92,7 +98,7 @@ class StatistikkService(
 
         val foersteUtbetaling = if (vedtak.type == VedtakType.INNVILGELSE) {
             vedtak.vedtakFattet?.let {
-                vedtak.pensjonTilUtbetaling?.minByOrNull { it.periode.fom }
+                vedtak.utbetalingsperioder.minByOrNull { it.periode.fom }
             }
         } else {
             null
@@ -104,8 +110,8 @@ class StatistikkService(
             sakId = vedtak.sak.id,
             mottattTidspunkt = mottattTid.toTidspunkt(),
             registrertTidspunkt = detaljertBehandling.behandlingOpprettet.toTidspunkt(),
-            ferdigbehandletTidspunkt = vedtak.attestasjon?.tidspunkt?.toTidspunkt(),
-            vedtakTidspunkt = vedtak.attestasjon?.tidspunkt?.toTidspunkt(),
+            ferdigbehandletTidspunkt = vedtak.attestasjon?.tidspunkt,
+            vedtakTidspunkt = vedtak.attestasjon?.tidspunkt,
             behandlingType = vedtak.behandling.type,
             behandlingStatus = hendelse.name,
             behandlingResultat = behandlingResultatFraVedtak(vedtak, hendelse, detaljertBehandling),
@@ -118,8 +124,8 @@ class StatistikkService(
             datoFoersteUtbetaling = foersteUtbetaling?.periode?.fom?.atDay(1),
             tekniskTid = tekniskTid.toTidspunkt(),
             sakYtelse = vedtak.sak.sakType.name,
-            vedtakLoependeFom = vedtak.virk.fom.atDay(1),
-            vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
+            vedtakLoependeFom = vedtak.virkningstidspunkt.atDay(1),
+            vedtakLoependeTom = vedtak.virkningstidspunkt.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
             ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet,
             sakUtland = SakUtland.NASJONAL,
@@ -128,7 +134,7 @@ class StatistikkService(
     }
 
     private fun behandlingResultatFraVedtak(
-        vedtak: Vedtak,
+        vedtak: VedtakDto,
         vedtakHendelse: VedtakHendelse,
         detaljertBehandling: DetaljertBehandling
     ): BehandlingResultat? {
@@ -138,7 +144,7 @@ class StatistikkService(
         if (vedtakHendelse !in listOf(VedtakHendelse.ATTESTERT, VedtakHendelse.IVERKSATT)) {
             return null
         }
-        return when (vedtak.pensjonTilUtbetaling?.any { it.type == UtbetalingsperiodeType.OPPHOER }) {
+        return when (vedtak.utbetalingsperioder.any { it.type == UtbetalingsperiodeType.OPPHOER }) {
             true -> BehandlingResultat.OPPHOER
             false -> BehandlingResultat.VEDTAK
             null -> null
@@ -157,7 +163,7 @@ class StatistikkService(
         behandlingKlient.hentSak(sakId)
     }
 
-    private fun vedtakTilStoenadsrad(vedtak: Vedtak, tekniskTid: LocalDateTime): StoenadRad {
+    private fun vedtakTilStoenadsrad(vedtak: VedtakDto, tekniskTid: LocalDateTime): StoenadRad {
         val persongalleri = hentPersongalleri(behandlingId = vedtak.behandling.id)
         val beregning = hentBeregningForBehandling(vedtak.behandling.id)
         return StoenadRad(
@@ -166,7 +172,7 @@ class StatistikkService(
             fnrForeldre = persongalleri.avdoed,
             fnrSoesken = persongalleri.soesken,
             anvendtTrygdetid = "40",
-            nettoYtelse = vedtak.beregning?.sammendrag?.firstOrNull()?.beloep.toString(),
+            nettoYtelse = vedtak.utbetalingsperioder.firstOrNull()?.beloep.toString(),
             beregningType = "FOLKETRYGD",
             anvendtSats = "",
             behandlingId = vedtak.behandling.id,
@@ -177,8 +183,8 @@ class StatistikkService(
             versjon = "",
             saksbehandler = vedtak.vedtakFattet!!.ansvarligSaksbehandler,
             attestant = vedtak.attestasjon?.attestant,
-            vedtakLoependeFom = vedtak.virk.fom.atDay(1),
-            vedtakLoependeTom = vedtak.virk.tom?.atEndOfMonth(),
+            vedtakLoependeFom = vedtak.virkningstidspunkt.atDay(1),
+            vedtakLoependeTom = null,
             beregning = beregning,
             vedtakType = vedtak.type
         )

@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
@@ -72,7 +72,7 @@ class VedtaksbrevService(
         }
     }
 
-    fun journalfoerVedtaksbrev(vedtak: Vedtak): Pair<Brev, JournalpostResponse> {
+    fun journalfoerVedtaksbrev(vedtak: VedtakDto): Pair<Brev, JournalpostResponse> {
         val behandlingId = vedtak.behandling.id
 
         val vedtaksbrev = hentVedtaksbrev(behandlingId)

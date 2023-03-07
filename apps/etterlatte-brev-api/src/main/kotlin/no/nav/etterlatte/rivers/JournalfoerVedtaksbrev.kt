@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -40,7 +40,7 @@ internal class JournalfoerVedtaksbrev(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         try {
             withLogContext {
-                val vedtak: Vedtak = deserialize(packet["vedtak"].toJson())
+                val vedtak: VedtakDto = deserialize(packet["vedtak"].toJson())
                 logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
 
                 val (brev, response) = service.journalfoerVedtaksbrev(vedtak)

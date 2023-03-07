@@ -22,10 +22,10 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -37,7 +37,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.*
 import no.nav.etterlatte.brev.behandling.Beregningsperiode as BrevBeregningsperiode
 
@@ -155,14 +154,14 @@ internal class SakOgBehandlingServiceTest {
         )
     }
 
-    private fun opprettVedtak() = mockk<Vedtak> {
+    private fun opprettVedtak() = mockk<VedtakDto> {
         every { sak } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID)
         every { behandling.id } returns BEHANDLING_ID
         every { vedtakId } returns 123L
         every { type } returns VedtakType.INNVILGELSE
-        every { virk } returns Periode(YearMonth.now(), null)
-        every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, "Ansvarlig enhet", ZonedDateTime.now())
-        every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, "Attestant enhet", ZonedDateTime.now())
+        every { virkningstidspunkt } returns YearMonth.now()
+        every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, "Ansvarlig enhet", Tidspunkt.now())
+        every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, "Attestant enhet", Tidspunkt.now())
     }
 
     private fun opprettGrunnlag() = GrunnlagTestData(

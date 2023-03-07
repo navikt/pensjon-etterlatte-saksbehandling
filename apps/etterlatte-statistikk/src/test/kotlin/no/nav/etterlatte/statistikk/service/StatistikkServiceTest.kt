@@ -1,6 +1,5 @@
 package no.nav.etterlatte.statistikk.service
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -16,10 +15,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.BilagMedSammendrag
-import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
@@ -36,7 +33,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.*
 
 class StatistikkServiceTest {
@@ -61,7 +57,7 @@ class StatistikkServiceTest {
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             soeknadMottattDato = null,
             innsender = null,
-            soeker = null,
+            soeker = "12312312312",
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
@@ -97,8 +93,8 @@ class StatistikkServiceTest {
             vedtak = vedtak(
                 sakId = sakId,
                 behandlingId = behandlingId,
-                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", ZonedDateTime.now()),
-                attestasjon = Attestasjon("Attestant", "attestantEnhet", ZonedDateTime.now())
+                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", Tidspunkt.now()),
+                attestasjon = Attestasjon("Attestant", "attestantEnhet", Tidspunkt.now())
             ),
             vedtakHendelse = VedtakHendelse.IVERKSATT,
             tekniskTid = tekniskTidForHendelse
@@ -146,7 +142,7 @@ class StatistikkServiceTest {
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             soeknadMottattDato = null,
             innsender = null,
-            soeker = null,
+            soeker = "12312312312",
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),
@@ -214,28 +210,23 @@ class StatistikkServiceTest {
 
 fun vedtak(
     vedtakId: Long = 0,
-    virk: Periode = Periode(fom = YearMonth.of(2022, 8), null),
+    virk: YearMonth = YearMonth.of(2022, 8),
     sakId: Long = 0,
     ident: String = "",
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingId: UUID = UUID.randomUUID(),
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     type: VedtakType = VedtakType.INNVILGELSE,
-    vilkaarsvurdering: JsonNode? = null,
-    beregning: BilagMedSammendrag<List<no.nav.etterlatte.libs.common.vedtak.Beregningsperiode>>? = null,
     pensjonTilUtbetaling: List<Utbetalingsperiode>? = null,
     vedtakFattet: VedtakFattet? = null,
     attestasjon: Attestasjon? = null
-): Vedtak = Vedtak(
+): VedtakDto = VedtakDto(
     vedtakId = vedtakId,
-    virk = virk,
+    virkningstidspunkt = virk,
     sak = Sak(ident = ident, sakType = sakType, id = sakId),
     behandling = Behandling(type = behandlingType, id = behandlingId),
     type = type,
-    grunnlag = emptyList(),
-    vilkaarsvurdering = vilkaarsvurdering,
-    beregning = beregning,
-    pensjonTilUtbetaling = pensjonTilUtbetaling,
+    utbetalingsperioder = pensjonTilUtbetaling ?: emptyList(),
     vedtakFattet = vedtakFattet,
     attestasjon = attestasjon
 )

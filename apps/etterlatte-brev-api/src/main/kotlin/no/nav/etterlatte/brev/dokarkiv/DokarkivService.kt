@@ -15,12 +15,12 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.journalpost.Sak
 import no.nav.etterlatte.libs.common.journalpost.Sakstype
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import org.slf4j.LoggerFactory
-import java.util.Base64
+import java.util.*
 
 interface DokarkivService {
-    fun journalfoer(vedtaksbrev: Brev, vedtak: Vedtak): JournalpostResponse
+    fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakDto): JournalpostResponse
 }
 
 class DokarkivServiceImpl(
@@ -29,7 +29,7 @@ class DokarkivServiceImpl(
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override fun journalfoer(vedtaksbrev: Brev, vedtak: Vedtak): JournalpostResponse = runBlocking {
+    override fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakDto): JournalpostResponse = runBlocking {
         logger.info("Oppretter journalpost for brev med id=${vedtaksbrev.id}")
 
         val innhold = db.hentBrevInnhold(vedtaksbrev.id)
@@ -43,7 +43,7 @@ class DokarkivServiceImpl(
 
     private fun mapTilJournalpostRequest(
         vedtaksbrev: Brev,
-        vedtak: Vedtak,
+        vedtak: VedtakDto,
         dokumentInnhold: ByteArray
     ): JournalpostRequest {
         return JournalpostRequest(

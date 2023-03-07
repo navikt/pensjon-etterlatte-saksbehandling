@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -15,7 +14,6 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import java.time.LocalDate
-import java.util.*
 
 fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
     route("/api/vedtak") {
@@ -23,30 +21,19 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId { behandlingId ->
-                val vedtaksresultat = service.hentVedtak(behandlingId)
-                if (vedtaksresultat == null) {
+                logger.info("Henter vedtak for behandling $behandlingId")
+                val vedtak = service.hentVedtak(behandlingId)
+                if (vedtak == null) {
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
-                    call.respond(vedtaksresultat)
+                    call.respond(vedtak.toDto())
                 }
             }
         }
 
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}/fellesvedtak") {
+        get("/{$BEHANDLINGSID_CALL_PARAMETER}/sammendrag") {
             withBehandlingId { behandlingId ->
-                val vedtaksresultat = service.hentFellesvedtak(
-                    behandlingId = behandlingId
-                )
-                if (vedtaksresultat == null) {
-                    call.response.status(HttpStatusCode.NotFound)
-                } else {
-                    call.respond(vedtaksresultat)
-                }
-            }
-        }
-
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}/sammendrag/") {
-            withBehandlingId { behandlingId ->
+                logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
                 val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendrag()
                 if (vedtaksresultat == null) {
                     call.response.status(HttpStatusCode.NotFound)
@@ -58,61 +45,54 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/upsert") {
             withBehandlingId { behandlingId ->
-                val nyttVedtak = service.opprettEllerOppdaterVedtak(
-                    behandlingId = behandlingId,
-                    bruker = bruker
-                )
-
-                call.respond(nyttVedtak)
-            }
-        }
-
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/attester") {
-            withBehandlingId { behandlingId ->
-                val attestert = service.attesterVedtak(behandlingId, bruker)
-
-                call.respond(attestert)
+                logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
+                val nyttVedtak = service.opprettEllerOppdaterVedtak(behandlingId, bruker)
+                call.respond(nyttVedtak.toDto())
             }
         }
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/fattvedtak") {
             withBehandlingId { behandlingId ->
+                logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak = service.fattVedtak(behandlingId, bruker)
 
-                call.respond(fattetVedtak)
+                call.respond(fattetVedtak.toDto())
+            }
+        }
+
+        post("/{$BEHANDLINGSID_CALL_PARAMETER}/attester") {
+            withBehandlingId { behandlingId ->
+                logger.info("Attesterer vedtak for behandling $behandlingId")
+                val attestert = service.attesterVedtak(behandlingId, bruker)
+
+                call.respond(attestert.toDto())
             }
         }
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/underkjenn") {
             withBehandlingId { behandlingId ->
-                val begrunnelse = call.receive<UnderkjennVedtakClientRequest>()
+                logger.info("Underkjenner vedtak for behandling $behandlingId")
+                val begrunnelse = call.receive<UnderkjennVedtakDto>()
                 val underkjentVedtak = service.underkjennVedtak(
                     behandlingId,
                     bruker,
                     begrunnelse
                 )
 
-                call.respond(underkjentVedtak)
+                call.respond(underkjentVedtak.toDto())
             }
         }
 
         get("/loepende/{sakId}") {
-            val sakId = call.parameters["sakId"]?.toLong() ?: return@get call.respond(
-                BadRequest,
-                "Sak ID må sendes med som et tall i requesten"
-            )
-            val dato = call.request.queryParameters["dato"]
-                ?.runCatching { LocalDate.parse(this) }
-                ?.fold(
-                    onSuccess = { it },
-                    onFailure = { return@get call.respond(BadRequest, "Dato som sendes må være på format YYYY-MM-DD") }
-                )
-                ?: return@get call.respond(BadRequest, "Det mangler et query parameter på dato")
+            val sakId = call.parameters["sakId"]?.toLong() ?: throw Exception("sakId er påkrevet")
+            val dato = call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
+                ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
-            val loependeYtelse = service.vedtakErLoependePaaDato(sakId, dato)
+            logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
+            val loependeYtelse = service.sjekkOmVedtakErLoependePaaDato(sakId, dato)
             call.respond(loependeYtelse)
         }
     }
 }
 
-data class UnderkjennVedtakClientRequest(val kommentar: String, val valgtBegrunnelse: String)
+data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)

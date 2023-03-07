@@ -30,10 +30,7 @@
   ],
   "vedtak": {
     "vedtakId": 217,
-    "virk": {
-      "fom": "2022-09",
-      "tom": null
-    },
+    "virkningstidspunkt": "2022-09",
     "sak": {
       "ident": "18111159498",
       "sakType": "BARNEPENSJON",
@@ -44,113 +41,7 @@
       "id": "989d8e2d-633c-4a10-942c-36c0ca2cc17a"
     },
     "type": "INNVILGELSE",
-    "grunnlag": [],
-    "vilkaarsvurdering": {
-      "behandlingId": "dbe1fb59-4740-4fd6-ac5d-0754792c2e8c",
-      "vilkaar": [],
-      "virkningstidspunkt": "2022-11",
-      "resultat": {
-        "utfall": "OPPFYLT",
-        "kommentar": null,
-        "tidspunkt": "2022-10-24T14:53:18.691504",
-        "saksbehandler": "ABCDEF"
-      }
-    },
-    "beregning": {
-      "bilag": {
-        "id": "4e6966b6-223a-4164-be86-7d4259885f4d",
-        "type": "GP",
-        "endringskode": "NY",
-        "resultat": "BEREGNET",
-        "beregningsperioder": [
-          {
-            "delytelsesId": "BP",
-            "type": "GP",
-            "datoFOM": "2022-09",
-            "datoTOM": null,
-            "utbetaltBeloep": 3716,
-            "soeskenFlokk": [
-              {
-                "fornavn": "Engasjert",
-                "etternavn": "Bry",
-                "foedselsnummer": "18111159498",
-                "foedselsdato": "2011-11-18",
-                "foedselsaar": 2011,
-                "foedeland": "NOR",
-                "doedsdato": null,
-                "adressebeskyttelse": "UGRADERT",
-                "bostedsadresse": [
-                  {
-                    "type": "VEGADRESSE",
-                    "aktiv": true,
-                    "coAdresseNavn": null,
-                    "adresseLinje1": "Seterlivegen 29",
-                    "adresseLinje2": null,
-                    "adresseLinje3": null,
-                    "postnr": "6490",
-                    "poststed": null,
-                    "land": null,
-                    "kilde": "FREG",
-                    "gyldigFraOgMed": "2011-11-18T00:00:00",
-                    "gyldigTilOgMed": null
-                  },
-                  {
-                    "type": "VEGADRESSE",
-                    "aktiv": false,
-                    "coAdresseNavn": null,
-                    "adresseLinje1": "Seterlivegen 29",
-                    "adresseLinje2": null,
-                    "adresseLinje3": null,
-                    "postnr": "6490",
-                    "poststed": null,
-                    "land": null,
-                    "kilde": "FREG",
-                    "gyldigFraOgMed": "2011-11-18T00:00:00",
-                    "gyldigTilOgMed": null
-                  }
-                ],
-                "deltBostedsadresse": null,
-                "kontaktadresse": [],
-                "oppholdsadresse": [],
-                "sivilstatus": "UOPPGITT",
-                "statsborgerskap": "NOR",
-                "utland": {
-                  "innflyttingTilNorge": [],
-                  "utflyttingFraNorge": []
-                },
-                "familieRelasjon": {
-                  "ansvarligeForeldre": [
-                    "24117424479",
-                    "27438228751"
-                  ],
-                  "foreldre": [
-                    "27438228751",
-                    "24117424479"
-                  ],
-                  "barn": null
-                },
-                "avdoedesBarn": null,
-                "vergemaalEllerFremtidsfullmakt": []
-              }
-            ],
-            "grunnbelopMnd": 9290,
-            "grunnbelop": 111477
-          }
-        ],
-        "beregnetDato": "2022-09-19T16:30:09.46767114",
-        "grunnlagVersjon": 98
-      },
-      "sammendrag": [
-        {
-          "periode": {
-            "fom": "2022-09",
-            "tom": null
-          },
-          "beloep": 9290
-        }
-      ]
-    },
-    "pensjonTilUtbetaling": [
+    "utbetalingsperioder": [
       {
         "id": 49,
         "periode": {

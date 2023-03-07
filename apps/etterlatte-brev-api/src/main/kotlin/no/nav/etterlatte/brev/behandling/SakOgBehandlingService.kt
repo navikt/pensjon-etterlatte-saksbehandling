@@ -6,9 +6,9 @@ import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.token.Bruker
+import java.time.YearMonth
 import java.util.*
 
 class SakOgBehandlingService(
@@ -34,7 +34,7 @@ class SakOgBehandlingService(
     }
 
     private suspend fun mapBehandling(
-        vedtak: Vedtak,
+        vedtak: VedtakDto,
         grunnlag: Grunnlag,
         bruker: Bruker
     ): Behandling {
@@ -68,14 +68,16 @@ class SakOgBehandlingService(
                 ),
                 attestant
             ),
-            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virk, bruker)
+            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, bruker)
         )
     }
 
-    private suspend fun finnUtbetalingsinfo(behandlingId: UUID, virk: Periode, bruker: Bruker): Utbetalingsinfo {
+    private suspend fun finnUtbetalingsinfo(
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        bruker: Bruker
+    ): Utbetalingsinfo {
         val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
-
-        val virkningstidspunkt = virk.fom.atDay(1)
 
         val beregningsperioder = beregning.beregningsperioder.map {
             Beregningsperiode(
@@ -94,7 +96,7 @@ class SakOgBehandlingService(
         return Utbetalingsinfo(
             antallBarn,
             beregningsperioder.hentUtbetaltBeloep(),
-            virkningstidspunkt,
+            virkningstidspunkt.atDay(1),
             soeskenjustering,
             beregningsperioder
         )

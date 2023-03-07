@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -10,13 +11,12 @@ import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.*
 
 fun vedtak(
@@ -37,7 +37,7 @@ fun vedtak(
     ),
     saktype: SakType = SakType.BARNEPENSJON
 
-): Vedtak = Vedtak(
+): VedtakDto = VedtakDto(
     vedtakId = vedtakId,
     behandling = behandling,
     sak = Sak(
@@ -46,21 +46,18 @@ fun vedtak(
         sakType = saktype
     ),
     type = VedtakType.INNVILGELSE,
-    virk = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 2)),
-    grunnlag = emptyList(),
+    virkningstidspunkt = YearMonth.of(2022, 1),
     vedtakFattet = VedtakFattet(
         ansvarligSaksbehandler = "12345678",
         ansvarligEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     ),
     attestasjon = Attestasjon(
         attestant = "87654321",
         attesterendeEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     ),
-    pensjonTilUtbetaling = utbetalingsperioder,
-    beregning = null,
-    vilkaarsvurdering = null
+    utbetalingsperioder = utbetalingsperioder
 )
 
 fun ugyldigVedtakTilUtbetaling(
@@ -70,7 +67,7 @@ fun ugyldigVedtakTilUtbetaling(
         type = BehandlingType.FØRSTEGANGSBEHANDLING
     ),
     saktype: SakType = SakType.BARNEPENSJON
-): Vedtak = Vedtak(
+): VedtakDto = VedtakDto(
     vedtakId = vedtakId,
     behandling = behandling,
     sak = Sak(
@@ -79,35 +76,35 @@ fun ugyldigVedtakTilUtbetaling(
         sakType = saktype
     ),
     type = VedtakType.INNVILGELSE,
-    virk = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 2)),
-    grunnlag = emptyList(),
-    vedtakFattet = VedtakFattet(
-        ansvarligSaksbehandler = "12345678",
-        ansvarligEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+    virkningstidspunkt = YearMonth.of(2022, 1),
+    vedtakFattet = null,
+    utbetalingsperioder = listOf(
+        Utbetalingsperiode(
+            1,
+            Periode(YearMonth.of(2022, 1), null),
+            BigDecimal.valueOf(1000),
+            UtbetalingsperiodeType.UTBETALING
+        )
     ),
-    pensjonTilUtbetaling = null,
     attestasjon = Attestasjon(
         attestant = "87654321",
         attesterendeEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
-    ),
-    beregning = null,
-    vilkaarsvurdering = null
+        tidspunkt = Tidspunkt.now()
+    )
 )
 
 fun revurderingVedtak(
-    vedtak: Vedtak,
-    nyttBeloep: BigDecimal = BigDecimal(vedtak.pensjonTilUtbetaling!!.first().beloep!!.longValueExact() - 1000),
+    vedtak: VedtakDto,
+    nyttBeloep: BigDecimal = BigDecimal(vedtak.utbetalingsperioder.first().beloep!!.longValueExact() - 1000),
     utbetalingsperioder: List<Utbetalingsperiode> = listOf(
         Utbetalingsperiode(
-            id = vedtak.pensjonTilUtbetaling!!.last().id + 1,
-            periode = Periode(fom = vedtak.pensjonTilUtbetaling!!.first().periode.fom.plusMonths(1), null),
+            id = vedtak.utbetalingsperioder.last().id!! + 1,
+            periode = Periode(fom = vedtak.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
             beloep = nyttBeloep,
             type = UtbetalingsperiodeType.UTBETALING
         )
     )
-): Vedtak = Vedtak(
+): VedtakDto = VedtakDto(
     vedtakId = vedtak.vedtakId + 1,
     behandling = Behandling(
         id = UUID.randomUUID(),
@@ -115,26 +112,23 @@ fun revurderingVedtak(
     ),
     sak = vedtak.sak,
     type = VedtakType.ENDRING,
-    virk = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 2)),
-    grunnlag = emptyList(),
+    virkningstidspunkt = YearMonth.of(2022, 1),
     vedtakFattet = VedtakFattet(
         ansvarligSaksbehandler = "12345678",
         ansvarligEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     ),
-    pensjonTilUtbetaling = utbetalingsperioder,
+    utbetalingsperioder = utbetalingsperioder,
     attestasjon = Attestasjon(
         attestant = "87654321",
         attesterendeEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
-    ),
-    beregning = null,
-    vilkaarsvurdering = null
+        tidspunkt = Tidspunkt.now()
+    )
 )
 
 fun opphoersVedtak(
-    vedtak: Vedtak
-): Vedtak = Vedtak(
+    vedtak: VedtakDto
+): VedtakDto = VedtakDto(
     vedtakId = vedtak.vedtakId + 1,
     behandling = Behandling(
         id = UUID.randomUUID(),
@@ -142,17 +136,16 @@ fun opphoersVedtak(
     ),
     sak = vedtak.sak,
     type = VedtakType.OPPHOER,
-    virk = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 2)),
-    grunnlag = emptyList(),
+    virkningstidspunkt = YearMonth.of(2022, 1),
     vedtakFattet = VedtakFattet(
         ansvarligSaksbehandler = "12345678",
         ansvarligEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
+        tidspunkt = Tidspunkt.now()
     ),
-    pensjonTilUtbetaling = listOf(
+    utbetalingsperioder = listOf(
         Utbetalingsperiode(
-            id = vedtak.pensjonTilUtbetaling!!.last().id + 1,
-            periode = Periode(fom = vedtak.pensjonTilUtbetaling!!.first().periode.fom.plusMonths(1), null),
+            id = vedtak.utbetalingsperioder.last().id!! + 1,
+            periode = Periode(fom = vedtak.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
             beloep = null,
             type = UtbetalingsperiodeType.OPPHOER
         )
@@ -160,10 +153,8 @@ fun opphoersVedtak(
     attestasjon = Attestasjon(
         attestant = "87654321",
         attesterendeEnhet = "123",
-        tidspunkt = ZonedDateTime.now()
-    ),
-    beregning = null,
-    vilkaarsvurdering = null
+        tidspunkt = Tidspunkt.now()
+    )
 )
 
 fun genererEtterfolgendeUtbetalingsperioder(
@@ -196,10 +187,10 @@ fun genererEtterfolgendeUtbetalingsperioder(
     }
 }
 
-fun vedtakEvent(vedtak: Vedtak) = """
+fun vedtakEvent(vedtakDto: VedtakDto) = """
     {
       "@event_name": "${KafkaHendelseType.ATTESTERT}",
-      "vedtak": ${vedtak.toJson()}
+      "vedtak": ${vedtakDto.toJson()}
     }
 """
 
@@ -224,9 +215,9 @@ fun main() {
         utbetalingsperioder = genererEtterfolgendeUtbetalingsperioder(
             antall = 2,
             intervallMnd = 6,
-            forrigeId = vedtak.pensjonTilUtbetaling!!.last().id,
-            startPeriode = vedtak.pensjonTilUtbetaling!!.last().periode.fom.plusMonths(1),
-            startBelop = vedtak.pensjonTilUtbetaling!!.last().beloep!!
+            forrigeId = vedtak.utbetalingsperioder.last().id!!,
+            startPeriode = vedtak.utbetalingsperioder.last().periode.fom.plusMonths(1),
+            startBelop = vedtak.utbetalingsperioder.last().beloep!!
         )
     )
     val revurderingsvedtakEvent = vedtakEvent(revurderingsvedtak)

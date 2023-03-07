@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -14,14 +14,14 @@ data class Utbetalingsvedtak(
     val attestasjon: Attestasjon
 ) {
     companion object {
-        fun fra(vedtak: Vedtak) =
+        fun fra(vedtak: VedtakDto) =
             Utbetalingsvedtak(
                 vedtakId = vedtak.vedtakId,
                 sak = Sak(vedtak.sak.ident, vedtak.sak.id, Saktype.fraString(vedtak.sak.sakType.toString())),
                 behandling = Behandling(type = vedtak.behandling.type, id = vedtak.behandling.id),
-                pensjonTilUtbetaling = vedtak.pensjonTilUtbetaling!!.map {
+                pensjonTilUtbetaling = vedtak.utbetalingsperioder.map {
                     Utbetalingsperiode(
-                        id = it.id,
+                        id = it.id!!,
                         periode = Periode(
                             fom = it.periode.fom,
                             tom = it.periode.tom

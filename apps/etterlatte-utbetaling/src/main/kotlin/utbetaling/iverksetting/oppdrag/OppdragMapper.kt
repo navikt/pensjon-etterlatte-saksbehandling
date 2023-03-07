@@ -39,7 +39,7 @@ object OppdragMapper {
             oppdragsEnhet120.add(
                 OppdragsEnhet120().apply {
                     typeEnhet = OppdragDefaults.OPPDRAGSENHET.typeEnhet
-                    enhet = utbetaling.saksbehandlerEnhet
+                    enhet = OppdragDefaults.OPPDRAGSENHET.enhet
                     datoEnhetFom = OppdragDefaults.OPPDRAGSENHET.datoEnhetFom
                 }
             )

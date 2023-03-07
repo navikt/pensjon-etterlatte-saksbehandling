@@ -25,9 +25,9 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.journalpost.Sakstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
@@ -36,8 +36,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.time.ZonedDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.etterlatte.libs.common.journalpost.Sak as JSak
 import no.nav.etterlatte.libs.common.sak.Sak as VSak
 
@@ -104,17 +103,14 @@ internal class DokarkivServiceTest {
         erVedtaksbrev = true
     )
 
-    private fun opprettVedtak() = Vedtak(
+    private fun opprettVedtak() = VedtakDto(
         vedtakId = 1,
-        virk = Periode(YearMonth.now(), YearMonth.now().plusYears(2)),
+        virkningstidspunkt = YearMonth.now(),
         behandling = Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.randomUUID()),
         type = VedtakType.INNVILGELSE,
-        grunnlag = emptyList(),
         sak = VSak("ident", SakType.BARNEPENSJON, 1),
-        vedtakFattet = VedtakFattet("Z12345", "4808", ZonedDateTime.now()),
-        vilkaarsvurdering = null,
-        beregning = null,
-        pensjonTilUtbetaling = null,
+        vedtakFattet = VedtakFattet("Z12345", "4808", Tidspunkt.now()),
+        utbetalingsperioder = emptyList(),
         attestasjon = null
     )
 

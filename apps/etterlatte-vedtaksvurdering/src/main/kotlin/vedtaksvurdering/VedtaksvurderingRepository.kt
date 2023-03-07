@@ -1,23 +1,31 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
+import kotliquery.TransactionalSession
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
-import java.io.Serializable
 import java.sql.Date
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-class VedtaksvurderingRepository(datasource: DataSource) {
+class VedtaksvurderingRepository(val datasource: DataSource) {
 
     private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(datasource)
 
@@ -25,167 +33,239 @@ class VedtaksvurderingRepository(datasource: DataSource) {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
     }
 
-    fun opprettVedtak(
-        behandlingsId: UUID,
-        sakid: Long,
-        fnr: String,
-        saktype: SakType,
-        behandlingtype: BehandlingType,
-        virkningsDato: LocalDate,
-        beregningsresultat: Beregningsresultat?,
-        vilkaarsresultat: VilkaarsvurderingDto?
-    ) = repositoryWrapper.opprett(
-        query = "INSERT INTO vedtak(behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, datovirkfom,  beregningsresultat, vilkaarsresultat) " + // ktlint-disable max-line-length
-            "VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :datovirkfom, :beregningsresultat, :vilkaarsresultat)", // ktlint-disable max-line-length
-        params = mapOf(
-            "behandlingId" to behandlingsId,
-            "sakid" to sakid,
-            "fnr" to fnr,
-            "behandlingtype" to behandlingtype.name,
-            "saktype" to saktype.name,
-            "vedtakstatus" to VedtakStatus.BEREGNET.name,
-            "datovirkfom" to Date.valueOf(virkningsDato),
-            "beregningsresultat" to beregningsresultat?.let { objectMapper.writeValueAsString(it) },
-            "vilkaarsresultat" to vilkaarsresultat?.let { objectMapper.writeValueAsString(it) }
-        ),
-        loggtekst = "Oppretter vedtak behandlingid: $behandlingsId sakid: $sakid"
-    )
+    fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak =
+        using(sessionOf(datasource, returnGeneratedKey = true)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = """
+                        INSERT INTO vedtak(
+                            behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, type, datovirkfom, 
+                            beregningsresultat, vilkaarsresultat)
+                        VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :type, 
+                            :datovirkfom, :beregningsresultat, :vilkaarsresultat)
+                        RETURNING id
+                        """,
+                    mapOf(
+                        "behandlingId" to opprettVedtak.behandlingId,
+                        "behandlingtype" to opprettVedtak.behandlingType.name,
+                        "sakid" to opprettVedtak.sakId,
+                        "saktype" to opprettVedtak.sakType.name,
+                        "fnr" to opprettVedtak.soeker.value,
+                        "vedtakstatus" to opprettVedtak.status.name,
+                        "type" to opprettVedtak.type.name,
+                        "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
+                        "beregningsresultat" to opprettVedtak.beregning?.toJson(),
+                        "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson()
+                    )
+                )
+                    .let { query -> tx.run(query.asUpdateAndReturnGeneratedKey) }
+                    ?.let { vedtakId ->
+                        opprettUtbetalingsperioder(vedtakId, opprettVedtak.utbetalingsperioder, tx)
+                    } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
+            }.let {
+                hentVedtak(opprettVedtak.behandlingId)
+                    ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
+            }
+        }
 
-    fun oppdaterVedtak(
-        behandlingsId: UUID,
-        beregningsresultat: Beregningsresultat?,
-        vilkaarsresultat: VilkaarsvurderingDto?,
-        virkningsDato: LocalDate
-    ) = repositoryWrapper.oppdater(
-        query = "UPDATE vedtak SET datovirkfom = :datovirkfom, beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat WHERE behandlingId = :behandlingid", // ktlint-disable max-line-length
-        params = mapOf(
-            "datovirkfom" to Date.valueOf(virkningsDato),
-            "beregningsresultat" to beregningsresultat?.let { objectMapper.writeValueAsString(it) },
-            "vilkaarsresultat" to vilkaarsresultat?.let { objectMapper.writeValueAsString(it) },
-            "behandlingid" to behandlingsId
-        ),
-        loggtekst = "Oppdaterer vedtak behandlingid: $behandlingsId "
-    ).also { require(it == 1) }
+    fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak =
+        using(sessionOf(datasource)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = """
+                        UPDATE vedtak 
+                        SET datovirkfom = :datovirkfom, type = :type, 
+                            beregningsresultat = :beregningsresultat, vilkaarsresultat = :vilkaarsresultat 
+                        WHERE behandlingId = :behandlingid
+                        """,
+                    mapOf(
+                        "datovirkfom" to oppdatertVedtak.virkningstidspunkt.atDay(1),
+                        "type" to oppdatertVedtak.type.name,
+                        "beregningsresultat" to oppdatertVedtak.beregning?.toJson(),
+                        "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
+                        "behandlingid" to oppdatertVedtak.behandlingId
+                    )
+                ).let { query -> tx.run(query.asUpdate) }
 
-    // Kan det finnes flere vedtak for en behandling? Hør med Henrik
-    fun lagreIverksattVedtak(
-        behandlingsId: UUID
-    ) = repositoryWrapper.oppdater(
-        query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
-        params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingsId),
-        loggtekst = "Lagrer iverksatt vedtak"
-    ).also { require(it == 1) }
+                slettUtbetalingsperioder(oppdatertVedtak.id, tx)
+                opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.utbetalingsperioder, tx)
+            }.let {
+                hentVedtak(oppdatertVedtak.behandlingId)
+                    ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
+            }
+        }
 
-    fun hentVedtak(behandlingsId: UUID): Vedtak? {
-        val hentVedtak =
-            "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, attestertVedtakEnhet, fattetVedtakEnhet FROM vedtak WHERE behandlingId = :behandlingId" // ktlint-disable max-line-length
-        return repositoryWrapper.hentMedKotliquery(
-            query = hentVedtak,
-            params = mapOf("behandlingId" to behandlingsId)
-        ) { it.toVedtak() }
-    }
+    private fun slettUtbetalingsperioder(vedtakId: Long, tx: TransactionalSession) =
+        queryOf(
+            statement = """
+                DELETE FROM utbetalingsperiode
+                WHERE vedtakid = :vedtakid
+                """,
+            paramMap = mapOf(
+                "vedtakid" to vedtakId
+            )
+        ).let { query -> tx.run(query.asUpdate) }
+
+    private fun opprettUtbetalingsperioder(
+        vedtakId: Long,
+        utbetalingsperioder: List<Utbetalingsperiode>,
+        tx: TransactionalSession
+    ) =
+        utbetalingsperioder.forEach {
+            queryOf(
+                statement = """
+                    INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) 
+                    VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)
+                    """,
+                paramMap = mapOf(
+                    "vedtakid" to vedtakId,
+                    "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
+                    "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
+                    "type" to it.type.name,
+                    "beloep" to it.beloep
+                )
+            ).let { query -> tx.run(query.asUpdate) }
+        }
+
+    fun hentVedtak(behandlingId: UUID): Vedtak? =
+        repositoryWrapper.hentMedKotliquery(
+            query = """
+            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, 
+                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                attestertVedtakEnhet, fattetVedtakEnhet, type  
+            FROM vedtak 
+            WHERE behandlingId = :behandlingId
+            """,
+            params = mapOf("behandlingId" to behandlingId)
+        ) {
+            val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"))
+            it.toVedtak(utbetalingsperioder)
+        }
+
+    private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =
+        requireNotNull(hentVedtak(behandlingId)) { "Fant ikke vedtak for behandling $behandlingId" }
 
     fun hentVedtakForSak(sakId: Long): List<Vedtak> {
-        val hentVedtak =
-            "SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, attestertVedtakEnhet, fattetVedtakEnhet FROM vedtak WHERE sakId = :sakId" // ktlint-disable max-line-length
+        val hentVedtak = """
+            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, 
+                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
+                attestertVedtakEnhet, fattetVedtakEnhet, type  
+            FROM vedtak  
+            WHERE sakId = :sakId
+            """
         return repositoryWrapper.hentListeMedKotliquery(
             query = hentVedtak,
             params = { mapOf("sakId" to sakId) }
-        ) { it.toVedtak() }
+        ) {
+            val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"))
+            it.toVedtak(utbetalingsperioder)
+        }
     }
 
-    private fun Row.toVedtak() = Vedtak(
-        sakId = longOrNull("sakid"),
-        behandlingId = uuid("behandlingid"),
-        saksbehandlerId = stringOrNull("saksbehandlerid"),
-        beregningsResultat = stringOrNull("beregningsresultat")?.let {
-            objectMapper.readValue(
-                it,
-                Beregningsresultat::class.java
-            )
-        },
-        vilkaarsResultat = stringOrNull("vilkaarsresultat")?.let { objectMapper.readTree(it) },
-        vedtakFattet = boolean("vedtakfattet"),
-        id = long("id"),
-        fnr = stringOrNull("fnr"),
-        datoFattet = sqlTimestampOrNull("datofattet")?.toInstant(),
-        datoattestert = sqlTimestampOrNull("datoattestert")?.toInstant(),
-        attestant = stringOrNull("attestant"),
-        virkningsDato = sqlDateOrNull("datovirkfom")?.toLocalDate(),
-        vedtakStatus = stringOrNull("vedtakstatus")?.let { VedtakStatus.valueOf(it) },
-        sakType = SakType.valueOf(string("saktype")),
-        behandlingType = BehandlingType.valueOf(string("behandlingtype")),
-        attestertVedtakEnhet = stringOrNull("attestertVedtakEnhet"),
-        fattetVedtakEnhet = stringOrNull("fattetVedtakEnhet")
-    )
+    private fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> =
+        repositoryWrapper.hentListeMedKotliquery(
+            query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
+            params = { mapOf("vedtakid" to vedtakId) }
+        ) { it.toUtbetalingsperiode() }
 
-    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> = repositoryWrapper.hentListeMedKotliquery(
-        query = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
-        params = { mapOf("vedtakid" to vedtakId) }
-    ) {
-        Utbetalingsperiode(
-            it.long("id"),
-            Periode(
-                YearMonth.from(it.localDate("datoFom")),
-                it.localDateOrNull("datoTom")?.let(YearMonth::from)
-            ),
-            it.bigDecimalOrNull("beloep"),
-            UtbetalingsperiodeType.valueOf(it.string("type"))
-        )
-    }
-
-    fun fattVedtak(saksbehandlerId: String, saksbehandlerEnhet: String, behandlingsId: UUID) =
+    fun fattVedtak(behandlingId: UUID, vedtakFattet: VedtakFattet): Vedtak =
         repositoryWrapper.oppdater(
-            query = "UPDATE vedtak SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, vedtakfattet = :vedtakfattet, datoFattet = now(), vedtakstatus = :vedtakstatus  WHERE behandlingId = :behandlingId", // ktlint-disable max-line-lengt
+            query = """
+                UPDATE vedtak 
+                SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, 
+                    vedtakfattet = :vedtakfattet, datoFattet = now(), vedtakstatus = :vedtakstatus  
+                WHERE behandlingId = :behandlingId
+                """,
             params = mapOf(
-                "saksbehandlerId" to saksbehandlerId,
-                "saksbehandlerEnhet" to saksbehandlerEnhet,
+                "saksbehandlerId" to vedtakFattet.ansvarligSaksbehandler,
+                "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet,
                 "vedtakfattet" to true,
                 "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
-                "behandlingId" to behandlingsId
+                "behandlingId" to behandlingId
             ),
-            loggtekst = "Fatter vedtok for behandling $behandlingsId"
+            loggtekst = "Fatter vedtok for behandling $behandlingId"
         )
+            .also { require(it == 1) }
+            .let { hentVedtakNonNull(behandlingId) }
 
-    fun attesterVedtak(
-        saksbehandlerId: String,
-        saksbehandlerEnhet: String,
-        behandlingsId: UUID,
-        vedtakId: Long,
-        utbetalingsperioder: List<Utbetalingsperiode>
-    ) {
-        utbetalingsperioder.map {
-            mapOf<String, Serializable?>(
-                "vedtakid" to vedtakId,
-                "datofom" to it.periode.fom.atDay(1).let(Date::valueOf),
-                "datotom" to it.periode.tom?.atEndOfMonth()?.let(Date::valueOf),
-                "type" to it.type.name,
-                "beloep" to it.beloep
-            )
-        }.let {
-            repositoryWrapper.opprettFlere(
-                query = "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) " +
-                    "VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)",
-                params = it,
-                loggtekst = "Attesterer vedtak"
-            )
-        }
+    fun attesterVedtak(behandlingId: UUID, attestasjon: Attestasjon): Vedtak =
         repositoryWrapper.oppdater(
-            query = "UPDATE vedtak SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = now(), vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
+            query = """
+                UPDATE vedtak 
+                SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = now(), 
+                    vedtakstatus = :vedtakstatus 
+                WHERE behandlingId = :behandlingId
+                """,
             params = mapOf(
-                "attestant" to saksbehandlerId,
-                "attestertVedtakEnhet" to saksbehandlerEnhet,
+                "attestant" to attestasjon.attestant,
+                "attestertVedtakEnhet" to attestasjon.attesterendeEnhet,
                 "vedtakstatus" to VedtakStatus.ATTESTERT.name,
-                "behandlingId" to behandlingsId
+                "behandlingId" to behandlingId
             ),
-            loggtekst = "Attesterer vedtak $vedtakId"
-        ).also { require(it == 1) }
-    }
+            loggtekst = "Attesterer vedtak $behandlingId"
+        )
+            .also { require(it == 1) }
+            .let { hentVedtakNonNull(behandlingId) }
 
-    fun underkjennVedtak(behandlingsId: UUID) =
+    fun underkjennVedtak(behandlingId: UUID): Vedtak =
         repositoryWrapper.oppdater(
-            "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId", // ktlint-disable max-line-length
-            params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingsId),
-            loggtekst = "Underkjenner vedtak for behandling $behandlingsId"
+            """
+            UPDATE vedtak 
+            SET attestant = null, datoAttestert = null, attestertVedtakEnhet = null, saksbehandlerId = null, 
+                vedtakfattet = false, datoFattet = null, fattetVedtakEnhet = null, vedtakstatus = :vedtakstatus 
+            WHERE behandlingId = :behandlingId
+            """,
+            params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
+            loggtekst = "Underkjenner vedtak for behandling $behandlingId"
+        )
+            .also { require(it == 1) }
+            .let { hentVedtakNonNull(behandlingId) }
+
+    fun iverksattVedtak(behandlingId: UUID): Vedtak = repositoryWrapper.oppdater(
+        query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+        params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
+        loggtekst = "Lagrer iverksatt vedtak"
+    )
+        .also { require(it == 1) }
+        .let { hentVedtakNonNull(behandlingId) }
+
+    private fun Row.toVedtak(utbetalingsperioder: List<Utbetalingsperiode>) = Vedtak(
+        id = long("id"),
+        sakId = long("sakid"),
+        sakType = SakType.valueOf(string("saktype")),
+        behandlingId = uuid("behandlingid"),
+        behandlingType = BehandlingType.valueOf(string("behandlingtype")),
+        soeker = string("fnr").let { Foedselsnummer.of(it) },
+        status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
+        type = string("type").let { VedtakType.valueOf(it) },
+        virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
+        vilkaarsvurdering = stringOrNull("vilkaarsresultat")?.let { objectMapper.readValue(it) },
+        beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
+        vedtakFattet = stringOrNull("saksbehandlerid")?.let {
+            VedtakFattet(
+                ansvarligSaksbehandler = string("saksbehandlerid"),
+                ansvarligEnhet = string("fattetVedtakEnhet"),
+                tidspunkt = sqlTimestamp("datofattet").toTidspunkt()
+            )
+        },
+        attestasjon = stringOrNull("attestant")?.let {
+            Attestasjon(
+                attestant = string("attestant"),
+                attesterendeEnhet = string("attestertVedtakEnhet"),
+                tidspunkt = sqlTimestamp("datoattestert").toTidspunkt()
+            )
+        },
+        utbetalingsperioder = utbetalingsperioder
+    )
+
+    private fun Row.toUtbetalingsperiode() =
+        Utbetalingsperiode(
+            id = long("id"),
+            periode = Periode(
+                fom = YearMonth.from(localDate("datoFom")),
+                tom = localDateOrNull("datoTom")?.let(YearMonth::from)
+            ),
+            beloep = bigDecimalOrNull("beloep"),
+            type = UtbetalingsperiodeType.valueOf(string("type"))
         )
 }

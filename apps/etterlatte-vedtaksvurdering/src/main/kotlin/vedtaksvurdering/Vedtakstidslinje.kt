@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 
 class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
@@ -10,7 +11,8 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     fun erLoependePaa(dato: LocalDate): LoependeYtelseDTO {
         if (iverksatteVedtak.isEmpty()) return LoependeYtelseDTO(false, dato)
 
-        val erLoepende = hentSenesteVedtakPaaDato(dato)?.tolkVedtak() == TolketVedtak.INNVILGET
+        val erLoepende =
+            hentSenesteVedtakPaaDato(dato)?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
         return LoependeYtelseDTO(
             erLoepende = erLoepende,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato
@@ -18,15 +20,15 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     }
 
     private fun hentSenesteVedtakPaaDato(dato: LocalDate): Vedtak? = iverksatteVedtak
-        .filter { it.virkningsDato?.isAfter(foersteMuligeVedtaksdag(dato))?.not() ?: false }
-        .maxByOrNull { it.datoattestert!! }
+        .filter { it.virkningstidspunkt.atDay(1).isAfter(foersteMuligeVedtaksdag(dato)).not() }
+        .maxByOrNull { it.attestasjon?.tidspunkt?.instant!! }
 
-    private fun hentIverksatteVedtak(): List<Vedtak> = vedtak.filter { it.vedtakStatus === VedtakStatus.IVERKSATT }
+    private fun hentIverksatteVedtak(): List<Vedtak> = vedtak.filter { it.status === VedtakStatus.IVERKSATT }
 
     private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {
         val foersteVirkningsdato = iverksatteVedtak.minBy {
-            it.datoattestert ?: throw Error("Kunne ikke finne datoattestert paa vedtak")
-        }.virkningsDato ?: throw Error("Fant ikke vikrningsdato på det iverksatte vedtaket")
+            it.attestasjon?.tidspunkt?.instant ?: throw Error("Kunne ikke finne datoattestert paa vedtak")
+        }.virkningstidspunkt.atDay(1)
         return maxOf(foersteVirkningsdato, fraDato)
     }
 }

@@ -7,7 +7,6 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -18,7 +17,6 @@ import java.util.*
 
 interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
-    suspend fun hentSak(sakId: Long, bruker: Bruker): Sak
 
     suspend fun fattVedtak(
         behandlingId: UUID,
@@ -66,26 +64,6 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Henting av behandling med behandlingId=$behandlingId feilet", e)
-        }
-    }
-
-    override suspend fun hentSak(sakId: Long, bruker: Bruker): Sak {
-        logger.info("Henter sak med sakId=$sakId")
-        try {
-            return downstreamResourceClient
-                .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/saker/$sakId"
-                    ),
-                    bruker = bruker
-                )
-                .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
-                )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Henting av sak med sakId=$sakId feilet")
         }
     }
 

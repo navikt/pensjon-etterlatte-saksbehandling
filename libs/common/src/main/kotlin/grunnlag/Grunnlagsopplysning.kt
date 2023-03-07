@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.Instant
 import java.time.YearMonth
 import java.util.*
@@ -68,9 +69,9 @@ open class Grunnlagsopplysning<T>(
         fun toJson() = objectMapperKilde.writeValueAsString(this)
     }
 
-    data class Saksbehandler(val ident: String, val tidspunkt: Instant) : Kilde("saksbehandler") {
+    data class Saksbehandler(val ident: String, val tidspunkt: Tidspunkt) : Kilde("saksbehandler") {
         companion object {
-            fun create(ident: String) = Saksbehandler(ident, Instant.now())
+            fun create(ident: String) = Saksbehandler(ident, Tidspunkt.now())
         }
 
         override fun toString(): String {

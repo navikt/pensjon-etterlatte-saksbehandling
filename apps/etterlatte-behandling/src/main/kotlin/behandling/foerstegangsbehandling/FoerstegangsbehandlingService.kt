@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.ManuellVurdering
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
@@ -108,7 +109,7 @@ class RealFoerstegangsbehandlingService(
                         resultat = resultat,
                         basertPaaOpplysninger = ManuellVurdering(
                             begrunnelse = begrunnelse,
-                            kilde = Grunnlagsopplysning.Saksbehandler(navIdent, klokke.norskKlokke().instant())
+                            kilde = Grunnlagsopplysning.Saksbehandler(navIdent, Tidspunkt.from(klokke.norskKlokke()))
                         )
                     )
                 ),

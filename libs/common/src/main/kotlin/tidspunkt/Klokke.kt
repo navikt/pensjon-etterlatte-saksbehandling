@@ -11,3 +11,5 @@ fun Clock.norskKlokke(): Clock = withZone(norskTidssone)
 fun Instant.fixedNorskTid(): Clock = Clock.fixed(this, norskTidssone)
 
 fun ZonedDateTime.fixedNorskTid() = toInstant().fixedNorskTid()
+
+fun Tidspunkt.fixedNorskTid() = instant.fixedNorskTid()

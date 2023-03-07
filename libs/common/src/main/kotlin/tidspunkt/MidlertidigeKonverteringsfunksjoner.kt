@@ -12,10 +12,6 @@ Denne fila samlar extension functions for tidskonvertering vi forhåpentlegvis i
 sia målet er å gå over til å bruke Tidspunkt ganske konsekvent
  */
 
-fun Instant.tilZonedDateTime() = atZone(standardTidssoneUTC)
-
-fun Timestamp.tilZonedDateTime() = toLocalDateTime().atZone(standardTidssoneUTC)
-
 fun LocalDateTime.tilUTCTimestamp() =
     Timestamp.from(this.atZone(standardTidssoneUTC).toTidspunkt().instant)
 

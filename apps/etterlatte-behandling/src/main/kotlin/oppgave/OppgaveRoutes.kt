@@ -10,6 +10,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.domain.Handling
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import no.nav.etterlatte.oppgave.domain.OppgaveType
@@ -61,7 +62,7 @@ data class OppgaveDTO(
                     oppgaveStatus = oppgave.oppgaveStatus,
                     soeknadType = oppgave.sakType.toString(),
                     oppgaveType = oppgave.oppgaveType,
-                    regdato = oppgave.registrertDato.toLocalDateTime().toString(),
+                    regdato = oppgave.registrertDato.toLocalDatetimeUTC().toString(),
                     fristdato = oppgave.fristDato.atStartOfDay().toString(),
                     fnr = oppgave.fnr.value,
                     beskrivelse = oppgave.beskrivelse,
@@ -76,7 +77,7 @@ data class OppgaveDTO(
                     oppgaveStatus = oppgave.oppgaveStatus,
                     soeknadType = oppgave.sakType.toString(),
                     oppgaveType = oppgave.oppgaveType,
-                    regdato = oppgave.registrertDato.toLocalDateTime().toString(),
+                    regdato = oppgave.registrertDato.toLocalDatetimeUTC().toString(),
                     fristdato = oppgave.fristDato.atStartOfDay().toString(),
                     fnr = oppgave.fnr.value,
                     beskrivelse = "",

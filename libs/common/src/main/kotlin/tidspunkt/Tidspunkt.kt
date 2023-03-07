@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import java.io.Serializable
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.time.temporal.Temporal
 import java.time.temporal.TemporalAdjuster
@@ -23,6 +24,7 @@ abstract class TruncatedInstant(
     fun isBefore(other: TruncatedInstant) = this.instant.isBefore(other.instant)
     fun isAfter(other: TruncatedInstant) = this.instant.isAfter(other.instant)
     fun toEpochMilli() = instant.toEpochMilli()
+    fun toLocalDate(): LocalDate = LocalDate.ofInstant(instant, standardTidssoneUTC)
 }
 
 /**

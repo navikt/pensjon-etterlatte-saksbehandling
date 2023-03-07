@@ -24,7 +24,7 @@ internal class KonsistensavstemmingJobTest {
         kjoereplan = setOf(datoEksekvering),
         leaderElection = leaderElection,
         jobbNavn = "jobb",
-        clock = datoEksekvering.midnattNorskTid().toInstant().fixedNorskTid()
+        clock = datoEksekvering.midnattNorskTid().fixedNorskTid()
     )
 
     @Test

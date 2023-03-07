@@ -5,7 +5,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
@@ -15,16 +14,15 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.sak.Saker
+import java.util.*
 
 interface Behandling {
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
     fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
-
     fun hentAlleSaker(): Saker
-
-    fun opprettOmregning(omregningshendelse: Omregningshendelse): HttpResponse
+    fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
     fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
 }
 
@@ -68,12 +66,12 @@ class BehandlingsService(
         }
     }
 
-    override fun opprettOmregning(omregningshendelse: Omregningshendelse): HttpResponse {
+    override fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse {
         return runBlocking {
             behandling_app.post("$url/omregning") {
                 contentType(ContentType.Application.Json)
                 setBody(omregningshendelse)
-            }
+            }.body()
         }
     }
 
@@ -90,3 +88,5 @@ class BehandlingsService(
             behandling_app.get("$url/saker").body()
         }
 }
+
+data class OpprettOmregningResponse(val behandlingId: UUID, val forrigeBehandling: UUID)

@@ -15,11 +15,11 @@ class OmregningService(
         sakId: Long,
         fradato: LocalDate,
         prosesstype: Prosesstype
-    ): UUID {
+    ): Pair<UUID, UUID> {
         val forrigeBehandling = behandlingService.hentBehandlingerISak(sakId)
             .maxByOrNull { it.behandlingOpprettet }
             ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
-        return inTransaction {
+        val behandlingId = inTransaction {
             reguleringFactory.opprettRegulering(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
@@ -27,5 +27,7 @@ class OmregningService(
                 prosesstype = prosesstype
             )
         }.lagretBehandling.id
+
+        return Pair(behandlingId, forrigeBehandling.id)
     }
 }

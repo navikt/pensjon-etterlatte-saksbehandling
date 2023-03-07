@@ -32,12 +32,14 @@ import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.lang.NullPointerException
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
@@ -273,6 +275,29 @@ internal class VilkaarsvurderingServiceTest {
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.FORMAAL }.let { vilkaar ->
             vilkaar.grunnlag shouldBe emptyList()
             vilkaar.hovedvilkaar.type shouldBe VilkaarType.FORMAAL
+        }
+    }
+
+    @Test
+    fun `kan opprette og kopiere vilkaarsvurdering fra forrige behandling`() {
+        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val nyBehandlingId = UUID.randomUUID()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+
+        val vilkaarsvurdering1 = runBlocking { service.opprettVilkaarsvurdering(uuid, bruker) }
+        val vilkaarsvurdering2 = runBlocking { service.kopierVilkaarsvurdering(nyBehandlingId, uuid, bruker) }
+
+        Assertions.assertEquals(vilkaarsvurdering1.resultat, vilkaarsvurdering2.resultat)
+        Assertions.assertEquals(
+            vilkaarsvurdering1.vilkaar.map { it.vurdering },
+            vilkaarsvurdering2.vilkaar.map { it.vurdering }
+        )
+    }
+
+    @Test
+    fun `kopier vilkaarsvurdering gir NullpointerException hvis det ikke finnes tidligere vilkaarsvurdering`() {
+        assertThrows<NullPointerException> {
+            runBlocking { service.kopierVilkaarsvurdering(UUID.randomUUID(), uuid, bruker) }
         }
     }
 

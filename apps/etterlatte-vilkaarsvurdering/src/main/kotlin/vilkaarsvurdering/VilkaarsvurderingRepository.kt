@@ -45,19 +45,50 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 }
         }
 
-    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =
+    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
-                val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
-                vilkaarsvurdering.vilkaar.forEach { vilkaar ->
-                    val vilkaarId = lagreVilkaar(vilkaarsvurderingId, vilkaar, tx)
-                    vilkaar.grunnlag?.forEach { grunnlag ->
-                        lagreGrunnlag(vilkaarId, grunnlag, tx)
-                    }
-                    delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
-                }
+                opprettVilkaarsvurdering(vilkaarsvurdering, tx)
             }
-        }.let { hentNonNull(vilkaarsvurdering.behandlingId) }
+        }
+
+        return hentNonNull(vilkaarsvurdering.behandlingId)
+    }
+
+    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering, kopiertFraId: UUID): Vilkaarsvurdering {
+        using(sessionOf(ds)) { session ->
+            session.transaction { tx ->
+                opprettVilkaarsvurdering(vilkaarsvurdering, tx)
+                opprettVilkaarsvurderingKilde(vilkaarsvurdering.id, kopiertFraId, tx)
+            }
+        }
+
+        return hentNonNull(vilkaarsvurdering.behandlingId)
+    }
+
+    private fun opprettVilkaarsvurdering(
+        vilkaarsvurdering: Vilkaarsvurdering,
+        tx: TransactionalSession
+    ) {
+        val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
+        vilkaarsvurdering.vilkaar.forEach { vilkaar ->
+            val vilkaarId = lagreVilkaar(vilkaarsvurderingId, vilkaar, tx)
+            vilkaar.grunnlag?.forEach { grunnlag ->
+                lagreGrunnlag(vilkaarId, grunnlag, tx)
+            }
+            delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
+        }
+    }
+
+    private fun opprettVilkaarsvurderingKilde(vilkaarsvurderingId: UUID, kopiertFraId: UUID, tx: TransactionalSession) {
+        queryOf(
+            statement = Queries.lagreVilkaarsvurderingKilde,
+            paramMap = mapOf(
+                "id" to vilkaarsvurderingId,
+                "kopiert_fra" to kopiertFraId
+            )
+        ).let { tx.run(it.asUpdate) }
+    }
 
     fun lagreVilkaarsvurderingResultat(
         behandlingId: UUID,
@@ -77,7 +108,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     "resultat_tidspunkt" to resultat.tidspunkt.toTidspunkt().toTimestamp(),
                     "resultat_saksbehandler" to resultat.saksbehandler
                 )
-            ).let { session.run(it.asUpdate) }
+            ).let { session.run(it.asExecute) }
         }
 
         return hentNonNull(behandlingId)
@@ -242,6 +273,10 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         const val lagreVilkaarsvurdering = """
             INSERT INTO vilkaarsvurdering(id, behandling_id, virkningstidspunkt, grunnlag_versjon) 
             VALUES(:id, :behandling_id, :virkningstidspunkt, :grunnlag_versjon)
+        """
+
+        const val lagreVilkaarsvurderingKilde = """
+            INSERT INTO vilkaarsvurdering_kilde(vilkaarsvurdering_id, kopiert_fra_vilkaarsvurdering_id) VALUES(:id, :kopiert_fra)
         """
 
         const val lagreVilkaar = """

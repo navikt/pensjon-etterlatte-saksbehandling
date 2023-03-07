@@ -13,6 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.behandling.BehandlingsBehov
+import no.nav.etterlatte.behandling.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -118,7 +119,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 )
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body<UUID>()
+                it.body<OpprettOmregningResponse>()
             }
 
             client.get("/behandlinger/$omregning") {

@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.bruker
+import java.lang.NullPointerException
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import java.util.*
 
@@ -60,6 +61,37 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
                             "Statussjekk for behandling feilet"
                     )
                     call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+                }
+            }
+        }
+
+        post("/{$BEHANDLINGSID_CALL_PARAMETER}/kopier") {
+            withBehandlingId { behandlingId ->
+                val forrigeBehandling = call.receive<OpprettVilkaarsvurderingFraBehandling>().forrigeBehandling
+
+                try {
+                    logger.info("Kopierer vilkårsvurdering for $behandlingId fra $forrigeBehandling")
+                    val vilkaarsvurdering = vilkaarsvurderingService.kopierVilkaarsvurdering(
+                        behandlingId = behandlingId,
+                        kopierFraBehandling = forrigeBehandling,
+                        bruker = bruker
+                    )
+
+                    call.respond(vilkaarsvurdering.toDto())
+                } catch (e: VirkningstidspunktIkkeSattException) {
+                    logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
+                    call.respond(HttpStatusCode.PreconditionFailed)
+                } catch (e: BehandlingstilstandException) {
+                    logger.error(
+                        "Kunne ikke opprette vilkaarsvurdering for behandling $behandlingId. " +
+                            "Statussjekk for behandling feilet"
+                    )
+                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+                } catch (e: NullPointerException) {
+                    logger.error(
+                        "Kunne ikke kopiere vilkårsvurdering fra $forrigeBehandling. Fant ikke vilkårsvurdering"
+                    )
+                    call.respond(HttpStatusCode.NotFound, "Fant ikke vilkårsvurdering")
                 }
             }
         }
@@ -188,3 +220,5 @@ data class VurdertVilkaarsvurderingResultatDto(
     val resultat: VilkaarsvurderingUtfall,
     val kommentar: String?
 )
+
+data class OpprettVilkaarsvurderingFraBehandling(val forrigeBehandling: UUID)

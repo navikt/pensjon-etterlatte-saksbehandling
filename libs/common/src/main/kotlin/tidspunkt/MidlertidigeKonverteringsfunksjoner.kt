@@ -17,7 +17,6 @@ fun Timestamp.tilUTCLocalDateTime(): LocalDateTime = toTidspunkt().instant.atZon
 fun Instant?.toLocalDateTimeNorskTid() = this?.let { LocalDateTime.ofInstant(it, norskTidssone) }
 
 fun LocalDate.midnattNorskTid(): ZonedDateTime = atStartOfDay(norskTidssone)
-fun nowNorskTid(): ZonedDateTime = ZonedDateTime.now(norskTidssone)
 
 fun ZonedDateTime.toTidspunkt() = Tidspunkt(this.toInstant())
 fun LocalDateTime.toTidspunkt(zoneId: ZoneId = standardTidssoneUTC) = atZone(zoneId).toTidspunkt()

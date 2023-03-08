@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.tidspunkt
 import java.time.Clock
 
 fun klokke(): Clock = Clock.systemUTC()
+fun norskKlokke(): Clock = klokke().norskKlokke()
 
 fun Clock.norskKlokke(): Clock = withZone(norskTidssone)
 

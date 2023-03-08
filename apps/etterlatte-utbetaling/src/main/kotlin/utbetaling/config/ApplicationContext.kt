@@ -1,7 +1,8 @@
 package no.nav.etterlatte.utbetaling.config
 
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.klokke
-import no.nav.etterlatte.libs.common.tidspunkt.nowNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -99,7 +100,7 @@ class ApplicationContext(
         GrensesnittsavstemmingJob(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
-            starttidspunkt = nowNorskTid().next(LocalTime.of(3, 0, 0)),
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS)
         )
 

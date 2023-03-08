@@ -10,7 +10,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -31,21 +30,11 @@ fun Int.oktober(year: Int): LocalDate = LocalDate.of(year, Month.OCTOBER, this)
 fun Int.november(year: Int): LocalDate = LocalDate.of(year, Month.NOVEMBER, this)
 fun Int.desember(year: Int): LocalDate = LocalDate.of(year, Month.DECEMBER, this)
 
-fun ZonedDateTime.next(atTime: LocalTime): Date {
-    return Date.from(
-        if (this.toLocalTime().isAfter(atTime)) {
-            this.plusDays(1).formater(atTime)
-        } else {
-            formater(atTime)
-        }
-    )
+fun Tidspunkt.next(atTime: LocalTime): Date = if (this.toLocalTime().isAfter(atTime)) {
+    this.plus(1, ChronoUnit.DAYS).medTimeMinuttSekund(atTime).toJavaUtilDate()
+} else {
+    this.medTimeMinuttSekund(atTime).toJavaUtilDate()
 }
-
-private fun ZonedDateTime.formater(atTime: LocalTime) =
-    this.withHour(atTime.hour)
-        .withMinute(atTime.minute)
-        .withSecond(atTime.second)
-        .toInstant()
 
 fun tidspunktMidnattIdag(clock: Clock = klokke()): Tidspunkt =
     Tidspunkt.now(clock)

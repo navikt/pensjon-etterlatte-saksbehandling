@@ -1,6 +1,5 @@
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
-import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -20,7 +19,9 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.util.*
 
 class SkjermingslesingTest {
@@ -51,7 +52,8 @@ class SkjermingslesingTest {
                 "SKJERMING_TOPIC" to pdlPersonTopic
             ),
             behandlingKlient,
-            KafkaConsumerEnvironmentTest()
+            KafkaConsumerEnvironmentTest(),
+            Duration.ofSeconds(8L)
         )
         runBlocking(Dispatchers.Default) {
             val job = launch {
@@ -65,8 +67,8 @@ class SkjermingslesingTest {
     private fun generateSkjermingsProducer() = KafkaProducer<String, String>(
         mapOf(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaEnv.brokersURL,
-            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
-            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
+            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.canonicalName,
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.canonicalName,
             KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG to kafkaEnv.schemaRegistry?.url,
             ProducerConfig.ACKS_CONFIG to "all"
         )
@@ -87,7 +89,7 @@ class SkjermingslesingTest {
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
                 put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, trettiSekunder)
-                put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true)
+                put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())
             }
             return properties
         }

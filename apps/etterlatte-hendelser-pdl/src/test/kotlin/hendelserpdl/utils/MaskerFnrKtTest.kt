@@ -1,6 +1,6 @@
 package hendelserpdl.utils
 
-import no.nav.etterlatte.hendelserpdl.utils.maskerFnr
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

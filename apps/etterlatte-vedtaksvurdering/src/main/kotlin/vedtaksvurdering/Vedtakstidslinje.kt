@@ -21,13 +21,13 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
 
     private fun hentSenesteVedtakPaaDato(dato: LocalDate): Vedtak? = iverksatteVedtak
         .filter { it.virkningstidspunkt.atDay(1).isAfter(foersteMuligeVedtaksdag(dato)).not() }
-        .maxByOrNull { it.attestasjon?.tidspunkt?.instant!! }
+        .maxByOrNull { it.attestasjon?.tidspunkt!! }
 
     private fun hentIverksatteVedtak(): List<Vedtak> = vedtak.filter { it.status === VedtakStatus.IVERKSATT }
 
     private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {
         val foersteVirkningsdato = iverksatteVedtak.minBy {
-            it.attestasjon?.tidspunkt?.instant ?: throw Error("Kunne ikke finne datoattestert paa vedtak")
+            it.attestasjon?.tidspunkt ?: throw Error("Kunne ikke finne datoattestert paa vedtak")
         }.virkningstidspunkt.atDay(1)
         return maxOf(foersteVirkningsdato, fraDato)
     }

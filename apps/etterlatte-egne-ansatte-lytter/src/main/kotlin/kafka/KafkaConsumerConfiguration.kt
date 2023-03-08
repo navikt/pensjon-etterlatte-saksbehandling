@@ -37,7 +37,7 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
             put(ConsumerConfig.CLIENT_ID_CONFIG, env["NAIS_APP_NAME"])
             put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
             put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, fiveMinutesInMs)
-            put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis())
+            put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())
             put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
             put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
 

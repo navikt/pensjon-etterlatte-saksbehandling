@@ -11,8 +11,9 @@ import { useAppSelector } from '~store/Store'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { JaNei } from '~shared/types/ISvar'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
-import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 
 export const Soeknadsoversikt = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -32,12 +33,14 @@ export const Soeknadsoversikt = () => {
         <OversiktGyldigFramsatt gyldigFramsatt={behandling.gyldighetsprøving} sakType={behandling.sakType} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
-            <OversiktKommerBarnetTilgode
-              kommerBarnetTilgode={behandling.kommerBarnetTilgode}
-              redigerbar={behandles}
-              søker={behandling.søker}
-              forelder={behandling.familieforhold?.gjenlevende}
-            />
+            {behandling.sakType == ISaksType.BARNEPENSJON && (
+              <OversiktKommerBarnetTilgode
+                kommerBarnetTilgode={behandling.kommerBarnetTilgode}
+                redigerbar={behandles}
+                søker={behandling.søker}
+                forelder={behandling.familieforhold?.gjenlevende}
+              />
+            )}
             <Virkningstidspunkt
               redigerbar={behandles}
               virkningstidspunkt={behandling.virkningstidspunkt}

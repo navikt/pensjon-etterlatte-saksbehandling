@@ -81,7 +81,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             <SendTilAttesteringModal />
           ) : (
             <Button loading={isPending(vedtak)} variant="primary" size="medium" onClick={opprettEllerOppdaterVedtak}>
-              {behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? 'Gå videre til brev' : 'Fatt vedtak'}
+              Gå videre til brev
             </Button>
           )}
         </BehandlingHandlingKnapper>

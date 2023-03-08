@@ -1,20 +1,18 @@
 import { Content } from '~shared/styled'
-import { Heading } from '@navikt/ds-react'
+import { Button, ErrorMessage, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { Infoboks } from '~components/behandling/soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { useEffect } from 'react'
-import { useAppSelector } from '~store/Store'
+import { useEffect, useState } from 'react'
 import { Opphoersgrunn, OVERSETTELSER_OPPHOERSGRUNNER } from '~components/person/ManueltOpphoerModal'
-import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
+import { hentManueltOpphoerDetaljer, upsertVedtak } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { isFailure, isPending, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering'
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -45,7 +43,16 @@ const useManueltOpphoerDetaljer = (behandlingId?: string) => {
 export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const manueltOpphoerDetaljer = useManueltOpphoerDetaljer(behandling.id)
+  const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const soeker = behandling.søker
+  const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
+
+  const opprettEllerOppdaterVedtak = () => {
+    oppdaterVedtakRequest(behandling.id, () => {
+      // TODO dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+      setVisAttesteringsmodal(true)
+    })
+  }
 
   return (
     <Content>
@@ -115,7 +122,14 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
         </SectionSpacing>
       </MainSection>
       <BehandlingHandlingKnapper>
-        {hentBehandlesFraStatus(behandling.status) && <SendTilAttesteringModal />}
+        {isFailure(vedtak) && <ErrorMessage>Vedtaksoppdatering feilet</ErrorMessage>}
+        {visAttesteringsmodal ? (
+          <SendTilAttesteringModal />
+        ) : (
+          <Button loading={isPending(vedtak)} variant="primary" size="medium" onClick={opprettEllerOppdaterVedtak}>
+            Fatt vedtak
+          </Button>
+        )}
       </BehandlingHandlingKnapper>
     </Content>
   )

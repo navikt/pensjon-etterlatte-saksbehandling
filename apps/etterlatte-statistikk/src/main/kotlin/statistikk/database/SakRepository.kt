@@ -2,8 +2,8 @@ package no.nav.etterlatte.statistikk.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
 import no.nav.etterlatte.statistikk.domain.BehandlingResultat
@@ -103,10 +103,10 @@ class SakRepository(private val datasource: DataSource) {
 private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = this.apply {
     setObject(1, sakRad.behandlingId)
     setLong(2, sakRad.sakId)
-    setTimestamp(3, sakRad.mottattTidspunkt.toTimestamp())
-    setTimestamp(4, sakRad.registrertTidspunkt.toTimestamp())
-    setTimestamp(5, sakRad.ferdigbehandletTidspunkt?.toTimestamp())
-    setTimestamp(6, sakRad.vedtakTidspunkt?.toTimestamp())
+    setTidspunkt(3, sakRad.mottattTidspunkt)
+    setTidspunkt(4, sakRad.registrertTidspunkt)
+    setTidspunkt(5, sakRad.ferdigbehandletTidspunkt)
+    setTidspunkt(6, sakRad.vedtakTidspunkt)
     setString(7, sakRad.behandlingType.name)
     setString(8, sakRad.behandlingStatus)
     setString(9, sakRad.behandlingResultat?.name)
@@ -116,7 +116,7 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement = thi
     setString(13, sakRad.ansvarligBeslutter)
     setString(14, sakRad.aktorId)
     setDate(15, sakRad.datoFoersteUtbetaling?.let { Date.valueOf(it) })
-    setTimestamp(16, sakRad.tekniskTid.toTimestamp())
+    setTidspunkt(16, sakRad.tekniskTid)
     setString(17, sakRad.sakYtelse)
     setDate(18, sakRad.vedtakLoependeFom?.let { Date.valueOf(it) })
     setDate(19, sakRad.vedtakLoependeTom?.let { Date.valueOf(it) })

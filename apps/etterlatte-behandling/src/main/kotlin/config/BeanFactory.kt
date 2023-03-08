@@ -188,6 +188,7 @@ abstract class CommonFactory : BeanFactory {
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
     override fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse =
         SakDaoAdressebeskyttelse(datasource)
+
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
     override fun hendelseDao(): HendelseDao = HendelseDao { databaseContext().activeTx() }
     override fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao =
@@ -275,7 +276,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-            Duration.of(1, ChronoUnit.MINUTES).toMillis()
+                Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

@@ -2,9 +2,9 @@ package no.nav.etterlatte.statistikk.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
@@ -65,7 +65,7 @@ class StoenadRepository(private val datasource: DataSource) {
                 setString(7, maanedStatistikkRad.anvendtSats)
                 setObject(8, maanedStatistikkRad.behandlingId)
                 setLong(9, maanedStatistikkRad.sakId)
-                setTimestamp(10, maanedStatistikkRad.tekniskTid.toTimestamp())
+                setTidspunkt(10, maanedStatistikkRad.tekniskTid)
                 setString(11, maanedStatistikkRad.sakYtelse)
                 setString(12, maanedStatistikkRad.versjon)
                 setString(13, maanedStatistikkRad.saksbehandler)
@@ -117,7 +117,7 @@ class StoenadRepository(private val datasource: DataSource) {
                 setDate(1, Date.valueOf(maaned.atEndOfMonth()))
                 setDate(2, Date.valueOf(maaned.atEndOfMonth()))
                 setDate(3, Date.valueOf(maaned.atEndOfMonth()))
-                setTimestamp(4, maaned.atEndOfMonth().atTime(LocalTime.MAX).toNorskTidspunkt().toTimestamp())
+                setTidspunkt(4, maaned.atEndOfMonth().atTime(LocalTime.MAX).toNorskTidspunkt())
             }.executeQuery().toList { asStoenadRad() }
         }
     }
@@ -213,7 +213,7 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
     setObject(8, stoenadsrad.behandlingId)
     setLong(9, stoenadsrad.sakId)
     setLong(10, stoenadsrad.sakId)
-    setTimestamp(11, stoenadsrad.tekniskTid.toTimestamp())
+    setTidspunkt(11, stoenadsrad.tekniskTid)
     setString(12, stoenadsrad.sakYtelse)
     setString(13, stoenadsrad.versjon)
     setString(14, stoenadsrad.saksbehandler)

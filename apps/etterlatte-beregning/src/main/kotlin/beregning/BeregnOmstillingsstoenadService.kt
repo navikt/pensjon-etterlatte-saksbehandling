@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 import java.util.UUID.randomUUID
@@ -149,7 +148,7 @@ class BeregnOmstillingsstoenadService(
     private fun opprettBeregningsgrunnlagOmstillingsstoenad(trygdetid: Int) = OmstillingstoenadGrunnlag(
         avdoed = FaktumNode(
             verdi = Avdoed(Beregningstall(trygdetid)),
-            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Instant.now(), "1"),
+            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
             beskrivelse = "Trygdetid avdøed ektefelle"
         )
     )

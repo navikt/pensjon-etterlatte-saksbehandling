@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -166,12 +165,12 @@ internal class UtbetalingDaoIntegrationTest {
 
     @Test
     fun `skal hente alle utbetalinger mellom to tidspunkter`() {
-        val jan1 = Tidspunkt(Instant.parse("2022-01-01T00:00:00Z"))
-        val jan2 = Tidspunkt(Instant.parse("2022-02-01T00:00:00Z"))
-        val jan3 = Tidspunkt(Instant.parse("2022-03-01T00:00:00Z"))
-        val jan4 = Tidspunkt(Instant.parse("2022-04-01T00:00:00Z"))
-        val jan5 = Tidspunkt(Instant.parse("2022-05-01T00:00:00Z"))
-        val jan6 = Tidspunkt(Instant.parse("2022-06-01T00:00:00Z"))
+        val jan1 = Tidspunkt.parse("2022-01-01T00:00:00Z")
+        val jan2 = Tidspunkt.parse("2022-02-01T00:00:00Z")
+        val jan3 = Tidspunkt.parse("2022-03-01T00:00:00Z")
+        val jan4 = Tidspunkt.parse("2022-04-01T00:00:00Z")
+        val jan5 = Tidspunkt.parse("2022-05-01T00:00:00Z")
+        val jan6 = Tidspunkt.parse("2022-06-01T00:00:00Z")
 
         utbetalingDao.opprettUtbetaling(
             opprettUtbetaling(
@@ -402,7 +401,7 @@ internal class UtbetalingDaoIntegrationTest {
                 vedtakId = 2L,
                 utbetalingslinjeId = 2L,
                 periodeFra = LocalDate.now().plusDays(1),
-                opprettet = Tidspunkt(Instant.from(LocalDate.now().plusDays(1).midnattNorskTid()))
+                opprettet = LocalDate.now().plusDays(1).midnattNorskTid().toTidspunkt()
             )
         val oppdrag2 = oppdrag(utbetaling2)
         val utbetalingId3 = UUID.randomUUID()

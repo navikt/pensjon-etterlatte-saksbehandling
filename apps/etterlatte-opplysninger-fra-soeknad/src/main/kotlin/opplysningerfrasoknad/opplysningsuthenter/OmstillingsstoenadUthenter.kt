@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
-import no.nav.etterlatte.libs.common.tidspunkt.tilInstant
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 
 internal object OmstillingsstoenadUthenter {
     fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any?>> {
@@ -45,7 +45,7 @@ internal object OmstillingsstoenadUthenter {
     private fun kilde(soknad: Omstillingsstoenad): Grunnlagsopplysning.Kilde {
         return Grunnlagsopplysning.Privatperson(
             soknad.innsender.foedselsnummer.svar.value,
-            soknad.mottattDato.tilInstant()
+            soknad.mottattDato.toTidspunkt()
         )
     }
 

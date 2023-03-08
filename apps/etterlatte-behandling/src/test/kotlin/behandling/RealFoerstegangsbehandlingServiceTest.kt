@@ -28,13 +28,12 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.time.Instant
 import java.time.YearMonth
 import java.util.*
 
@@ -182,7 +181,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     @Test
     fun `lagring av gyldighetsproeving skal lagre og returnere gyldighetsresultat for innsender er gjenlevende`() {
         val id = UUID.randomUUID()
-        val naaTid = Instant.now()
+        val naaTid = Tidspunkt.now()
         val forventetResultat = GyldighetsResultat(
             resultat = VurderingsResultat.OPPFYLT,
             vurderinger = listOf(
@@ -195,7 +194,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                     )
                 )
             ),
-            vurdertDato = naaTid.toLocalDateTimeNorskTid()!!
+            vurdertDato = naaTid.toNorskTid().toLocalDateTime()
         )
 
         val foerstegangsbehandlingFactory = mockk<FoerstegangsbehandlingFactory>()

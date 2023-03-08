@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import java.util.*
 
 enum class Handling {
@@ -18,7 +18,7 @@ enum class Handling {
 sealed class Oppgave {
     abstract val sakId: Long
     abstract val sakType: SakType
-    abstract val registrertDato: ZonedDateTime
+    abstract val registrertDato: Tidspunkt
     abstract val fristDato: LocalDate
     abstract val fnr: Foedselsnummer
     abstract val handling: Handling
@@ -28,7 +28,7 @@ sealed class Oppgave {
     data class BehandlingOppgave(
         override val sakId: Long,
         override val sakType: SakType,
-        override val registrertDato: ZonedDateTime,
+        override val registrertDato: Tidspunkt,
         override val fnr: Foedselsnummer,
         val behandlingId: UUID,
         val behandlingsType: BehandlingType,
@@ -51,7 +51,7 @@ sealed class Oppgave {
     data class Grunnlagsendringsoppgave(
         override val sakId: Long,
         override val sakType: SakType,
-        override val registrertDato: ZonedDateTime,
+        override val registrertDato: Tidspunkt,
         override val fnr: Foedselsnummer,
         val grunnlagsendringsType: GrunnlagsendringsType,
         val gjelderRolle: Saksrolle

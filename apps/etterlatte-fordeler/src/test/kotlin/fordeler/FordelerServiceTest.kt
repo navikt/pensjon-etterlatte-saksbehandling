@@ -9,7 +9,7 @@ import no.nav.etterlatte.FNR_3
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
@@ -17,7 +17,6 @@ import no.nav.etterlatte.readSoknad
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -125,7 +124,7 @@ internal class FordelerServiceTest {
 
     @Test
     fun `Er gyldig for behandling om søknad tidligere er fordelt til Doffen`() {
-        every { fordelerRepo.finnFordeling(any()) } returns FordeltRecord(1, "DOFFEN", Instant.now().toTidspunkt())
+        every { fordelerRepo.finnFordeling(any()) } returns FordeltRecord(1, "DOFFEN", Tidspunkt.now())
         every { fordelerRepo.finnKriterier(any()) } returns emptyList()
 
         val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
@@ -137,7 +136,7 @@ internal class FordelerServiceTest {
 
     @Test
     fun `Er ikke gyldig for behandling om søknad tidligere er fordelt til Pesys`() {
-        every { fordelerRepo.finnFordeling(any()) } returns FordeltRecord(1, "PESYS", Instant.now().toTidspunkt())
+        every { fordelerRepo.finnFordeling(any()) } returns FordeltRecord(1, "PESYS", Tidspunkt.now())
         every { fordelerRepo.finnKriterier(any()) } returns emptyList()
 
         val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())

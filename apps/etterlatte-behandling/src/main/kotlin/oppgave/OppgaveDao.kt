@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.tidspunkt.tilZonedDateTime
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import org.slf4j.LoggerFactory
@@ -42,8 +42,8 @@ class OppgaveDao(private val connection: () -> Connection) {
             stmt.setArray(3, createArrayOf("text", statuser.toTypedArray()))
             stmt.setString(4, Prosesstype.AUTOMATISK.toString())
             return stmt.executeQuery().toList {
-                val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
-                    ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
+                val mottattDato = getTidspunkt("soeknad_mottatt_dato")
+                    ?: getTidspunkt("behandling_opprettet")
                     ?: throw IllegalStateException(
                         "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
                     )
@@ -80,8 +80,8 @@ class OppgaveDao(private val connection: () -> Connection) {
             stmt.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
             stmt.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
             return stmt.executeQuery().toList {
-                val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
-                    ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
+                val mottattDato = getTidspunkt("soeknad_mottatt_dato")
+                    ?: getTidspunkt("behandling_opprettet")
                     ?: throw IllegalStateException(
                         "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
                     )
@@ -115,7 +115,7 @@ class OppgaveDao(private val connection: () -> Connection) {
             )
             stmt.setString(1, GrunnlagsendringStatus.SJEKKET_AV_JOBB.name)
             return stmt.executeQuery().toList {
-                val registrertDato = getTimestamp("opprettet").tilZonedDateTime()
+                val registrertDato = requireNotNull(getTidspunkt("opprettet"))
                 Oppgave.Grunnlagsendringsoppgave(
                     sakId = getLong("sak_id"),
                     sakType = SakType.valueOf(getString("sakType")),

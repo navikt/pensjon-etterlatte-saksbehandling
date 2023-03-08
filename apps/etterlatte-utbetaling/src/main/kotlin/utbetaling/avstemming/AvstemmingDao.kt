@@ -7,9 +7,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import javax.sql.DataSource
@@ -64,10 +64,10 @@ class AvstemmingDao(private val dataSource: DataSource) {
     private fun toKonsistensavstemming(row: Row) = Konsistensavstemming(
         id = UUIDBase64(row.string("id")),
         sakType = row.string("saktype").let { Saktype.fraString(it) },
-        opprettet = row.instant("opprettet").toTidspunkt(),
+        opprettet = row.tidspunkt("opprettet"),
         avstemmingsdata = row.string("avstemmingsdata"),
-        loependeFraOgMed = row.instant("loepende_fom").toTidspunkt(),
-        opprettetTilOgMed = row.instant("opprettet_tom").toTidspunkt(),
+        loependeFraOgMed = row.tidspunkt("loepende_fom"),
+        opprettetTilOgMed = row.tidspunkt("opprettet_tom"),
         loependeUtbetalinger = objectMapper.readValue(row.string("loepende_utbetalinger"))
     )
 
@@ -114,10 +114,10 @@ class AvstemmingDao(private val dataSource: DataSource) {
 
     private fun toGrensesnittavstemming(row: Row) = Grensesnittavstemming(
         id = UUIDBase64(row.string("id")),
-        opprettet = row.instant("opprettet").toTidspunkt(),
+        opprettet = row.tidspunkt("opprettet"),
         periode = Avstemmingsperiode(
-            fraOgMed = row.instant("periode_fra").toTidspunkt(),
-            til = row.instant("periode_til").toTidspunkt()
+            fraOgMed = row.tidspunkt("periode_fra"),
+            til = row.tidspunkt("periode_til")
         ),
         antallOppdrag = row.int("antall_oppdrag"),
         avstemmingsdata = row.string("avstemmingsdata"),

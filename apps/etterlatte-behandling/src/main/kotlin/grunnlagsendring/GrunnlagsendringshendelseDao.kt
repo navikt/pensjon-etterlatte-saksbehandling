@@ -8,9 +8,9 @@ import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCLocalDateTime
-import no.nav.etterlatte.libs.common.tidspunkt.tilUTCTimestamp
-import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.postgresql.util.PGobject
@@ -35,7 +35,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 stmt.setObject(1, id)
                 stmt.setLong(2, sakId)
                 stmt.setString(3, type.name)
-                stmt.setTimestamp(4, opprettet.tilUTCTimestamp())
+                stmt.setTidspunkt(4, opprettet.toTidspunkt())
                 stmt.setString(5, status.name)
                 stmt.setString(6, hendelseGjelderRolle.name)
                 stmt.setJsonb(7, samsvarMellomPdlOgGrunnlag)
@@ -135,7 +135,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                    AND status = ?
                 """.trimIndent()
             ).use {
-                it.setTimestamp(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES).toTimestamp())
+                it.setTidspunkt(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES))
                 it.setString(2, GrunnlagsendringStatus.VENTER_PAA_JOBB.name)
                 return it.executeQuery().toList { asGrunnlagsendringshendelse() }
             }

@@ -21,9 +21,10 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.tilUTCLocalDateTime
-import no.nav.etterlatte.libs.common.tidspunkt.tilUTCTimestamp
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -158,7 +159,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
                 WHERE status not in (${
-            BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
+                BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
             })
             """.trimIndent()
         )
@@ -261,14 +262,11 @@ class BehandlingDao(private val connection: () -> Connection) {
         with(behandling) {
             stmt.setObject(1, id)
             stmt.setLong(2, sakId)
-            stmt.setTimestamp(3, opprettet.somTimestampUTC())
-            stmt.setTimestamp(4, opprettet.somTimestampUTC())
+            stmt.setTidspunkt(3, opprettet)
+            stmt.setTidspunkt(4, opprettet)
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
-            stmt.setTimestamp(
-                7,
-                soeknadMottattDato?.somTimestampUTC()
-            )
+            stmt.setTidspunkt(7, soeknadMottattDato?.toTidspunkt())
             with(persongalleri) {
                 stmt.setString(8, innsender)
                 stmt.setString(9, soeker)
@@ -300,10 +298,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             )
         stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
         stmt.setString(2, behandling.status.name)
-        stmt.setTimestamp(
-            3,
-            behandling.sistEndret.somTimestampUTC()
-        )
+        stmt.setTidspunkt(3, behandling.sistEndret.toTidspunkt())
         stmt.setObject(4, behandling.id)
         require(stmt.executeUpdate() == 1)
     }
@@ -322,10 +317,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
         stmt.setString(1, status.name)
-        stmt.setTimestamp(
-            2,
-            sistEndret.somTimestampUTC()
-        )
+        stmt.setTidspunkt(2, sistEndret.toTidspunkt())
         stmt.setObject(3, behandling)
         require(stmt.executeUpdate() == 1)
     }
@@ -411,8 +403,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 }
-
-private fun LocalDateTime.somTimestampUTC() = tilUTCTimestamp()
 
 private fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTimestamp(kolonne).tilUTCLocalDateTime()
 

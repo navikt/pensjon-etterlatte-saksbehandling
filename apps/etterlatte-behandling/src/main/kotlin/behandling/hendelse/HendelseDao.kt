@@ -3,8 +3,8 @@ package no.nav.etterlatte.behandling.hendelse
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,7 +41,7 @@ class HendelseDao(private val connection: () -> Connection) {
     fun behandlingOpprettet(behandling: BehandlingOpprettet) = lagreHendelse(
         UlagretHendelse(
             "BEHANDLING:OPPRETTET",
-            behandling.timestamp.toTidspunkt(),
+            behandling.timestamp,
             null,
             behandling.id,
             behandling.sak,
@@ -124,11 +124,7 @@ class HendelseDao(private val connection: () -> Connection) {
     }
 }
 
-fun PreparedStatement.setTidspunkt(index: Int, value: Tidspunkt?) = setTimestamp(index, value?.toTimestamp())
-
 fun PreparedStatement.setLong(index: Int, value: Long?) =
     if (value == null) setNull(index, Types.BIGINT) else setLong(3, value)
-
-fun ResultSet.getTidspunkt(name: String) = getTimestamp(name)?.toInstant()?.toTidspunkt()
 fun ResultSet.getUUID(name: String) = getObject(name) as UUID
 fun ResultSet.getLongOrNull(name: String) = getLong(name).takeIf { !wasNull() }

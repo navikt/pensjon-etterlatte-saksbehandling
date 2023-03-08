@@ -45,7 +45,6 @@ import vedtaksvurdering.SAKSBEHANDLER_2
 import vedtaksvurdering.attestant
 import vedtaksvurdering.opprettVedtak
 import vedtaksvurdering.saksbehandler
-import java.time.Instant
 import java.time.Month
 import java.time.YearMonth
 import java.util.*
@@ -543,7 +542,7 @@ internal class VedtaksvurderingServiceTest {
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { virkningstidspunkt } returns Virkningstidspunkt(
             virk,
-            Grunnlagsopplysning.Saksbehandler(SAKSBEHANDLER_1, Instant.now()),
+            Grunnlagsopplysning.Saksbehandler(SAKSBEHANDLER_1, Tidspunkt.now()),
             "enBegrunnelse"
         )
     }

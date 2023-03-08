@@ -25,6 +25,7 @@ abstract class TruncatedInstant(
     fun isAfter(other: TruncatedInstant) = this.instant.isAfter(other.instant)
     fun toEpochMilli() = instant.toEpochMilli()
     fun toLocalDate(): LocalDate = LocalDate.ofInstant(instant, standardTidssoneUTC)
+    fun toNorskLocalDate(): LocalDate = LocalDate.ofInstant(instant, norskTidssone)
 }
 
 /**

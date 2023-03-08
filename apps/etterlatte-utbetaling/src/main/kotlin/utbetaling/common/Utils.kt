@@ -3,8 +3,6 @@ package no.nav.etterlatte.utbetaling.common
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
@@ -37,10 +35,7 @@ fun Tidspunkt.next(atTime: LocalTime): Date = if (this.toLocalTime().isAfter(atT
 }
 
 fun tidspunktMidnattIdag(clock: Clock = klokke()): Tidspunkt =
-    Tidspunkt.now(clock)
-        .toNorskTid()
-        .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid
-        .toTidspunkt()
+    Tidspunkt.ofNorskTidssone(LocalDate.now(clock), LocalTime.MIDNIGHT)
 
 fun forsteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atDay(1)
 

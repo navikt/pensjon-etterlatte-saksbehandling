@@ -55,6 +55,9 @@ constructor(
 
         fun from(clock: Clock = klokke()) = Tidspunkt(clock.instant())
         fun parse(text: String) = Tidspunkt(Instant.parse(text))
+
+        fun ofNorskTidssone(dato: LocalDate, tid: LocalTime) =
+            Tidspunkt(ZonedDateTime.of(dato, tid, norskTidssone).toInstant())
     }
 
     /**

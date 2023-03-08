@@ -6,6 +6,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -22,6 +23,7 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient) {
         )
         val skjermet = record.value().toBoolean()
         val fnr = record.key()
+        logger.info("Haandterer hendelse for fnr maskert ${fnr.maskerFnr()}")
         postTilBehandling(fnr = fnr, skjermet = skjermet)
     }
 

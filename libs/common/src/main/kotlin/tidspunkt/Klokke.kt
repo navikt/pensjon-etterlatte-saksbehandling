@@ -6,4 +6,4 @@ fun klokke(): Clock = Clock.systemUTC()
 
 fun Clock.norskKlokke(): Clock = withZone(norskTidssone)
 
-fun Tidspunkt.fixedNorskTid() = Clock.fixed(this.instant, norskTidssone)
+fun Tidspunkt.fixedNorskTid(): Clock = Clock.fixed(this.instant, norskTidssone)

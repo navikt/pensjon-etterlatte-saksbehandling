@@ -12,11 +12,11 @@ Denne fila samlar extension functions for tidskonvertering vi forhåpentlegvis i
 sia målet er å gå over til å bruke Tidspunkt ganske konsekvent
  */
 
-fun Timestamp.tilUTCLocalDateTime() = toTidspunkt().instant.atZone(standardTidssoneUTC).toLocalDateTime()
+fun Timestamp.tilUTCLocalDateTime(): LocalDateTime = toTidspunkt().instant.atZone(standardTidssoneUTC).toLocalDateTime()
 
 fun Instant?.toLocalDateTimeNorskTid() = this?.let { LocalDateTime.ofInstant(it, norskTidssone) }
 
-fun LocalDate.midnattNorskTid() = atStartOfDay(norskTidssone)
+fun LocalDate.midnattNorskTid(): ZonedDateTime = atStartOfDay(norskTidssone)
 fun nowNorskTid(): ZonedDateTime = ZonedDateTime.now(norskTidssone)
 
 fun ZonedDateTime.toTidspunkt() = Tidspunkt(this.toInstant())

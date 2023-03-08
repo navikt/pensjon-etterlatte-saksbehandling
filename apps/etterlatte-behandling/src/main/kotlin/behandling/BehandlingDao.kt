@@ -35,24 +35,6 @@ import java.util.UUID
 
 class BehandlingDao(private val connection: () -> Connection) {
 
-    fun hentBehandling(id: UUID, type: BehandlingType): Behandling? {
-        val stmt =
-            connection().prepareStatement(
-                """
-                    SELECT b.*, s.sakType, s.fnr 
-                    FROM behandling b
-                    INNER JOIN sak s ON b.sak_id = s.id
-                    WHERE b.id = ? AND b.behandlingstype = ? 
-                    """
-            )
-        stmt.setObject(1, id)
-        stmt.setString(2, type.name)
-
-        return stmt.executeQuery().singleOrNull {
-            behandlingAvRettType()
-        }
-    }
-
     fun hentBehandling(id: UUID): Behandling? {
         val stmt =
             connection().prepareStatement(

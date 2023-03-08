@@ -94,10 +94,7 @@ internal class BehandlingDaoIntegrationTest {
 
         behandlingRepo.opprettBehandling(opprettBehandlingMedPersongalleri)
         val opprettetBehandling = requireNotNull(
-            behandlingRepo.hentBehandling(
-                opprettBehandlingMedPersongalleri.id,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            behandlingRepo.hentBehandling(opprettBehandlingMedPersongalleri.id)
         ) as Foerstegangsbehandling
         assertEquals(opprettBehandlingMedPersongalleri.id, opprettetBehandling.id)
         assertEquals(
@@ -126,12 +123,8 @@ internal class BehandlingDaoIntegrationTest {
         )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
-        val opprettetBehandling = requireNotNull(
-            behandlingRepo.hentBehandling(
-                opprettBehandling.id,
-                BehandlingType.REVURDERING
-            )
-        ) as Revurdering
+        val opprettetBehandling = requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Revurdering
+
         assertEquals(opprettBehandling.id, opprettetBehandling.id)
         assertEquals(
             opprettBehandling.persongalleri.avdoed,
@@ -171,12 +164,7 @@ internal class BehandlingDaoIntegrationTest {
         )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
-        val opprettetBehandling = requireNotNull(
-            behandlingRepo.hentBehandling(
-                opprettBehandling.id,
-                BehandlingType.MANUELT_OPPHOER
-            )
-        ) as ManueltOpphoer
+        val opprettetBehandling = requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as ManueltOpphoer
 
         assertEquals(sakId, opprettetBehandling.sak.id)
         assertEquals(persongalleri(), opprettetBehandling.persongalleri)
@@ -197,12 +185,8 @@ internal class BehandlingDaoIntegrationTest {
 
         behandlingRepo.opprettBehandling(opprettBehandling)
 
-        val lagretPersongalleriBehandling = requireNotNull(
-            behandlingRepo.hentBehandling(
-                opprettBehandling.id,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
-        ) as Foerstegangsbehandling
+        val lagretPersongalleriBehandling =
+            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
         val gyldighetsproevingBehanding = lagretPersongalleriBehandling.copy(
             gyldighetsproeving = GyldighetsResultat(
@@ -220,12 +204,8 @@ internal class BehandlingDaoIntegrationTest {
         )
 
         behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)
-        val lagretGyldighetsproving = requireNotNull(
-            behandlingRepo.hentBehandling(
-                opprettBehandling.id,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
-        ) as Foerstegangsbehandling
+        val lagretGyldighetsproving =
+            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
         assertEquals(
             gyldighetsproevingBehanding.gyldighetsproeving,
@@ -328,10 +308,7 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.opprettBehandling(it)
         }
 
-        val behandling = behandlingRepo.hentBehandling(
-            id = opprettBehandling.id,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING
-        )
+        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
         assertTrue(behandling is Foerstegangsbehandling)
     }
 
@@ -347,7 +324,7 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.opprettBehandling(it)
         }
 
-        val behandling = behandlingRepo.hentBehandling(id = opprettBehandling.id, type = BehandlingType.REVURDERING)
+        val behandling = behandlingRepo.hentBehandling(id = opprettBehandling.id)
         assertTrue(behandling is Revurdering)
     }
 
@@ -364,7 +341,7 @@ internal class BehandlingDaoIntegrationTest {
         ).also {
             behandlingRepo.opprettBehandling(it)
         }
-        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id, BehandlingType.MANUELT_OPPHOER)
+        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
         assertTrue(behandling is ManueltOpphoer)
     }
 
@@ -442,11 +419,7 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.opprettBehandling(it)
         }
 
-        val behandlingFoerStatusendring =
-            behandlingRepo.hentBehandling(
-                opprettBehandling.id,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            ) as? Foerstegangsbehandling
+        val behandlingFoerStatusendring = behandlingRepo.hentBehandling(opprettBehandling.id) as? Foerstegangsbehandling
         assertNotNull(behandlingFoerStatusendring)
 
         val endretTidspunkt = Tidspunkt.now().toLocalDatetimeUTC()
@@ -454,8 +427,7 @@ internal class BehandlingDaoIntegrationTest {
             behandlingFoerStatusendring!!.copy(status = BehandlingStatus.VILKAARSVURDERT, sistEndret = endretTidspunkt)
         behandlingRepo.lagreStatus(behandlingMedNyStatus)
 
-        val behandlingEtterStatusendring =
-            behandlingRepo.hentBehandling(opprettBehandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandlingEtterStatusendring = behandlingRepo.hentBehandling(opprettBehandling.id)
 
         assertEquals(BehandlingStatus.OPPRETTET, behandlingFoerStatusendring.status)
         assertEquals(BehandlingStatus.VILKAARSVURDERT, behandlingEtterStatusendring!!.status)

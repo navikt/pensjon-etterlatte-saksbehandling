@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 class ReguleringAggregat(
     id: UUID,
@@ -54,8 +54,7 @@ class ReguleringAggregat(
         }
     }
 
-    var lagretBehandling: Regulering =
-        requireNotNull(behandlinger.hentBehandling(id, BehandlingType.OMREGNING) as Regulering)
+    var lagretBehandling = requireNotNull(behandlinger.hentBehandling(id) as Regulering)
 
     fun registrerVedtakHendelse(
         vedtakId: Long,

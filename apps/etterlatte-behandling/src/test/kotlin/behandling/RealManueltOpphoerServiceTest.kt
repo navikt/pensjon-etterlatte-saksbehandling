@@ -61,7 +61,7 @@ internal class RealManueltOpphoerServiceTest {
         val sakId = 1L
         val id = UUID.randomUUID()
         val behandlingerMock = mockk<BehandlingDao> {
-            every { hentBehandling(id = id, type = BehandlingType.MANUELT_OPPHOER) } returns manueltOpphoer(
+            every { hentBehandling(id) } returns manueltOpphoer(
                 sakId = sakId
             )
         }
@@ -296,7 +296,7 @@ internal class RealManueltOpphoerServiceTest {
         val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val hendelserMock = mockk<HendelseDao>()
         val behandlingerMock = mockk<BehandlingDao> {
-            every { hentBehandling(any(), BehandlingType.MANUELT_OPPHOER) } returns null
+            every { hentBehandling(any()) } returns null
             every { alleBehandlingerISak(any()) } returns listOf()
         }
         val service = RealManueltOpphoerService(
@@ -327,7 +327,7 @@ internal class RealManueltOpphoerServiceTest {
             opphoerAarsaker = listOf(ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED)
         )
         val behandlingerMock = mockk<BehandlingDao> {
-            every { hentBehandling(manueltOpphoerId, BehandlingType.MANUELT_OPPHOER) } returns opphoer
+            every { hentBehandling(manueltOpphoerId) } returns opphoer
             every { alleBehandlingerISak(sakId) } returns listOf(
                 opphoer,
                 foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.BEREGNET),

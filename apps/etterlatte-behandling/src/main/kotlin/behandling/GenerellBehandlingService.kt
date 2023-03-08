@@ -89,7 +89,7 @@ class RealGenerellBehandlingService(
 
     override fun hentBehandling(behandlingId: UUID): Behandling? {
         return inTransaction {
-            behandlinger.hentBehandlingType(behandlingId)?.let { behandlinger.hentBehandling(behandlingId, it) }
+            behandlinger.hentBehandling(behandlingId)
         }
     }
 

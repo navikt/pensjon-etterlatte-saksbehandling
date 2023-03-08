@@ -42,7 +42,7 @@ import java.sql.Connection
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class RealGenerellBehandlingServiceTest {
     @BeforeEach
@@ -281,7 +281,7 @@ class RealGenerellBehandlingServiceTest {
         val service = lagRealGenerellBehandlingService(
             behandlinger = mockk {
                 every { hentBehandlingType(BEHANDLINGS_ID) } returns BehandlingType.FØRSTEGANGSBEHANDLING
-                every { hentBehandling(BEHANDLINGS_ID, BehandlingType.FØRSTEGANGSBEHANDLING) } returns behandling
+                every { hentBehandling(BEHANDLINGS_ID) } returns behandling
             },
             grunnlagKlient = mockk {
                 coEvery {
@@ -371,7 +371,7 @@ class RealGenerellBehandlingServiceTest {
             behandlinger = mockk {
                 every { hentBehandlingType(BEHANDLINGS_ID) } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every {
-                    hentBehandling(BEHANDLINGS_ID, BehandlingType.FØRSTEGANGSBEHANDLING)
+                    hentBehandling(BEHANDLINGS_ID)
                 } returns behandling
             },
             grunnlagKlient = mockk {

@@ -53,16 +53,16 @@ class RealManueltOpphoerService(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun hentManueltOpphoer(behandling: UUID): ManueltOpphoer? =
-        behandlinger.hentBehandling(behandling, BehandlingType.MANUELT_OPPHOER) as ManueltOpphoer?
+        behandlinger.hentBehandling(behandling) as ManueltOpphoer?
 
     override fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer? =
-        inTransaction { behandlinger.hentBehandling(behandling, BehandlingType.MANUELT_OPPHOER) as ManueltOpphoer? }
+        inTransaction { behandlinger.hentBehandling(behandling) as ManueltOpphoer? }
 
     override fun hentManueltOpphoerOgAlleIverksatteBehandlingerISak(
         behandling: UUID
     ): Pair<ManueltOpphoer, List<Behandling>>? =
         inTransaction {
-            val opphoer = behandlinger.hentBehandling(behandling, BehandlingType.MANUELT_OPPHOER) as ManueltOpphoer?
+            val opphoer = behandlinger.hentBehandling(behandling) as ManueltOpphoer?
                 ?: return@inTransaction null
             val andreBehandlinger = behandlinger.alleBehandlingerISak(opphoer.sak.id)
                 .filter { it.id != behandling && it.status == BehandlingStatus.IVERKSATT }

@@ -12,7 +12,8 @@ import java.util.*
 class KafkaConsumerEgneAnsatte(
     env: Map<String, String>,
     private var behandlingKlient: BehandlingKlient,
-    kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment()
+    kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
+    private var pollTimeoutInSeconds: Duration = Duration.ofSeconds(8L)
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
     private val kafkaProperties: Properties = kafkaEnvironment.generateKafkaConsumerProperties(env)
@@ -25,7 +26,7 @@ class KafkaConsumerEgneAnsatte(
             consumer.subscribe(listOf(skjermingTopic))
             logger.info("KafkaConsumerEgneAnsatte startet")
             while (true) {
-                val meldinger: ConsumerRecords<String, String> = consumer.poll(Duration.ofSeconds(9L))
+                val meldinger: ConsumerRecords<String, String> = consumer.poll(pollTimeoutInSeconds)
                 meldinger.forEach {
                     behandlingKlient.haandterHendelse(it)
                 }

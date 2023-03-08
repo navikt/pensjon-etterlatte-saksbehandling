@@ -21,6 +21,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.util.*
 
 class SkjermingslesingTest {
@@ -51,7 +52,8 @@ class SkjermingslesingTest {
                 "SKJERMING_TOPIC" to pdlPersonTopic
             ),
             behandlingKlient,
-            KafkaConsumerEnvironmentTest()
+            KafkaConsumerEnvironmentTest(),
+            Duration.ofSeconds(8L)
         )
         runBlocking(Dispatchers.Default) {
             val job = launch {

@@ -3,17 +3,16 @@ import { Familieforhold } from './familieforhold/Familieforhold'
 import { Border, HeadingWrapper, Innhold } from './styled'
 import { Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { Start } from '../handlinger/start'
 import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
 import { useAppSelector } from '~store/Store'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { JaNei } from '~shared/types/ISvar'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
+import { Start } from '~components/behandling/handlinger/start'
 
 export const Soeknadsoversikt = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -56,7 +55,7 @@ export const Soeknadsoversikt = () => {
       <Familieforhold behandling={behandling} />
       {behandles ? (
         <BehandlingHandlingKnapper>
-          {behandlingErUtfylt(behandling) && behandling.kommerBarnetTilgode?.svar === JaNei.JA && (
+          {behandlingErUtfylt(behandling) && (
             <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT} />
           )}
         </BehandlingHandlingKnapper>

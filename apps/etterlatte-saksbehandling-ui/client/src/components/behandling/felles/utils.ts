@@ -8,9 +8,21 @@ import {
 } from '~shared/types/IDetaljertBehandling'
 import { IKriterie, IKriterieOpplysning, KriterieOpplysningsType, Kriterietype } from '~shared/types/Kriterie'
 import { IBehandlingsammendrag } from '~components/person/typer'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { JaNei } from '~shared/types/ISvar'
 
 export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
-  return Boolean(behandling.gyldighetsprøving && behandling.kommerBarnetTilgode && behandling.virkningstidspunkt)
+  const gyldigUtfylt = !!(behandling.gyldighetsprøving && behandling.virkningstidspunkt)
+
+  if (behandling.sakType == ISaksType.BARNEPENSJON) {
+    const kommerBarnetTilgode = !!behandling.kommerBarnetTilgode && behandling.kommerBarnetTilgode?.svar === JaNei.JA
+
+    return gyldigUtfylt && kommerBarnetTilgode
+  } else if (behandling.sakType == ISaksType.OMSTILLINGSSTOENAD) {
+    return gyldigUtfylt
+  } else {
+    return false
+  }
 }
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {

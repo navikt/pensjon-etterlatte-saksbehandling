@@ -34,7 +34,7 @@ class OppgaveDao(private val connection: () -> Connection) {
                 |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE ((adressebeskyttelse = ?) OR (adressebeskyttelse = ?)) 
-                | AND status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
+                |AND status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
                 """.trimMargin()
             )
             stmt.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
@@ -71,43 +71,35 @@ class OppgaveDao(private val connection: () -> Connection) {
                 |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
+                |AND adressebeskyttelse is null OR 
+                |(adressebeskyttelse is NOT NULL AND (adressebeskyttelse != ? AND adressebeskyttelse != ?))
                 """.trimMargin()
             )
             stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))
             stmt.setString(2, Prosesstype.AUTOMATISK.toString())
-            val oppgaver = stmt.executeQuery().toList {
-                val adressebeskyttelse = getString("adressebeskyttelse")
-                if (adressebeskyttelse != null &&
-                    (
-                        adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString() ||
-                            adressebeskyttelse == AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString()
-                        )
-                ) {
-                    null
-                } else {
-                    val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
-                        ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
-                        ?: throw IllegalStateException(
-                            "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
-                        )
-                    Oppgave.BehandlingOppgave(
-                        behandlingId = getObject("id") as UUID,
-                        behandlingStatus = BehandlingStatus.valueOf(getString("status")),
-                        sakId = getLong("sak_id"),
-                        sakType = enumValueOf(getString("sakType")),
-                        fnr = Foedselsnummer.of(getString("fnr")),
-                        registrertDato = mottattDato,
-                        behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
-                        antallSoesken = antallSoesken(getString("soesken"))
+            stmt.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
+            stmt.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
+            return stmt.executeQuery().toList {
+                val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
+                    ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
+                    ?: throw IllegalStateException(
+                        "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
                     )
-                }
+                Oppgave.BehandlingOppgave(
+                    behandlingId = getObject("id") as UUID,
+                    behandlingStatus = BehandlingStatus.valueOf(getString("status")),
+                    sakId = getLong("sak_id"),
+                    sakType = enumValueOf(getString("sakType")),
+                    fnr = Foedselsnummer.of(getString("fnr")),
+                    registrertDato = mottattDato,
+                    behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
+                    antallSoesken = antallSoesken(getString("soesken"))
+                )
+            }.also {
+                logger.info(
+                    "Hentet behandlingsoppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver"
+                )
             }
-            return oppgaver.filterNotNull()
-                .also {
-                    logger.info(
-                        "Hentet behandlingsoppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver"
-                    )
-                }
         }
     }
 

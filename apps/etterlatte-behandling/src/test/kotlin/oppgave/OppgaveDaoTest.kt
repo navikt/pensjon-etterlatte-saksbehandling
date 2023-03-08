@@ -130,20 +130,23 @@ internal class OppgaveDaoTest {
         val fnr = STOR_SNERK.value
 
         val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON)
-        val manuel = lagRegulering(Prosesstype.MANUELL, fnr, sak.id)
-        behandlingDao.opprettBehandling(manuel)
+        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, fnr, sak.id))
         sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        val sakk = sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
+        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, TRIVIELL_MIDTPUNKT.value, sakk.id))
 
         val alleBehandlingsStatuser = BehandlingStatus.values().asList()
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
-        assertEquals(0, oppgaver.size)
+        assertEquals(1, oppgaver.size)
+
         val strengtFortroligOppgaver = oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(
             alleBehandlingsStatuser
         )
         assertEquals(1, strengtFortroligOppgaver.size)
 
         sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
-        assertEquals(1, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
+        assertEquals(2, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
         assertEquals(
             0,
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(alleBehandlingsStatuser).size
@@ -153,7 +156,7 @@ internal class OppgaveDaoTest {
             sak.id,
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
         )
-        assertEquals(0, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
+        assertEquals(1, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
         assertEquals(
             1,
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(alleBehandlingsStatuser).size

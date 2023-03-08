@@ -7,7 +7,7 @@ import { genererPdf, opprettEllerOppdaterBrevForVedtak } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import styled from 'styled-components'
-import { useAppSelector } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import { PdfVisning } from '../brev/pdf-visning'
 import {
@@ -17,6 +17,7 @@ import {
   VurderingsResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 
 interface VilkaarOption {
   value: string
@@ -26,6 +27,7 @@ interface VilkaarOption {
 export const Vedtaksbrev = () => {
   const { behandlingId } = useParams()
   const { sak, soeknadMottattDato, status } = useAppSelector((state) => state.behandlingReducer.behandling)
+  const dispatch = useAppDispatch()
 
   const [fileURL, setFileURL] = useState<string>()
   const [vedtaksbrev, setVedtaksbrev] = useState<any>(undefined)
@@ -89,6 +91,7 @@ export const Vedtaksbrev = () => {
     hentVilkaarsvurdering(behandlingId).then((response) => {
       if (response.status === 'ok') {
         setVilkaarsvurdering(response.data)
+        dispatch(updateVilkaarsvurdering(response.data))
       }
     })
 

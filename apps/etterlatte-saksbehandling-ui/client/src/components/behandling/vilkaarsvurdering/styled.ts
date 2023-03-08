@@ -48,7 +48,7 @@ export const VilkaarInfobokser = styled.div`
 
 export const VilkaarColumn = styled.div`
   height: fit-content;
-  
+
   .missing {
     color: red;
   }

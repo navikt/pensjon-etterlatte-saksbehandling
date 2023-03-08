@@ -16,6 +16,7 @@ import differenceInYears from 'date-fns/differenceInYears'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 export interface ManueltOpphoerDetaljer {
   id: string
@@ -49,7 +50,6 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
 
   const opprettEllerOppdaterVedtak = () => {
     oppdaterVedtakRequest(behandling.id, () => {
-      // TODO dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
       setVisAttesteringsmodal(true)
     })
   }
@@ -121,16 +121,18 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
           )}
         </SectionSpacing>
       </MainSection>
-      <BehandlingHandlingKnapper>
-        {isFailure(vedtak) && <ErrorMessage>Vedtaksoppdatering feilet</ErrorMessage>}
-        {visAttesteringsmodal ? (
-          <SendTilAttesteringModal />
-        ) : (
-          <Button loading={isPending(vedtak)} variant="primary" size="medium" onClick={opprettEllerOppdaterVedtak}>
-            Fatt vedtak
-          </Button>
-        )}
-      </BehandlingHandlingKnapper>
+      {hentBehandlesFraStatus(behandling.status) && (
+        <BehandlingHandlingKnapper>
+          {isFailure(vedtak) && <ErrorMessage>Vedtaksoppdatering feilet</ErrorMessage>}
+          {visAttesteringsmodal ? (
+            <SendTilAttesteringModal />
+          ) : (
+            <Button loading={isPending(vedtak)} variant="primary" size="medium" onClick={opprettEllerOppdaterVedtak}>
+              Opprett vedtak
+            </Button>
+          )}
+        </BehandlingHandlingKnapper>
+      )}
     </Content>
   )
 }

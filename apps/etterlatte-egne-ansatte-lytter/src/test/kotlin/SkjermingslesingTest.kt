@@ -89,6 +89,7 @@ class SkjermingslesingTest {
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
                 put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, trettiSekunder)
+                put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())
             }
             return properties
         }

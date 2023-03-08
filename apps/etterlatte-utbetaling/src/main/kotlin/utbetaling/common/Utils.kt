@@ -32,23 +32,20 @@ fun Int.november(year: Int): LocalDate = LocalDate.of(year, Month.NOVEMBER, this
 fun Int.desember(year: Int): LocalDate = LocalDate.of(year, Month.DECEMBER, this)
 
 fun ZonedDateTime.next(atTime: LocalTime): Date {
-    return if (this.toLocalTime().isAfter(atTime)) {
-        Date.from(
-            this.plusDays(1)
-                .withHour(atTime.hour)
-                .withMinute(atTime.minute)
-                .withSecond(atTime.second)
-                .toInstant()
-        )
-    } else {
-        Date.from(
-            this.withHour(atTime.hour)
-                .withMinute(atTime.minute)
-                .withSecond(atTime.second)
-                .toInstant()
-        )
-    }
+    return Date.from(
+        if (this.toLocalTime().isAfter(atTime)) {
+            this.plusDays(1).formater(atTime)
+        } else {
+            formater(atTime)
+        }
+    )
 }
+
+private fun ZonedDateTime.formater(atTime: LocalTime) =
+    this.withHour(atTime.hour)
+        .withMinute(atTime.minute)
+        .withSecond(atTime.second)
+        .toInstant()
 
 fun tidspunktMidnattIdag(clock: Clock = klokke()): Tidspunkt =
     Tidspunkt.now(clock)

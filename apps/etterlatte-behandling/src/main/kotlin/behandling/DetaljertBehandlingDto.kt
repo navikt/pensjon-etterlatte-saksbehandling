@@ -20,7 +20,7 @@ data class DetaljertBehandlingDto(
     val gyldighetsprøving: GyldighetsResultat?,
     val saksbehandlerId: String?,
     val datoFattet: Tidspunkt?,
-    val datoattestert: Tidspunkt?,
+    val datoAttestert: Tidspunkt?,
     val attestant: String?,
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: Virkningstidspunkt?,

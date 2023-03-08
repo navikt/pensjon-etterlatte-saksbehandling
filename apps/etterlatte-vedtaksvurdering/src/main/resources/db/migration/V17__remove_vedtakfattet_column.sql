@@ -1,0 +1,1 @@
+ALTER TABLE vedtak DROP COLUMN vedtakfattet;

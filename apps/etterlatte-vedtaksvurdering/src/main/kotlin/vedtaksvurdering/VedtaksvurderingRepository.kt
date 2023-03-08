@@ -130,7 +130,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
     fun hentVedtak(behandlingId: UUID): Vedtak? =
         repositoryWrapper.hentMedKotliquery(
             query = """
-            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, 
+            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type  
             FROM vedtak 
@@ -147,7 +147,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
 
     fun hentVedtakForSak(sakId: Long): List<Vedtak> {
         val hentVedtak = """
-            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, vedtakfattet, id, fnr, 
+            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type  
             FROM vedtak  
@@ -172,14 +172,13 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         repositoryWrapper.oppdater(
             query = """
                 UPDATE vedtak 
-                SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, 
-                    vedtakfattet = :vedtakfattet, datoFattet = now(), vedtakstatus = :vedtakstatus  
+                SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, datoFattet = now(), 
+                    vedtakstatus = :vedtakstatus  
                 WHERE behandlingId = :behandlingId
                 """,
             params = mapOf(
                 "saksbehandlerId" to vedtakFattet.ansvarligSaksbehandler,
                 "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet,
-                "vedtakfattet" to true,
                 "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
                 "behandlingId" to behandlingId
             ),
@@ -212,7 +211,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             """
             UPDATE vedtak 
             SET attestant = null, datoAttestert = null, attestertVedtakEnhet = null, saksbehandlerId = null, 
-                vedtakfattet = false, datoFattet = null, fattetVedtakEnhet = null, vedtakstatus = :vedtakstatus 
+                datoFattet = null, fattetVedtakEnhet = null, vedtakstatus = :vedtakstatus 
             WHERE behandlingId = :behandlingId
             """,
             params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),

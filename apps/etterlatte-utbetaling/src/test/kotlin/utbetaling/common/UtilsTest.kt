@@ -17,7 +17,7 @@ internal class UtilsTest {
         val statiskKlokke = Instant.parse("2022-01-01T21:14:29.4839104Z").fixedNorskTid()
         val midnatt = tidspunktMidnattIdag(statiskKlokke)
 
-        assertEquals("2021-12-31T23:00:00Z", midnatt.instant.toString())
+        assertEquals("2021-12-31T23:00:00Z", midnatt.toString())
     }
 
     @Test
@@ -25,7 +25,7 @@ internal class UtilsTest {
         val statiskKlokke = Instant.parse("2022-06-01T21:14:29.4839104Z").fixedNorskTid()
         val midnatt = tidspunktMidnattIdag(statiskKlokke)
 
-        assertEquals("2022-05-31T22:00:00Z", midnatt.instant.toString())
+        assertEquals("2022-05-31T22:00:00Z", midnatt.toString())
     }
 
     @Test

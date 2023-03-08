@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.person.Person
-import java.time.Instant
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDateTime
 import java.util.*
 
@@ -19,8 +19,8 @@ data class DetaljertBehandlingDto(
     val sakType: SakType,
     val gyldighetsprøving: GyldighetsResultat?,
     val saksbehandlerId: String?,
-    val datoFattet: Instant?,
-    val datoattestert: Instant?,
+    val datoFattet: Tidspunkt?,
+    val datoattestert: Tidspunkt?,
     val attestant: String?,
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: Virkningstidspunkt?,

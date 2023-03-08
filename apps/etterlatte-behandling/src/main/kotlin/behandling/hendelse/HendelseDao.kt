@@ -4,13 +4,13 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.sql.Timestamp
 import java.sql.Types
 import java.util.*
 
@@ -124,8 +124,7 @@ class HendelseDao(private val connection: () -> Connection) {
     }
 }
 
-fun PreparedStatement.setTidspunkt(index: Int, value: Tidspunkt?) =
-    setTimestamp(index, value?.instant?.let(Timestamp::from))
+fun PreparedStatement.setTidspunkt(index: Int, value: Tidspunkt?) = setTimestamp(index, value?.toTimestamp())
 
 fun PreparedStatement.setLong(index: Int, value: Long?) =
     if (value == null) setNull(index, Types.BIGINT) else setLong(3, value)

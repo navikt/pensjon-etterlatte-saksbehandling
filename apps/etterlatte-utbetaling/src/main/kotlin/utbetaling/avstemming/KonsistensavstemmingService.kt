@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
@@ -16,7 +17,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -79,7 +79,7 @@ class KonsistensavstemmingService(
          * Inspirasjon og takk rettes mot su-se-bakover's implementasjon av tilsvarende
          */
         val loependeUtbetalinger: List<OppdragForKonsistensavstemming> = relevanteUtbetalinger
-            .filter { it.opprettet <= registrertFoerTom.instant } // 1
+            .filter { it.opprettet <= registrertFoerTom } // 1
             .groupBy { it.sakId } // 2
             .mapValues { entry -> // 3
                 entry.value.map { utbetaling ->
@@ -132,7 +132,7 @@ class KonsistensavstemmingService(
         return Konsistensavstemming(
             id = UUIDBase64(),
             sakType = saktype,
-            opprettet = Tidspunkt(instant = Instant.now()),
+            opprettet = Tidspunkt.now(),
             avstemmingsdata = null,
             loependeFraOgMed = loependeYtelseFom,
             opprettetTilOgMed = registrertFoerTom,
@@ -184,7 +184,7 @@ class KonsistensavstemmingService(
 fun gjeldendeLinjerForEnDato(utbetalingslinjer: List<Utbetalingslinje>, dato: LocalDate): List<Utbetalingslinje> {
     val linjerSomErOpprettetOgIkkeAvsluttetPaaDato = utbetalingslinjer
         .filter {
-            it.opprettet.instant <= dato.midnattNorskTid().toInstant()
+            it.opprettet <= dato.midnattNorskTid().toTidspunkt()
         } // 1
         .filter { (it.periode.til ?: dato) >= dato } // 2
 

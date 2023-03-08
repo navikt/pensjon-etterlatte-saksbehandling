@@ -34,7 +34,7 @@ class OppgaveDao(private val connection: () -> Connection) {
                 |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE ((adressebeskyttelse = ?) OR (adressebeskyttelse = ?)) 
-                | AND status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
+                |AND status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
                 """.trimMargin()
             )
             stmt.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
@@ -71,7 +71,8 @@ class OppgaveDao(private val connection: () -> Connection) {
                 |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
-                |AND ((adressebeskyttelse != ?) OR (adressebeskyttelse != ?)) 
+                |AND adressebeskyttelse is null OR 
+                |(adressebeskyttelse is NOT NULL AND (adressebeskyttelse != ? AND adressebeskyttelse != ?))
                 """.trimMargin()
             )
             stmt.setArray(1, createArrayOf("text", statuser.toTypedArray()))

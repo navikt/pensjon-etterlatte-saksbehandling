@@ -139,13 +139,14 @@ internal class OppgaveDaoTest {
         val alleBehandlingsStatuser = BehandlingStatus.values().asList()
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
         assertEquals(1, oppgaver.size)
+
         val strengtFortroligOppgaver = oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(
             alleBehandlingsStatuser
         )
         assertEquals(1, strengtFortroligOppgaver.size)
 
         sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
-        assertEquals(1, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
+        assertEquals(2, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
         assertEquals(
             0,
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(alleBehandlingsStatuser).size

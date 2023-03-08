@@ -29,12 +29,12 @@ spec:
     initialDelay: 7
     failureThreshold: 10
     periodSeconds: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 7
     failureThreshold: 10
     periodSeconds: 5
-    path: /isready
+    path: /health/isready
   prometheus:
     enabled: true
     path: /metrics

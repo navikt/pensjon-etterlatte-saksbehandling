@@ -80,8 +80,8 @@ class OppgaveDao(private val connection: () -> Connection) {
             stmt.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
             stmt.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
             return stmt.executeQuery().toList {
-                val mottattDato = getTimestamp("soeknad_mottatt_dato")?.tilZonedDateTime()
-                    ?: getTimestamp("behandling_opprettet")?.tilZonedDateTime()
+                val mottattDato = getTidspunkt("soeknad_mottatt_dato")
+                    ?: getTidspunkt("behandling_opprettet")
                     ?: throw IllegalStateException(
                         "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
                     )

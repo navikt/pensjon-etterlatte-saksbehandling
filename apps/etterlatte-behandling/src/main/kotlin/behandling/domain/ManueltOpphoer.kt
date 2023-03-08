@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class ManueltOpphoer(
     override val id: UUID,
@@ -26,24 +26,6 @@ data class ManueltOpphoer(
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER
 
-    constructor(
-        sak: Sak,
-        persongalleri: Persongalleri,
-        opphoerAarsaker: List<ManueltOpphoerAarsak>,
-        fritekstAarsak: String?,
-        virkningstidspunkt: Virkningstidspunkt?
-    ) : this(
-        id = UUID.randomUUID(),
-        sak = sak,
-        behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-        sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-        status = BehandlingStatus.OPPRETTET,
-        persongalleri = persongalleri,
-        opphoerAarsaker = opphoerAarsaker,
-        fritekstAarsak = fritekstAarsak,
-        virkningstidspunkt = virkningstidspunkt
-    )
-
     private val erFyltUt: Boolean
         get() {
             return (virkningstidspunkt != null)
@@ -55,23 +37,13 @@ data class ManueltOpphoer(
     override val vilkaarUtfall: VilkaarsvurderingUtfall?
         get() = null
 
-    override fun tilBeregnet(): ManueltOpphoer = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.OPPRETTET,
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.RETURNERT
-        )
-    ) {
-        endreTilStatus(BehandlingStatus.BEREGNET)
-    }
-
     override fun tilFattetVedtak(): ManueltOpphoer {
         if (!erFyltUt) {
             logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisTilstandEr(listOf(BehandlingStatus.BEREGNET, BehandlingStatus.RETURNERT)) {
+        return hvisTilstandEr(listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.RETURNERT)) {
             endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
         }
     }

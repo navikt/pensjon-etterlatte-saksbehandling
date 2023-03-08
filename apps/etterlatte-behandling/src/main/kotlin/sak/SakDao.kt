@@ -75,7 +75,7 @@ class SakDao(private val connection: () -> Connection) {
                 """.trimIndent()
             )
             statement.setBoolean(1, skjermet)
-            statement.setArray(2, createArrayOf("bigserial", sakIder.toTypedArray()))
+            statement.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
             statement.executeUpdate()
         }
     }

@@ -8,6 +8,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { Behandlingsoppsummering } from '~components/behandling/attestering/oppsummering/oppsummering'
 import { Attestering } from '~components/behandling/attestering/attestering/attestering'
 import { IBeslutning } from '~components/behandling/attestering/types'
+import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 
 export const SideMeny = () => {
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
@@ -15,8 +16,9 @@ export const SideMeny = () => {
   const [collapsed, setCollapsed] = useState(false)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
 
-  const behandlingsinfo = {
+  const behandlingsinfo: IBehandlingInfo = {
     type: behandling.behandlingType,
+    sakType: behandling.sakType,
     status: behandling.status,
     saksbehandler: behandling.saksbehandlerId,
     attestant: behandling.attestant,

@@ -3,6 +3,9 @@ package statistikk.jobs
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.klokke
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
@@ -12,12 +15,8 @@ import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Month
 import java.time.YearMonth
-import java.time.ZoneId
-import java.time.ZoneOffset
 
 class MaanedligStatistikkJobTest {
-
-    private val norskTidssone = ZoneId.of("Europe/Oslo")
 
     @Test
     fun `run stopper hvis den ikke er leader`() {
@@ -28,7 +27,7 @@ class MaanedligStatistikkJobTest {
         val sut = MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
             leaderElection = leaderElection,
             statistikkService = statistikkService,
-            clock = Clock.systemUTC()
+            clock = klokke()
         )
 
         sut.run()
@@ -46,13 +45,12 @@ class MaanedligStatistikkJobTest {
         val statistikkService: StatistikkService = mockk()
         every { statistikkService.statistikkProdusertForMaaned(maanedProdusert) } returns KjoertStatus.INGEN_FEIL
 
-        val clockMaanedEtterProdusert: Clock = Clock.fixed(
+        val clockMaanedEtterProdusert: Clock =
             maanedProdusert.plusMonths(1)
                 .atDay(1)
                 .atTime(1, 1)
-                .toInstant(ZoneOffset.UTC),
-            norskTidssone
-        )
+                .toNorskTidspunkt()
+                .fixedNorskTid()
 
         val sut = MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
             leaderElection = leaderElection,
@@ -75,13 +73,12 @@ class MaanedligStatistikkJobTest {
         val statistikkService: StatistikkService = mockk()
         every { statistikkService.statistikkProdusertForMaaned(maanedFeil) } returns KjoertStatus.FEIL
 
-        val clockMaanedEtterProdusert: Clock = Clock.fixed(
+        val clockMaanedEtterProdusert: Clock =
             maanedFeil.plusMonths(1)
                 .atDay(1)
                 .atTime(1, 1)
-                .toInstant(ZoneOffset.UTC),
-            norskTidssone
-        )
+                .toNorskTidspunkt()
+                .fixedNorskTid()
 
         val sut = MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
             leaderElection = leaderElection,
@@ -107,13 +104,12 @@ class MaanedligStatistikkJobTest {
         every { statistikkService.produserStoenadStatistikkForMaaned(maanedIkkeKjoert) } returns mockMaanedStatistikk
         every { statistikkService.lagreMaanedsstatistikk(mockMaanedStatistikk) } returns Unit
 
-        val clockMaanedEtterProdusert: Clock = Clock.fixed(
+        val clockMaanedEtterProdusert: Clock =
             maanedIkkeKjoert.plusMonths(1)
                 .atDay(1)
                 .atTime(1, 1)
-                .toInstant(ZoneOffset.UTC),
-            norskTidssone
-        )
+                .toNorskTidspunkt()
+                .fixedNorskTid()
 
         val sut = MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
             leaderElection = leaderElection,

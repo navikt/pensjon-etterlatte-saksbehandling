@@ -396,10 +396,10 @@
   resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.4.0.tgz#779ef27cb0b5108da571b17407ae5b949d13efd8"
   integrity sha512-xhCwcejE9/6uGlvhKA5YGJXyTFmAN5J4jEr/M/nmib2dXZTNAILpY8vExGrs05BqAnsuYVqUy+2TBSwv5irhWA==
 
-"@navikt/ds-icons@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-icons/-/ds-icons-2.4.0.tgz#3878e7930fe35a9a569204a07a0b5514fe9971b4"
-  integrity sha512-FEEX0qFkaYHT5SMHkRcnX+pSeDxPALbf+GcmJI0k0mshb2bE336PsfM3peAECr+PQV/2axjgMl448I1sAll3Sg==
+"@navikt/ds-icons@^2.4.0", "@navikt/ds-icons@^2.6.2":
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-icons/-/ds-icons-2.6.2.tgz#6ee4a119cfb0c0640ede5cd44925cabef5326564"
+  integrity sha512-KcKm7PCMR8bmYi4DlErnc7uRshDE50URKPvrtgpzkaDe4ETY9TDe3wMTtkn4/GiP0toMHyzPC5PlsAemo4/17Q==
 
 "@navikt/ds-react-internal@^2.4.0":
   version "2.4.0"
@@ -411,13 +411,13 @@
     clsx "^1.1.1"
     copy-to-clipboard "^3.3.1"
 
-"@navikt/ds-react@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-2.4.0.tgz#f5703e68829b27994805860026c323054d46591f"
-  integrity sha512-H9ou7/bb2D/El3BqgpGETVnkSFDEuwKJ5QamXoWNUL+UaM5hqv3Mgri9UcA19eqiPW5dwy84+Dz1mYHnn09ruA==
+"@navikt/ds-react@^2.4.0", "@navikt/ds-react@^2.6.2":
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-2.6.2.tgz#8d621b8e125218e67695520d6ece6fa21db8f271"
+  integrity sha512-oGMh6DEhRgqx01wvlbJStaIlEMOB9sT/gyHkgUYIJjfEN4UG3HBQ+U/d8KuYAkJnUXRoJfQ0jBFfTKhf+0/Gsg==
   dependencies:
     "@floating-ui/react" "0.17.0"
-    "@navikt/ds-icons" "^2.4.0"
+    "@navikt/ds-icons" "^2.6.2"
     "@radix-ui/react-tabs" "1.0.0"
     "@radix-ui/react-toggle-group" "1.0.0"
     clsx "^1.2.1"

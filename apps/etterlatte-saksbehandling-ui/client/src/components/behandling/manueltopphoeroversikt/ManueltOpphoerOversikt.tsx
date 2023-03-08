@@ -1,11 +1,10 @@
 import { Content } from '~shared/styled'
-import { Button, Heading } from '@navikt/ds-react'
+import { Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { Infoboks } from '~components/behandling/soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { useEffect, useState } from 'react'
-import { opprettEllerEndreBeregning } from '~shared/api/beregning'
-import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { useEffect } from 'react'
+import { useAppSelector } from '~store/Store'
 import { Opphoersgrunn, OVERSETTELSER_OPPHOERSGRUNNER } from '~components/person/ManueltOpphoerModal'
 import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
@@ -15,7 +14,8 @@ import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
-import { lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
@@ -44,24 +44,7 @@ const useManueltOpphoerDetaljer = (behandlingId?: string) => {
 
 export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
-  const [loadingBeregning, setLoadingBeregning] = useState(false)
-  const behandlingRoutes = useBehandlingRoutes()
-  const [feilmelding, setFeilmelding] = useState('')
   const manueltOpphoerDetaljer = useManueltOpphoerDetaljer(behandling.id)
-
-  async function lagBeregningOgGaaVidere() {
-    setLoadingBeregning(true)
-    setFeilmelding('')
-    try {
-      await lagreSoeskenMedIBeregning({ behandlingsId: behandling.id, soeskenMedIBeregning: [] })
-      await opprettEllerEndreBeregning(behandling.id)
-      behandlingRoutes.next()
-    } catch (e) {
-      setFeilmelding('Kunne ikke opprette beregning for behandlingen. Prøv igjen senere.')
-    } finally {
-      setLoadingBeregning(false)
-    }
-  }
   const soeker = behandling.søker
 
   return (
@@ -93,7 +76,9 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
           )}
           {mapApiResult(
             manueltOpphoerDetaljer,
-            <Spinner visible label="Henter detaljer om det manuelle opphøret" />,
+            () => (
+              <Spinner visible label="Henter detaljer om det manuelle opphøret" />
+            ),
             () => (
               <MainSection>
                 <Feilmelding>Kunne ikke hente ut detaljer om manuelt opphør</Feilmelding>
@@ -130,11 +115,8 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
         </SectionSpacing>
       </MainSection>
       <BehandlingHandlingKnapper>
-        <Button variant="primary" size="medium" loading={loadingBeregning} onClick={lagBeregningOgGaaVidere}>
-          Se over beregning
-        </Button>
+        {hentBehandlesFraStatus(behandling.status) && <SendTilAttesteringModal />}
       </BehandlingHandlingKnapper>
-      {feilmelding.length > 0 && <Feilmelding>{feilmelding}</Feilmelding>}
     </Content>
   )
 }

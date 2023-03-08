@@ -11,7 +11,6 @@ import {
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 import { Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
@@ -39,8 +38,8 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       {fattetDato && <Tekst>{fattetDato}</Tekst>}
       <TagList>
         <li>
-          <Tag variant={tagColors[ISaksType.BARNEPENSJON]} size={'small'}>
-            {formaterSakstype(ISaksType.BARNEPENSJON)}
+          <Tag variant={tagColors[behandlingsInfo.sakType]} size={'small'}>
+            {formaterSakstype(behandlingsInfo.sakType)}
           </Tag>
         </li>
         <li>

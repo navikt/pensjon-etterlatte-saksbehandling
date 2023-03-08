@@ -25,7 +25,7 @@ class KafkaConsumerEgneAnsatte(
             consumer.subscribe(listOf(skjermingTopic))
             logger.info("KafkaConsumerEgneAnsatte startet")
             while (true) {
-                val meldinger: ConsumerRecords<String, String> = consumer.poll(Duration.ofSeconds(10L))
+                val meldinger: ConsumerRecords<String, String> = consumer.poll(Duration.ofSeconds(1L))
                 meldinger.forEach {
                     behandlingKlient.haandterHendelse(it)
                 }

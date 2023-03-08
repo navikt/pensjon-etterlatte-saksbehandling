@@ -36,23 +36,21 @@ class Server {
         }
     )
     fun run() {
-        StartEgenAnsattLytter()
+        val env = System.getenv().toMutableMap()
+        startEgenAnsattLytter(env, ConfigFactory.load())
         setReady().also { engine.start(true) }
     }
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-fun StartEgenAnsattLytter() {
-    val env = System.getenv().toMutableMap()
-
+fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
     val logger = LoggerFactory.getLogger(Application::class.java)
-    val config: Config = ConfigFactory.load()
 
     val behandlingHttpClient = httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("pdl.azure.scope")
+        azureAppScope = config.getString("behandling.azure.scope")
     )
     val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient)
 

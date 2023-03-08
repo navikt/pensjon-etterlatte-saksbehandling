@@ -1,7 +1,6 @@
 package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
-import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.Beregningstall
@@ -34,8 +33,7 @@ import java.util.*
 
 class BeregnBarnepensjonService(
     private val grunnlagKlient: GrunnlagKlient,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
-    private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -48,23 +46,23 @@ class BeregnBarnepensjonService(
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.OMREGNING ->
+            BehandlingType.OMREGNING ->
                 beregnBarnepensjon(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
-            BehandlingType.REVURDERING -> {
+            BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, bruker)
                     .resultat?.utfall
-                    ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
+                    ?: throw Exception("Forventa å ha resultat for behandling ${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.OPPFYLT ->
                         beregnBarnepensjon(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
-                        opphoer(behandling.id, grunnlag, virkningstidspunkt)
+                        throw Exception("Beregning for utfall $vilkaarsvurderingUtfall er ikke støttet")
                 }
             }
 
-            BehandlingType.MANUELT_OPPHOER -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
+            else -> throw Exception("Beregning for $behandlingType er ikke støttet")
         }
     }
 
@@ -116,30 +114,6 @@ class BeregnBarnepensjonService(
             is RegelkjoeringResultat.UgyldigPeriode ->
                 throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }
-    }
-
-    private fun opphoer(
-        behandlingId: UUID,
-        grunnlag: Grunnlag,
-        virkningstidspunkt: YearMonth
-    ): Beregning {
-        val grunnbeloep = grunnbeloepRepository.hentGjeldendeGrunnbeloep(virkningstidspunkt)
-
-        return beregning(
-            behandlingId = behandlingId,
-            grunnlagMetadata = grunnlag.metadata,
-            beregningsperioder = listOf(
-                Beregningsperiode(
-                    datoFOM = virkningstidspunkt,
-                    datoTOM = null,
-                    utbetaltBeloep = 0,
-                    soeskenFlokk = null,
-                    grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
-                    grunnbelop = grunnbeloep.grunnbeloep,
-                    trygdetid = 0
-                )
-            )
-        )
     }
 
     private fun beregning(

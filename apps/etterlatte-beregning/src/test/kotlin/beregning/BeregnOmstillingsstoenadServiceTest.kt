@@ -17,12 +17,17 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.UUID.randomUUID
 
 internal class BeregnOmstillingsstoenadServiceTest {
 
-    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
+    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient> {
+        coEvery { hentVilkaarsvurdering(any(), any()) } returns mockk {
+            every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
+        }
+    }
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregnOmstillingsstoenadService = BeregnOmstillingsstoenadService(
         grunnlagKlient = grunnlagKlient,
@@ -92,61 +97,27 @@ internal class BeregnOmstillingsstoenadServiceTest {
     }
 
     @Test
-    fun `skal opphoere ved revurdering og vilkaarsvurdering ikke oppfylt`() {
+    fun `skal kaste exception ved revurdering og vilkaarsvurdering ikke oppfylt`() {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns mockk {
             every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
         }
 
         runBlocking {
-            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.OMS
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe 0
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    trygdetid shouldBe 0
-                }
+            assertThrows<Exception> {
+                beregnOmstillingsstoenadService.beregn(behandling, bruker)
             }
         }
     }
 
     @Test
-    fun `skal sette beloep til 0 ved manuelt opphoer`() {
+    fun `skal kaste exception ved behandlingtype manuelt opphoer`() {
         val behandling = mockBehandling(BehandlingType.MANUELT_OPPHOER)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
-            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.OMS
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe 0
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe null
-                    trygdetid shouldBe 0
-                }
+            assertThrows<Exception> {
+                beregnOmstillingsstoenadService.beregn(behandling, bruker)
             }
         }
     }

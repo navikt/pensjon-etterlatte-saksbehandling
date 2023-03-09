@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.klokke
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.utbetaling.common.tidspunktMidnattIdag
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -22,7 +22,7 @@ internal class GrensesnittavstemmingServiceTest {
     private val avstemmingDao: AvstemmingDao = mockk()
     private val utbetalingDao: UtbetalingDao = mockk()
     private val avstemmingsdataSender: AvstemmingsdataSender = mockk()
-    private val clock: Clock = klokke()
+    private val clock: Clock = utcKlokke()
 
     private val grensesnittavstemmingService: GrensesnittsavstemmingService = GrensesnittsavstemmingService(
         avstemmingsdataSender = avstemmingsdataSender,

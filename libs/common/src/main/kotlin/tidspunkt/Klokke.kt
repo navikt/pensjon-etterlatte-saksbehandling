@@ -2,8 +2,9 @@ package no.nav.etterlatte.libs.common.tidspunkt
 
 import java.time.Clock
 
-fun klokke(): Clock = Clock.systemUTC()
+fun utcKlokke(): Clock = Clock.systemUTC()
+fun norskKlokke(): Clock = utcKlokke().norskKlokke()
 
 fun Clock.norskKlokke(): Clock = withZone(norskTidssone)
 
-fun Tidspunkt.fixedNorskTid() = Clock.fixed(this.instant, norskTidssone)
+fun Tidspunkt.fixedNorskTid(): Clock = Clock.fixed(this.instant, norskTidssone)

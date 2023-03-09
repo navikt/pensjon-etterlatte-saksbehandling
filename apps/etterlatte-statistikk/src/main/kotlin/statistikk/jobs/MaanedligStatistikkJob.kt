@@ -1,8 +1,8 @@
 package no.nav.etterlatte.statistikk.jobs
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.service.StatistikkService
@@ -35,7 +35,7 @@ class MaanedligStatistikkJob(
                 ProduserOgLagreMaanedligStatistikk(
                     leaderElection = leaderElection,
                     statistikkService = statistikkService,
-                    clock = klokke().norskKlokke()
+                    clock = utcKlokke().norskKlokke()
                 ).run()
             } catch (e: Throwable) {
                 logger.error("Kunne ikke kjøre jobb for produsering av månedlig stønadsstatistikk på grunn av feil", e)

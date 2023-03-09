@@ -1,6 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.config
 
-import no.nav.etterlatte.libs.common.tidspunkt.klokke
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
@@ -12,7 +12,7 @@ class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
 ) {
 
-    var clock = klokke()
+    var clock = utcKlokke()
 
     var dataSource = DataSourceBuilder.createDataSource(
         jdbcUrl = jdbcUrl(

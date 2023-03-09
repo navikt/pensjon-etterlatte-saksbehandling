@@ -1,7 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -401,7 +400,7 @@ internal class UtbetalingDaoIntegrationTest {
                 vedtakId = 2L,
                 utbetalingslinjeId = 2L,
                 periodeFra = LocalDate.now().plusDays(1),
-                opprettet = LocalDate.now().plusDays(1).midnattNorskTid().toTidspunkt()
+                opprettet = Tidspunkt.ofNorskTidssone(LocalDate.now().plusDays(1), LocalTime.MIDNIGHT)
             )
         val oppdrag2 = oppdrag(utbetaling2)
         val utbetalingId3 = UUID.randomUUID()

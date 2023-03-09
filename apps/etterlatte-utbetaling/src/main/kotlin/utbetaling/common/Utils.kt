@@ -1,10 +1,10 @@
 package no.nav.etterlatte.utbetaling.common
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import java.time.Clock
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
@@ -42,10 +42,11 @@ fun forsteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atDay(1)
 fun sisteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atEndOfMonth()
 
 fun LocalDate.toXMLDate(): XMLGregorianCalendar {
-    return DatatypeFactory.newInstance()
-        .newXMLGregorianCalendar(GregorianCalendar.from(midnattNorskTid())).apply {
-            timezone = DatatypeConstants.FIELD_UNDEFINED
-        }
+    return DatatypeFactory.newInstance().newXMLGregorianCalendar(
+        LocalDateTime.of(this, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME)
+    ).apply {
+        timezone = DatatypeConstants.FIELD_UNDEFINED
+    }
 }
 
 fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30).let { UUID30(it) }

@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
+import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException
 import no.nav.etterlatte.readSoknad
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -188,6 +189,48 @@ internal class FordelerServiceTest {
         val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
 
         assertTrue(resultat is FordelerResultat.IkkeGyldigForBehandling)
+    }
+
+    @Test
+    fun `returnerer UgyldigHendelse hvis en av barn, avdød, gjenlevende ikke finnes i PDL`() {
+        val fordelerService = FordelerService(
+            FordelerKriterier(),
+            pdlTjenesterKlient,
+            fordelerRepo,
+            maxFordelingTilDoffen = 10
+        )
+        every { fordelerRepo.finnFordeling(any()) } returns null
+        every { fordelerRepo.lagreFordeling(any()) } returns Unit
+
+        val barnFnr = Foedselsnummer.of(FNR_1)
+        val avdoedFnr = Foedselsnummer.of(FNR_2)
+        val etterlattFnr = Foedselsnummer.of(FNR_3)
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
+                foreldre = listOf(etterlattFnr, avdoedFnr),
+                barn = null
+            )
+        )
+
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr })
+        } throws PersonFinnesIkkeException(
+            avdoedFnr
+        )
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr),
+                foreldre = null,
+                barn = listOf(barnFnr)
+            )
+        )
+        val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
+        assertTrue(resultat is FordelerResultat.UgyldigHendelse)
     }
 
     private fun fordelerEvent(hendelseGyldigTil: OffsetDateTime = OffsetDateTime.now().plusDays(1)) = FordelerEvent(

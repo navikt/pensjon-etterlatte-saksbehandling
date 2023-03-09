@@ -12,10 +12,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
 
 internal class Vilkaarsvurder(
@@ -29,6 +29,8 @@ internal class Vilkaarsvurder(
         River(rapidsConnection).apply {
             eventName(VILKAARSVURDER)
             validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
             correlationId()
         }.register(this)
     }
@@ -36,16 +38,15 @@ internal class Vilkaarsvurder(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             withFeilhaandtering(packet, context, VILKAARSVURDER) {
-                val sakId = packet.sakId
-                logger.info("Prøver å vilkårsvurdere for sak $sakId")
-
                 val behandlingId = packet.behandlingId
                 val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
 
                 vilkaarsvurderingService.kopierForrigeVilkaarsvurdering(behandlingId, behandlingViOmregnerFra)
                 packet.eventName = EventNames.BEREGN
                 context.publish(packet.toJson())
-                logger.info("Vilkaarsvurdert ferdig for sak $sakId og melding x ble sendt.")
+                logger.info(
+                    "Vilkaarsvurdert ferdig for behandling $behandlingId og melding beregningsmelding ble sendt."
+                )
             }
         }
 }

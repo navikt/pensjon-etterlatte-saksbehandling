@@ -2,12 +2,15 @@ package no.nav.etterlatte.pdltjenester
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.accept
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.retry
@@ -28,8 +31,16 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
-                is RetryResult.Failure -> throw it.exceptions.last()
+                is RetryResult.Failure -> {
+                    val exception = it.exceptions.last()
+                    if (exception is ClientRequestException && exception.response.status == HttpStatusCode.NotFound) {
+                        throw PersonFinnesIkkeException(hentPersonRequest.foedselsnummer)
+                    }
+                    throw it.exceptions.last()
+                }
             }
         }
     }
 }
+
+data class PersonFinnesIkkeException(val fnr: Foedselsnummer) : Exception()

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
+import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException
 import java.time.Clock
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -38,11 +39,15 @@ class FordelerService(
                 "Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})"
             )
         } else {
-            fordelSoekand(event).let {
-                when (it.fordeltTil) {
-                    Vedtaksloesning.DOFFEN -> GyldigForBehandling
-                    Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
+            try {
+                fordelSoekand(event).let {
+                    when (it.fordeltTil) {
+                        Vedtaksloesning.DOFFEN -> GyldigForBehandling
+                        Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
+                    }
                 }
+            } catch (e: PersonFinnesIkkeException) {
+                UgyldigHendelse("Person fra søknaden med fnr=${e.fnr} finnes ikke i PDL")
             }
         }
     }

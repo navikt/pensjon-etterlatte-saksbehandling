@@ -2,7 +2,6 @@ package no.nav.etterlatte.fordeler
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
@@ -57,7 +56,7 @@ internal class Fordeler(
                 logger.info("Sjekker om soknad (${packet.soeknadId()}) er gyldig for fordeling")
 
                 when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
-                    is GyldigForBehandling -> {
+                    FordelerResultat.GyldigForBehandling -> {
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling")
                         context.publish(packet.leggPaaFordeltStatus(true).toJson())
                         fordelerMetricLogger.logMetricFordelt()
@@ -70,7 +69,7 @@ internal class Fordeler(
                     }
 
                     is FordelerResultat.UgyldigHendelse -> {
-                        logger.error("Avbrutt fordeling: ${resultat.message}")
+                        logger.warn("Avbrutt fordeling: ${resultat.message}")
                     }
                 }
             } catch (e: JsonMappingException) {

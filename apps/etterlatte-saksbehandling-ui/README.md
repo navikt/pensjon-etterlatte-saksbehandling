@@ -32,7 +32,7 @@ For å kjøre mot backend lokalt med docker må det være mulig å nå `host.doc
 dette i `/etc/hosts`:
 
 `127.0.0.1 host.docker.internal`
-k
+
 
 #### Variant A: Med gyldig token mot dev-gcp
 

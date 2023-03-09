@@ -3,7 +3,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.libs.common.tidspunkt.klokke
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
@@ -31,7 +31,7 @@ internal class UtbetalingServiceTest {
         oppdragSender = oppdragSender,
         utbetalingDao = utbetalingDao,
         rapidsConnection = mockk(),
-        clock = klokke()
+        clock = utcKlokke()
     )
 
     /**

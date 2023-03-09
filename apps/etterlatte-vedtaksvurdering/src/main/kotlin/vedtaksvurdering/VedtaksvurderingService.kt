@@ -10,8 +10,8 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
@@ -41,7 +41,7 @@ class VedtaksvurderingService(
     private val behandlingKlient: BehandlingKlient,
     private val sendToRapid: (String, UUID) -> Unit,
     private val saksbehandlere: Map<String, String>,
-    private val clock: Clock = klokke()
+    private val clock: Clock = utcKlokke()
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
 

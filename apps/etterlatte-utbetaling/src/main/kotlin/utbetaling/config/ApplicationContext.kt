@@ -1,8 +1,8 @@
 package no.nav.etterlatte.utbetaling.config
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -41,7 +41,7 @@ class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
     val rapidsConnection: RapidsConnection = RapidApplication.create(System.getenv().withConsumerGroupId())
 ) {
-    val clock = klokke()
+    val clock = utcKlokke()
 
     val dataSource = DataSourceBuilder.createDataSource(
         jdbcUrl = jdbcUrl(

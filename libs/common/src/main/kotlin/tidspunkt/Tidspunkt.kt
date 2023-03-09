@@ -51,9 +51,9 @@ constructor(
     companion object {
         val unit: ChronoUnit = ChronoUnit.MICROS
         val MIN = Tidspunkt(Instant.EPOCH)
-        fun now(clock: Clock = klokke()) = Tidspunkt(Instant.now(clock))
+        fun now(clock: Clock = utcKlokke()) = Tidspunkt(Instant.now(clock))
 
-        fun from(clock: Clock = klokke()) = Tidspunkt(clock.instant())
+        fun from(clock: Clock = utcKlokke()) = Tidspunkt(clock.instant())
         fun parse(text: String) = Tidspunkt(Instant.parse(text))
 
         fun ofNorskTidssone(dato: LocalDate, tid: LocalTime) =

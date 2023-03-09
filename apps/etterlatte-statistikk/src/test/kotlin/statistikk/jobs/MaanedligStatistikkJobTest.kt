@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
-import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
@@ -27,7 +27,7 @@ class MaanedligStatistikkJobTest {
         val sut = MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
             leaderElection = leaderElection,
             statistikkService = statistikkService,
-            clock = klokke()
+            clock = utcKlokke()
         )
 
         sut.run()

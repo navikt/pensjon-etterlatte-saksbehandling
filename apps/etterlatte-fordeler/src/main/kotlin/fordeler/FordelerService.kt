@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.tidspunkt.klokke
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import java.time.Clock
 import java.time.OffsetDateTime
@@ -29,7 +29,7 @@ class FordelerService(
     private val fordelerKriterier: FordelerKriterier,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val fordelerRepository: FordelerRepository,
-    private val klokke: Clock = klokke(),
+    private val klokke: Clock = utcKlokke(),
     private val maxFordelingTilDoffen: Long
 ) {
     fun sjekkGyldighetForBehandling(event: FordelerEvent): FordelerResultat = runBlocking {

@@ -17,9 +17,9 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.klokke
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -63,7 +63,7 @@ class RealFoerstegangsbehandlingService(
     private val behandlinger: BehandlingDao,
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
     private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>,
-    private val klokke: Clock = klokke()
+    private val klokke: Clock = utcKlokke()
 ) : FoerstegangsbehandlingService {
     private val logger = LoggerFactory.getLogger(RealFoerstegangsbehandlingService::class.java)
 

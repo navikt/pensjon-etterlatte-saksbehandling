@@ -16,25 +16,11 @@ on:
       - main
     paths:
       - apps/etterlatte-trygdetid/**
-      - libs/common/**
-      - libs/etterlatte-helsesjekk/**
-      - libs/etterlatte-ktor/**
-      - libs/etterlatte-database/**
-      - libs/ktor2client-onbehalfof/**
-      - libs/testdata/**
-      - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-trygdetid/**
-      - libs/common/**
-      - libs/etterlatte-helsesjekk/**
-      - libs/etterlatte-ktor/**
-      - libs/etterlatte-database/**
-      - libs/ktor2client-onbehalfof/**
-      - libs/testdata/**
-      - gradle/libs.versions.toml
 
 jobs:
   test:

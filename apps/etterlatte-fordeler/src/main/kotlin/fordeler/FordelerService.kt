@@ -40,7 +40,7 @@ class FordelerService(
             )
         } else {
             try {
-                fordelSoekand(event).let {
+                fordelSoeknad(event).let {
                     when (it.fordeltTil) {
                         Vedtaksloesning.DOFFEN -> GyldigForBehandling
                         Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
@@ -52,7 +52,7 @@ class FordelerService(
         }
     }
 
-    private fun fordelSoekand(event: FordelerEvent): Fordeling {
+    private fun fordelSoeknad(event: FordelerEvent): Fordeling {
         return finnEksisterendeFordeling(event.soeknadId) ?: nyFordeling(event).apply { lagre() }
     }
 

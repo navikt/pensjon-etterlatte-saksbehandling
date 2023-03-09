@@ -12,7 +12,7 @@ class JdbcUtilsKtTest {
         val resultSet: ResultSet = mockk()
         every {
             resultSet.next()
-        } returnsMany listOf(true, true, true, true, false, false, false, false)
+        } returnsMany listOf(true, true, true, true, false)
 
         val block: ResultSet.() -> String? = mockk()
         every { resultSet.block() } returnsMany listOf("1", "2", null, "4")

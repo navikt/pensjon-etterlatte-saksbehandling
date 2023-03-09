@@ -162,6 +162,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
     companion object {
         val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, 1)
         const val GRUNNBELOEP_JAN_23: Int = 9290
-        const val OMS_BELOEP_JAN_23: Int = 250823
+        const val OMS_BELOEP_JAN_23: Int = 20902
     }
 }

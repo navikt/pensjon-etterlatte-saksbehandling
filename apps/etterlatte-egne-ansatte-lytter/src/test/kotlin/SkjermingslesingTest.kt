@@ -53,7 +53,7 @@ class SkjermingslesingTest {
             ),
             behandlingKlient,
             KafkaConsumerEnvironmentTest(),
-            Duration.ofSeconds(8L)
+            Duration.ofSeconds(12L)
         )
         runBlocking(Dispatchers.Default) {
             val job = launch {

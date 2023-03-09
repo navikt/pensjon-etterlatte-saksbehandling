@@ -5,27 +5,30 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.statistikk.domain.Beregning
+import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BeregningKlient {
-    suspend fun hentBeregningForBehandling(behandlingId: UUID): Beregning
+    suspend fun hentBeregningForBehandling(behandlingId: UUID): Beregning?
 }
 
 class BeregningKlientImpl(
     private val beregningHttpClient: HttpClient,
     private val beregningUrl: String
 ) : BeregningKlient {
-    override suspend fun hentBeregningForBehandling(behandlingId: UUID): Beregning {
+
+    val logger = LoggerFactory.getLogger(this.javaClass)
+    override suspend fun hentBeregningForBehandling(behandlingId: UUID): Beregning? {
         return try {
             beregningHttpClient.get("$beregningUrl/api/beregning/$behandlingId")
                 .body<BeregningDTO>()
                 .let { Beregning.fraBeregningDTO(it) }
         } catch (e: Exception) {
-            throw KunneIkkeHenteFraBeregning(
+            logger.warn(
                 "Kunne ikke hente beregningen for behandlingen med id=$behandlingId " +
-                    "fra beregning",
-                e
+                    "fra beregning"
             )
+            null
         }
     }
 }

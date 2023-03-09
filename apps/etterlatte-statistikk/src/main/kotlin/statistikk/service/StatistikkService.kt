@@ -72,7 +72,7 @@ class StatistikkService(
         }
     }
 
-    private fun hentBeregningForBehandling(behandlingId: UUID): Beregning {
+    private fun hentBeregningForBehandling(behandlingId: UUID): Beregning? {
         return runBlocking {
             beregningKlient.hentBeregningForBehandling(behandlingId)
         }

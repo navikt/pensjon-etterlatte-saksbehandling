@@ -13,14 +13,15 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
 
-fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
+fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlient: BehandlingKlient) {
     route("/api/vedtak") {
         val logger = application.log
 
         get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
                 val vedtak = service.hentVedtak(behandlingId)
                 if (vedtak == null) {
@@ -32,7 +33,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
         }
 
         get("/{$BEHANDLINGSID_CALL_PARAMETER}/sammendrag") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
                 val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendrag()
                 if (vedtaksresultat == null) {
@@ -44,7 +45,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
         }
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/upsert") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
                 val nyttVedtak = service.opprettEllerOppdaterVedtak(behandlingId, bruker)
                 call.respond(nyttVedtak.toDto())
@@ -52,7 +53,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
         }
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/fattvedtak") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak = service.fattVedtak(behandlingId, bruker)
 
@@ -61,7 +62,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
         }
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/attester") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 val attestert = service.attesterVedtak(behandlingId, bruker)
 
@@ -70,7 +71,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService) {
         }
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/underkjenn") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Underkjenner vedtak for behandling $behandlingId")
                 val begrunnelse = call.receive<UnderkjennVedtakDto>()
                 val underkjentVedtak = service.underkjennVedtak(

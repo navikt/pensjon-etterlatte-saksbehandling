@@ -29,6 +29,7 @@ import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
@@ -64,6 +65,7 @@ class ApplicationBuilder {
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())
+    private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val sakOgBehandlingService = SakOgBehandlingService(
         vedtakKlient,
         grunnlagKlient,
@@ -98,8 +100,8 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, brregService)
-                    vedtaksbrevRoute(vedtaksbrevService)
+                    brevRoute(brevService, brregService, behandlingKlient)
+                    vedtaksbrevRoute(vedtaksbrevService, behandlingKlient)
                     dokumentRoute(journalpostService)
                 }
             }

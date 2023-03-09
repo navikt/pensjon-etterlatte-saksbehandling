@@ -44,7 +44,7 @@ class ApplicationBuilder {
     private val rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
         .withKtorModule {
             restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                grunnlagRoute(grunnlagService)
+                grunnlagRoute(grunnlagService, behandlingKlient)
             }
         }
         .build().apply {

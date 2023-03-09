@@ -9,10 +9,10 @@ import rapidsandrivers.RapidsAndRiversAppBuilder
 class AppBuilder(props: Map<String, String>) : RapidsAndRiversAppBuilder(props) {
     private val config: Config = ConfigFactory.load()
     private val vilkaarsvurderingHttpKlient = httpClientClientCredentials(
-        azureAppClientId = config.getString("pdl.client_id"),
-        azureAppJwk = config.getString("pdl.client_jwk"),
-        azureAppWellKnownUrl = config.getString("pdl.well_known_url"),
-        azureAppScope = config.getString("pdl.outbound")
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("vilkaarsvurdering.azure.scope")
     )
     private val vilkaarsvurderingUrl = requireNotNull(props["ETTERLATTE_VILKAARSVURDERING_URL"])
 

@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.regulering.ReguleringFactory
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingMedGrunnlagsopplysninger
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -38,7 +39,8 @@ interface GenerellBehandlingService {
     fun hentBehandlinger(): List<Behandling>
     fun hentBehandling(behandlingId: UUID): Behandling?
     fun hentBehandlingstype(behandlingId: UUID): BehandlingType?
-    fun hentBehandlingerISak(sakid: Long): List<Behandling>
+    fun hentBehandlingerISak(sakId: Long): List<Behandling>
+    fun hentSenestIverksatteBehandling(sakId: Long): Behandling?
     fun slettBehandlingerISak(sak: Long)
     fun avbrytBehandling(behandlingId: UUID, saksbehandler: String)
     fun registrerVedtakHendelse(
@@ -99,10 +101,18 @@ class RealGenerellBehandlingService(
         return inTransaction { behandlinger.hentBehandlingType(behandlingId) }
     }
 
-    override fun hentBehandlingerISak(sakid: Long): List<Behandling> {
+    override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
         return inTransaction {
-            behandlinger.alleBehandlingerISak(sakid)
+            behandlinger.alleBehandlingerISak(sakId)
         }
+    }
+
+    override fun hentSenestIverksatteBehandling(sakId: Long): Behandling? {
+        val alleBehandlinger = inTransaction { behandlinger.alleBehandlingerISak(sakId) }
+
+        return alleBehandlinger
+            .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
+            .maxByOrNull { it.behandlingOpprettet }
     }
 
     override fun slettBehandlingerISak(sak: Long) {

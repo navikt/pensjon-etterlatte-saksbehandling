@@ -7,5 +7,5 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 
 fun main() = init(
     { AppBuilder(it) },
-    { rc: RapidsConnection, ab: AppBuilder -> Vilkaarsvurder(rc, ab.lagVedtakKlient()) }
+    { rc: RapidsConnection, ab: AppBuilder -> Vilkaarsvurder(rc, ab.lagVilkaarsvurderingKlient()) }
 )

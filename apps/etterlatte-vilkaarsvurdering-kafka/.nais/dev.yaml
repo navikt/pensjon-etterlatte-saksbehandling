@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: etterlatte-vedtaksvurdering-kafka
+  name: etterlatte-vilkaarsvurdering-kafka
   namespace: etterlatte
   labels:
     team: etterlatte
@@ -31,11 +31,11 @@ spec:
       value: etterlatte.dodsmelding
     - name: KAFKA_RESET_POLICY
       value: earliest
-    - name: VEDTAK_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
-    - name: ETTERLATTE_VEDTAK_URL
-      value: http://etterlatte-vedtaksvurdering
+    - name: VILKAARSVURDERING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-vilkaarsvurdering

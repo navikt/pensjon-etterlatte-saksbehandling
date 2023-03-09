@@ -33,45 +33,45 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Sjekk ut koden
+      - name: Checkout code
         uses: actions/checkout@v3
-      - name: Sett opp Node
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
-      - name: Installer klient
+      - name: Install client
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
-      - name: Installer server
+      - name: Install server
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
-      - name: Kjør tester
+      - name: Run tests
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
 
-  bygg-og-publiser:
+  build-and-publish:
     if: github.event_name != 'pull_request'
-    name: Bygg, test og publiser
+    name: Build, test and publish
     runs-on: ubuntu-latest
     steps:
-      - name: Sjekk ut koden
+      - name: Checkout code
         uses: actions/checkout@v3
-      - name: Sett opp Node
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
-      - name: Injiser kortform av byggvariabler
+      - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
-      - name: Installer og bygg klient
+      - name: Install and build client
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
-      - name: Installer og bygg server
+      - name: Install and build server
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
-      - name: Kjør tester
+      - name: Run tests
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
-      - name: Bygg og publiser Docker-image
+      - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -80,9 +80,9 @@ jobs:
           docker push ${{ env.IMAGE }}
           docker push ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}
 
-  deploy-til-dev-gcp:
-    name: Deploy til dev-gcp
-    needs: bygg-og-publiser
+  deploy-to-dev-gcp:
+    name: Deploy to dev-gcp
+    needs: build-and-publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -93,10 +93,10 @@ jobs:
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml
 
 
-  deploy-til-prod-gcp:
-    name: Deploy til prod-gcp
+  deploy-to-prod-gcp:
+    name: Deploy to prod-gcp
     if: ${{ github.event.inputs.deploy-prod == 'true' }} # Tvinge manuell prod deploy inntil videre
-    needs: deploy-til-dev-gcp
+    needs: deploy-to-dev-gcp
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

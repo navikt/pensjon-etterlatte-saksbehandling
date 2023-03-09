@@ -73,6 +73,10 @@ internal fun Route.sakRoutes(
             )
         }
     }
+    get("/personer/{fnr}/sjekkadressebeskyttelse") {
+        val fnr = call.parameters["fnr"]!!
+        call.respond(sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(fnr))
+    }
 }
 
 private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt.inTransaction {
@@ -80,4 +84,5 @@ private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt
 }
 
 data class Sak(val ident: String, val sakType: SakType, val id: Long)
+
 data class Saker(val saker: List<Sak>)

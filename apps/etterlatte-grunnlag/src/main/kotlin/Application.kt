@@ -73,7 +73,7 @@ private fun Route.adressebeskyttelsesInterceptor(behandlingKlient: BehandlingKli
             return@intercept
         }
         val fnr = call.receive<FoedselsnummerDTO>()
-        val erStrengtFortrolig = behandlingKlient.sjekkErStrengtFortrolig(fnr.foedselsnummer)
+        val erStrengtFortrolig = behandlingKlient.sjekkErStrengtFortrolig(fnr.foedselsnummer, bruker)
         if (erStrengtFortrolig) {
             call.respond(HttpStatusCode.NotFound)
         }

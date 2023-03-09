@@ -11,14 +11,12 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.Bruker
-import no.nav.etterlatte.token.System
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
-
-    suspend fun sjekkErStrengtFortrolig(fnr: String): Boolean
+    suspend fun sjekkErStrengtFortrolig(fnr: String, bruker: Bruker): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -55,7 +53,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun sjekkErStrengtFortrolig(fnr: String): Boolean {
+    override suspend fun sjekkErStrengtFortrolig(fnr: String, bruker: Bruker): Boolean {
         logger.info("Sjekker strengt fortrolig for ${fnr.maskerFnr()}")
         try {
             return downstreamResourceClient
@@ -64,7 +62,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                         clientId = clientId,
                         url = "$resourceUrl/personer/{$fnr}/sjekkadressebeskyttelse"
                     ),
-                    bruker = System("maskin", "maskin")
+                    bruker = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

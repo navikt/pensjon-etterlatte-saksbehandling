@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.database.kotliquery)
 
     testImplementation(libs.test.jupiter.engine)
+    testImplementation(libs.test.mockk)
     testImplementation(libs.test.testcontainer.jupiter)
     testImplementation(libs.test.testcontainer.postgresql)
 

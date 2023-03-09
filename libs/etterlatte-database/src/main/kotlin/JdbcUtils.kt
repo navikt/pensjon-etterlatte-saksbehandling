@@ -13,11 +13,9 @@ fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
 }
 
 fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
-    return generateSequence {
-        if (next()) {
-            block()
-        } else {
-            null
-        }
-    }.toList()
+    val list = ArrayList<T>()
+    while (next()) {
+        list.add(block())
+    }
+    return list
 }

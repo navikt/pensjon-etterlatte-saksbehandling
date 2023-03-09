@@ -22,7 +22,6 @@ import no.nav.etterlatte.egenansatt.egenAnsattRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
-import no.nav.etterlatte.libs.ktor.adresseBeskyttelseRoute
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
@@ -65,17 +64,10 @@ fun Application.module(beanFactory: BeanFactory) {
 
         val sakServiceAdressebeskyttelse = sakServiceAdressebeskyttelse()
         val sakService = sakService()
-        restModule(sikkerLogg) {
-            interceptorWrapper(
-                adressebeskyttelse = {
-                    adresseBeskyttelseRoute(
-                        ressursHarAdressebeskyttelse = { behandlingId ->
-                            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
-                        }
-                    )
-                },
-                leggTilKontekst = { attachContekst(dataSource(), beanFactory) }
-            )
+        restModule(sikkerLogg, harAdressebeskyttelseFunc = { behandlingId ->
+            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
+        }) {
+            attachContekst(dataSource(), beanFactory)
             sakRoutes(
                 sakService = sakService,
                 generellBehandlingService = generellBehandlingService,
@@ -96,14 +88,6 @@ fun Application.module(beanFactory: BeanFactory) {
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService))
         }
     }
-}
-
-private fun Route.interceptorWrapper(
-    adressebeskyttelse: () -> Unit,
-    leggTilKontekst: () -> Unit
-) {
-    adressebeskyttelse()
-    leggTilKontekst()
 }
 
 private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {

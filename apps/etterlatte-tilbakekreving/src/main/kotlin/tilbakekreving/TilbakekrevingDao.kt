@@ -15,7 +15,6 @@ import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.SakId
 import org.slf4j.LoggerFactory
-import java.sql.Timestamp
 import java.util.*
 import javax.sql.DataSource
 
@@ -39,7 +38,7 @@ class TilbakekrevingDao(
                             "sak_id" to sakId.value.param<Long>(),
                             "behandling_id" to behandlingId.value.param<UUID>(),
                             "kravgrunnlag_id" to kravgrunnlagId.value.param<Long>(),
-                            "opprettet" to mottattKravgrunnlag.opprettet.toTimestamp().param<Timestamp>(),
+                            "opprettet" to mottattKravgrunnlag.opprettet.toTimestamp().param(),
                             "kravgrunnlag" to kravgrunnlag.toJson().param<String>()
                         )
                     }

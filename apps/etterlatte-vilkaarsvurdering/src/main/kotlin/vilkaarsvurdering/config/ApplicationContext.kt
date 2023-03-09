@@ -17,9 +17,10 @@ class ApplicationContext {
         username = properties.dbUsername,
         password = properties.dbPassword
     )
+    val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     val vilkaarsvurderingService = VilkaarsvurderingService(
         vilkaarsvurderingRepository = VilkaarsvurderingRepository(dataSource),
-        behandlingKlient = BehandlingKlientImpl(config, httpClient()),
+        behandlingKlient = behandlingKlient,
         grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     )
 }

@@ -7,13 +7,14 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import org.slf4j.LoggerFactory
 import java.util.*
 
-fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
+fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: BehandlingKlient) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
 
     route("brev") {
@@ -27,7 +28,7 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService) {
         }
 
         post("attestert/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 val ferdigstiltOK = service.ferdigstillVedtaksbrev(behandlingId)
 
                 if (ferdigstiltOK) {

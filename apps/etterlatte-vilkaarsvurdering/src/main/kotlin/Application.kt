@@ -31,7 +31,7 @@ class Server(private val context: ApplicationContext) {
                 config = HoconApplicationConfig(context.config)
                 module {
                     restModule(sikkerLogg) {
-                        vilkaarsvurdering(vilkaarsvurderingService)
+                        vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
                     }
                 }
                 connector { port = properties.httpPort }

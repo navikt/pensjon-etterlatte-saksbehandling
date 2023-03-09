@@ -57,7 +57,7 @@ class ApplicationBuilder {
         .withKtorModule {
             restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                 adressebeskyttelsesInterceptor(behandlingKlient = behandlingKlient)
-                grunnlagRoute(grunnlagService).also { install(DoubleReceive) }
+                grunnlagRoute(grunnlagService, behandlingKlient).also { install(DoubleReceive) }
             }
         }
         .build().apply {

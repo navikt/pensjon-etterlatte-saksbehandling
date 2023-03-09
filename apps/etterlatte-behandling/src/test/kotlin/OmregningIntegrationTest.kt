@@ -12,44 +12,121 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
-import no.nav.etterlatte.behandling.BehandlingsBehov
+import io.mockk.mockk
 import no.nav.etterlatte.behandling.omregning.OpprettOmregningResponse
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.sak.Sak
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
-import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
     @BeforeAll
-    fun start() = startServer()
+    fun start() {
+        startServer()
+        Kontekst.set(Context(mockk(), DatabaseContext(beanFactory.dataSource())))
+    }
 
     @AfterAll
     fun shutdown() = afterAll()
 
     @AfterEach
-    fun beforeEach() {
+    fun afterEach() {
         beanFactory.resetDatabase()
     }
 
-    @ParameterizedTest(name = "Kan opprette {0} omregningstype paa sak")
-    @EnumSource(Prosesstype::class)
-    fun `kan opprette omregning paa sak som har foerstegangsbehandling`(prosesstype: Prosesstype) {
-        val fnr = "234"
+    @Nested
+    inner class KanOmregne {
+        private val sakId = 1L
+
+        @BeforeEach
+        fun beforeEach() {
+            val (_, foerstegangsbehandling) = inTransaction {
+                beanFactory.opprettSakMedFoerstegangsbehandling(sakId, "234")
+            }
+            val virkningstidspunkt = virkningstidspunktVurdering()
+
+            val iverksattBehandling = foerstegangsbehandling
+                .oppdaterKommerBarnetTilgode(kommerBarnetTilGodeVurdering())
+                .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
+                .oppdaterVirkningstidspunkt(
+                    virkningstidspunkt.dato,
+                    virkningstidspunkt.kilde,
+                    virkningstidspunkt.begrunnelse
+                )
+                .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+                .tilBeregnet()
+                .tilFattetVedtak()
+                .tilAttestert()
+                .tilIverksatt()
+
+            inTransaction { beanFactory.behandlingDao().lagreStatus(iverksattBehandling) }
+        }
+
+        @AfterEach
+        fun afterEach() {
+            beanFactory.resetDatabase()
+        }
+
+        @ParameterizedTest(name = "Kan opprette {0} omregningstype paa sak")
+        @EnumSource(Prosesstype::class)
+        fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`(prosesstype: Prosesstype) {
+            testApplication {
+                environment {
+                    config = hoconApplicationConfig
+                }
+                val client = createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
+                }
+                application { module(beanFactory) }
+
+                val (omregning) = client.post("/omregning") {
+                    addAuthToken(tokenServiceUser)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        Omregningshendelse(
+                            1,
+                            LocalDate.now(),
+                            null,
+                            prosesstype
+                        )
+                    )
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    it.body<OpprettOmregningResponse>()
+                }
+
+                client.get("/behandlinger/$omregning") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    it.body<DetaljertBehandling>().also { behandling ->
+                        Assertions.assertEquals(omregning, behandling.id)
+                        Assertions.assertEquals(sakId, behandling.sak)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `omregning feiler hvis det ikke finnes noen iverksatt behandling fra foerr`() {
         testApplication {
             environment {
                 config = hoconApplicationConfig
@@ -61,76 +138,12 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
             }
             application { module(beanFactory) }
 
-            client.get("/saker/$fnr") {
-                addAuthToken(tokenSaksbehandler)
-            }.apply {
-                Assertions.assertEquals(HttpStatusCode.NotFound, status)
-            }
-            val sak: Sak = client.get("/personer/$fnr/saker/BARNEPENSJON") {
-                addAuthToken(tokenSaksbehandler)
-            }.apply {
-                Assertions.assertEquals(HttpStatusCode.OK, status)
-            }.body()
-
-            client.get("/saker/${sak.id}") {
-                addAuthToken(tokenSaksbehandler)
+            client.post("/omregning") {
+                addAuthToken(tokenServiceUser)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(Omregningshendelse(1, LocalDate.now(), null, Prosesstype.AUTOMATISK))
             }.also {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                val lestSak: Sak = it.body()
-                Assertions.assertEquals(fnr, lestSak.ident)
-                Assertions.assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
-            }
-            val foerstegangsbehandling = client.post("/behandlinger/foerstegangsbehandling") {
-                addAuthToken(tokenServiceUser)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    BehandlingsBehov(
-                        1,
-                        Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                        Tidspunkt.now().toLocalDatetimeUTC().toString()
-                    )
-                )
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                UUID.fromString(it.body())
-            }
-
-            client.get("/behandlinger/$foerstegangsbehandling") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body<DetaljertBehandling>().also { behandling ->
-                    Assertions.assertEquals(foerstegangsbehandling, behandling.id)
-                    Assertions.assertEquals(sak.id, behandling.sak)
-                }
-            }
-
-            val omregning = client.post("/omregning") {
-                addAuthToken(tokenServiceUser)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    Omregningshendelse(
-                        1,
-                        LocalDate.now(),
-                        null,
-                        prosesstype
-                    )
-                )
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body<OpprettOmregningResponse>()
-            }
-
-            client.get("/behandlinger/$omregning") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body<DetaljertBehandling>().also { behandling ->
-                    Assertions.assertEquals(omregning, behandling.id)
-                    Assertions.assertEquals(sak.id, behandling.sak)
-                }
+                Assertions.assertEquals(HttpStatusCode.InternalServerError, it.status)
             }
         }
     }

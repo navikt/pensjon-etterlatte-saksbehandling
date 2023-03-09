@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
@@ -41,8 +42,10 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 fun opprettBehandling(
@@ -243,6 +246,7 @@ fun grunnlagsOpplysningMedPersonopplysning(
     fnr = null,
     periode = null
 )
+
 fun personOpplysning(
     doedsdato: LocalDate? = null
 ) = Person(
@@ -315,6 +319,27 @@ fun mockPerson(
     familieRelasjon = familieRelasjon?.let { OpplysningDTO(it, UUID.randomUUID().toString()) },
     avdoedesBarn = null,
     vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) }
+)
+
+fun kommerBarnetTilGodeVurdering() = KommerBarnetTilgode(
+    svar = JaNeiVetIkke.JA,
+    begrunnelse = "begrunnelse",
+    kilde = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now()))
+)
+
+fun virkningstidspunktVurdering() = Virkningstidspunkt(
+    YearMonth.of(2023, 1),
+    Grunnlagsopplysning.Saksbehandler(
+        "ident",
+        Tidspunkt.now()
+    ),
+    "begrunnelse"
+)
+
+fun gyldighetsresultatVurdering() = GyldighetsResultat(
+    VurderingsResultat.OPPFYLT,
+    vurderinger = listOf(),
+    vurdertDato = Tidspunkt.now().toLocalDatetimeUTC()
 )
 
 val saksbehandlerToken =

@@ -20,8 +20,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.bruker
-import java.lang.NullPointerException
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
+import java.lang.NullPointerException
 import java.util.*
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, behandlingKlient: BehandlingKlient) {
@@ -66,7 +66,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
         }
 
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/kopier") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 val forrigeBehandling = call.receive<OpprettVilkaarsvurderingFraBehandling>().forrigeBehandling
 
                 try {

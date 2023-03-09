@@ -12,11 +12,11 @@ interface VilkaarsvurderingService {
     fun kopierForrigeVilkaarsvurdering(behandlingId: UUID, behandlingViOmregnerFra: UUID)
 }
 
-class VilkaarsvurderingServiceImpl(private val VilkaarsvurderingKlient: HttpClient, private val url: String) :
+class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClient, private val url: String) :
     VilkaarsvurderingService {
     override fun kopierForrigeVilkaarsvurdering(behandlingId: UUID, behandlingViOmregnerFra: UUID) {
         runBlocking {
-            VilkaarsvurderingKlient.post("$url/api/$behandlingId/kopier") {
+            vilkaarsvurderingKlient.post("$url/api/$behandlingId/kopier") {
                 contentType(ContentType.Application.Json)
                 setBody(OpprettVilkaarsvurderingFraBehandling(behandlingViOmregnerFra))
             }

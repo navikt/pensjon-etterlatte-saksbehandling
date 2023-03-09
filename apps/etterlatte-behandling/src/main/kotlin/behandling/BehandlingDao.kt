@@ -159,7 +159,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
                 WHERE status not in (${
-                BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
+            BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
             })
             """.trimIndent()
         )

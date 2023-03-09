@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
@@ -95,11 +96,9 @@ class SakDao(private val connection: () -> Connection) {
             statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
             statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
             val resultSet = statement.executeQuery()
-            var result = false
-            while (resultSet.next()) {
-                result = resultSet.getInt(1) > 0
-            }
-            return result
+            return resultSet.single {
+                getInt(1)
+            } > 0
         }
     }
 }

@@ -12,6 +12,15 @@ fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
     }
 }
 
+fun <T> ResultSet.single(block: ResultSet.() -> T): T {
+    require(next()) {
+        "Skal ha en verdi"
+    }
+    return block().also {
+        require(!next()) { "Skal være unik" }
+    }
+}
+
 fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
     val list = ArrayList<T>()
     while (next()) {

@@ -9,6 +9,7 @@ import io.ktor.server.application.install
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.request.receive
+import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import no.nav.etterlatte.grunnlag.BehandlingHendelser
@@ -72,10 +73,12 @@ private fun Route.adressebeskyttelsesInterceptor(behandlingKlient: BehandlingKli
         if (bruker is no.nav.etterlatte.token.System) {
             return@intercept
         }
-        val fnr = call.receive<FoedselsnummerDTO>()
-        val erStrengtFortrolig = behandlingKlient.sjekkErStrengtFortrolig(fnr.foedselsnummer, bruker)
-        if (erStrengtFortrolig) {
-            call.respond(HttpStatusCode.NotFound)
+        if (call.request.uri.contains("person")) {
+            val fnrDTO = call.receive<FoedselsnummerDTO>()
+            val erStrengtFortrolig = behandlingKlient.sjekkErStrengtFortrolig(fnrDTO.foedselsnummer, bruker)
+            if (erStrengtFortrolig) {
+                call.respond(HttpStatusCode.NotFound)
+            }
         }
         return@intercept
     }

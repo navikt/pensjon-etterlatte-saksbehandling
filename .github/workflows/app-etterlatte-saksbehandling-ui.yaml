@@ -33,51 +33,45 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Sjekk ut koden
         uses: actions/checkout@v3
-      - name: Setup Node 18
+      - name: Sett opp Node
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
       - name: Installer klient
         working-directory: apps/${{ env.APP_NAME }}
-        run: |
-          yarn --cwd client install --frozen-lockfile && yarn --cwd client build
+        run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
       - name: Installer server
         working-directory: apps/${{ env.APP_NAME }}
-        run: |
-          yarn --cwd server install --frozen-lockfile && yarn --cwd server build
-      - name: Run tests
+        run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
+      - name: Kjør tester
         working-directory: apps/${{ env.APP_NAME }}/client
-        run: |
-          CI=true yarn test
+        run: CI=true yarn test
 
-  build-and-publish:
+  bygg-og-publiser:
     if: github.event_name != 'pull_request'
-    name: Build, test and publish
+    name: Bygg, test og publiser
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Sjekk ut koden
         uses: actions/checkout@v3
-      - name: Setup Node 18
+      - name: Sett opp Node
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
-      - name: Inject slug/short variables
+      - name: Injiser kortform av byggvariabler
         uses: rlespinasse/github-slug-action@v4
       - name: Installer og bygg klient
         working-directory: apps/${{ env.APP_NAME }}
-        run: |
-          yarn --cwd client install --frozen-lockfile && yarn --cwd client build
+        run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
       - name: Installer og bygg server
         working-directory: apps/${{ env.APP_NAME }}
-        run: |
-          yarn --cwd server install --frozen-lockfile && yarn --cwd server build
-      - name: Run tests
+        run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
+      - name: Kjør tester
         working-directory: apps/${{ env.APP_NAME }}/client
-        run: |
-          CI=true yarn test
-      - name: Build and publish Docker image
+        run: CI=true yarn test
+      - name: Bygg og publiser Docker-image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -86,9 +80,9 @@ jobs:
           docker push ${{ env.IMAGE }}
           docker push ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}
 
-  deploy-to-dev-gcp:
-    name: Deploy to dev-gcp
-    needs: build-and-publish
+  deploy-til-dev-gcp:
+    name: Deploy til dev-gcp
+    needs: bygg-og-publiser
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -99,10 +93,10 @@ jobs:
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml
 
 
-  deploy-to-prod-gcp:
-    name: Deploy to prod-gcp
+  deploy-til-prod-gcp:
+    name: Deploy til prod-gcp
     if: ${{ github.event.inputs.deploy-prod == 'true' }} # Tvinge manuell prod deploy inntil videre
-    needs: deploy-to-dev-gcp
+    needs: deploy-til-dev-gcp
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

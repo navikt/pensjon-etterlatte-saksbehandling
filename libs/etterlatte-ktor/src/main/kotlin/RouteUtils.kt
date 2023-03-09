@@ -18,19 +18,13 @@ inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
         "BehandlingsId er ikke i path params"
     )
 
-interface TilgangsSjekk {
-    fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean
-    fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean
-    fun harTilgangTilPerson(behandlingId: Foedselsnummer, bruker: Saksbehandler): Boolean
-}
-
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
-    tilgangsSjekk: TilgangsSjekk,
+    behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     onSuccess: (id: UUID) -> Unit
 ) = withParam(BEHANDLINGSID_CALL_PARAMETER) { behandlingId ->
     when (bruker) {
         is Saksbehandler -> {
-            if (tilgangsSjekk.harTilgangTilBehandling(behandlingId, bruker as Saksbehandler)) {
+            if (behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, bruker as Saksbehandler)) {
                 onSuccess(behandlingId)
             } else {
                 call.respond(HttpStatusCode.NotFound)
@@ -41,12 +35,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
-    tilgangsSjekk: TilgangsSjekk,
+    sakTilgangsSjekk: SakTilgangsSjekk,
     onSuccess: (id: Long) -> Unit
 ) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
     when (bruker) {
         is Saksbehandler -> {
-            if (tilgangsSjekk.harTilgangTilSak(sakId, bruker as Saksbehandler)) {
+            if (sakTilgangsSjekk.harTilgangTilSak(sakId, bruker as Saksbehandler)) {
                 onSuccess(sakId)
             } else {
                 call.respond(HttpStatusCode.NotFound)
@@ -58,12 +52,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     fnr: String,
-    tilgangsSjekk: TilgangsSjekk,
+    personTilgangsSjekk: PersonTilgangsSjekk,
     onSuccess: (fnr: Foedselsnummer) -> Unit
 ) = Foedselsnummer.of(fnr).let { foedselsnummer ->
     when (bruker) {
         is Saksbehandler -> {
-            if (tilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)) {
+            if (personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)) {
                 onSuccess(foedselsnummer)
             } else {
                 call.respond(HttpStatusCode.NotFound)
@@ -89,4 +83,16 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     } else {
         call.respond(HttpStatusCode.BadRequest, "$param var null, forventet en UUID")
     }
+}
+
+interface BehandlingTilgangsSjekk {
+    fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean
+}
+
+interface SakTilgangsSjekk {
+    fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean
+}
+
+interface PersonTilgangsSjekk {
+    fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean
 }

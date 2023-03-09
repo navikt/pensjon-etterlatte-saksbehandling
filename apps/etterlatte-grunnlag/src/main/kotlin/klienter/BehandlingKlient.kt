@@ -4,7 +4,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.TilgangsSjekk
+import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
+import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -16,7 +18,7 @@ import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
 
-interface BehandlingKlient : TilgangsSjekk {
+interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk, PersonTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
 }
 
@@ -62,7 +64,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         return true
     }
 
-    override fun harTilgangTilPerson(behandlingId: Foedselsnummer, bruker: Saksbehandler): Boolean {
-        TODO("Not yet implemented")
+    override fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean {
+        return true
     }
 }

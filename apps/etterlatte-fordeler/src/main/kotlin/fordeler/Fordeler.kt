@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
@@ -60,12 +61,16 @@ internal class Fordeler(
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling")
                         context.publish(packet.leggPaaFordeltStatus(true).toJson())
                         fordelerMetricLogger.logMetricFordelt()
+                        lagStatistikkMelding(packet, resultat)
+                            ?.let { context.publish(it) }
                     }
 
                     is FordelerResultat.IkkeGyldigForBehandling -> {
                         logger.info("Avbrutt fordeling: ${resultat.ikkeOppfylteKriterier}")
                         context.publish(packet.leggPaaFordeltStatus(false).toJson())
                         fordelerMetricLogger.logMetricIkkeFordelt(resultat)
+                        lagStatistikkMelding(packet, resultat)
+                            ?.let { context.publish(it) }
                     }
 
                     is FordelerResultat.UgyldigHendelse -> {
@@ -91,6 +96,26 @@ internal class Fordeler(
             soeknad = get(SoeknadInnsendt.skjemaInfoKey).toJson().let(objectMapper::readValue),
             hendelseGyldigTil = get(SoeknadInnsendt.hendelseGyldigTilKey).textValue().let(OffsetDateTime::parse)
         )
+
+    fun lagStatistikkMelding(packet: JsonMessage, fordelerResultat: FordelerResultat): String? {
+        val (resultat, mangler) = when (fordelerResultat) {
+            FordelerResultat.GyldigForBehandling -> "GYLDIG" to null
+            is FordelerResultat.IkkeGyldigForBehandling -> "IKKE_GYLDIG" to fordelerResultat.ikkeOppfylteKriterier
+            else -> {
+                logger.error("Kan ikke produsere statistikkmelding for fordelerResultat $fordelerResultat")
+                return null
+            }
+        }
+        val meldingsinnhold: MutableMap<String, Any> = mutableMapOf(
+            EVENT_NAME_KEY to "FORDELER:STATISTIKK",
+            "soeknad_id" to packet.soeknadId(),
+            "resultat" to resultat
+        )
+        mangler?.let {
+            meldingsinnhold["mangler"] = it
+        }
+        return meldingsinnhold.toJson()
+    }
 
     private fun JsonMessage.leggPaaFordeltStatus(fordelt: Boolean): JsonMessage {
         this[FordelerFordelt.soeknadFordeltKey] = fordelt

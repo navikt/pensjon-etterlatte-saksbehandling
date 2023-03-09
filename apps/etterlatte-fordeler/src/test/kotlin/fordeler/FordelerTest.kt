@@ -10,6 +10,7 @@ import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.readFile
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -67,6 +68,43 @@ internal class FordelerTest {
 
         assertEquals(0, inspector.size)
         verify(exactly = 0) { fordelerService.sjekkGyldighetForBehandling(any()) }
+    }
+
+    @Test
+    fun `lagStatistikkMelding lager riktig statistikkmelding`() {
+        val soeknadId = 1337L
+        val fordeler = Fordeler(
+            rapidsConnection = mockk(relaxed = true),
+            fordelerService = fordelerService,
+            fordelerMetricLogger = fordelerMetricLogger
+        )
+        val packet: JsonMessage = mockk()
+
+        every {
+            packet["@lagret_soeknad_id"].longValue()
+        } returns soeknadId
+
+        val statistikkMeldingGyldig = fordeler.lagStatistikkMelding(packet, FordelerResultat.GyldigForBehandling)
+        assertEquals(
+            statistikkMeldingGyldig,
+            "{\"@event_name\":\"FORDELER:STATISTIKK\",\"soeknad_id\":1337,\"resultat\":\"GYLDIG\"}"
+        )
+
+        val kriterier = listOf(
+            FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE,
+            FordelerKriterie.AVDOED_HAR_ADRESSEBESKYTTELSE
+        )
+
+        val statistikkmeldingIkkeGyldig = fordeler.lagStatistikkMelding(
+            packet,
+            FordelerResultat.IkkeGyldigForBehandling(kriterier)
+        )
+
+        assertEquals(
+            statistikkmeldingIkkeGyldig,
+            "{\"@event_name\":\"FORDELER:STATISTIKK\",\"soeknad_id\":1337,\"resultat\":\"IKKE_GYLDIG\"," +
+                "\"mangler\":[\"BARN_ER_IKKE_BOSATT_I_NORGE\",\"AVDOED_HAR_ADRESSEBESKYTTELSE\"]}"
+        )
     }
 
     @Test

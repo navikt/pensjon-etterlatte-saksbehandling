@@ -85,7 +85,7 @@ class SakDao(private val connection: () -> Connection) {
         with(connection()) {
             val statement = prepareStatement(
                 """
-                 SELECT id, sakType, fnr 
+                 SELECT count(*) as strengt_fortrolig 
                  from sak
                  where id = any(?)
                  AND adressebeskyttelse is NOT NULL AND (adressebeskyttelse == ? OR adressebeskyttelse == ?)
@@ -94,13 +94,12 @@ class SakDao(private val connection: () -> Connection) {
             statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
             statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
             statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
-            return statement.executeQuery().toList {
-                Sak(
-                    id = getLong(1),
-                    sakType = enumValueOf(getString(2)),
-                    ident = getString(3)
-                )
-            }.isNotEmpty()
+            val resultSet = statement.executeQuery()
+            var result = false
+            while (resultSet.next()) {
+                result = resultSet.getInt(1) > 0
+            }
+            return result
         }
     }
 }

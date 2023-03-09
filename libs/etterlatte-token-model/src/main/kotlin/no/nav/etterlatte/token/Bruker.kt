@@ -23,9 +23,9 @@ sealed class Bruker {
 }
 
 data class System(val oid: String, val sub: String) : Bruker() {
-    override fun ident() = Fagsaksystem.EY.name
+    override fun ident() = Fagsaksystem.EY.navn
 
-    override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = Fagsaksystem.EY.name
+    override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = Fagsaksystem.EY.enhet
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 }

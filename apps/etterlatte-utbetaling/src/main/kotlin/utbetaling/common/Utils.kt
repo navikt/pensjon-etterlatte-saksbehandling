@@ -43,7 +43,7 @@ fun sisteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atEndOfMonth()
 
 fun LocalDate.toXMLDate(): XMLGregorianCalendar {
     return DatatypeFactory.newInstance().newXMLGregorianCalendar(
-        LocalDateTime.of(this, LocalTime.MIDNIGHT).format(DateTimeFormatter.ISO_DATE_TIME)
+        LocalDateTime.of(this, LocalTime.MIDNIGHT).format(tidsstempleMilliOppdrag)
     ).apply {
         timezone = DatatypeConstants.FIELD_UNDEFINED
     }
@@ -54,6 +54,8 @@ fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30).let { UU
 data class UUID30(val value: String)
 
 const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG = 70
+
 val tidsstempelDatoOppdrag = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 val tidsstempelTimeOppdrag = DateTimeFormatter.ofPattern("yyyyMMddHH")
 val tidsstempelMikroOppdrag = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
+val tidsstempleMilliOppdrag = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")

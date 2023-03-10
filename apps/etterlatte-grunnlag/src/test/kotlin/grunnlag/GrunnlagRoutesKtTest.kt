@@ -32,7 +32,7 @@ internal class GrunnlagRoutesKtTest {
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     companion object {
-        private const val ISSUER_ID = "ISSUER_ID"
+        private const val ISSUER_ID = "azure"
         private const val CLIENT_ID = "CLIENT_ID"
     }
 

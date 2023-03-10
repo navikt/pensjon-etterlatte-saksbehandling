@@ -28,6 +28,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
         val logger = application.log
 
         get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+            logger.info("Henter vilkårsvurdering for behandling ${call.parameters[BEHANDLINGSID_CALL_PARAMETER]}")
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)

@@ -12,6 +12,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -53,13 +54,14 @@ fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
         azureAppScope = config.getString("behandling.azure.scope")
     )
     val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient)
-
-    GlobalScope.launch {
-        try {
-            KafkaConsumerEgneAnsatte(env = env, behandlingKlient = behandlingKlient).poll()
-        } catch (e: Exception) {
-            logger.error("App avsluttet med en feil", e)
-            exitProcess(1)
+    withLogContext {
+        GlobalScope.launch {
+            try {
+                KafkaConsumerEgneAnsatte(env = env, behandlingKlient = behandlingKlient).poll()
+            } catch (e: Exception) {
+                logger.error("App avsluttet med en feil", e)
+                exitProcess(1)
+            }
         }
     }
 }

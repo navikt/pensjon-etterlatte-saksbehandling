@@ -55,12 +55,13 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun sjekkErStrengtFortrolig(fnr: String, bruker: Bruker): Boolean {
         try {
             return downstreamResourceClient
-                .get(
+                .post(
                     resource = Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/personer/$fnr/sjekkadressebeskyttelse"
+                        url = "$resourceUrl/personer/sjekkstrengtfortrolig"
                     ),
-                    bruker = bruker
+                    bruker = bruker,
+                    postBody = fnr
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

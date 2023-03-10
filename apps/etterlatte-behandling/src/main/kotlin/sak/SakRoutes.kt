@@ -75,7 +75,7 @@ internal fun Route.sakRoutes(
             )
         }
     }
-    post("/personer/sjekkadressebeskyttelse") {
+    post("/personer/sjekkstrengtfortrolig") {
         val fnr = call.receive<String>()
         call.respond(sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(fnr))
     }

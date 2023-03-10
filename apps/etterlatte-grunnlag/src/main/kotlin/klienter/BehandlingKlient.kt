@@ -58,7 +58,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 .post(
                     resource = Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/personer/sjekkadressebeskyttelse"
+                        url = "$resourceUrl/personer/sjekkstrengtfortrolig"
                     ),
                     bruker = bruker,
                     postBody = fnr

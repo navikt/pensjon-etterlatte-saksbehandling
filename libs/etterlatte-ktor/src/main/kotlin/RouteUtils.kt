@@ -86,13 +86,13 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
 }
 
 interface BehandlingTilgangsSjekk {
-    fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean
+    suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean
 }
 
 interface SakTilgangsSjekk {
-    fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean
+    suspend fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean
 }
 
 interface PersonTilgangsSjekk {
-    fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean
+    suspend fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean
 }

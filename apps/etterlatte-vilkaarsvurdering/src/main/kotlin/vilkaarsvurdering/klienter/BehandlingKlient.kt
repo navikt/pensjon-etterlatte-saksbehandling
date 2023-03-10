@@ -137,7 +137,22 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         )
     }
 
-    override fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean {
-        return true
+    override suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/tilgang/behandling/$behandlingId"
+                    ),
+                    bruker = bruker
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
+        }
     }
 }

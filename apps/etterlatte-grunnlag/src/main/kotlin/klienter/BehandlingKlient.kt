@@ -20,7 +20,6 @@ import java.util.*
 
 interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk, PersonTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
-    suspend fun sjekkErStrengtFortrolig(fnr: String, bruker: Bruker): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -57,38 +56,61 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun sjekkErStrengtFortrolig(fnr: String, bruker: Bruker): Boolean {
+    override suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean {
         try {
             return downstreamResourceClient
-                .post(
+                .get(
                     resource = Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/personer/sjekkstrengtfortrolig"
+                        url = "$resourceUrl/tilgang/behandling/$behandlingId"
                     ),
-                    bruker = bruker,
-                    postBody = fnr
+                    bruker = bruker
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage }
                 )
         } catch (e: Exception) {
-            throw BehandlingKlientException(
-                "Sjekking av strengt fortrolig feilet",
-                e
-            )
+            throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
         }
     }
 
-    override fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean {
-        return true
+    override suspend fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/tilgang/sak/$sakId"
+                    ),
+                    bruker = bruker
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Sjekking av tilgang for sak feilet", e)
+        }
     }
 
-    override fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean {
-        return true
-    }
-
-    override fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean {
-        return true
+    override suspend fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean {
+        try {
+            return downstreamResourceClient
+                .post(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/tilgang/person"
+                    ),
+                    bruker = bruker,
+                    postBody = foedselsnummer.value
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Sjekking av tilgang for person feilet", e)
+        }
     }
 }

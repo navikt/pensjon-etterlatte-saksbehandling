@@ -67,6 +67,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
     createConfiguration = ::PluginConfiguration
 ) {
     on(AdressebeskyttelseHook) { call ->
+        val log = call.application.log
         val bruker = call.bruker
         if (bruker is System) {
             return@on
@@ -75,6 +76,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
         val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER] ?: return@on
 
         if (pluginConfig.ressursHarAdressebeskyttelse(behandlingId)) {
+            log.info("Logs not found in hook for $behandlingId")
             call.respond(HttpStatusCode.NotFound)
         }
         return@on

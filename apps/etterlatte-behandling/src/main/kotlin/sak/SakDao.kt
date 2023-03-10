@@ -89,7 +89,7 @@ class SakDao(private val connection: () -> Connection) {
                  SELECT count(*) as strengt_fortrolig 
                  from sak
                  where id = any(?)
-                 AND adressebeskyttelse is NOT NULL AND (texteq(adressebeskyttelse, ?::TEXT) OR texteq(adressebeskyttelse, ?::TEXT))
+                 AND adressebeskyttelse is NOT NULL AND (adressebeskyttelse = ? OR adressebeskyttelse = ?)
                 """.trimIndent()
             )
             statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))

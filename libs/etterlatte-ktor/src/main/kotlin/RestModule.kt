@@ -129,11 +129,13 @@ fun Application.restModule(
         healthApi()
         authenticate {
             route(routePrefix ?: "") {
-                routes()
-                if (harAdressebeskyttelseFunc != null) {
-                    install(adressebeskyttelsePlugin) {
-                        ressursHarAdressebeskyttelse = { behandlingId ->
-                            harAdressebeskyttelseFunc(behandlingId)
+                route("") {
+                    routes()
+                    if (harAdressebeskyttelseFunc != null) {
+                        install(adressebeskyttelsePlugin) {
+                            ressursHarAdressebeskyttelse = { behandlingId ->
+                                harAdressebeskyttelseFunc(behandlingId)
+                            }
                         }
                     }
                 }

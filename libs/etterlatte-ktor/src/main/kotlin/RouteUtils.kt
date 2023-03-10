@@ -6,10 +6,8 @@ import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Saksbehandler
-import org.slf4j.LoggerFactory
 import java.util.*
 
 const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
@@ -24,12 +22,10 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     onSuccess: (id: UUID) -> Unit
 ) = withParam(BEHANDLINGSID_CALL_PARAMETER) { behandlingId ->
-    val logger = LoggerFactory.getLogger("behandlingsid")
     when (bruker) {
         is Saksbehandler -> {
             val harTilgangTilBehandling =
                 behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, bruker as Saksbehandler)
-            logger.info("har tilgang tilbehandling $behandlingId $harTilgangTilBehandling")
             if (harTilgangTilBehandling) {
                 onSuccess(behandlingId)
             } else {
@@ -44,11 +40,9 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     sakTilgangsSjekk: SakTilgangsSjekk,
     onSuccess: (id: Long) -> Unit
 ) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
-    val logger = LoggerFactory.getLogger("withSakId")
     when (bruker) {
         is Saksbehandler -> {
             val harTilgangTilSak = sakTilgangsSjekk.harTilgangTilSak(sakId, bruker as Saksbehandler)
-            logger.info("Har tilgang for sak $sakId $harTilgangTilSak")
             if (harTilgangTilSak) {
                 onSuccess(sakId)
             } else {
@@ -64,12 +58,9 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     personTilgangsSjekk: PersonTilgangsSjekk,
     onSuccess: (fnr: Foedselsnummer) -> Unit
 ) = Foedselsnummer.of(fnr).let { foedselsnummer ->
-    val logger = LoggerFactory.getLogger("withSakId")
-
     when (bruker) {
         is Saksbehandler -> {
             val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)
-            logger.info("Har tilgang for sak ${foedselsnummer.value.maskerFnr()} $harTilgangTilPerson")
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer)
             } else {

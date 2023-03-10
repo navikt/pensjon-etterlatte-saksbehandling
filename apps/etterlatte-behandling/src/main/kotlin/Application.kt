@@ -71,6 +71,7 @@ fun Application.module(beanFactory: BeanFactory) {
                 sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
             },
             routesUtenHookInterceptor = {
+                attachContekst(dataSource(), beanFactory)
                 tilgangRoutes(sakService, sakServiceAdressebeskyttelse)
             }
         ) {

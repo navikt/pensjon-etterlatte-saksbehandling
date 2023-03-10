@@ -8,7 +8,6 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Saksbehandler
-import org.slf4j.LoggerFactory
 import java.util.*
 
 const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
@@ -23,10 +22,8 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     onSuccess: (id: UUID) -> Unit
 ) = withParam(BEHANDLINGSID_CALL_PARAMETER) { behandlingId ->
-    val logger = LoggerFactory.getLogger("withbehandlingid")
     when (bruker) {
         is Saksbehandler -> {
-            logger.info("Er saksbehandler")
             val harTilgangTilBehandling =
                 behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, bruker as Saksbehandler)
             if (harTilgangTilBehandling) {
@@ -35,10 +32,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
                 call.respond(HttpStatusCode.NotFound)
             }
         }
-        else -> {
-            logger.info("Er systembruker")
-            onSuccess(behandlingId)
-        }
+        else -> onSuccess(behandlingId)
     }
 }
 

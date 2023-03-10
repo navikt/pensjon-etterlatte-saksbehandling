@@ -17,7 +17,7 @@ import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
 
 internal fun Route.tilgangRoutes(sakService: SakService, sakServiceAdressebeskyttelse: SakServiceAdressebeskyttelse) {
     val logger = application.log
-    route("/tilgang") {
+    route("") {
         post("/person") {
             val fnr = call.receive<String>()
             val harTilgang = !sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(fnr)

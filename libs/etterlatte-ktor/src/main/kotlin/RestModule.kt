@@ -139,7 +139,7 @@ fun Application.restModule(
                 }
             }
             if (routesUtenHookInterceptor != null) {
-                route("") {
+                route("tilgang") {
                     routesUtenHookInterceptor()
                 }
             }

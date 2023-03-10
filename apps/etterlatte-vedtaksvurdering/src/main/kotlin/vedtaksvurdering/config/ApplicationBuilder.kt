@@ -48,11 +48,12 @@ class ApplicationBuilder {
         )
     }
 
+    private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val vedtaksvurderingService = VedtaksvurderingService(
         repository = VedtaksvurderingRepository.using(dataSource),
         beregningKlient = BeregningKlientImpl(config, httpClient()),
         vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
-        behandlingKlient = BehandlingKlientImpl(config, httpClient()),
+        behandlingKlient = behandlingKlient,
         sendToRapid = ::publiser,
         saksbehandlere = getSaksbehandlere()
     )
@@ -61,7 +62,7 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env.withConsumerGroupId()))
             .withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
-                    vedtaksvurderingRoute(vedtaksvurderingService)
+                    vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient)
                 }
             }
             .build()

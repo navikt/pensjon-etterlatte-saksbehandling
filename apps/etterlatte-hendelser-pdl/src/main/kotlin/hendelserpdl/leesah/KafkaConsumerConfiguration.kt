@@ -9,7 +9,6 @@ import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringDeserializer
 import java.time.Duration
-import java.time.temporal.ChronoUnit
 import java.util.Properties
 
 interface KafkaConsumerConfiguration {
@@ -18,7 +17,7 @@ interface KafkaConsumerConfiguration {
 
 class KafkaEnvironment : KafkaConsumerConfiguration {
     override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {
-        val maxPollInterval = Duration.of(5, ChronoUnit.MINUTES).toMillis().toInt()
+        val maxPollInterval = Duration.ofMinutes(8L).toMillis().toInt()
         val properties = Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env["KAFKA_BROKERS"])
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)
@@ -39,6 +38,8 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
             put(ConsumerConfig.CLIENT_ID_CONFIG, env["NAIS_APP_NAME"])
             put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
             put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollInterval)
+            put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())
+
             put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
             put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
 

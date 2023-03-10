@@ -11,7 +11,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
@@ -84,14 +86,15 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
             }
         }
 
-        get("/loepende/{sakId}") {
-            val sakId = call.parameters["sakId"]?.toLong() ?: throw Exception("sakId er påkrevet")
-            val dato = call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
-                ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
+        get("/loepende/{$SAKID_CALL_PARAMETER}") {
+            withSakId(behandlingKlient) { sakId ->
+                val dato = call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
+                    ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
-            logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
-            val loependeYtelse = service.sjekkOmVedtakErLoependePaaDato(sakId, dato)
-            call.respond(loependeYtelse)
+                logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
+                val loependeYtelse = service.sjekkOmVedtakErLoependePaaDato(sakId, dato)
+                call.respond(loependeYtelse)
+            }
         }
     }
 }

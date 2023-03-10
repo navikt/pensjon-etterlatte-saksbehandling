@@ -20,10 +20,8 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.OmregningService
-import no.nav.etterlatte.behandling.regulering.RealRevurderingService
 import no.nav.etterlatte.behandling.regulering.ReguleringFactory
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
-import no.nav.etterlatte.behandling.regulering.RevurderingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -50,7 +48,7 @@ import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.Timer
 import javax.sql.DataSource
 
 interface BeanFactory {
@@ -59,7 +57,6 @@ interface BeanFactory {
     fun sakService(): SakService
     fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse
     fun foerstegangsbehandlingService(): FoerstegangsbehandlingService
-    fun revurderingService(): RevurderingService
     fun generellBehandlingService(): GenerellBehandlingService
     fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService
     fun manueltOpphoerService(): ManueltOpphoerService
@@ -154,13 +151,6 @@ abstract class CommonFactory : BeanFactory {
             behandlingHendelser().nyHendelse
         )
 
-    override fun revurderingService(): RevurderingService =
-        RealRevurderingService(
-            behandlingDao(),
-            revurderingFactory(),
-            behandlingHendelser().nyHendelse
-        )
-
     override fun manueltOpphoerService(): ManueltOpphoerService =
         RealManueltOpphoerService(
             behandlingDao(),
@@ -226,7 +216,7 @@ abstract class CommonFactory : BeanFactory {
         OmregningService(reguleringFactory = reguleringFactory(), behandlingService = generellBehandlingService())
 }
 
-class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
+class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun getSaksbehandlerGroupIdsByKey(): Map<String, String?> {

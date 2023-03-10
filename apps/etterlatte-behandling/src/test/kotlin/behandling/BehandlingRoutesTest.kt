@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingRoutesTest {
@@ -85,7 +85,6 @@ internal class BehandlingRoutesTest {
                     behandlingRoutes(
                         generellBehandlingService,
                         foerstegangsbehandlingService,
-                        revurderingService,
                         manueltOpphoerService
                     )
                 }
@@ -134,7 +133,6 @@ internal class BehandlingRoutesTest {
                     behandlingRoutes(
                         generellBehandlingService,
                         foerstegangsbehandlingService,
-                        revurderingService,
                         manueltOpphoerService
                     )
                 }

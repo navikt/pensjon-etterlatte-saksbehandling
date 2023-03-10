@@ -11,6 +11,7 @@ interface SakService {
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
     fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean)
+    fun sjekkOmSakHarStrengtFortroligBeskyttelse(fnr: String): Boolean
 }
 
 class RealSakService(private val dao: SakDao) : SakService {
@@ -34,6 +35,13 @@ class RealSakService(private val dao: SakDao) : SakService {
     override fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean) {
         inTransaction {
             dao.markerSakerMedSkjerming(sakIder, skjermet)
+        }
+    }
+
+    override fun sjekkOmSakHarStrengtFortroligBeskyttelse(fnr: String): Boolean {
+        val sakIder = this.finnSaker(fnr).map { it.id }
+        return inTransaction {
+            dao.sjekkOmSakHarStrengtFortroligBeskyttelse(sakIder)
         }
     }
 

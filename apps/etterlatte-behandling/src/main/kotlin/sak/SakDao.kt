@@ -1,6 +1,8 @@
 package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
@@ -77,6 +79,26 @@ class SakDao(private val connection: () -> Connection) {
             statement.setBoolean(1, skjermet)
             statement.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
             statement.executeUpdate()
+        }
+    }
+
+    fun sjekkOmSakHarStrengtFortroligBeskyttelse(sakIder: List<Long>): Boolean {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                 SELECT count(*) as strengt_fortrolig 
+                 from sak
+                 where id = any(?)
+                 AND adressebeskyttelse is NOT NULL AND (adressebeskyttelse == ? OR adressebeskyttelse == ?)
+                """.trimIndent()
+            )
+            statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
+            statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
+            statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
+            val resultSet = statement.executeQuery()
+            return resultSet.single {
+                getInt(1)
+            } > 0
         }
     }
 }

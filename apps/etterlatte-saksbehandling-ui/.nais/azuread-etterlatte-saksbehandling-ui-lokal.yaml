@@ -28,6 +28,9 @@ spec:
     - application: etterlatte-grunnlag
       cluster: dev-gcp
       namespace: etterlatte
+    - application: etterlatte-trygdetid
+      cluster: dev-gcp
+      namespace: etterlatte
   tenant: trygdeetaten.no
   secretName: azuread-etterlatte-saksbehandling-ui-lokal
   claims:

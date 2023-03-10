@@ -42,13 +42,13 @@ class RealSakService(private val dao: SakDao) : SakService {
     override fun sjekkOmSakHarStrengtFortroligBeskyttelse(fnr: String): Boolean {
         val sakIder = this.finnSaker(fnr).map { it.id }
         return inTransaction {
-            dao.sjekkOmSakHarStrengtFortroligBeskyttelse(sakIder)
+            dao.enAvSakeneHarStrengtFortroligBeskyttelse(sakIder)
         }
     }
 
     override fun sjekkOmSakHarStrengtFortroligBeskyttelse(sakId: Long): Boolean {
         return inTransaction {
-            dao.sjekkOmSakHarStrengtFortroligBeskyttelse(listOf(sakId))
+            dao.enAvSakeneHarStrengtFortroligBeskyttelse(listOf(sakId))
         }
     }
 

@@ -22,9 +22,9 @@ internal fun Route.tilgangRoutes(sakService: SakService, sakServiceAdressebeskyt
     route("/tilgang") {
         post("/person") {
             val fnr = call.receive<String>()
-            val sjekkOmSakHarStrengtFortroligBeskyttelse = sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(fnr)
-            logger.info("har tilgang for ${fnr.maskerFnr()} $sjekkOmSakHarStrengtFortroligBeskyttelse")
-            call.respond(sjekkOmSakHarStrengtFortroligBeskyttelse)
+            val harTilgang = !sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(fnr)
+            logger.info("har tilgang for ${fnr.maskerFnr()} $harTilgang")
+            call.respond(harTilgang)
         }
 
         get("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -36,9 +36,9 @@ internal fun Route.tilgangRoutes(sakService: SakService, sakServiceAdressebeskyt
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
             val sakId = call.parameters[SAKID_CALL_PARAMETER]!!.toLong()
-            val sjekkOmSakHarStrengtFortroligBeskyttelse = sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(sakId)
-            logger.info("har tilgang for $sakId $sjekkOmSakHarStrengtFortroligBeskyttelse")
-            call.respond(sjekkOmSakHarStrengtFortroligBeskyttelse)
+            val harTilgang = !sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(sakId)
+            logger.info("har tilgang for $sakId $harTilgang")
+            call.respond(harTilgang)
         }
     }
 }

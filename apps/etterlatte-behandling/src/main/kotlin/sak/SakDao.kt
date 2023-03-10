@@ -82,7 +82,7 @@ class SakDao(private val connection: () -> Connection) {
         }
     }
 
-    fun sjekkOmSakHarStrengtFortroligBeskyttelse(sakIder: List<Long>): Boolean {
+    fun enAvSakeneHarStrengtFortroligBeskyttelse(sakIder: List<Long>): Boolean {
         with(connection()) {
             val statement = prepareStatement(
                 """

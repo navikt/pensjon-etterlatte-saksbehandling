@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
+import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
@@ -86,6 +87,7 @@ fun Application.module(beanFactory: BeanFactory) {
             oppgaveRoutes(service = beanFactory.oppgaveService())
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService))
+            tilgangRoutes(sakService, sakServiceAdressebeskyttelse)
         }
     }
 }

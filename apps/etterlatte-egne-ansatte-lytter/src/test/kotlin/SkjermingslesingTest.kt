@@ -21,6 +21,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 
@@ -36,12 +37,15 @@ class SkjermingslesingTest {
             withSchemaRegistry = true
         )
     }
+    private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
     @Test
     fun `Les skjermingshendelse og post det til behandlingsapp`() {
         val skjermingsProducer: KafkaProducer<String, String> = generateSkjermingsProducer()
         val fnr = "70078749472"
-        skjermingsProducer.send(ProducerRecord(pdlPersonTopic, fnr, "value"))
+        val send = skjermingsProducer.send(ProducerRecord(pdlPersonTopic, fnr, "true"))
+        send.get()
+        skjermingsProducer.flush()
         val behandlingKlient = mockk<BehandlingKlient>()
         every { behandlingKlient.haandterHendelse(any()) } just runs
         val kafkaConsumerEgneAnsatte = KafkaConsumerEgneAnsatte(
@@ -53,13 +57,17 @@ class SkjermingslesingTest {
             ),
             behandlingKlient,
             KafkaConsumerEnvironmentTest(),
-            Duration.ofSeconds(20L)
+            Duration.ofSeconds(12L)
         )
         runBlocking(Dispatchers.Default) {
             val job = launch {
+                logger.info("kjører poll")
                 kafkaConsumerEgneAnsatte.poll()
+                logger.info("kjørt poll")
             }
+            logger.info("jobblaunched")
             job.cancelAndJoin()
+            logger.info("joinet og canclet")
         }
         verify { behandlingKlient.haandterHendelse(any()) }
     }

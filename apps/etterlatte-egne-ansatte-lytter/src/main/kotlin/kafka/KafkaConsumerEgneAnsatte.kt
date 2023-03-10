@@ -23,6 +23,7 @@ class KafkaConsumerEgneAnsatte(
 
     suspend fun poll() {
         consumer.use {
+            logger.info("KafkaConsumerEgneAnsatte før subscribe")
             consumer.subscribe(listOf(skjermingTopic))
             logger.info("KafkaConsumerEgneAnsatte startet")
             while (true) {

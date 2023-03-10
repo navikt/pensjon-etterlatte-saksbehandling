@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.token.Bruker
+import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
@@ -82,6 +83,7 @@ class RealGenerellBehandlingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val sporingslogg: Sporingslogg
 ) : GenerellBehandlingService {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun hentBehandlinger(): List<Behandling> {
         return inTransaction { behandlinger.alleBehandlinger() }
@@ -188,15 +190,20 @@ class RealGenerellBehandlingService(
             detaljertBehandling.kommerBarnetTilgode.takeIf { detaljertBehandling.sakType == SakType.BARNEPENSJON }
 
         val sakId = detaljertBehandling.sak
+        logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {
             val vedtak = async { vedtakKlient.hentVedtak(behandlingId.toString(), bruker) }
+            logger.info("Hentet vedtak for $behandlingId")
             val avdoed = async {
                 grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, bruker)
             }
+            logger.info("Hentet Opplysningstype.AVDOED_PDL_V1 for $behandlingId")
 
             val soeker = async {
                 grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, bruker)
             }
+            logger.info("Hentet Opplysningstype.SOEKER_PDL_V1 for $behandlingId")
+
             val gjenlevende = if (detaljertBehandling.sakType == SakType.OMSTILLINGSSTOENAD) {
                 soeker
             } else {
@@ -208,6 +215,7 @@ class RealGenerellBehandlingService(
                     )
                 }
             }
+            logger.info("Hentet Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1 for $behandlingId")
 
             DetaljertBehandlingDto(
                 id = detaljertBehandling.id,

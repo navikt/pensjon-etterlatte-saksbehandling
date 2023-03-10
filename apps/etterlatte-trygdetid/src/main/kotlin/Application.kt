@@ -30,7 +30,7 @@ class Server(private val context: ApplicationContext) {
                 config = HoconApplicationConfig(context.config)
                 module {
                     restModule(sikkerLogg) {
-                        trygdetid()
+                        trygdetid(trygdetidService)
                     }
                 }
                 connector { port = properties.httpPort }
@@ -39,6 +39,7 @@ class Server(private val context: ApplicationContext) {
     }
 
     fun run() = with(context) {
+        datasource.migrate()
         setReady()
         engine.start(true)
     }

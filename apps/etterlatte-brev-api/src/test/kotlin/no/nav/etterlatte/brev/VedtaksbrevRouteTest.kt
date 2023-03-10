@@ -148,7 +148,7 @@ internal class VedtaksbrevRouteTest {
                 }
             }
 
-            val response = client.post("/api/brev/vedtak")
+            val response = client.post("/api/brev/vedtak/${UUID.randomUUID()}")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }

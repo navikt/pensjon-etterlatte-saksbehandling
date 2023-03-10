@@ -89,6 +89,7 @@ internal class BeregningRoutesTest {
     fun `skal hente beregning`() {
         val beregning = beregning()
 
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
 
         testApplication {
@@ -133,6 +134,7 @@ internal class BeregningRoutesTest {
 
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 

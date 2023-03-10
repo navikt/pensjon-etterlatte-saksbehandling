@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.withBehandlingId
@@ -23,7 +24,7 @@ import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: BehandlingKlient) {
     route("grunnlag") {
-        get("{sakId}") {
+        get("{$SAKID_CALL_PARAMETER}") {
             withSakId(behandlingKlient) { sakId ->
                 when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
@@ -32,7 +33,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        get("{sakId}/versjon/{versjon}") {
+        get("{$SAKID_CALL_PARAMETER}/versjon/{versjon}") {
             withSakId(behandlingKlient) { sakId ->
                 val versjon = call.parameters["versjon"]!!.toLong()
                 when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagMedVersjon(sakId, versjon)) {
@@ -42,7 +43,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        get("{sakId}/{opplysningType}") {
+        get("{$SAKID_CALL_PARAMETER}/{opplysningType}") {
             withSakId(behandlingKlient) { sakId ->
                 val opplysningstype = Opplysningstype.valueOf(call.parameters["opplysningType"].toString())
                 val grunnlag = grunnlagService.hentGrunnlagAvType(sakId, opplysningstype)

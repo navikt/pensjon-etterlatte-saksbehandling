@@ -101,6 +101,7 @@ spec:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
         - application: etterlatte-beregning
+        - application: etterlatte-behandling
       external:
         - host: saf.dev-fss-pub.nais.io
         - host: dokarkiv.dev-fss-pub.nais.io

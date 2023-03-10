@@ -17,4 +17,4 @@ jobs:
           java-version: 17.x
           cache: gradle
       - name: Gradle test and build
-        run: ./gradlew :apps:${{ github.workflow }}:test --stacktrace
+        run: ./gradlew :apps:${{ github.workflow }}:test --stacktrace --debug

@@ -20,13 +20,11 @@ import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.libs.ktor.httpClient
-import no.nav.etterlatte.libs.ktor.logger
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -78,7 +76,6 @@ private fun Route.adressebeskyttelsesInterceptor(behandlingKlient: BehandlingKli
         if (call.request.uri.contains("person")) {
             val fnrDTO = call.receive<FoedselsnummerDTO>()
             val erStrengtFortrolig = behandlingKlient.sjekkErStrengtFortrolig(fnrDTO.foedselsnummer, bruker)
-            logger.info("Er strengt fortrolig for ${fnrDTO.foedselsnummer.maskerFnr()} $erStrengtFortrolig")
             if (erStrengtFortrolig) {
                 call.respond(HttpStatusCode.NotFound)
             }

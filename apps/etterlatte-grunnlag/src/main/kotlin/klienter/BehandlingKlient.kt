@@ -6,7 +6,6 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -54,7 +53,6 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     }
 
     override suspend fun sjekkErStrengtFortrolig(fnr: String, bruker: Bruker): Boolean {
-        logger.info("Sjekker strengt fortrolig for ${fnr.maskerFnr()}")
         try {
             return downstreamResourceClient
                 .get(

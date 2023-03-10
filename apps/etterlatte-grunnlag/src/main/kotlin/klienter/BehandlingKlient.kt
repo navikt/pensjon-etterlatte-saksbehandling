@@ -60,7 +60,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 .get(
                     resource = Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/personer/{$fnr}/sjekkadressebeskyttelse"
+                        url = "$resourceUrl/personer/$fnr/sjekkadressebeskyttelse"
                     ),
                     bruker = bruker
                 )

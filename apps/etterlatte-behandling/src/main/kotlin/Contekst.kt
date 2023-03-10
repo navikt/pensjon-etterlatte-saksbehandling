@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.sql.Connection
@@ -26,7 +27,7 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
         throw IllegalArgumentException("Støtter ikke navn på systembruker")
     }
     override fun kanSetteKilde(): Boolean {
-        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("roles", "kan-sette-kilde")
+        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim("roles", "kan-sette-kilde")
     }
 }
 
@@ -36,27 +37,27 @@ class Saksbehandler(
 ) :
     ExternalUser(identifiedBy) {
     init {
-        println("""Groups: ${identifiedBy.getJwtToken("azure").jwtTokenClaims.getAsList("groups")}""")
+        println("""Groups: ${identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.getAsList("groups")}""")
     }
     override fun name(): String {
-        return identifiedBy.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
+        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.getStringClaim("NAVident")
     }
 
     fun harRolleSaksbehandler(): Boolean {
-        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
+        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
             "groups",
             saksbehandlerGroupIdsByKey["AZUREAD_SAKSBEHANDLER_GROUPID"] ?: ""
         )
     }
     fun harRolleAttestant(): Boolean {
-        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
+        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
             "groups",
             saksbehandlerGroupIdsByKey["AZUREAD_ATTESTANT_GROUPID"] ?: ""
         )
     }
 
     fun harRolleStrengtFortrolig(): Boolean {
-        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
+        return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
             "groups",
             saksbehandlerGroupIdsByKey["AZUREAD_STRENGT_FORTROLIG_GROUPID"] ?: ""
         )
@@ -75,8 +76,8 @@ fun decideUser(
 ): ExternalUser {
     return if (principal.context.issuers.contains("tokenx")) {
         Kunde(principal.context)
-    } else if (principal.context.issuers.contains("azure")) {
-        if (principal.context.getJwtToken("azure").jwtTokenClaims.let { it.getStringClaim("oid") == it.subject }) {
+    } else if (principal.context.issuers.contains(AZURE_ISSUER)) {
+        if (principal.context.getJwtToken(AZURE_ISSUER).jwtTokenClaims.let { it.getStringClaim("oid") == it.subject }) {
             SystemUser(principal.context)
         } else {
             Saksbehandler(principal.context, saksbehandlerGroupIdsByKey)

@@ -86,6 +86,7 @@ fun Application.restModule(
     routePrefix: String? = null,
     config: ApplicationConfig = environment.config,
     harAdressebeskyttelseFunc: ((id: String) -> Boolean)? = null,
+    routesUtenHookInterceptor: (Route.() -> Unit)? = null,
     routes: Route.() -> Unit
 ) {
     install(ContentNegotiation) {
@@ -133,6 +134,11 @@ fun Application.restModule(
                             harAdressebeskyttelseFunc(behandlingId)
                         }
                     }
+                }
+            }
+            if (routesUtenHookInterceptor != null) {
+                route("") {
+                    routesUtenHookInterceptor()
                 }
             }
         }

@@ -46,8 +46,11 @@ class RealSakService(private val dao: SakDao) : SakService {
         }
     }
 
-    override fun sjekkOmSakHarStrengtFortroligBeskyttelse(sakId: Long): Boolean =
-        dao.sjekkOmSakHarStrengtFortroligBeskyttelse(listOf(sakId))
+    override fun sjekkOmSakHarStrengtFortroligBeskyttelse(sakId: Long): Boolean {
+        return inTransaction {
+            dao.sjekkOmSakHarStrengtFortroligBeskyttelse(listOf(sakId))
+        }
+    }
 
     override fun finnEllerOpprettSak(person: String, type: SakType): Sak {
         val eksisterendeSak = finnSak(person, type)

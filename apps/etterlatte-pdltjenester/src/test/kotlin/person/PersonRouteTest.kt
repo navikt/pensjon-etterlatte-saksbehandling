@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.mockFolkeregisterident
@@ -43,7 +44,7 @@ class PersonRouteTest {
     fun before() {
         server.start()
         applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID, CLIENT_ID)
+            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterAll
@@ -207,7 +208,7 @@ class PersonRouteTest {
 
     private val token: String by lazy {
         server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "John Doe",
@@ -220,7 +221,6 @@ class PersonRouteTest {
         const val PERSON_ENDEPUNKT = "/person"
         const val PERSON_ENDEPUNKT_V2 = "/person/v2"
         const val FOLKEREGISTERIDENT_ENDEPUNKT = "/folkeregisterident"
-        const val ISSUER_ID = "azure"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

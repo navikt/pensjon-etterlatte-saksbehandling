@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -66,7 +67,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun before() {
         server.start()
         val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
         postgreSQLContainer.start()
         ds = DataSourceBuilder.createDataSource(
             postgreSQLContainer.jdbcUrl,
@@ -102,7 +103,7 @@ internal class VilkaarsvurderingRoutesTest {
 
     private val token: String by lazy {
         server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "John Doe",
@@ -596,7 +597,6 @@ internal class VilkaarsvurderingRoutesTest {
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
         val oboToken = Bruker.of("token", "s1", null, null)
-        const val ISSUER_ID = "azure"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

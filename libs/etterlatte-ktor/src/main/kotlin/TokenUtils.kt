@@ -11,6 +11,8 @@ import no.nav.etterlatte.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
+const val AZURE_ISSUER = "azure"
+
 fun hentAccessToken(call: ApplicationCall) = call.request.parseAuthorizationHeader().let {
     if (!(it == null || it !is HttpAuthHeader.Single || it.authScheme != "Bearer")) {
         it.blob
@@ -28,7 +30,7 @@ inline val ApplicationCall.bruker: Bruker
     get() {
         val claims = this.principal<TokenValidationContextPrincipal>()
             ?.context
-            ?.getJwtToken("azure")
+            ?.getJwtToken(AZURE_ISSUER)
             ?.jwtTokenClaims
         val oidSub = claims
             ?.let {

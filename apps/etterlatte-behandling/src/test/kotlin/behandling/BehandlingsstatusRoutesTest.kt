@@ -15,6 +15,7 @@ import io.mockk.runs
 import no.nav.etterlatte.BeanFactory
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -36,7 +37,7 @@ internal class BehandlingsstatusRoutesTest {
     fun before() {
         server.start()
         val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterAll
@@ -102,7 +103,7 @@ internal class BehandlingsstatusRoutesTest {
 
     private val token: String by lazy {
         server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "John Doe",
@@ -113,7 +114,6 @@ internal class BehandlingsstatusRoutesTest {
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        const val ISSUER_ID = "azure"
         const val CLIENT_ID = "mock-client-id"
     }
 }

@@ -56,7 +56,7 @@ class RestModuleTest {
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val token: String by lazy {
         server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "John Doe",
@@ -69,7 +69,7 @@ class RestModuleTest {
     fun beforeAll() {
         server.start()
         val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterAll
@@ -276,6 +276,5 @@ class RestModuleTest {
 
     private companion object {
         const val CLIENT_ID = "azure-id for saksbehandler"
-        const val ISSUER_ID = "azure"
     }
 }

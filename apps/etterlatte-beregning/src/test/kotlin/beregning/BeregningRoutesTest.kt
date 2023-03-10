@@ -60,6 +60,7 @@ internal class BeregningRoutesTest {
 
         applicationConfig =
             buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID, CLIENT_ID)
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
     }
 
     @AfterAll
@@ -73,7 +74,7 @@ internal class BeregningRoutesTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService) } }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
 
             val response = client.get("/api/beregning/${randomUUID()}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -92,7 +93,7 @@ internal class BeregningRoutesTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService) } }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
 
             val response = client.get("/api/beregning/${beregning.behandlingId}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -102,6 +103,26 @@ internal class BeregningRoutesTest {
             val hentetBeregning = objectMapper.readValue(response.bodyAsText(), BeregningDTO::class.java)
 
             hentetBeregning shouldNotBe null
+        }
+    }
+
+    @Test
+    fun `skal returnere not found naar saksbehandler ikke har tilgang til behandling`() {
+        val beregning = beregning()
+
+        every { beregningRepository.hent(beregning.behandlingId) } returns beregning
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns false
+
+        testApplication {
+            environment { config = applicationConfig }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+
+            client.get("/api/beregning/${beregning.behandlingId}") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let {
+                it.status shouldBe HttpStatusCode.NotFound
+            }
         }
     }
 
@@ -117,7 +138,7 @@ internal class BeregningRoutesTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService) } }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
 
             val response = client.post("/api/beregning/${behandling.id}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

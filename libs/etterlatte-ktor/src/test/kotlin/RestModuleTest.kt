@@ -10,6 +10,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.HttpStatusCode.Companion.NotFound
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.server.application.call
 import io.ktor.server.application.log
@@ -21,8 +22,18 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
+import io.mockk.coEvery
+import io.mockk.mockk
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.common.withFoedselsnummer
+import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -33,9 +44,13 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RestModuleTest {
+    private val behandlingTilgangsSjekkMock = mockk<BehandlingTilgangsSjekk>()
+    private val sakTilgangsSjekkMock = mockk<SakTilgangsSjekk>()
+    private val personTilgangsSjekkMock = mockk<PersonTilgangsSjekk>()
 
     private val server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
@@ -85,6 +100,44 @@ class RestModuleTest {
 
             assertEquals(OK, response1.status)
             assertEquals(OK, response2.status)
+        }
+    }
+
+    @Test
+    fun `skal kun svare ok dersom bruker har tilgang`() {
+        coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { sakTilgangsSjekkMock.harTilgangTilSak(any(), any()) } returns true
+        coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any()) } returns true
+
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application { restModule(this.log) { tilgangTestRoute() } }.also { setReady() }
+
+            client.get("/behandling/${UUID.randomUUID()}") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let { assertEquals(OK, it.status) }
+            client.get("/sak/1") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let { assertEquals(OK, it.status) }
+            client.get("/person/30106519672") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let { assertEquals(OK, it.status) }
+
+            coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any()) } returns false
+            coEvery { sakTilgangsSjekkMock.harTilgangTilSak(any(), any()) } returns false
+            coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any()) } returns false
+
+            client.get("/behandling/${UUID.randomUUID()}") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let { assertEquals(NotFound, it.status) }
+            client.get("/sak/1") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let { assertEquals(NotFound, it.status) }
+            client.get("/person/30106519672") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let { assertEquals(NotFound, it.status) }
         }
     }
 
@@ -195,6 +248,26 @@ class RestModuleTest {
         route("/test2") {
             get("/") {
                 call.respond(OK)
+            }
+        }
+    }
+
+    private fun Route.tilgangTestRoute() {
+        route("") {
+            get("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+                withBehandlingId(behandlingTilgangsSjekkMock) {
+                    call.respond(OK)
+                }
+            }
+            get("sak/{$SAKID_CALL_PARAMETER}") {
+                withSakId(sakTilgangsSjekkMock) {
+                    call.respond(OK)
+                }
+            }
+            get("person/{fnr}") {
+                withFoedselsnummer(call.parameters["fnr"]!!, personTilgangsSjekkMock) {
+                    call.respond(OK)
+                }
             }
         }
     }

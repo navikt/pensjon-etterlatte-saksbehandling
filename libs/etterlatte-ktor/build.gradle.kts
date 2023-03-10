@@ -35,6 +35,7 @@ dependencies {
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.navfelles.mockoauth2server)
+    testImplementation(libs.test.mockk)
 
     tasks {
         withType<Test> {

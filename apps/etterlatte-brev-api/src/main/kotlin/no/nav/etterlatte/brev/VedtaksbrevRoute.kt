@@ -12,19 +12,19 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import org.slf4j.LoggerFactory
-import java.util.*
 
 fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: BehandlingKlient) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
 
     route("brev") {
-        post("vedtak") {
-            val (sakId, behandlingId) = call.receive<OpprettVedtaksbrevRequest>()
+        post("vedtak/{$BEHANDLINGSID_CALL_PARAMETER}") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val (sakId) = call.receive<OpprettVedtaksbrevRequest>()
+                logger.info("Genererer vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
+                val brev = service.oppdaterVedtaksbrev(sakId, behandlingId, bruker)
 
-            logger.info("Genererer vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
-            val brev = service.oppdaterVedtaksbrev(sakId, behandlingId, bruker)
-
-            call.respond(brev)
+                call.respond(brev)
+            }
         }
 
         post("attestert/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -42,6 +42,5 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
 }
 
 data class OpprettVedtaksbrevRequest(
-    val sakId: Long,
-    val behandlingId: UUID
+    val sakId: Long
 )

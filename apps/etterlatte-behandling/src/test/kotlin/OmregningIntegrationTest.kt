@@ -13,7 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.behandling.BehandlingsBehov
-import no.nav.etterlatte.libs.common.behandling.BehandlingListe
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
@@ -94,6 +94,17 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 UUID.fromString(it.body())
             }
 
+            client.get("/behandlinger/$foerstegangsbehandling") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.let {
+                Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                it.body<DetaljertBehandling>().also { behandling ->
+                    Assertions.assertEquals(foerstegangsbehandling, behandling.id)
+                    Assertions.assertEquals(sak.id, behandling.sak)
+                }
+            }
+
             val omregning = client.post("/omregning") {
                 addAuthToken(tokenServiceUser)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -110,17 +121,15 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 it.body<UUID>()
             }
 
-            client.get("/sak/1/behandlinger") {
+            client.get("/behandlinger/$omregning") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body<BehandlingListe>().also { liste ->
-                    Assertions.assertEquals(foerstegangsbehandling, liste.behandlinger[0].id)
-                    Assertions.assertEquals(omregning, liste.behandlinger[1].id)
+                it.body<DetaljertBehandling>().also { behandling ->
+                    Assertions.assertEquals(omregning, behandling.id)
+                    Assertions.assertEquals(sak.id, behandling.sak)
                 }
-            }.also {
-                Assertions.assertEquals(2, it.behandlinger.size)
             }
         }
     }

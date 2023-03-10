@@ -22,13 +22,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.module
 import no.nav.etterlatte.sak.Sak
-import no.nav.etterlatte.sak.Saker
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdressebeskyttelseTest : BehandlingIntegrationTest() {
@@ -64,13 +63,6 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 it.body()
             }
 
-            val saker: Saker = client.get("personer/$fnr/saker") {
-                addAuthToken(tokenSaksbehandler)
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body()
-            }
-            Assertions.assertEquals(1, saker.saker.size)
             val behandlingId = client.post("/behandlinger/foerstegangsbehandling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -86,13 +78,13 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 UUID.fromString(it.body())
             }
 
-            client.get("/behandlinger/foerstegangsbehandling/$behandlingId") {
+            client.get("/behandlinger/$behandlingId") {
                 addAuthToken(systemBruker)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.get("/behandlinger/foerstegangsbehandling/$behandlingId") {
+            client.get("/behandlinger/$behandlingId") {
                 addAuthToken(tokenSaksbehandler)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -103,7 +95,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG
             )
 
-            client.get("/behandlinger/foerstegangsbehandling/$behandlingId") {
+            client.get("/behandlinger/$behandlingId") {
                 addAuthToken(tokenSaksbehandler)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
@@ -115,7 +107,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
             }
             // systemBruker skal alltid ha tilgang
-            client.get("/behandlinger/foerstegangsbehandling/$behandlingId") {
+            client.get("/behandlinger/$behandlingId") {
                 addAuthToken(systemBruker)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)

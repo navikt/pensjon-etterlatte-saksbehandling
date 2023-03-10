@@ -21,7 +21,6 @@ import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.VurderingMedBegrunnelseJson
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -56,7 +55,7 @@ import org.junit.jupiter.api.TestInstance
 import java.lang.Thread.sleep
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class IntegrationTest : BehandlingIntegrationTest() {
@@ -119,14 +118,12 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
             behandlingOpprettet = behandlingId
 
-            client.get("/sak/1/behandlinger") {
+            client.get("/behandlinger/$behandlingId") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.let {
                 assertEquals(HttpStatusCode.OK, it.status)
-                it.body<BehandlingListe>()
-            }.also {
-                assertEquals(1, it.behandlinger.size)
+                it.body<DetaljertBehandling>()
             }
 
             client.post("/behandlinger/$behandlingId/gyldigfremsatt") {

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Hovedvilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -12,7 +12,7 @@ object OmstillingstoenadVilkaar {
     )
 
     private fun etVilkaar() = Vilkaar(
-        Hovedvilkaar(
+        Delvilkaar(
             type = VilkaarType.OMS_TESTVILKAAR,
             tittel = "Testvilkår",
             beskrivelse = "Testvilkår",

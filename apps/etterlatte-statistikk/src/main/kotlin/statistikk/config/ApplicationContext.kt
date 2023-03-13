@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.config
 
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -17,7 +18,6 @@ import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import requireEnvValue
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource

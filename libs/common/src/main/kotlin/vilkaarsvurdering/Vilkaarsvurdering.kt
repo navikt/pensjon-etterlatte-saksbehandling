@@ -14,9 +14,9 @@ data class VilkaarsvurderingDto(
 
 data class Vilkaar(
     val hovedvilkaar: Hovedvilkaar,
-    val unntaksvilkaar: List<Unntaksvilkaar>? = null,
+    val unntaksvilkaar: List<Unntaksvilkaar> = emptyList(),
     val vurdering: VilkaarVurderingData? = null,
-    val grunnlag: List<Vilkaarsgrunnlag<out Any?>>? = null,
+    val grunnlag: List<Vilkaarsgrunnlag<out Any?>> = emptyList(),
     val id: UUID = UUID.randomUUID()
 )
 

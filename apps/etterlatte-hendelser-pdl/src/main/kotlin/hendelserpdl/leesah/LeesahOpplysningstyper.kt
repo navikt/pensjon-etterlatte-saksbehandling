@@ -1,4 +1,4 @@
-package no.nav.etterlatte.hendelserpdl
+package no.nav.etterlatte.hendelserpdl.leesah
 
 enum class LeesahOpplysningstyper {
     ADRESSEBESKYTTELSE_V1,

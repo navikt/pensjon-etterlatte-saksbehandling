@@ -1,10 +1,6 @@
-package no.nav.etterlatte.hendelserpdl
+package no.nav.etterlatte.hendelserpdl.leesah
 
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
@@ -12,58 +8,30 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
 
-object LyttPaaHendelserProvider {
-    private var lyttPaaHendelser: LyttPaaHendelser? = null
-
-    fun getStream(): LyttPaaHendelser {
-        return this.lyttPaaHendelser ?: throw LyttPaaHendelserStreamNullable()
-    }
-
-    fun setStream(lyttPaaHendelserTmp: LyttPaaHendelser) {
-        this.lyttPaaHendelser = lyttPaaHendelserTmp
-    }
-}
-class LyttPaaHendelserStreamNullable : Exception("LyttPaaHendelser er ikke initialisert")
-
-class LyttPaaHendelser(
-    private val livshendelser: ILivetErEnStroemAvHendelser,
+class PersonHendelseFordeler(
     private val postHendelser: ILivsHendelserRapid,
     private val pdlService: Pdl
 ) {
-    val log: Logger = LoggerFactory.getLogger(LyttPaaHendelser::class.java)
-    private var iterasjoner = 0
-    private var doedsmeldinger = 0
-    private var meldinger = 0
-    private var stopped = false
+    private val log: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
 
-    fun stream() {
-        iterasjoner++
+    fun haandterHendelse(personhendelse: Personhendelse) {
+        when (personhendelse.opplysningstype) {
+            LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(personhendelse)
+            LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(
+                personhendelse
+            )
 
-        val antallMeldingerLest = livshendelser.poll {
-            meldinger++
-            withLogContext {
-                when (it.opplysningstype) {
-                    LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(it)
-                    LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(it)
-                    LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(it)
-                    LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(it)
-                    else -> log.info("Så en hendelse av type ${it.opplysningstype} som vi ikke håndterer")
-                }
-            }
-        }
+            LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(
+                personhendelse
+            )
 
-        runBlocking {
-            if (antallMeldingerLest == 0) delay(500)
+            LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(
+                personhendelse
+            )
+
+            else -> log.info("Så en hendelse av type ${personhendelse.opplysningstype} som vi ikke håndterer")
         }
     }
-
-    fun getAntallIterasjoner(): Int = this.iterasjoner
-
-    fun getAntallDoedsMeldinger(): Int = this.doedsmeldinger
-
-    fun getAntallMeldinger(): Int = this.meldinger
-
-    fun getStopped(): Boolean = this.stopped
 
     private fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
         val hendelseType = "Adressebeskyttelse"
@@ -73,9 +41,8 @@ class LyttPaaHendelser(
             return
         }
         try {
-            val personnummer = runBlocking {
+            val personnummer =
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
-            }
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             personhendelse.adressebeskyttelse.let {
                 postHendelser.haandterAdressebeskyttelse(
@@ -94,9 +61,9 @@ class LyttPaaHendelser(
     private fun haandterForelderBarnRelasjon(personhendelse: Personhendelse) {
         val hendelseType = "Forelder-barn-relasjon-hendelse"
         try {
-            val personnummer = runBlocking {
+            val personnummer =
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
-            }
+
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             personhendelse.forelderBarnRelasjon.let {
                 postHendelser.forelderBarnRelasjon(
@@ -117,9 +84,9 @@ class LyttPaaHendelser(
     private fun haandterDoedsendelse(personhendelse: Personhendelse) {
         val hendelseType = "Doedshendelse"
         try {
-            val personnummer = runBlocking {
+            val personnummer =
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
-            }
+
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             postHendelser.personErDod(
                 fnr = personnummer.folkeregisterident.value,
@@ -134,15 +101,14 @@ class LyttPaaHendelser(
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
         }
-        doedsmeldinger++
     }
 
-    fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
+    private fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
         val hendelseType = "Utflytting fra Norge-hendelse"
         try {
-            val personnummer = runBlocking {
+            val personnummer =
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
-            }
+
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             postHendelser.personUtflyttingFraNorge(
                 fnr = personnummer.folkeregisterident.value,
@@ -168,17 +134,5 @@ class LyttPaaHendelser(
                 "folkeregisteridentifikatoren fra PDL",
             e
         )
-    }
-
-    fun fraStart() {
-        livshendelser.fraStart()
-    }
-
-    fun stop() {
-        stopped = true
-    }
-
-    fun start() {
-        stopped = false
     }
 }

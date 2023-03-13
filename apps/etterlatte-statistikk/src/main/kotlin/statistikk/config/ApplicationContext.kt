@@ -17,6 +17,7 @@ import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import requireEnvValue
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
@@ -85,12 +86,6 @@ class ApplicationContext {
         )
     }
 }
-
-private fun Map<String, String>.requireEnvValue(key: String) =
-    when (val value = this[key]) {
-        null -> throw IllegalArgumentException("app env is missing required key $key")
-        else -> value
-    }
 
 private fun Map<String, String>.withConsumerGroupId() =
     this.toMutableMap().apply {

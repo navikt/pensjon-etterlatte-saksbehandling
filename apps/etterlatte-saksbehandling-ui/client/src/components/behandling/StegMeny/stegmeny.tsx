@@ -40,6 +40,14 @@ export const StegMeny = () => {
       )}
       {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
         <>
+          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.OPPRETTET) })}>
+            <NavLink to="trygdetid">Trygdetid</NavLink>
+          </li>
+          <Separator aria-hidden={'true'} />
+        </>
+      )}
+      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+        <>
           <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
             <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
           </li>

@@ -10,6 +10,7 @@ import { Vedtaksbrev } from './vedtaksbrev/Vedtaksbrev'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
 
 const behandlingRoutes = [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false, erManueltOpphoerRoute: false },
@@ -19,7 +20,13 @@ const behandlingRoutes = [
     erRevurderingRoute: false,
     erManueltOpphoerRoute: true,
   },
-  { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering />, erRevurderingRoute: true, erManueltOpphoerRoute: false },
+  {
+    path: 'vilkaarsvurdering',
+    element: <Vilkaarsvurdering />,
+    erRevurderingRoute: true,
+    erManueltOpphoerRoute: false,
+  },
+  { path: 'trygdetid', element: <Trygdetid />, erRevurderingRoute: false, erManueltOpphoerRoute: false },
   {
     path: 'beregningsgrunnlag',
     element: <Beregningsgrunnlag />,

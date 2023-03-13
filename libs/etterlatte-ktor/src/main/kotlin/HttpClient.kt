@@ -14,7 +14,10 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.security.ktor.clientCredential
 
-fun httpClient() = HttpClient(OkHttp) {
+fun httpClient(forventSuksess: Boolean = false) = HttpClient(OkHttp) {
+    if (forventSuksess) {
+        expectSuccess = true
+    }
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }

@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -42,13 +41,11 @@ internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private v
                 logger.info("Mottatt omregningshendelse")
 
                 val hendelse: Omregningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
-                runBlocking {
-                    val (behandlingId, behandlingViOmregnerFra) = behandlinger.opprettOmregning(hendelse)
-                    packet.behandlingId = behandlingId
-                    packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
-                    packet.eventName = VILKAARSVURDER
-                    context.publish(packet.toJson())
-                }
+                val (behandlingId, behandlingViOmregnerFra) = behandlinger.opprettOmregning(hendelse)
+                packet.behandlingId = behandlingId
+                packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
+                packet.eventName = VILKAARSVURDER
+                context.publish(packet.toJson())
                 logger.info("Publiserte oppdatert omregningshendelse")
             }
         }

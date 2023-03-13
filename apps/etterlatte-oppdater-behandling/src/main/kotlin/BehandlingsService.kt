@@ -89,4 +89,4 @@ class BehandlingsService(
         }
 }
 
-data class OpprettOmregningResponse(val behandlingId: UUID, val forrigeBehandling: UUID)
+data class OpprettOmregningResponse(val behandlingId: UUID, val forrigeBehandlingId: UUID)

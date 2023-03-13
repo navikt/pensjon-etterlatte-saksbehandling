@@ -1,5 +1,6 @@
 package regulering
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -54,5 +55,35 @@ internal class OpprettVedtakforespoerselTest {
         verify { vedtakServiceMock.upsertVedtak(behandlingId) }
         verify { vedtakServiceMock.fattVedtak(behandlingId) }
         verify { vedtakServiceMock.attesterVedtak(behandlingId) }
+    }
+
+    @Test
+    fun `skal ikke fatte vedtak hvis opprettelse feiler`() {
+        val behandlingId = UUID.randomUUID()
+        val melding = genererOpprettVedtakforespoersel(behandlingId)
+        val vedtakServiceMock = mockk<VedtakService>()
+        val inspector = TestRapid().apply { OpprettVedtakforespoersel(this, vedtakServiceMock) }
+
+        inspector.sendTestMessage(melding.toJson())
+
+        verify(exactly = 1) { vedtakServiceMock.upsertVedtak(behandlingId) }
+        verify(exactly = 0) { vedtakServiceMock.fattVedtak(behandlingId) }
+        verify(exactly = 0) { vedtakServiceMock.attesterVedtak(behandlingId) }
+    }
+
+    @Test
+    fun `skal ikke attestere vedtak hvis aa fattevedtak feiler`() {
+        val behandlingId = UUID.randomUUID()
+        val melding = genererOpprettVedtakforespoersel(behandlingId)
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true) {
+            every { fattVedtak(any()) } throws RuntimeException()
+        }
+        val inspector = TestRapid().apply { OpprettVedtakforespoersel(this, vedtakServiceMock) }
+
+        inspector.sendTestMessage(melding.toJson())
+
+        verify(exactly = 1) { vedtakServiceMock.upsertVedtak(behandlingId) }
+        verify(exactly = 1) { vedtakServiceMock.fattVedtak(behandlingId) }
+        verify(exactly = 0) { vedtakServiceMock.attesterVedtak(behandlingId) }
     }
 }

@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.rivers.DistribuerBrev
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
@@ -58,10 +59,20 @@ class ApplicationBuilder {
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }
+
+    private val proxyClient: HttpClient by lazy {
+        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.proxy")
+        httpClientClientCredentials(
+            azureAppClientId = inntektsConfig.getString("clientId"),
+            azureAppJwk = inntektsConfig.getString("clientJwk"),
+            azureAppWellKnownUrl = inntektsConfig.getString("wellKnownUrl"),
+            azureAppScope = inntektsConfig.getString("outbound")
+        )
+    }
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env["ETTERLATTE_PDFGEN_URL"]!!)
     private val brregService = BrregService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
-    private val regoppslagKlient = RegoppslagKlient(proxyClient(), env["ETTERLATTE_PROXY_URL"]!!)
-    private val navansattKlient = NavansattKlient(proxyClient(), env["NAVANSATT_URL"]!!)
+    private val regoppslagKlient = RegoppslagKlient(proxyClient, env["ETTERLATTE_PROXY_URL"]!!)
+    private val navansattKlient = NavansattKlient(proxyClient, env["NAVANSATT_URL"]!!)
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())
@@ -139,27 +150,6 @@ class ApplicationBuilder {
                     config = env.toMutableMap()
                         .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                 }
-            }
-        }
-        defaultRequest {
-            header(X_CORRELATION_ID, getCorrelationId())
-        }
-    }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
-
-    private fun proxyClient() = HttpClient(OkHttp) {
-        expectSuccess = true
-
-        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.proxy")
-        val env = mutableMapOf(
-            "AZURE_APP_CLIENT_ID" to inntektsConfig.getString("clientId"),
-            "AZURE_APP_WELL_KNOWN_URL" to inntektsConfig.getString("wellKnownUrl"),
-            "AZURE_APP_OUTBOUND_SCOPE" to inntektsConfig.getString("outbound"),
-            "AZURE_APP_JWK" to inntektsConfig.getString("clientJwk")
-        )
-        install(ContentNegotiation) { jackson() }
-        install(Auth) {
-            clientCredential {
-                config = env
             }
         }
         defaultRequest {

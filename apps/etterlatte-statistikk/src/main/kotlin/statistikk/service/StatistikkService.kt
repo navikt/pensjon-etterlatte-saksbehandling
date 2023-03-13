@@ -26,7 +26,7 @@ import no.nav.etterlatte.statistikk.river.BehandlingIntern
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 class StatistikkService(
     private val stoenadRepository: StoenadRepository,
@@ -147,7 +147,6 @@ class StatistikkService(
         return when (vedtak.utbetalingsperioder.any { it.type == UtbetalingsperiodeType.OPPHOER }) {
             true -> BehandlingResultat.OPPHOER
             false -> BehandlingResultat.VEDTAK
-            null -> null
         }
     }
 
@@ -157,10 +156,6 @@ class StatistikkService(
 
     private fun hentPersongalleri(behandlingId: UUID): Persongalleri = runBlocking {
         behandlingKlient.hentPersongalleri(behandlingId)
-    }
-
-    private fun hentSak(sakId: Long) = runBlocking {
-        behandlingKlient.hentSak(sakId)
     }
 
     private fun vedtakTilStoenadsrad(vedtak: VedtakDto, tekniskTid: LocalDateTime): StoenadRad {
@@ -195,11 +190,10 @@ class StatistikkService(
         behandlingHendelse: BehandlingHendelse,
         tekniskTid: LocalDateTime
     ): SakRad {
-        val sak = hentSak(behandlingIntern.sakId)
         val fellesRad = SakRad(
             id = -1,
             behandlingId = behandlingIntern.id,
-            sakId = behandlingIntern.sakId,
+            sakId = behandlingIntern.sak.id,
             mottattTidspunkt = behandlingIntern.behandlingOpprettet.toTidspunkt(),
             registrertTidspunkt = behandlingIntern.behandlingOpprettet.toTidspunkt(),
             ferdigbehandletTidspunkt = null,
@@ -211,10 +205,10 @@ class StatistikkService(
             behandlingMetode = null,
             opprettetAv = null,
             ansvarligBeslutter = null,
-            aktorId = behandlingIntern.persongalleri.soeker,
+            aktorId = behandlingIntern.sak.ident,
             datoFoersteUtbetaling = null,
             tekniskTid = tekniskTid.toTidspunkt(),
-            sakYtelse = sak.sakType.name,
+            sakYtelse = behandlingIntern.sak.sakType.name,
             vedtakLoependeFom = null,
             vedtakLoependeTom = null,
             saksbehandler = null,

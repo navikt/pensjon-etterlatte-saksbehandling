@@ -11,11 +11,6 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
-import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.domain.ManueltOpphoer
-import no.nav.etterlatte.behandling.domain.Regulering
-import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
@@ -77,41 +72,16 @@ class BehandlingsHendelser(
                 JsonMessage.newMessage(
                     "BEHANDLING:${hendelse.second.name}",
                     mapOf(
-                        "behandlingId" to behandling.id,
                         CORRELATION_ID_KEY to correlationId,
-                        BehandlingRiverKey.behandlingObjectKey to behandling.toDetaljertBehandling(),
+                        BehandlingRiverKey.behandlingObjectKey to behandling,
                         BehandlingRiverKey.sakIdKey to behandling.sak.id,
-                        BehandlingRiverKey.sakObjectKey to behandling.sak,
-                        BehandlingRiverKey.behandlingOpprettetKey to behandling.behandlingOpprettet
+                        BehandlingRiverKey.persongalleriKey to behandling.persongalleri
                     )
-                ).also {
-                    when (behandling) {
-                        is Foerstegangsbehandling -> {
-                            it[BehandlingRiverKey.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingRiverKey.persongalleriKey] = behandling.persongalleri
-                        }
-                        is Revurdering -> {
-                            it[BehandlingRiverKey.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingRiverKey.persongalleriKey] = behandling.persongalleri
-                            it[BehandlingRiverKey.revurderingAarsakKey] = behandling.revurderingsaarsak
-                        }
-                        is ManueltOpphoer -> {
-                            it[BehandlingRiverKey.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingRiverKey.persongalleriKey] = behandling.persongalleri
-                            it[BehandlingRiverKey.manueltOpphoerAarsakKey] = behandling.opphoerAarsaker
-                            it[BehandlingRiverKey.manueltOpphoerfritekstAarsakKey] =
-                                behandling.fritekstAarsak ?: ""
-                        }
-                        is Regulering -> {
-                            it[BehandlingRiverKey.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingRiverKey.persongalleriKey] = behandling.persongalleri
-                        }
-                    }
-                }.toJson()
-            ).also {
+                ).toJson()
+            ).also { (partition, offset) ->
                 logger.info(
                     "Posted event BEHANDLING:${hendelse.second.name} for behandling ${hendelse.first}" +
-                        " to partiton ${it.first}, offset ${it.second} correlationid: $correlationId"
+                        " to partiton $partition, offset $offset correlationid: $correlationId"
                 )
             }
         }

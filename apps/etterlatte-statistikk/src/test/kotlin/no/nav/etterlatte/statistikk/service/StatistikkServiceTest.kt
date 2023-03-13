@@ -28,11 +28,12 @@ import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
+import no.nav.etterlatte.statistikk.river.BehandlingIntern
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 class StatistikkServiceTest {
 
@@ -237,23 +238,12 @@ fun behandling(
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    soeker: String = "12312312312",
-    innsender: String? = null,
-    soesken: List<String> = emptyList(),
-    avdoed: List<String> = emptyList(),
-    gjenlevende: List<String> = emptyList()
-): no.nav.etterlatte.statistikk.river.BehandlingIntern = no.nav.etterlatte.statistikk.river.BehandlingIntern(
+    soeker: String = "12312312312"
+) = BehandlingIntern(
     id = id,
-    sakId = sakId,
+    sak = Sak(soeker, SakType.BARNEPENSJON, sakId),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
-    type = type,
-    persongalleri = Persongalleri(
-        soeker = soeker,
-        innsender = innsender,
-        soesken = soesken,
-        avdoed = avdoed,
-        gjenlevende = gjenlevende
-    )
+    type = type
 )

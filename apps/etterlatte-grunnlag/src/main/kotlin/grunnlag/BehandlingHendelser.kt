@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
+import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -19,8 +20,8 @@ class BehandlingHendelser(
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GYLDIG_FREMSATT")
             correlationId()
-            validate { it.requireKey("persongalleri") }
-            validate { it.requireKey("sakId") }
+            validate { it.requireKey(BehandlingRiverKey.persongalleriKey) }
+            validate { it.requireKey(BehandlingRiverKey.sakIdKey) }
         }.register(this)
     }
 

@@ -2,13 +2,10 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.http.content.PartData
 import io.ktor.http.content.readAllParts
 import io.ktor.http.content.streamProvider
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
-import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
@@ -152,11 +149,3 @@ data class FilData(
     val mottaker: Mottaker,
     val filNavn: String
 )
-
-fun getAccessToken(call: ApplicationCall): String {
-    val authHeader = call.request.parseAuthorizationHeader()
-    if (!(authHeader == null || authHeader !is HttpAuthHeader.Single || authHeader.authScheme != "Bearer")) {
-        return authHeader.blob
-    }
-    throw Exception("Missing authorization header")
-}

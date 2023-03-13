@@ -5,10 +5,10 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import no.nav.etterlatte.brev.getAccessToken
 import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.withFoedselsnummer
+import no.nav.etterlatte.libs.ktor.bruker
 import org.slf4j.LoggerFactory
 
 fun Route.dokumentRoute(safService: SafService, behandlingKlient: BehandlingKlient) {
@@ -16,31 +16,17 @@ fun Route.dokumentRoute(safService: SafService, behandlingKlient: BehandlingKlie
 
     route("dokumenter") {
         get("{fnr}") {
-            val accessToken = try {
-                getAccessToken(call)
-            } catch (ex: Exception) {
-                logger.error("Bearer not found", ex)
-                throw ex
-            }
-
             val fnr = call.parameters["fnr"]!!
             withFoedselsnummer(fnr, behandlingKlient) { foedselsnummer ->
-                val innhold = safService.hentDokumenter(foedselsnummer.value, BrukerIdType.FNR, accessToken)
+                val innhold = safService.hentDokumenter(foedselsnummer.value, BrukerIdType.FNR, bruker.accessToken())
                 call.respond(innhold)
             }
         }
 
         get("{journalpostId}/{dokumentInfoId}") {
-            val accessToken = try {
-                getAccessToken(call)
-            } catch (ex: Exception) {
-                logger.error("Bearer not found", ex)
-                throw ex
-            }
-
             val journalpostId = call.parameters["journalpostId"]!!
             val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-            val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, accessToken)
+            val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, bruker.accessToken())
 
             call.respond(innhold)
         }

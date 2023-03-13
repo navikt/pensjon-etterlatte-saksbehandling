@@ -10,12 +10,12 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.BehandlingId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.SakId
 import org.slf4j.LoggerFactory
-import java.sql.Timestamp
 import java.util.*
 import javax.sql.DataSource
 
@@ -39,7 +39,7 @@ class TilbakekrevingDao(
                             "sak_id" to sakId.value.param<Long>(),
                             "behandling_id" to behandlingId.value.param<UUID>(),
                             "kravgrunnlag_id" to kravgrunnlagId.value.param<Long>(),
-                            "opprettet" to mottattKravgrunnlag.opprettet.toTimestamp().param<Timestamp>(),
+                            "opprettet" to mottattKravgrunnlag.opprettet.toTimestamp().param(),
                             "kravgrunnlag" to kravgrunnlag.toJson().param<String>()
                         )
                     }
@@ -103,7 +103,7 @@ class TilbakekrevingDao(
                         sakId = SakId(long("sak_id")),
                         behandlingId = BehandlingId(uuid("behandling_id"), Kravgrunnlag.UUID30("")), // TODO
                         kravgrunnlagId = KravgrunnlagId(long("kravgrunnlag_id")),
-                        opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
+                        opprettet = tidspunkt("opprettet"),
                         kravgrunnlag = objectMapper.readValue(string("kravgrunnlag")),
                         vedtak = objectMapper.readValue(vedtak),
                         attestasjon = objectMapper.readValue(attestasjon)
@@ -114,7 +114,7 @@ class TilbakekrevingDao(
                         sakId = SakId(row.long("sak_id")),
                         behandlingId = BehandlingId(row.uuid("behandling_id"), Kravgrunnlag.UUID30("")), // TODO
                         kravgrunnlagId = KravgrunnlagId(row.long("kravgrunnlag_id")),
-                        opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
+                        opprettet = tidspunkt("opprettet"),
                         kravgrunnlag = objectMapper.readValue(string("kravgrunnlag")),
                         vedtak = objectMapper.readValue(vedtak)
                     )
@@ -124,7 +124,7 @@ class TilbakekrevingDao(
                         sakId = SakId(row.long("sak_id")),
                         behandlingId = BehandlingId(row.uuid("behandling_id"), Kravgrunnlag.UUID30("")), // TODO
                         kravgrunnlagId = KravgrunnlagId(row.long("kravgrunnlag_id")),
-                        opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
+                        opprettet = tidspunkt("opprettet"),
                         kravgrunnlag = objectMapper.readValue(kravgrunnlag)
                     )
                 }

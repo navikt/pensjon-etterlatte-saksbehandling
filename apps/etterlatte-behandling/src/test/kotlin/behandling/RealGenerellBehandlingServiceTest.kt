@@ -355,6 +355,22 @@ class RealGenerellBehandlingServiceTest {
         assertFalse(gyldigVirkningstidspunkt)
     }
 
+    @Test
+    fun `hentSenestIverksatteBehandling() returnerer seneste iverksatte behandlingen`() {
+        val behandling1 = foerstegangsbehandling(sakId = 1, status = BehandlingStatus.IVERKSATT)
+        val behandling2 = revurdering(
+            sakId = 1,
+            status = BehandlingStatus.BEREGNET,
+            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+        )
+        val behandlingDaoMock = mockk<BehandlingDao> {
+            every { alleBehandlingerISak(any()) } returns listOf(behandling1, behandling2)
+        }
+        val service = lagRealGenerellBehandlingService(behandlinger = behandlingDaoMock)
+
+        assertEquals(behandling1, service.hentSenestIverksatteBehandling(1))
+    }
+
     private fun behandlingServiceMedMocks(
         doedsdato: LocalDate?,
         soeknadMottatt: LocalDateTime

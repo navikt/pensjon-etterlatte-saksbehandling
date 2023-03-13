@@ -12,10 +12,12 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.config.HoconApplicationConfig
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -26,12 +28,14 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.token.Bruker
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -188,6 +192,15 @@ class TestBeanFactory(
                 """.trimIndent()
             ).execute()
         }
+    }
+
+    fun opprettSakMedFoerstegangsbehandling(sakId: Long, fnr: String): Pair<Sak, Foerstegangsbehandling> {
+        val sak = sakDao().opprettSak(fnr, SakType.BARNEPENSJON)
+        val foerstegangsbehandling = foerstegangsbehandlingFactory()
+            .opprettFoerstegangsbehandling(sakId, LocalDateTime.now().toString(), persongalleri())
+            .lagretBehandling
+
+        return Pair(sak, foerstegangsbehandling)
     }
 
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton

@@ -20,6 +20,8 @@ data class Vilkaar(
     val id: UUID = UUID.randomUUID()
 )
 
+fun List<Vilkaar>.kopier() = this.map { it.copy(id = UUID.randomUUID()) }
+
 data class Delvilkaar(
     val type: VilkaarType,
     val tittel: String,

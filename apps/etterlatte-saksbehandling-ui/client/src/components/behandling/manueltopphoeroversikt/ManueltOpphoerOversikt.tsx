@@ -11,25 +11,20 @@ import { Opphoersgrunn, OVERSETTELSER_OPPHOERSGRUNNER } from '~components/person
 import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
-import { IDetaljertBehandling, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering'
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
 import { lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
-
-interface Persongalleri {
-  soeker: string
-  avdoed?: string[]
-}
+import { IBehandlingsammendrag } from '~components/person/typer'
 
 export interface ManueltOpphoerDetaljer {
   id: string
   virkningstidspunkt?: Virkningstidspunkt
-  persongalleri: Persongalleri
   opphoerAarsaker: Opphoersgrunn[]
   fritekstAarsak?: string
-  andreBehandlinger: IDetaljertBehandling[]
+  andreBehandlinger: IBehandlingsammendrag[]
 }
 
 const useManueltOpphoerDetaljer = (behandlingId?: string) => {

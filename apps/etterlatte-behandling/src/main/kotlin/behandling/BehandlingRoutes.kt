@@ -18,15 +18,15 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.TilstandException
-import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
+import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -103,7 +103,7 @@ internal fun Route.behandlingRoutes(
                     else -> {
                         val (opphoer, andre) = opphoerOgBehandlinger
                         call.respond(
-                            opphoer.toManueltOpphoerOppsummmering(andre.map { it.toDetaljertBehandling() })
+                            opphoer.toManueltOpphoerOppsummmering(andre.map { it.toBehandlingSammendrag() })
                         )
                     }
                 }
@@ -213,19 +213,17 @@ internal fun Route.behandlingRoutes(
 data class ManueltOpphoerOppsummeringDto(
     val id: UUID,
     val virkningstidspunkt: Virkningstidspunkt?,
-    val persongalleri: Persongalleri,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
     val fritekstAarsak: String?,
-    val andreBehandlinger: List<DetaljertBehandling>
+    val andreBehandlinger: List<BehandlingSammendrag>
 )
 
 private fun ManueltOpphoer.toManueltOpphoerOppsummmering(
-    andreBehandlinger: List<DetaljertBehandling>
+    andreBehandlinger: List<BehandlingSammendrag>
 ): ManueltOpphoerOppsummeringDto =
     ManueltOpphoerOppsummeringDto(
         id = this.id,
         virkningstidspunkt = this.virkningstidspunkt,
-        persongalleri = this.persongalleri,
         opphoerAarsaker = this.opphoerAarsaker,
         fritekstAarsak = this.fritekstAarsak,
         andreBehandlinger = andreBehandlinger

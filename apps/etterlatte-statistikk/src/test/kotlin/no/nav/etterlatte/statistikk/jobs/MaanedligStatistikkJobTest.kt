@@ -1,4 +1,4 @@
-package statistikk.jobs
+package no.nav.etterlatte.statistikk.jobs
 
 import io.mockk.every
 import io.mockk.mockk
@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
-import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import org.junit.jupiter.api.Test
 import java.time.Clock

@@ -9,4 +9,5 @@ object EventNames {
     const val FATT_VEDTAK = "FATT_VEDTAK"
     const val ATTESTER = "ATTESTER"
     const val FEILA = "FEILA"
+    const val FORDELER_STATISTIKK = "FORDELER:STATISTIKK"
 }

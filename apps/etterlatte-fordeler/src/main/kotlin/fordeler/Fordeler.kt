@@ -2,16 +2,23 @@ package no.nav.etterlatte.fordeler
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -61,7 +68,7 @@ internal class Fordeler(
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling")
                         context.publish(packet.leggPaaFordeltStatus(true).toJson())
                         fordelerMetricLogger.logMetricFordelt()
-                        lagStatistikkMelding(packet, resultat)
+                        lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
                             ?.let { context.publish(it) }
                     }
 
@@ -69,7 +76,7 @@ internal class Fordeler(
                         logger.info("Avbrutt fordeling: ${resultat.ikkeOppfylteKriterier}")
                         context.publish(packet.leggPaaFordeltStatus(false).toJson())
                         fordelerMetricLogger.logMetricIkkeFordelt(resultat)
-                        lagStatistikkMelding(packet, resultat)
+                        lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
                             ?.let { context.publish(it) }
                     }
 
@@ -97,22 +104,24 @@ internal class Fordeler(
             hendelseGyldigTil = get(SoeknadInnsendt.hendelseGyldigTilKey).textValue().let(OffsetDateTime::parse)
         )
 
-    fun lagStatistikkMelding(packet: JsonMessage, fordelerResultat: FordelerResultat): String? {
-        val (resultat, mangler) = when (fordelerResultat) {
-            FordelerResultat.GyldigForBehandling -> "GYLDIG" to null
-            is FordelerResultat.IkkeGyldigForBehandling -> "IKKE_GYLDIG" to fordelerResultat.ikkeOppfylteKriterier
+    fun lagStatistikkMelding(packet: JsonMessage, fordelerResultat: FordelerResultat, sakType: SakType): String? {
+        val (resultat, ikkeOppfylteKriterier) = when (fordelerResultat) {
+            FordelerResultat.GyldigForBehandling -> true to null
+            is FordelerResultat.IkkeGyldigForBehandling -> false to fordelerResultat.ikkeOppfylteKriterier
             else -> {
                 logger.error("Kan ikke produsere statistikkmelding for fordelerResultat $fordelerResultat")
                 return null
             }
         }
-        val meldingsinnhold: MutableMap<String, Any> = mutableMapOf(
-            EVENT_NAME_KEY to "FORDELER:STATISTIKK",
-            "soeknad_id" to packet.soeknadId(),
-            "resultat" to resultat
+        val meldingsinnhold: MutableMap<String, Any?> = mutableMapOf(
+            CORRELATION_ID_KEY to packet.correlationId,
+            EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
+            SAK_TYPE_KEY to sakType,
+            SOEKNAD_ID_KEY to packet.soeknadId(),
+            GYLDIG_FOR_BEHANDLING_KEY to resultat
         )
-        mangler?.let {
-            meldingsinnhold["mangler"] = it
+        ikkeOppfylteKriterier?.let {
+            meldingsinnhold[FEILENDE_KRITERIER_KEY] = it
         }
         return meldingsinnhold.toJson()
     }

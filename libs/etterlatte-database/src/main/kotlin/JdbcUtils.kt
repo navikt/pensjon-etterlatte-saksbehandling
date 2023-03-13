@@ -12,6 +12,12 @@ fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
     }
 }
 
+fun <T> ResultSet.single(block: ResultSet.() -> T): T {
+    return requireNotNull(singleOrNull(block)) {
+        "Skal ha en verdi"
+    }
+}
+
 fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
     val list = ArrayList<T>()
     while (next()) {

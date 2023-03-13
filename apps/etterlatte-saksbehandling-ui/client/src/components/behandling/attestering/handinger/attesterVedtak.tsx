@@ -47,7 +47,7 @@ export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
         </Button>
       </ButtonWrapper>
       <GeneriskModal
-        tekst="Er du sikker på at vil iverksette vedtaket?"
+        tekst="Er du sikker på at du vil iverksette vedtaket?"
         tekstKnappJa="Ja, iverksett vedtak"
         tekstKnappNei=" Nei, gå tilbake"
         onYesClick={attester}

@@ -32,13 +32,14 @@ fun main() {
     }
     val dataSource = DataSourceBuilder.createDataSource(env).apply { migrate() }
 
+    val appBuilder = AppBuilder(env)
     RapidApplication.create(env)
         .also {
             Fordeler(
                 rapidsConnection = it,
                 fordelerService = FordelerService(
                     FordelerKriterier(),
-                    pdlTjenesterKlient(env),
+                    appBuilder.pdlTjenesterKlient(),
                     FordelerRepository(dataSource),
                     maxFordelingTilDoffen = env.longFeature("FEATURE_MAX_FORDELING_TIL_DOFFEN")
                 )
@@ -50,25 +51,28 @@ fun Map<String, String>.longFeature(featureName: String, default: Long = 0): Lon
     return (this[featureName]?.toLong() ?: default).takeIf { it > -1 } ?: Long.MAX_VALUE
 }
 
-private fun pdlTjenesterKlient(env: MutableMap<String, String>) = PdlTjenesterKlient(
-    client = pdlTjenesterHttpClient(env),
-    apiUrl = requireNotNull(env["PDL_URL"])
-)
+class AppBuilder(val env: Map<String, String>) {
 
-private fun pdlTjenesterHttpClient(env: MutableMap<String, String>) = HttpClient(OkHttp) {
-    expectSuccess = true
-    install(ContentNegotiation) {
-        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-    }
-    install(Auth) {
-        clientCredential {
-            config =
-                env.toMutableMap().apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("PDL_AZURE_SCOPE"))) }
+    internal fun pdlTjenesterKlient() = PdlTjenesterKlient(
+        client = pdlTjenesterHttpClient(),
+        apiUrl = requireNotNull(env["PDL_URL"])
+    )
+
+    private fun pdlTjenesterHttpClient() = HttpClient(OkHttp) {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter(objectMapper))
         }
+        install(Auth) {
+            clientCredential {
+                config =
+                    env.toMutableMap().apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("PDL_AZURE_SCOPE"))) }
+            }
+        }
+        defaultRequest {
+            header(X_CORRELATION_ID, getCorrelationId())
+        }
+    }.also {
+        Runtime.getRuntime().addShutdownHook(Thread { it.close() })
     }
-    defaultRequest {
-        header(X_CORRELATION_ID, getCorrelationId())
-    }
-}.also {
-    Runtime.getRuntime().addShutdownHook(Thread { it.close() })
 }

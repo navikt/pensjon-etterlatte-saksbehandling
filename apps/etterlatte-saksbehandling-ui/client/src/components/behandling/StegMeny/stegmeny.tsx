@@ -5,10 +5,12 @@ import { Next } from '@navikt/ds-icons'
 import { useAppSelector } from '~store/Store'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { kanGaaTilStatus } from '~components/behandling/felles/utils'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export const StegMeny = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandlingType = behandling.behandlingType
+  const sakType = behandling.sakType
   const behandlingstatus = behandling.status
   const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(behandlingstatus).includes(steg)
 
@@ -38,7 +40,7 @@ export const StegMeny = () => {
           <Separator aria-hidden={'true'} />
         </>
       )}
-      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && sakType === ISaksType.OMSTILLINGSSTOENAD && (
         <>
           <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.OPPRETTET) })}>
             <NavLink to="trygdetid">Trygdetid</NavLink>

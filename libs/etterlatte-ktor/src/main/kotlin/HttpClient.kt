@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.ktor
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
@@ -26,11 +27,13 @@ fun httpClientClientCredentials(
     azureAppClientId: String,
     azureAppJwk: String,
     azureAppWellKnownUrl: String,
-    azureAppScope: String
+    azureAppScope: String,
+    ekstraJacksoninnstillinger: ((o: ObjectMapper) -> Unit) = { }
 ) = HttpClient(OkHttp) {
     expectSuccess = true
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
+        ekstraJacksoninnstillinger(objectMapper)
     }
     install(Auth) {
         clientCredential {

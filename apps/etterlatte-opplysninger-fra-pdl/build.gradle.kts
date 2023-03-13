@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:common"))
+    implementation(project(":libs:etterlatte-ktor"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)

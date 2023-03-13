@@ -16,7 +16,7 @@ class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClie
     VilkaarsvurderingService {
     override fun kopierForrigeVilkaarsvurdering(behandlingId: UUID, behandlingViOmregnerFra: UUID) {
         runBlocking {
-            vilkaarsvurderingKlient.post("$url/api/$behandlingId/kopier") {
+            vilkaarsvurderingKlient.post("$url/api/vilkaarsvurdering/$behandlingId/kopier") {
                 contentType(ContentType.Application.Json)
                 setBody(OpprettVilkaarsvurderingFraBehandling(behandlingViOmregnerFra))
             }

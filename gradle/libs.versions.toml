@@ -8,7 +8,7 @@ jackson-version = "2.13.5"
 jupiter-version = "5.9.2"
 kotlinx-version = "1.6.4"
 ktor2-version = "2.2.2"
-navfelles-token-version = "3.0.2"
+navfelles-token-version = "3.0.7"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.17.3"
 

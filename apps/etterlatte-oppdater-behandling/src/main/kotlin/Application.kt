@@ -1,20 +1,14 @@
 package no.nav.etterlatte
 
-import no.nav.helse.rapids_rivers.RapidApplication
+import no.nav.etterlatte.rapidsandrivers.init
+import no.nav.helse.rapids_rivers.RapidsConnection
 
-fun main() {
-    System.getenv().toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }.also { env ->
-        AppBuilder(env).also { ab ->
-            RapidApplication.create(env)
-                .also {
-                    val behandlingservice = ab.createBehandlingService()
-                    PdlHendelser(it, behandlingservice)
-                    OmregningsHendelser(it, behandlingservice)
-                    Reguleringsforespoersel(it, behandlingservice)
-                }
-                .start()
-        }
+fun main() = init(
+    { AppBuilder(it) },
+    { rc: RapidsConnection, ab: AppBuilder ->
+        val behandlingservice = ab.createBehandlingService()
+        PdlHendelser(rc, behandlingservice)
+        OmregningsHendelser(rc, behandlingservice)
+        Reguleringsforespoersel(rc, behandlingservice)
     }
-}
+)

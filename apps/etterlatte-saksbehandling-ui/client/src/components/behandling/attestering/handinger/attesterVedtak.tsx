@@ -6,14 +6,16 @@ import { GeneriskModal } from '~shared/modal/modal'
 import { attesterVedtaksbrev } from '~shared/api/brev'
 import { useAppSelector } from '~store/Store'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { useNavigate } from 'react-router'
 
 export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
-  const { behandlingType } = useAppSelector((state) => state.behandlingReducer.behandling)
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
+  const navigate = useNavigate()
   const [modalisOpen, setModalisOpen] = useState(false)
 
   const ferdigstillVedtaksbrev = async () => {
-    if (behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
+    if (behandling.behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
       return true
     }
 
@@ -31,7 +33,7 @@ export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
     if (vedtaksbrevAttestertOK) {
       attesterVedtak(behandlingId).then((response) => {
         if (response.status === 'ok') {
-          window.location.reload()
+          navigate(`/person/${behandling.søker?.foedselsnummer}`)
         }
       })
     }

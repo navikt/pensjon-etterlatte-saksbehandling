@@ -1,6 +1,7 @@
 export interface Beregning {
   beregningId: string
   behandlingId: string
+  type: Beregningstype
   beregningsperioder: Beregningsperiode[]
   beregnetDato: string
   grunnlagMetadata: GrunnlagMetadata
@@ -11,9 +12,13 @@ export interface GrunnlagMetadata {
   versjon: number
 }
 
+export enum Beregningstype {
+  BP = 'BP',
+  OMS = 'OMS',
+}
+
 export interface Beregningsperiode {
   delytelsesId: string
-  type: string
   datoFOM: string
   datoTOM: string
   utbetaltBeloep: number

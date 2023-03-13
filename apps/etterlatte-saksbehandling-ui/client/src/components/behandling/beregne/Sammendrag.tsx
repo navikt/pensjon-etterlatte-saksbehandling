@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { IPdlPerson } from '~shared/types/Person'
-import { Beregning } from '~shared/types/Beregning'
+import { Beregning, Beregningstype } from '~shared/types/Beregning'
 import { GjelderTooltip } from '~components/behandling/beregne/GjelderToolTip'
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 
 export const Sammendrag = ({ beregning, soeker, soesken }: Props) => {
   const beregningsperioder = beregning.beregningsperioder
-    
+
   return (
     <TableWrapper>
       <Heading spacing size="small" level="2">
@@ -40,7 +40,12 @@ export const Sammendrag = ({ beregning, soeker, soesken }: Props) => {
                 }`}
               </Table.DataCell>
               <Table.DataCell>
-                {beregningsperiode.type == 'GP' ? 'Grunnpensjon' : beregningsperiode.type}
+                {
+                  {
+                    [Beregningstype.BP]: 'Barnepensjon',
+                    [Beregningstype.OMS]: 'Omstillingsstønad',
+                  }[beregning.type]
+                }
               </Table.DataCell>
               <Table.DataCell>40 år</Table.DataCell>
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>

@@ -2,11 +2,9 @@ package no.nav.etterlatte.sak
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
@@ -58,10 +56,6 @@ internal fun Route.sakRoutes(
                 }
             )
         }
-    }
-    post("/personer/sjekkstrengtfortrolig") {
-        val fnr = call.receive<String>()
-        call.respond(sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(fnr))
     }
 }
 

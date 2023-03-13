@@ -42,11 +42,11 @@ class SakDaoTest {
     fun kanSjekkeOmHarAdressebeskyttelse() {
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
 
-        Assertions.assertFalse(sakRepo.sjekkOmSakHarStrengtFortroligBeskyttelse(listOf(opprettSak.id)))
+        Assertions.assertFalse(sakRepo.enAvSakeneHarStrengtFortroligBeskyttelse(listOf(opprettSak.id)))
         sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
             opprettSak.id,
             AdressebeskyttelseGradering.STRENGT_FORTROLIG
         )
-        Assertions.assertTrue(sakRepo.sjekkOmSakHarStrengtFortroligBeskyttelse(listOf(opprettSak.id)))
+        Assertions.assertTrue(sakRepo.enAvSakeneHarStrengtFortroligBeskyttelse(listOf(opprettSak.id)))
     }
 }

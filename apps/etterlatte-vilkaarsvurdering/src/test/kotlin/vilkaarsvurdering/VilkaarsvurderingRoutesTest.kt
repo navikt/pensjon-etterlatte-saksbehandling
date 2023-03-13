@@ -83,6 +83,7 @@ internal class VilkaarsvurderingRoutesTest {
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any(), VilkaarsvurderingUtfall.OPPFYLT)
         } returns true
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
@@ -116,7 +117,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -148,7 +149,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             val nyBehandlingId = UUID.randomUUID()
             val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
@@ -161,12 +162,36 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
+    fun `skal returnere not found dersom saksbehandler ikke har tilgang til behandlingen`() {
+        val behandlingKlient = mockk<BehandlingKlient>()
+        val nyBehandlingId = UUID.randomUUID()
+        coEvery { behandlingKlient.harTilgangTilBehandling(nyBehandlingId, any()) } returns false
+
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
+
+            val response = client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            assertEquals(response.status, HttpStatusCode.NotFound)
+            coVerify(exactly = 1) {
+                behandlingKlient.harTilgangTilBehandling(nyBehandlingId, any())
+            }
+        }
+    }
+
+    @Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes ved opprettelse`() {
         testApplication {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
             val nyBehandlingId = UUID.randomUUID()
 
             coEvery { behandlingKlient.hentBehandling(nyBehandlingId, any()) } returns detaljertBehandling().apply {
@@ -188,7 +213,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -230,7 +255,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -299,7 +324,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -349,7 +374,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
             val resultat = VurdertVilkaarsvurderingResultatDto(
@@ -390,7 +415,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
             val resultat = VurdertVilkaarsvurderingResultatDto(
@@ -431,7 +456,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
             val response = client.get("/api/vilkaarsvurdering/$behandlingId")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
@@ -443,6 +468,7 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -451,7 +477,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             coVerify(exactly = 1) {
@@ -465,6 +491,7 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns false
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -473,7 +500,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             val response = client.post("/api/vilkaarsvurdering/$behandlingId/opprett") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -489,6 +516,7 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -497,7 +525,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -515,6 +543,7 @@ internal class VilkaarsvurderingRoutesTest {
             true,
             false
         )
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
@@ -523,7 +552,7 @@ internal class VilkaarsvurderingRoutesTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl) } }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 

@@ -31,9 +31,10 @@ class ApplicationContext {
         vilkaarsvurderingKlient = vilkaarsvurderingKlient,
         grunnlagKlient = grunnlagKlient
     )
+    val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     val beregningService = BeregningService(
         beregningRepository = BeregningRepository(dataSource),
-        behandlingKlient = BehandlingKlientImpl(config, httpClient()),
+        behandlingKlient = behandlingKlient,
         beregnBarnepensjonService = beregnBarnepensjonService,
         beregnOmstillingsstoenadService = beregnOmstillingsstoenadService
     )

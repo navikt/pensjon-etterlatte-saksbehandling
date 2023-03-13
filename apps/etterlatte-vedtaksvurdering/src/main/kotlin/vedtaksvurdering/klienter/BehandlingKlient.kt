@@ -4,6 +4,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
@@ -11,11 +13,12 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.util.*
 
-interface BehandlingKlient {
+interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
 
     suspend fun fattVedtak(
@@ -23,11 +26,13 @@ interface BehandlingKlient {
         bruker: Bruker,
         vedtakHendelse: VedtakHendelse? = null
     ): Boolean
+
     suspend fun attester(
         behandlingId: UUID,
         bruker: Bruker,
         vedtakHendelse: VedtakHendelse? = null
     ): Boolean
+
     suspend fun underkjenn(
         behandlingId: UUID,
         bruker: Bruker,
@@ -100,6 +105,44 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             statussjekkForBehandling(behandlingId, bruker, BehandlingStatus.RETURNERT)
         } else {
             commitStatussjekkForBehandling(behandlingId, bruker, BehandlingStatus.RETURNERT, vedtakHendelse)
+        }
+    }
+
+    override suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/tilgang/behandling/$behandlingId"
+                    ),
+                    bruker = bruker
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
+        }
+    }
+
+    override suspend fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/tilgang/sak/$sakId"
+                    ),
+                    bruker = bruker
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Sjekking av tilgang for sak feilet", e)
         }
     }
 

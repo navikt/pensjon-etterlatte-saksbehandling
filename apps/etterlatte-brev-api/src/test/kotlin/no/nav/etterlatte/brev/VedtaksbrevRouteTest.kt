@@ -19,6 +19,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
@@ -39,6 +40,7 @@ internal class VedtaksbrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val behandlingKlient = mockk<BehandlingKlient>()
 
     @BeforeAll
     fun before() {
@@ -60,6 +62,7 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Endepunkt for oppretting eller oppdatering av vedtaksbrev`() {
         coEvery { vedtaksbrevService.oppdaterVedtaksbrev(any(), any(), any()) } returns opprettBrev()
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val sakId = 123456L
         val token = accessToken
@@ -68,7 +71,14 @@ internal class VedtaksbrevRouteTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { vedtaksbrevRoute(vedtaksbrevService) } }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    vedtaksbrevRoute(
+                        vedtaksbrevService,
+                        behandlingKlient
+                    )
+                }
+            }
 
             val client = createClient {
                 install(ContentNegotiation) {
@@ -76,10 +86,10 @@ internal class VedtaksbrevRouteTest {
                 }
             }
 
-            val response = client.post("/api/brev/vedtak") {
+            val response = client.post("/api/brev/vedtak/$BEHANDLING_ID") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
-                setBody(OpprettVedtaksbrevRequest(sakId, BEHANDLING_ID))
+                setBody(OpprettVedtaksbrevRequest(sakId))
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
@@ -91,16 +101,26 @@ internal class VedtaksbrevRouteTest {
                 BEHANDLING_ID,
                 any()
             )
+            behandlingKlient.harTilgangTilBehandling(any(), any())
         }
     }
 
     @Test
     fun `Endepunkt som ikke finnes`() {
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+
         testApplication {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { vedtaksbrevRoute(vedtaksbrevService) } }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    vedtaksbrevRoute(
+                        vedtaksbrevService,
+                        behandlingKlient
+                    )
+                }
+            }
 
             val response = client.get("/api/brev/finnesikke") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
@@ -110,6 +130,7 @@ internal class VedtaksbrevRouteTest {
         }
 
         verify { vedtaksbrevService wasNot Called }
+        verify { behandlingKlient wasNot Called }
     }
 
     @Test
@@ -118,14 +139,22 @@ internal class VedtaksbrevRouteTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { vedtaksbrevRoute(vedtaksbrevService) } }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    vedtaksbrevRoute(
+                        vedtaksbrevService,
+                        behandlingKlient
+                    )
+                }
+            }
 
-            val response = client.post("/api/brev/vedtak")
+            val response = client.post("/api/brev/vedtak/${UUID.randomUUID()}")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
 
         verify { vedtaksbrevService wasNot Called }
+        verify { behandlingKlient wasNot Called }
     }
 
     private val accessToken: String by lazy {

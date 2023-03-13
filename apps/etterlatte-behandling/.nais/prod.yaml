@@ -108,6 +108,7 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-opplysninger-fra-soeknad
+        - application: etterlatte-brev-api
           permissions:
             roles:
               - "kan-sette-kilde"

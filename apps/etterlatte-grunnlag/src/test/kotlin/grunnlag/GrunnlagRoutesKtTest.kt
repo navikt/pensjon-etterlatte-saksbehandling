@@ -9,8 +9,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -25,11 +27,12 @@ import testsupport.buildTestApplicationConfigurationForOauth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagRoutesKtTest {
     private val grunnlagService = mockk<GrunnlagService>()
+    private val behandlingKlient = mockk<BehandlingKlient>()
     private val server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     companion object {
-        private const val ISSUER_ID = "ISSUER_ID"
+        private const val ISSUER_ID = "azure"
         private const val CLIENT_ID = "CLIENT_ID"
     }
 
@@ -38,6 +41,7 @@ internal class GrunnlagRoutesKtTest {
         server.start()
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
     }
 
     @AfterAll
@@ -62,7 +66,9 @@ internal class GrunnlagRoutesKtTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
+            application {
+                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
+            }
             val response = client.get("api/grunnlag/1")
 
             Assertions.assertEquals(HttpStatusCode.Unauthorized, response.status)
@@ -77,7 +83,9 @@ internal class GrunnlagRoutesKtTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
+            application {
+                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
+            }
             val response = client.get("api/grunnlag/1") {
                 headers {
                     append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -98,7 +106,9 @@ internal class GrunnlagRoutesKtTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService) } }
+            application {
+                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
+            }
             val response = client.get("api/grunnlag/1") {
                 headers {
                     append(HttpHeaders.ContentType, ContentType.Application.Json.toString())

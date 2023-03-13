@@ -177,7 +177,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             id = getObject("id") as UUID,
             sakId = getLong("sak_id"),
             type = GrunnlagsendringsType.valueOf(getString("type")),
-            opprettet = getTidspunkt("opprettet")!!.toLocalDatetimeUTC(),
+            opprettet = getTidspunkt("opprettet").toLocalDatetimeUTC(),
             status = GrunnlagsendringStatus.valueOf(getString("status")),
             behandlingId = getObject("behandling_id")?.let { it as UUID },
             hendelseGjelderRolle = Saksrolle.valueOf(getString("hendelse_gjelder_rolle")),

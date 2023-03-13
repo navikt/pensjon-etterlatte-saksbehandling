@@ -404,7 +404,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 }
 
-private fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne)!!.toLocalDatetimeUTC()
+private fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLocalDatetimeUTC()
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

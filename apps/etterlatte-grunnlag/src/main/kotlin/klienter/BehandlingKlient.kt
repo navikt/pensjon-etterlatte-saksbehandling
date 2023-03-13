@@ -15,6 +15,7 @@ import java.util.*
 
 interface BehandlingKlient {
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
+    suspend fun sjekkErStrengtFortrolig(fnr: String, bruker: Bruker): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -46,6 +47,29 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         } catch (e: Exception) {
             throw BehandlingKlientException(
                 "Henting av behandling med behandlingId=$behandlingId fra grunnlag feilet",
+                e
+            )
+        }
+    }
+
+    override suspend fun sjekkErStrengtFortrolig(fnr: String, bruker: Bruker): Boolean {
+        try {
+            return downstreamResourceClient
+                .post(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/personer/sjekkstrengtfortrolig"
+                    ),
+                    bruker = bruker,
+                    postBody = fnr
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException(
+                "Sjekking av strengt fortrolig feilet",
                 e
             )
         }

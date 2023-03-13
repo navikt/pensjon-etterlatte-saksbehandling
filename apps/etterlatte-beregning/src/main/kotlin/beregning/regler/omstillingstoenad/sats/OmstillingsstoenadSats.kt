@@ -42,5 +42,7 @@ val omstillingsstoenadSatsRegel = RegelMeta(
     beskrivelse = "Beregn uavkortet omstillingsstønad",
     regelReferanse = RegelReferanse(id = "TODO")
 ) benytter faktorKonstant og grunnbeloep med { faktor, grunnbeloep ->
-    faktor.multiply(grunnbeloep.grunnbeloep)
+    faktor
+        .multiply(grunnbeloep.grunnbeloep)
+        .divide(12)
 }

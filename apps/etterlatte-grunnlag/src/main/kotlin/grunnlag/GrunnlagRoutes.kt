@@ -86,7 +86,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService) {
     }
 }
 
-private data class FoedselsnummerDTO(
+internal data class FoedselsnummerDTO(
     val foedselsnummer: String
 )
 

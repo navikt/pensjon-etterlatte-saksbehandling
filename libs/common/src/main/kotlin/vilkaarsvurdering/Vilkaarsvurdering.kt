@@ -13,8 +13,8 @@ data class VilkaarsvurderingDto(
 )
 
 data class Vilkaar(
-    val hovedvilkaar: Hovedvilkaar,
-    val unntaksvilkaar: List<Unntaksvilkaar> = emptyList(),
+    val hovedvilkaar: Delvilkaar,
+    val unntaksvilkaar: List<Delvilkaar> = emptyList(),
     val vurdering: VilkaarVurderingData? = null,
     val grunnlag: List<Vilkaarsgrunnlag<out Any?>> = emptyList(),
     val id: UUID = UUID.randomUUID()
@@ -27,9 +27,6 @@ data class Delvilkaar(
     val lovreferanse: Lovreferanse,
     val resultat: Utfall? = null
 )
-
-typealias Hovedvilkaar = Delvilkaar
-typealias Unntaksvilkaar = Delvilkaar
 
 data class Lovreferanse(
     val paragraf: String,

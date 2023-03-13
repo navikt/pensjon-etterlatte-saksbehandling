@@ -6,7 +6,6 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Unntaksvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -86,7 +85,7 @@ internal class DelvilkaarRepository {
 
     private fun lagreDelvilkaar(
         vilkaarId: UUID,
-        unntaksvilkaar: Unntaksvilkaar,
+        unntaksvilkaar: Delvilkaar,
         hovedvilkaar: Boolean,
         tx: TransactionalSession
     ) = queryOf(

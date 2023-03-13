@@ -7,10 +7,11 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.security.ktor.clientCredential
 import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(props: Map<String, String>) : RapidsAndRiversAppBuilder(props) {
+class AppBuilder(props: Miljoevariabler) : RapidsAndRiversAppBuilder(props) {
 
     private val beregningapp = beregningHttpClient()
 

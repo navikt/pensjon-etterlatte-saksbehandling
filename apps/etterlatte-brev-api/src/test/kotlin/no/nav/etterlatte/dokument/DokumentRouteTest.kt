@@ -16,6 +16,7 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.dokument.JournalpostResponse
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
+import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -30,6 +31,7 @@ import testsupport.buildTestApplicationConfigurationForOauth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DokumentRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
+    private val behandlingKlient = mockk<BehandlingKlient>()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val journalpostService = mockk<SafClient>()
 
@@ -53,15 +55,23 @@ internal class DokumentRouteTest {
     @Test
     fun `Endepunkt for uthenting av alle dokumenter tilknyttet brukeren`() {
         coEvery { journalpostService.hentDokumenter(any(), any(), any()) } returns JournalpostResponse(null, null)
+        coEvery { behandlingKlient.harTilgangTilPerson(any(), any()) } returns true
 
         val token = accessToken
-        val fnr = "11223300000"
+        val fnr = "26117512737"
 
         testApplication {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    dokumentRoute(
+                        journalpostService,
+                        behandlingKlient
+                    )
+                }
+            }
 
             val response = client.get("/api/dokumenter/$fnr") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -84,7 +94,14 @@ internal class DokumentRouteTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    dokumentRoute(
+                        journalpostService,
+                        behandlingKlient
+                    )
+                }
+            }
 
             val response = client.get("/api/dokumenter/$journalpostId/$dokumentInfoId") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
@@ -102,7 +119,14 @@ internal class DokumentRouteTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    dokumentRoute(
+                        journalpostService,
+                        behandlingKlient
+                    )
+                }
+            }
 
             val response = client.get("/api/dokument/finnesikke") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")

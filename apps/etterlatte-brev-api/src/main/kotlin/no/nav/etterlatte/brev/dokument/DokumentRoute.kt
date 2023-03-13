@@ -6,10 +6,12 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.getAccessToken
+import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
+import no.nav.etterlatte.libs.common.withFoedselsnummer
 import org.slf4j.LoggerFactory
 
-fun Route.dokumentRoute(safService: SafService) {
+fun Route.dokumentRoute(safService: SafService, behandlingKlient: BehandlingKlient) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.dokument.DokumentRoute")
 
     route("dokumenter") {
@@ -22,9 +24,10 @@ fun Route.dokumentRoute(safService: SafService) {
             }
 
             val fnr = call.parameters["fnr"]!!
-            val innhold = safService.hentDokumenter(fnr, BrukerIdType.FNR, accessToken)
-
-            call.respond(innhold)
+            withFoedselsnummer(fnr, behandlingKlient) { foedselsnummer ->
+                val innhold = safService.hentDokumenter(foedselsnummer.value, BrukerIdType.FNR, accessToken)
+                call.respond(innhold)
+            }
         }
 
         get("{journalpostId}/{dokumentInfoId}") {

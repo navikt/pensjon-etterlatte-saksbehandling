@@ -10,32 +10,59 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.withParam
 
 fun Route.trygdetid(trygdetidService: TrygdetidService) {
-    route("/api/trygdetid") {
+    route("/api/trygdetid/{$BEHANDLINGSID_CALL_PARAMETER}") {
         val logger = application.log
 
         get {
-            logger.info("Henter trygdetid")
-            val trygdetid = trygdetidService.hentTrygdetid()
-            call.respond(trygdetid.toDto())
+            // withBehandlingId() TODO
+            withParam(BEHANDLINGSID_CALL_PARAMETER) {
+                logger.info("Henter trygdetid")
+                val trygdetid = trygdetidService.hentTrygdetid(behandlingsId)
+                if (trygdetid != null) {
+                    call.respond(trygdetid.toDto())
+                } else {
+                    call.respond(
+                        status = HttpStatusCode.NoContent,
+                        message = "Det finnes ingen trygdetid for denne behandlingen"
+                    )
+                }
+            }
+        }
+
+        post {
+            // withBehandlingId() TODO
+            withParam(BEHANDLINGSID_CALL_PARAMETER) {
+                logger.info("Oppretter trygdetid")
+                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId)
+                call.respond(trygdetid.toDto())
+            }
         }
 
         post("/grunnlag") {
-            logger.info("Lagre trygdetidgrunnlag")
-            val trygdetidDto = call.receive<TrygdetidGrunnlagDto>()
-            trygdetidService.lagreTrygdetidGrunnlag(trygdetidDto.fromDto())
-            call.respond(HttpStatusCode.OK)
+            // withBehandlingId() TODO
+            withParam(BEHANDLINGSID_CALL_PARAMETER) {
+                logger.info("Lagre trygdetidgrunnlag")
+                val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
+                val trygdetid = trygdetidService.lagreTrygdetidGrunnlag(behandlingsId, trygdetidgrunnlagDto.fromDto())
+                call.respond(trygdetid.toDto())
+            }
         }
     }
 }
 
 data class TrygdetidDto(
+    val oppsummertTrygdetid: Int?,
     val grunnlag: List<TrygdetidGrunnlagDto>
 )
 
 fun Trygdetid.toDto(): TrygdetidDto {
     return TrygdetidDto(
+        oppsummertTrygdetid = oppsummertTrygdetid,
         grunnlag = grunnlag.map { it.toDto() }
     )
 }

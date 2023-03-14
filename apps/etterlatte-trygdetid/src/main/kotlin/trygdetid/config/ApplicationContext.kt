@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDate
+import java.util.*
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -21,24 +22,35 @@ class ApplicationContext {
 
 class InMemoryDs {
 
-    companion object TrygdetidGrunnlagTable : Table() {
-        val bosted = varchar("bosted", 10)
+    object TrygdetidTable : Table() {
+        val behandlingsId = uuid("behandling_id")
+        val oppsummertTrygdetid = integer("oppsummertTrygdetid").nullable()
+    }
+    var trygdetidTable = TrygdetidTable
+
+    object TrygdetidGrunnlagTable : Table() {
+        val behandlingsId = uuid("behandling_id")
+        val bosted = varchar("bosted", 50)
         val periodeFra = date("periodeFra")
         val periodeTil = date("periodeTil")
     }
 
-    var trygdetidTable = TrygdetidGrunnlagTable
+    var trygdetidGrunnlagTable = TrygdetidGrunnlagTable
 
     fun migrate() {
         Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "org.h2.Driver")
         transaction {
-            SchemaUtils.create(TrygdetidGrunnlagTable)
+            SchemaUtils.create(TrygdetidTable, TrygdetidGrunnlagTable)
             fillDb()
         }
     }
 
     private fun fillDb() {
         trygdetidTable.insert {
+            it[behandlingsId] = UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31")
+        }
+        trygdetidGrunnlagTable.insert {
+            it[behandlingsId] = UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31")
             it[bosted] = "Norge"
             it[periodeFra] = LocalDate.now()
             it[periodeTil] = LocalDate.now()

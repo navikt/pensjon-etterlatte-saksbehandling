@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { Fnr } from './fnr'
-import { IPersonInfo } from '~components/person/typer'
 import { Link } from '@navikt/ds-react'
 
 export enum StatusBarTheme {
@@ -9,26 +8,38 @@ export enum StatusBarTheme {
   white = 'white',
 }
 
-export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: IPersonInfo }) => {
+export interface IPersonInfo {
+  fornavn: string
+  etternavn: string
+  fnr: string
+}
+export const StatusBar = ({
+  theme,
+  personInfo: { fnr, fornavn, etternavn },
+}: {
+  theme: StatusBarTheme
+  personInfo: IPersonInfo
+}) => {
   const gender = (): GenderList => {
-    const genderNum = Number(props.personInfo?.fnr[8])
+    const genderNum = Number(fnr[8])
     if (genderNum % 2 === 0) {
       return GenderList.female
     }
     return GenderList.male
   }
 
+  const navn = `${fornavn} ${etternavn}`
+
   return (
-    <StatusBarWrapper theme={props.theme}>
-      {props.personInfo?.fnr && (
+    <StatusBarWrapper theme={theme}>
+      {fnr && (
         <UserInfo>
           <GenderIcon gender={gender()} />
           <Name>
-            <Link href={`/person/${props.personInfo?.fnr}`}>{props.personInfo?.navn}</Link>{' '}
+            <Link href={`/person/${fnr}`}>{navn}</Link>{' '}
           </Name>
           <Skilletegn>|</Skilletegn>
-          <Fnr copy value={props.personInfo?.fnr || 'N/A'} />
-          {/** <Status value={{ status: PersonStatus.BARN, dato: '19.05.2011' }} />*/}
+          <Fnr copy value={fnr} />
         </UserInfo>
       )}
     </StatusBarWrapper>

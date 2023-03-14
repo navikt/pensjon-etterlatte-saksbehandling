@@ -16,10 +16,10 @@ import InnkommendeBrevModal from './innkommende-brev-modal'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
 import LastOppBrev from './nytt-brev/last-opp'
-import { useAppSelector } from '~store/Store'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import { hentDokumenter } from '~shared/api/dokument'
 import { tagColors, TagList } from '~shared/Tags'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -36,10 +36,9 @@ export interface IBrev {
   erVedtaksbrev: boolean
 }
 
-export const Brev = () => {
+export const Brev = (props: { behandling: IDetaljertBehandling }) => {
+  const { soeknadMottattDato, behandlingType } = props.behandling
   const { behandlingId, fnr } = useParams()
-  const { soeknadMottattDato, behandlingType } = useAppSelector((state) => state.behandlingReducer.behandling)
-
   const [brevListe, setBrevListe] = useState<IBrev[]>([])
   const [innkommendeBrevListe, setInnkommendeBrevListe] = useState<Journalpost[]>([])
   const [error, setError] = useState(false)

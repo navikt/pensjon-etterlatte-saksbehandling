@@ -27,9 +27,16 @@ interface Props {
   søker: IPdlPerson | undefined
   forelder: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
   redigerbar: boolean
+  behandlingId: string
 }
 
-export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, redigerbar, søker, forelder }: Props) => {
+export const OversiktKommerBarnetTilgode = ({
+  kommerBarnetTilgode,
+  redigerbar,
+  søker,
+  forelder,
+  behandlingId,
+}: Props) => {
   const [vurder, setVurder] = useState(kommerBarnetTilgode !== null)
   const bostedsadresse = søker?.bostedsadresse?.find((adresse) => adresse.aktiv === true)
   const foreldersadresse = forelder?.opplysning?.bostedsadresse?.find((adresse) => adresse.aktiv === true)
@@ -70,6 +77,7 @@ export const OversiktKommerBarnetTilgode = ({ kommerBarnetTilgode, redigerbar, s
             kommerBarnetTilgode={kommerBarnetTilgode}
             redigerbar={redigerbar}
             setVurder={(visVurderingKnapp: boolean) => setVurder(visVurderingKnapp)}
+            behandlingId={behandlingId}
           />
         ) : (
           <LeggTilVurderingButton onClick={() => setVurder(true)}>Legg til vurdering</LeggTilVurderingButton>

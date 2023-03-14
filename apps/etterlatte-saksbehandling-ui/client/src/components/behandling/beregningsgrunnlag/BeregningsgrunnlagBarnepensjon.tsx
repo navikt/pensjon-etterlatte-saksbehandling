@@ -10,7 +10,7 @@ import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { Controller, useForm } from 'react-hook-form'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { hentSoeskenjusteringsgrunnlag, lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
@@ -18,6 +18,7 @@ import { SoeskenMedIBeregning } from '~shared/types/Grunnlagsopplysning'
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import {
+  IBehandlingReducer,
   oppdaterBehandlingsstatus,
   oppdaterSoeskenjusteringsgrunnlag,
   resetBeregning,
@@ -30,9 +31,9 @@ interface FormValues {
   skalBrukes?: boolean
 }
 
-const BeregningsgrunnlagBarnepensjon = () => {
+const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
+  const { behandling } = props
   const { next } = useBehandlingRoutes()
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const soeskenjustering = behandling.soeskenjusteringsgrunnlag?.beregningsgrunnlag
   const [ikkeValgtOppdrasSammenPaaAlle, setIkkeValgtOppdrasSammenPaaAlleFeil] = useState(false)

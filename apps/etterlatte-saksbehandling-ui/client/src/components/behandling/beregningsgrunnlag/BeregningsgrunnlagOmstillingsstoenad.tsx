@@ -3,18 +3,18 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-const BeregningsgrunnlagOmstillingsstoenad = () => {
+const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IDetaljertBehandling }) => {
+  const { behandling } = props
   const [beregning, setOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
 
   const oppdaterBeregning = () => {

@@ -1,18 +1,17 @@
 import { RadioGroup, Radio } from '@navikt/ds-react'
 import { Underkjenn } from './underkjenn'
 import { RadioGroupWrapper } from '../styled'
-import { Godkjenn } from './godkjenn'
 import { IBeslutning } from '../types'
-import { useAppSelector } from '~store/Store'
+import { AttesterVedtak } from '~components/behandling/attestering/handinger/attesterVedtak'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 type Props = {
   beslutning: IBeslutning | undefined
   setBeslutning: (value: IBeslutning) => void
+  behandling: IDetaljertBehandling
 }
 
-export const Beslutningsvalg: React.FC<Props> = ({ beslutning, setBeslutning }) => {
-  const behandlingId = useAppSelector((state) => state.behandlingReducer.behandling.id)
-
+export const Beslutningsvalg: React.FC<Props> = ({ beslutning, setBeslutning, behandling }) => {
   return (
     <>
       <RadioGroupWrapper>
@@ -29,8 +28,8 @@ export const Beslutningsvalg: React.FC<Props> = ({ beslutning, setBeslutning }) 
         </RadioGroup>
       </RadioGroupWrapper>
 
-      {beslutning === IBeslutning.godkjenn && <Godkjenn behandlingId={behandlingId} />}
-      {beslutning === IBeslutning.underkjenn && <Underkjenn behandlingId={behandlingId} />}
+      {beslutning === IBeslutning.godkjenn && <AttesterVedtak behandling={behandling} />}
+      {beslutning === IBeslutning.underkjenn && <Underkjenn behandlingId={behandling.id} />}
     </>
   )
 }

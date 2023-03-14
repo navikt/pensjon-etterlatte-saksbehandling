@@ -1,4 +1,4 @@
-import { IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 import {
   Beskrivelse,
@@ -8,18 +8,16 @@ import {
 } from '~components/behandling/soeknadsoversikt/styled'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { useAppSelector } from '~store/Store'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 export const GyldigFramsattOmstillingsstoenad = ({
-  gyldigFramsatt,
+  behandling,
   gyldigFremsattTilStatusIcon,
 }: {
-  gyldigFramsatt: IGyldighetResultat | undefined
   gyldigFremsattTilStatusIcon: 'success' | 'error' | 'warning'
+  behandling: IDetaljertBehandling
 }) => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling.status)
   const innsender = behandling.familieforhold?.gjenlevende
   const navn = innsender ? `${innsender.opplysning.fornavn} ${innsender.opplysning.etternavn}` : 'Ukjent'
@@ -45,7 +43,11 @@ export const GyldigFramsattOmstillingsstoenad = ({
         </InfobokserWrapper>
       </div>
       <VurderingsContainerWrapper>
-        <GyldigFramsattVurdering behandlingId={behandling.id} gyldigFramsatt={gyldigFramsatt} redigerbar={behandles} />
+        <GyldigFramsattVurdering
+          behandlingId={behandling.id}
+          gyldigFramsatt={behandling.gyldighetsprøving}
+          redigerbar={behandles}
+        />
       </VurderingsContainerWrapper>
     </Soeknadsvurdering>
   )

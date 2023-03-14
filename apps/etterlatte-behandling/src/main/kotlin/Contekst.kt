@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import org.slf4j.LoggerFactory
 import java.sql.Connection
 
 object Kontekst : ThreadLocal<Context>()
@@ -36,8 +37,9 @@ class Saksbehandler(
     val saksbehandlerGroupIdsByKey: Map<String, String?>
 ) :
     ExternalUser(identifiedBy) {
+    private val logger = LoggerFactory.getLogger(Saksbehandler::class.java)
     init {
-        println("""Groups: ${identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.getAsList("groups")}""")
+        logger.info("""Groups: ${identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.getAsList("groups")}""")
     }
     override fun name(): String {
         return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.getStringClaim("NAVident")

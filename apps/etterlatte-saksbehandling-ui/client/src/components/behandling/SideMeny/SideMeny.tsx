@@ -9,6 +9,7 @@ import { Behandlingsoppsummering } from '~components/behandling/attestering/opps
 import { Attestering } from '~components/behandling/attestering/attestering/attestering'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
+import { Dokumentoversikt } from '~components/person/dokumentoversikt'
 
 export const SideMeny = () => {
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
@@ -48,6 +49,12 @@ export const SideMeny = () => {
             <Behandlingsoppsummering behandlingsInfo={behandlingsinfo} beslutning={beslutning} />
             {kanAttestere && <Attestering setBeslutning={setBeslutning} beslutning={beslutning} />}
           </>
+        )}
+      </SidebarContent>
+
+      <SidebarContent collapsed={collapsed}>
+        {behandlingsinfo && behandling.søker?.foedselsnummer && (
+          <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />
         )}
       </SidebarContent>
     </CollapsibleSidebar>

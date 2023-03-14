@@ -1,16 +1,8 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
-import io.ktor.http.HttpHeaders
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
@@ -27,11 +19,11 @@ import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.healthApi
-import no.nav.etterlatte.security.ktor.clientCredential
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
 
@@ -39,7 +31,7 @@ fun main() {
     Server().run()
 }
 
-class Server {
+class Server() {
     private val engine = embeddedServer(
         factory = CIO,
         environment = applicationEngineEnvironment {
@@ -62,8 +54,17 @@ class Server {
 @OptIn(DelicateCoroutinesApi::class)
 fun startLeesahLytter(env: Map<String, String>) {
     val logger = LoggerFactory.getLogger(Application::class.java)
+    val pdlTjenester: HttpClient by lazy {
+        httpClientClientCredentials(
+            azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
+            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
+            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppScope = env.requireEnvValue("PDL_AZURE_SCOPE"),
+            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) }
+        )
+    }
     val pdlService by lazy {
-        PdlService(pdlHttpClient(env), "http://etterlatte-pdltjenester")
+        PdlService(pdlTjenester, "http://etterlatte-pdltjenester")
     }
     val topic = env.getValue("KAFKA_RAPID_TOPIC")
     // Gcpkafkaconfig burde renames?
@@ -85,22 +86,3 @@ fun startLeesahLytter(env: Map<String, String>) {
         }
     }
 }
-
-fun pdlHttpClient(props: Map<String, String>) = HttpClient(OkHttp) {
-    expectSuccess = true
-    install(ContentNegotiation) {
-        jackson {
-            registerModule(JavaTimeModule())
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        }
-    }
-    install(Auth) {
-        clientCredential {
-            config = props.toMutableMap()
-                .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("PDL_AZURE_SCOPE"))) }
-        }
-    }
-    defaultRequest {
-        header(HttpHeaders.XCorrelationId, getCorrelationId())
-    }
-}.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }

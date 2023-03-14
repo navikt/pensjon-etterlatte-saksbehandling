@@ -22,7 +22,9 @@ type behandlingRouteTypes =
   | 'beregne'
   | 'brev'
 
-const behandlingRoutes = (behandling: IBehandlingReducer): Array<{ path: behandlingRouteTypes; element: any }> => [
+const behandlingRoutes = (
+  behandling: IBehandlingReducer
+): Array<{ path: behandlingRouteTypes; element: JSX.Element }> => [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt behandling={behandling} /> },
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },

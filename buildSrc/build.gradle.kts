@@ -40,4 +40,7 @@ tasks {
         warnUsedUndeclared = true
         warnUnusedDeclared = true
     }
+    test {
+        testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }

@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.DateTime
+import java.time.LocalDate
 
 class TrygdetidRepository(private val dataSource: InMemoryDs) {
 
@@ -40,7 +40,7 @@ class TrygdetidRepository(private val dataSource: InMemoryDs) {
 
     private fun fromTrygdetidGrunnlag(trygdetid: TrygdetidGrunnlag, it: InsertStatement<Number>) {
         it[bosted] = trygdetid.bosted
-        it[periodeFra] = DateTime.parse(trygdetid.periodeFra)
-        it[periodeTil] = DateTime.parse(trygdetid.periodeTil)
+        it[periodeFra] = LocalDate.parse(trygdetid.periodeFra)
+        it[periodeTil] = LocalDate.parse(trygdetid.periodeTil)
     }
 }

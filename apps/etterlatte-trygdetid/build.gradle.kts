@@ -13,8 +13,11 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
 
-    implementation("com.h2database:h2:1.3.148")
-    implementation("org.jetbrains.exposed:exposed:0.17.14")
+    implementation("com.h2database:h2:2.1.210")
+    implementation("org.jetbrains.exposed:exposed-core:0.41.1")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
+    implementation("org.jetbrains.exposed:exposed-dao:0.41.1")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.41.1")
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercore)

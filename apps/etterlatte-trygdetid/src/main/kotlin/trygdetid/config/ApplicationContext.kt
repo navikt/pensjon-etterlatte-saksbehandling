@@ -8,8 +8,9 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.DateTime
+import java.time.LocalDate
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -39,8 +40,8 @@ class InMemoryDs {
     private fun fillDb() {
         trygdetidTable.insert {
             it[bosted] = "Norge"
-            it[periodeFra] = DateTime.now()
-            it[periodeTil] = DateTime.now()
+            it[periodeFra] = LocalDate.now()
+            it[periodeTil] = LocalDate.now()
         }
     }
 }

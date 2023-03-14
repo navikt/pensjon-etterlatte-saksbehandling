@@ -63,7 +63,6 @@ ktor2-metricsmicrometer = { module = "io.ktor:ktor-server-metrics-micrometer", v
 ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2-version" }
 ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
-ktor2-doublerecieve = { module = "io.ktor:ktor-server-double-receive", version.ref = "ktor2-version" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "1.7.30" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.5" }

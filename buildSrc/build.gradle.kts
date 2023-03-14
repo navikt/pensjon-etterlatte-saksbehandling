@@ -40,7 +40,21 @@ tasks {
         warnUsedUndeclared = true
         warnUnusedDeclared = true
     }
-    test {
+    withType<Test> {
         testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}
+setupTestLogging()
+
+fun Project.setupTestLogging() {
+    for (sub in subprojects) {
+        sub.tasks.withType<Test> {
+            testLogging {
+                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                showStackTraces = true
+                showStandardStreams = true
+                showCauses = true
+            }
+        }
     }
 }

@@ -19,23 +19,6 @@ internal class LogUtilsTest {
     }
 
     @Test
-    fun `feil med vilje`() {
-        try {
-            extracted()
-        } catch (e: RuntimeException) {
-            e2(e)
-        }
-    }
-
-    private fun e2(e: RuntimeException) {
-        throw IllegalArgumentException("og her", e)
-    }
-
-    private fun extracted() {
-        throw RuntimeException("feil her")
-    }
-
-    @Test
     fun `Sjekk MDC correlation ID - exception flyt`() {
         assert(MDC.get(CORRELATION_ID) == null)
 

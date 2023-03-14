@@ -20,45 +20,25 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
             <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
           </li>
           <Separator aria-hidden={'true'} />
-        </>
-      )}
-      {behandlingType === IBehandlingsType.MANUELT_OPPHOER && (
-        <>
-          <li>
-            <NavLink to="opphoeroversikt">Opphør</NavLink>
-          </li>
-          <Separator aria-hidden={'true'} />
-        </>
-      )}
-      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
-        <>
           <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.VILKAARSVURDERT) })}>
             <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
           </li>
           <Separator aria-hidden={'true'} />
-        </>
-      )}
-      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && sakType === ISaksType.OMSTILLINGSSTOENAD && (
-        <>
-          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.OPPRETTET) })}>
-            <NavLink to="trygdetid">Trygdetid</NavLink>
-          </li>
-          <Separator aria-hidden={'true'} />
-        </>
-      )}
-      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-        <>
+          {sakType === ISaksType.OMSTILLINGSSTOENAD && (
+            <>
+              <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.OPPRETTET) })}>
+                <NavLink to="trygdetid">Trygdetid</NavLink>
+              </li>
+              <Separator aria-hidden={'true'} />
+            </>
+          )}
           <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
             <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
           </li>
           <Separator aria-hidden={'true'} />
-        </>
-      )}
-      <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
-        <NavLink to="beregne">Beregning</NavLink>
-      </li>
-      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
-        <>
+          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
+            <NavLink to="beregne">Beregning</NavLink>
+          </li>
           <Separator aria-hidden={'true'} />
           <li
             className={classNames({
@@ -66,6 +46,13 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
             })}
           >
             <NavLink to="brev">Vedtaksbrev</NavLink>
+          </li>
+        </>
+      )}
+      {behandlingType === IBehandlingsType.MANUELT_OPPHOER && (
+        <>
+          <li>
+            <NavLink to="opphoeroversikt">Opphør</NavLink>
           </li>
         </>
       )}

@@ -83,9 +83,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
           )}
           {mapApiResult(
             manueltOpphoerDetaljer,
-            () => (
-              <Spinner visible label="Henter detaljer om det manuelle opphøret" />
-            ),
+            <Spinner visible label="Henter detaljer om det manuelle opphøret" />,
             () => (
               <MainSection>
                 <Feilmelding>Kunne ikke hente ut detaljer om manuelt opphør</Feilmelding>

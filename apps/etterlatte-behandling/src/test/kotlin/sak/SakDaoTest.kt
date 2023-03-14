@@ -39,14 +39,50 @@ class SakDaoTest {
     }
 
     @Test
-    fun kanSjekkeOmHarAdressebeskyttelse() {
+    fun kanSjekkeOmHarStrengtFortroligAdressebeskyttelse() {
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
 
-        Assertions.assertFalse(sakRepo.enAvSakeneHarStrengtFortroligBeskyttelse(listOf(opprettSak.id)))
+        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
         sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
             opprettSak.id,
             AdressebeskyttelseGradering.STRENGT_FORTROLIG
         )
-        Assertions.assertTrue(sakRepo.enAvSakeneHarStrengtFortroligBeskyttelse(listOf(opprettSak.id)))
+        Assertions.assertTrue(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
+    }
+
+    @Test
+    fun kanSjekkeOmHarStrengtFortroligUtlandAdressebeskyttelse() {
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
+
+        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
+        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
+            opprettSak.id,
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
+        )
+        Assertions.assertTrue(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
+    }
+
+    @Test
+    fun kanSjekkeOmHarFortroligAdressebeskyttelse() {
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
+
+        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
+        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
+            opprettSak.id,
+            AdressebeskyttelseGradering.FORTROLIG
+        )
+        Assertions.assertTrue(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
+    }
+
+    @Test
+    fun kanSjekkeUgradertAdressebeskyttlese() {
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
+
+        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
+        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
+            opprettSak.id,
+            AdressebeskyttelseGradering.UGRADERT
+        )
+        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
     }
 }

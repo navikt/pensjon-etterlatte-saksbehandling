@@ -27,5 +27,6 @@ dependencies {
 tasks {
     withType<Test> {
         useJUnitPlatform()
+        testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
 }

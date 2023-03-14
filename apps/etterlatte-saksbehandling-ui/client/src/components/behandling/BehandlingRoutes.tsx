@@ -10,25 +10,27 @@ import { Vedtaksbrev } from './vedtaksbrev/Vedtaksbrev'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { Trygdetid } from './trygdetid/Trygdetid'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
-const behandlingRoutes = [
-  { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false, erManueltOpphoerRoute: false },
-  {
-    path: 'opphoeroversikt',
-    element: <ManueltOpphoerOversikt />,
-    erRevurderingRoute: false,
-    erManueltOpphoerRoute: true,
-  },
-  { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering />, erRevurderingRoute: true, erManueltOpphoerRoute: false },
-  {
-    path: 'beregningsgrunnlag',
-    element: <Beregningsgrunnlag />,
-    erRevurderingRoute: false,
-    erManueltOpphoerRoute: false,
-  },
-  { path: 'beregne', element: <Beregne />, erRevurderingRoute: true, erManueltOpphoerRoute: true },
-  { path: 'brev', element: <Vedtaksbrev />, erRevurderingRoute: true, erManueltOpphoerRoute: false },
-] as const
+type behandlingRouteTypes =
+  | 'soeknadsoversikt'
+  | 'opphoeroversikt'
+  | 'vilkaarsvurdering'
+  | 'trygdetid'
+  | 'beregningsgrunnlag'
+  | 'beregne'
+  | 'brev'
+
+const behandlingRoutes: Array<{ path: behandlingRouteTypes; element: any }> = [
+  { path: 'soeknadsoversikt', element: <Soeknadsoversikt /> },
+  { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt /> },
+  { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering /> },
+  { path: 'trygdetid', element: <Trygdetid /> },
+  { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag /> },
+  { path: 'beregne', element: <Beregne /> },
+  { path: 'brev', element: <Vedtaksbrev /> },
+]
 
 function useRouteNavigation() {
   const [currentRoute, setCurrentRoute] = useState<string | undefined>()
@@ -39,7 +41,7 @@ function useRouteNavigation() {
     setCurrentRoute(match?.params?.section)
   }, [match])
 
-  const goto = (path: (typeof behandlingRoutes)[number]['path']) => {
+  const goto = (path: behandlingRouteTypes) => {
     setCurrentRoute(path)
     navigate(`/behandling/${match?.params?.behandlingId}/${path}`)
     window.scrollTo(0, 0)
@@ -74,17 +76,29 @@ export const useBehandlingRoutes = () => {
 }
 
 const hentAktuelleRoutes = (behandling: IBehandlingReducer) => {
+  const soeknadRoutes = finnRoutesFoerstegangbehandling(behandling)
+  const revurderingRoutes: Array<behandlingRouteTypes> = ['vilkaarsvurdering', 'beregne', 'brev']
+  const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
+
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      const soeknadRoutes = behandlingRoutes.filter((route) => route.path !== 'opphoeroversikt')
-      if (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT) {
-        return soeknadRoutes.filter((route) => route.path !== 'beregne' && route.path !== 'beregningsgrunnlag')
-      }
-      return soeknadRoutes
+      return behandlingRoutes.filter((route) => soeknadRoutes.includes(route.path))
     case IBehandlingsType.REVURDERING:
     case IBehandlingsType.OMREGNING:
-      return behandlingRoutes.filter((route) => route.erRevurderingRoute)
+      return behandlingRoutes.filter((route) => revurderingRoutes.includes(route.path))
     case IBehandlingsType.MANUELT_OPPHOER:
-      return behandlingRoutes.filter((route) => route.erManueltOpphoerRoute)
+      return behandlingRoutes.filter((route) => manueltOpphoerRoutes.includes(route.path))
   }
+}
+
+function finnRoutesFoerstegangbehandling(behandling: IBehandlingReducer): Array<behandlingRouteTypes> {
+  const routes: Array<behandlingRouteTypes> = ['soeknadsoversikt', 'vilkaarsvurdering', 'brev']
+  if (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT) {
+    routes.push('beregningsgrunnlag')
+    routes.push('beregne')
+  }
+  if (behandling.sakType == ISaksType.OMSTILLINGSSTOENAD) {
+    routes.push('trygdetid')
+  }
+  return routes
 }

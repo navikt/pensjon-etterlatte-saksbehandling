@@ -39,4 +39,8 @@ export const ApiConfig = {
     url: process.env.VEDTAK_API_URL || 'https://etterlatte-vedtaksvurdering.dev.intern.nav.no',
     scope: process.env.VEDTAK_API_SCOPE || 'api://069b1b2c-0a06-4cc9-8418-f100b8ff71be/.default',
   },
+  trygdetid: {
+    url: process.env.VEDTAK_API_URL || 'https://etterlatte-trygdetid.dev.intern.nav.no',
+    scope: process.env.VEDTAK_API_SCOPE || 'api://8385435e-f3d7-45ec-be59-ebd1c71df735/.default',
+  },
 }

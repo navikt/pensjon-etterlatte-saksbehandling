@@ -40,10 +40,18 @@ class SkjermingslesingTest {
     @Test
     fun `feil med vilje`() {
         try {
-            throw RuntimeException("feil her")
+            extracted()
         } catch (e: RuntimeException) {
-            throw IllegalArgumentException("og her", e)
+            e2(e)
         }
+    }
+
+    private fun e2(e: RuntimeException) {
+        throw IllegalArgumentException("og her", e)
+    }
+
+    private fun extracted() {
+        throw RuntimeException("feil her")
     }
 
     @Test

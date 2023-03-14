@@ -1,6 +1,7 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.avro)
+    id("etterlatte.rapids-and-rivers-ktor2")
     id("etterlatte.kafka")
 }
 
@@ -27,8 +28,6 @@ dependencies {
     implementation(libs.kafka.avro)
     implementation(libs.kafka.avroserializer)
     implementation(libs.logging.logbackclassic)
-
-    implementation(project(":libs:rapidsandrivers-extras"))
 
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.kafka.embeddedenv)

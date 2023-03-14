@@ -24,7 +24,7 @@ object OmstillingstoenadVilkaar {
             """.trimIndent(),
             spoersmaal = "Er ektefelle/partner/samboer registrert død?",
             lovreferanse = Lovreferanse(
-                paragraf = "Folketrygdloven § 17-1"
+                paragraf = "§ 17-1"
             )
         )
     )

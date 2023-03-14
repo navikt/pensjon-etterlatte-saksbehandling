@@ -78,39 +78,43 @@ internal class DelvilkaarRepository {
 
     internal fun opprettVilkaarsvurdering(vilkaarId: UUID, vilkaar: Vilkaar, tx: TransactionalSession) {
         lagreDelvilkaar(vilkaarId, vilkaar.hovedvilkaar, true, tx)
-        vilkaar.unntaksvilkaar?.forEach { unntaksvilkaar ->
+        vilkaar.unntaksvilkaar.forEach { unntaksvilkaar ->
             lagreDelvilkaar(vilkaarId, unntaksvilkaar, false, tx)
         }
     }
 
     private fun lagreDelvilkaar(
         vilkaarId: UUID,
-        unntaksvilkaar: Delvilkaar,
+        delvilkaar: Delvilkaar,
         hovedvilkaar: Boolean,
         tx: TransactionalSession
     ) = queryOf(
         statement = """
-            INSERT INTO delvilkaar(vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, paragraf, ledd, bokstav, lenke, resultat) 
-            VALUES(:vilkaar_id, :vilkaar_type, :hovedvilkaar, :tittel, :beskrivelse, :paragraf, :ledd, :bokstav, :lenke, :resultat)
+            INSERT INTO delvilkaar(vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, spoersmaal, paragraf, 
+                ledd, bokstav, lenke, resultat) 
+            VALUES(:vilkaar_id, :vilkaar_type, :hovedvilkaar, :tittel, :beskrivelse, :spoersmaal, :paragraf, :ledd, 
+                :bokstav, :lenke, :resultat)
         """,
         paramMap = mapOf(
             "vilkaar_id" to vilkaarId,
-            "vilkaar_type" to unntaksvilkaar.type.name,
+            "vilkaar_type" to delvilkaar.type.name,
             "hovedvilkaar" to hovedvilkaar,
-            "tittel" to unntaksvilkaar.tittel,
-            "beskrivelse" to unntaksvilkaar.beskrivelse,
-            "paragraf" to unntaksvilkaar.lovreferanse.paragraf,
-            "ledd" to unntaksvilkaar.lovreferanse.ledd,
-            "bokstav" to unntaksvilkaar.lovreferanse.paragraf,
-            "lenke" to unntaksvilkaar.lovreferanse.lenke,
-            "resultat" to unntaksvilkaar.resultat?.name
+            "tittel" to delvilkaar.tittel,
+            "beskrivelse" to delvilkaar.beskrivelse,
+            "spoersmaal" to delvilkaar.spoersmaal,
+            "paragraf" to delvilkaar.lovreferanse.paragraf,
+            "ledd" to delvilkaar.lovreferanse.ledd,
+            "bokstav" to delvilkaar.lovreferanse.paragraf,
+            "lenke" to delvilkaar.lovreferanse.lenke,
+            "resultat" to delvilkaar.resultat?.name
         )
     ).let { tx.run(it.asExecute) }
 
     internal fun hentDelvilkaar(vilkaarId: UUID, hovedvilkaar: Boolean, session: Session): List<Delvilkaar> =
         queryOf(
             """
-            SELECT vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, paragraf, ledd, bokstav, lenke, resultat 
+            SELECT vilkaar_id, vilkaar_type, hovedvilkaar, tittel, beskrivelse, spoersmaal, paragraf, ledd, bokstav, 
+                lenke, resultat 
             FROM delvilkaar WHERE vilkaar_id = :vilkaar_id AND hovedvilkaar = :hovedvilkaar
         """,
             mapOf("vilkaar_id" to vilkaarId, "hovedvilkaar" to hovedvilkaar)
@@ -135,6 +139,7 @@ internal class DelvilkaarRepository {
             type = VilkaarType.valueOf(string("vilkaar_type")),
             tittel = string("tittel"),
             beskrivelse = stringOrNull("beskrivelse"),
+            spoersmaal = stringOrNull("spoersmaal"),
             lovreferanse = Lovreferanse(
                 paragraf = string("paragraf"),
                 ledd = intOrNull("ledd"),

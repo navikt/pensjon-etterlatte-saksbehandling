@@ -1,9 +1,7 @@
 import { IHendelse } from '~shared/types/IHendelse'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeSaksbehandler } from '~shared/types/kilde'
-import { IKriterie } from '~shared/types/Kriterie'
 import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
-import { Utfall } from '~shared/types/Utfall'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 
@@ -70,14 +68,6 @@ export interface IKommerBarnetTilgode {
   svar: JaNei
   begrunnelse: string
   kilde: KildeSaksbehandler
-}
-
-export interface IVilkaarsproving {
-  navn: VilkaarsType
-  resultat: VurderingsResultat
-  utfall: Utfall | undefined
-  kriterier: IKriterie[]
-  vurdertDato: string
 }
 
 export interface Virkningstidspunkt {

@@ -22,14 +22,14 @@ type behandlingRouteTypes =
   | 'beregne'
   | 'brev'
 
-const behandlingRoutes: Array<{ path: behandlingRouteTypes; element: any }> = [
-  { path: 'soeknadsoversikt', element: <Soeknadsoversikt /> },
-  { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt /> },
-  { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering /> },
-  { path: 'trygdetid', element: <Trygdetid /> },
-  { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag /> },
-  { path: 'beregne', element: <Beregne /> },
-  { path: 'brev', element: <Vedtaksbrev /> },
+const behandlingRoutes = (behandling: IBehandlingReducer): Array<{ path: behandlingRouteTypes; element: any }> => [
+  { path: 'soeknadsoversikt', element: <Soeknadsoversikt behandling={behandling} /> },
+  { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
+  { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
+  { path: 'trygdetid', element: <Trygdetid behandling={behandling} /> },
+  { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
+  { path: 'beregne', element: <Beregne behandling={behandling} /> },
+  { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
 ]
 
 function useRouteNavigation() {
@@ -75,19 +75,21 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-const hentAktuelleRoutes = (behandling: IBehandlingReducer) => {
+const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
+  if (!behandling) return []
+
   const soeknadRoutes = finnRoutesFoerstegangbehandling(behandling)
   const revurderingRoutes: Array<behandlingRouteTypes> = ['vilkaarsvurdering', 'beregne', 'brev']
   const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      return behandlingRoutes.filter((route) => soeknadRoutes.includes(route.path))
+      return behandlingRoutes(behandling).filter((route) => soeknadRoutes.includes(route.path))
     case IBehandlingsType.REVURDERING:
     case IBehandlingsType.OMREGNING:
-      return behandlingRoutes.filter((route) => revurderingRoutes.includes(route.path))
+      return behandlingRoutes(behandling).filter((route) => revurderingRoutes.includes(route.path))
     case IBehandlingsType.MANUELT_OPPHOER:
-      return behandlingRoutes.filter((route) => manueltOpphoerRoutes.includes(route.path))
+      return behandlingRoutes(behandling).filter((route) => manueltOpphoerRoutes.includes(route.path))
   }
 }
 

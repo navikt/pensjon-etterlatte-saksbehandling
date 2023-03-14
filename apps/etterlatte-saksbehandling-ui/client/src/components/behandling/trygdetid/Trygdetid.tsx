@@ -2,7 +2,6 @@ import { Content, ContentHeader } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Button, Heading, TextField } from '@navikt/ds-react'
 import { Innhold } from '~components/behandling/trygdetid/styled'
-import { useAppSelector } from '~store/Store'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
@@ -14,9 +13,10 @@ import React, { FormEvent, useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-export const Trygdetid = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+export const Trygdetid = (props: { behandling: IDetaljertBehandling }) => {
+  const { behandling } = props
   const behandles = hentBehandlesFraStatus(behandling.status)
   const { next } = useBehandlingRoutes()
 

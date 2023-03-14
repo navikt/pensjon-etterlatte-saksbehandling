@@ -1,4 +1,3 @@
-import { useAppSelector } from '~store/Store'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import BeregningsgrunnlagBarnepensjon from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagBarnepensjon'
 import BeregningsgrunnlagOmstillingsstoenad from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagOmstillingsstoenad'
@@ -7,9 +6,10 @@ import { BodyShort, Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { Content, ContentHeader } from '~shared/styled'
 import Trygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-const Beregningsgrunnlag = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
+  const { behandling } = props
 
   return (
     <Content>
@@ -30,8 +30,8 @@ const Beregningsgrunnlag = () => {
       <Trygdetid />
       {
         {
-          [ISaksType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon />,
-          [ISaksType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad />,
+          [ISaksType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon behandling={behandling} />,
+          [ISaksType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad behandling={behandling} />,
         }[behandling.sakType]
       }
     </Content>

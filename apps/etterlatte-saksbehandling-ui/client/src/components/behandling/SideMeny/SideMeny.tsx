@@ -4,16 +4,17 @@ import { Button } from '@navikt/ds-react'
 import { CollapsibleSidebar, SidebarContent, SidebarTools } from '~shared/styled'
 import { IHendelseType } from '~shared/types/IHendelse'
 import { IRolle } from '~store/reducers/SaksbehandlerReducer'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Behandlingsoppsummering } from '~components/behandling/attestering/oppsummering/oppsummering'
 import { Attestering } from '~components/behandling/attestering/attestering/attestering'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { IBehandlingInfo } from '~components/behandling/SideMeny/types'
 import { Dokumentoversikt } from '~components/person/dokumentoversikt'
 
-export const SideMeny = () => {
+export const SideMeny = (props: { behandling: IDetaljertBehandling }) => {
+  const { behandling } = props
+
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const [collapsed, setCollapsed] = useState(false)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
 
@@ -47,7 +48,9 @@ export const SideMeny = () => {
         {behandlingsinfo && (
           <>
             <Behandlingsoppsummering behandlingsInfo={behandlingsinfo} beslutning={beslutning} />
-            {kanAttestere && <Attestering setBeslutning={setBeslutning} beslutning={beslutning} />}
+            {kanAttestere && (
+              <Attestering setBeslutning={setBeslutning} beslutning={beslutning} behandling={behandling} />
+            )}
           </>
         )}
       </SidebarContent>

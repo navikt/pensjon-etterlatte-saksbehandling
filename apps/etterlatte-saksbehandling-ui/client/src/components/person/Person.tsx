@@ -24,9 +24,9 @@ export const Person = () => {
 
   const personInfo = isSuccess(personStatus)
     ? {
-        navn: personStatus.data.fornavn + ' ' + personStatus.data.etternavn,
+        fornavn: personStatus.data.fornavn,
+        etternavn: personStatus.data.etternavn,
         fnr: personStatus.data.foedselsnummer,
-        type: 'Etterlatt',
       }
     : null
 

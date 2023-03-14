@@ -9,7 +9,7 @@ import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny/SideMeny'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Behandling = () => {
@@ -17,7 +17,7 @@ export const Behandling = () => {
   const dispatch = useAppDispatch()
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
-  const [hentBehandlingStatus, hentBehandlingCall] = useApiCall(hentBehandling)
+  const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
 
   const behandlingId = behandling?.id
 
@@ -26,7 +26,7 @@ export const Behandling = () => {
     if (!behandlingIdFraURL) return
 
     if (behandlingIdFraURL !== behandlingId) {
-      hentBehandlingCall(
+      fetchBehandling(
         behandlingIdFraURL,
         (res) => dispatch(addBehandling(res)),
         () => dispatch(resetBehandling())
@@ -34,41 +34,33 @@ export const Behandling = () => {
     }
   }, [match?.params.behandlingId, behandlingId])
 
-  const soeker = behandling?.søker
-  const soekerInfo = soeker
-    ? { navn: `${soeker.fornavn} ${soeker.etternavn}`, fnr: soeker.foedselsnummer, type: 'Etterlatt' }
-    : null
+  const soekerInfo = behandling?.søker
 
   return (
     <>
-      {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />}
-      {mapApiResult(
-        hentBehandlingStatus,
-        <Spinner visible label="Laster" />,
-        () => (
-          <>
-            <StegMeny />
-            <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>
-          </>
-        ),
-        (behandling) => (
-          <>
-            <StegMeny />
-            <GridContainer>
-              {behandling.id}
-              <MainContent>
-                <Routes>
-                  {behandlingRoutes.map((route) => (
-                    <Route key={route.path} path={route.path} element={route.element} />
-                  ))}
-                  <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
-                </Routes>
-              </MainContent>
-              <SideMeny />
-            </GridContainer>
-          </>
-        )
+      {soekerInfo && (
+        <StatusBar
+          theme={StatusBarTheme.gray}
+          personInfo={{ fnr: soekerInfo.foedselsnummer, fornavn: soekerInfo.fornavn, etternavn: soekerInfo.etternavn }}
+        />
       )}
+      {behandling && <StegMeny behandling={behandling} />}
+
+      <Spinner visible={isPendingOrInitial(fetchBehandlingStatus)} label="Laster" />
+      {behandling && (
+        <GridContainer>
+          <MainContent>
+            <Routes>
+              {behandlingRoutes.map((route) => (
+                <Route key={route.path} path={route.path} element={route.element} />
+              ))}
+              <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
+            </Routes>
+          </MainContent>
+          <SideMeny behandling={behandling} />
+        </GridContainer>
+      )}
+      {isFailure(fetchBehandlingStatus) && <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>}
     </>
   )
 }

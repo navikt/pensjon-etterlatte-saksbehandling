@@ -5,7 +5,6 @@ import { Infoboks } from '~components/behandling/soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { useEffect, useState } from 'react'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
-import { useAppSelector } from '~store/Store'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { Opphoersgrunn, OVERSETTELSER_OPPHOERSGRUNNER } from '~components/person/ManueltOpphoerModal'
 import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
@@ -18,6 +17,7 @@ import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
 import { lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
 import { IBehandlingsammendrag } from '~components/person/typer'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
 export interface ManueltOpphoerDetaljer {
   id: string
@@ -42,8 +42,8 @@ const useManueltOpphoerDetaljer = (behandlingId?: string) => {
   return manueltOpphoerDetaljer
 }
 
-export const ManueltOpphoerOversikt = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }) => {
+  const { behandling } = props
   const [loadingBeregning, setLoadingBeregning] = useState(false)
   const behandlingRoutes = useBehandlingRoutes()
   const [feilmelding, setFeilmelding] = useState('')

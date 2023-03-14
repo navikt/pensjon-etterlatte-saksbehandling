@@ -1,7 +1,6 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.avro)
-    id("etterlatte.rapids-and-rivers-ktor2")
     id("etterlatte.kafka")
 }
 
@@ -10,6 +9,7 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-helsesjekk"))
+    implementation(project(":libs:etterlatte-kafka"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)

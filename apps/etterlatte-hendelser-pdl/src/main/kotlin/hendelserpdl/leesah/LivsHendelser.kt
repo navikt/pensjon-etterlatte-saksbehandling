@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.maskerFnr
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -56,8 +55,8 @@ class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, Js
         kafkaProduser.publiser(
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
+                "PDL:PERSONHENDELSE",
                 mapOf(
-                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.DOEDSFALL_V1.toString(),
                     "hendelse_data" to doedshendelse
                 )
@@ -85,8 +84,8 @@ class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, Js
         kafkaProduser.publiser(
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
+                "PDL:PERSONHENDELSE",
                 mapOf(
-                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString(),
                     "hendelse_data" to utflyttingsHendelse
                 )
@@ -114,8 +113,8 @@ class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, Js
         kafkaProduser.publiser(
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
+                "PDL:PERSONHENDELSE",
                 mapOf(
-                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString(),
                     "hendelse_data" to forelderBarnRelasjonHendelse
                 )
@@ -137,8 +136,8 @@ class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, Js
         kafkaProduser.publiser(
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
+                "PDL:PERSONHENDELSE",
                 mapOf(
-                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString(),
                     "hendelse_data" to adressebeskyttelse
                 )

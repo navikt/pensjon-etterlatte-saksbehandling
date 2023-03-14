@@ -9,18 +9,14 @@ interface SakServiceAdressebeskyttelse {
 
 class SakServiceAdressebeskyttelseImpl(private val dao: SakDaoAdressebeskyttelse) : SakServiceAdressebeskyttelse {
 
-    override fun behandlingHarAdressebeskyttelse(behandlingId: String): Boolean {
-        val adressebeskyttelseGradering = dao.sjekkOmBehandlingHarAdressebeskyttelse(behandlingId)
-        return if (adressebeskyttelseGradering != null) {
-            when (adressebeskyttelseGradering) {
-                AdressebeskyttelseGradering.FORTROLIG -> true
-                AdressebeskyttelseGradering.STRENGT_FORTROLIG -> true
-                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> true
-                else -> false
-            }
-        } else {
-            false
-        }
+    override fun behandlingHarAdressebeskyttelse(behandlingId: String) =
+        dao.sjekkOmBehandlingHarAdressebeskyttelse(behandlingId).harBeskyttelse()
+
+    private fun AdressebeskyttelseGradering?.harBeskyttelse() = when (this) {
+        AdressebeskyttelseGradering.FORTROLIG -> true
+        AdressebeskyttelseGradering.STRENGT_FORTROLIG -> true
+        AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> true
+        else -> false
     }
 
     override fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int {

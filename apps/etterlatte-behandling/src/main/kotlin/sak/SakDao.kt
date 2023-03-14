@@ -82,19 +82,20 @@ class SakDao(private val connection: () -> Connection) {
         }
     }
 
-    fun enAvSakeneHarStrengtFortroligBeskyttelse(sakIder: List<Long>): Boolean {
+    fun enAvSakeneHarAdresseBeskyttelse(sakIder: List<Long>): Boolean {
         with(connection()) {
             val statement = prepareStatement(
                 """
-                 SELECT count(*) as strengt_fortrolig 
+                 SELECT count(*) as gradert 
                  from sak
                  where id = any(?)
-                 AND adressebeskyttelse is NOT NULL AND (adressebeskyttelse = ? OR adressebeskyttelse = ?)
+                 AND adressebeskyttelse is NOT NULL AND adressebeskyttelse IN (?, ?, ?)
                 """.trimIndent()
             )
             statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
             statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
             statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
+            statement.setString(4, AdressebeskyttelseGradering.FORTROLIG.toString())
             val resultSet = statement.executeQuery()
             return resultSet.single {
                 getInt(1)

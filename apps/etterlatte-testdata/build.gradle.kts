@@ -37,3 +37,9 @@ dependencies {
     testImplementation(libs.test.mockk)
     testImplementation(libs.test.kotest.assertionscore)
 }
+
+tasks {
+    test {
+        testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}

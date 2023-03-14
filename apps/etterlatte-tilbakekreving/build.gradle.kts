@@ -51,3 +51,9 @@ dependencies {
     testImplementation(libs.test.testcontainer.jupiter)
     testImplementation(libs.test.testcontainer.postgresql)
 }
+
+tasks {
+    test {
+        testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}

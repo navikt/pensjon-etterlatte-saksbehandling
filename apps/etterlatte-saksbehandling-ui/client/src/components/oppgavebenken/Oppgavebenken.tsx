@@ -60,9 +60,7 @@ const Oppgavebenken = () => {
         />
         {mapApiResult(
           oppgaver,
-          () => (
-            <Spinner visible={true} label={'Laster oppgaver'} />
-          ),
+          <Spinner visible label={'Laster oppgaver'} />,
           () => (
             <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>
           ),

@@ -9,7 +9,7 @@ import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny/SideMeny'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Behandling = () => {
@@ -17,8 +17,9 @@ export const Behandling = () => {
   const dispatch = useAppDispatch()
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
-  const behandlingId = behandling.id
   const [hentBehandlingStatus, hentBehandlingCall] = useApiCall(hentBehandling)
+
+  const behandlingId = behandling?.id
 
   useEffect(() => {
     const behandlingIdFraURL = match?.params.behandlingId
@@ -41,23 +42,33 @@ export const Behandling = () => {
   return (
     <>
       {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />}
-      {!isPendingOrInitial(hentBehandlingStatus) && <StegMeny />}
-
-      <Spinner visible={isPendingOrInitial(hentBehandlingStatus)} label="Laster" />
-      {isSuccess(hentBehandlingStatus) && (
-        <GridContainer>
-          <MainContent>
-            <Routes>
-              {behandlingRoutes.map((route) => (
-                <Route key={route.path} path={route.path} element={route.element} />
-              ))}
-              <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
-            </Routes>
-          </MainContent>
-          <SideMeny />
-        </GridContainer>
+      {mapApiResult(
+        hentBehandlingStatus,
+        <Spinner visible label="Laster" />,
+        () => (
+          <>
+            <StegMeny />
+            <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>
+          </>
+        ),
+        (behandling) => (
+          <>
+            <StegMeny />
+            <GridContainer>
+              {behandling.id}
+              <MainContent>
+                <Routes>
+                  {behandlingRoutes.map((route) => (
+                    <Route key={route.path} path={route.path} element={route.element} />
+                  ))}
+                  <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
+                </Routes>
+              </MainContent>
+              <SideMeny />
+            </GridContainer>
+          </>
+        )
       )}
-      {isFailure(hentBehandlingStatus) && <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>}
     </>
   )
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { ReactElement, useState } from 'react'
 import { ApiError, ApiResponse } from '../api/apiClient'
 
 export function useApiCall<T, U>(
@@ -56,14 +56,14 @@ const error = <A = never>(error: ApiError): Result<A> => ({
   error,
 })
 
-export const mapApiResult = <T, R>(
+export const mapApiResult = <T>(
   result: Result<T>,
-  mapInitialOrPending: (_: Initial | Pending) => R,
-  mapError: (_: ApiError) => R,
-  mapSuccess: (_: T) => R
-): R => {
+  mapInitialOrPending: ReactElement,
+  mapError: (_: ApiError) => ReactElement,
+  mapSuccess: (_: T) => ReactElement
+): ReactElement => {
   if (isPendingOrInitial(result)) {
-    return mapInitialOrPending(result)
+    return mapInitialOrPending
   }
   if (isFailure(result)) {
     return mapError(result.error)

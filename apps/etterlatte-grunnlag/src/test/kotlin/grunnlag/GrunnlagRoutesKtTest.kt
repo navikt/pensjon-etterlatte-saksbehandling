@@ -14,6 +14,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.serialize
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -32,7 +33,6 @@ internal class GrunnlagRoutesKtTest {
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     companion object {
-        private const val ISSUER_ID = "azure"
         private const val CLIENT_ID = "CLIENT_ID"
     }
 
@@ -40,7 +40,7 @@ internal class GrunnlagRoutesKtTest {
     fun before() {
         server.start()
         val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
         coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
     }
 
@@ -51,7 +51,7 @@ internal class GrunnlagRoutesKtTest {
 
     private val token by lazy {
         server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "Per Persson",

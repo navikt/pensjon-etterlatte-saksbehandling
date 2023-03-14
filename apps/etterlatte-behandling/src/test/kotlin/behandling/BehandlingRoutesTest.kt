@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -52,7 +53,7 @@ internal class BehandlingRoutesTest {
     fun before() {
         mockOAuth2Server.start(1234)
         val httpServer = mockOAuth2Server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -186,7 +187,7 @@ internal class BehandlingRoutesTest {
 
     private val token: String by lazy {
         mockOAuth2Server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "John Doe",
@@ -198,7 +199,6 @@ internal class BehandlingRoutesTest {
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
         const val NAVident = "Saksbehandler01"
-        const val ISSUER_ID = "azure"
         const val CLIENT_ID = "mock-client-id"
     }
 }

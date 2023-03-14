@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sak.Sak
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.token.Bruker
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.testcontainers.containers.PostgreSQLContainer
@@ -51,7 +52,7 @@ abstract class BehandlingIntegrationTest {
         server.start()
 
         val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
         postgreSQLContainer.start()
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
@@ -128,13 +129,12 @@ abstract class BehandlingIntegrationTest {
 
     private fun issueToken(claims: Map<String, Any>) =
         server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = claims
         ).serialize()
 
     private companion object {
-        const val ISSUER_ID = "azure"
         const val CLIENT_ID = "mock-client-id"
     }
 }

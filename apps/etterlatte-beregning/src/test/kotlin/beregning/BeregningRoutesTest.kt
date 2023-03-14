@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -59,7 +60,7 @@ internal class BeregningRoutesTest {
         server.start()
 
         applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID, CLIENT_ID)
+            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
     }
 
@@ -193,14 +194,13 @@ internal class BeregningRoutesTest {
 
     private val token: String by lazy {
         server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01")
         ).serialize()
     }
 
     private companion object {
-        const val ISSUER_ID = "azure"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

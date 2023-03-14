@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.dokument.JournalpostResponse
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -37,7 +38,7 @@ internal class DokumentRouteTest {
     fun before() {
         mockOAuth2Server.start()
         val httpServer = mockOAuth2Server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -116,7 +117,7 @@ internal class DokumentRouteTest {
 
     private val accessToken: String by lazy {
         mockOAuth2Server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "Test Veiledersen",
@@ -126,7 +127,6 @@ internal class DokumentRouteTest {
     }
 
     companion object {
-        private const val ISSUER_ID = "azure"
         private const val CLIENT_ID = "mock-client-id"
     }
 }

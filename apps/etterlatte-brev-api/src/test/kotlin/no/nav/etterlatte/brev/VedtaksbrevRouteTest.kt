@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -46,7 +47,7 @@ internal class VedtaksbrevRouteTest {
     fun before() {
         mockOAuth2Server.start()
         val httpServer = mockOAuth2Server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -159,7 +160,7 @@ internal class VedtaksbrevRouteTest {
 
     private val accessToken: String by lazy {
         mockOAuth2Server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "Test Veiledersen",
@@ -179,7 +180,6 @@ internal class VedtaksbrevRouteTest {
     )
 
     companion object {
-        private const val ISSUER_ID = "azure"
         private const val CLIENT_ID = "mock-client-id"
         private val STOR_SNERK = Foedselsnummer.of("11057523044")
         private val BEHANDLING_ID = UUID.randomUUID()

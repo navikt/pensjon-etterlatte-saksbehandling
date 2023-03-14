@@ -10,7 +10,7 @@ import { Vedtaksbrev } from './vedtaksbrev/Vedtaksbrev'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
+import { Trygdetid } from './trygdetid/Trygdetid'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 type behandlingRouteTypes =

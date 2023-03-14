@@ -8,7 +8,7 @@ import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/Beh
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { hentTrygdetid, ITrygdetid, ITrygdetidGrunnlag, lagreTrygdetidgrunnlag } from '~shared/api/trygdetid'
 import React, { FormEvent, useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
@@ -72,7 +72,7 @@ export const Trygdetid = () => {
               />
             </FormWrapper>
             <FormKnapper>
-              <Button loading={false} type="submit">
+              <Button loading={isPending(trygdetidgrunnlagStatus)} type="submit">
                 Lagre
               </Button>
             </FormKnapper>
@@ -81,10 +81,8 @@ export const Trygdetid = () => {
       )}
 
       {isPending(trygdetidStatus) && <Spinner visible={true} label={'Henter trygdetid'} />}
-      {isFailure(trygdetidStatus) && isInitial(trygdetidStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
-      {isFailure(trygdetidgrunnlagStatus) && isInitial(trygdetidgrunnlagStatus) && (
-        <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
-      )}
+      {isFailure(trygdetidStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      {isFailure(trygdetidgrunnlagStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
 
       {behandles ? (
         <BehandlingHandlingKnapper>

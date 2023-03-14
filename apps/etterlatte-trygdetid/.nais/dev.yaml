@@ -28,15 +28,15 @@ spec:
       tenant: trygdeetaten.no
       claims:
         groups:
-          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # Tror dette er 0000-GA-PENSJON_ATTESTERING
+          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # 0000-GA-PENSJON_ATTESTERING
           - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
         extra:
           - NAVident
 
   replicas:
     cpuThresholdPercentage: 90
-    max: 4
-    min: 2
+    max: 1
+    min: 1
   env:
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling

@@ -18,7 +18,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
         get {
             logger.info("Henter trygdetid")
             val trygdetid = trygdetidService.hentTrygdetid()
-            call.respond(TrygdetidDto.toDto(trygdetid))
+            call.respond(trygdetid.toDto())
         }
 
         post("/grunnlag") {
@@ -32,35 +32,32 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
 
 data class TrygdetidDto(
     val grunnlag: List<TrygdetidGrunnlagDto>
-) {
-    companion object {
-        fun toDto(trygdetid: Trygdetid): TrygdetidDto {
-            return TrygdetidDto(
-                grunnlag = trygdetid.grunnlag.map { TrygdetidGrunnlagDto.toDto(it) }
-            )
-        }
-    }
+)
+
+fun Trygdetid.toDto(): TrygdetidDto {
+    return TrygdetidDto(
+        grunnlag = grunnlag.map { it.toDto() }
+    )
 }
 
 data class TrygdetidGrunnlagDto(
     val bosted: String,
     val periodeFra: String,
     val periodeTil: String
-) {
-    fun fromDto(): TrygdetidGrunnlag {
-        return TrygdetidGrunnlag(
-            bosted,
-            periodeFra,
-            periodeTil
-        )
-    }
-    companion object {
-        fun toDto(trygdetidGrunnlag: TrygdetidGrunnlag): TrygdetidGrunnlagDto {
-            return TrygdetidGrunnlagDto(
-                trygdetidGrunnlag.bosted,
-                trygdetidGrunnlag.periodeFra,
-                trygdetidGrunnlag.periodeTil
-            )
-        }
-    }
+)
+
+fun TrygdetidGrunnlagDto.fromDto(): TrygdetidGrunnlag {
+    return TrygdetidGrunnlag(
+        bosted,
+        periodeFra,
+        periodeTil
+    )
+}
+
+fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
+    return TrygdetidGrunnlagDto(
+        bosted,
+        periodeFra,
+        periodeTil
+    )
 }

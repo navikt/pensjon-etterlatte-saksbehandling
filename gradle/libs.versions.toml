@@ -16,7 +16,7 @@ testcontainer-version = "1.17.6"
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.5" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.0.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "8.5.13" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.15.2" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.3.8" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 

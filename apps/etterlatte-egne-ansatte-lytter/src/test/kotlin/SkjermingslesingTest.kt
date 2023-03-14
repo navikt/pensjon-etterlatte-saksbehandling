@@ -38,23 +38,6 @@ class SkjermingslesingTest {
     }
 
     @Test
-    fun `feil med vilje`() {
-        try {
-            extracted()
-        } catch (e: RuntimeException) {
-            e2(e)
-        }
-    }
-
-    private fun e2(e: RuntimeException) {
-        throw IllegalArgumentException("og her", e)
-    }
-
-    private fun extracted() {
-        throw RuntimeException("feil her")
-    }
-
-    @Test
     fun `Les skjermingshendelse og post det til behandlingsapp`() {
         val skjermingsProducer: KafkaProducer<String, String> = generateSkjermingsProducer()
         val fnr = "70078749472"

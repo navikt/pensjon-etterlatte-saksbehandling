@@ -1,5 +1,7 @@
-package no.nav.etterlatte.hendelserpdl
+package no.nav.etterlatte.hendelserpdl.leesah
 
+import no.nav.etterlatte.kafka.JsonMessage
+import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
@@ -7,9 +9,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.maskerFnr
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -46,22 +45,22 @@ interface ILivsHendelserRapid {
     )
 }
 
-class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelserRapid {
+class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, JsonMessage>) : ILivsHendelserRapid {
     val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun personErDod(fnr: String, doedsdato: String?, endringstype: Endringstype) {
         logger.info("Poster at en person med fnr=${fnr.maskerFnr()} er doed")
         val avdoedDoedsdato = doedsdato.parseDato(fnr, logger)
         val doedshendelse = Doedshendelse(avdoedFnr = fnr, doedsdato = avdoedDoedsdato, endringstype = endringstype)
-        context.publish(
+        kafkaProduser.publiser(
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
+                "PDL:PERSONHENDELSE",
                 mapOf(
-                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.DOEDSFALL_V1.toString(),
                     "hendelse_data" to doedshendelse
                 )
-            ).toJson()
+            )
         )
     }
 
@@ -82,16 +81,15 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             endringstype = endringstype
 
         )
-        context.publish(
+        kafkaProduser.publiser(
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
+                "PDL:PERSONHENDELSE",
                 mapOf(
-                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString(),
                     "hendelse_data" to utflyttingsHendelse
                 )
             )
-                .toJson()
         )
     }
 
@@ -112,16 +110,15 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             relatertPersonUtenFolkeregisteridentifikator = relatertPersonUtenFolkeregisteridentifikator,
             endringstype = endringstype
         )
-        context.publish(
+        kafkaProduser.publiser(
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
+                "PDL:PERSONHENDELSE",
                 mapOf(
-                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString(),
                     "hendelse_data" to forelderBarnRelasjonHendelse
                 )
             )
-                .toJson()
         )
     }
 
@@ -136,16 +133,15 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             adressebeskyttelseGradering = adressebeskyttelseGradering,
             endringstype = endringstype
         )
-        context.publish(
+        kafkaProduser.publiser(
             UUID.randomUUID().toString(),
             JsonMessage.newMessage(
+                "PDL:PERSONHENDELSE",
                 mapOf(
-                    EVENT_NAME_KEY to "PDL:PERSONHENDELSE",
                     "hendelse" to LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString(),
                     "hendelse_data" to adressebeskyttelse
                 )
             )
-                .toJson()
         )
     }
 }

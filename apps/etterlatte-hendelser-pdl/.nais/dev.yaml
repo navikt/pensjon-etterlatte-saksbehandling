@@ -10,10 +10,10 @@ spec:
   port: 8080
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
   strategy:
     type: Recreate
   kafka:
@@ -38,8 +38,6 @@ spec:
       value: "pdl.leesah-v1"
     - name: PDL_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
-    - name: DELAYED_START
-      value: "true"
   accessPolicy:
     outbound:
       rules:

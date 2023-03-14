@@ -127,6 +127,4 @@ open class JsonMessage(
     fun toJson(): String = objectMapper.writeValueAsString(json)
 }
 
-fun String.toUUID(): UUID = UUID.fromString(this)
-
 fun JsonNode.isMissingOrNull() = isMissingNode || isNull

@@ -5,7 +5,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 
 interface KafkaProdusent<K, V> {
-    fun publiser(noekkel: K, verdi: V, headers: Map<String, ByteArray> = emptyMap()): Pair<Int, Long>
+    fun publiser(noekkel: K, verdi: V, headers: Map<String, ByteArray>? = emptyMap()): Pair<Int, Long>
     fun close() = Unit
 }
 
@@ -22,10 +22,10 @@ class KafkaProdusentImpl<K, V> (
     private val kafka: KafkaProducer<K, V>,
     private val topic: String
 ) : KafkaProdusent<K, V> {
-    override fun publiser(noekkel: K, verdi: V, headers: Map<String, ByteArray>): Pair<Int, Long> {
+    override fun publiser(noekkel: K, verdi: V, headers: Map<String, ByteArray>?): Pair<Int, Long> {
         return kafka.send(
             ProducerRecord(topic, noekkel, verdi).also {
-                headers.forEach { h ->
+                headers?.forEach { h ->
                     it.headers().add(h.key, h.value)
                 }
             }
@@ -40,10 +40,10 @@ class KafkaProdusentImpl<K, V> (
 }
 
 class TestProdusent<K, V> () : KafkaProdusent<K, V> {
-    data class Record<K, V>(val noekkel: K, val verdi: V, val headers: Map<String, ByteArray>)
+    data class Record<K, V>(val noekkel: K, val verdi: V, val headers: Map<String, ByteArray>?)
     var closed = false; private set
     val publiserteMeldinger = mutableListOf<Record<K, V>>()
-    override fun publiser(noekkel: K, verdi: V, headers: Map<String, ByteArray>): Pair<Int, Long> {
+    override fun publiser(noekkel: K, verdi: V, headers: Map<String, ByteArray>?): Pair<Int, Long> {
         require(!closed)
         return publiserteMeldinger.let {
             it.add(Record(noekkel, verdi, headers))

@@ -18,12 +18,12 @@ class KafkaConsumerEgneAnsatte(
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
     private val kafkaProperties: Properties = kafkaEnvironment.generateKafkaConsumerProperties(env)
     private val skjermingTopic: String = env["SKJERMING_TOPIC"]!!
-    private val consumer: KafkaConsumer<String, String> = KafkaConsumer<String, String>(kafkaProperties)
-    private var antallMeldinger = 0
+    private val consumer: KafkaConsumer<String, String> = KafkaConsumer<String, String>(kafkaProperties).also {
+        it.subscribe(listOf(skjermingTopic))
+    }
 
     suspend fun poll() {
         consumer.use {
-            consumer.subscribe(listOf(skjermingTopic))
             logger.info("KafkaConsumerEgneAnsatte startet")
             while (true) {
                 val meldinger: ConsumerRecords<String, String> = consumer.poll(pollTimeoutInSeconds)
@@ -36,7 +36,7 @@ class KafkaConsumerEgneAnsatte(
                     logger.error("Kunne ikke committe offsett")
                     throw e
                 }
-                antallMeldinger = meldinger.count()
+                val antallMeldinger = meldinger.count()
                 logger.info("En runde med $antallMeldinger")
                 if (antallMeldinger == 0) {
                     delay(500)

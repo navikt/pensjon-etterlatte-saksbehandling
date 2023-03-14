@@ -24,10 +24,11 @@ fun main() {
 }
 
 class Server {
+    private val defaultConfig: Config = ConfigFactory.load()
     private val engine = embeddedServer(
         factory = io.ktor.server.cio.CIO,
         environment = applicationEngineEnvironment {
-            config = HoconApplicationConfig(ConfigFactory.load())
+            config = HoconApplicationConfig(defaultConfig)
             module {
                 routing {
                     healthApi()
@@ -38,7 +39,7 @@ class Server {
     )
     fun run() {
         val env = System.getenv().toMutableMap()
-        startEgenAnsattLytter(env, ConfigFactory.load())
+        startEgenAnsattLytter(env, defaultConfig)
         setReady().also { engine.start(true) }
     }
 }

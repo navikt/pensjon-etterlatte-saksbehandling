@@ -66,7 +66,7 @@ class LocalAppBeanFactory(
     override fun dataSource(): DataSource = DataSourceBuilder.createDataSource(jdbcUrl, username, password)
     override fun rapid(): KafkaProdusent<String, String> {
         return object : KafkaProdusent<String, String> {
-            override fun publiser(noekkel: String, verdi: String, headers: Map<String, ByteArray>): Pair<Int, Long> {
+            override fun publiser(noekkel: String, verdi: String, headers: Map<String, ByteArray>?): Pair<Int, Long> {
                 return 0 to 0
             }
         }

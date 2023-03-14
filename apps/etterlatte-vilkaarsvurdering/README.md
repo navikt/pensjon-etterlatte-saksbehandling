@@ -30,7 +30,7 @@ HTTP_PORT=8087;
 ```
 2. Kjør opp en proxy mot postgres i dev: `nais postgres proxy etterlatte-vilkaarsvurdering`, eller kjør opp en lokal 
    instans med `docker-compose up -d`.
-3. Kopier inn følgende environment variabler i IntelliJ:
+3. Kopier inn følgende environment variabler i IntelliJ (merk at passord må kommenteres bort mot databasen dersom man bruker proxy):
 ```
 DB_JDBC_URL=jdbc:postgresql://localhost:5432/vilkaarsvurdering?user=FORNAVN.ETTERNAVN@nav.no;
 DB_PASSWORD=postgres;
@@ -46,7 +46,7 @@ HTTP_PORT=8087
 og legge til følgende linjer nederst i `.env.dev-gcp` fila til saksbehandling-ui.
 ```
 VILKAARSVURDERING_API_URL=http://host.docker.internal:8087
-VILKAARSVURDERING_API_SCOPE=<VILKAARSVURDERING_CLIENT_ID> // Se .env.dev-gcp fila du opprettet i steg 1.
+VILKAARSVURDERING_API_SCOPE=app://<VILKAARSVURDERING_CLIENT_ID>/.default // Se .env.dev-gcp fila du opprettet i steg 1.
 ```
 
 ### Teste mot REST-endepunkter

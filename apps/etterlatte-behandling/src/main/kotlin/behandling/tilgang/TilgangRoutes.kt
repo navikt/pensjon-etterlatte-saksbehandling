@@ -12,9 +12,10 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
+import no.nav.etterlatte.tilgangRoutePath
 
 internal fun Route.tilgangRoutes(sakService: SakService, sakServiceAdressebeskyttelse: SakServiceAdressebeskyttelse) {
-    route("") {
+    route("$tilgangRoutePath") {
         post("/person") {
             val fnr = call.receive<String>()
             val harTilgang = !sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(fnr)

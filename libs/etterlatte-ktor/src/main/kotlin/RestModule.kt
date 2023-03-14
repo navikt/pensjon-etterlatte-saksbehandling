@@ -6,13 +6,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.ApplicationCallPipeline
-import io.ktor.server.application.ApplicationCallPipeline.ApplicationPhase.Call
-import io.ktor.server.application.Hook
-import io.ktor.server.application.RouteScopedPlugin
-import io.ktor.server.application.call
-import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
@@ -30,65 +23,17 @@ import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import io.ktor.util.pipeline.PipelinePhase
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.token.System
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
-
-class PluginConfiguration {
-    var ressursHarAdressebeskyttelse: (id: String) -> Boolean = { false }
-}
-
-private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
-    private val AdressebeskyttelseHook: PipelinePhase = PipelinePhase("Adressebeskyttelse")
-    private val AuthenticatePhase: PipelinePhase = PipelinePhase("Authenticate")
-    override fun install(
-        pipeline: ApplicationCallPipeline,
-        handler: suspend (ApplicationCall) -> Unit
-    ) {
-        // Inspirasjon AuthenticationChecked
-        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AuthenticatePhase)
-        pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
-        pipeline.insertPhaseBefore(Call, AdressebeskyttelseHook)
-        pipeline.intercept(AdressebeskyttelseHook) { handler(call) }
-    }
-}
-
-val logger: Logger = LoggerFactory.getLogger("Adressebeskyttelselogger")
-
-val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRouteScopedPlugin(
-    name = "Adressebeskyttelsesplugin",
-    createConfiguration = ::PluginConfiguration
-) {
-    on(AdressebeskyttelseHook) { call ->
-        val log = call.application.log
-        val bruker = call.bruker
-        if (bruker is System) {
-            return@on
-        }
-
-        val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER] ?: return@on
-
-        if (pluginConfig.ressursHarAdressebeskyttelse(behandlingId)) {
-            log.info("Logs not found in hook for $behandlingId")
-            call.respond(HttpStatusCode.NotFound)
-        }
-        return@on
-    }
-}
 
 fun Application.restModule(
     sikkerLogg: Logger,
     routePrefix: String? = null,
     config: ApplicationConfig = environment.config,
-    harAdressebeskyttelseFunc: ((id: String) -> Boolean)? = null,
-    routesUtenHookInterceptor: (Route.() -> Unit)? = null,
     routes: Route.() -> Unit
 ) {
     install(ContentNegotiation) {
@@ -130,21 +75,8 @@ fun Application.restModule(
         authenticate {
             route(routePrefix ?: "") {
                 routes()
-                if (harAdressebeskyttelseFunc != null) {
-                    install(adressebeskyttelsePlugin) {
-                        ressursHarAdressebeskyttelse = { behandlingId ->
-                            harAdressebeskyttelseFunc(behandlingId)
-                        }
-                    }
-                }
-            }
-            if (routesUtenHookInterceptor != null) {
-                route("tilgang") {
-                    routesUtenHookInterceptor()
-                }
             }
         }
-
         metrics()
     }
 }

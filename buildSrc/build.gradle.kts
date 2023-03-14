@@ -22,15 +22,6 @@ dependencies {
     implementation(kotlin("gradle-plugin"))
 
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
-
-    tasks {
-        test {
-            testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        }
-        withType<Test> {
-            testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        }
-    }
 }
 
 tasks {
@@ -48,36 +39,5 @@ tasks {
     withType<AnalyzeDependenciesTask> {
         warnUsedUndeclared = true
         warnUnusedDeclared = true
-    }
-    withType<Test> {
-        testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-    }
-
-    tasks {
-        test {
-            testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        }
-    }
-}
-
-tasks.withType<Test> {
-    testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-}
-
-tasks {
-    test {
-        testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-    }
-}
-
-setupTestLogging()
-
-fun Project.setupTestLogging() {
-    for (sub in subprojects) {
-        sub.tasks.withType<Test> {
-            testLogging {
-                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-            }
-        }
     }
 }

@@ -3,8 +3,6 @@ package no.nav.etterlatte.hendelserpdl.leesah
 import kotlinx.coroutines.delay
 import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.Duration
 
 class KafkaConsumerHendelserPdl(
@@ -12,7 +10,6 @@ class KafkaConsumerHendelserPdl(
     env: Map<String, String>,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment()
 ) {
-    val log: Logger = LoggerFactory.getLogger(KafkaConsumerHendelserPdl::class.java)
     private var antallMeldinger = 0
     private val leesahtopic = env["LEESAH_TOPIC_PERSON"]
     private val consumer: KafkaConsumer<String, Personhendelse>

@@ -20,6 +20,7 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehan
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -94,6 +95,7 @@ interface BeanFactory {
     fun sporingslogg(): Sporingslogg
     fun getSaksbehandlerGroupIdsByKey(): Map<String, String?>
     fun norg2HttpClient(): Norg2Klient
+    fun navAnsattKlient(): NavAnsattKlient
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -303,5 +305,17 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
         }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
         return Norg2KlientImpl(client, env.getValue("NORG2_URL"))
+    }
+
+    override fun navAnsattKlient(): NavAnsattKlient {
+        return NavAnsattKlient(
+            httpClientClientCredentials(
+                azureAppClientId = config.getString("azure.app.client.id"),
+                azureAppJwk = config.getString("azure.app.jwk"),
+                azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                azureAppScope = config.getString("navansatt.azure.scope")
+            ),
+            env.getValue("NAVANSATT_URL")
+        )
     }
 }

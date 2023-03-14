@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.common.logging
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
-import kotlin.RuntimeException
 
 internal class LogUtilsTest {
     private val testCorrelationID = "TEST_CORRELATION_ID"
@@ -17,6 +16,23 @@ internal class LogUtilsTest {
         }
 
         assert(MDC.get(CORRELATION_ID) == null)
+    }
+
+    @Test
+    fun `feil med vilje`() {
+        try {
+            extracted()
+        } catch (e: RuntimeException) {
+            e2(e)
+        }
+    }
+
+    private fun e2(e: RuntimeException) {
+        throw IllegalArgumentException("og her", e)
+    }
+
+    private fun extracted() {
+        throw RuntimeException("feil her")
     }
 
     @Test

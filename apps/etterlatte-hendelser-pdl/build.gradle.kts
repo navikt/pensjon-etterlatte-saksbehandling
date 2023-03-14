@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.ktor2.clientloggingjvm)
     implementation(libs.ktor2.clientauth)
     implementation(libs.ktor2.clientjackson)
+    implementation(libs.ktor2.servercio)
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.servercontentnegotiation)
     implementation(libs.ktor2.calllogging)
@@ -26,6 +27,8 @@ dependencies {
     implementation(libs.kafka.avro)
     implementation(libs.kafka.avroserializer)
     implementation(libs.logging.logbackclassic)
+
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.kafka.embeddedenv)

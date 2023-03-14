@@ -31,9 +31,11 @@ export const Title = styled.div`
   font-size: 1em;
   font-weight: bold;
 `
-export const Lovtekst = styled.div`
+export const VilkaarBeskrivelse = styled.div`
+  margin-top: 15px;
+  max-width: 600px;
   display: flex;
-  max-width: 300px;
+  white-space: pre-wrap;
 `
 
 export const VilkaarInfobokser = styled.div`
@@ -48,7 +50,7 @@ export const VilkaarInfobokser = styled.div`
 
 export const VilkaarColumn = styled.div`
   height: fit-content;
-  
+
   .missing {
     color: red;
   }

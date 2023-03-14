@@ -10,6 +10,7 @@ import {
 import styled from 'styled-components'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { formaterVurderingsResultat } from '~components/behandling/vilkaarsvurdering/utils'
 
 const MIN_KOMMENTAR_LENGDE = 1
 
@@ -50,6 +51,9 @@ export const Vurdering = ({
   const [kommentarError, setKommentarError] = useState<string>()
   const [, postVurderVilkaar] = useApiCall(vurderVilkaar)
   const [, postSlettVurdering] = useApiCall(slettVurdering)
+  const vilkaarSpoersmaal = vilkaar.hovedvilkaar.spoersmaal
+    ? vilkaar.hovedvilkaar.spoersmaal
+    : 'Er hovedvilkår oppfylt?' // TODO denne burde vi kunne bli kvitt når BP får spørsmål som en del av vilkår
 
   const valider = (vilkaarForm: VilkaarForm): vilkaarForm is VilkaarFormValidert => {
     vilkaarForm.resultat ? setRadioError(undefined) : setRadioError('Du må velge et svar')
@@ -141,12 +145,19 @@ export const Vurdering = ({
           tittel={overskrift()}
           subtittelKomponent={
             <>
-              {oppfyltUnntaksvilkaar?.tittel && (
+              {oppfyltUnntaksvilkaar != null ? (
                 <VilkaarVurdertInformasjon>
                   <Heading size="xsmall" level={'3'}>
-                    Unntak er oppfylt
+                    Er unntak fra hovedvilkåret oppfylt?
                   </Heading>
                   <BodyShort size="small">{oppfyltUnntaksvilkaar?.tittel}</BodyShort>
+                </VilkaarVurdertInformasjon>
+              ) : (
+                <VilkaarVurdertInformasjon>
+                  <Heading size="xsmall" level={'3'}>
+                    {vilkaarSpoersmaal}
+                  </Heading>
+                  <BodyShort size="small">{formaterVurderingsResultat(vilkaar.hovedvilkaar.resultat)}</BodyShort>
                 </VilkaarVurdertInformasjon>
               )}
             </>
@@ -166,7 +177,7 @@ export const Vurdering = ({
           <>
             <RadioGroupWrapper>
               <RadioGroup
-                legend="Er hovedvilkår oppfylt?"
+                legend={vilkaarSpoersmaal}
                 size="small"
                 className="radioGroup"
                 onChange={(event) => {
@@ -177,8 +188,8 @@ export const Vurdering = ({
                 error={radioError}
               >
                 <div className="flex">
-                  <Radio value={VurderingsResultat.OPPFYLT}>Oppfylt</Radio>
-                  <Radio value={VurderingsResultat.IKKE_OPPFYLT}>Ikke oppfylt</Radio>
+                  <Radio value={VurderingsResultat.OPPFYLT}>Ja</Radio>
+                  <Radio value={VurderingsResultat.IKKE_OPPFYLT}>Nei</Radio>
                   <Radio value={VurderingsResultat.IKKE_VURDERT}>Ikke vurdert</Radio>
                 </div>
               </RadioGroup>
@@ -190,7 +201,7 @@ export const Vurdering = ({
                 <>
                   <Unntaksvilkaar>
                     <RadioGroup
-                      legend="Er unntak fra hovedregelen oppfylt?"
+                      legend="Er unntak fra hovedvilkåret oppfylt?"
                       size="small"
                       className="radioGroup"
                       onChange={(type) => setVilkaarutkast({ ...vilkaarutkast, vilkaarsUnntakType: type })}

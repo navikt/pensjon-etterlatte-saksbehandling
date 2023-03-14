@@ -1,4 +1,4 @@
-import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { VilkaarsvurderingResultat, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { ISvar } from '~shared/types/ISvar'
 import { KildeType } from '~shared/types/kilde'
 
@@ -32,10 +32,15 @@ export function hentKildenavn(type?: KildeType): string {
   }
 }
 
-export enum RequestStatus {
-  notStarted,
-  isloading,
-  error,
-  ok,
-  preconditionFailed,
+export function formaterVurderingsResultat(vurderingsResultat?: VurderingsResultat | null): string {
+  switch (vurderingsResultat) {
+    case VurderingsResultat.OPPFYLT:
+      return 'Ja'
+    case VurderingsResultat.IKKE_OPPFYLT:
+      return 'Nei'
+    case VurderingsResultat.IKKE_VURDERT:
+      return 'Ikke vurdert'
+    default:
+      return 'Ukjent'
+  }
 }

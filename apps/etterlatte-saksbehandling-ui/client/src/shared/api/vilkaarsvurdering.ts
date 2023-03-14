@@ -56,6 +56,7 @@ export interface Delvilkaar {
   type: string
   tittel: string
   beskrivelse: string
+  spoersmaal?: string
   lovreferanse: Paragraf
   resultat?: VurderingsResultat | null
 }

@@ -73,7 +73,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
         vilkaarsvurdering.vilkaar.forEach { vilkaar ->
             val vilkaarId = lagreVilkaar(vilkaarsvurderingId, vilkaar, tx)
-            vilkaar.grunnlag?.forEach { grunnlag ->
+            vilkaar.grunnlag.forEach { grunnlag ->
                 lagreGrunnlag(vilkaarId, grunnlag, tx)
             }
             delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)

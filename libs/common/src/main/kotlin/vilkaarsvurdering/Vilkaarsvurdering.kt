@@ -26,6 +26,7 @@ data class Delvilkaar(
     val type: VilkaarType,
     val tittel: String,
     val beskrivelse: String? = null,
+    val spoersmaal: String? = null,
     val lovreferanse: Lovreferanse,
     val resultat: Utfall? = null
 )

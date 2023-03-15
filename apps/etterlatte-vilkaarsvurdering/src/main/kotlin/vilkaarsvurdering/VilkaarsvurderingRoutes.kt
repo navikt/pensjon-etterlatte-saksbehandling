@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
-import java.lang.NullPointerException
 import java.util.*
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, behandlingKlient: BehandlingKlient) {
@@ -37,10 +36,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
                     call.respond(vilkaarsvurdering.toDto())
                 } else {
                     logger.info("Fant ingen vilkårsvurdering for behandling ($behandlingId)")
-                    call.respond(
-                        status = HttpStatusCode.NoContent,
-                        message = "Det finnes ingen vilkårsvurdering for denne behandlingen"
-                    )
+                    call.respond(HttpStatusCode.NoContent)
                 }
             }
         }

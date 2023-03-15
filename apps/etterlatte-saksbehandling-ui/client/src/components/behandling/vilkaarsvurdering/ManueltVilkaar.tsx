@@ -1,6 +1,6 @@
 import {
   Innhold,
-  Lovtekst,
+  VilkaarBeskrivelse,
   Title,
   VilkaarBorder,
   VilkaarColumn,
@@ -56,9 +56,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                   {vilkaar.hovedvilkaar.lovreferanse.paragraf} {vilkaar.hovedvilkaar.tittel}
                 </Link>
               </Title>
-              <Lovtekst>
-                <p>{vilkaar.hovedvilkaar.beskrivelse}</p>
-              </Lovtekst>
+              <VilkaarBeskrivelse>{vilkaar.hovedvilkaar.beskrivelse}</VilkaarBeskrivelse>
             </VilkaarColumn>
             <VilkaarGrunnlagsStoette vilkaar={vilkaar} />
           </VilkaarInfobokser>

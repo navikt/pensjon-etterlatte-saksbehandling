@@ -88,7 +88,7 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
     }
 }
 
-const val tilgangRoutePath = "tilgang"
+const val TILGANG_ROUTE_PATH = "tilgang"
 
 val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRouteScopedPlugin(
     name = "Adressebeskyttelsesplugin",
@@ -99,7 +99,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
         if (bruker is no.nav.etterlatte.token.System) {
             return@on
         }
-        if (!call.request.uri.contains(tilgangRoutePath)) {
+        if (!call.request.uri.contains(TILGANG_ROUTE_PATH)) {
             val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER] ?: return@on
 
             if (pluginConfig.ressursHarAdressebeskyttelse(behandlingId)) {

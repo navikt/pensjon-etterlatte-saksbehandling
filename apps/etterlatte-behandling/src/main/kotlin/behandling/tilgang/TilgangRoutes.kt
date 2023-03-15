@@ -7,15 +7,15 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
-import no.nav.etterlatte.tilgangRoutePath
 
 internal fun Route.tilgangRoutes(sakService: SakService, sakServiceAdressebeskyttelse: SakServiceAdressebeskyttelse) {
-    route("$tilgangRoutePath") {
+    route("$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()
             val harTilgang = !sakService.sjekkOmSakHarStrengtFortroligBeskyttelse(fnr)

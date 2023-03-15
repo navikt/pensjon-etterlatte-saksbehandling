@@ -16,11 +16,11 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.regulering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -44,9 +44,8 @@ internal class BehandlingRoutesTest {
 
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
-    private val generellBehandlingService = mockk<GenerellBehandlingService>()
+    private val generellBehandlingService = mockk<GenerellBehandlingService>(relaxUnitFun = true)
     private val foerstegangsbehandlingService = mockk<FoerstegangsbehandlingService>()
-    private val revurderingService = mockk<RevurderingService>()
     private val manueltOpphoerService = mockk<ManueltOpphoerService>()
 
     @BeforeAll
@@ -111,6 +110,37 @@ internal class BehandlingRoutesTest {
             }
 
             assertEquals(200, response.status.value)
+        }
+    }
+
+    @Test
+    fun `Avbryt behandling`() {
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application {
+                restModule(this.log) {
+                    behandlingRoutes(
+                        generellBehandlingService,
+                        foerstegangsbehandlingService,
+                        manueltOpphoerService
+                    )
+                }
+            }
+
+            val client = createClient {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                }
+            }
+
+            val response = client.post("/api/behandling/$behandlingId/avbryt") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            assertEquals(200, response.status.value)
+            verify(exactly = 1) { generellBehandlingService.avbrytBehandling(behandlingId, any()) }
         }
     }
 

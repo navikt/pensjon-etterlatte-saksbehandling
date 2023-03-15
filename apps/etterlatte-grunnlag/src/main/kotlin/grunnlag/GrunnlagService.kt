@@ -2,7 +2,10 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakOgRolle
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -21,7 +24,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
@@ -40,6 +43,9 @@ interface GrunnlagService {
         soeskenMedIBeregning: List<SoeskenMedIBeregning>,
         bruker: Bruker
     )
+
+    fun hentSakerOgRoller(fnr: Foedselsnummer): PersonMedSakerOgRoller
+    fun hentAlleSakerForIdent(fnr: Foedselsnummer): Set<Long>
 }
 
 class RealGrunnlagService(
@@ -102,6 +108,24 @@ class RealGrunnlagService(
 
         val sakId = behandling.sak
         lagreNyeSaksopplysninger(sakId, opplysning)
+    }
+
+    override fun hentSakerOgRoller(fnr: Foedselsnummer): PersonMedSakerOgRoller {
+        return opplysningDao.finnAllePersongalleriHvorPersonFinnes(fnr)
+            .map { it.sakId to deserialize<Persongalleri>(it.opplysning.opplysning.toJson()) }
+            .map { (sakId, persongalleri) -> SakOgRolle(sakId, rolle = mapTilRolle(fnr.value, persongalleri)) }
+            .let { PersonMedSakerOgRoller(fnr.value, it) }
+    }
+
+    override fun hentAlleSakerForIdent(fnr: Foedselsnummer): Set<Long> =
+        opplysningDao.finnAlleSakerForPerson(fnr)
+
+    private fun mapTilRolle(fnr: String, persongalleri: Persongalleri): Saksrolle = when (fnr) {
+        persongalleri.soeker -> Saksrolle.SOEKER
+        in persongalleri.soesken -> Saksrolle.SOESKEN
+        in persongalleri.avdoed -> Saksrolle.AVDOED
+        in persongalleri.gjenlevende -> Saksrolle.GJENLEVENDE
+        else -> Saksrolle.UKJENT
     }
 
     private fun <T> lagOpplysning(

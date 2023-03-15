@@ -2,14 +2,21 @@ package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import io.mockk.clearAllMocks
+import io.mockk.spyk
+import io.mockk.verify
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.grunnlag.OpplysningDao
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOESKEN_I_BEREGNINGEN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -24,6 +31,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -32,7 +40,7 @@ import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -56,7 +64,7 @@ internal class GrunnlagDaoIntegrationTest {
         )
         dataSource.migrate()
 
-        opplysningRepo = OpplysningDao(dataSource)
+        opplysningRepo = spyk(OpplysningDao(dataSource))
     }
 
     @AfterAll
@@ -66,6 +74,7 @@ internal class GrunnlagDaoIntegrationTest {
 
     @AfterEach
     fun afterEach() {
+        clearAllMocks()
         dataSource.connection.use {
             it.prepareStatement(""" TRUNCATE grunnlagshendelse""").execute()
         }
@@ -186,5 +195,122 @@ internal class GrunnlagDaoIntegrationTest {
         val actual = opplysningRepo.hentAlleGrunnlagForSak(1).first().toJson()
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `Finn alle persongalleri person er tilknyttet`() {
+        val gjenlevendeFnr = TRIVIELL_MIDTPUNKT
+
+        val barnepensjonSoeker1 = BLAAOEYD_SAKS
+        val persongalleri1 = Persongalleri(
+            soeker = barnepensjonSoeker1.value,
+            innsender = gjenlevendeFnr.value,
+            soesken = listOf(
+                GOEYAL_KRONJUVEL.value,
+                GROENN_STAUDE.value
+            ),
+            avdoed = listOf(STOR_SNERK.value),
+            gjenlevende = listOf(gjenlevendeFnr.value)
+        )
+
+        val opplysning1 =
+            lagGrunnlagsopplysning(PERSONGALLERI_V1, verdi = persongalleri1.toJsonNode(), fnr = barnepensjonSoeker1)
+        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning1, barnepensjonSoeker1)
+
+        val barnepensjonSoeker2 = GOEYAL_KRONJUVEL
+        val persongalleri2 = Persongalleri(
+            soeker = barnepensjonSoeker2.value,
+            innsender = gjenlevendeFnr.value,
+            soesken = listOf(
+                BLAAOEYD_SAKS.value,
+                GROENN_STAUDE.value
+            ),
+            avdoed = listOf(STOR_SNERK.value),
+            gjenlevende = listOf(gjenlevendeFnr.value)
+        )
+
+        val opplysning2 =
+            lagGrunnlagsopplysning(PERSONGALLERI_V1, verdi = persongalleri2.toJsonNode(), fnr = barnepensjonSoeker2)
+        opplysningRepo.leggOpplysningTilGrunnlag(2, opplysning2, barnepensjonSoeker2)
+
+        val persongalleri3 = Persongalleri(
+            soeker = gjenlevendeFnr.value,
+            innsender = gjenlevendeFnr.value,
+            avdoed = listOf(STOR_SNERK.value)
+        )
+
+        val opplysning3 =
+            lagGrunnlagsopplysning(PERSONGALLERI_V1, verdi = persongalleri3.toJsonNode(), fnr = gjenlevendeFnr)
+        opplysningRepo.leggOpplysningTilGrunnlag(3, opplysning3, gjenlevendeFnr)
+
+        // gjenlevende skal finnes i 3 behandlingshendelser
+        assertEquals(3, opplysningRepo.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr).size)
+        // BP soeker 1 skal finnes i 2 behandlingshendelser
+        assertEquals(2, opplysningRepo.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker1).size)
+        // BP soeker 2 skal finnes i 2 behandlingshendelser
+        assertEquals(2, opplysningRepo.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker2).size)
+        // Søsken GROENN_STAUDE har ikke søkt, men skal finnes i 2 behandlingshendelser
+        assertEquals(2, opplysningRepo.finnAllePersongalleriHvorPersonFinnes(GROENN_STAUDE).size)
+
+        assertTrue(opplysningRepo.finnAllePersongalleriHvorPersonFinnes(GROENN_KOPP).isEmpty())
+        assertTrue(opplysningRepo.finnAllePersongalleriHvorPersonFinnes(SMEKKER_GYNGEHEST).isEmpty())
+
+        verify(exactly = 1) { opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning1, barnepensjonSoeker1) }
+        verify(exactly = 1) { opplysningRepo.leggOpplysningTilGrunnlag(2, opplysning2, barnepensjonSoeker2) }
+        verify(exactly = 1) { opplysningRepo.leggOpplysningTilGrunnlag(3, opplysning3, gjenlevendeFnr) }
+    }
+
+    @Test
+    fun `Uthenting av alle saker tilknyttet person fungerer`() {
+        val grunnlagsopplysning1 = lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = STOR_SNERK)
+        opplysningRepo.leggOpplysningTilGrunnlag(1, grunnlagsopplysning1, STOR_SNERK)
+
+        val grunnlagsopplysning2 = lagGrunnlagsopplysning(
+            PERSONGALLERI_V1,
+            verdi = Persongalleri(
+                soeker = BLAAOEYD_SAKS.value,
+                gjenlevende = listOf(GROENN_KOPP.value),
+                avdoed = listOf(STOR_SNERK.value)
+            ).toJsonNode()
+        )
+        opplysningRepo.leggOpplysningTilGrunnlag(2, grunnlagsopplysning2)
+
+        val grunnlagsopplysning3 = lagGrunnlagsopplysning(
+            PERSONGALLERI_V1,
+            verdi = Persongalleri(
+                soeker = BLAAOEYD_SAKS.value,
+                gjenlevende = emptyList(),
+                avdoed = listOf(STOR_SNERK.value, GROENN_KOPP.value)
+            ).toJsonNode()
+        )
+        opplysningRepo.leggOpplysningTilGrunnlag(3, grunnlagsopplysning3)
+
+        // mange dummy-opplysninger tilknyttet andre personer, skal ignoreres...
+        listOf(BLAAOEYD_SAKS, GROENN_KOPP, TRIVIELL_MIDTPUNKT, SMEKKER_GYNGEHEST).forEachIndexed { i, fnr ->
+            opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(SOEKER_SOEKNAD_V1, fnr = fnr))
+            opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = fnr))
+            opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(PERSONGALLERI_V1, fnr = fnr))
+            opplysningRepo.leggOpplysningTilGrunnlag(
+                i.toLong(),
+                lagGrunnlagsopplysning(SOESKEN_I_BEREGNINGEN, fnr = fnr)
+            )
+        }
+
+        val result = opplysningRepo.finnAlleSakerForPerson(STOR_SNERK)
+        assertEquals(3, result.size)
+
+        verify(exactly = 19) { opplysningRepo.leggOpplysningTilGrunnlag(any(), any(), any()) }
+    }
+
+    private companion object {
+        val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
+        val STOR_SNERK = Foedselsnummer.of("11057523044")
+        val GROENN_KOPP = Foedselsnummer.of("29018322402")
+        val SMEKKER_GYNGEHEST = Foedselsnummer.of("11078431921")
+
+        // barn
+        val BLAAOEYD_SAKS = Foedselsnummer.of("05111850870")
+        val GOEYAL_KRONJUVEL = Foedselsnummer.of("27121779531")
+        val GROENN_STAUDE = Foedselsnummer.of("09011350027")
     }
 }

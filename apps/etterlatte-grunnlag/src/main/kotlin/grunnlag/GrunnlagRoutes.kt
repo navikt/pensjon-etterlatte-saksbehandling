@@ -57,6 +57,30 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 }
             }
         }
+
+        get("/person/{fnr}/saker}") {
+            withFoedselsnummer(call.parameters["fnr"].toString(), behandlingKlient) {
+                val saksliste = grunnlagService.hentAlleSakerForIdent(it)
+
+                if (saksliste.isNotEmpty()) {
+                    call.respond(saksliste)
+                } else {
+                    call.respond(HttpStatusCode.NoContent)
+                }
+            }
+        }
+        get("/person/{fnr}/roller}") {
+            withFoedselsnummer(call.parameters["fnr"].toString(), behandlingKlient) {
+                val sakOgRoller = grunnlagService.hentSakerOgRoller(it)
+
+                if (sakOgRoller.sakerOgRoller.isNotEmpty()) {
+                    call.respond(sakOgRoller)
+                } else {
+                    call.respond(HttpStatusCode.NoContent)
+                }
+            }
+        }
+
         post("/person") {
             val navIdent = navIdentFraToken() ?: return@post call.respond(
                 HttpStatusCode.Unauthorized,

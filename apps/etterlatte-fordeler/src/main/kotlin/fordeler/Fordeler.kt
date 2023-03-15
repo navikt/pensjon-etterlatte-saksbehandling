@@ -108,7 +108,7 @@ internal class Fordeler(
         val (resultat, ikkeOppfylteKriterier) = when (fordelerResultat) {
             FordelerResultat.GyldigForBehandling -> true to null
             is FordelerResultat.IkkeGyldigForBehandling -> false to fordelerResultat.ikkeOppfylteKriterier
-            else -> {
+            is FordelerResultat.UgyldigHendelse -> {
                 logger.error("Kan ikke produsere statistikkmelding for fordelerResultat $fordelerResultat")
                 return null
             }

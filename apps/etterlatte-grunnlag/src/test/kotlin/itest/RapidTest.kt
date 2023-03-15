@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RapidTest {
@@ -56,7 +56,7 @@ internal class RapidTest {
         grunnlagService = RealGrunnlagService(opplysningRepo, behandlingKlient, mockk())
         inspector = TestRapid().apply {
             GrunnlagHendelser(this, grunnlagService)
-            BehandlingHendelser(this)
+            BehandlingHendelser(this, grunnlagService)
         }
     }
 

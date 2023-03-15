@@ -17,7 +17,10 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
+import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -37,7 +40,7 @@ import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 abstract class BehandlingIntegrationTest {
@@ -236,9 +239,21 @@ class TestBeanFactory(
     override fun grunnlagHttpClient(): HttpClient = HttpClient(MockEngine) {
         engine {
             addHandler { request ->
-                if (request.url.fullPath.startsWith("/")) {
+                if (request.url.fullPath.contains("api/grunnlag")) {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     respond(Grunnlag.empty().toJson(), headers = headers)
+                } else if (request.url.fullPath.endsWith("/roller")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(
+                        PersonMedSakerOgRoller("08071272487", listOf(SakOgRolle(1, Saksrolle.SOEKER))).toJson(),
+                        headers = headers
+                    )
+                } else if (request.url.fullPath.endsWith("/saker")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(
+                        setOf(1).toJson(),
+                        headers = headers
+                    )
                 } else {
                     error(request.url.fullPath)
                 }

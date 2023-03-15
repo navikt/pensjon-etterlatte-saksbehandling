@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
-import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -28,7 +27,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class GrunnlagsendringshendelseService(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
@@ -74,10 +73,8 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    fun oppdaterAdressebeskyttelseHendelse(
-        adressebeskyttelse: Adressebeskyttelse
-    ) {
-        val sakIder = finnSakIdForFnr(adressebeskyttelse.fnr).distinct()
+    suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
+        val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
         sakIder.forEach { sakId ->
             val oppdaterAdressebeskyttelse = sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
                 sakId,
@@ -90,12 +87,6 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    private fun finnSakIdForFnr(fnr: String): List<Long> {
-        return generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(fnr).map {
-            it.second
-        }
-    }
-
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
@@ -103,11 +94,13 @@ class GrunnlagsendringshendelseService(
     ):
         List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
-        return generellBehandlingService.hentSakerOgRollerMedFnrIPersongalleri(fnr).let {
+        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
+
+        return sakerOgRoller.let {
             inTransaction {
                 it.filter { rolleOgSak ->
                     !hendelseEksistererFraFoer(
-                        rolleOgSak,
+                        rolleOgSak.sakId,
                         fnr,
                         grunnlagendringType
                     )
@@ -116,16 +109,16 @@ class GrunnlagsendringshendelseService(
                         val hendelseId = UUID.randomUUID()
                         logger.info(
                             "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                                "type $grunnlagendringType på sak med id=${rolleOgSak.second}"
+                                "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
                         )
                         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                             Grunnlagsendringshendelse(
                                 id = hendelseId,
-                                sakId = rolleOgSak.second,
+                                sakId = rolleOgSak.sakId,
                                 status = grunnlagsEndringsStatus,
                                 type = grunnlagendringType,
                                 opprettet = tidspunktForMottakAvHendelse,
-                                hendelseGjelderRolle = rolleOgSak.first,
+                                hendelseGjelderRolle = rolleOgSak.rolle,
                                 gjelderPerson = fnr
                             )
                         )
@@ -264,12 +257,12 @@ class GrunnlagsendringshendelseService(
     }
 
     private fun hendelseEksistererFraFoer(
-        rolleOgSak: Pair<Saksrolle, Long>,
+        sakId: Long,
         fnr: String,
         hendelsesType: GrunnlagsendringsType
     ): Boolean {
         return grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
-            rolleOgSak.second,
+            sakId,
             listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB)
         ).any {
             it.gjelderPerson == fnr && it.type == hendelsesType

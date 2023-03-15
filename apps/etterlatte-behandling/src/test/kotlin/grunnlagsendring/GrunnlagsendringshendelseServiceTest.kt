@@ -1,9 +1,13 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -18,15 +22,21 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
+import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
+import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
+import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
+import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -34,9 +44,24 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal class GrunnlagsendringshendelseServiceTest {
+
+    private val generellBehandlingService = mockk<GenerellBehandlingService>()
+    private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>()
+    private val pdlService = mockk<PdlKlientImpl>()
+    private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
+    private val adressebeskyttelseDaoMock = mockk<SakDaoAdressebeskyttelse>()
+    private val sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(adressebeskyttelseDaoMock)
+
+    private val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
+        grunnlagshendelsesDao,
+        generellBehandlingService,
+        pdlService,
+        grunnlagClient,
+        sakServiceAdressebeskyttelse
+    )
 
     @BeforeEach
     fun before() {
@@ -56,6 +81,11 @@ internal class GrunnlagsendringshendelseServiceTest {
         )
     }
 
+    @AfterEach
+    fun afterEach() {
+        clearAllMocks()
+    }
+
     @Test
     fun `skal opprette grunnlagsendringshendelser i databasen for doedshendelser`() {
         val sakId = 1L
@@ -73,29 +103,19 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val opprettGrunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
 
-        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
-            every { oppdaterGrunnlagsendringStatus(any(), any(), any(), any()) } returns Unit
-            every {
-                opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
-            } returns grunnlagsendringshendelse
-            every { hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns emptyList()
-        }
-        val generellBehandlingService = mockk<GenerellBehandlingService> {
-            every { hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
-            every { alleBehandlingerForSoekerMedFnr(fnr) } returns foerstegangsbehandlinger
-            every { alleSakIderForSoekerMedFnr(fnr) } returns listOf(1L)
-            every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
-        }
-        val pdlService = mockk<PdlKlientImpl>()
-        val grunnlagClient = mockk<GrunnlagKlient>()
-        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
-        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
-            grunnlagshendelsesDao,
-            generellBehandlingService,
-            pdlService,
-            grunnlagClient,
-            sakServiceAdressebeskyttelse
-        )
+        every { grunnlagshendelsesDao.oppdaterGrunnlagsendringStatus(any(), any(), any(), any()) } returns Unit
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
+        } returns grunnlagsendringshendelse
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns emptyList()
+
+        every { generellBehandlingService.hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
+        every { generellBehandlingService.alleBehandlingerForSoekerMedFnr(fnr) } returns foerstegangsbehandlinger
+
+        coEvery { grunnlagClient.hentPersonSakOgRolle(any()) }
+            .returns(PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER))))
 
         val lagredeGrunnlagsendringshendelser = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
@@ -141,26 +161,13 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val opprettGrlaghendelseUtflytting = slot<Grunnlagsendringshendelse>()
 
-        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
-            every {
-                opprettGrunnlagsendringshendelse(capture(opprettGrlaghendelseUtflytting))
-            } returns grlagEndringUtflytting
-            every { hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns emptyList()
-        }
-        val generellBehandlingService = mockk<GenerellBehandlingService> {
-            every { alleSakIderForSoekerMedFnr(fnr) } returns listOf(1L)
-            every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
-        }
-        val grunnlagClient = mockk<GrunnlagKlient>()
-        val pdlService = mockk<PdlKlientImpl>()
-        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
-        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
-            grunnlagshendelsesDao,
-            generellBehandlingService,
-            pdlService,
-            grunnlagClient,
-            sakServiceAdressebeskyttelse
-        )
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(opprettGrlaghendelseUtflytting))
+        } returns grlagEndringUtflytting
+        every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns emptyList()
+        coEvery {
+            grunnlagClient.hentPersonSakOgRolle(any())
+        } returns PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
 
         grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             utflyttingsHendelse = UtflyttingsHendelse(
@@ -216,30 +223,19 @@ internal class GrunnlagsendringshendelseServiceTest {
             samsvarMellomPdlOgGrunnlag = null
         )
 
-        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
-            every {
-                opprettGrunnlagsendringshendelse(any())
-            } returns grunnlagsendringshendelse1
-            every {
-                hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
-            } returns emptyList() andThen listOf(
-                grunnlagsendringshendelse1,
-                grunnlagsendringshendelse2
-            )
-        }
-        val generellBehandlingService = mockk<GenerellBehandlingService> {
-            every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
-        }
-        val pdlService = mockk<PdlKlientImpl>()
-        val grunnlagClient = mockk<GrunnlagKlient>()
-        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
-        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
-            grunnlagshendelsesDao,
-            generellBehandlingService,
-            pdlService,
-            grunnlagClient,
-            sakServiceAdressebeskyttelse
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
+        } returns grunnlagsendringshendelse1
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns emptyList() andThen listOf(
+            grunnlagsendringshendelse1,
+            grunnlagsendringshendelse2
         )
+        coEvery {
+            grunnlagClient.hentPersonSakOgRolle(any())
+        } returns PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
+
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettDoedshendelse(
             Doedshendelse(
                 avdoedFnr = fnr,
@@ -293,30 +289,19 @@ internal class GrunnlagsendringshendelseServiceTest {
             samsvarMellomPdlOgGrunnlag = null
         )
 
-        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
-            every {
-                opprettGrunnlagsendringshendelse(any())
-            } returns grunnlagsendringshendelse1
-            every {
-                hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
-            } returns emptyList() andThen listOf(
-                grunnlagsendringshendelse1,
-                grunnlagsendringshendelse2
-            )
-        }
-        val generellBehandlingService = mockk<GenerellBehandlingService> {
-            every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
-        }
-        val pdlService = mockk<PdlKlientImpl>()
-        val grunnlagClient = mockk<GrunnlagKlient>()
-        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
-        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
-            grunnlagshendelsesDao,
-            generellBehandlingService,
-            pdlService,
-            grunnlagClient,
-            sakServiceAdressebeskyttelse
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
+        } returns grunnlagsendringshendelse1
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns emptyList() andThen listOf(
+            grunnlagsendringshendelse1,
+            grunnlagsendringshendelse2
         )
+        coEvery {
+            grunnlagClient.hentPersonSakOgRolle(any())
+        } returns PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
+
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettUtflyttingshendelse(
             UtflyttingsHendelse(
                 fnr = fnr,
@@ -369,30 +354,19 @@ internal class GrunnlagsendringshendelseServiceTest {
             samsvarMellomPdlOgGrunnlag = null
         )
 
-        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
-            every {
-                opprettGrunnlagsendringshendelse(any())
-            } returns grunnlagsendringshendelse1
-            every {
-                hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
-            } returns emptyList() andThen listOf(
-                grunnlagsendringshendelse1,
-                grunnlagsendringshendelse2
-            )
-        }
-        val generellBehandlingService = mockk<GenerellBehandlingService> {
-            every { hentSakerOgRollerMedFnrIPersongalleri(any()) } returns listOf(Pair(Saksrolle.SOEKER, sakId))
-        }
-        val pdlService = mockk<PdlKlientImpl>()
-        val grunnlagClient = mockk<GrunnlagKlient>()
-        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
-        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
-            grunnlagshendelsesDao,
-            generellBehandlingService,
-            pdlService,
-            grunnlagClient,
-            sakServiceAdressebeskyttelse
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
+        } returns grunnlagsendringshendelse1
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns emptyList() andThen listOf(
+            grunnlagsendringshendelse1,
+            grunnlagsendringshendelse2
         )
+        coEvery {
+            grunnlagClient.hentPersonSakOgRolle(any())
+        } returns PersonMedSakerOgRoller("Soeker", listOf(SakOgRolle(sakId, Saksrolle.SOEKER)))
+
         val lagredeGrunnlagsendringshendelser1 = grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
             ForelderBarnRelasjonHendelse(
                 fnr = "Soeker",
@@ -450,51 +424,61 @@ internal class GrunnlagsendringshendelseServiceTest {
         )
 
         val idArg = slot<UUID>()
-        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
-            every {
-                hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
-                    minutter
-                )
-            } returns grunnlagsendringshendelser
-            every {
-                oppdaterGrunnlagsendringStatus(
-                    capture(idArg),
-                    GrunnlagsendringStatus.VENTER_PAA_JOBB,
-                    GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                    any()
-                )
-            } returns Unit
-        }
-        val mockPdlModel = mockk<PersonDTO>()
-        val pdlService = mockk<PdlKlientImpl> {
-            every { hentPdlModell(avdoedFnr, personRolle) } returns mockPdlModel
-        }
-        every { mockPdlModel.hentDoedsdato() } returns doedsdato
-
-        val behandlingId = UUID.randomUUID()
-        val generellBehandlingService = mockk<GenerellBehandlingService> {
-            every { hentBehandlingerISak(sakId) } returns listOf(
-                mockk {
-                    every { status } returns BehandlingStatus.VILKAARSVURDERT
-                    every { id } returns behandlingId
-                    every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
-                }
+        every {
+            grunnlagshendelsesDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
+                minutter
             )
+        } returns grunnlagsendringshendelser
+        every {
+            grunnlagshendelsesDao.oppdaterGrunnlagsendringStatus(
+                capture(idArg),
+                GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                any()
+            )
+        } returns Unit
+        val mockPdlModel = mockk<PersonDTO> {
+            every { hentDoedsdato() } returns doedsdato
         }
+        every { pdlService.hentPdlModell(avdoedFnr, personRolle) } returns mockPdlModel
 
-        val grunnlagClient = mockk<GrunnlagKlient> {
-            coEvery { hentGrunnlag(any()) } returns null
-        }
-        val sakServiceAdressebeskyttelse = mockk<SakServiceAdressebeskyttelse>()
-        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
-            grunnlagshendelsesDao,
-            generellBehandlingService,
-            pdlService,
-            grunnlagClient,
-            sakServiceAdressebeskyttelse
+        every { generellBehandlingService.hentBehandlingerISak(sakId) } returns listOf(
+            mockk {
+                every { status } returns BehandlingStatus.VILKAARSVURDERT
+                every { id } returns UUID.randomUUID()
+                every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            }
         )
+
+        coEvery { grunnlagClient.hentGrunnlag(any()) } returns null
+
         grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(minutter)
 
         assertEquals(grlg_id, idArg.captured)
+    }
+
+    @Test
+    fun `Sett adressebeskyttelse fungerer`() {
+        val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
+        val adressebeskyttelse =
+            Adressebeskyttelse("16017919184", AdressebeskyttelseGradering.STRENGT_FORTROLIG, Endringstype.OPPRETTET)
+
+        coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
+        every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
+
+        runBlocking {
+            grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
+        }
+
+        coVerify(exactly = 1) { grunnlagClient.hentAlleSakIder(adressebeskyttelse.fnr) }
+
+        sakIder.forEach {
+            verify(exactly = 1) {
+                adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(
+                    it,
+                    adressebeskyttelse.adressebeskyttelseGradering
+                )
+            }
+        }
     }
 }

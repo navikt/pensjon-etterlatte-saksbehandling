@@ -49,7 +49,7 @@ class ApplicationBuilder {
         }
         .build().apply {
             GrunnlagHendelser(this, grunnlagService)
-            BehandlingHendelser(this)
+            BehandlingHendelser(this, grunnlagService)
         }
 
     fun start() = setReady().also { rapidsConnection.start() }

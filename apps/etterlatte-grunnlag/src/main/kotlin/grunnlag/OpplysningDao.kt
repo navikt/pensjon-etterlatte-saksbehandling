@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.sql.Types.VARCHAR
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 class OpplysningDao(private val datasource: DataSource) {
@@ -142,6 +142,35 @@ class OpplysningDao(private val datasource: DataSource) {
                     behandlingsopplysning.periode?.fom?.let { setString(8, it.toString()) } ?: setNull(8, VARCHAR)
                     behandlingsopplysning.periode?.tom?.let { setString(9, it.toString()) } ?: setNull(9, VARCHAR)
                 }.executeQuery().apply { next() }.getLong("hendelsenummer")
+        }
+
+    fun finnAllePersongalleriHvorPersonFinnes(fnr: Foedselsnummer): List<GrunnlagHendelse> =
+        connection.use {
+            it.prepareStatement(
+                """
+                    SELECT * FROM grunnlagshendelse
+                    WHERE opplysning LIKE ?
+                    AND opplysning_type = ?;
+                """.trimIndent()
+            ).apply {
+                setString(1, "%${fnr.value}%")
+                setString(2, Opplysningstype.PERSONGALLERI_V1.name)
+            }.executeQuery().toList { asGrunnlagshendelse() }
+        }
+
+    fun finnAlleSakerForPerson(fnr: Foedselsnummer): Set<Long> =
+        connection.use {
+            it.prepareStatement(
+                """
+                    SELECT distinct(sak_id) 
+                    FROM grunnlagshendelse
+                    WHERE opplysning LIKE ?
+                    OR fnr = ?;
+                """.trimIndent()
+            ).apply {
+                setString(1, "%${fnr.value}%")
+                setString(2, fnr.value)
+            }.executeQuery().toList { getLong("sak_id") }.toSet()
         }
 }
 

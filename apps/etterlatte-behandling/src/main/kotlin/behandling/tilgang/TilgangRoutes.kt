@@ -11,11 +11,12 @@ import no.nav.etterlatte.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
 
 internal fun Route.tilgangRoutes(sakService: SakService, sakServiceAdressebeskyttelse: SakServiceAdressebeskyttelse) {
-    route("$TILGANG_ROUTE_PATH") {
+    route("/$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()
             val harTilgang = !sakService.sjekkOmSakHarAdresseBeskyttelse(fnr)
@@ -29,7 +30,6 @@ internal fun Route.tilgangRoutes(sakService: SakService, sakServiceAdressebeskyt
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
-            val sakId = call.parameters[SAKID_CALL_PARAMETER]!!.toLong()
             val harTilgang = !sakService.sjekkOmSakHarAdresseBeskyttelse(sakId)
             call.respond(harTilgang)
         }

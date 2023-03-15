@@ -11,8 +11,10 @@ import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.FNR_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.fnr
 
 internal fun Route.sakRoutes(
     sakService: SakService,
@@ -38,10 +40,10 @@ internal fun Route.sakRoutes(
         call.respond(inTransaction { sakService.finnEllerOpprettSak(ident, type) })
     }
 
-    route("/api/personer/{fnr}") {
+    route("/api/personer/{$FNR_CALL_PARAMETER}") {
         get("behandlinger") {
             call.respond(
-                sakService.finnSaker(requireNotNull(call.parameters["fnr"])).map { sak ->
+                sakService.finnSaker(fnr).map { sak ->
                     generellBehandlingService.hentBehandlingerISak(sak.id).map {
                         it.toBehandlingSammendrag()
                     }.let { BehandlingListe(it) }
@@ -51,7 +53,7 @@ internal fun Route.sakRoutes(
 
         get("grunnlagsendringshendelser") {
             call.respond(
-                sakService.finnSaker(requireNotNull(call.parameters["fnr"])).map { sak ->
+                sakService.finnSaker(fnr).map { sak ->
                     GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
                 }
             )

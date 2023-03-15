@@ -93,8 +93,8 @@ const Virkningstidspunkt = (props: Props) => {
       >
         <div>
           <Beskrivelse>
-            Barnepensjon kan tidligst innvilges fra og med måneden etter dødsfallet og den kan gis for opptil tre år før
-            søknaden er mottatt.
+            Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for
+            opptil tre år før søknaden er mottatt.
           </Beskrivelse>
           <InfobokserWrapper>
             <InfoWrapper>

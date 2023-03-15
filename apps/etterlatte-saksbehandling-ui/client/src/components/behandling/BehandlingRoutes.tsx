@@ -81,7 +81,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   if (!behandling) return []
 
   const soeknadRoutes = finnRoutesFoerstegangbehandling(behandling)
-  const revurderingRoutes: Array<behandlingRouteTypes> = ['vilkaarsvurdering', 'beregne', 'brev']
+  const omregningRoutes: Array<behandlingRouteTypes> = ['vilkaarsvurdering', 'beregne']
   const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
 
   switch (behandling.behandlingType) {
@@ -89,7 +89,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
       return behandlingRoutes(behandling).filter((route) => soeknadRoutes.includes(route.path))
     case IBehandlingsType.REVURDERING:
     case IBehandlingsType.OMREGNING:
-      return behandlingRoutes(behandling).filter((route) => revurderingRoutes.includes(route.path))
+      return behandlingRoutes(behandling).filter((route) => omregningRoutes.includes(route.path))
     case IBehandlingsType.MANUELT_OPPHOER:
       return behandlingRoutes(behandling).filter((route) => manueltOpphoerRoutes.includes(route.path))
   }

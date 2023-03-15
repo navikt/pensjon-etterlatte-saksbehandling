@@ -55,7 +55,7 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
       <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
-      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
+      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && behandlingType !== IBehandlingsType.OMREGNING && (
         <>
           <Separator aria-hidden={'true'} />
           <li

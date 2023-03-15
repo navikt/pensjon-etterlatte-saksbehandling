@@ -5,6 +5,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
@@ -41,7 +42,7 @@ class ApplicationBuilder {
     )
 
     private fun getSaksbehandlere(): Map<String, String> {
-        val saksbehandlereSecret = env["saksbehandlere"]!!
+        val saksbehandlereSecret = env.requireEnvValue("saksbehandlere")
         return objectMapper.readValue(
             saksbehandlereSecret,
             object : TypeReference<Map<String, String>>() {}

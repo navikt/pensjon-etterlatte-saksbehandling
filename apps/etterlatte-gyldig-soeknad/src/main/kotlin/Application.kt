@@ -4,10 +4,10 @@ import no.nav.etterlatte.gyldigsoeknad.barnepensjon.FordeltSoeknadRiver
 import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.config.AppBuilder
 import no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad.InnsendtSoeknadRiver
-import no.nav.etterlatte.rapidsandrivers.init
+import no.nav.etterlatte.rapidsandrivers.startRapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
-fun main() = init(
+fun main() = startRapidApplication(
     { AppBuilder(it) },
     { rc: RapidsConnection, ab: AppBuilder ->
         FordeltSoeknadRiver(

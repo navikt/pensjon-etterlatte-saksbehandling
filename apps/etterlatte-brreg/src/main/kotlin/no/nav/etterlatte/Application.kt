@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.enhetsregister.EnhetsregKlient
 import no.nav.etterlatte.enhetsregister.EnhetsregService
+import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClient
 
 class ApplicationContext {
@@ -12,7 +13,7 @@ class ApplicationContext {
         httpClient(forventSuksess = true)
     }
 
-    val service = EnhetsregService(EnhetsregKlient(env["BRREG_URL"]!!, httpClient))
+    val service = EnhetsregService(EnhetsregKlient(env.requireEnvValue("BRREG_URL"), httpClient))
 }
 
 fun main() {

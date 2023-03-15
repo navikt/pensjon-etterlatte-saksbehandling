@@ -35,6 +35,7 @@ import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
@@ -69,10 +70,10 @@ class ApplicationBuilder {
             azureAppScope = inntektsConfig.getString("outbound")
         )
     }
-    private val pdfGenerator = PdfGeneratorKlient(httpClient(), env["ETTERLATTE_PDFGEN_URL"]!!)
-    private val brregService = BrregService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
-    private val regoppslagKlient = RegoppslagKlient(proxyClient, env["ETTERLATTE_PROXY_URL"]!!)
-    private val navansattKlient = NavansattKlient(proxyClient, env["NAVANSATT_URL"]!!)
+    private val pdfGenerator = PdfGeneratorKlient(httpClient(), env.requireEnvValue("ETTERLATTE_PDFGEN_URL"))
+    private val brregService = BrregService(httpClient(), env.requireEnvValue("ETTERLATTE_BRREG_URL"))
+    private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
+    private val navansattKlient = NavansattKlient(proxyClient, env.requireEnvValue("NAVANSATT_URL"))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())
@@ -83,7 +84,7 @@ class ApplicationBuilder {
         beregningKlient,
         saksbehandlere = getSaksbehandlere()
     )
-    private val norg2Klient = Norg2Klient(env["NORG2_URL"]!!, httpClient())
+    private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
     private val db = BrevRepository.using(datasource)
 
@@ -105,7 +106,8 @@ class ApplicationBuilder {
             dokarkivService
         )
 
-    private val journalpostService = SafClient(httpClient(), env["SAF_BASE_URL"]!!, env["SAF_SCOPE"]!!)
+    private val journalpostService =
+        SafClient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE"))
 
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
@@ -128,7 +130,7 @@ class ApplicationBuilder {
             }
 
     private fun getSaksbehandlere(): Map<String, String> {
-        val saksbehandlereSecret = env["saksbehandlere"]!!
+        val saksbehandlereSecret = env.requireEnvValue("saksbehandlere")
         return objectMapper.readValue(
             saksbehandlereSecret,
             object : TypeReference<Map<String, String>>() {}

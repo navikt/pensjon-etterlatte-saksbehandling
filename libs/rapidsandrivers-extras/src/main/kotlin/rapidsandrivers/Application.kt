@@ -5,7 +5,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.RapidsAndRiversAppBuilder
 
-fun <A : RapidsAndRiversAppBuilder> init(
+fun <A : RapidsAndRiversAppBuilder> startRapidApplication(
     appBuilder: (env: Miljoevariabler) -> A,
     also: (rc: RapidsConnection, service: A) -> Unit
 ) {

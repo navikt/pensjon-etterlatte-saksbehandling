@@ -12,31 +12,21 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
-import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
-import no.nav.etterlatte.behandling.domain.Regulering
-import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
-import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
-import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.regulering.RevurderingService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -48,12 +38,11 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
-    revurderingService: RevurderingService,
     manueltOpphoerService: ManueltOpphoerService
 ) {
     val logger = application.log
@@ -114,7 +103,7 @@ internal fun Route.behandlingRoutes(
                     else -> {
                         val (opphoer, andre) = opphoerOgBehandlinger
                         call.respond(
-                            opphoer.toManueltOpphoerOppsummmering(andre.map { it.toDetaljertBehandling() })
+                            opphoer.toManueltOpphoerOppsummmering(andre.map { it.toBehandlingSammendrag() })
                         )
                     }
                 }
@@ -167,24 +156,6 @@ internal fun Route.behandlingRoutes(
     }
 
     route("/behandlinger") {
-        get { // TODO kan slettes? finner ingen spor i loggen.
-            call.respond(
-                generellBehandlingService.hentBehandlinger().map {
-                    BehandlingSammendrag(
-                        it.id,
-                        it.sak.id,
-                        it.status,
-                        if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                        it.behandlingOpprettet,
-                        it.type,
-                        if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD",
-                        it.virkningstidspunkt,
-                        it.vilkaarUtfall
-                    )
-                }.let { BehandlingListe(it) }
-            )
-        }
-
         route("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             get {
                 logger.info("Henter detaljert behandling for behandling med id=$behandlingsId")
@@ -201,30 +172,6 @@ internal fun Route.behandlingRoutes(
             }
         }
 
-        route("/sak") {
-            get("/{sakid}") {
-                call.respond(
-                    generellBehandlingService.hentBehandlingerISak(sakId).map {
-                        it.toBehandlingSammendrag()
-                    }.let { BehandlingListe(it) }
-                )
-            }
-
-            delete("/{sakid}") {
-                generellBehandlingService.slettBehandlingerISak(sakId)
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-
-        route("/foerstegangsbehandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            get {
-                call.respond(
-                    foerstegangsbehandlingService.hentFoerstegangsbehandling(behandlingsId)?.toDetaljertBehandling()
-                        ?: HttpStatusCode.NotFound
-                )
-            }
-        }
-
         route("/foerstegangsbehandling") {
             post {
                 val behandlingsBehov = call.receive<BehandlingsBehov>()
@@ -234,43 +181,6 @@ internal fun Route.behandlingRoutes(
                     behandlingsBehov.persongalleri,
                     behandlingsBehov.mottattDato
                 ).also { call.respondText(it.id.toString()) }
-            }
-        }
-
-        route("/revurdering") {
-            get {
-                call.respond(
-                    revurderingService.hentRevurdering(behandlingsId)?.let {
-                        DetaljertBehandling(
-                            id = it.id,
-                            sak = it.sak.id,
-                            sakType = it.sak.sakType,
-                            behandlingOpprettet = it.behandlingOpprettet,
-                            sistEndret = it.sistEndret,
-                            soeknadMottattDato = it.behandlingOpprettet,
-                            innsender = it.persongalleri.innsender,
-                            soeker = it.persongalleri.soeker,
-                            gjenlevende = it.persongalleri.gjenlevende,
-                            avdoed = it.persongalleri.avdoed,
-                            soesken = it.persongalleri.soesken,
-                            gyldighetsproeving = null,
-                            status = it.status,
-                            virkningstidspunkt = null,
-                            behandlingType = BehandlingType.REVURDERING,
-                            kommerBarnetTilgode = it.kommerBarnetTilgode,
-                            revurderingsaarsak = it.revurderingsaarsak
-                        )
-                    } ?: HttpStatusCode.NotFound
-                )
-            }
-        }
-
-        route("/manueltopphoer") {
-            get {
-                call.respond(
-                    manueltOpphoerService.hentManueltOpphoerInTransaction(behandlingsId)?.toDetaljertBehandling()
-                        ?: HttpStatusCode.NotFound
-                )
             }
         }
     }
@@ -298,70 +208,28 @@ internal fun Route.behandlingRoutes(
             }
         }
     }
-
-// TODO: fases ut -> nytt endepunkt: /behandlinger/sak/{sakid}
-    route("/sak") {
-        get("/{sakid}/behandlinger") {
-            call.respond(
-                generellBehandlingService.hentBehandlingerISak(sakId).map {
-                    BehandlingSammendrag(
-                        id = it.id,
-                        sak = it.sak.id,
-                        status = it.status,
-                        soeknadMottattDato = if (it is Foerstegangsbehandling) {
-                            it.soeknadMottattDato
-                        } else {
-                            it.behandlingOpprettet
-                        },
-                        behandlingOpprettet = it.behandlingOpprettet,
-                        behandlingType = it.type,
-                        aarsak = when (it) {
-                            is Foerstegangsbehandling -> "SOEKNAD"
-                            is Revurdering -> it.revurderingsaarsak.name
-                            is ManueltOpphoer -> "MANUELT OPPHOER"
-                            is Regulering -> "REGULERING"
-                        },
-                        virkningstidspunkt = it.virkningstidspunkt,
-                        vilkaarsvurderingUtfall = it.vilkaarUtfall
-                    )
-                }.let { BehandlingListe(it) }
-            )
-        }
-
-        delete("/{sakid}/behandlinger") {
-            generellBehandlingService.slettBehandlingerISak(sakId)
-            call.respond(HttpStatusCode.OK)
-        }
-    }
 }
 
 data class ManueltOpphoerOppsummeringDto(
     val id: UUID,
     val virkningstidspunkt: Virkningstidspunkt?,
-    val persongalleri: Persongalleri,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
     val fritekstAarsak: String?,
-    val andreBehandlinger: List<DetaljertBehandling>
+    val andreBehandlinger: List<BehandlingSammendrag>
 )
 
 private fun ManueltOpphoer.toManueltOpphoerOppsummmering(
-    andreBehandlinger: List<DetaljertBehandling>
+    andreBehandlinger: List<BehandlingSammendrag>
 ): ManueltOpphoerOppsummeringDto =
     ManueltOpphoerOppsummeringDto(
         id = this.id,
         virkningstidspunkt = this.virkningstidspunkt,
-        persongalleri = this.persongalleri,
         opphoerAarsaker = this.opphoerAarsaker,
         fritekstAarsak = this.fritekstAarsak,
         andreBehandlinger = andreBehandlinger
     )
 
-inline val PipelineContext<*, ApplicationCall>.sakId
-    get() = call.parameters["sakid"]?.toLong() ?: throw NullPointerException(
-        "sakid er ikke i path params"
-    )
-
-fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() =
+private fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() =
     call.principal<TokenValidationContextPrincipal>()?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")
         ?.toString()
 
@@ -371,10 +239,6 @@ data class VedtakHendelse(
     val inntruffet: Tidspunkt,
     val kommentar: String?,
     val valgtBegrunnelse: String?
-)
-
-data class LagretHendelser(
-    val hendelser: List<LagretHendelse>
 )
 
 data class ManueltOpphoerResponse(val behandlingId: String)

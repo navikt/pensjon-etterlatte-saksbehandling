@@ -31,7 +31,6 @@ class GcpKafkaConfig(
             keystorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
             clientId = generateInstanceId(env)
         )
-        fun fromEnv(): KafkaConfig = fromEnv(System.getenv())
     }
     override fun producerConfig() = kafkaBaseConfig().apply {
         put(ProducerConfig.ACKS_CONFIG, "all")
@@ -53,7 +52,7 @@ class GcpKafkaConfig(
 }
 
 class LocalKafkaConfig(
-    private val bootstrapServers: String
+    private val brokersURL: String
 ) : KafkaConfig {
     override fun producerConfig() = kafkaBaseConfig().apply {
         put(ProducerConfig.ACKS_CONFIG, "1")
@@ -64,6 +63,6 @@ class LocalKafkaConfig(
     }
 
     private fun kafkaBaseConfig() = Properties().apply {
-        put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
+        put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, brokersURL)
     }
 }

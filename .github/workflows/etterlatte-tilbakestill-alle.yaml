@@ -19,11 +19,6 @@ jobs:
     with:
       applikasjon: brev-api
     secrets: inherit
-  tilbakestill-brev-distribusjon:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: brev-distribusjon
-    secrets: inherit
   tilbakestill-brreg:
     uses: ./.github/workflows/.deploy-main.yaml
     with:

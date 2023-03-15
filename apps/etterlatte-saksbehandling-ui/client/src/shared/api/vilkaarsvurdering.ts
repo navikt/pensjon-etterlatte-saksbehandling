@@ -39,8 +39,8 @@ export interface IVilkaarsvurdering {
 
 export interface Vilkaar {
   id: string
-  hovedvilkaar: Hovedvilkaar
-  unntaksvilkaar?: Unntaksvilkaar[]
+  hovedvilkaar: Delvilkaar
+  unntaksvilkaar: Delvilkaar[]
   vurdering?: VurdertResultat | null
   grunnlag: Vilkaarsgrunnlag<any>[]
 }
@@ -52,20 +52,12 @@ export interface Vilkaarsgrunnlag<T> {
   opplysning: T
 }
 
-export interface Hovedvilkaar {
+export interface Delvilkaar {
   type: string
   tittel: string
   beskrivelse: string
   lovreferanse: Paragraf
   resultat?: VurderingsResultat | null
-}
-
-export interface Unntaksvilkaar {
-  type: string
-  tittel: string
-  beskrivelse?: string
-  lovreferanse: Paragraf
-  resultat?: VurderingsResultat
 }
 
 export interface VurdertResultat {

@@ -2,15 +2,13 @@ import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 import classNames from 'classnames'
 import { Next } from '@navikt/ds-icons'
-import { useAppSelector } from '~store/Store'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { kanGaaTilStatus } from '~components/behandling/felles/utils'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
-export const StegMeny = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
-  const behandlingType = behandling.behandlingType
-  const behandlingstatus = behandling.status
-  const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(behandlingstatus).includes(steg)
+export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
+  const { behandlingType, sakType, status } = props.behandling
+  const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(status).includes(steg)
 
   return (
     <StegMenyWrapper role="navigation">
@@ -34,6 +32,14 @@ export const StegMeny = () => {
         <>
           <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.VILKAARSVURDERT) })}>
             <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
+          </li>
+          <Separator aria-hidden={'true'} />
+        </>
+      )}
+      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && sakType === ISaksType.OMSTILLINGSSTOENAD && (
+        <>
+          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.OPPRETTET) })}>
+            <NavLink to="trygdetid">Trygdetid</NavLink>
           </li>
           <Separator aria-hidden={'true'} />
         </>

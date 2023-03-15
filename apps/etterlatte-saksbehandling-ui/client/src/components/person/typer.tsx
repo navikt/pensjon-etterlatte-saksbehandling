@@ -12,12 +12,6 @@ export interface Dokumenter {
   brev: Dokument[]
 }
 
-export interface IPersonInfo {
-  navn: string
-  fnr: string
-  type: string
-}
-
 export interface IPersonResult {
   fornavn: string
   etternavn: string

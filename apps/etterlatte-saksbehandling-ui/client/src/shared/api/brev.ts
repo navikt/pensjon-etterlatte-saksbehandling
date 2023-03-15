@@ -30,7 +30,7 @@ export const opprettBrevFraPDF = async (behandlingId: string, pdf: FormData): Pr
 export const opprettEllerOppdaterBrevForVedtak = async (
   sakId: number,
   behandlingId: string
-): Promise<ApiResponse<any>> => apiClient.post(`/brev/vedtak`, { sakId, behandlingId })
+): Promise<ApiResponse<any>> => apiClient.post(`/brev/vedtak/${behandlingId}`, { sakId })
 
 export const attesterVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/attestert/${behandlingId}`, {})

@@ -5,31 +5,26 @@ import { Infoboks } from '~components/behandling/soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { useEffect, useState } from 'react'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
-import { useAppSelector } from '~store/Store'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { Opphoersgrunn, OVERSETTELSER_OPPHOERSGRUNNER } from '~components/person/ManueltOpphoerModal'
 import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
-import { IDetaljertBehandling, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering'
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { Child } from '@navikt/ds-icons'
 import differenceInYears from 'date-fns/differenceInYears'
 import { lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
-
-interface Persongalleri {
-  soeker: string
-  avdoed?: string[]
-}
+import { IBehandlingsammendrag } from '~components/person/typer'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
 export interface ManueltOpphoerDetaljer {
   id: string
   virkningstidspunkt?: Virkningstidspunkt
-  persongalleri: Persongalleri
   opphoerAarsaker: Opphoersgrunn[]
   fritekstAarsak?: string
-  andreBehandlinger: IDetaljertBehandling[]
+  andreBehandlinger: IBehandlingsammendrag[]
 }
 
 const useManueltOpphoerDetaljer = (behandlingId?: string) => {
@@ -47,8 +42,8 @@ const useManueltOpphoerDetaljer = (behandlingId?: string) => {
   return manueltOpphoerDetaljer
 }
 
-export const ManueltOpphoerOversikt = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }) => {
+  const { behandling } = props
   const [loadingBeregning, setLoadingBeregning] = useState(false)
   const behandlingRoutes = useBehandlingRoutes()
   const [feilmelding, setFeilmelding] = useState('')
@@ -98,9 +93,7 @@ export const ManueltOpphoerOversikt = () => {
           )}
           {mapApiResult(
             manueltOpphoerDetaljer,
-            () => (
-              <Spinner visible label="Henter detaljer om det manuelle opphøret" />
-            ),
+            <Spinner visible label="Henter detaljer om det manuelle opphøret" />,
             () => (
               <MainSection>
                 <Feilmelding>Kunne ikke hente ut detaljer om manuelt opphør</Feilmelding>

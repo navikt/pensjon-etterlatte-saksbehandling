@@ -8,19 +8,20 @@ import { VurderingsboksWrapper } from '~components/vurderingsboks/Vurderingsboks
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBegrunnelseKommerBarnetTilgode } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerBarnetTilgode,
   redigerbar,
   setVurder,
+  behandlingId,
 }: {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   redigerbar: boolean
   setVurder: (visVurderingKnapp: boolean) => void
+  behandlingId: string
 }) => {
-  const behandlingId = useAppSelector((state) => state.behandlingReducer.behandling.id)
   const dispatch = useAppDispatch()
 
   const [svar, setSvar] = useState<JaNei | undefined>(kommerBarnetTilgode?.svar)

@@ -13,8 +13,11 @@ fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
 }
 
 fun <T> ResultSet.single(block: ResultSet.() -> T): T {
-    return requireNotNull(singleOrNull(block)) {
+    require(next()) {
         "Skal ha en verdi"
+    }
+    return block().also {
+        require(!next()) { "Skal være unik" }
     }
 }
 

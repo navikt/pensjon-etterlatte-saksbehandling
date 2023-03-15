@@ -53,7 +53,7 @@ class SkjermingslesingTest {
             ),
             behandlingKlient,
             KafkaConsumerEnvironmentTest(),
-            Duration.ofSeconds(8L)
+            Duration.ofSeconds(20L)
         )
         runBlocking(Dispatchers.Default) {
             val job = launch {
@@ -86,10 +86,10 @@ class SkjermingslesingTest {
                 put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
                 put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
+                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 10)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
                 put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, trettiSekunder)
-                put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())
+                put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(40L).toMillis().toInt())
             }
             return properties
         }

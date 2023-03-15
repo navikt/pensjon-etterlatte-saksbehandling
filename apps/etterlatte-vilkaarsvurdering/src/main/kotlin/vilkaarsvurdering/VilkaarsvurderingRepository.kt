@@ -9,6 +9,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
@@ -18,7 +21,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
-import java.sql.Timestamp
+import no.nav.etterlatte.libs.database.tidspunkt
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -42,19 +45,50 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 }
         }
 
-    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering =
+    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
-                val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
-                vilkaarsvurdering.vilkaar.forEach { vilkaar ->
-                    val vilkaarId = lagreVilkaar(vilkaarsvurderingId, vilkaar, tx)
-                    vilkaar.grunnlag?.forEach { grunnlag ->
-                        lagreGrunnlag(vilkaarId, grunnlag, tx)
-                    }
-                    delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
-                }
+                opprettVilkaarsvurdering(vilkaarsvurdering, tx)
             }
-        }.let { hentNonNull(vilkaarsvurdering.behandlingId) }
+        }
+
+        return hentNonNull(vilkaarsvurdering.behandlingId)
+    }
+
+    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering, kopiertFraId: UUID): Vilkaarsvurdering {
+        using(sessionOf(ds)) { session ->
+            session.transaction { tx ->
+                opprettVilkaarsvurdering(vilkaarsvurdering, tx)
+                opprettVilkaarsvurderingKilde(vilkaarsvurdering.id, kopiertFraId, tx)
+            }
+        }
+
+        return hentNonNull(vilkaarsvurdering.behandlingId)
+    }
+
+    private fun opprettVilkaarsvurdering(
+        vilkaarsvurdering: Vilkaarsvurdering,
+        tx: TransactionalSession
+    ) {
+        val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
+        vilkaarsvurdering.vilkaar.forEach { vilkaar ->
+            val vilkaarId = lagreVilkaar(vilkaarsvurderingId, vilkaar, tx)
+            vilkaar.grunnlag?.forEach { grunnlag ->
+                lagreGrunnlag(vilkaarId, grunnlag, tx)
+            }
+            delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
+        }
+    }
+
+    private fun opprettVilkaarsvurderingKilde(vilkaarsvurderingId: UUID, kopiertFraId: UUID, tx: TransactionalSession) {
+        queryOf(
+            statement = Queries.lagreVilkaarsvurderingKilde,
+            paramMap = mapOf(
+                "id" to vilkaarsvurderingId,
+                "kopiert_fra" to kopiertFraId
+            )
+        ).let { tx.run(it.asUpdate) }
+    }
 
     fun lagreVilkaarsvurderingResultat(
         behandlingId: UUID,
@@ -71,10 +105,10 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     "virkningstidspunkt" to virkningstidspunkt,
                     "resultat_utfall" to resultat.utfall.name,
                     "resultat_kommentar" to resultat.kommentar,
-                    "resultat_tidspunkt" to Timestamp.valueOf(resultat.tidspunkt),
+                    "resultat_tidspunkt" to resultat.tidspunkt.toTidspunkt().toTimestamp(),
                     "resultat_saksbehandler" to resultat.saksbehandler
                 )
-            ).let { session.run(it.asUpdate) }
+            ).let { session.run(it.asExecute) }
         }
 
         return hentNonNull(behandlingId)
@@ -100,7 +134,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             params = mapOf(
                 "id" to vurdertVilkaar.vilkaarId,
                 "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
-                "resultat_tidspunkt" to Timestamp.valueOf(vurdertVilkaar.vurdering.tidspunkt),
+                "resultat_tidspunkt" to vurdertVilkaar.vurdering.tidspunkt.toTidspunkt().toTimestamp(),
                 "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
             ),
             loggtekst = "Lagrer vilkårresultat",
@@ -168,7 +202,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 "id" to vilkaar.id,
                 "vilkaarsvurdering_id" to vilkaarsvurderingId,
                 "resultat_kommentar" to vilkaar.vurdering?.kommentar,
-                "resultat_tidspunkt" to vilkaar.vurdering?.tidspunkt?.let { Timestamp.valueOf(it) },
+                "resultat_tidspunkt" to vilkaar.vurdering?.tidspunkt?.toTidspunkt()?.toTimestamp(),
                 "resultat_saksbehandler" to vilkaar.vurdering?.saksbehandler
             )
         ).let { tx.run(it.asUpdate) }
@@ -202,7 +236,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 VilkaarsvurderingResultat(
                     utfall = VilkaarsvurderingUtfall.valueOf(utfall),
                     kommentar = stringOrNull("resultat_kommentar"),
-                    tidspunkt = sqlTimestamp("resultat_tidspunkt").toLocalDateTime(),
+                    tidspunkt = tidspunkt("resultat_tidspunkt").toLocalDatetimeUTC(),
                     saksbehandler = string("resultat_saksbehandler")
                 )
             }
@@ -220,7 +254,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             vurdering = stringOrNull("resultat_kommentar")?.let { kommentar ->
                 VilkaarVurderingData(
                     kommentar = kommentar,
-                    tidspunkt = sqlTimestamp("resultat_tidspunkt").toLocalDateTime(),
+                    tidspunkt = tidspunkt("resultat_tidspunkt").toLocalDatetimeUTC(),
                     saksbehandler = string("resultat_saksbehandler")
                 )
             },
@@ -239,6 +273,10 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         const val lagreVilkaarsvurdering = """
             INSERT INTO vilkaarsvurdering(id, behandling_id, virkningstidspunkt, grunnlag_versjon) 
             VALUES(:id, :behandling_id, :virkningstidspunkt, :grunnlag_versjon)
+        """
+
+        const val lagreVilkaarsvurderingKilde = """
+            INSERT INTO vilkaarsvurdering_kilde(vilkaarsvurdering_id, kopiert_fra_vilkaarsvurdering_id) VALUES(:id, :kopiert_fra)
         """
 
         const val lagreVilkaar = """

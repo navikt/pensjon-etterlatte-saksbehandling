@@ -1,17 +1,15 @@
-
-import io.ktor.client.call.body
-import io.ktor.client.statement.HttpResponse
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingsService
 import no.nav.etterlatte.OmregningsHendelser
+import no.nav.etterlatte.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import java.io.FileNotFoundException
 import java.util.UUID
 
@@ -23,13 +21,11 @@ internal class OmregningsHendelserTest {
     @Test
     fun `skal opprette omregning`() {
         val omregningshendelseSlot = slot<Omregningshendelse>()
-        val uuid = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        val behandlingViOmregnerFra = UUID.randomUUID()
 
-        val returnValue = mockk<HttpResponse>().also {
-            every {
-                runBlocking { it.body<UUID>() }
-            } returns uuid
-        }
+        val returnValue = OpprettOmregningResponse(behandlingId, behandlingViOmregnerFra)
+
         every { behandlingService.opprettOmregning(capture(omregningshendelseSlot)) }.returns(returnValue)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
@@ -38,7 +34,13 @@ internal class OmregningsHendelserTest {
 
         Assertions.assertEquals(1, omregningshendelseSlot.captured.sakId)
         Assertions.assertEquals(2, inspector.inspektør.size)
-        Assertions.assertEquals(uuid.toString(), inspector.inspektør.message(1).get(BEHANDLING_ID_KEY).asText())
+        Assertions.assertEquals(behandlingId.toString(), inspector.inspektør.message(1).get(BEHANDLING_ID_KEY).asText())
+        Assertions.assertEquals(
+            behandlingViOmregnerFra.toString(),
+            inspector.inspektør.message(1).get(
+                BEHANDLING_VI_OMREGNER_FRA_KEY
+            ).asText()
+        )
     }
 
     companion object {

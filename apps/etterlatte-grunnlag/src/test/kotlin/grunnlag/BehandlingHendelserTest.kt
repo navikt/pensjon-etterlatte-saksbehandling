@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
+import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -31,8 +32,8 @@ class BehandlingHendelserTest {
     private fun behandlingOpprettetMelding() = JsonMessage.newMessage(
         mapOf(
             EVENT_NAME_KEY to "BEHANDLING:GYLDIG_FREMSATT",
-            "sakId" to 1,
-            "persongalleri" to GrunnlagTestData().hentPersonGalleri()
+            BehandlingRiverKey.sakIdKey to 1,
+            BehandlingRiverKey.persongalleriKey to GrunnlagTestData().hentPersonGalleri()
         )
     )
 }

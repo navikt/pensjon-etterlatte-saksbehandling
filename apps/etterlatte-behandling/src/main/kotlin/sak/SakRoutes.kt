@@ -4,10 +4,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
@@ -21,37 +19,23 @@ internal fun Route.sakRoutes(
     generellBehandlingService: GenerellBehandlingService,
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService
 ) {
-    get("/saker") {
-        call.respond(Saker(inTransaction { sakService.hentSaker() }))
-    }
-
-    get("/saker/{id}") {
-        call.respond(
-            inTransaction { sakService.finnSak(requireNotNull(call.parameters["id"]).toLong()) }
-                ?: HttpStatusCode.NotFound
-        )
-    }
-    delete("/saker/{id}/") {
-        no.nav.etterlatte.sak.inTransaction { sakService.slettSak(requireNotNull(call.parameters["id"]).toLong()) }
-        call.respond(HttpStatusCode.OK)
-    }
-
-    route("personer/{id}") {
-        get("saker") {
-            call.respond(
-                Saker(
-                    sakService.finnSaker(requireNotNull(call.parameters["id"]))
-                )
-            )
+    route("/saker") {
+        get {
+            call.respond(Saker(inTransaction { sakService.hentSaker() }))
         }
 
-        route("saker/{type}") {
-            get {
-                val ident = requireNotNull(call.parameters["id"])
-                val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
-                call.respond(inTransaction { sakService.finnEllerOpprettSak(ident, type) })
+        get("/{id}") {
+            val sak = inTransaction {
+                sakService.finnSak(requireNotNull(call.parameters["id"]).toLong())
             }
+            call.respond(sak ?: HttpStatusCode.NotFound)
         }
+    }
+
+    get("personer/{ident}/saker/{type}") {
+        val ident = requireNotNull(call.parameters["ident"])
+        val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
+        call.respond(inTransaction { sakService.finnEllerOpprettSak(ident, type) })
     }
 
     route("/api/personer/{fnr}") {
@@ -75,9 +59,6 @@ internal fun Route.sakRoutes(
     }
 }
 
-private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt.inTransaction {
-    block()
-}
-
 data class Sak(val ident: String, val sakType: SakType, val id: Long)
+
 data class Saker(val saker: List<Sak>)

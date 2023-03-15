@@ -4,21 +4,21 @@ analyze = { id = "com.faire.gradle.analyze", version = "1.0.9" }
 cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.0" }
 
 [versions]
-jackson-version = "2.13.5"
+jackson-version = "2.14.2"
 jupiter-version = "5.9.2"
 kotlinx-version = "1.6.4"
 ktor2-version = "2.2.2"
 navfelles-token-version = "3.0.2"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.17.3"
+testcontainer-version = "1.17.6"
 
 [libraries]
-cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.1" }
+cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.5" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.0.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "8.5.13" }
-database-postgresql = { module = "org.postgresql:postgresql", version = "42.3.8" }
-database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.7.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.15.2" }
+database-postgresql = { module = "org.postgresql:postgresql", version = "42.5.4" }
+database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
 jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }
 jackson-datatypejdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson-version" }
@@ -82,7 +82,7 @@ navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.na
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version = "2589.e85bf84" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "0.5.7" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "0.5.8" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }

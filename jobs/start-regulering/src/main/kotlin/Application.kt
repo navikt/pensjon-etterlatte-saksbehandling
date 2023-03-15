@@ -20,7 +20,7 @@ fun main() {
     val topic = env.getValue("KAFKA_TARGET_TOPIC")
 
     logger.info("Konfig lest, oppretter kafka-produsent")
-    val producer = GcpKafkaConfig.fromEnv().standardProducer(topic)
+    val producer = GcpKafkaConfig.fromEnv(env).standardProducer(topic)
 
     producer.publiser(
         noekkel = "StartReguleringJob-${UUID.randomUUID()}",

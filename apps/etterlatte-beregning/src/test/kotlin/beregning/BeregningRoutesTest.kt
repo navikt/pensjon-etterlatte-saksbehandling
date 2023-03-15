@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -59,7 +60,8 @@ internal class BeregningRoutesTest {
         server.start()
 
         applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID, CLIENT_ID)
+            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
     }
 
     @AfterAll
@@ -73,7 +75,7 @@ internal class BeregningRoutesTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService) } }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
 
             val response = client.get("/api/beregning/${randomUUID()}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -88,11 +90,12 @@ internal class BeregningRoutesTest {
     fun `skal hente beregning`() {
         val beregning = beregning()
 
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService) } }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
 
             val response = client.get("/api/beregning/${beregning.behandlingId}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -106,18 +109,39 @@ internal class BeregningRoutesTest {
     }
 
     @Test
+    fun `skal returnere not found naar saksbehandler ikke har tilgang til behandling`() {
+        val beregning = beregning()
+
+        every { beregningRepository.hent(beregning.behandlingId) } returns beregning
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns false
+
+        testApplication {
+            environment { config = applicationConfig }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+
+            client.get("/api/beregning/${beregning.behandlingId}") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let {
+                it.status shouldBe HttpStatusCode.NotFound
+            }
+        }
+    }
+
+    @Test
     fun `skal opprette ny beregning for foerstegangsbehandling av barnepensjon`() {
         val behandling = mockBehandling()
         val beregning = beregning()
 
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService) } }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
 
             val response = client.post("/api/beregning/${behandling.id}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -170,14 +194,13 @@ internal class BeregningRoutesTest {
 
     private val token: String by lazy {
         server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01")
         ).serialize()
     }
 
     private companion object {
-        const val ISSUER_ID = "azure"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

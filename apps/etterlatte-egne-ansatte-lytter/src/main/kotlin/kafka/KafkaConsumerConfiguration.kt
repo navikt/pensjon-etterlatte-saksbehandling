@@ -16,7 +16,7 @@ interface KafkaConsumerConfiguration {
 
 class KafkaEnvironment : KafkaConsumerConfiguration {
     override fun generateKafkaConsumerProperties(env: Map<String, String>): Properties {
-        val fiveMinutesInMs = 300000
+        val fiveMinutesInMs = Duration.ofMinutes(8L).toMillis().toInt()
         val properties = Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env["KAFKA_BROKERS"])
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)

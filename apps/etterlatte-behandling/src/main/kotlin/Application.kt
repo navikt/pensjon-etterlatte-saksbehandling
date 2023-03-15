@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
+import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
@@ -64,9 +65,16 @@ fun Application.module(beanFactory: BeanFactory) {
 
         val sakServiceAdressebeskyttelse = sakServiceAdressebeskyttelse()
         val sakService = sakService()
-        restModule(sikkerLogg, harAdressebeskyttelseFunc = { behandlingId ->
-            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
-        }) {
+        restModule(
+            sikkerLogg,
+            harAdressebeskyttelseFunc = { behandlingId ->
+                sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
+            },
+            routesUtenHookInterceptor = {
+                attachContekst(dataSource(), beanFactory)
+                tilgangRoutes(sakService, sakServiceAdressebeskyttelse)
+            }
+        ) {
             attachContekst(dataSource(), beanFactory)
             sakRoutes(
                 sakService = sakService,
@@ -76,7 +84,6 @@ fun Application.module(beanFactory: BeanFactory) {
             behandlingRoutes(
                 generellBehandlingService = generellBehandlingService,
                 foerstegangsbehandlingService = foerstegangsbehandlingService(),
-                revurderingService = revurderingService(),
                 manueltOpphoerService = manueltOpphoerService()
             )
             omregningRoutes(

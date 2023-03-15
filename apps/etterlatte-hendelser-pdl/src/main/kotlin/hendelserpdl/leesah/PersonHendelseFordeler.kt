@@ -1,0 +1,138 @@
+package no.nav.etterlatte.hendelserpdl.leesah
+
+import no.nav.etterlatte.hendelserpdl.pdl.Pdl
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.person.pdl.leesah.Personhendelse
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import java.time.format.DateTimeFormatter
+
+class PersonHendelseFordeler(
+    private val postHendelser: ILivsHendelserRapid,
+    private val pdlService: Pdl
+) {
+    private val log: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
+
+    fun haandterHendelse(personhendelse: Personhendelse) {
+        when (personhendelse.opplysningstype) {
+            LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(personhendelse)
+            LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(
+                personhendelse
+            )
+
+            LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(
+                personhendelse
+            )
+
+            LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(
+                personhendelse
+            )
+
+            else -> log.info("Så en hendelse av type ${personhendelse.opplysningstype} som vi ikke håndterer")
+        }
+    }
+
+    private fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
+        val hendelseType = "Adressebeskyttelse"
+        val gradering = personhendelse.adressebeskyttelse?.gradering
+        if (gradering == null || gradering == no.nav.person.pdl.leesah.adressebeskyttelse.Gradering.UGRADERT) {
+            log.info("Ignorerer person med tom eller ugradert gradering, krever ingen tiltak.")
+            return
+        }
+        try {
+            val personnummer =
+                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+            personhendelse.adressebeskyttelse.let {
+                postHendelser.haandterAdressebeskyttelse(
+                    fnr = personnummer.folkeregisterident.value,
+                    adressebeskyttelseGradering = gradering.let {
+                        AdressebeskyttelseGradering.valueOf(gradering.toString())
+                    },
+                    endringstype = endringstype
+                )
+            }
+        } catch (e: Exception) {
+            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
+        }
+    }
+
+    private fun haandterForelderBarnRelasjon(personhendelse: Personhendelse) {
+        val hendelseType = "Forelder-barn-relasjon-hendelse"
+        try {
+            val personnummer =
+                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+
+            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+            personhendelse.forelderBarnRelasjon.let {
+                postHendelser.forelderBarnRelasjon(
+                    fnr = personnummer.folkeregisterident.value,
+                    relatertPersonsIdent = it?.relatertPersonsIdent,
+                    relatertPersonsRolle = it?.relatertPersonsRolle,
+                    minRolleForPerson = it?.minRolleForPerson,
+                    relatertPersonUtenFolkeregisteridentifikator =
+                    it?.relatertPersonUtenFolkeregisteridentifikator?.toString(),
+                    endringstype = endringstype
+                )
+            }
+        } catch (e: Exception) {
+            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
+        }
+    }
+
+    private fun haandterDoedsendelse(personhendelse: Personhendelse) {
+        val hendelseType = "Doedshendelse"
+        try {
+            val personnummer =
+                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+
+            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+            postHendelser.personErDod(
+                fnr = personnummer.folkeregisterident.value,
+                doedsdato = try {
+                    personhendelse.doedsfall?.doedsdato?.format(DateTimeFormatter.ISO_DATE)
+                } catch (e: Exception) {
+                    log.warn("Kunne ikke String-formatere dato i en dødshendelse")
+                    null
+                },
+                endringstype = endringstype
+            )
+        } catch (e: Exception) {
+            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
+        }
+    }
+
+    private fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
+        val hendelseType = "Utflytting fra Norge-hendelse"
+        try {
+            val personnummer =
+                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+
+            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+            postHendelser.personUtflyttingFraNorge(
+                fnr = personnummer.folkeregisterident.value,
+                tilflyttingsLand = personhendelse.utflyttingFraNorge?.tilflyttingsland,
+                tilflyttingsstedIUtlandet = personhendelse.utflyttingFraNorge?.tilflyttingsstedIUtlandet,
+                utflyttingsdato = try {
+                    personhendelse.utflyttingFraNorge?.utflyttingsdato?.format(DateTimeFormatter.ISO_DATE)
+                } catch (e: Exception) {
+                    log.warn("Kunne ikke String-formatere dato i en utflyttingshendelse")
+                    null
+                },
+                endringstype = endringstype
+            )
+        } catch (e: Exception) {
+            loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
+        }
+    }
+
+    private fun loggFeilVedHaandtering(hendelsesid: String, hendelseType: String, e: Exception) {
+        log.error(
+            "kunne ikke haandtere $hendelseType for hendelsen med id=$hendelsesid. Dette skyldes sannsynligvis" +
+                "at personhendelsen ser annerledes ut enn forventet, eller at det var problem med henting av " +
+                "folkeregisteridentifikatoren fra PDL",
+            e
+        )
+    }
+}

@@ -7,7 +7,7 @@ import { genererPdf, opprettEllerOppdaterBrevForVedtak } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import styled from 'styled-components'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import { PdfVisning } from '../brev/pdf-visning'
 import {
@@ -18,15 +18,16 @@ import {
 } from '~shared/api/vilkaarsvurdering'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 interface VilkaarOption {
   value: string
   label: string
 }
 
-export const Vedtaksbrev = () => {
+export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
-  const { sak, soeknadMottattDato, status } = useAppSelector((state) => state.behandlingReducer.behandling)
+  const { sak, soeknadMottattDato, status } = props.behandling
   const dispatch = useAppDispatch()
 
   const [fileURL, setFileURL] = useState<string>()

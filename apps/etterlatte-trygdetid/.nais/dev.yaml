@@ -1,0 +1,58 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-trygdetid
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - "https://etterlatte-trygdetid.dev.intern.nav.no"
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  secureLogs:
+    enabled: true
+  prometheus:
+    enabled: true
+    path: /metrics
+
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      claims:
+        groups:
+          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # 0000-GA-PENSJON_ATTESTERING
+          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
+        extra:
+          - NAVident
+
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
+    - name: ETTERLATTE_GRUNNLAG_URL
+      value: http://etterlatte-grunnlag/api
+    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
+      value: ce96a301-13db-4409-b277-5b27f464d08b
+  accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-beregning
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+        - application: etterlatte-grunnlag

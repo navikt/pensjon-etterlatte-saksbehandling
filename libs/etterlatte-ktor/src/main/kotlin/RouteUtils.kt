@@ -5,17 +5,71 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.token.Saksbehandler
 import java.util.*
 
 const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
+const val SAKID_CALL_PARAMETER = "sakId"
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
     get() = call.parameters[BEHANDLINGSID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
         "BehandlingsId er ikke i path params"
     )
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSuccess: (id: UUID) -> Unit) =
-    withParam(BEHANDLINGSID_CALL_PARAMETER, onSuccess)
+suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
+    behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
+    onSuccess: (id: UUID) -> Unit
+) = withParam(BEHANDLINGSID_CALL_PARAMETER) { behandlingId ->
+    when (bruker) {
+        is Saksbehandler -> {
+            val harTilgangTilBehandling =
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, bruker as Saksbehandler)
+            if (harTilgangTilBehandling) {
+                onSuccess(behandlingId)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+        else -> onSuccess(behandlingId)
+    }
+}
+
+suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
+    sakTilgangsSjekk: SakTilgangsSjekk,
+    onSuccess: (id: Long) -> Unit
+) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
+    when (bruker) {
+        is Saksbehandler -> {
+            val harTilgangTilSak = sakTilgangsSjekk.harTilgangTilSak(sakId, bruker as Saksbehandler)
+            if (harTilgangTilSak) {
+                onSuccess(sakId)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+        else -> onSuccess(sakId)
+    }
+}
+
+suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
+    fnr: String,
+    personTilgangsSjekk: PersonTilgangsSjekk,
+    onSuccess: (fnr: Foedselsnummer) -> Unit
+) = Foedselsnummer.of(fnr).let { foedselsnummer ->
+    when (bruker) {
+        is Saksbehandler -> {
+            val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)
+            if (harTilgangTilPerson) {
+                onSuccess(foedselsnummer)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+        else -> onSuccess(foedselsnummer)
+    }
+}
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     param: String,
@@ -35,28 +89,14 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
-    param1: String,
-    param2: String,
-    onSuccess: (value1: UUID, value2: UUID) -> Unit
-) {
-    val value1 = call.parameters[param1]
-    val value2 = call.parameters[param2]
-    if (value1 != null && value2 != null) {
-        val (uuidParam1, uuidParam2) = try {
-            UUID.fromString(value1) to UUID.fromString(value2)
-        } catch (e: IllegalArgumentException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                "$param1 og $param2 må være UUID (fikk $param1=$value1 og $param2=$value2)"
-            )
-            return
-        }
-        onSuccess(uuidParam1, uuidParam2)
-    } else {
-        call.respond(
-            HttpStatusCode.BadRequest,
-            "$param1 eller $param2 var null, men de må være UUID (fikk $param1=$value1 og $param2=$value2)"
-        )
-    }
+interface BehandlingTilgangsSjekk {
+    suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean
+}
+
+interface SakTilgangsSjekk {
+    suspend fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean
+}
+
+interface PersonTilgangsSjekk {
+    suspend fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean
 }

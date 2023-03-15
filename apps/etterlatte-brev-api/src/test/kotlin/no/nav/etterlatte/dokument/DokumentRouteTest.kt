@@ -16,7 +16,9 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.dokument.JournalpostResponse
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
+import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -30,6 +32,7 @@ import testsupport.buildTestApplicationConfigurationForOauth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DokumentRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
+    private val behandlingKlient = mockk<BehandlingKlient>()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val journalpostService = mockk<SafClient>()
 
@@ -37,7 +40,7 @@ internal class DokumentRouteTest {
     fun before() {
         mockOAuth2Server.start()
         val httpServer = mockOAuth2Server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), ISSUER_ID, CLIENT_ID)
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -53,15 +56,23 @@ internal class DokumentRouteTest {
     @Test
     fun `Endepunkt for uthenting av alle dokumenter tilknyttet brukeren`() {
         coEvery { journalpostService.hentDokumenter(any(), any(), any()) } returns JournalpostResponse(null, null)
+        coEvery { behandlingKlient.harTilgangTilPerson(any(), any()) } returns true
 
         val token = accessToken
-        val fnr = "11223300000"
+        val fnr = "26117512737"
 
         testApplication {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    dokumentRoute(
+                        journalpostService,
+                        behandlingKlient
+                    )
+                }
+            }
 
             val response = client.get("/api/dokumenter/$fnr") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -84,7 +95,14 @@ internal class DokumentRouteTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    dokumentRoute(
+                        journalpostService,
+                        behandlingKlient
+                    )
+                }
+            }
 
             val response = client.get("/api/dokumenter/$journalpostId/$dokumentInfoId") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
@@ -102,7 +120,14 @@ internal class DokumentRouteTest {
             environment {
                 config = hoconApplicationConfig
             }
-            application { restModule(this.log, routePrefix = "api") { dokumentRoute(journalpostService) } }
+            application {
+                restModule(this.log, routePrefix = "api") {
+                    dokumentRoute(
+                        journalpostService,
+                        behandlingKlient
+                    )
+                }
+            }
 
             val response = client.get("/api/dokument/finnesikke") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
@@ -116,7 +141,7 @@ internal class DokumentRouteTest {
 
     private val accessToken: String by lazy {
         mockOAuth2Server.issueToken(
-            issuerId = ISSUER_ID,
+            issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
             claims = mapOf(
                 "navn" to "Test Veiledersen",
@@ -126,7 +151,6 @@ internal class DokumentRouteTest {
     }
 
     companion object {
-        private const val ISSUER_ID = "azure"
         private const val CLIENT_ID = "mock-client-id"
     }
 }

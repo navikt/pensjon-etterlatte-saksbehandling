@@ -2,13 +2,10 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.http.content.PartData
 import io.ktor.http.content.readAllParts
 import io.ktor.http.content.streamProvider
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
-import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
@@ -18,6 +15,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.adresse.BrregService
+import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
@@ -27,7 +25,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.withBehandlingId
 import org.slf4j.LoggerFactory
 
-fun Route.brevRoute(service: BrevService, brregService: BrregService) {
+fun Route.brevRoute(service: BrevService, brregService: BrregService, behandlingKlient: BehandlingKlient) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
 
     route("brev") {
@@ -56,13 +54,13 @@ fun Route.brevRoute(service: BrevService, brregService: BrregService) {
         }
 
         get("behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 call.respond(service.hentAlleBrev(behandlingId))
             }
         }
 
         post("behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 val request = call.receive<OpprettBrevRequest>()
 
                 val brevInnhold = service.opprett(request.mottaker, request.mal, request.enhet)
@@ -81,7 +79,7 @@ fun Route.brevRoute(service: BrevService, brregService: BrregService) {
         }
 
         post("pdf/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            withBehandlingId { behandlingId ->
+            withBehandlingId(behandlingKlient) { behandlingId ->
                 try {
                     val mp = call.receiveMultipart().readAllParts()
 
@@ -151,11 +149,3 @@ data class FilData(
     val mottaker: Mottaker,
     val filNavn: String
 )
-
-fun getAccessToken(call: ApplicationCall): String {
-    val authHeader = call.request.parseAuthorizationHeader()
-    if (!(authHeader == null || authHeader !is HttpAuthHeader.Single || authHeader.authScheme != "Bearer")) {
-        return authHeader.blob
-    }
-    throw Exception("Missing authorization header")
-}

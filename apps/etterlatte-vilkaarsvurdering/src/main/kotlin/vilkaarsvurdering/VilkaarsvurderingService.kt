@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
@@ -18,7 +19,8 @@ import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
 import java.util.*
 
-class VirkningstidspunktIkkeSattException(message: String) : RuntimeException(message)
+class VirkningstidspunktIkkeSattException(behandlingId: UUID) :
+    RuntimeException("Virkningstidspunkt ikke satt for behandling $behandlingId")
 
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
@@ -86,6 +88,33 @@ class VilkaarsvurderingService(
         vilkaarsvurderingRepository.slettVilkaarResultat(behandlingId, vilkaarId)
     }
 
+    suspend fun kopierVilkaarsvurdering(
+        behandlingId: UUID,
+        kopierFraBehandling: UUID,
+        bruker: Bruker
+    ): Vilkaarsvurdering {
+        logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
+        return tilstandssjekkFoerKjoering(behandlingId, bruker) {
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, bruker)
+            val tidligereVilkaarsvurdering = vilkaarsvurderingRepository.hent(kopierFraBehandling)
+                ?: throw NullPointerException("Fant ikke vilkårsvurdering fra behandling $kopierFraBehandling")
+
+            val virkningstidspunkt =
+                behandling.virkningstidspunkt ?: throw VirkningstidspunktIkkeSattException(behandlingId)
+
+            vilkaarsvurderingRepository.opprettVilkaarsvurdering(
+                vilkaarsvurdering = Vilkaarsvurdering(
+                    behandlingId = behandlingId,
+                    grunnlagVersjon = grunnlag.metadata.versjon,
+                    virkningstidspunkt = virkningstidspunkt.dato,
+                    vilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
+                    resultat = tidligereVilkaarsvurdering.resultat
+                ),
+                kopiertFraId = tidligereVilkaarsvurdering.id
+            )
+        }
+    }
+
     suspend fun opprettVilkaarsvurdering(behandlingId: UUID, bruker: Bruker): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, bruker) {
             vilkaarsvurderingRepository.hent(behandlingId)?.let {
@@ -94,9 +123,7 @@ class VilkaarsvurderingService(
 
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, bruker)
             val virkningstidspunkt = behandling.virkningstidspunkt
-                ?: throw VirkningstidspunktIkkeSattException(
-                    "Virkningstidspunkt ikke satt for behandling $behandlingId"
-                )
+                ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
             logger.info(
                 "Oppretter vilkårsvurdering for behandling ($behandlingId) med sakType ${behandling.sakType} og " +
@@ -132,10 +159,12 @@ class VilkaarsvurderingService(
                     "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                 )
             }
+
         SakType.OMSTILLINGSSTOENAD ->
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
                     OmstillingstoenadVilkaar.inngangsvilkaar()
+
                 else -> throw IllegalArgumentException(
                     "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                 )

@@ -47,10 +47,10 @@ internal class OpprettVedtakforespoersel(
                 logger.info("Opprettet vedtak ${respons.vedtakId} for sak: $sakId og behandling: $behandlingId")
             }
                 .takeIf { it == Status.SUKSESS }
-                .let {
+                ?.let {
                     fattVedtak(packet, context, behandlingId, sakId)
                         .takeIf { it == Status.SUKSESS }
-                        .let { attester(packet, context, behandlingId, sakId) }
+                        ?.let { attester(packet, context, behandlingId, sakId) }
                 }
         }
 

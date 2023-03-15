@@ -3,11 +3,11 @@ import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useEffect, useState } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
-import { oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { Sammendrag } from './Sammendrag'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
@@ -19,9 +19,9 @@ import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
 
-export const Beregne = () => {
+export const Beregne = (props: { behandling: IBehandlingReducer }) => {
+  const { behandling } = props
   const { next } = useBehandlingRoutes()
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const beregningFraState = behandling.beregning
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)

@@ -6,7 +6,7 @@ import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.sak.Sak
-import java.util.*
+import java.util.UUID
 
 interface BehandlingKlient {
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
@@ -45,7 +45,7 @@ class BehandlingKlientImpl(
 class KunneIkkeHenteFraBehandling(message: String, cause: Exception) : Exception(message, cause)
 
 fun DetaljertBehandling.toPersongalleri() = Persongalleri(
-    soeker = this.soeker!!,
+    soeker = this.soeker,
     innsender = this.innsender,
     soesken = this.soesken ?: emptyList(),
     avdoed = this.avdoed ?: emptyList(),

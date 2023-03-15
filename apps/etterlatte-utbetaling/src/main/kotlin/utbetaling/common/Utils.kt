@@ -1,10 +1,10 @@
 package no.nav.etterlatte.utbetaling.common
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.midnattNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import java.time.Clock
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
@@ -42,10 +42,11 @@ fun forsteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atDay(1)
 fun sisteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atEndOfMonth()
 
 fun LocalDate.toXMLDate(): XMLGregorianCalendar {
-    return DatatypeFactory.newInstance()
-        .newXMLGregorianCalendar(GregorianCalendar.from(midnattNorskTid())).apply {
-            timezone = DatatypeConstants.FIELD_UNDEFINED
-        }
+    return DatatypeFactory.newInstance().newXMLGregorianCalendar(
+        LocalDateTime.of(this, LocalTime.MIDNIGHT).format(tidsstempleMilliOppdrag)
+    ).apply {
+        timezone = DatatypeConstants.FIELD_UNDEFINED
+    }
 }
 
 fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30).let { UUID30(it) }
@@ -53,6 +54,8 @@ fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30).let { UU
 data class UUID30(val value: String)
 
 const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG = 70
+
 val tidsstempelDatoOppdrag = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 val tidsstempelTimeOppdrag = DateTimeFormatter.ofPattern("yyyyMMddHH")
 val tidsstempelMikroOppdrag = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
+val tidsstempleMilliOppdrag = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")

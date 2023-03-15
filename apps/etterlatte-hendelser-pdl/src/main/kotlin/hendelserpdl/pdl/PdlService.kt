@@ -14,7 +14,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface Pdl {
-    suspend fun hentFolkeregisterIdentifikator(ident: String): FolkeregisterIdent
+    fun hentFolkeregisterIdentifikator(ident: String): FolkeregisterIdent
 }
 
 class PdlService(
@@ -26,7 +26,7 @@ class PdlService(
         val logger: Logger = LoggerFactory.getLogger(PdlService::class.java)
     }
 
-    override suspend fun hentFolkeregisterIdentifikator(ident: String): FolkeregisterIdent {
+    override fun hentFolkeregisterIdentifikator(ident: String): FolkeregisterIdent {
         logger.info("Henter folkeregisteridentifikator")
         return runBlocking {
             try {

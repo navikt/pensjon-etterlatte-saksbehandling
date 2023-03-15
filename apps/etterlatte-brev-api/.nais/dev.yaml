@@ -88,6 +88,10 @@ spec:
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
   accessPolicy:
     outbound:
       rules:
@@ -97,6 +101,7 @@ spec:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
         - application: etterlatte-beregning
+        - application: etterlatte-behandling
       external:
         - host: saf.dev-fss-pub.nais.io
         - host: dokarkiv.dev-fss-pub.nais.io

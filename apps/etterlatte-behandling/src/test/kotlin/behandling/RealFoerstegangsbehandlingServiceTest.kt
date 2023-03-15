@@ -28,8 +28,8 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -194,7 +194,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                     )
                 )
             ),
-            vurdertDato = naaTid.toNorskTid().toLocalDateTime()
+            vurdertDato = naaTid.toLocalDatetimeNorskTid()
         )
 
         val foerstegangsbehandlingFactory = mockk<FoerstegangsbehandlingFactory>()

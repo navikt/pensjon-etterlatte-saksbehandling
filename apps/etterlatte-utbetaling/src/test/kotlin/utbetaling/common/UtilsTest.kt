@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.*
@@ -84,5 +85,17 @@ internal class UtilsTest {
             { assertEquals(30, uuid30.value.length) },
             { assertEquals(uuidUFoerste30Tegn, uuid30.value) }
         )
+    }
+
+    @Test
+    fun toXMLDateFormatererRiktig() {
+        val localDate = LocalDate.of(2020, Month.FEBRUARY, 8)
+        val gregorian = localDate.toXMLDate()
+        assertEquals(2020, gregorian.year)
+        assertEquals(Month.FEBRUARY.value, gregorian.month)
+        assertEquals(8, gregorian.day)
+        assertEquals(0, gregorian.hour)
+        assertEquals(0, gregorian.minute)
+        assertEquals(0, gregorian.second)
     }
 }

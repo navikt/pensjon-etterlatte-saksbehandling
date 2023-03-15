@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDateTimeNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
@@ -113,7 +113,7 @@ class RealFoerstegangsbehandlingService(
                         )
                     )
                 ),
-                vurdertDato = klokke.instant().toLocalDateTimeNorskTid()!!
+                vurdertDato = Tidspunkt(klokke.instant()).toLocalDatetimeNorskTid()
             )
             val foerstegangsbehandlingAggregat = foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
             foerstegangsbehandlingAggregat.lagreGyldighetproeving(gyldighetsResultat)

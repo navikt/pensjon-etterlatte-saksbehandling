@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.regulering.ReguleringFactory
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingMedGrunnlagsopplysninger
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.token.Bruker
+import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
@@ -37,7 +39,8 @@ interface GenerellBehandlingService {
     fun hentBehandlinger(): List<Behandling>
     fun hentBehandling(behandlingId: UUID): Behandling?
     fun hentBehandlingstype(behandlingId: UUID): BehandlingType?
-    fun hentBehandlingerISak(sakid: Long): List<Behandling>
+    fun hentBehandlingerISak(sakId: Long): List<Behandling>
+    fun hentSenestIverksatteBehandling(sakId: Long): Behandling?
     fun slettBehandlingerISak(sak: Long)
     fun avbrytBehandling(behandlingId: UUID, saksbehandler: String)
     fun registrerVedtakHendelse(
@@ -82,6 +85,7 @@ class RealGenerellBehandlingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val sporingslogg: Sporingslogg
 ) : GenerellBehandlingService {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun hentBehandlinger(): List<Behandling> {
         return inTransaction { behandlinger.alleBehandlinger() }
@@ -97,10 +101,18 @@ class RealGenerellBehandlingService(
         return inTransaction { behandlinger.hentBehandlingType(behandlingId) }
     }
 
-    override fun hentBehandlingerISak(sakid: Long): List<Behandling> {
+    override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
         return inTransaction {
-            behandlinger.alleBehandlingerISak(sakid)
+            behandlinger.alleBehandlingerISak(sakId)
         }
+    }
+
+    override fun hentSenestIverksatteBehandling(sakId: Long): Behandling? {
+        val alleBehandlinger = inTransaction { behandlinger.alleBehandlingerISak(sakId) }
+
+        return alleBehandlinger
+            .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
+            .maxByOrNull { it.behandlingOpprettet }
     }
 
     override fun slettBehandlingerISak(sak: Long) {
@@ -188,15 +200,20 @@ class RealGenerellBehandlingService(
             detaljertBehandling.kommerBarnetTilgode.takeIf { detaljertBehandling.sakType == SakType.BARNEPENSJON }
 
         val sakId = detaljertBehandling.sak
+        logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {
             val vedtak = async { vedtakKlient.hentVedtak(behandlingId.toString(), bruker) }
+            logger.info("Hentet vedtak for $behandlingId")
             val avdoed = async {
                 grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, bruker)
             }
+            logger.info("Hentet Opplysningstype.AVDOED_PDL_V1 for $behandlingId")
 
             val soeker = async {
                 grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, bruker)
             }
+            logger.info("Hentet Opplysningstype.SOEKER_PDL_V1 for $behandlingId")
+
             val gjenlevende = if (detaljertBehandling.sakType == SakType.OMSTILLINGSSTOENAD) {
                 soeker
             } else {
@@ -208,6 +225,7 @@ class RealGenerellBehandlingService(
                     )
                 }
             }
+            logger.info("Hentet Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1 for $behandlingId")
 
             DetaljertBehandlingDto(
                 id = detaljertBehandling.id,

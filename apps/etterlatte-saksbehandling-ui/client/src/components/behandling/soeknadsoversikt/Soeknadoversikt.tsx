@@ -6,16 +6,16 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
-import { useAppSelector } from '~store/Store'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 import { Start } from '~components/behandling/handlinger/start'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-export const Soeknadsoversikt = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
+  const { behandling } = props
   const behandles = hentBehandlesFraStatus(behandling.status)
 
   return (
@@ -29,7 +29,7 @@ export const Soeknadsoversikt = () => {
         <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
       </ContentHeader>
       <Innhold>
-        <OversiktGyldigFramsatt gyldigFramsatt={behandling.gyldighetsprøving} sakType={behandling.sakType} />
+        <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
             {behandling.sakType == ISaksType.BARNEPENSJON && (
@@ -38,6 +38,7 @@ export const Soeknadsoversikt = () => {
                 redigerbar={behandles}
                 søker={behandling.søker}
                 forelder={behandling.familieforhold?.gjenlevende}
+                behandlingId={behandling.id}
               />
             )}
             <Virkningstidspunkt

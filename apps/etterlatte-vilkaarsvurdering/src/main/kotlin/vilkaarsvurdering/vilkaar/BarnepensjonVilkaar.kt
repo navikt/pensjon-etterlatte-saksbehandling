@@ -5,9 +5,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Hovedvilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Unntaksvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.AVDOED_DOEDSDATO
@@ -31,7 +30,7 @@ object BarnepensjonVilkaar {
     )
 
     private fun formaal() = Vilkaar(
-        Hovedvilkaar(
+        Delvilkaar(
             type = VilkaarType.FORMAAL,
             tittel = "Formål",
             beskrivelse =
@@ -45,7 +44,7 @@ object BarnepensjonVilkaar {
     )
 
     private fun doedsfallForelder() = Vilkaar(
-        Hovedvilkaar(
+        Delvilkaar(
             type = VilkaarType.DOEDSFALL_FORELDER,
             tittel = "Dødsfall forelder",
             beskrivelse = "En eller begge foreldrene er registrert død",
@@ -61,7 +60,7 @@ object BarnepensjonVilkaar {
         virkningstidspunkt: Virkningstidspunkt,
         grunnlag: Grunnlag
     ): Vilkaar = Vilkaar(
-        hovedvilkaar = Hovedvilkaar(
+        hovedvilkaar = Delvilkaar(
             type = VilkaarType.ALDER_BARN,
             tittel = "Barnets alder",
             beskrivelse = "Barnet er under 18 år (på virkningstidspunkt)",
@@ -88,7 +87,7 @@ object BarnepensjonVilkaar {
     )
 
     private fun barnetsMedlemskap() = Vilkaar(
-        hovedvilkaar = Hovedvilkaar(
+        hovedvilkaar = Delvilkaar(
             type = VilkaarType.FORTSATT_MEDLEMSKAP,
             tittel = "Barnets medlemskap",
             beskrivelse = "Barnet er medlem i trygden (fra virkningstidspunkt)",
@@ -106,7 +105,7 @@ object BarnepensjonVilkaar {
     )
 
     private fun avdoedesForutgaaendeMedlemskap() = Vilkaar(
-        hovedvilkaar = Hovedvilkaar(
+        hovedvilkaar = Delvilkaar(
             type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
             tittel = "Avdødes forutgående medlemskap",
             beskrivelse =
@@ -128,7 +127,7 @@ object BarnepensjonVilkaar {
     )
 
     private fun yrkesskadeAvdoed() = Vilkaar(
-        Hovedvilkaar(
+        Delvilkaar(
             type = VilkaarType.YRKESSKADE_AVDOED,
             tittel = "Yrkesskade",
             beskrivelse = "Dødsfallet skyldes en godkjent yrkes-skade/sykdom",
@@ -140,7 +139,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun beggeForeldreDoedeUtdanningHovedbeskjeftigelse() = Unntaksvilkaar(
+    private fun beggeForeldreDoedeUtdanningHovedbeskjeftigelse() = Delvilkaar(
         type = VilkaarType.ALDER_BARN_UNNTAK_UTDANNING,
         tittel = "Ja. Barnet er foreldreløs og har utdanning som hovedbeskjeftigelse",
         lovreferanse = Lovreferanse(
@@ -149,7 +148,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun beggeForeldreDoedeLaerlingPraktikantInntektUnder2G() = Unntaksvilkaar(
+    private fun beggeForeldreDoedeLaerlingPraktikantInntektUnder2G() = Delvilkaar(
         type = VilkaarType.ALDER_BARN_UNNTAK_LAERLING_PRAKTIKANT,
         tittel =
         "Ja. Barnet er foreldreløs og er lærling/praktikant med en inntekt etter skatt på mindre enn to " +
@@ -160,7 +159,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun minstEttBarnForedreloestBarnekullMedlemTrygden() = Unntaksvilkaar(
+    private fun minstEttBarnForedreloestBarnekullMedlemTrygden() = Delvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRELOEST_BARN_I_KULL_MEDLEM_TRYGDEN,
         tittel = "Ja. Minst ett av barna i et foreldreløst barnekull er medlem i trygden",
         lovreferanse = Lovreferanse(
@@ -170,7 +169,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun avdoedMindreEnn20AarsSamletBotidRettTilTilleggspensjon() = Unntaksvilkaar(
+    private fun avdoedMindreEnn20AarsSamletBotidRettTilTilleggspensjon() = Delvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_AVDOED_MINDRE_20_AAR_BOTID_RETT_TILLEGGSPENSJON,
         tittel = "Ja. Den avdøde har mindre enn 20 års botid, men har opptjent rett til tilleggspensjon",
         lovreferanse = Lovreferanse(
@@ -180,7 +179,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun enForelderMinst20AarsSamletBotid() = Unntaksvilkaar(
+    private fun enForelderMinst20AarsSamletBotid() = Delvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRE_MINST_20_AAR_SAMLET_BOTID,
         tittel = "Ja. En av foreldrene har minst 20 års samlet botid",
         lovreferanse = Lovreferanse(
@@ -190,7 +189,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun avdoedMedlemITrygdenIkkeFylt26Aar() = Unntaksvilkaar(
+    private fun avdoedMedlemITrygdenIkkeFylt26Aar() = Delvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR,
         tittel =
         "Ja. Avdøde var medlem ved dødsfallet og hadde ikke fylt 26 år (oppfylles tidligst fra tidspunktet " +
@@ -202,7 +201,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun avdoedMedlemEtter16AarMedUnntakAvMaksimum5Aar() = Unntaksvilkaar(
+    private fun avdoedMedlemEtter16AarMedUnntakAvMaksimum5Aar() = Delvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR,
         tittel =
         "Ja. Avdøde var medlem ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år " +
@@ -214,7 +213,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon() = Unntaksvilkaar(
+    private fun avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon() = Delvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_HALV_MINSTEPENSJON,
         tittel =
         "Ja. Avdøde var medlem ved dødsfallet og kunne fått en ytelse på minst 1 G (har minst 20 års " +
@@ -225,7 +224,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun avdoedHaddeTidsromMedAvtalefestetPensjon() = Unntaksvilkaar(
+    private fun avdoedHaddeTidsromMedAvtalefestetPensjon() = Delvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_AVTALEFESTET_PENSJON,
         tittel =
         "Ja. Avdøde hadde tidsrom med avtalefestet pensjon med statstilskott, som skal likestilles med tidsrom " +
@@ -236,7 +235,7 @@ object BarnepensjonVilkaar {
         )
     )
 
-    private fun avdoedHaddeTidsromMedPensjonFraLovfestetPensjonsordning() = Unntaksvilkaar(
+    private fun avdoedHaddeTidsromMedPensjonFraLovfestetPensjonsordning() = Delvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_LOVFESTET_PENSJONSORDNING,
         tittel =
         "Ja. Avdøde hadde tidsrom med pensjon fra en lovfestet pensjonsordning som er tilpasset " +

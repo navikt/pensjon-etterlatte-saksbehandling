@@ -6,19 +6,20 @@ import { ManueltVilkaar } from './ManueltVilkaar'
 import { VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
 import Spinner from '~shared/Spinner'
-import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
+import { useAppDispatch } from '~store/Store'
 import { Heading } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-export const Vilkaarsvurdering = () => {
+export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
+  const { behandling } = props
+
   const location = useLocation()
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const vilkaarsvurdering = behandling.vilkårsprøving
   const behandles = hentBehandlesFraStatus(behandling.status)
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)

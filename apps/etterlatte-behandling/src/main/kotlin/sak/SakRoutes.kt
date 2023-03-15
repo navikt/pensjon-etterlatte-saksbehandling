@@ -42,13 +42,13 @@ internal fun Route.sakRoutes(
 
     route("/api/personer/{$FNR_CALL_PARAMETER}") {
         get("behandlinger") {
-            call.respond(
-                sakService.finnSaker(fnr).map { sak ->
+            val behandlinger = sakService.finnSaker(fnr)
+                .map { sak ->
                     generellBehandlingService.hentBehandlingerISak(sak.id).map {
                         it.toBehandlingSammendrag()
                     }.let { BehandlingListe(it) }
                 }
-            )
+            call.respond(behandlinger)
         }
 
         get("grunnlagsendringshendelser") {

@@ -87,7 +87,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }.apply {
                 assertEquals(HttpStatusCode.NotFound, status)
             }
-            val sak: Sak = client.get("/personer/$fnr/saker/BARNEPENSJON") {
+            val sak: Sak = client.get("/personer/$fnr/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
             }.apply {
                 assertEquals(HttpStatusCode.OK, status)
@@ -369,7 +369,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 setBody(
                     BehandlingsBehov(
                         1,
-                        Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
+                        Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
                         Tidspunkt.now().toLocalDatetimeUTC().toString()
                     )
 

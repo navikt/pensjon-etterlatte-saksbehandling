@@ -145,7 +145,7 @@ export const Vurdering = ({
           tittel={overskrift()}
           subtittelKomponent={
             <>
-              {oppfyltUnntaksvilkaar != null ? (
+              {!!oppfyltUnntaksvilkaar ? (
                 <VilkaarVurdertInformasjon>
                   <Heading size="xsmall" level={'3'}>
                     Er unntak fra hovedvilkåret oppfylt?

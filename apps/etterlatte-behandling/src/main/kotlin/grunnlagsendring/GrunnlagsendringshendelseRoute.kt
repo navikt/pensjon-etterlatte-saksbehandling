@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -11,12 +10,13 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.sakId
 
 internal fun Route.grunnlagsendringshendelseRoute(
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService
@@ -52,7 +52,7 @@ internal fun Route.grunnlagsendringshendelseRoute(
             call.respond(HttpStatusCode.OK)
         }
 
-        route("/{sakid}") {
+        route("/{$SAKID_CALL_PARAMETER}") {
             get {
                 call.respond(GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)))
             }
@@ -65,5 +65,3 @@ internal fun Route.grunnlagsendringshendelseRoute(
 }
 
 data class GrunnlagsendringsListe(val hendelser: List<Grunnlagsendringshendelse>)
-
-inline val PipelineContext<*, ApplicationCall>.sakId get() = requireNotNull(call.parameters["sakid"]).toLong()

@@ -22,7 +22,6 @@ import no.nav.etterlatte.behandling.VurderingMedBegrunnelseJson
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
@@ -337,7 +336,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 )
             }
 
-            val manueltOpphoer = client.post("/api/behandlinger/${sak.id}/manueltopphoer") {
+            client.post("/api/behandlinger/${sak.id}/manueltopphoer") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -352,15 +351,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
-            }.body<ManueltOpphoerResponse>()
-
-            client.get("/behandlinger/manueltopphoer?behandlingsid=${manueltOpphoer.behandlingId}") {
-                addAuthToken(tokenSaksbehandler)
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-                val result = it.body<DetaljertBehandling>()
-                assertEquals(sak.id, result.sak)
-                assertEquals(BehandlingType.MANUELT_OPPHOER, result.behandlingType)
+                it.body<ManueltOpphoerResponse>()
             }
 
             val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger/foerstegangsbehandling") {

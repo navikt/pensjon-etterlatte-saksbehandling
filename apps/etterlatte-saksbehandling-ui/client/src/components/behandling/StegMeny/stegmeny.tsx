@@ -10,8 +10,6 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingType, sakType, status } = props.behandling
   const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(status).includes(steg)
 
-  console.log(props.behandling)
-
   return (
     <StegMenyWrapper role="navigation">
       {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (

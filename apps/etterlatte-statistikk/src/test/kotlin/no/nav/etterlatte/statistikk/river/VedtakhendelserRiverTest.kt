@@ -1,4 +1,4 @@
-package no.nav.etterlatte.statistikk
+package no.nav.etterlatte.statistikk.river
 
 import io.mockk.every
 import io.mockk.mockk
@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.statistikk.domain.StoenadRad
-import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions

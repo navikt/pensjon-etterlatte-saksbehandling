@@ -27,11 +27,12 @@ class SoeknadStatistikkRiver(
 
     init {
         River(rapidsConnection).apply {
-            validate { eventName(EventNames.FORDELER_STATISTIKK) }
+            eventName(EventNames.FORDELER_STATISTIKK)
             validate { it.requireKey(SOEKNAD_ID_KEY) }
             validate { it.requireKey(GYLDIG_FOR_BEHANDLING_KEY) }
             validate { it.requireKey(SAK_TYPE_KEY) }
             validate { it.interestedIn(FEILENDE_KRITERIER_KEY) }
+            correlationId()
         }.register(this)
     }
 

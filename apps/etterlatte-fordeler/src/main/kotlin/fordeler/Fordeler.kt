@@ -107,7 +107,11 @@ internal class Fordeler(
     fun lagStatistikkMelding(packet: JsonMessage, fordelerResultat: FordelerResultat, sakType: SakType): String? {
         val (resultat, ikkeOppfylteKriterier) = when (fordelerResultat) {
             FordelerResultat.GyldigForBehandling -> true to null
-            is FordelerResultat.IkkeGyldigForBehandling -> false to fordelerResultat.ikkeOppfylteKriterier
+            is FordelerResultat.IkkeGyldigForBehandling ->
+                // Sjekker eksplisitt opp mot ikkeOppfylteKriterier for om det er gyldig for behandling,
+                // siden det er logikk for å begrense hvor mange saker vi tar inn i pilot
+                fordelerResultat.ikkeOppfylteKriterier.isNotEmpty() to fordelerResultat.ikkeOppfylteKriterier
+
             is FordelerResultat.UgyldigHendelse -> {
                 logger.error("Kan ikke produsere statistikkmelding for fordelerResultat $fordelerResultat")
                 return null

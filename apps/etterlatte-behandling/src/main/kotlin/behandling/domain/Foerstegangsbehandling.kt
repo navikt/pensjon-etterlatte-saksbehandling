@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -13,7 +14,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 data class Foerstegangsbehandling(
     override val id: UUID,
@@ -30,9 +31,13 @@ data class Foerstegangsbehandling(
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 
-    private val erFyltUt: Boolean
-        get() {
-            return (virkningstidspunkt != null) && (gyldighetsproeving != null) && (kommerBarnetTilgode != null)
+    private fun erFyltUt(): Boolean =
+        when (sak.sakType) {
+            SakType.BARNEPENSJON ->
+                (virkningstidspunkt != null) && (gyldighetsproeving != null) && (kommerBarnetTilgode != null)
+
+            SakType.OMSTILLINGSSTOENAD ->
+                (virkningstidspunkt != null) && (gyldighetsproeving != null)
         }
 
     fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Foerstegangsbehandling = hvisRedigerbar {
@@ -59,7 +64,7 @@ data class Foerstegangsbehandling(
     }
 
     override fun tilVilkaarsvurdert(utfall: VilkaarsvurderingUtfall?): Foerstegangsbehandling {
-        if (!erFyltUt) {
+        if (!erFyltUt()) {
             logger.info("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert")
             throw TilstandException.IkkeFyltUt
         }
@@ -78,7 +83,7 @@ data class Foerstegangsbehandling(
     }
 
     override fun tilFattetVedtak(): Foerstegangsbehandling {
-        if (!erFyltUt) {
+        if (!erFyltUt()) {
             logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
             throw TilstandException.IkkeFyltUt
         }

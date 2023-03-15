@@ -46,7 +46,7 @@ export const DokumentlisteLiten = ({
       )}
       {error && (
         <Alert variant={'error'} style={{ marginTop: '10px' }}>
-          Det har oppstått en feil ved henting av henting av dokumenter..
+          Det har oppstått en feil ved henting av dokumenter.
         </Alert>
       )}
     </>

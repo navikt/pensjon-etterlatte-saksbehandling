@@ -1,12 +1,6 @@
 import { isAfter } from 'date-fns'
 import { IAdresse } from '~shared/types/IAdresse'
-import {
-  IBehandlingStatus,
-  IBehandlingsType,
-  IDetaljertBehandling,
-  IVilkaarsproving,
-} from '~shared/types/IDetaljertBehandling'
-import { IKriterie, IKriterieOpplysning, KriterieOpplysningsType, Kriterietype } from '~shared/types/Kriterie'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { JaNei } from '~shared/types/ISvar'
@@ -60,22 +54,6 @@ export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
     status === IBehandlingStatus.IVERKSATT ||
     status === IBehandlingStatus.AVBRUTT
   )
-}
-
-export const hentKriterierMedOpplysning = (
-  vilkaar: IVilkaarsproving | undefined,
-  kriterieType: Kriterietype,
-  kriterieOpplysningsType: KriterieOpplysningsType
-): IKriterieOpplysning | undefined => {
-  try {
-    return vilkaar?.kriterier
-      ?.find((krit: IKriterie) => krit.navn === kriterieType)
-      ?.basertPaaOpplysninger.find(
-        (opplysning: IKriterieOpplysning) => opplysning.kriterieOpplysningsType === kriterieOpplysningsType
-      )
-  } catch (e: any) {
-    console.error(e)
-  }
 }
 
 export const harIngenUavbrutteManuelleOpphoer = (behandlingliste: IBehandlingsammendrag[]): boolean =>

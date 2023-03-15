@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import no.nav.etterlatte.libs.common.requireEnvValue
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import javax.sql.DataSource
@@ -12,12 +13,12 @@ object DataSourceBuilder {
 
     fun createDataSource(env: Map<String, String>, maxPoolSize: Int = MAX_POOL_SIZE): DataSource {
         val jdbcUrl = jdbcUrl(
-            host = requireNotNull(env["DB_HOST"]),
-            port = requireNotNull(env["DB_PORT"]).toInt(),
-            databaseName = requireNotNull(env["DB_DATABASE"])
+            host = env.requireEnvValue("DB_HOST"),
+            port = env.requireEnvValue("DB_PORT").toInt(),
+            databaseName = env.requireEnvValue("DB_DATABASE")
         )
-        val username = requireNotNull(env["DB_USERNAME"])
-        val password = requireNotNull(env["DB_PASSWORD"])
+        val username = env.requireEnvValue("DB_USERNAME")
+        val password = env.requireEnvValue("DB_PASSWORD")
         return createDataSource(jdbcUrl, username, password, maxPoolSize)
     }
 

@@ -90,10 +90,10 @@ class ApplicationBuilder {
 
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 
-    private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE"), requireNotNull(env["DOKARKIV_URL"]))
+    private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE"), env.requireEnvValue("DOKARKIV_URL"))
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
 
-    private val distribusjonKlient = DistribusjonKlient(httpClient("DOKDIST_SCOPE"), requireNotNull(env["DOKDIST_URL"]))
+    private val distribusjonKlient = DistribusjonKlient(httpClient("DOKDIST_SCOPE"), env.requireEnvValue("DOKDIST_URL"))
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
     private val brevService = BrevService(db, pdfGenerator, adresseService)

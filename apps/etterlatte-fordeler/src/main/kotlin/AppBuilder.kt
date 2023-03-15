@@ -12,7 +12,7 @@ class AppBuilder(private val env: Miljoevariabler) : RapidsAndRiversAppBuilder(e
 
     internal fun pdlTjenesterKlient() = PdlTjenesterKlient(
         client = pdlTjenesterHttpClient,
-        apiUrl = requireNotNull(env["PDL_URL"])
+        apiUrl = env.requireEnvValue("PDL_URL")
     )
 
     private val pdlTjenesterHttpClient: HttpClient by lazy {

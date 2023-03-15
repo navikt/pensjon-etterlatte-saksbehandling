@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -27,6 +28,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -77,16 +79,18 @@ class GrunnlagsendringshendelseService(
     fun oppdaterAdressebeskyttelseHendelse(
         adressebeskyttelse: Adressebeskyttelse
     ) {
+        val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = finnSakIdForFnr(adressebeskyttelse.fnr).distinct()
         sakIder.forEach { sakId ->
-            val oppdaterAdressebeskyttelse = sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
+            sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
                 sakId,
-                adressebeskyttelse.adressebeskyttelseGradering
+                gradering
             )
-            logger.info(
-                "Oppdaterte adressebeskyttelse for sak $sakId " +
-                    "antall: $oppdaterAdressebeskyttelse"
-            )
+            sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sakId med gradering=$gradering")
+        }
+
+        if (sakIder.isNotEmpty() && gradering != AdressebeskyttelseGradering.UGRADERT) {
+            logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
         }
     }
 

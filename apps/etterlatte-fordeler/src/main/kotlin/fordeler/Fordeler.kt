@@ -110,7 +110,7 @@ internal class Fordeler(
             is FordelerResultat.IkkeGyldigForBehandling ->
                 // Sjekker eksplisitt opp mot ikkeOppfylteKriterier for om det er gyldig for behandling,
                 // siden det er logikk for å begrense hvor mange saker vi tar inn i pilot
-                fordelerResultat.ikkeOppfylteKriterier.isNotEmpty() to fordelerResultat.ikkeOppfylteKriterier
+                fordelerResultat.ikkeOppfylteKriterier.isEmpty() to fordelerResultat.ikkeOppfylteKriterier
 
             is FordelerResultat.UgyldigHendelse -> {
                 logger.error("Kan ikke produsere statistikkmelding for fordelerResultat $fordelerResultat")

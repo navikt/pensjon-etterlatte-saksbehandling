@@ -1,10 +1,10 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.Marshaller
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.io.StringReader
 import java.io.StringWriter
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.Marshaller
 import javax.xml.stream.XMLInputFactory
 import javax.xml.transform.stream.StreamSource
 

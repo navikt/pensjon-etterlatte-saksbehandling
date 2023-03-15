@@ -228,7 +228,8 @@ internal class UtbetalingDaoIntegrationTest {
 
         val oppdragMedKvittering = oppdrag.apply {
             oppdrag110.oppdragsId = 1
-            mmel = Mmel().withAlvorlighetsgrad("08").withBeskrMelding("beskrivende melding").withKodeMelding("1234")
+            mmel = Mmel().also { it.alvorlighetsgrad = "08" }.also { it.beskrMelding = "beskrivende melding" }
+                .also { it.kodeMelding = "1234" }
         }
 
         utbetalingDao.oppdaterKvittering(oppdragMedKvittering, Tidspunkt.now(), utbetaling.id)

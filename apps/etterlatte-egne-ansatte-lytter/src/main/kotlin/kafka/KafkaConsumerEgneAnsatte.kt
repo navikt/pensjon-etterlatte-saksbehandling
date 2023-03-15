@@ -3,6 +3,7 @@ package no.nav.etterlatte.kafka
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import no.nav.etterlatte.BehandlingKlient
+import no.nav.etterlatte.libs.common.requireEnvValue
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
@@ -17,7 +18,7 @@ class KafkaConsumerEgneAnsatte(
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
     private val kafkaProperties: Properties = kafkaEnvironment.generateKafkaConsumerProperties(env)
-    private val skjermingTopic: String = env["SKJERMING_TOPIC"]!!
+    private val skjermingTopic: String = env.requireEnvValue("SKJERMING_TOPIC")
     private val consumer: KafkaConsumer<String, String> = KafkaConsumer<String, String>(kafkaProperties).also {
         it.subscribe(listOf(skjermingTopic))
     }

@@ -1,36 +1,24 @@
 package no.nav.etterlatte.beregningkafka
 
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.jackson.jackson
-import no.nav.etterlatte.security.ktor.clientCredential
+import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(props: Map<String, String>) : RapidsAndRiversAppBuilder(props) {
+class AppBuilder(props: Miljoevariabler) : RapidsAndRiversAppBuilder(props) {
 
-    private val beregningapp = beregningHttpClient()
+    private val beregningapp: HttpClient by lazy {
+        httpClientClientCredentials(
+            azureAppClientId = props.requireEnvValue("AZURE_APP_CLIENT_ID"),
+            azureAppJwk = props.requireEnvValue("AZURE_APP_JWK"),
+            azureAppWellKnownUrl = props.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppScope = props.requireEnvValue("BEREGNING_AZURE_SCOPE"),
+            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) }
+        )
+    }
 
     fun createBeregningService(): BeregningService {
         return BeregningService(beregningapp, "http://etterlatte-beregning")
     }
-
-    private fun beregningHttpClient() = HttpClient(OkHttp) {
-        expectSuccess = true
-        install(ContentNegotiation) {
-            jackson {
-                registerModule(JavaTimeModule())
-                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            }
-        }
-        install(Auth) {
-            clientCredential {
-                config = props.toMutableMap()
-                    .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("BEREGNING_AZURE_SCOPE"))) }
-            }
-        }
-    }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }

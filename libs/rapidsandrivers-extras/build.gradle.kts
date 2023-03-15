@@ -13,6 +13,8 @@ dependencies {
     api(libs.bundles.jackson)
     api(libs.navfelles.rapidandriversktor2)
 
+    implementation(project(":libs:common"))
+
     compileOnly(libs.logging.slf4japi)
 
     testImplementation(libs.test.mockk)

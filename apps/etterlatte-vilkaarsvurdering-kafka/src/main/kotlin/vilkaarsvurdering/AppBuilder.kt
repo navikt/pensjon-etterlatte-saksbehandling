@@ -2,11 +2,12 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingServiceImpl
 import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(props: Map<String, String>) : RapidsAndRiversAppBuilder(props) {
+class AppBuilder(props: Miljoevariabler) : RapidsAndRiversAppBuilder(props) {
     private val config: Config = ConfigFactory.load()
     private val vilkaarsvurderingHttpKlient = httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),

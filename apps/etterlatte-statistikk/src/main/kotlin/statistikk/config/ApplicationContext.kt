@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.config
 
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -85,12 +86,6 @@ class ApplicationContext {
         )
     }
 }
-
-private fun Map<String, String>.requireEnvValue(key: String) =
-    when (val value = this[key]) {
-        null -> throw IllegalArgumentException("app env is missing required key $key")
-        else -> value
-    }
 
 private fun Map<String, String>.withConsumerGroupId() =
     this.toMutableMap().apply {

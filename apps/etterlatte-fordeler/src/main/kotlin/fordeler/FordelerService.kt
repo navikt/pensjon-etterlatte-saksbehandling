@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter
 enum class Vedtaksloesning {
     DOFFEN, PESYS
 }
+
 data class Fordeling(val soeknadId: Long, val fordeltTil: Vedtaksloesning, val kriterier: List<FordelerKriterie>)
 
 sealed class FordelerResultat {
@@ -33,22 +34,21 @@ class FordelerService(
     private val klokke: Clock = utcKlokke(),
     private val maxFordelingTilDoffen: Long
 ) {
-    fun sjekkGyldighetForBehandling(event: FordelerEvent): FordelerResultat = runBlocking {
+    fun sjekkGyldighetForBehandling(event: FordelerEvent): FordelerResultat {
         if (ugyldigHendelse(event)) {
-            UgyldigHendelse(
+            return UgyldigHendelse(
                 "Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})"
             )
-        } else {
-            try {
-                fordelSoeknad(event).let {
-                    when (it.fordeltTil) {
-                        Vedtaksloesning.DOFFEN -> GyldigForBehandling
-                        Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
-                    }
+        }
+        return try {
+            fordelSoeknad(event).let {
+                when (it.fordeltTil) {
+                    Vedtaksloesning.DOFFEN -> GyldigForBehandling
+                    Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
                 }
-            } catch (e: PersonFinnesIkkeException) {
-                UgyldigHendelse("Person fra søknaden med fnr=${e.fnr} finnes ikke i PDL")
             }
+        } catch (e: PersonFinnesIkkeException) {
+            UgyldigHendelse("Person fra søknaden med fnr=${e.fnr} finnes ikke i PDL")
         }
     }
 
@@ -70,6 +70,7 @@ class FordelerService(
     private fun Fordeling.lagre() {
         fordelerRepository.lagreFordeling(FordeltTransient(soeknadId, fordeltTil.name, kriterier.map { it.name }))
     }
+
     private fun nyFordeling(event: FordelerEvent): Fordeling = runBlocking {
         val soeknad: Barnepensjon = event.soeknad
 

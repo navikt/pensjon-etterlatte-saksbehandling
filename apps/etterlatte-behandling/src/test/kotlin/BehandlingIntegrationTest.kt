@@ -28,8 +28,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
-import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.token.Bruker
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.testcontainers.containers.PostgreSQLContainer

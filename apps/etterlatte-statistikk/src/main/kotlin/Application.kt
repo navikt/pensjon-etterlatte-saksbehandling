@@ -19,4 +19,5 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
         .apply {
             applicationContext.vedtakhendelserRiver
             applicationContext.behandlinghendelseRiver
+            applicationContext.soeknadStatistikkRiver
         }

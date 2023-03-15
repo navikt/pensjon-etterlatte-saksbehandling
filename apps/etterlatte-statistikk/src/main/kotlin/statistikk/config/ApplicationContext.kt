@@ -11,10 +11,14 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
 import no.nav.etterlatte.statistikk.database.SakRepository
+import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
+import no.nav.etterlatte.statistikk.river.SoeknadStatistikkRiver
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
+import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
+import no.nav.etterlatte.statistikk.service.SoeknadStatistikkServiceImpl
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -53,6 +57,18 @@ class ApplicationContext {
 
     private val beregningKlient: BeregningKlient by lazy {
         BeregningKlientImpl(beregningHttpClient, "http://etterlatte-beregning")
+    }
+
+    private val soeknadStatistikkRepository: SoeknadStatistikkRepository by lazy {
+        SoeknadStatistikkRepository.using(datasource)
+    }
+
+    private val soeknadStatistikkService: SoeknadStatistikkService by lazy {
+        SoeknadStatistikkServiceImpl(soeknadStatistikkRepository)
+    }
+
+    val soeknadStatistikkRiver: SoeknadStatistikkRiver by lazy {
+        SoeknadStatistikkRiver(rapidsConnection, soeknadStatistikkService)
     }
 
     val maanedligStatistikkJob: MaanedligStatistikkJob by lazy {

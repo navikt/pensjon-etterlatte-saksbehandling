@@ -5,7 +5,6 @@ import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.routing.contentType
 import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.config.ApplicationContext
 import no.nav.etterlatte.libs.database.migrate

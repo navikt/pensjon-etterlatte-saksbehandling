@@ -37,5 +37,5 @@ var JsonMessage.tilbakestilteBehandlinger: List<UUID>
         .filter { it.isNotEmpty() }
         .map { UUID.fromString(it) }
     set(name) {
-        this[TILBAKESTILTE_BEHANDLINGER_KEY] = name.map { it.toString() }.joinToString { ";" }
+        this[TILBAKESTILTE_BEHANDLINGER_KEY] = name.joinToString(";") { it.toString() }
     }

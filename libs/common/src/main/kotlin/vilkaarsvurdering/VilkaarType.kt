@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
 enum class VilkaarType(val rekkefoelge: Int) {
     // Barnepensjon
+    BP_FORMAAL(10),
     BP_DOEDSFALL_FORELDER(100),
     BP_ALDER_BARN(200),
     BP_ALDER_BARN_UNNTAK_UTDANNING(201),

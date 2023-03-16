@@ -128,7 +128,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
-            val vilkaar = vilkaarsvurdering.vilkaar.first()
+            val vilkaar = vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_DOEDSFALL_FORELDER }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(behandlingId, vilkaarsvurdering.behandlingId)

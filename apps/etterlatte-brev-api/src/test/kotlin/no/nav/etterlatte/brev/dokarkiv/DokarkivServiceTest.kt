@@ -11,6 +11,7 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
@@ -105,6 +106,7 @@ internal class DokarkivServiceTest {
 
     private fun opprettVedtak() = VedtakDto(
         vedtakId = 1,
+        status = VedtakStatus.FATTET_VEDTAK,
         virkningstidspunkt = YearMonth.now(),
         behandling = Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.randomUUID()),
         type = VedtakType.INNVILGELSE,

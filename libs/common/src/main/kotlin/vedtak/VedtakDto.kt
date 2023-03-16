@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.vedtak
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
@@ -10,6 +11,7 @@ import java.util.Objects.isNull
 
 data class VedtakDto(
     val vedtakId: Long,
+    val status: VedtakStatus,
     val virkningstidspunkt: YearMonth,
     val sak: Sak,
     val behandling: Behandling,

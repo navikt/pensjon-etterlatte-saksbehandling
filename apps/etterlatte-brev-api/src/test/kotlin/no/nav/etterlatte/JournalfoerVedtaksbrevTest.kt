@@ -10,6 +10,7 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
@@ -119,6 +120,7 @@ internal class JournalfoerVedtaksbrevTest {
     private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {
         return VedtakDto(
             vedtakId = 1L,
+            status = VedtakStatus.ATTESTERT,
             virkningstidspunkt = YearMonth.now(),
             sak = Sak("Z123456", SakType.BARNEPENSJON, 2L),
             behandling = Behandling(behandlingType, UUID.randomUUID()),

@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -39,6 +40,7 @@ fun vedtak(
 
 ): VedtakDto = VedtakDto(
     vedtakId = vedtakId,
+    status = VedtakStatus.ATTESTERT,
     behandling = behandling,
     sak = Sak(
         id = sakId,
@@ -69,6 +71,7 @@ fun ugyldigVedtakTilUtbetaling(
     saktype: SakType = SakType.BARNEPENSJON
 ): VedtakDto = VedtakDto(
     vedtakId = vedtakId,
+    status = VedtakStatus.ATTESTERT,
     behandling = behandling,
     sak = Sak(
         id = 1,
@@ -106,6 +109,7 @@ fun revurderingVedtak(
     )
 ): VedtakDto = VedtakDto(
     vedtakId = vedtak.vedtakId + 1,
+    status = VedtakStatus.ATTESTERT,
     behandling = Behandling(
         id = UUID.randomUUID(),
         type = BehandlingType.REVURDERING
@@ -130,6 +134,7 @@ fun opphoersVedtak(
     vedtak: VedtakDto
 ): VedtakDto = VedtakDto(
     vedtakId = vedtak.vedtakId + 1,
+    status = VedtakStatus.ATTESTERT,
     behandling = Behandling(
         id = UUID.randomUUID(),
         type = BehandlingType.REVURDERING

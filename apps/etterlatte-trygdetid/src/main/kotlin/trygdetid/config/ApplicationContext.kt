@@ -24,12 +24,15 @@ class InMemoryDs {
 
     object TrygdetidTable : Table() {
         val behandlingsId = uuid("behandling_id")
+        val nasjonalTrygdetid = integer("nasjonalTrygdetid").nullable()
+        val fremtidigTrygdetid = integer("fremtidigTrygdetid").nullable()
         val oppsummertTrygdetid = integer("oppsummertTrygdetid").nullable()
     }
     var trygdetidTable = TrygdetidTable
 
     object TrygdetidGrunnlagTable : Table() {
         val behandlingsId = uuid("behandling_id")
+        val trygdetidType = varchar("type", 50)
         val bosted = varchar("bosted", 50)
         val periodeFra = date("periodeFra")
         val periodeTil = date("periodeTil")
@@ -51,6 +54,7 @@ class InMemoryDs {
         }
         trygdetidGrunnlagTable.insert {
             it[behandlingsId] = UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31")
+            it[trygdetidType] = "NASJONAL_TRYGDETID"
             it[bosted] = "Norge"
             it[periodeFra] = LocalDate.now()
             it[periodeTil] = LocalDate.now()

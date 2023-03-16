@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.withParam
+import java.time.LocalDate
 
 fun Route.trygdetid(trygdetidService: TrygdetidService) {
     route("/api/trygdetid/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -27,7 +28,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
                     call.respond(trygdetid.toDto())
                 } else {
                     call.respond(
-                        status = HttpStatusCode.NoContent,
+                        status = HttpStatusCode.NotFound,
                         message = "Det finnes ingen trygdetid for denne behandlingen"
                     )
                 }
@@ -58,7 +59,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
             withParam(BEHANDLINGSID_CALL_PARAMETER) {
                 logger.info("Lagre oppsummert trygdetid")
                 val oppsummertTrygdetid = call.receive<OppsummertTrygdetidDto>()
-                val trygdetid = trygdetidService.lagreOppsummertTrygdetid(behandlingsId, oppsummertTrygdetid.verdi)
+                val trygdetid = trygdetidService.lagreOppsummertTrygdetid(behandlingsId, oppsummertTrygdetid.fromDto())
                 call.respond(trygdetid.toDto())
             }
         }
@@ -66,39 +67,55 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
 }
 
 data class TrygdetidDto(
-    val oppsummertTrygdetid: Int?,
+    val oppsummertTrygdetid: OppsummertTrygdetidDto?,
     val grunnlag: List<TrygdetidGrunnlagDto>
 )
 
-fun Trygdetid.toDto(): TrygdetidDto {
-    return TrygdetidDto(
-        oppsummertTrygdetid = oppsummertTrygdetid,
+fun Trygdetid.toDto(): TrygdetidDto =
+    TrygdetidDto(
+        oppsummertTrygdetid = oppsummertTrygdetid?.let {
+            OppsummertTrygdetidDto(
+                nasjonalTrygdetid = oppsummertTrygdetid.nasjonalTrygdetid,
+                fremtidigTrygdetid = oppsummertTrygdetid.fremtidigTrygdetid,
+                totalt = oppsummertTrygdetid.totalt
+            )
+        },
         grunnlag = grunnlag.map { it.toDto() }
     )
-}
 
-data class TrygdetidGrunnlagDto(
-    val bosted: String,
-    val periodeFra: String,
-    val periodeTil: String
+data class OppsummertTrygdetidDto(
+    val nasjonalTrygdetid: Int?,
+    val fremtidigTrygdetid: Int?,
+    val totalt: Int?
 )
 
-fun TrygdetidGrunnlagDto.fromDto(): TrygdetidGrunnlag {
-    return TrygdetidGrunnlag(
+fun OppsummertTrygdetidDto.fromDto(): OppsummertTrygdetid =
+    OppsummertTrygdetid(
+        nasjonalTrygdetid = nasjonalTrygdetid,
+        fremtidigTrygdetid = fremtidigTrygdetid,
+        totalt = totalt
+    )
+
+data class TrygdetidGrunnlagDto(
+    val type: String,
+    val bosted: String,
+    val periodeFra: LocalDate,
+    val periodeTil: LocalDate
+)
+
+fun TrygdetidGrunnlagDto.fromDto(): TrygdetidGrunnlag =
+    TrygdetidGrunnlag(
+        TrygdetidType.valueOf(type),
         bosted,
         periodeFra,
         periodeTil
     )
-}
 
 fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
     return TrygdetidGrunnlagDto(
+        type.name,
         bosted,
         periodeFra,
         periodeTil
     )
 }
-
-data class OppsummertTrygdetidDto(
-    val verdi: Int
-)

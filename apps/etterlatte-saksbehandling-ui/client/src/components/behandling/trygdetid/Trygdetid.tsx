@@ -51,7 +51,15 @@ export const Trygdetid = () => {
 
       {trygdetid && (
         <>
+          <ContentHeader>
+            <Heading spacing size="medium" level="3">
+              Grunnlag trygdetid
+            </Heading>
+          </ContentHeader>
           <TrygdetidGrunnlag trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
+
+          <TrygdetidGrunnlag trygdetid={trygdetid} setTrygdetid={setTrygdetid} erFremtidigTrygdetid={true} />
+
           <TrygdetidOppsummert trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
         </>
       )}

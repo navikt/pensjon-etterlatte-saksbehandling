@@ -13,7 +13,15 @@ type Props = {
 }
 export const TrygdetidOppsummert: React.FC<Props> = ({ trygdetid, setTrygdetid }) => {
   const { behandlingId: behandlingsId } = useParams()
-  const [oppsummertTrygdetid, setOppsummertTrygdetid] = useState<number | null>(trygdetid.oppsummertTrygdetid)
+  const [nasjonalTrygdetid, setNasjonalTrygdetid] = useState<number | null>(
+    trygdetid.oppsummertTrygdetid == null ? null : trygdetid.oppsummertTrygdetid.nasjonalTrygdetid
+  )
+  const [fremtidigTrygdetid, setFremtidigTrygdetid] = useState<number | null>(
+    trygdetid.oppsummertTrygdetid == null ? null : trygdetid.oppsummertTrygdetid.fremtidigTrygdetid
+  )
+  const [oppsummertTrygdetid, setOppsummertTrygdetid] = useState<number | null>(
+    trygdetid.oppsummertTrygdetid == null ? null : trygdetid.oppsummertTrygdetid.totalt
+  )
   const [oppsummertTrygdetidStatus, requestLagreOppsummertTrygdetid] = useApiCall(lagreOppsummertTrygdetid)
 
   const onSubmit = (e: FormEvent) => {
@@ -23,7 +31,11 @@ export const TrygdetidOppsummert: React.FC<Props> = ({ trygdetid, setTrygdetid }
     requestLagreOppsummertTrygdetid(
       {
         behandlingsId,
-        oppsummertTrygdetid,
+        oppsummertTrygdetid: {
+          nasjonalTrygdetid: nasjonalTrygdetid,
+          fremtidigTrygdetid: fremtidigTrygdetid,
+          totalt: oppsummertTrygdetid,
+        },
       },
       (respons) => {
         setTrygdetid(respons)
@@ -40,7 +52,19 @@ export const TrygdetidOppsummert: React.FC<Props> = ({ trygdetid, setTrygdetid }
         <TrygdetidForm onSubmit={onSubmit}>
           <FormWrapper>
             <TextField
-              label="Legg til trygdetid"
+              label="Nasjonal trygdetid"
+              size="small"
+              type="number"
+              onChange={(e) => setNasjonalTrygdetid(Number(e.target.value))}
+            />
+            <TextField
+              label="Fremtidig trygdetid"
+              size="small"
+              type="number"
+              onChange={(e) => setFremtidigTrygdetid(Number(e.target.value))}
+            />
+            <TextField
+              label="Sum trygdetid"
               size="small"
               type="number"
               onChange={(e) => setOppsummertTrygdetid(Number(e.target.value))}

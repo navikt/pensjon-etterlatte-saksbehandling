@@ -2,7 +2,7 @@ import { ContentHeader } from '~shared/styled'
 import { Button, Heading, TextField } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { ITrygdetid, ITrygdetidGrunnlag, lagreTrygdetidgrunnlag } from '~shared/api/trygdetid'
+import { ITrygdetid, ITrygdetidGrunnlag, ITrygdetidType, lagreTrygdetidgrunnlag } from '~shared/api/trygdetid'
 import React, { FormEvent, useRef, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
@@ -13,11 +13,13 @@ import { useParams } from 'react-router-dom'
 type Props = {
   trygdetid: ITrygdetid
   setTrygdetid: (trygdetid: ITrygdetid) => void
+  erFremtidigTrygdetid?: boolean
 }
-export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid }) => {
+export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, erFremtidigTrygdetid = false }) => {
   const { behandlingId } = useParams()
 
   const [nyttTrygdetidgrunnlag, setNyttTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>({
+    type: erFremtidigTrygdetid ? ITrygdetidType.FREMTIDIG_TRYGDETID : ITrygdetidType.NASJONAL_TRYGDETID,
     bosted: '',
     periodeFra: null,
     periodeTil: null,
@@ -41,16 +43,24 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid }) 
     )
   }
 
+  const relevantGrunnlag = (grunnlag: ITrygdetidGrunnlag) => {
+    if (erFremtidigTrygdetid) {
+      return grunnlag.type === ITrygdetidType.FREMTIDIG_TRYGDETID
+    } else {
+      return grunnlag.type !== ITrygdetidType.FREMTIDIG_TRYGDETID
+    }
+  }
+
   return (
     <>
       <ContentHeader>
-        <Heading spacing size="medium" level="2">
-          Trygdetidgrunnlag
+        <Heading spacing size="medium" level="3">
+          {erFremtidigTrygdetid ? 'Fremtidig trygdetid' : 'Faktisk trygdetid'}
         </Heading>
       </ContentHeader>
       <Innhold>
         <OppsummeringListe>
-          {trygdetid.grunnlag.map((grunnlag) => (
+          {trygdetid.grunnlag.filter(relevantGrunnlag).map((grunnlag) => (
             <li key={grunnlag.bosted}>
               {grunnlag.bosted} fra {grunnlag.periodeTil} til {grunnlag.periodeTil}
             </li>

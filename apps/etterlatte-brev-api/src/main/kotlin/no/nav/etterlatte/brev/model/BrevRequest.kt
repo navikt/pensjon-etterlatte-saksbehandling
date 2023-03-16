@@ -34,7 +34,9 @@ data class Mottaker(
         // todo: Må legge til støtte for utenlandske adresser. Er kun adresselinje 1 hvis innland. linje 2 og 3 hvis utland
         fun fraRegoppslag(regoppslag: RegoppslagResponseDTO) = Mottaker(
             navn = regoppslag.navn,
-            adresse = regoppslag.adresse.adresselinje1,
+            adresse = """
+                ${regoppslag.adresse.adresselinje1}, ${regoppslag.adresse.poststed} ${regoppslag.adresse.postnummer}
+            """.trimIndent(),
             postnummer = regoppslag.adresse.postnummer,
             poststed = regoppslag.adresse.poststed,
             land = regoppslag.adresse.land

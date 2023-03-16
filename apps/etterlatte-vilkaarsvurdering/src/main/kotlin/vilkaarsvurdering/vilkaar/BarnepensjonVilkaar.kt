@@ -25,24 +25,6 @@ object BarnepensjonVilkaar {
         yrkesskadeAvdoed()
     )
 
-    fun loependevilkaar() = listOf(
-        formaal()
-    )
-
-    private fun formaal() = Vilkaar(
-        Delvilkaar(
-            type = VilkaarType.BP_FORMAAL,
-            tittel = "Formål",
-            beskrivelse =
-            "Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde.",
-            lovreferanse = Lovreferanse(
-                paragraf = "§ 18-1",
-                ledd = 1,
-                lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-1"
-            )
-        )
-    )
-
     private fun doedsfallForelder() = Vilkaar(
         Delvilkaar(
             type = VilkaarType.BP_DOEDSFALL_FORELDER,

@@ -119,11 +119,11 @@ data class Avdoed(
 }
 
 data class Verge(
-    override val fornavn: Opplysning<String>,
-    override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>
-) : Person {
-    override val type = PersonType.VERGE
+    val fornavn: Opplysning<String>?,
+    val etternavn: Opplysning<String>?,
+    val foedselsnummer: Opplysning<Foedselsnummer>?
+) {
+    val type = PersonType.VERGE
 }
 
 data class Samboer(

@@ -35,7 +35,7 @@ data class Mottaker(
         fun fraRegoppslag(regoppslag: RegoppslagResponseDTO) = Mottaker(
             navn = regoppslag.navn,
             adresse = """
-                ${regoppslag.adresse.adresselinje1}, ${regoppslag.adresse.poststed} ${regoppslag.adresse.postnummer}
+                ${regoppslag.adresse.adresselinje1}, ${regoppslag.adresse.postnummer} ${regoppslag.adresse.poststed?.capitalize()}
             """.trimIndent(),
             postnummer = regoppslag.adresse.postnummer,
             poststed = regoppslag.adresse.poststed,
@@ -43,6 +43,8 @@ data class Mottaker(
         )
     }
 }
+
+fun String.capitalize(): String = this.lowercase().replaceFirstChar { char -> char.titlecase() }
 
 data class Avsender(
     val kontor: String,

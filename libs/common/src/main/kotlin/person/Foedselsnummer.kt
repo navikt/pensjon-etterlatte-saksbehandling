@@ -40,7 +40,15 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
 
         val fnrDay = value.slice(0 until 2).toInt()
         val day = if (isDNumber()) fnrDay - 40 else fnrDay
-        val month = if (isHNumber()) fnrMonth - 40 else fnrMonth
+
+        val month =
+            if (isTestNorgeNumber()) {
+                fnrMonth - 80
+            } else if (isHNumber()) {
+                fnrMonth - 40
+            } else {
+                fnrMonth
+            }
 
         return LocalDate.of(getYearOfBirth(), month, day)
     }
@@ -90,7 +98,13 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
      *
      * Brukes også for identer i test som er opprettet som "NAV syntetisk" i Dolly
      */
-    private fun isHNumber(): Boolean = Character.getNumericValue(value[2]) >= 4
+    private fun isHNumber(): Boolean = Character.getNumericValue(value[2]) in 4..7
+
+    /**
+     * Sjekker om fødselsnummeret er av typen "Syntetisk bruker fra Skatteetaten".
+     */
+    private fun isTestNorgeNumber(): Boolean = Character.getNumericValue(value[2]) >= 8
+
 
     /**
      * Sjekker om fødselsnummeret er av typen "Felles Nasjonalt Hjelpenummer".

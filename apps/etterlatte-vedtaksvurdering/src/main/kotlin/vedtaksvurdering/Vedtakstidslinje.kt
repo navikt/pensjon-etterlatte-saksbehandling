@@ -1,19 +1,18 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
-import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 
 class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     private val iverksatteVedtak = hentIverksatteVedtak()
 
-    fun erLoependePaa(dato: LocalDate): LoependeYtelseDTO {
-        if (iverksatteVedtak.isEmpty()) return LoependeYtelseDTO(false, dato)
+    fun erLoependePaa(dato: LocalDate): LoependeYtelse {
+        if (iverksatteVedtak.isEmpty()) return LoependeYtelse(false, dato)
 
         val erLoepende =
             hentSenesteVedtakPaaDato(dato)?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
-        return LoependeYtelseDTO(
+        return LoependeYtelse(
             erLoepende = erLoepende,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato
         )

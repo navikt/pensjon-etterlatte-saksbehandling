@@ -14,6 +14,7 @@ import rapidsandrivers.DATO_KEY
 import rapidsandrivers.dato
 import rapidsandrivers.sakId
 import rapidsandrivers.tilbakestilteBehandlinger
+import rapidsandrivers.withFeilhaandtering
 
 internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
@@ -31,14 +32,16 @@ internal class Reguleringsforespoersel(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            logger.info("Leser reguleringsfoerespoersel for dato ${packet.dato}")
+            withFeilhaandtering(packet, context, REGULERING_EVENT_NAME) {
+                logger.info("Leser reguleringsfoerespoersel for dato ${packet.dato}")
 
-            val tilbakemigrerte = behandlingService.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
-            behandlingService.hentAlleSaker().saker.forEach {
-                packet.eventName = FINN_LOEPENDE_YTELSER
-                packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
-                packet.sakId = it.id
-                context.publish(packet.toJson())
+                val tilbakemigrerte = behandlingService.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
+                behandlingService.hentAlleSaker().saker.forEach {
+                    packet.eventName = FINN_LOEPENDE_YTELSER
+                    packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
+                    packet.sakId = it.id
+                    context.publish(packet.toJson())
+                }
             }
         }
 }

@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.time.LocalDate
 import java.util.*
 
@@ -72,6 +73,17 @@ class TrygdetidRepository(private val dataSource: InMemoryDs) {
                 it[bosted] = trygdetidGrunnlag.bosted
                 it[periodeFra] = LocalDate.parse(trygdetidGrunnlag.periodeFra)
                 it[periodeTil] = LocalDate.parse(trygdetidGrunnlag.periodeTil)
+            }
+        }
+        return hentTrygdtidNotNull(behandlingsId)
+    }
+
+    fun lagreOppsummertTrygdetid(behandlingsId: UUID, oppsummertTrygdetid: Int): Trygdetid {
+        transaction {
+            dataSource.trygdetidTable.update({
+                dataSource.trygdetidTable.behandlingsId eq behandlingsId
+            }) {
+                it[this.oppsummertTrygdetid] = oppsummertTrygdetid
             }
         }
         return hentTrygdtidNotNull(behandlingsId)

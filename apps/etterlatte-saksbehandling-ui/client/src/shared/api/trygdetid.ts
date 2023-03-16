@@ -1,17 +1,30 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 
-export const hentTrygdetid = async (): Promise<ApiResponse<ITrygdetid>> => apiClient.get<ITrygdetid>(`/trygdetid`)
-export const lagreTrygdetidgrunnlag = async (
+export const hentTrygdetid = async (behandlingsId: string): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.get<ITrygdetid>(`/trygdetid/${behandlingsId}`)
+
+export const opprettTrygdetid = async (behandlingsId: string): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid/${behandlingsId}`, {})
+
+export const lagreTrygdetidgrunnlag = async (args: {
+  behandlingsId: string
   nyttTrygdetidgrunnlag: ITrygdetidGrunnlag
-): Promise<ApiResponse<ITrygdetidGrunnlag>> =>
-  apiClient.post<ITrygdetidGrunnlag>(`/trygdetid/grunnlag`, { ...nyttTrygdetidgrunnlag })
+}): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag`, { ...args.nyttTrygdetidgrunnlag })
+
+export const lagreOppsummertTrygdetid = async (args: {
+  behandlingsId: string
+  oppsummertTrygdetid: number
+}): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid/${args.behandlingsId}/oppsummert`, { verdi: args.oppsummertTrygdetid })
 
 export interface ITrygdetid {
+  oppsummertTrygdetid: number | null
   grunnlag: ITrygdetidGrunnlag[]
 }
 
 export interface ITrygdetidGrunnlag {
   bosted: string
-  periodeTil: string
-  periodeFra: string
+  periodeTil: string | null
+  periodeFra: string | null
 }

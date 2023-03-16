@@ -52,6 +52,16 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
                 call.respond(trygdetid.toDto())
             }
         }
+
+        post("/oppsummert") {
+            // withBehandlingId() TODO
+            withParam(BEHANDLINGSID_CALL_PARAMETER) {
+                logger.info("Lagre oppsummert trygdetid")
+                val oppsummertTrygdetid = call.receive<OppsummertTrygdetidDto>()
+                val trygdetid = trygdetidService.lagreOppsummertTrygdetid(behandlingsId, oppsummertTrygdetid.verdi)
+                call.respond(trygdetid.toDto())
+            }
+        }
     }
 }
 
@@ -88,3 +98,7 @@ fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
         periodeTil
     )
 }
+
+data class OppsummertTrygdetidDto(
+    val verdi: Int
+)

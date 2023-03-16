@@ -70,7 +70,8 @@ internal class BehandlingDaoReguleringTest {
             opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak, status = status)
 
         behandlingRepo.opprettBehandling(opprettBehandling)
-        behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+        val trengerNyBeregning =
+            behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
 
         with(behandlingRepo.hentBehandling(opprettBehandling.id)) {
             val expected = BehandlingStatus.VILKAARSVURDERT
@@ -78,6 +79,7 @@ internal class BehandlingDaoReguleringTest {
 
             assertEquals(expected, actual)
         }
+        assertEquals(listOf(sak), trengerNyBeregning.ider)
     }
 
     private fun hentStatuser() = BehandlingStatus.skalIkkeOmregnesVedGRegulering()

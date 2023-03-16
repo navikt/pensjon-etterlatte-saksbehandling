@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import java.util.*
 
@@ -23,7 +24,7 @@ interface Behandling {
     fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
     fun hentAlleSaker(): Saker
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
-    fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
+    fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe
 }
 
 class BehandlingsService(
@@ -75,11 +76,11 @@ class BehandlingsService(
         }
     }
 
-    override fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert() {
+    override fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe {
         return runBlocking {
             behandling_app.post("$url/behandlinger/settTilbakeTilVilkaarsvurdert") {
                 contentType(ContentType.Application.Json)
-            }
+            }.body()
         }
     }
 

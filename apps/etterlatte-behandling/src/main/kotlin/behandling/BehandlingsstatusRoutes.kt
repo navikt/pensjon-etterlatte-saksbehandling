@@ -100,8 +100,9 @@ internal fun Route.behandlingsstatusRoutes(
 
     route("/behandlinger") {
         post("/settTilbakeTilVilkaarsvurdert") {
-            behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
-            call.respond(HttpStatusCode.OK)
+            val tilbakestilteBehandlinger =
+                behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+            call.respond(tilbakestilteBehandlinger)
         }
     }
 }

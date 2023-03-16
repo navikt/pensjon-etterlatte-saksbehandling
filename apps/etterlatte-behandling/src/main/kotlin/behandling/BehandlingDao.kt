@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -153,17 +154,17 @@ class BehandlingDao(private val connection: () -> Connection) {
         return stmt.executeQuery().behandlingsListe()
     }
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning() {
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
         val stmt = connection().prepareStatement(
             """
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
                 WHERE status not in (${
-            BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
-            })
+                BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
+            }) RETURNING sak_id
             """.trimIndent()
         )
-        stmt.executeUpdate()
+        return SakIDListe(stmt.executeQuery().toList { getLong("sak_id") })
     }
 
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(

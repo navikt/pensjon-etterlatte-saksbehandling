@@ -12,6 +12,7 @@ const val BEREGNING_KEY = "beregning"
 const val DATO_KEY = "dato"
 const val HENDELSE_DATA_KEY = "hendelse_data"
 const val BEHANDLING_VI_OMREGNER_FRA_KEY = "behandling_vi_omregner_fra"
+const val TILBAKESTILT_KEY = "false"
 
 var JsonMessage.sakId: Long
     get() = this[SAK_ID_KEY].asLong()
@@ -29,4 +30,10 @@ var JsonMessage.dato: LocalDate
     get() = this[DATO_KEY].asLocalDate()
     set(name) {
         this[DATO_KEY] = name
+    }
+
+var JsonMessage.tilbakestilt: Boolean
+    get() = this[TILBAKESTILT_KEY].asBoolean()
+    set(name) {
+        this[TILBAKESTILT_KEY] = name
     }

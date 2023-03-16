@@ -140,7 +140,7 @@ internal object BarnepensjonUthenter {
         }
     }
 
-    fun soeker(
+    private fun soeker(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out SoekerBarnSoeknad> {
@@ -179,7 +179,7 @@ internal object BarnepensjonUthenter {
         )
     }
 
-    fun gjenlevendeForelder(
+    private fun gjenlevendeForelder(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out GjenlevendeForelderSoeknad>? {

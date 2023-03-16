@@ -30,30 +30,81 @@ internal class SoeknadStatistikkRiverTest {
     }
 
     @Test
-    fun `melding om soeknadStatistikk leses ut og håndteres`() {
+    fun `melding om soeknadStatistikk for ugyldig for behandling leses ut og håndteres`() {
         val soeknadStatistikk: SoeknadStatistikk = mockk()
+        val soeknadId = 1337L
+        val gyldigForBehandling = false
+        val sakType = SakType.BARNEPENSJON
+        val feilendeKriterier = listOf("SØKNADEN ER HJEMSØKT")
         every {
             soeknadStatistikkService.registrerSoeknadStatistikk(
-                soeknadId = any(),
-                gyldigForBehandling = any(),
-                sakType = any(),
-                feilendeKriterier = any()
+                soeknadId,
+                gyldigForBehandling,
+                sakType,
+                feilendeKriterier
             )
         } returns soeknadStatistikk
+
         val message = JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
                 CORRELATION_ID_KEY to UUID.randomUUID(),
-                SOEKNAD_ID_KEY to 1337L,
-                SAK_TYPE_KEY to SakType.BARNEPENSJON.toString(),
-                GYLDIG_FOR_BEHANDLING_KEY to false,
-                FEILENDE_KRITERIER_KEY to listOf("SØKNADEN ER HJEMSØKT")
+                SOEKNAD_ID_KEY to soeknadId,
+                SAK_TYPE_KEY to sakType,
+                GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling,
+                FEILENDE_KRITERIER_KEY to feilendeKriterier
             )
         ).toJson()
 
         val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
 
         Assertions.assertEquals(0, inspector.size) // Skal ikke sende ut noen nye kafka-meldinger
-        verify(exactly = 1) { soeknadStatistikkService.registrerSoeknadStatistikk(any(), any(), any(), any()) }
+        verify(exactly = 1) {
+            soeknadStatistikkService.registrerSoeknadStatistikk(
+                soeknadId,
+                gyldigForBehandling,
+                sakType,
+                feilendeKriterier
+            )
+        }
+    }
+
+    @Test
+    fun `melding om soeknadStatistikk for gyldig for behandling leses ut og håndteres`() {
+        val soeknadStatistikk: SoeknadStatistikk = mockk()
+        val soeknadId = 1337L
+        val gyldigForBehandling = true
+        val sakType = SakType.BARNEPENSJON
+        val feilendeKriterier = null
+        every {
+            soeknadStatistikkService.registrerSoeknadStatistikk(
+                soeknadId,
+                gyldigForBehandling,
+                sakType,
+                feilendeKriterier
+            )
+        } returns soeknadStatistikk
+
+        val message = JsonMessage.newMessage(
+            mapOf(
+                EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
+                CORRELATION_ID_KEY to UUID.randomUUID(),
+                SOEKNAD_ID_KEY to soeknadId,
+                SAK_TYPE_KEY to sakType,
+                GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling
+            )
+        ).toJson()
+
+        val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
+
+        Assertions.assertEquals(0, inspector.size) // Skal ikke sende ut noen nye kafka-meldinger
+        verify(exactly = 1) {
+            soeknadStatistikkService.registrerSoeknadStatistikk(
+                soeknadId,
+                gyldigForBehandling,
+                sakType,
+                feilendeKriterier
+            )
+        }
     }
 }

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.statistikk.river
 
+import com.fasterxml.jackson.databind.node.MissingNode
+import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -42,9 +44,9 @@ class SoeknadStatistikkRiver(
                 val soeknadId = packet[SOEKNAD_ID_KEY].longValue()
                 val gyldigForBehandling = packet[GYLDIG_FOR_BEHANDLING_KEY].booleanValue()
                 val sakType = enumValueOf<SakType>(packet[SAK_TYPE_KEY].textValue())
-                val feilendeKriterier = when (val feilendeKriterier = packet[FEILENDE_KRITERIER_KEY].textValue()) {
-                    null -> null
-                    else -> objectMapper.readValue<List<String>>(feilendeKriterier)
+                val feilendeKriterier = when (val feilendeKriterier = packet[FEILENDE_KRITERIER_KEY]) {
+                    is MissingNode, is NullNode -> null
+                    else -> objectMapper.readValue<List<String>>(feilendeKriterier.toString())
                 }
                 statistikkService.registrerSoeknadStatistikk(soeknadId, gyldigForBehandling, sakType, feilendeKriterier)
             } catch (e: Exception) {

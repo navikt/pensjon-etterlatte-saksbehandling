@@ -42,6 +42,7 @@ internal class InnsendtSoeknadRiver(
             validate { it.requireKey(SoeknadInnsendt.adressebeskyttelseKey) }
             validate { it.requireKey(SoeknadInnsendt.fnrSoekerKey) }
             validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
+            validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
         }.register(this)
     }
 

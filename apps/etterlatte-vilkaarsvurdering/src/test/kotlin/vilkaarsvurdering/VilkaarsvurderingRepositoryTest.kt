@@ -118,7 +118,7 @@ internal class VilkaarsvurderingRepositoryTest {
     @Test
     fun `skal sette resultat paa vilkaar`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
-        val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.ALDER_BARN)
+        val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_ALDER_BARN)
         val vurdertVilkaar = VurdertVilkaar(
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
@@ -127,9 +127,9 @@ internal class VilkaarsvurderingRepositoryTest {
                 saksbehandler = "saksbehandler1"
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
-            unntaksvilkaar = vilkaar.unntaksvilkaar?.let {
+            unntaksvilkaar = vilkaar.unntaksvilkaar.let {
                 val unntaksvilkaar =
-                    it.first { delvilkaar -> delvilkaar.type == VilkaarType.ALDER_BARN_UNNTAK_UTDANNING }
+                    it.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
                 VilkaarTypeOgUtfall(unntaksvilkaar.type, Utfall.IKKE_VURDERT)
             }
         )
@@ -147,7 +147,7 @@ internal class VilkaarsvurderingRepositoryTest {
                 saksbehandler shouldBe vurdertVilkaar.vurdering.saksbehandler
             }
             it.hovedvilkaar.resultat shouldBe Utfall.IKKE_VURDERT
-            it.unntaksvilkaar?.first { delvilkaar -> delvilkaar.type == VilkaarType.ALDER_BARN_UNNTAK_UTDANNING }
+            it.unntaksvilkaar.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
                 ?.resultat shouldBe Utfall.IKKE_VURDERT
         }
     }
@@ -155,7 +155,7 @@ internal class VilkaarsvurderingRepositoryTest {
     @Test
     fun `skal slette resultat paa vilkaar`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
-        val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.ALDER_BARN)
+        val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_ALDER_BARN)
         val vurdertVilkaar = VurdertVilkaar(
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
@@ -164,9 +164,9 @@ internal class VilkaarsvurderingRepositoryTest {
                 saksbehandler = "saksbehandler1"
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
-            unntaksvilkaar = vilkaar.unntaksvilkaar?.let {
+            unntaksvilkaar = vilkaar.unntaksvilkaar.let {
                 val unntaksvilkaar =
-                    it.first { delvilkaar -> delvilkaar.type == VilkaarType.ALDER_BARN_UNNTAK_UTDANNING }
+                    it.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
                 VilkaarTypeOgUtfall(unntaksvilkaar.type, Utfall.IKKE_VURDERT)
             }
         )
@@ -185,15 +185,15 @@ internal class VilkaarsvurderingRepositoryTest {
         oppdatertVilkaarsvurdering.vilkaar.first { it.id == vilkaar.id }.let {
             it.vurdering shouldBe null
             it.hovedvilkaar.resultat shouldBe null
-            it.unntaksvilkaar?.first { delvilkaar -> delvilkaar.type == VilkaarType.ALDER_BARN_UNNTAK_UTDANNING }
-                ?.resultat shouldBe null
+            it.unntaksvilkaar.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
+                .resultat shouldBe null
         }
     }
 
     @Test
     fun `når vi setter et ikke-oppfylt vilkaar oppfylt, skal resultatet fjernes fra alle unntakene`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
-        val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORUTGAAENDE_MEDLEMSKAP)
+        val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)
         val vurdertVilkaarIkkeOppfylt = VurdertVilkaar(
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
@@ -203,7 +203,7 @@ internal class VilkaarsvurderingRepositoryTest {
             ),
             hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
             unntaksvilkaar = VilkaarTypeOgUtfall(
-                VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR,
+                VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR,
                 Utfall.OPPFYLT
             )
         )
@@ -229,16 +229,16 @@ internal class VilkaarsvurderingRepositoryTest {
 
         val resultatVilkaar = vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
             .vilkaar
-            .first { it.hovedvilkaar.type == VilkaarType.FORUTGAAENDE_MEDLEMSKAP }
+            .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
 
         resultatVilkaar.hovedvilkaar.resultat shouldBe Utfall.OPPFYLT
-        resultatVilkaar.unntaksvilkaar!!.forEach { it.resultat shouldBe null }
+        resultatVilkaar.unntaksvilkaar.forEach { it.resultat shouldBe null }
     }
 
     @Test
     fun `når vi setter et vilkaar til ikke oppfylt, og ingen unntak treffer, setter vi alle unntak til ikke oppfylt`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
-        val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORUTGAAENDE_MEDLEMSKAP)
+        val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)
         val vurdertVilkaarIkkeOppfylt = VurdertVilkaar(
             vilkaarId = vilkaar?.id!!,
             vurdering = VilkaarVurderingData(
@@ -256,10 +256,10 @@ internal class VilkaarsvurderingRepositoryTest {
 
         val resultatVilkaar = vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
             .vilkaar
-            .first { it.hovedvilkaar.type == VilkaarType.FORUTGAAENDE_MEDLEMSKAP }
+            .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
 
         resultatVilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
-        resultatVilkaar.unntaksvilkaar!!.forEach { it.resultat shouldBe Utfall.IKKE_OPPFYLT }
+        resultatVilkaar.unntaksvilkaar.forEach { it.resultat shouldBe Utfall.IKKE_OPPFYLT }
     }
 
     companion object {

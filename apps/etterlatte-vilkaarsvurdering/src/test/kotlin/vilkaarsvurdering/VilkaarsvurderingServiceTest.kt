@@ -114,7 +114,7 @@ internal class VilkaarsvurderingServiceTest {
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
         vilkaarsvurdering.vilkaar shouldHaveSize 5
-        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.ALDER_BARN }.let { vilkaar ->
+        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN }.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
             vilkaar.grunnlag!! shouldHaveSize 2
 
@@ -137,8 +137,8 @@ internal class VilkaarsvurderingServiceTest {
 
         val vurdering = vilkaarsVurderingData()
         val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORTSATT_MEDLEMSKAP)?.id!!,
-            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.FORTSATT_MEDLEMSKAP, resultat = Utfall.OPPFYLT),
+            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
+            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.BP_FORTSATT_MEDLEMSKAP, resultat = Utfall.OPPFYLT),
             vurdering = vurdering
         )
 
@@ -148,7 +148,7 @@ internal class VilkaarsvurderingServiceTest {
 
             vilkaarsvurderingOppdatert shouldNotBe null
             vilkaarsvurderingOppdatert.vilkaar
-                .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
+                .first { it.hovedvilkaar.type == VilkaarType.BP_FORTSATT_MEDLEMSKAP }
                 .let { vilkaar ->
                     vilkaar.hovedvilkaar.resultat shouldBe Utfall.OPPFYLT
                     vilkaar.unntaksvilkaar?.forEach {
@@ -169,10 +169,13 @@ internal class VilkaarsvurderingServiceTest {
 
         val vurdering = vilkaarsVurderingData()
         val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORTSATT_MEDLEMSKAP)?.id!!,
-            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.FORTSATT_MEDLEMSKAP, resultat = Utfall.IKKE_OPPFYLT),
+            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
+            hovedvilkaar = VilkaarTypeOgUtfall(
+                type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
+                resultat = Utfall.IKKE_OPPFYLT
+            ),
             unntaksvilkaar = VilkaarTypeOgUtfall(
-                type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRE_MINST_20_AAR_SAMLET_BOTID,
+                type = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRE_MINST_20_AAR_SAMLET_BOTID,
                 resultat = Utfall.OPPFYLT
             ),
             vurdering = vurdering
@@ -183,7 +186,7 @@ internal class VilkaarsvurderingServiceTest {
 
             vilkaarsvurderingOppdatert shouldNotBe null
             vilkaarsvurderingOppdatert.vilkaar
-                .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
+                .first { it.hovedvilkaar.type == VilkaarType.BP_FORTSATT_MEDLEMSKAP }
                 .let { vilkaar ->
                     vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
                     val unntaksvilkaar =
@@ -205,8 +208,11 @@ internal class VilkaarsvurderingServiceTest {
 
         val vurdering = vilkaarsVurderingData()
         val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORTSATT_MEDLEMSKAP)?.id!!,
-            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.FORTSATT_MEDLEMSKAP, resultat = Utfall.IKKE_OPPFYLT),
+            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
+            hovedvilkaar = VilkaarTypeOgUtfall(
+                type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
+                resultat = Utfall.IKKE_OPPFYLT
+            ),
             vurdering = vurdering
         )
 
@@ -215,7 +221,7 @@ internal class VilkaarsvurderingServiceTest {
 
             vilkaarsvurderingOppdatert shouldNotBe null
             vilkaarsvurderingOppdatert.vilkaar
-                .first { it.hovedvilkaar.type == VilkaarType.FORTSATT_MEDLEMSKAP }
+                .first { it.hovedvilkaar.type == VilkaarType.BP_FORTSATT_MEDLEMSKAP }
                 .let { vilkaar ->
                     vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
                     vilkaar.unntaksvilkaar?.forEach {
@@ -237,8 +243,11 @@ internal class VilkaarsvurderingServiceTest {
 
         val vurdering = vilkaarsVurderingData()
         val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.FORTSATT_MEDLEMSKAP)?.id!!,
-            hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.FORTSATT_MEDLEMSKAP, resultat = Utfall.IKKE_OPPFYLT),
+            vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
+            hovedvilkaar = VilkaarTypeOgUtfall(
+                type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
+                resultat = Utfall.IKKE_OPPFYLT
+            ),
             vurdering = vurdering
         )
 
@@ -272,9 +281,9 @@ internal class VilkaarsvurderingServiceTest {
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
         vilkaarsvurdering.vilkaar shouldHaveSize 1
-        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.FORMAAL }.let { vilkaar ->
+        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_FORMAAL }.let { vilkaar ->
             vilkaar.grunnlag shouldBe emptyList()
-            vilkaar.hovedvilkaar.type shouldBe VilkaarType.FORMAAL
+            vilkaar.hovedvilkaar.type shouldBe VilkaarType.BP_FORMAAL
         }
     }
 

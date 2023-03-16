@@ -24,6 +24,13 @@ spec:
   azure:
     application:
       enabled: true
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-fordeler
+        databases:
+          - name: fordeling
+            envVarPrefix: DB
   replicas:
     cpuThresholdPercentage: 90
     max: 1

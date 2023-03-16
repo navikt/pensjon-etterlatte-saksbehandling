@@ -1,5 +1,9 @@
 package no.nav.etterlatte.libs.common.sak
 
-data class SakIDListe(val ider: List<Long>) {
-    fun contains(id: Long) = ider.contains(id)
+import java.util.*
+
+data class SakIDListe(private val ider: List<BehandlingOgSak>) {
+    fun behandlingerForSak(id: Long): List<UUID> = ider.filter { it.sakId == id }.map { it.behandlingId }
 }
+
+data class BehandlingOgSak(val behandlingId: UUID, val sakId: Long)

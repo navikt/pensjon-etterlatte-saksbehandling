@@ -31,6 +31,7 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -506,6 +507,18 @@ internal class VedtaksvurderingServiceTest {
             assertThrows<VedtakTilstandException> {
                 service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())
             }
+        }
+    }
+
+    @Test
+    fun `tilbakestill vedtak setter status tilbake til returnert`() {
+        val behandlingId = randomUUID()
+        runBlocking {
+            val oppretta = repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
+                .let { repository.fattVedtak(behandlingId, VedtakFattet(SAKSBEHANDLER_1, "0001", Tidspunkt.now())) }
+            Assertions.assertEquals(oppretta.status, VedtakStatus.FATTET_VEDTAK)
+            val tilbakestilt = service.tilbakestillIkkeIverksatteVedtak(behandlingId)
+            Assertions.assertEquals(tilbakestilt!!.status, VedtakStatus.RETURNERT)
         }
     }
 

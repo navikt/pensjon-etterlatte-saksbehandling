@@ -79,7 +79,7 @@ internal class BehandlingDaoReguleringTest {
 
             assertEquals(expected, actual)
         }
-        assertEquals(listOf(sak), trengerNyBeregning.ider)
+        assertEquals(listOf(opprettBehandling.id), trengerNyBeregning.behandlingerForSak(sak))
     }
 
     private fun hentStatuser() = BehandlingStatus.skalIkkeOmregnesVedGRegulering()

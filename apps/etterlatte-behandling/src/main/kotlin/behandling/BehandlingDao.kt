@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -19,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -161,10 +163,10 @@ class BehandlingDao(private val connection: () -> Connection) {
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
                 WHERE status not in (${
                 BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
-            }) RETURNING sak_id
+            }) RETURNING id, sak_id
             """.trimIndent()
         )
-        return SakIDListe(stmt.executeQuery().toList { getLong("sak_id") })
+        return SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
     }
 
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(

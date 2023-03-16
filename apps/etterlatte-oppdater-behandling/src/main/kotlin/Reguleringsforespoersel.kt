@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.dato
 import rapidsandrivers.sakId
-import rapidsandrivers.tilbakestilt
+import rapidsandrivers.tilbakestilteBehandlinger
 
 internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
@@ -36,7 +36,7 @@ internal class Reguleringsforespoersel(
             val tilbakemigrerte = behandlingService.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
             behandlingService.hentAlleSaker().saker.forEach {
                 packet.eventName = FINN_LOEPENDE_YTELSER
-                packet.tilbakestilt = tilbakemigrerte.contains(it.id)
+                packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
                 packet.sakId = it.id
                 context.publish(packet.toJson())
             }

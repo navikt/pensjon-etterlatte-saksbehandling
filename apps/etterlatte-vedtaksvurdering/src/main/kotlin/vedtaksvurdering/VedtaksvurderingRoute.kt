@@ -8,6 +8,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
@@ -94,6 +95,14 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
                 logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
                 val loependeYtelse = service.sjekkOmVedtakErLoependePaaDato(sakId, dato)
                 call.respond(loependeYtelse)
+            }
+        }
+
+        patch("/tilbakestill/{$BEHANDLINGSID_CALL_PARAMETER}") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
+                service.tilbakestillIkkeIverksatteVedtak(behandlingId)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

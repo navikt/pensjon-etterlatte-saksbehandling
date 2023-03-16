@@ -7,15 +7,14 @@ import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import java.time.LocalDate
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.*
 
 data class OpprettVedtak(
@@ -50,6 +49,7 @@ data class Vedtak(
 ) {
     fun toDto() = VedtakDto(
         vedtakId = id,
+        status = status,
         virkningstidspunkt = virkningstidspunkt,
         sak = Sak(soeker.value, sakType, sakId),
         behandling = Behandling(behandlingType, behandlingId),
@@ -60,12 +60,6 @@ data class Vedtak(
     )
 }
 
-data class VedtakSammendrag(
-    val id: String,
-    val behandlingId: UUID,
-    val datoAttestert: ZonedDateTime?
-)
-
 data class VedtakHendelse(
     val vedtakId: Long,
     val inntruffet: Tidspunkt,
@@ -74,8 +68,4 @@ data class VedtakHendelse(
     val valgtBegrunnelse: String? = null
 )
 
-fun Vedtak.toVedtakSammendrag() = VedtakSammendrag(
-    id = id.toString(),
-    behandlingId = behandlingId,
-    datoAttestert = attestasjon?.tidspunkt?.toNorskTid()
-)
+data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate)

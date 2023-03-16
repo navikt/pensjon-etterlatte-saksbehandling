@@ -13,5 +13,6 @@ export interface IBehandlingInfo {
   datoAttestert?: string
   underkjentLogg?: IHendelse[]
   fattetLogg?: IHendelse[]
+  attestertLogg?: IHendelse[]
   rolle: string
 }

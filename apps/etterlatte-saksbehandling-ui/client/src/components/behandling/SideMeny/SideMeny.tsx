@@ -29,6 +29,7 @@ export const SideMeny = (props: { behandling: IDetaljertBehandling }) => {
     datoAttestert: behandling.datoAttestert,
     underkjentLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_UNDERKJENT),
     fattetLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_FATTET),
+    attestertLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_ATTESTERT),
     rolle: saksbehandler.rolle,
   }
 

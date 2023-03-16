@@ -116,7 +116,7 @@ class VedtaksvurderingService(
         return fattetVedtak
     }
 
-    suspend fun attesterVedtak(behandlingId: UUID, bruker: Bruker): Vedtak {
+    suspend fun attesterVedtak(behandlingId: UUID, kommentar: String, bruker: Bruker): Vedtak {
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -134,7 +134,8 @@ class VedtaksvurderingService(
             VedtakHendelse(
                 vedtakId = attestertVedtak.id,
                 inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
-                saksbehandler = attestertVedtak.attestasjon.attestant
+                saksbehandler = attestertVedtak.attestasjon.attestant,
+                kommentar = kommentar
             )
         )
 

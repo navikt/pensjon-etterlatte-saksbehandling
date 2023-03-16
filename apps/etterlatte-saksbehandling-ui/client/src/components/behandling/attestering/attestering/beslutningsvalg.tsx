@@ -2,8 +2,8 @@ import { RadioGroup, Radio } from '@navikt/ds-react'
 import { Underkjenn } from './underkjenn'
 import { RadioGroupWrapper } from '../styled'
 import { IBeslutning } from '../types'
-import { AttesterVedtak } from '~components/behandling/attestering/handinger/attesterVedtak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { Godkjenn } from '~components/behandling/attestering/attestering/godkjenn'
 
 type Props = {
   beslutning: IBeslutning | undefined
@@ -28,7 +28,7 @@ export const Beslutningsvalg: React.FC<Props> = ({ beslutning, setBeslutning, be
         </RadioGroup>
       </RadioGroupWrapper>
 
-      {beslutning === IBeslutning.godkjenn && <AttesterVedtak behandling={behandling} />}
+      {beslutning === IBeslutning.godkjenn && <Godkjenn behandling={behandling} />}
       {beslutning === IBeslutning.underkjenn && <Underkjenn behandling={behandling} />}
     </>
   )

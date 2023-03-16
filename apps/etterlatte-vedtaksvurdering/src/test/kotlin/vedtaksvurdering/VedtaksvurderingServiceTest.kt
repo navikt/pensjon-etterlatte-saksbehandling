@@ -294,7 +294,7 @@ internal class VedtaksvurderingServiceTest {
                 opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
             )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, "", attestant)
         }
 
         attestertVedtak shouldNotBe null
@@ -320,7 +320,7 @@ internal class VedtaksvurderingServiceTest {
             service.fattVedtak(behandlingId, saksbehandler)
 
             assertThrows<BehandlingstilstandException> {
-                service.attesterVedtak(behandlingId, attestant)
+                service.attesterVedtak(behandlingId, "", attestant)
             }
         }
     }
@@ -335,7 +335,7 @@ internal class VedtaksvurderingServiceTest {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
             assertThrows<VedtakTilstandException> {
-                service.attesterVedtak(behandlingId, saksbehandler)
+                service.attesterVedtak(behandlingId, "", saksbehandler)
             }
         }
     }
@@ -350,10 +350,10 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, "", attestant)
 
             assertThrows<VedtakTilstandException> {
-                service.attesterVedtak(behandlingId, attestant)
+                service.attesterVedtak(behandlingId, "", attestant)
             }
         }
     }
@@ -382,7 +382,7 @@ internal class VedtaksvurderingServiceTest {
                 opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
             )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, "", attestant)
             service.iverksattVedtak(behandlingId)
         }
 
@@ -417,7 +417,7 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, "", attestant)
             service.iverksattVedtak(behandlingId)
 
             assertThrows<VedtakTilstandException> {
@@ -501,7 +501,7 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, "", attestant)
 
             assertThrows<VedtakTilstandException> {
                 service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())

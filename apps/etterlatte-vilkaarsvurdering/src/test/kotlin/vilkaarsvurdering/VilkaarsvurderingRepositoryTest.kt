@@ -148,7 +148,7 @@ internal class VilkaarsvurderingRepositoryTest {
             }
             it.hovedvilkaar.resultat shouldBe Utfall.IKKE_VURDERT
             it.unntaksvilkaar.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
-                ?.resultat shouldBe Utfall.IKKE_VURDERT
+                .resultat shouldBe Utfall.IKKE_VURDERT
         }
     }
 
@@ -191,7 +191,7 @@ internal class VilkaarsvurderingRepositoryTest {
     }
 
     @Test
-    fun `når vi setter et ikke-oppfylt vilkaar oppfylt, skal resultatet fjernes fra alle unntakene`() {
+    fun `naar vi setter et ikke-oppfylt vilkaar oppfylt, skal resultatet fjernes fra alle unntakene`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)
         val vurdertVilkaarIkkeOppfylt = VurdertVilkaar(
@@ -236,7 +236,7 @@ internal class VilkaarsvurderingRepositoryTest {
     }
 
     @Test
-    fun `når vi setter et vilkaar til ikke oppfylt, og ingen unntak treffer, setter vi alle unntak til ikke oppfylt`() {
+    fun `naar vi setter et vilkaar til ikke oppfylt, og ingen unntak treffer, setter alle unntak til ikke oppfylt`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)
         val vurdertVilkaarIkkeOppfylt = VurdertVilkaar(

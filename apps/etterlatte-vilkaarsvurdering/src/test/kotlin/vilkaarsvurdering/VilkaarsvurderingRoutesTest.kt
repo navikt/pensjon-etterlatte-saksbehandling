@@ -311,7 +311,7 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(Utfall.IKKE_OPPFYLT, vurdertVilkaarPaaUnntak.hovedvilkaar.resultat)
             assertNotNull(vurdertVilkaarPaaUnntak.vurdering)
             assertNotNull(vurdertVilkaarPaaUnntak.unntaksvilkaar)
-            vurdertVilkaarPaaUnntak.unntaksvilkaar?.forEach {
+            vurdertVilkaarPaaUnntak.unntaksvilkaar.forEach {
                 if (it.type === VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR) {
                     assertEquals(Utfall.OPPFYLT, it.resultat)
                 } else {
@@ -365,7 +365,7 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(HttpStatusCode.OK, response.status)
             assertNull(vurdertVilkaarSlettet.vurdering)
             assertNull(vurdertVilkaarSlettet.hovedvilkaar.resultat)
-            vurdertVilkaarSlettet.unntaksvilkaar?.forEach {
+            vurdertVilkaarSlettet.unntaksvilkaar.forEach {
                 assertNull(it.resultat)
             }
         }

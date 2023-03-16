@@ -153,7 +153,11 @@ class VilkaarsvurderingService(
                     BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
 
                 BehandlingType.REVURDERING ->
-                    vilkaarRevurderingBarnepensjon(requireNotNull(behandling.revurderingsaarsak))
+                    vilkaarRevurderingBarnepensjon(
+                        requireNotNull(behandling.revurderingsaarsak),
+                        grunnlag,
+                        virkningstidspunkt
+                    )
 
                 BehandlingType.OMREGNING, BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
                     "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
@@ -197,10 +201,14 @@ class VilkaarsvurderingService(
         }
     }
 
-    private fun vilkaarRevurderingBarnepensjon(revurderingAarsak: RevurderingAarsak): List<Vilkaar> {
+    private fun vilkaarRevurderingBarnepensjon(
+        revurderingAarsak: RevurderingAarsak,
+        grunnlag: Grunnlag,
+        virkningstidspunkt: Virkningstidspunkt
+    ): List<Vilkaar> {
         logger.info("Vilkårsvurdering har revurderingsårsak $revurderingAarsak")
         return when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> BarnepensjonVilkaar.loependevilkaar()
+            RevurderingAarsak.SOEKER_DOD -> BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )

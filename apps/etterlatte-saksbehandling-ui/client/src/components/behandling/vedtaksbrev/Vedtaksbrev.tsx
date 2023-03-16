@@ -128,9 +128,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
                   <div className="info">
                     <Info>Navn</Info>
-                    <Tekst>
-                      {vedtaksbrev.mottaker?.adresse?.fornavn} {vedtaksbrev.mottaker?.adresse?.etternavn}
-                    </Tekst>
+                    <Tekst>{vedtaksbrev.mottaker?.adresse?.navn}</Tekst>
                   </div>
 
                   <div className="info">

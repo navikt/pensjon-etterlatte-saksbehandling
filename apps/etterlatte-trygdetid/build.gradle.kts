@@ -13,7 +13,7 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
 
-    implementation("com.h2database:h2:1.3.148")
+    implementation("com.h2database:h2:2.1.214")
     implementation("org.jetbrains.exposed:exposed:0.17.14")
 
     implementation(libs.ktor2.okhttp)

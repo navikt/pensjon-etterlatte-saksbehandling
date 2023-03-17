@@ -2,6 +2,7 @@ package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
+import no.nav.etterlatte.libs.common.person.firesifretAarstallFraTosifret
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -66,6 +67,24 @@ internal class FoedselsnummerTest {
         val hidentForDnummer = Foedselsnummer.of("51447721728")
         assertEquals(LocalDate.of(1981, 12, 18), hident.getBirthDate())
         assertEquals(LocalDate.of(1977, 4, 11), hidentForDnummer.getBirthDate())
+    }
+
+    @Test
+    fun `fødselsmåned for syntetiske skatteetaten identer finner fødselsdatoer riktig`() {
+        val skattdent = Foedselsnummer.of("30901699972")
+        assertEquals(LocalDate.of(2016, 10, 30), skattdent.getBirthDate())
+    }
+    @Test
+    fun `korrekt logikk for firesifret foedselsnummer fra fnr`() {
+
+        assertEquals(2019,firesifretAarstallFraTosifret(19,999))
+        assertEquals(1940,firesifretAarstallFraTosifret(40,999))
+        assertEquals(1919,firesifretAarstallFraTosifret(19,499))
+        assertEquals(1940,firesifretAarstallFraTosifret(40,1))
+        assertEquals(1855,firesifretAarstallFraTosifret(55,500))
+        assertEquals(1855,firesifretAarstallFraTosifret(55,749))
+        assertEquals(2039,firesifretAarstallFraTosifret(39,751))
+        assertEquals(1940,firesifretAarstallFraTosifret(40,900))
     }
 
     @Test

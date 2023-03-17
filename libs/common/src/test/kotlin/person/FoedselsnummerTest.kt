@@ -69,6 +69,12 @@ internal class FoedselsnummerTest {
     }
 
     @Test
+    fun `fødselsmåned for syntetiske skatteetaten identer finner fødselsdatoer riktig`() {
+        val skattdent = Foedselsnummer.of("30901699972")
+        assertEquals(LocalDate.of(2016, 10, 30), skattdent.getBirthDate())
+    }
+
+    @Test
     fun `Sjekk diverse ugyldige tekst verdier`() {
         assertThrows<InvalidFoedselsnummer> { Foedselsnummer.of("") }
         assertThrows<InvalidFoedselsnummer> { Foedselsnummer.of("hei") }

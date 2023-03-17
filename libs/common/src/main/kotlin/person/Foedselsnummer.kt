@@ -119,14 +119,14 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
     override fun toString(): String = this.value.replaceRange(6 until 11, "*****")
 }
 internal fun firesifretAarstallTosifret(year: Int, individnummer: Int): Int {
-    if (individnummer < 500) {
-        return (year + 1900)
+    return if (individnummer < 500) {
+        (year + 1900)
     } else if ((individnummer < 750) && (54 < year)) {
-        return (year + 1800)
+        (year + 1800)
     } else if ( year < 40) {
-        return year + 2000
+        year + 2000
     } else if (900 <= individnummer) {
-        return year + 1900
+        year + 1900
     } else {
         throw IllegalArgumentException("Ingen gyldig årstall funnet for individnummer $individnummer")
     }

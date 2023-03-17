@@ -1,8 +1,9 @@
-import { Button, Heading, Modal } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 
 export type Props = {
-  tekst: string
+  tittel: string
+  beskrivelse?: string
   tekstKnappJa: string
   tekstKnappNei: string
   onYesClick: () => void
@@ -11,7 +12,8 @@ export type Props = {
 }
 
 export const GeneriskModal: React.FC<Props> = ({
-  tekst,
+  tittel,
+  beskrivelse,
   tekstKnappJa,
   tekstKnappNei,
   onYesClick,
@@ -29,8 +31,9 @@ export const GeneriskModal: React.FC<Props> = ({
     >
       <Modal.Content>
         <Heading spacing level="1" id="modal-heading" size="medium">
-          {tekst}
+          {tittel}
         </Heading>
+        {beskrivelse && <BodyShort spacing>{beskrivelse}</BodyShort>}
         <ButtonWrapper>
           <Button variant="primary" size="medium" className="button" onClick={onYesClick}>
             {tekstKnappJa}
@@ -50,7 +53,6 @@ export const GeneriskModal: React.FC<Props> = ({
     </Modal>
   )
 }
-
 
 export const ButtonWrapper = styled.div`
   display: flex;

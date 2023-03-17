@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
+import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -53,7 +54,7 @@ internal class Fordeler(
             validate { it.requireKey(SoeknadInnsendt.adressebeskyttelseKey) }
             validate { it.requireKey(SoeknadInnsendt.fnrSoekerKey) }
             validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
-            validate { it.rejectKey(FordelerFordelt.sakIdKey) }
+            validate { it.rejectKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.rejectKey(FordelerFordelt.soeknadFordeltKey) }
             correlationId()
         }.register(this)
@@ -144,7 +145,7 @@ internal class Fordeler(
     }
 
     private fun JsonMessage.leggPaaSakId(sakId: Long): JsonMessage = this.apply {
-        this[FordelerFordelt.sakIdKey] = sakId
+        this[GyldigSoeknadVurdert.sakIdKey] = sakId
     }
 
     private fun JsonMessage.soeknadId(): Long = get(SoeknadInnsendt.lagretSoeknadIdKey).longValue()

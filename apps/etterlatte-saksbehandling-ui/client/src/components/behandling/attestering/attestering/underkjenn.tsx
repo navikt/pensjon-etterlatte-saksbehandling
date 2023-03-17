@@ -3,8 +3,9 @@ import { useState } from 'react'
 import { UnderkjennVedtak } from '../handinger/underkjennVedtak'
 import { BeslutningWrapper, Text } from '../styled'
 import { IReturType } from '../types'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-export const Underkjenn = ({ behandlingId }: { behandlingId: string }) => {
+export const Underkjenn = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const [tilbakemeldingFraAttestant, setTilbakemeldingFraAttestant] = useState('')
   const [returType, setReturType] = useState<IReturType>(IReturType.velg)
 
@@ -39,11 +40,7 @@ export const Underkjenn = ({ behandlingId }: { behandlingId: string }) => {
           autoComplete="off"
         />
       </div>
-      <UnderkjennVedtak
-        behandlingId={behandlingId}
-        kommentar={tilbakemeldingFraAttestant}
-        valgtBegrunnelse={returType}
-      />
+      <UnderkjennVedtak behandling={behandling} kommentar={tilbakemeldingFraAttestant} valgtBegrunnelse={returType} />
     </BeslutningWrapper>
   )
 }

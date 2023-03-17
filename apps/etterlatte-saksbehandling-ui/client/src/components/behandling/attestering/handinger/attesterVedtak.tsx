@@ -7,7 +7,7 @@ import { attesterVedtaksbrev } from '~shared/api/brev'
 import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
 
-export const AttesterVedtak = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
   const [modalisOpen, setModalisOpen] = useState(false)
 
@@ -26,7 +26,7 @@ export const AttesterVedtak = ({ behandling }: { behandling: IDetaljertBehandlin
     const vedtaksbrevAttestertOK = await ferdigstillVedtaksbrev()
 
     if (vedtaksbrevAttestertOK) {
-      attesterVedtak(behandling.id).then((response) => {
+      attesterVedtak(behandling.id, kommentar).then((response) => {
         if (response.status === 'ok') {
           navigate(`/person/${behandling.søker?.foedselsnummer}`)
         }

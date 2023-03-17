@@ -55,7 +55,7 @@ export const OversiktWrapper = styled.div`
 
 export const OversiktWrapperLiten = styled.div`
   border: 1px solid #c7c0c0;
-  margin: 20px 8px 0px 8px;
+  margin: 30px 8px 0 8px;
   padding: 1em;
 `
 

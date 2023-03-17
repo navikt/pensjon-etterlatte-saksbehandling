@@ -42,7 +42,6 @@ internal class JournalfoerVedtaksbrev(
             withLogContext {
                 val vedtak: VedtakDto = deserialize(packet["vedtak"].toJson())
                 logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
-
                 val (brev, response) = service.journalfoerVedtaksbrev(vedtak)
 
                 logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")

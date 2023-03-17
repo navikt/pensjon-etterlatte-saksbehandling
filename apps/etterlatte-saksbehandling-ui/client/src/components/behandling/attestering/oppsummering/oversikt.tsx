@@ -15,6 +15,7 @@ import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalite
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.ident)
+  const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
 
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
@@ -66,6 +67,12 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           </Tekst>
         </div>
       </div>
+      {kommentarFraAttestant && (
+        <div className="info">
+          <Info>Kommentar fra attestant</Info>
+          <Tekst>{kommentarFraAttestant}</Tekst>
+        </div>
+      )}
     </BehandlingsinfoContainer>
   )
 }
@@ -80,6 +87,7 @@ const BehandlingsinfoContainer = styled.div`
     display: flex;
     justify-content: space-between;
   }
+
   .info {
     margin-top: 1em;
     margin-bottom: 1em;

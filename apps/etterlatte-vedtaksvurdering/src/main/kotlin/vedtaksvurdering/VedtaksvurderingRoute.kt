@@ -67,7 +67,8 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/attester") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Attesterer vedtak for behandling $behandlingId")
-                val attestert = service.attesterVedtak(behandlingId, bruker)
+                val (kommentar) = call.receive<AttesterVedtakDto>()
+                val attestert = service.attesterVedtak(behandlingId, kommentar, bruker)
 
                 call.respond(attestert.toDto())
             }
@@ -109,3 +110,4 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
 }
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
+data class AttesterVedtakDto(val kommentar: String)

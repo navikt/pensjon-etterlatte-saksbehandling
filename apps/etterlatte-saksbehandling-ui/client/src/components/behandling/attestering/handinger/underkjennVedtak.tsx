@@ -3,24 +3,27 @@ import { useState } from 'react'
 import { ButtonWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { hentBehandling, underkjennVedtak } from '~shared/api/behandling'
+import { useNavigate } from 'react-router'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 type Props = {
-  behandlingId: string
+  behandling: IDetaljertBehandling
   kommentar: string
   valgtBegrunnelse: string
 }
 
-export const UnderkjennVedtak: React.FC<Props> = ({ behandlingId, kommentar, valgtBegrunnelse }) => {
+export const UnderkjennVedtak: React.FC<Props> = ({ behandling, kommentar, valgtBegrunnelse }) => {
   const [modalisOpen, setModalisOpen] = useState(false)
+  const navigate = useNavigate()
 
   const underkjenn = () => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
+    if (!behandling.id) throw new Error('Mangler behandlingsid')
 
-    underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse).then((response) => {
+    underkjennVedtak(behandling.id, kommentar, valgtBegrunnelse).then((response) => {
       if (response.status === 'ok') {
-        hentBehandling(behandlingId).then((response) => {
+        hentBehandling(behandling.id).then((response) => {
           if (response.status === 'ok') {
-            window.location.reload()
+            navigate(`/person/${behandling.søker?.foedselsnummer}`)
           }
         })
       }

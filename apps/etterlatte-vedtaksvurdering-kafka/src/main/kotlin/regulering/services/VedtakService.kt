@@ -5,9 +5,14 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.token.Fagsaksystem
 import java.time.LocalDate
 import java.util.*
 
@@ -37,7 +42,13 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
 
     override fun attesterVedtak(behandlingId: UUID): VedtakDto =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/$behandlingId/attester").body()
+            vedtakKlient.post("$url/api/vedtak/$behandlingId/attester") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    AttesterVedtakDto("Automatisk attestert av ${Fagsaksystem.EY.systemnavn}")
+                )
+            }
+                .body()
         }
 
     override fun tilbakestillVedtak(behandlingId: UUID) {

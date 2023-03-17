@@ -13,6 +13,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.bruker
@@ -110,4 +111,3 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
 }
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
-data class AttesterVedtakDto(val kommentar: String)

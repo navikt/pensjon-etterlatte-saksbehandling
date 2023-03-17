@@ -2,7 +2,7 @@ package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
-import no.nav.etterlatte.libs.common.person.firesifretAarstallTosifret
+import no.nav.etterlatte.libs.common.person.firesifretAarstallFraTosifret
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -77,14 +77,14 @@ internal class FoedselsnummerTest {
     @Test
     fun `korrekt logikk for firesifret foedselsnummer fra fnr`() {
 
-        assertEquals(2019,firesifretAarstallTosifret(19,999))
-        assertEquals(1940,firesifretAarstallTosifret(40,999))
-        assertEquals(1919,firesifretAarstallTosifret(19,499))
-        assertEquals(1940,firesifretAarstallTosifret(40,1))
-        assertEquals(1855,firesifretAarstallTosifret(55,500))
-        assertEquals(1855,firesifretAarstallTosifret(55,749))
-        assertEquals(2039,firesifretAarstallTosifret(39,751))
-        assertEquals(1940,firesifretAarstallTosifret(40,900))
+        assertEquals(2019,firesifretAarstallFraTosifret(19,999))
+        assertEquals(1940,firesifretAarstallFraTosifret(40,999))
+        assertEquals(1919,firesifretAarstallFraTosifret(19,499))
+        assertEquals(1940,firesifretAarstallFraTosifret(40,1))
+        assertEquals(1855,firesifretAarstallFraTosifret(55,500))
+        assertEquals(1855,firesifretAarstallFraTosifret(55,749))
+        assertEquals(2039,firesifretAarstallFraTosifret(39,751))
+        assertEquals(1940,firesifretAarstallFraTosifret(40,900))
     }
 
     @Test

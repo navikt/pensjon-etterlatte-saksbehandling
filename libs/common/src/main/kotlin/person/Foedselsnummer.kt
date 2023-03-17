@@ -75,7 +75,7 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
         val year = value.slice(4 until 6).toInt()
         val individnummer = value.slice(6 until 9).toInt()
 
-        return firesifretAarstallTosifret(year, individnummer)
+        return firesifretAarstallFraTosifret(year, individnummer)
     }
 
     fun getAge(): Int {
@@ -118,7 +118,7 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
      */
     override fun toString(): String = this.value.replaceRange(6 until 11, "*****")
 }
-internal fun firesifretAarstallTosifret(year: Int, individnummer: Int): Int {
+internal fun firesifretAarstallFraTosifret(year: Int, individnummer: Int): Int {
     return if (individnummer < 500) {
         (year + 1900)
     } else if ((individnummer < 750) && (54 < year)) {

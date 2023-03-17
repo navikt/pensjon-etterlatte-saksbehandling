@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
+import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.Brev
@@ -13,7 +14,6 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType

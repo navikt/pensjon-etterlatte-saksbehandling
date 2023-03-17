@@ -16,8 +16,8 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.dokument.JournalpostResponse
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
+import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
-import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server

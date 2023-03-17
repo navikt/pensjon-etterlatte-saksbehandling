@@ -5,8 +5,8 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
-import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.bruker
 import org.slf4j.LoggerFactory

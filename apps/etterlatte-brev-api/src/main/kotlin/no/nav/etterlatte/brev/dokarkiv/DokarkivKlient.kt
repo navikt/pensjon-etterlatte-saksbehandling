@@ -10,8 +10,8 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
-import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.journalpost.JournalpostRequest
+import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory

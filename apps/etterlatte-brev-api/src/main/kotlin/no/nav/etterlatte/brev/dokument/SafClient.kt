@@ -12,8 +12,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.content.TextContent
+import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient

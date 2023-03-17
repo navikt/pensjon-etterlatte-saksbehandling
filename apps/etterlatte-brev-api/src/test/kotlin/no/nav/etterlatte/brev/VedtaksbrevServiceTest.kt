@@ -24,12 +24,12 @@ import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
+import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType

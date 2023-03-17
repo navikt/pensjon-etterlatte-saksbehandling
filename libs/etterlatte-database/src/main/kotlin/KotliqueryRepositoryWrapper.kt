@@ -52,19 +52,19 @@ class KotliqueryRepositoryWrapper(private val datasource: DataSource) {
             }
         }
 
+    fun <T> hentMedKotliquery(query: String, params: Map<String, Any>, converter: (r: Row) -> T) =
+        using(sessionOf(datasource)) { session ->
+            queryOf(statement = query, paramMap = params)
+                .let { query -> session.run(query.map { row -> converter.invoke(row) }.asSingle) }
+        }
+
     fun <T> hentMedKotliquery(
         query: String,
         params: Map<String, Any>,
+        tx: TransactionalSession,
         converter: (r: Row) -> T
-    ) = using(sessionOf(datasource)) { session ->
-        queryOf(statement = query, paramMap = params)
-            .let { query ->
-                session.run(
-                    query.map { row -> converter.invoke(row) }
-                        .asSingle
-                )
-            }
-    }
+    ) = queryOf(statement = query, paramMap = params)
+        .let { tx.run(it.map { row -> converter.invoke(row) }.asSingle) }
 
     fun <T> hentListeMedKotliquery(
         query: String,

@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import no.nav.etterlatte.libs.database.tidspunkt
 import java.time.LocalDate
@@ -45,6 +46,14 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 }
         }
 
+    private fun hentNonNull(behandlingId: UUID, tx: TransactionalSession): Vilkaarsvurdering {
+        val params = mapOf("behandling_id" to behandlingId)
+        return repositoryWrapper.hentMedKotliquery(Queries.hentVilkaarsvurdering, params, tx) { row ->
+            val vilkaarsvurderingId = row.uuid("id")
+            row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, tx))
+        } ?: throw NullPointerException("Forventet å hente en vilkaarsvurdering men var null.")
+    }
+
     fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
@@ -55,10 +64,18 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         return hentNonNull(vilkaarsvurdering.behandlingId)
     }
 
-    fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering, kopiertFraId: UUID): Vilkaarsvurdering {
+    fun kopierVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering, kopiertFraId: UUID): Vilkaarsvurdering {
+        val nyVilkaarsvurdering = vilkaarsvurdering.copy(vilkaar = vilkaarsvurdering.vilkaar.kopier())
+
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
-                opprettVilkaarsvurdering(vilkaarsvurdering, tx)
+                opprettVilkaarsvurdering(nyVilkaarsvurdering, tx)
+                lagreVilkaarsvurderingResultat(
+                    nyVilkaarsvurdering.behandlingId,
+                    nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
+                    nyVilkaarsvurdering.resultat ?: throw IllegalStateException("Fant ikke vilkårsvurderingsresultat"),
+                    tx
+                )
                 opprettVilkaarsvurderingKilde(vilkaarsvurdering.id, kopiertFraId, tx)
             }
         }
@@ -97,22 +114,43 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
     ): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
             val vilkaarsvurdering = hentNonNull(behandlingId)
-
-            queryOf(
-                statement = Queries.lagreVilkaarsvurderingResultat,
-                paramMap = mapOf(
-                    "id" to vilkaarsvurdering.id,
-                    "virkningstidspunkt" to virkningstidspunkt,
-                    "resultat_utfall" to resultat.utfall.name,
-                    "resultat_kommentar" to resultat.kommentar,
-                    "resultat_tidspunkt" to resultat.tidspunkt.toTidspunkt().toTimestamp(),
-                    "resultat_saksbehandler" to resultat.saksbehandler
+            vilkaarsvurderingResultatQuery(vilkaarsvurdering, virkningstidspunkt, resultat).let {
+                session.run(
+                    it.asExecute
                 )
-            ).let { session.run(it.asExecute) }
+            }
         }
 
         return hentNonNull(behandlingId)
     }
+
+    private fun lagreVilkaarsvurderingResultat(
+        behandlingId: UUID,
+        virkningstidspunkt: LocalDate,
+        resultat: VilkaarsvurderingResultat,
+        tx: TransactionalSession
+    ): Vilkaarsvurdering {
+        val vilkaarsvurdering = hentNonNull(behandlingId, tx)
+        vilkaarsvurderingResultatQuery(vilkaarsvurdering, virkningstidspunkt, resultat).let { tx.run(it.asExecute) }
+
+        return hentNonNull(behandlingId, tx)
+    }
+
+    private fun vilkaarsvurderingResultatQuery(
+        vilkaarsvurdering: Vilkaarsvurdering,
+        virkningstidspunkt: LocalDate,
+        resultat: VilkaarsvurderingResultat
+    ) = queryOf(
+        statement = Queries.lagreVilkaarsvurderingResultat,
+        paramMap = mapOf(
+            "id" to vilkaarsvurdering.id,
+            "virkningstidspunkt" to virkningstidspunkt,
+            "resultat_utfall" to resultat.utfall.name,
+            "resultat_kommentar" to resultat.kommentar,
+            "resultat_tidspunkt" to resultat.tidspunkt.toTidspunkt().toTimestamp(),
+            "resultat_saksbehandler" to resultat.saksbehandler
+        )
+    )
 
     fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->

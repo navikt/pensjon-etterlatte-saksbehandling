@@ -23,6 +23,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -40,6 +42,7 @@ import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -289,14 +292,44 @@ internal class VilkaarsvurderingServiceTest {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyBehandlingId = UUID.randomUUID()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any(), any()) } returns true
 
-        val vilkaarsvurdering1 = runBlocking { service.opprettVilkaarsvurdering(uuid, bruker) }
-        val vilkaarsvurdering2 = runBlocking { service.kopierVilkaarsvurdering(nyBehandlingId, uuid, bruker) }
+        runBlocking {
+            service.opprettVilkaarsvurdering(uuid, bruker)
+            val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
+            vilkaarsvurdering.vilkaar.forEach { vilkaar ->
+                service.oppdaterVurderingPaaVilkaar(
+                    uuid,
+                    bruker,
+                    VurdertVilkaar(
+                        vilkaar.id,
+                        VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
+                        null,
+                        VilkaarVurderingData("kommentar", LocalDateTime.now(), "saksbehandler")
+                    )
+                )
+            }
+            service.oppdaterTotalVurdering(
+                uuid,
+                bruker,
+                VilkaarsvurderingResultat(
+                    VilkaarsvurderingUtfall.OPPFYLT,
+                    "kommentar",
+                    LocalDateTime.now(),
+                    "saksbehandler"
+                )
+            )
+        }
 
-        Assertions.assertEquals(vilkaarsvurdering1.resultat, vilkaarsvurdering2.resultat)
+        val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
+        val kopiertVilkaarsvurdering =
+            runBlocking { service.kopierVilkaarsvurdering(nyBehandlingId, vilkaarsvurdering.behandlingId, bruker) }
+
+        Assertions.assertNotNull(kopiertVilkaarsvurdering.resultat)
+        Assertions.assertEquals(vilkaarsvurdering.resultat, kopiertVilkaarsvurdering.resultat)
         Assertions.assertEquals(
-            vilkaarsvurdering1.vilkaar.map { it.vurdering },
-            vilkaarsvurdering2.vilkaar.map { it.vurdering }
+            vilkaarsvurdering.vilkaar.map { it.vurdering },
+            kopiertVilkaarsvurdering.vilkaar.map { it.vurdering }
         )
     }
 

@@ -18,15 +18,12 @@ import java.util.*
 object BarnepensjonVilkaar {
 
     fun inngangsvilkaar(grunnlag: Grunnlag, virkningstidspunkt: Virkningstidspunkt) = listOf(
+        formaal(),
         doedsfallForelder(),
         alderBarn(virkningstidspunkt, grunnlag),
         barnetsMedlemskap(),
         avdoedesForutgaaendeMedlemskap(),
         yrkesskadeAvdoed()
-    )
-
-    fun loependevilkaar() = listOf(
-        formaal()
     )
 
     private fun formaal() = Vilkaar(

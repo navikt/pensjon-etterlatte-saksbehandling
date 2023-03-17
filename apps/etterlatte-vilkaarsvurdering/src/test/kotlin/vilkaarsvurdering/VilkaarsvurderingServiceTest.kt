@@ -39,7 +39,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.lang.NullPointerException
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
@@ -113,17 +112,17 @@ internal class VilkaarsvurderingServiceTest {
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar shouldHaveSize 5
+        vilkaarsvurdering.vilkaar shouldHaveSize 6
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN }.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
-            vilkaar.grunnlag!! shouldHaveSize 2
+            vilkaar.grunnlag shouldHaveSize 2
 
-            requireNotNull(vilkaar.grunnlag?.get(0)).let {
+            requireNotNull(vilkaar.grunnlag.get(0)).let {
                 it.opplysningsType shouldBe VilkaarOpplysningType.SOEKER_FOEDSELSDATO
                 val opplysning: LocalDate = objectMapper.readValue(it.opplysning!!.toJson())
                 opplysning shouldBe grunnlag.soeker.hentFoedselsdato()?.verdi
             }
-            requireNotNull(vilkaar.grunnlag?.get(1)).let {
+            requireNotNull(vilkaar.grunnlag.get(1)).let {
                 it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
                 val opplysning: LocalDate? = objectMapper.readValue(it.opplysning!!.toJson())
                 opplysning shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
@@ -151,7 +150,7 @@ internal class VilkaarsvurderingServiceTest {
                 .first { it.hovedvilkaar.type == VilkaarType.BP_FORTSATT_MEDLEMSKAP }
                 .let { vilkaar ->
                     vilkaar.hovedvilkaar.resultat shouldBe Utfall.OPPFYLT
-                    vilkaar.unntaksvilkaar?.forEach {
+                    vilkaar.unntaksvilkaar.forEach {
                         it.resultat shouldBe null
                     }
                     vilkaar.vurdering?.let {
@@ -190,8 +189,8 @@ internal class VilkaarsvurderingServiceTest {
                 .let { vilkaar ->
                     vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
                     val unntaksvilkaar =
-                        vilkaar.unntaksvilkaar?.first { it.type == vurdertVilkaar.unntaksvilkaar?.type }
-                    unntaksvilkaar?.resultat shouldBe Utfall.OPPFYLT
+                        vilkaar.unntaksvilkaar.first { it.type == vurdertVilkaar.unntaksvilkaar?.type }
+                    unntaksvilkaar.resultat shouldBe Utfall.OPPFYLT
 
                     vilkaar.vurdering?.let {
                         it.saksbehandler shouldBe vurdering.saksbehandler
@@ -224,7 +223,7 @@ internal class VilkaarsvurderingServiceTest {
                 .first { it.hovedvilkaar.type == VilkaarType.BP_FORTSATT_MEDLEMSKAP }
                 .let { vilkaar ->
                     vilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
-                    vilkaar.unntaksvilkaar?.forEach {
+                    vilkaar.unntaksvilkaar.forEach {
                         it.resultat shouldBe Utfall.IKKE_OPPFYLT
                     }
                     vilkaar.vurdering?.let {
@@ -280,10 +279,8 @@ internal class VilkaarsvurderingServiceTest {
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar shouldHaveSize 1
-        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_FORMAAL }.let { vilkaar ->
-            vilkaar.grunnlag shouldBe emptyList()
-            vilkaar.hovedvilkaar.type shouldBe VilkaarType.BP_FORMAAL
+        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN }.let { vilkaar ->
+            vilkaar.hovedvilkaar.type shouldBe VilkaarType.BP_ALDER_BARN
         }
     }
 

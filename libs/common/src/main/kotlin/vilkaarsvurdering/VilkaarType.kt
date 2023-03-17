@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
 enum class VilkaarType(val rekkefoelge: Int) {
     // Barnepensjon
+    BP_FORMAAL(10),
     BP_DOEDSFALL_FORELDER(100),
     BP_ALDER_BARN(200),
     BP_ALDER_BARN_UNNTAK_UTDANNING(201),
@@ -17,7 +18,6 @@ enum class VilkaarType(val rekkefoelge: Int) {
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_AVTALEFESTET_PENSJON(404),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_LOVFESTET_PENSJONSORDNING(405),
     BP_YRKESSKADE_AVDOED(500),
-    BP_FORMAAL(600),
 
     // Omstillingsstønad
     OMS_DOEDSFALL(100),
@@ -30,7 +30,5 @@ enum class VilkaarType(val rekkefoelge: Int) {
     OMS_GJENLEVENDES_MEDLEMSKAP(400),
     OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_BOTID(401),
     OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_PENSJON(402),
-    OMS_OEVRIGE_VILKAAR(500),
-
-    OMS_TESTVILKAAR(50) // TODO for bakoverkompabilitet - fjernes
+    OMS_OEVRIGE_VILKAAR(500)
 }

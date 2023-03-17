@@ -5,10 +5,10 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
+import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
+import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.BrevEventTypes
-import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
-import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rivers.DistribuerBrev

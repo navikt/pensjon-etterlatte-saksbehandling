@@ -6,12 +6,12 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingslinjerForVedtakEksisterer
@@ -58,6 +58,7 @@ class VedtakMottaker(
                         logger.info("Vedtak med vedtakId=${vedtak.vedtakId} sendt til oppdrag - avventer kvittering")
                         sendUtbetalingSendtEvent(context, resultat.utbetaling)
                     }
+
                     is UtbetalingForVedtakEksisterer -> {
                         val feilmelding =
                             "Vedtak med vedtakId=${vedtak.vedtakId} eksisterer fra før. " +
@@ -74,6 +75,7 @@ class VedtakMottaker(
                             )
                         }
                     }
+
                     is UtbetalingslinjerForVedtakEksisterer -> {
                         (
                             "En eller flere utbetalingslinjer med id=[${resultat.utbetalingslinjeIDer()}] " +

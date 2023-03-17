@@ -6,7 +6,7 @@ metadata:
   name: start-regulering
   namespace: etterlatte
 spec:
-  image: ghcr.io/navikt/pensjon-etterlatte-saksbehandling/start-regulering:f1b028a8b9258bd815ed567cbc204641be8229fc
+  image: ghcr.io/navikt/pensjon-etterlatte-saksbehandling/start-regulering:0892af416e8ef7b8992c702b1732018ca48d1bc9
   kafka:
     pool: nav-dev
   env:

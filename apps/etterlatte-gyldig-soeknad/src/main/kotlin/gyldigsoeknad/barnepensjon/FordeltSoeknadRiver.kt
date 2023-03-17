@@ -5,6 +5,7 @@ import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.event.SoeknadJournalfoert
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.OPPFYLT
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -32,7 +33,9 @@ internal class FordeltSoeknadRiver(
             validate { it.demandValue(FordelerFordelt.soeknadFordeltKey, true) }
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
-            validate { it.rejectKey(GyldigSoeknadVurdert.sakIdKey) }
+            validate { it.requireKey(SoeknadJournalfoert.dokarkivKey) }
+            validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }
+            validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
         }.register(this)
     }
 
@@ -53,7 +56,6 @@ internal class FordeltSoeknadRiver(
 
                 context.publish(
                     packet.apply {
-                        set(GyldigSoeknadVurdert.sakIdKey, sakId)
                         set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
                         set(GyldigSoeknadVurdert.gyldigInnsenderKey, gyldighetsVurdering.resultat == OPPFYLT)
                     }.toJson()

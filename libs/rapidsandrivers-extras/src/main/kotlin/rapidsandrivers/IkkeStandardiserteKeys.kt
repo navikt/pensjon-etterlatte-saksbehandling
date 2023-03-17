@@ -12,6 +12,7 @@ const val BEREGNING_KEY = "beregning"
 const val DATO_KEY = "dato"
 const val HENDELSE_DATA_KEY = "hendelse_data"
 const val BEHANDLING_VI_OMREGNER_FRA_KEY = "behandling_vi_omregner_fra"
+const val TILBAKESTILTE_BEHANDLINGER_KEY = "tilbakestilte_behandlinger"
 
 var JsonMessage.sakId: Long
     get() = this[SAK_ID_KEY].asLong()
@@ -29,4 +30,12 @@ var JsonMessage.dato: LocalDate
     get() = this[DATO_KEY].asLocalDate()
     set(name) {
         this[DATO_KEY] = name
+    }
+
+var JsonMessage.tilbakestilteBehandlinger: List<UUID>
+    get() = this[TILBAKESTILTE_BEHANDLINGER_KEY].asText().trim().split(";")
+        .filter { it.isNotEmpty() }
+        .map { UUID.fromString(it) }
+    set(name) {
+        this[TILBAKESTILTE_BEHANDLINGER_KEY] = name.joinToString(";") { it.toString() }
     }

@@ -4,6 +4,7 @@ import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -21,7 +22,7 @@ interface BehandlingStatusService {
     fun sjekkOmKanReturnereVedtak(behandlingId: UUID)
     fun settReturnertVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
     fun settIverksattVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe
 }
 
 class BehandlingStatusServiceImpl constructor(
@@ -98,10 +99,8 @@ class BehandlingStatusServiceImpl constructor(
         }
     }
 
-    override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning() {
-        inTransaction {
-            behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
-        }
+    override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning() = inTransaction {
+        behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
     }
 
     fun registrerVedtakHendelse(behandlingId: UUID, vedtakHendelse: VedtakHendelse, hendelseType: HendelseType) {

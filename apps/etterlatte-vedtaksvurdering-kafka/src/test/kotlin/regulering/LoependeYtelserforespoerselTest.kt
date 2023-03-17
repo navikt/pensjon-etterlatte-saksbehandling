@@ -1,7 +1,9 @@
 package regulering
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.Test
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
+import rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import java.time.LocalDate
 
 internal class LoependeYtelserforespoerselTest {
@@ -30,7 +33,8 @@ internal class LoependeYtelserforespoerselTest {
         mapOf(
             EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
             SAK_ID_KEY to sakId,
-            DATO_KEY to dato
+            DATO_KEY to dato,
+            TILBAKESTILTE_BEHANDLINGER_KEY to ""
         )
     )
 
@@ -51,6 +55,7 @@ internal class LoependeYtelserforespoerselTest {
         val fraDato = LocalDate.of(2023, 8, 1)
         val melding = genererReguleringMelding(`1_mai_2023`, sakId)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        every { vedtakServiceMock.tilbakestillVedtak(any()) } just runs
         every { vedtakServiceMock.harLoependeYtelserFra(sakId, `1_mai_2023`) } returns LoependeYtelseDTO(true, fraDato)
         val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
 

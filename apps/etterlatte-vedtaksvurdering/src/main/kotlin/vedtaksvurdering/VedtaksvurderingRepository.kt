@@ -267,4 +267,25 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
             beloep = bigDecimalOrNull("beloep"),
             type = UtbetalingsperiodeType.valueOf(string("type"))
         )
+
+    fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? {
+        val hentVedtak = hentVedtak(behandlingId)
+        if (hentVedtak?.status != VedtakStatus.FATTET_VEDTAK) {
+            return null
+        }
+        return repositoryWrapper.oppdater(
+            query = """
+                UPDATE vedtak 
+                SET vedtakstatus = :vedtakstatus 
+                WHERE behandlingId = :behandlingId
+                """,
+            params = mapOf(
+                "vedtakstatus" to VedtakStatus.RETURNERT.name,
+                "behandlingId" to behandlingId
+            ),
+            loggtekst = "Returnerer vedtak $behandlingId"
+        )
+            .also { require(it == 1) }
+            .let { hentVedtakNonNull(behandlingId) }
+    }
 }

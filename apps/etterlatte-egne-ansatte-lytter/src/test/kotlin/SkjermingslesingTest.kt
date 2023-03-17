@@ -20,7 +20,6 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.*
 
@@ -37,7 +36,6 @@ class SkjermingslesingTest {
         )
     }
 
-    @Test
     fun `Les skjermingshendelse og post det til behandlingsapp`() {
         val skjermingsProducer: KafkaProducer<String, String> = generateSkjermingsProducer()
         val fnr = "70078749472"

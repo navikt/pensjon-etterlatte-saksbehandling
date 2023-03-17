@@ -15,8 +15,10 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
+import rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import rapidsandrivers.dato
 import rapidsandrivers.sakId
+import rapidsandrivers.tilbakestilteBehandlinger
 import rapidsandrivers.withFeilhaandtering
 
 internal class LoependeYtelserforespoersel(
@@ -30,6 +32,7 @@ internal class LoependeYtelserforespoersel(
             eventName(FINN_LOEPENDE_YTELSER)
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
+            validate { it.requireKey(TILBAKESTILTE_BEHANDLINGER_KEY) }
             correlationId()
         }.register(this)
     }
@@ -41,6 +44,12 @@ internal class LoependeYtelserforespoersel(
                 logger.info("Leser reguleringsfoerespoersel for sak $sakId")
 
                 val reguleringsdato = packet.dato
+
+                val tilbakestilteBehandlinger = packet.tilbakestilteBehandlinger
+                tilbakestilteBehandlinger.forEach {
+                    vedtak.tilbakestillVedtak(it)
+                }
+
                 val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
                 respons.takeIf { it.erLoepende }?.let {
                     packet.eventName = OMREGNINGSHENDELSE

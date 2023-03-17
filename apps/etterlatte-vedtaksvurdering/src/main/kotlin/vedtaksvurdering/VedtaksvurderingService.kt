@@ -276,12 +276,14 @@ class VedtaksvurderingService(
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.AVSLAG
                 }
             }
+
             BehandlingType.REVURDERING -> {
                 when (vilkaarsvurderingUtfallNonNull(vilkaarsvurdering?.resultat?.utfall)) {
                     VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.ENDRING
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.OPPHOER
                 }
             }
+
             BehandlingType.OMREGNING -> VedtakType.ENDRING
             BehandlingType.MANUELT_OPPHOER -> VedtakType.OPPHOER
         }
@@ -303,6 +305,7 @@ class VedtaksvurderingService(
                     )
                 }
             }
+
             VedtakType.OPPHOER ->
                 listOf(
                     Utbetalingsperiode(
@@ -311,6 +314,7 @@ class VedtaksvurderingService(
                         type = UtbetalingsperiodeType.OPPHOER
                     )
                 )
+
             VedtakType.AVSLAG -> emptyList()
         }
     }
@@ -338,6 +342,7 @@ class VedtaksvurderingService(
                             val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
                             Triple(behandling, vilkaarsvurdering, beregning)
                         }
+
                         null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
                     }
                 }
@@ -356,6 +361,9 @@ class VedtaksvurderingService(
                 TEKNISK_TID_KEY to tekniskTid
             )
         ).toJson()
+
+    fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? =
+        repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 }
 
 class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) :

@@ -3,6 +3,7 @@ package no.nav.etterlatte.regulering
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
@@ -15,6 +16,7 @@ interface VedtakService {
     fun upsertVedtak(behandlingId: UUID): VedtakDto
     fun fattVedtak(behandlingId: UUID): VedtakDto
     fun attesterVedtak(behandlingId: UUID): VedtakDto
+    fun tilbakestillVedtak(behandlingId: UUID)
 }
 
 class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: String) : VedtakService {
@@ -37,4 +39,10 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$behandlingId/attester").body()
         }
+
+    override fun tilbakestillVedtak(behandlingId: UUID) {
+        runBlocking {
+            vedtakKlient.patch("$url/api/vedtak/$behandlingId")
+        }
+    }
 }

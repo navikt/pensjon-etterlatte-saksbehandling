@@ -13,8 +13,8 @@ import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import org.slf4j.LoggerFactory
-import java.util.UUID
-import no.nav.etterlatte.brev.model.Mottaker as BrevMottaker
+import java.util.*
+import no.nav.etterlatte.brev.model.MottakerRequest as BrevMottaker
 
 class BrevService(
     private val db: BrevRepository,

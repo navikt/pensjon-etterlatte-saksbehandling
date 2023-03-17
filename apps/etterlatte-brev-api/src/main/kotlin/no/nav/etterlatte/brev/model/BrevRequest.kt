@@ -8,14 +8,14 @@ import java.time.LocalDate
 abstract class BrevRequest {
     abstract val spraak: Spraak
     abstract val avsender: Avsender
-    abstract val mottaker: Mottaker
+    abstract val mottaker: MottakerRequest
     abstract val attestant: Attestant?
     val utsendingsDato = LocalDate.now()
     abstract fun templateName(): String
 }
 
 // TODO: Sikre non-nullable
-data class Mottaker(
+data class MottakerRequest(
     val navn: String? = null,
     val adresse: String? = null,
     val postnummer: String? = null,
@@ -23,7 +23,7 @@ data class Mottaker(
     val land: String? = null
 ) {
     companion object {
-        fun fraAdresse(adresse: Adresse) = Mottaker(
+        fun fraAdresse(adresse: Adresse) = MottakerRequest(
             navn = adresse.navn,
             adresse = adresse.adresse,
             postnummer = adresse.postnummer,
@@ -32,7 +32,7 @@ data class Mottaker(
         )
 
         // todo: Må legge til støtte for utenlandske adresser. Er kun adresselinje 1 hvis innland. linje 2 og 3 hvis utland
-        fun fraRegoppslag(regoppslag: RegoppslagResponseDTO) = Mottaker(
+        fun fraRegoppslag(regoppslag: RegoppslagResponseDTO) = MottakerRequest(
             navn = regoppslag.navn,
             adresse = """
                 ${regoppslag.adresse.adresselinje1}, ${regoppslag.adresse.postnummer} ${regoppslag.adresse.poststed?.capitalize()}

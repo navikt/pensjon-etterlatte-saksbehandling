@@ -344,7 +344,7 @@ internal class VedtaksbrevServiceTest {
         )
     )
 
-    private fun opprettMottaker() = no.nav.etterlatte.brev.model.Mottaker(
+    private fun opprettMottaker() = no.nav.etterlatte.brev.model.MottakerRequest(
         "navn",
         "adresse",
         "1234",

@@ -48,8 +48,8 @@ internal class FordeltSoeknadRiver(
                 val personGalleri = gyldigSoeknadService.hentPersongalleriFraSoeknad(soeknad)
                 val gyldighetsVurdering = gyldigSoeknadService.vurderGyldighet(personGalleri)
                 logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
+                val sakId = packet[GyldigSoeknadVurdert.sakIdKey].longValue()
 
-                val sakId = behandlingClient.skaffSak(personGalleri.soeker, "BARNEPENSJON")
                 val behandlingId = behandlingClient.initierBehandling(sakId, soeknad.mottattDato, personGalleri)
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
                 logger.info("Behandling {} startet på sak {}", behandlingId, sakId)

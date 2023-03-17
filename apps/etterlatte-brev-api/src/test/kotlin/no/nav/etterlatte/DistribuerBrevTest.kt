@@ -5,8 +5,8 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
-import no.nav.etterlatte.libs.common.brev.model.Adresse
-import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
+import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY

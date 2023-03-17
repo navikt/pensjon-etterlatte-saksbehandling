@@ -14,11 +14,12 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.brev.adresse.BrregService
+import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.adresse.enhetsregister.BrregService
 import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
-import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak

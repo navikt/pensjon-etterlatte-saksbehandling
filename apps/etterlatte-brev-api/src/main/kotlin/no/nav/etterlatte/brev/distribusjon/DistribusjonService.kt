@@ -2,8 +2,8 @@ package no.nav.etterlatte.brev.distribusjon
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.libs.common.brev.model.Adresse
-import no.nav.etterlatte.libs.common.brev.model.Status
+import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.distribusjon.DistribuerJournalpostRequest
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
-import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import java.time.LocalDate
 

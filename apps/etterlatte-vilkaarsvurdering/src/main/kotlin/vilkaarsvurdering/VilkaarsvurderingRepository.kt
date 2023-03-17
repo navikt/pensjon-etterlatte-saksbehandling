@@ -47,15 +47,11 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         }
 
     private fun hentNonNull(behandlingId: UUID, tx: TransactionalSession): Vilkaarsvurdering {
-        return queryOf(Queries.hentVilkaarsvurdering, mapOf("behandling_id" to behandlingId))
-            .let { query ->
-                tx.run(
-                    query.map { row ->
-                        val vilkaarsvurderingId = row.uuid("id")
-                        row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, tx))
-                    }.asSingle
-                )
-            }!!
+        val params = mapOf("behandling_id" to behandlingId)
+        return repositoryWrapper.hentMedKotliquery(Queries.hentVilkaarsvurdering, params, tx) { row ->
+            val vilkaarsvurderingId = row.uuid("id")
+            row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, tx))
+        } ?: throw NullPointerException("Forventet å hente en vilkaarsvurdering men var null.")
     }
 
     fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
@@ -77,7 +73,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 lagreVilkaarsvurderingResultat(
                     nyVilkaarsvurdering.behandlingId,
                     nyVilkaarsvurdering.virkningstidspunkt.atDay(1),
-                    nyVilkaarsvurdering.resultat!!,
+                    nyVilkaarsvurdering.resultat ?: throw IllegalStateException("Fant ikke vilkårsvurderingsresultat"),
                     tx
                 )
                 opprettVilkaarsvurderingKilde(vilkaarsvurdering.id, kopiertFraId, tx)

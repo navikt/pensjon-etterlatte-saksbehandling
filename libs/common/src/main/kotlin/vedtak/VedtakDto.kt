@@ -45,6 +45,8 @@ data class Attestasjon(
     val tidspunkt: Tidspunkt
 )
 
+data class AttesterVedtakDto(val kommentar: String)
+
 data class Utbetalingsperiode(
     val id: Long? = null,
     val periode: Periode,

@@ -18,9 +18,10 @@ fun main() {
             Fordeler(
                 rapidsConnection = rc,
                 fordelerService = FordelerService(
-                    FordelerKriterier(),
-                    ab.pdlTjenesterKlient(),
-                    FordelerRepository(ab.createDataSource()),
+                    fordelerKriterier = FordelerKriterier(),
+                    pdlTjenesterKlient = ab.pdlTjenesterKlient(),
+                    fordelerRepository = FordelerRepository(ab.createDataSource()),
+                    behandlingClient = ab.behandlingClient(),
                     maxFordelingTilDoffen = ab.longFeature("FEATURE_MAX_FORDELING_TIL_DOFFEN")
                 )
             )

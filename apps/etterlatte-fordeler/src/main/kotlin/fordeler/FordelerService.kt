@@ -1,9 +1,11 @@
 package no.nav.etterlatte.fordeler
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingClient
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.IkkeGyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.UgyldigHendelse
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
@@ -31,6 +33,7 @@ class FordelerService(
     private val fordelerKriterier: FordelerKriterier,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val fordelerRepository: FordelerRepository,
+    private val behandlingClient: BehandlingClient,
     private val klokke: Clock = utcKlokke(),
     private val maxFordelingTilDoffen: Long
 ) {
@@ -112,4 +115,13 @@ class FordelerService(
             foedselsnummer = soeknad.soeker.foedselsnummer.svar,
             rolle = PersonRolle.BARN
         )
+
+    fun hentSakId(fnr: String?, barnepensjon: SakType): Long {
+        requireNotNull(fnr) {
+            "Må ha et fødselsnummer for søker"
+        }
+        return runBlocking {
+            behandlingClient.hentSak(fnr, barnepensjon)
+        }
+    }
 }

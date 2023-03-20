@@ -6,11 +6,11 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.behandling.SakType
 
-class BehandlingClient(
+class BehandlingKlient(
     private val httpClient: HttpClient,
     private val url: String
 ) {
-    suspend fun hentSak(fnr: String, barnepensjon: SakType): Long {
-        return httpClient.get("$url/personer/$fnr/saker/$barnepensjon").body<ObjectNode>()["id"].longValue()
+    suspend fun hentSak(fnr: String, sakType: SakType): Long {
+        return httpClient.get("$url/personer/$fnr/saker/$sakType").body<ObjectNode>()["id"].longValue()
     }
 }

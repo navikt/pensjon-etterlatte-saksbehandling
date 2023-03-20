@@ -51,7 +51,7 @@ internal class FordelerServiceTest {
         )
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
-            doedsdato = LocalDate.parse("2022-01-01"),
+            doedsdato = LocalDate.parse("2023-01-01"),
             bostedsadresse = mockNorskAdresse()
         )
 

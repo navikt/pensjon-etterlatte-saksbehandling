@@ -69,6 +69,11 @@ jobs:
     with:
       applikasjon: egne-ansatte-lytter
     secrets: inherit
+  tilbakestill-statistikk:
+    uses: ./.github/workflows/.deploy-main.yaml
+    with:
+      applikasjon: statistikk
+    secrets: inherit
   tilbakestill-tilbakekreving:
     uses: ./.github/workflows/.deploy-main.yaml
     with:

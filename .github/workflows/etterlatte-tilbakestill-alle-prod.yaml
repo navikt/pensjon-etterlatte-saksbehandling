@@ -1,0 +1,32 @@
+name: etterlatte-tilbakestill-alle-prod
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+
+jobs:
+  tilbakestill-til-main:
+    secrets: inherit
+    strategy:
+      matrix:
+        applikasjon:
+          - behandling
+          - beregning
+          - brev-api
+          - fordeler
+          - grunnlag
+          - gyldig-soeknad
+          - hendelser-pdl
+          - oppdater-behandling
+          - opplysninger-fra-pdl
+          - opplysninger-fra-soeknad
+          - pdltjenester
+          - saksbehandling-ui
+          - statistikk
+          - egne-ansatte-lytter
+          - tilbakekreving
+          - utbetaling
+          - vedtaksvurdering
+          - vilkaarsvurdering
+    uses: ./.github/workflows/.deploy-main-prod.yaml
+    with:
+      applikasjon: ${{ matrix.app }}

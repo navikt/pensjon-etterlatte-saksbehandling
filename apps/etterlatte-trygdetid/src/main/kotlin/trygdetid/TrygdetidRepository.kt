@@ -2,6 +2,8 @@ package no.nav.etterlatte.trygdetid
 
 import no.nav.etterlatte.trygdetid.config.InMemoryDs
 import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.bosted
+import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.id
+import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.kilde
 import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.periodeFra
 import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.periodeTil
 import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.trygdetidType
@@ -36,11 +38,13 @@ class TrygdetidRepository(private val dataSource: InMemoryDs) {
     private fun ResultRow.toTrygdetid(trygdetidGrunnlag: List<TrygdetidGrunnlag>): Trygdetid {
         return Trygdetid(
             behandlingsId = this[behandlingsId],
-            oppsummertTrygdetid = OppsummertTrygdetid(
-                nasjonalTrygdetid = this[nasjonalTrygdetid],
-                fremtidigTrygdetid = this[fremtidigTrygdetid],
-                totalt = this[oppsummertTrygdetid]
-            ),
+            oppsummertTrygdetid = this[nasjonalTrygdetid]?.let {
+                OppsummertTrygdetid(
+                    nasjonalTrygdetid = this[nasjonalTrygdetid]!!,
+                    fremtidigTrygdetid = this[fremtidigTrygdetid]!!,
+                    totalt = this[oppsummertTrygdetid]!!
+                )
+            },
             grunnlag = trygdetidGrunnlag
         )
     }
@@ -57,10 +61,12 @@ class TrygdetidRepository(private val dataSource: InMemoryDs) {
 
     private fun ResultRow.toTrygdetidGrunnlag(): TrygdetidGrunnlag {
         return TrygdetidGrunnlag(
+            id = this[id],
             bosted = this[bosted],
             type = TrygdetidType.valueOf(this[trygdetidType]),
             periodeFra = this[periodeFra],
-            periodeTil = this[periodeTil]
+            periodeTil = this[periodeTil],
+            kilde = this[kilde]
         )
     }
 
@@ -77,10 +83,12 @@ class TrygdetidRepository(private val dataSource: InMemoryDs) {
         transaction {
             dataSource.trygdetidGrunnlagTable.insert {
                 it[this.behandlingsId] = behandlingsId
+                it[id] = trygdetidGrunnlag.id
                 it[trygdetidType] = trygdetidGrunnlag.type.name
                 it[bosted] = trygdetidGrunnlag.bosted
                 it[periodeFra] = trygdetidGrunnlag.periodeFra
                 it[periodeTil] = trygdetidGrunnlag.periodeTil
+                it[kilde] = trygdetidGrunnlag.kilde
             }
         }
         return hentTrygdtidNotNull(behandlingsId)

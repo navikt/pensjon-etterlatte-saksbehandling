@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.withParam
 import java.time.LocalDate
+import java.util.*
 
 fun Route.trygdetid(trygdetidService: TrygdetidService) {
     route("/api/trygdetid/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -27,10 +28,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
                 if (trygdetid != null) {
                     call.respond(trygdetid.toDto())
                 } else {
-                    call.respond(
-                        status = HttpStatusCode.NotFound,
-                        message = "Det finnes ingen trygdetid for denne behandlingen"
-                    )
+                    call.respond(HttpStatusCode.NoContent)
                 }
             }
         }
@@ -84,9 +82,9 @@ fun Trygdetid.toDto(): TrygdetidDto =
     )
 
 data class OppsummertTrygdetidDto(
-    val nasjonalTrygdetid: Int?,
-    val fremtidigTrygdetid: Int?,
-    val totalt: Int?
+    val nasjonalTrygdetid: Int,
+    val fremtidigTrygdetid: Int,
+    val totalt: Int
 )
 
 fun OppsummertTrygdetidDto.fromDto(): OppsummertTrygdetid =
@@ -97,25 +95,31 @@ fun OppsummertTrygdetidDto.fromDto(): OppsummertTrygdetid =
     )
 
 data class TrygdetidGrunnlagDto(
+    val id: UUID?,
     val type: String,
     val bosted: String,
     val periodeFra: LocalDate,
-    val periodeTil: LocalDate
+    val periodeTil: LocalDate,
+    val kilde: String
 )
 
 fun TrygdetidGrunnlagDto.fromDto(): TrygdetidGrunnlag =
     TrygdetidGrunnlag(
+        id ?: UUID.randomUUID(),
         TrygdetidType.valueOf(type),
         bosted,
         periodeFra,
-        periodeTil
+        periodeTil,
+        kilde
     )
 
 fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
     return TrygdetidGrunnlagDto(
+        id,
         type.name,
         bosted,
         periodeFra,
-        periodeTil
+        periodeTil,
+        kilde
     )
 }

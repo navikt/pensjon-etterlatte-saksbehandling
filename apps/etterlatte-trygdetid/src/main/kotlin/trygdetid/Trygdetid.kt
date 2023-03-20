@@ -10,16 +10,18 @@ data class Trygdetid(
 )
 
 data class OppsummertTrygdetid(
-    val nasjonalTrygdetid: Int?,
-    val fremtidigTrygdetid: Int?,
-    val totalt: Int?
+    val nasjonalTrygdetid: Int,
+    val fremtidigTrygdetid: Int,
+    val totalt: Int
 )
 
 data class TrygdetidGrunnlag(
+    val id: UUID,
     val type: TrygdetidType,
     val bosted: String,
     val periodeFra: LocalDate,
-    val periodeTil: LocalDate
+    val periodeTil: LocalDate,
+    val kilde: String
 )
 
 enum class TrygdetidType {

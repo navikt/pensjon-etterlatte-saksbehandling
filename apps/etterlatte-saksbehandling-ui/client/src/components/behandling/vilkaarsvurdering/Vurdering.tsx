@@ -58,13 +58,13 @@ export const Vurdering = ({
     : 'Er hovedvilkår oppfylt?' // TODO denne burde vi kunne bli kvitt når BP får spørsmål som en del av vilkår
 
   const valider = (vilkaarForm: VilkaarForm): vilkaarForm is VilkaarFormValidert => {
-    let resultatIkkeValgt = vilkaarForm.resultat == undefined
+    const resultatIkkeValgt = vilkaarForm.resultat == undefined
     resultatIkkeValgt ? setRadioError('Du må velge et svar') : setRadioError(undefined)
 
-    let unntakIkkeValgt = vilkaarForm.resultat == VurderingsResultat.IKKE_OPPFYLT && !vilkaarForm.vilkaarsUnntakType
+    const unntakIkkeValgt = vilkaarForm.resultat == VurderingsResultat.IKKE_OPPFYLT && !vilkaarForm.vilkaarsUnntakType
     unntakIkkeValgt ? setUnntakRadioError('Du må velge et unntak') : setUnntakRadioError(undefined)
 
-    let manglerKommentar = MIN_KOMMENTAR_LENGDE > (vilkaarForm.kommentar?.length ?? 0)
+    const manglerKommentar = MIN_KOMMENTAR_LENGDE > (vilkaarForm.kommentar?.length ?? 0)
     manglerKommentar ? setKommentarError('Du må oppgi en begrunnelse') : setKommentarError(undefined)
 
     return !resultatIkkeValgt && !unntakIkkeValgt && !manglerKommentar

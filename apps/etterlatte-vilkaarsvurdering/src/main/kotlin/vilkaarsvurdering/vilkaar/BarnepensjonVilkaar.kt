@@ -20,18 +20,20 @@ object BarnepensjonVilkaar {
     fun inngangsvilkaar(grunnlag: Grunnlag, virkningstidspunkt: Virkningstidspunkt) = listOf(
         formaal(),
         doedsfallForelder(),
+        yrkesskadeAvdoed(),
         alderBarn(virkningstidspunkt, grunnlag),
         barnetsMedlemskap(),
-        avdoedesForutgaaendeMedlemskap(),
-        yrkesskadeAvdoed()
+        avdoedesForutgaaendeMedlemskap()
     )
 
     private fun formaal() = Vilkaar(
         Delvilkaar(
             type = VilkaarType.BP_FORMAAL,
             tittel = "Formål",
-            beskrivelse =
-            "Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde.",
+            beskrivelse = """
+                Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde. Dette betyr at barnet må være i live for å ha rett på barnepensjon.
+            """.trimIndent(),
+            spoersmaal = "Lever barnet det søkes barnepensjon for?",
             lovreferanse = Lovreferanse(
                 paragraf = "§ 18-1",
                 ledd = 1,
@@ -44,7 +46,10 @@ object BarnepensjonVilkaar {
         Delvilkaar(
             type = VilkaarType.BP_DOEDSFALL_FORELDER,
             tittel = "Dødsfall forelder",
-            beskrivelse = "En eller begge foreldrene er registrert død",
+            beskrivelse = """
+                For å ha rett på ytelsen må en eller begge foreldre være registrer død i folkeregisteret eller hos utenlandske myndigheter.
+            """.trimIndent(),
+            spoersmaal = "Er en eller begge foreldrene registrert som død?",
             lovreferanse = Lovreferanse(
                 paragraf = "§ 18-4",
                 ledd = 2,
@@ -60,7 +65,8 @@ object BarnepensjonVilkaar {
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.BP_ALDER_BARN,
             tittel = "Barnets alder",
-            beskrivelse = "Barnet er under 18 år (på virkningstidspunkt)",
+            beskrivelse = "For å ha rett på ytelsen må barnet være under 18 år på virkningstidspunktet.",
+            spoersmaal = "Er barnet under 18 år på virkningstidspunktet?",
             lovreferanse = Lovreferanse(
                 paragraf = "§ 18-4",
                 ledd = 1,
@@ -87,7 +93,8 @@ object BarnepensjonVilkaar {
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
             tittel = "Barnets medlemskap",
-            beskrivelse = "Barnet er medlem i trygden (fra virkningstidspunkt)",
+            beskrivelse = "For å ha rett på ytelsen må barnet være medlem i trygden.",
+            spoersmaal = "Er barnet medlem i trygden på virkningstidspunktet?",
             lovreferanse = Lovreferanse(
                 paragraf = "§ 18-3",
                 ledd = 1,
@@ -105,9 +112,13 @@ object BarnepensjonVilkaar {
         hovedvilkaar = Delvilkaar(
             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP,
             tittel = "Avdødes forutgående medlemskap",
-            beskrivelse =
-            "Avdød har vært medlem eller mottatt pensjon/uføretrygd fra folketrygden de " +
-                "siste fem årene fram til dødsfallet",
+            beskrivelse = """
+                For å ha rett på ytelsen må avdøde:
+                
+                a) ha vært medlem i trygden siste fem årene før dødsfallet, eller
+                b) ha mottatt pensjon eller uføretrygd siste fem årene før dødsfallet
+            """.trimIndent(),
+            spoersmaal = "Er et av vilkårene oppfylt?",
             lovreferanse = Lovreferanse(
                 paragraf = "§ 18-2",
                 ledd = 1,
@@ -127,7 +138,16 @@ object BarnepensjonVilkaar {
         Delvilkaar(
             type = VilkaarType.BP_YRKESSKADE_AVDOED,
             tittel = "Yrkesskade",
-            beskrivelse = "Dødsfallet skyldes en godkjent yrkes-skade/sykdom",
+            beskrivelse = """
+                Ved dødsfall som skyldes en skade eller sykdom som går inn under kapittel 13, ytes det barnepensjon etter følgende særbestemmelser:
+                
+                a) Vilkåret i § 18-2 om forutgående medlemskap gjelder ikke.
+                b) Vilkåret i § 18-3 om fortsatt medlemskap gjelder ikke.
+                c) Bestemmelsene i §18-5 om reduksjon på grunn av manglende trygdetid gjelder ikke.
+                d) Dersom barnet har utdanning som hovedbeskjeftigelse, ytes det pensjon inntil barnet fyller 21 år. 
+                e) Til praktikanter og lærlinger ytes det barnepensjon inntil barnet fyller 21 år, dersom arbeidsinntekten etter fradrag for skatt er mindre enn grunnbeløpet pluss særtillegg for enslige. 
+            """.trimIndent(),
+            spoersmaal = "Skyldes dødsfallet en godkjent yrkesskade/sykdom?",
             lovreferanse = Lovreferanse(
                 paragraf = "§ 18-11",
                 ledd = 1,
@@ -147,9 +167,9 @@ object BarnepensjonVilkaar {
 
     private fun beggeForeldreDoedeLaerlingPraktikantInntektUnder2G() = Delvilkaar(
         type = VilkaarType.BP_ALDER_BARN_UNNTAK_LAERLING_PRAKTIKANT,
-        tittel =
-        "Ja. Barnet er foreldreløs og er lærling/praktikant med en inntekt etter skatt på mindre enn to " +
-            "ganger grunnbeløpet",
+        tittel = """
+            Ja. Barnet er foreldreløs og er lærling/praktikant med en inntekt etter skatt på mindre enn to ganger grunnbeløpet
+        """.trimIndent(),
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-4",
             ledd = 3
@@ -188,9 +208,9 @@ object BarnepensjonVilkaar {
 
     private fun avdoedMedlemITrygdenIkkeFylt26Aar() = Delvilkaar(
         type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR,
-        tittel =
-        "Ja. Avdøde var medlem ved dødsfallet og hadde ikke fylt 26 år (oppfylles tidligst fra tidspunktet " +
-            "avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde",
+        tittel = """
+            Ja. Avdøde var medlem ved dødsfallet og hadde ikke fylt 26 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde
+        """.trimIndent(),
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 3,
@@ -200,9 +220,9 @@ object BarnepensjonVilkaar {
 
     private fun avdoedMedlemEtter16AarMedUnntakAvMaksimum5Aar() = Delvilkaar(
         type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR,
-        tittel =
-        "Ja. Avdøde var medlem ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år " +
-            "(oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)",
+        tittel = """
+            Ja. Avdøde var medlem ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)
+        """.trimIndent(),
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 3,
@@ -212,9 +232,9 @@ object BarnepensjonVilkaar {
 
     private fun avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon() = Delvilkaar(
         type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_HALV_MINSTEPENSJON,
-        tittel =
-        "Ja. Avdøde var medlem ved dødsfallet og kunne fått en ytelse på minst 1 G (har minst 20 års " +
-            "medlemskap, eller opptjent rett til tilleggspensjon høyere enn særtillegget)",
+        tittel = """
+            Ja. Avdøde var medlem ved dødsfallet og kunne fått en ytelse på minst 1 G (har minst 20 års medlemskap, eller opptjent rett til tilleggspensjon høyere enn særtillegget)
+        """.trimIndent(),
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 6
@@ -223,9 +243,9 @@ object BarnepensjonVilkaar {
 
     private fun avdoedHaddeTidsromMedAvtalefestetPensjon() = Delvilkaar(
         type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_AVTALEFESTET_PENSJON,
-        tittel =
-        "Ja. Avdøde hadde tidsrom med avtalefestet pensjon med statstilskott, som skal likestilles med tidsrom " +
-            "med pensjon fra folketrygden",
+        tittel = """
+            Ja. Avdøde hadde tidsrom med avtalefestet pensjon med statstilskott, som skal likestilles med tidsrom med pensjon fra folketrygden
+        """.trimIndent(),
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 5
@@ -234,9 +254,9 @@ object BarnepensjonVilkaar {
 
     private fun avdoedHaddeTidsromMedPensjonFraLovfestetPensjonsordning() = Delvilkaar(
         type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_LOVFESTET_PENSJONSORDNING,
-        tittel =
-        "Ja. Avdøde hadde tidsrom med pensjon fra en lovfestet pensjonsordning som er tilpasset " +
-            "folketrygden ved at det ikke gis ordinær barnepensjon",
+        tittel = """
+            Ja. Avdøde hadde tidsrom med pensjon fra en lovfestet pensjonsordning som er tilpasset folketrygden ved at det ikke gis ordinær barnepensjon
+        """.trimIndent(),
         lovreferanse = Lovreferanse(
             paragraf = "§ 18-2",
             ledd = 5

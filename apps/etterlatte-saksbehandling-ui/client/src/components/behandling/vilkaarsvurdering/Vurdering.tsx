@@ -49,6 +49,7 @@ export const Vurdering = ({
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
   const [vilkaarutkast, setVilkaarutkast] = useState<VilkaarForm>(initiellForm(vilkaar))
   const [radioError, setRadioError] = useState<string>()
+  const [unntakRadioError, setUnntakRadioError] = useState<string>()
   const [kommentarError, setKommentarError] = useState<string>()
   const [, postVurderVilkaar] = useApiCall(vurderVilkaar)
   const [, postSlettVurdering] = useApiCall(slettVurdering)
@@ -57,11 +58,16 @@ export const Vurdering = ({
     : 'Er hovedvilkår oppfylt?' // TODO denne burde vi kunne bli kvitt når BP får spørsmål som en del av vilkår
 
   const valider = (vilkaarForm: VilkaarForm): vilkaarForm is VilkaarFormValidert => {
-    vilkaarForm.resultat ? setRadioError(undefined) : setRadioError('Du må velge et svar')
-    MIN_KOMMENTAR_LENGDE > (vilkaarForm.kommentar?.length ?? 0)
-      ? setKommentarError('Du må oppgi en begrunnelse')
-      : setKommentarError(undefined)
-    return vilkaarForm.resultat !== undefined && (vilkaarForm?.kommentar ?? '').length >= MIN_KOMMENTAR_LENGDE
+    let resultatIkkeValgt = vilkaarForm.resultat == undefined
+    resultatIkkeValgt ? setRadioError('Du må velge et svar') : setRadioError(undefined)
+
+    let unntakIkkeValgt = vilkaarForm.resultat == VurderingsResultat.IKKE_OPPFYLT && !vilkaarForm.vilkaarsUnntakType
+    unntakIkkeValgt ? setUnntakRadioError('Du må velge et unntak') : setUnntakRadioError(undefined)
+
+    let manglerKommentar = MIN_KOMMENTAR_LENGDE > (vilkaarForm.kommentar?.length ?? 0)
+    manglerKommentar ? setKommentarError('Du må oppgi en begrunnelse') : setKommentarError(undefined)
+
+    return !resultatIkkeValgt && !unntakIkkeValgt && !manglerKommentar
   }
 
   const vilkaarVurdert = (values: VilkaarFormValidert, onSuccess?: () => void) => {
@@ -182,7 +188,10 @@ export const Vurdering = ({
                 size="small"
                 className="radioGroup"
                 onChange={(event) => {
-                  setVilkaarutkast({ ...vilkaarutkast, resultat: VurderingsResultat[event as VurderingsResultat] })
+                  setVilkaarutkast({
+                    ...vilkaarutkast,
+                    resultat: VurderingsResultat[event as VurderingsResultat],
+                  })
                   setRadioError(undefined)
                 }}
                 value={vilkaarutkast.resultat}
@@ -205,8 +214,15 @@ export const Vurdering = ({
                       legend="Er unntak fra hovedvilkåret oppfylt?"
                       size="small"
                       className="radioGroup"
-                      onChange={(type) => setVilkaarutkast({ ...vilkaarutkast, vilkaarsUnntakType: type })}
+                      onChange={(type) => {
+                        setVilkaarutkast({
+                          ...vilkaarutkast,
+                          vilkaarsUnntakType: type,
+                        })
+                        setUnntakRadioError(undefined)
+                      }}
                       value={vilkaarutkast.vilkaarsUnntakType}
+                      error={unntakRadioError}
                     >
                       <div className="flex">
                         {vilkaar.unntaksvilkaar.map((unntakvilkaar) => (

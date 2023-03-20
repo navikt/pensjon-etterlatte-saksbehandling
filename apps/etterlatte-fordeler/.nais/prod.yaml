@@ -27,7 +27,19 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14
+        tier: db-custom-1-3840
+        collation: nb_NO.UTF8
+        cascadingDelete: false
         name: etterlatte-fordeler
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
+        maintenance:
+          day: 7
+          hour: 2
         databases:
           - name: fordeling
             envVarPrefix: DB
@@ -45,6 +57,8 @@ spec:
       value: http://etterlatte-pdltjenester/person
     - name: PDL_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: FEATURE_MAX_FORDELING_TIL_DOFFEN
+      value: "0"
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEHANDLING_URL

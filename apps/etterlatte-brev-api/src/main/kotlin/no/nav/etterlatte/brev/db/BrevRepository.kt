@@ -215,15 +215,8 @@ class BrevRepository private constructor(private val ds: DataSource) {
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
                 FROM hendelse
-                ORDER  BY brev_id, opprettet DESC
+                ORDER BY brev_id, opprettet DESC
             )
-        """
-
-        const val HENT_VEDTAK_BREV_QUERY = """
-            SELECT *
-            FROM brev b
-            WHERE b.behandling_id = ? 
-            AND b.vedtaksbrev = true
         """
 
         const val OPPRETT_BREV_QUERY = """

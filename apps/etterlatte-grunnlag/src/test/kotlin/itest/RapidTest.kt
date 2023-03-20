@@ -2,7 +2,6 @@ package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
-import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
@@ -26,7 +25,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RapidTest {
@@ -37,7 +35,6 @@ internal class RapidTest {
     private lateinit var grunnlagService: RealGrunnlagService
     private lateinit var inspector: TestRapid
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val sendToRapid: (String, UUID) -> Unit = mockk(relaxed = true)
 
     @BeforeAll
     fun beforeAll() {
@@ -56,7 +53,6 @@ internal class RapidTest {
         grunnlagService = RealGrunnlagService(opplysningRepo, behandlingKlient, mockk())
         inspector = TestRapid().apply {
             GrunnlagHendelser(this, grunnlagService)
-            BehandlingHendelser(this)
         }
     }
 

@@ -30,5 +30,9 @@ dependencies {
     testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.navfelles.mockoauth2server) {
+        exclude("org.slf4j", "slf4j-api")
+    }
     testImplementation(project(":libs:testdata"))
 }

@@ -76,9 +76,7 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    fun oppdaterAdressebeskyttelseHendelse(
-        adressebeskyttelse: Adressebeskyttelse
-    ) {
+    suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = finnSakIdForFnr(adressebeskyttelse.fnr).distinct()
         sakIder.forEach { sakId ->

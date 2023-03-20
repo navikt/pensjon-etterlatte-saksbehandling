@@ -13,11 +13,16 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
+import java.time.ZonedDateTime
+import java.util.*
 
 fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlient: BehandlingKlient) {
     route("/api/vedtak") {
@@ -38,7 +43,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
         get("/{$BEHANDLINGSID_CALL_PARAMETER}/sammendrag") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
-                val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendrag()
+                val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendragDto()
                 if (vedtaksresultat == null) {
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
@@ -67,7 +72,8 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/attester") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Attesterer vedtak for behandling $behandlingId")
-                val attestert = service.attesterVedtak(behandlingId, bruker)
+                val (kommentar) = call.receive<AttesterVedtakDto>()
+                val attestert = service.attesterVedtak(behandlingId, kommentar, bruker)
 
                 call.respond(attestert.toDto())
             }
@@ -94,7 +100,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
 
                 logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
                 val loependeYtelse = service.sjekkOmVedtakErLoependePaaDato(sakId, dato)
-                call.respond(loependeYtelse)
+                call.respond(loependeYtelse.toDto())
             }
         }
 
@@ -108,4 +114,17 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
     }
 }
 
+private fun Vedtak.toVedtakSammendragDto() = VedtakSammendragDto(
+    id = id.toString(),
+    behandlingId = behandlingId,
+    datoAttestert = attestasjon?.tidspunkt?.toNorskTid()
+)
+
+private fun LoependeYtelse.toDto() = LoependeYtelseDTO(
+    erLoepende = erLoepende,
+    dato = dato
+)
+
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
+
+data class VedtakSammendragDto(val id: String, val behandlingId: UUID, val datoAttestert: ZonedDateTime?)

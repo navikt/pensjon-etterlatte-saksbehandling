@@ -7,9 +7,9 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.loependeYtelse.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
 import no.nav.etterlatte.rapidsandrivers.EventNames.OMREGNINGSHENDELSE
 import no.nav.etterlatte.regulering.LoependeYtelserforespoersel
@@ -23,16 +23,17 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import java.time.LocalDate
+import java.util.*
 
 internal class LoependeYtelserforespoerselTest {
 
     private val `1_mai_2023` = LocalDate.of(2023, 5, 1)
     private val sakId = 1L
 
-    private fun genererReguleringMelding(dato: LocalDate, sakId: Long) = JsonMessage.newMessage(
+    private fun genererReguleringMelding(dato: LocalDate) = JsonMessage.newMessage(
         mapOf(
             EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
-            SAK_ID_KEY to sakId,
+            SAK_ID_KEY to 1,
             DATO_KEY to dato,
             TILBAKESTILTE_BEHANDLINGER_KEY to ""
         )
@@ -40,7 +41,7 @@ internal class LoependeYtelserforespoerselTest {
 
     @Test
     fun `kan ta imot reguleringsmelding og kalle paa vedtakservice med riktige verdier`() {
-        val melding = genererReguleringMelding(`1_mai_2023`, sakId)
+        val melding = genererReguleringMelding(`1_mai_2023`)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
 
@@ -53,7 +54,7 @@ internal class LoependeYtelserforespoerselTest {
     @Test
     fun `skal lage ny melding med dato basert paa hva ytelsen har som foerste mulige dato`() {
         val fraDato = LocalDate.of(2023, 8, 1)
-        val melding = genererReguleringMelding(`1_mai_2023`, sakId)
+        val melding = genererReguleringMelding(`1_mai_2023`)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         every { vedtakServiceMock.tilbakestillVedtak(any()) } just runs
         every { vedtakServiceMock.harLoependeYtelserFra(sakId, `1_mai_2023`) } returns LoependeYtelseDTO(true, fraDato)
@@ -74,7 +75,7 @@ internal class LoependeYtelserforespoerselTest {
 
     @Test
     fun `sender ikke ny melding dersom det ikke er en loepende ytelse`() {
-        val melding = genererReguleringMelding(`1_mai_2023`, sakId)
+        val melding = genererReguleringMelding(`1_mai_2023`)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         every { vedtakServiceMock.harLoependeYtelserFra(sakId, `1_mai_2023`) } returns LoependeYtelseDTO(
             false,
@@ -84,5 +85,27 @@ internal class LoependeYtelserforespoerselTest {
 
         inspector.sendTestMessage(melding.toJson())
         Assertions.assertEquals(0, inspector.inspektør.size)
+    }
+
+    @Test
+    fun `tilbakestiller alle vedtak for behandlinger som blitt tilbakestillt allerede`() {
+        val behandlinger = listOf(UUID.randomUUID(), UUID.randomUUID())
+        val melding = mapOf(
+            EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
+            SAK_ID_KEY to 1,
+            DATO_KEY to `1_mai_2023`,
+            TILBAKESTILTE_BEHANDLINGER_KEY to "${behandlinger[0]};${behandlinger[1]}"
+        ).let { JsonMessage.newMessage(it) }
+
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, `1_mai_2023`) } returns LoependeYtelseDTO(
+            true,
+            `1_mai_2023`
+        )
+        val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
+
+        inspector.sendTestMessage(melding.toJson())
+        verify(exactly = 1) { vedtakServiceMock.tilbakestillVedtak(behandlinger[0]) }
+        verify(exactly = 1) { vedtakServiceMock.tilbakestillVedtak(behandlinger[1]) }
     }
 }

@@ -7,7 +7,7 @@ import { attesterVedtaksbrev } from '~shared/api/brev'
 import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
 
-export const AttesterVedtak = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
   const [modalisOpen, setModalisOpen] = useState(false)
 
@@ -26,7 +26,7 @@ export const AttesterVedtak = ({ behandling }: { behandling: IDetaljertBehandlin
     const vedtaksbrevAttestertOK = await ferdigstillVedtaksbrev()
 
     if (vedtaksbrevAttestertOK) {
-      attesterVedtak(behandling.id).then((response) => {
+      attesterVedtak(behandling.id, kommentar).then((response) => {
         if (response.status === 'ok') {
           navigate(`/person/${behandling.søker?.foedselsnummer}`)
         }
@@ -38,11 +38,12 @@ export const AttesterVedtak = ({ behandling }: { behandling: IDetaljertBehandlin
     <BeslutningWrapper>
       <ButtonWrapper>
         <Button variant="primary" size="medium" className="button" onClick={() => setModalisOpen(true)}>
-          Iverksett vedtak
+          Iverksett vedtak og send brev
         </Button>
       </ButtonWrapper>
       <GeneriskModal
-        tekst="Er du sikker på at du vil iverksette vedtaket?"
+        tittel="Er du sikker på at du vil iverksette vedtaket?"
+        beskrivelse="Vedtaksbrevet sendes ut automatisk ved iverksettelse"
         tekstKnappJa="Ja, iverksett vedtak"
         tekstKnappNei=" Nei, gå tilbake"
         onYesClick={attester}

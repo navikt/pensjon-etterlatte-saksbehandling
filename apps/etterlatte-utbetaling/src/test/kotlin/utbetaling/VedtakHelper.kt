@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.math.BigDecimal
 import java.time.Month
@@ -39,6 +40,7 @@ fun vedtak(
 
 ): VedtakDto = VedtakDto(
     vedtakId = vedtakId,
+    status = VedtakStatus.ATTESTERT,
     behandling = behandling,
     sak = Sak(
         id = sakId,
@@ -69,6 +71,7 @@ fun ugyldigVedtakTilUtbetaling(
     saktype: SakType = SakType.BARNEPENSJON
 ): VedtakDto = VedtakDto(
     vedtakId = vedtakId,
+    status = VedtakStatus.ATTESTERT,
     behandling = behandling,
     sak = Sak(
         id = 1,
@@ -106,6 +109,7 @@ fun revurderingVedtak(
     )
 ): VedtakDto = VedtakDto(
     vedtakId = vedtak.vedtakId + 1,
+    status = VedtakStatus.ATTESTERT,
     behandling = Behandling(
         id = UUID.randomUUID(),
         type = BehandlingType.REVURDERING
@@ -130,6 +134,7 @@ fun opphoersVedtak(
     vedtak: VedtakDto
 ): VedtakDto = VedtakDto(
     vedtakId = vedtak.vedtakId + 1,
+    status = VedtakStatus.ATTESTERT,
     behandling = Behandling(
         id = UUID.randomUUID(),
         type = BehandlingType.REVURDERING

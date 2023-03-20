@@ -1,4 +1,4 @@
-name: etterlatte-tilbakestill-alle
+name: etterlatte-tilbakestill-alle-prod
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
@@ -12,7 +12,6 @@ jobs:
           - behandling
           - beregning
           - brev-api
-          - brreg
           - fordeler
           - grunnlag
           - gyldig-soeknad
@@ -23,11 +22,11 @@ jobs:
           - pdltjenester
           - saksbehandling-ui
           - statistikk
-          - testdata
+          - egne-ansatte-lytter
           - tilbakekreving
           - utbetaling
           - vedtaksvurdering
           - vilkaarsvurdering
-    uses: ./.github/workflows/.deploy-main.yaml
+    uses: ./.github/workflows/.deploy-main-prod.yaml
     with:
       applikasjon: ${{ matrix.applikasjon }}

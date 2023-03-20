@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.loependeYtelse
+package no.nav.etterlatte.libs.common.vedtak
 
 import java.time.LocalDate
 

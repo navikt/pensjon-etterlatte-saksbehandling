@@ -7,13 +7,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -295,7 +296,7 @@ internal class VedtaksvurderingServiceTest {
                 opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
             )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
         }
 
         attestertVedtak shouldNotBe null
@@ -305,7 +306,10 @@ internal class VedtaksvurderingServiceTest {
             tidspunkt shouldNotBe null
         }
 
-        coVerify(exactly = 2) { behandlingKlientMock.attester(any(), any(), any()) }
+        val hendelse = slot<VedtakHendelse>()
+        coVerify(exactly = 1) { behandlingKlientMock.attester(any(), any(), null) }
+        coVerify(exactly = 1) { behandlingKlientMock.attester(any(), any(), capture(hendelse)) }
+        hendelse.captured.kommentar shouldBe KOMMENTAR
         verify(exactly = 2) { sendToRapidMock.invoke(any(), any()) }
     }
 
@@ -321,7 +325,7 @@ internal class VedtaksvurderingServiceTest {
             service.fattVedtak(behandlingId, saksbehandler)
 
             assertThrows<BehandlingstilstandException> {
-                service.attesterVedtak(behandlingId, attestant)
+                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
             }
         }
     }
@@ -336,7 +340,7 @@ internal class VedtaksvurderingServiceTest {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
             assertThrows<VedtakTilstandException> {
-                service.attesterVedtak(behandlingId, saksbehandler)
+                service.attesterVedtak(behandlingId, KOMMENTAR, saksbehandler)
             }
         }
     }
@@ -351,10 +355,10 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
 
             assertThrows<VedtakTilstandException> {
-                service.attesterVedtak(behandlingId, attestant)
+                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
             }
         }
     }
@@ -383,7 +387,7 @@ internal class VedtaksvurderingServiceTest {
                 opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
             )
             service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
             service.iverksattVedtak(behandlingId)
         }
 
@@ -418,7 +422,7 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
             service.iverksattVedtak(behandlingId)
 
             assertThrows<VedtakTilstandException> {
@@ -502,7 +506,7 @@ internal class VedtaksvurderingServiceTest {
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, attestant)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
 
             assertThrows<VedtakTilstandException> {
                 service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())
@@ -563,5 +567,6 @@ internal class VedtaksvurderingServiceTest {
     private companion object {
         val VIRKNINGSTIDSPUNKT_JAN_2023 = YearMonth.of(2023, Month.JANUARY)
         val VIRKNINGSTIDSPUNKT_JAN_2024 = YearMonth.of(2024, Month.JANUARY)
+        val KOMMENTAR = "Sendt oppgave til NØP"
     }
 }

@@ -1,96 +1,33 @@
-name: etterlatte-tilbakestill-alle
+name: etterlatte-tilbakestill-alle-prod
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
 
 jobs:
-  tilbakestill-behandling:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: behandling
+  tilbakestill-til-main:
     secrets: inherit
-  tilbakestill-beregning:
-    uses: ./.github/workflows/.deploy-main.yaml
+    strategy:
+      matrix:
+        applikasjon:
+          - behandling
+          - beregning
+          - brev-api
+          - brreg
+          - fordeler
+          - grunnlag
+          - gyldig-soeknad
+          - hendelser-pdl
+          - oppdater-behandling
+          - opplysninger-fra-pdl
+          - opplysninger-fra-soeknad
+          - pdltjenester
+          - saksbehandling-ui
+          - statistikk
+          - egne-ansatte-lytter
+          - tilbakekreving
+          - utbetaling
+          - vedtaksvurdering
+          - vilkaarsvurdering
+    uses: ./.github/workflows/.deploy-main-prod.yaml
     with:
-      applikasjon: beregning
-    secrets: inherit
-  tilbakestill-brev-api:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: brev-api
-    secrets: inherit
-  tilbakestill-fordeler:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: fordeler
-    secrets: inherit
-  tilbakestill-grunnlag:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: grunnlag
-    secrets: inherit
-  tilbakestill-gyldig-soeknad:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: gyldig-soeknad
-    secrets: inherit
-  tilbakestill-hendelser-pdl:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: hendelser-pdl
-    secrets: inherit
-  tilbakestill-oppdater-behandling:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: oppdater-behandling
-    secrets: inherit
-  tilbakestill-opplysninger-fra-pdl:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: opplysninger-fra-pdl
-    secrets: inherit
-  tilbakestill-opplysninger-fra-soeknad:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: opplysninger-fra-soeknad
-    secrets: inherit
-  tilbakestill-pdltjenester:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: pdltjenester
-    secrets: inherit
-  tilbakestill-saksbehandling-ui:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: saksbehandling-ui
-    secrets: inherit
-  tilbakestill-egne-ansatte-lytter:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: egne-ansatte-lytter
-    secrets: inherit
-  tilbakestill-statistikk:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: statistikk
-    secrets: inherit
-  tilbakestill-tilbakekreving:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: tilbakekreving
-    secrets: inherit
-  tilbakestill-utbetaling:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: utbetaling
-    secrets: inherit
-  tilbakestill-vedtaksvurdering:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: vedtaksvurdering
-    secrets: inherit
-  tilbakestill-vilkaarsvurdering:
-    uses: ./.github/workflows/.deploy-main.yaml
-    with:
-      applikasjon: vilkaarsvurdering
-    secrets: inherit
+      applikasjon: ${{ matrix.app }}

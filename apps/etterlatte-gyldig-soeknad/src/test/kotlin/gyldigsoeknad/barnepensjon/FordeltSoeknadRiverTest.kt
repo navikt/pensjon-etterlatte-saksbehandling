@@ -51,11 +51,12 @@ internal class FordeltSoeknadRiverTest {
         every { gyldigSoeknadServiceMock.hentPersongalleriFraSoeknad(any()) } returns persongalleri
         every { gyldigSoeknadServiceMock.vurderGyldighet(persongalleri) } returns gyldighetsResultat
         every { behandlingClientMock.initierBehandling(any(), any(), persongalleri) } returns id
+        every { behandlingClientMock.skaffSak(any(), any()) } returns 1337L
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        assertEquals("soeknad_innsendt", inspector.first().get(EVENT_NAME_KEY).asText())
+        assertEquals("trenger_behandling", inspector.first().get(EVENT_NAME_KEY).asText())
         assertEquals(1337L, inspector.first().get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals(id.toString(), inspector.first().get(GyldigSoeknadVurdert.behandlingIdKey).asText())
         assertEquals(true, inspector.first().get(GyldigSoeknadVurdert.gyldigInnsenderKey).asBoolean())

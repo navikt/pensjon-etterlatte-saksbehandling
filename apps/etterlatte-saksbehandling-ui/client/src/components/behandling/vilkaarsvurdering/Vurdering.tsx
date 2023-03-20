@@ -13,6 +13,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { formaterVurderingsResultat } from '~components/behandling/vilkaarsvurdering/utils'
 
 const MIN_KOMMENTAR_LENGDE = 1
+const INGEN_VILKAAR_OPPFYLT = 'ingen_vilkaar_oppfylt'
 
 interface VilkaarForm {
   resultat: VurderingsResultat | null
@@ -67,7 +68,7 @@ export const Vurdering = ({
     const unntaksvilkaar =
       values.resultat == VurderingsResultat.IKKE_OPPFYLT &&
       values.vilkaarsUnntakType &&
-      values.vilkaarsUnntakType !== ''
+      values.vilkaarsUnntakType !== INGEN_VILKAAR_OPPFYLT
         ? {
             unntaksvilkaar: {
               type: values.vilkaarsUnntakType,
@@ -213,7 +214,7 @@ export const Vurdering = ({
                             {unntakvilkaar.tittel}
                           </Radio>
                         ))}
-                        <Radio key="Nei" value="">
+                        <Radio key="Nei" value={INGEN_VILKAAR_OPPFYLT}>
                           Nei, ingen av unntakene er oppfylt
                         </Radio>
                       </div>

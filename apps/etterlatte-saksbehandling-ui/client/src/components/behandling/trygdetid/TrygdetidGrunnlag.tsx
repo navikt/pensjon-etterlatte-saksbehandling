@@ -20,7 +20,7 @@ type Props = {
 const initialState = (erFremtidigTrygdetid: boolean) => {
   return {
     id: null,
-    type: erFremtidigTrygdetid ? ITrygdetidType.FREMTIDIG_TRYGDETID : ITrygdetidType.NASJONAL_TRYGDETID,
+    type: erFremtidigTrygdetid ? ITrygdetidType.FREMTIDIG : ITrygdetidType.NASJONAL,
     bosted: '',
     periodeFra: null,
     periodeTil: null,
@@ -63,9 +63,9 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
 
   const relevantGrunnlag = (grunnlag: ITrygdetidGrunnlag) => {
     if (erFremtidigTrygdetid) {
-      return grunnlag.type === ITrygdetidType.FREMTIDIG_TRYGDETID
+      return grunnlag.type === ITrygdetidType.FREMTIDIG
     } else {
-      return grunnlag.type !== ITrygdetidType.FREMTIDIG_TRYGDETID
+      return grunnlag.type !== ITrygdetidType.FREMTIDIG
     }
   }
 
@@ -78,7 +78,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
       </ContentHeader>
       <Innhold>
         <TrygdetidPerioder>
-          {trygdetid.grunnlag.filter(relevantGrunnlag).map((grunnlag) => (
+          {trygdetid.trygdetidGrunnlag.filter(relevantGrunnlag).map((grunnlag) => (
             <TrygdetidPeriode key={grunnlag.id} grunnlag={grunnlag} />
           ))}
         </TrygdetidPerioder>

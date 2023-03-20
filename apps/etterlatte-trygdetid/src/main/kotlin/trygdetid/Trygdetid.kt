@@ -1,31 +1,38 @@
 package no.nav.etterlatte.trygdetid
 
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.*
 
 data class Trygdetid(
-    val behandlingsId: UUID,
-    val oppsummertTrygdetid: OppsummertTrygdetid?,
-    val grunnlag: List<TrygdetidGrunnlag>
+    val id: UUID,
+    val behandlingId: UUID,
+    val opprettet: Tidspunkt,
+    val trygdetidGrunnlag: List<TrygdetidGrunnlag>,
+    val beregnetTrygdetid: BeregnetTrygdetid?
 )
 
-data class OppsummertTrygdetid(
-    val nasjonalTrygdetid: Int,
-    val fremtidigTrygdetid: Int,
-    val totalt: Int
+data class BeregnetTrygdetid(
+    val nasjonal: Int,
+    val fremtidig: Int,
+    val total: Int
 )
 
 data class TrygdetidGrunnlag(
     val id: UUID,
     val type: TrygdetidType,
     val bosted: String,
-    val periodeFra: LocalDate,
-    val periodeTil: LocalDate,
+    val periode: TrygdetidPeriode,
     val kilde: String
 )
 
+data class TrygdetidPeriode(
+    val fra: LocalDate,
+    val til: LocalDate
+)
+
 enum class TrygdetidType {
-    NASJONAL_TRYGDETID,
-    FREMTIDIG_TRYGDETID,
-    UTENLANDS_TRYGDETID
+    NASJONAL,
+    FREMTIDIG,
+    UTLAND
 }

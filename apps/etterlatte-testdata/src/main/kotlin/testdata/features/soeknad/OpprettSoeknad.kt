@@ -93,7 +93,9 @@ private fun opprettSoeknadJson(ytelse: String, gjenlevendeFnr: String, avdoedFnr
     val erOmstilling = "Omstillingsstoenad" == ytelse
     val skjemaInfo: String
     val soeker: String
+    val eventName: String
     if (erOmstilling) {
+        eventName = "soeknad_innsendt"
         soeker = gjenlevendeFnr
         skjemaInfo = opprettSkjemaInfoOmstillingsstoenad(
             gjenlevendeFnr,
@@ -101,6 +103,7 @@ private fun opprettSoeknadJson(ytelse: String, gjenlevendeFnr: String, avdoedFnr
             Tidspunkt.now().toLocalDatetimeUTC()
         )
     } else {
+        eventName = "trenger_behandling"
         soeker = barnFnr
         skjemaInfo = opprettSkjemaInfoBarnepensjon(
             gjenlevendeFnr,
@@ -111,7 +114,7 @@ private fun opprettSoeknadJson(ytelse: String, gjenlevendeFnr: String, avdoedFnr
     }
     return JsonMessage.newMessage(
         mutableMapOf(
-            "@event_name" to "soeknad_innsendt",
+            "@event_name" to eventName,
             "@skjema_info" to objectMapper.readValue<ObjectNode>(skjemaInfo),
             "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
             "@template" to "soeknad",

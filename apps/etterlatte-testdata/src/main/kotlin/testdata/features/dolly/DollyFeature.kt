@@ -150,7 +150,7 @@ fun opprettSoeknadJson(
 
     return JsonMessage.newMessage(
         mapOf(
-            "@event_name" to "soeknad_innsendt",
+            "@event_name" to "trenger_behandling",
             "@skjema_info" to objectMapper.readValue<ObjectNode>(skjemaInfo),
             "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
             "@template" to "soeknad",

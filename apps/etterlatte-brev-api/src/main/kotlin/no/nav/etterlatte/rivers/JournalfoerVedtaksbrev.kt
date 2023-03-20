@@ -1,22 +1,22 @@
 package no.nav.etterlatte.rivers
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
-import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class JournalfoerVedtaksbrev(
     private val rapidsConnection: RapidsConnection,
@@ -28,6 +28,10 @@ internal class JournalfoerVedtaksbrev(
         River(rapidsConnection).apply {
             eventName(KafkaHendelseType.ATTESTERT.toString())
             validate { it.requireKey("vedtak") }
+            validate { it.requireKey("vedtak.vedtakId") }
+            validate { it.requireKey("vedtak.behandling.id") }
+            validate { it.requireKey("vedtak.sak.ident") }
+            validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
                 it.rejectValues(
                     "vedtak.behandling.type",
@@ -40,9 +44,25 @@ internal class JournalfoerVedtaksbrev(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         try {
             withLogContext {
-                val vedtak: VedtakDto = deserialize(packet["vedtak"].toJson())
+                val vedtak = VedtakTilJournalfoering(
+                    vedtakId = packet["vedtak.vedtakId"].asLong(),
+                    behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText()),
+                    soekerIdent = packet["vedtak.sak.ident"].asText(),
+                    ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText()
+                )
                 logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
-                val (brev, response) = service.journalfoerVedtaksbrev(vedtak)
+                val behandlingId = vedtak.behandlingId
+
+                val vedtaksbrev = service.hentVedtaksbrev(behandlingId)
+                    ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
+
+                // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
+                if (vedtaksbrev.status == Status.JOURNALFOERT) {
+                    logger.warn("Vedtaksbrev (id=${vedtaksbrev.id}) er allerede journalført.")
+                    return@withLogContext
+                }
+
+                val (brev, response) = service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
 
                 logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")
 
@@ -74,3 +94,11 @@ internal class JournalfoerVedtaksbrev(
         publish(packet.toJson())
     }
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class VedtakTilJournalfoering(
+    val vedtakId: Long,
+    val behandlingId: UUID,
+    val soekerIdent: String,
+    val ansvarligEnhet: String
+)

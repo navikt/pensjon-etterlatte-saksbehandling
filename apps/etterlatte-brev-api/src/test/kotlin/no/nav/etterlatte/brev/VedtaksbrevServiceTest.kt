@@ -32,10 +32,8 @@ import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -48,7 +46,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
+import kotlin.random.Random
 
 internal class VedtaksbrevServiceTest {
 
@@ -146,7 +145,7 @@ internal class VedtaksbrevServiceTest {
             coVerify(exactly = 1) {
                 pdfGenerator.genererPdf(any<InnvilgetBrevRequest>())
                 sakOgBehandlingService.hentBehandling(SAK_ID, BEHANDLING_ID, any())
-                adresseService.hentAvsenderOgAttestant(any<ForenkletVedtak>())
+                adresseService.hentAvsenderOgAttestant(any())
                 adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
             }
 
@@ -272,26 +271,19 @@ internal class VedtaksbrevServiceTest {
         fun `Vedtaksbrev journalfoeres som forventet`() {
             val forventetBrev = Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), true)
 
-            every { db.hentBrevForBehandling(any()) } returns listOf(
-                forventetBrev,
-                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), false),
-                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.JOURNALFOERT, Mottaker(STOR_SNERK), false)
-            )
-
             val forventetResponse = JournalpostResponse("1", "OK", "melding", true)
             every { dokarkivService.journalfoer(any(), any()) } returns forventetResponse
 
             val vedtak = opprettVedtak()
 
             val (brev, response) = runBlocking {
-                vedtaksbrevService.journalfoerVedtaksbrev(vedtak)
+                vedtaksbrevService.journalfoerVedtaksbrev(forventetBrev, vedtak)
             }
 
             assertEquals(forventetBrev, brev)
             assertEquals(forventetResponse, response)
 
             verify(exactly = 1) {
-                db.hentBrevForBehandling(BEHANDLING_ID)
                 dokarkivService.journalfoer(forventetBrev, vedtak)
                 db.setJournalpostId(forventetBrev.id, response.journalpostId)
                 db.oppdaterStatus(forventetBrev.id, Status.JOURNALFOERT, any())
@@ -309,19 +301,14 @@ internal class VedtaksbrevServiceTest {
             names = ["FERDIGSTILT"]
         )
         fun `Journalfoering av brev med ugyldig status`(status: Status) {
-            every { db.hentBrevForBehandling(any()) } returns listOf(
-                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), false),
-                Brev(2, BEHANDLING_ID, "fnr", "tittel", status, Mottaker(STOR_SNERK), true),
-                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), false)
-            )
+            val brev = Brev(Random.nextLong(), BEHANDLING_ID, "fnr", "tittel", status, Mottaker(STOR_SNERK), true)
 
             runBlocking {
                 assertThrows<IllegalArgumentException> {
-                    vedtaksbrevService.journalfoerVedtaksbrev(opprettVedtak())
+                    vedtaksbrevService.journalfoerVedtaksbrev(brev, opprettVedtak())
                 }
             }
 
-            verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
             verify(exactly = 0) { db.oppdaterStatus(any(), any()) }
 
             verify {
@@ -331,11 +318,12 @@ internal class VedtaksbrevServiceTest {
         }
     }
 
-    private fun opprettVedtak() = mockk<VedtakDto> {
-        every { behandling.id } returns BEHANDLING_ID
-        every { sak.ident } returns "ident"
-        every { vedtakFattet } returns VedtakFattet("Z12345", "ansvarlig enhet", Tidspunkt.now())
-    }
+    private fun opprettVedtak() = VedtakTilJournalfoering(
+        vedtakId = 1234,
+        behandlingId = BEHANDLING_ID,
+        soekerIdent = "ident",
+        ansvarligEnhet = "ansvarlig enhet"
+    )
 
     private fun opprettBehandling() = Behandling(
         SAK_ID,
@@ -365,7 +353,7 @@ internal class VedtaksbrevServiceTest {
     )
 
     private companion object {
-        private val SAK_ID = 123L
+        private const val SAK_ID = 123L
         private val BEHANDLING_ID = UUID.randomUUID()
         private val STOR_SNERK = Foedselsnummer.of("11057523044")
         private const val PORSGRUNN = "0805"

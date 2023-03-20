@@ -15,12 +15,12 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.journalpost.Sak
 import no.nav.etterlatte.libs.common.journalpost.Sakstype
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.Base64
 
 interface DokarkivService {
-    fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakDto): JournalpostResponse
+    fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): JournalpostResponse
 }
 
 class DokarkivServiceImpl(
@@ -29,7 +29,7 @@ class DokarkivServiceImpl(
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakDto): JournalpostResponse = runBlocking {
+    override fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): JournalpostResponse = runBlocking {
         logger.info("Oppretter journalpost for brev med id=${vedtaksbrev.id}")
 
         val innhold = db.hentBrevInnhold(vedtaksbrev.id)
@@ -43,7 +43,7 @@ class DokarkivServiceImpl(
 
     private fun mapTilJournalpostRequest(
         vedtaksbrev: Brev,
-        vedtak: VedtakDto,
+        vedtak: VedtakTilJournalfoering,
         dokumentInnhold: ByteArray
     ): JournalpostRequest {
         return JournalpostRequest(
@@ -51,13 +51,13 @@ class DokarkivServiceImpl(
             journalpostType = JournalPostType.UTGAAENDE,
             behandlingstema = BEHANDLINGSTEMA_BP,
             avsenderMottaker = vedtaksbrev.mottaker.tilAvsenderMottaker(),
-            bruker = Bruker(vedtak.sak.ident),
+            bruker = Bruker(vedtak.soekerIdent),
             eksternReferanseId = "${vedtaksbrev.behandlingId}.${vedtaksbrev.id}",
             sak = Sak(Sakstype.FAGSAK, vedtaksbrev.behandlingId.toString()),
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(vedtaksbrev.tittel)),
             tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema
             kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
-            journalfoerendeEnhet = vedtak.vedtakFattet!!.ansvarligEnhet
+            journalfoerendeEnhet = vedtak.ansvarligEnhet
         )
     }
 

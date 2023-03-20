@@ -9,8 +9,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.brev.model.Brev
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
@@ -25,21 +23,14 @@ import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.journalpost.Sakstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.etterlatte.libs.common.journalpost.Sak as JSak
-import no.nav.etterlatte.libs.common.sak.Sak as VSak
 
 internal class DokarkivServiceTest {
 
@@ -80,7 +71,7 @@ internal class DokarkivServiceTest {
 
         assertEquals(vedtaksbrev.mottaker.foedselsnummer!!.value, actualRequest.avsenderMottaker.id)
 
-        assertEquals(Bruker(vedtak.sak.ident), actualRequest.bruker)
+        assertEquals(Bruker(vedtak.soekerIdent), actualRequest.bruker)
         assertEquals("${vedtaksbrev.behandlingId}.${vedtaksbrev.id}", actualRequest.eksternReferanseId)
         assertEquals(JSak(Sakstype.FAGSAK, vedtaksbrev.behandlingId.toString()), actualRequest.sak)
 
@@ -91,7 +82,7 @@ internal class DokarkivServiceTest {
 
         assertEquals("EYB", actualRequest.tema)
         assertEquals("S", actualRequest.kanal)
-        assertEquals(vedtak.vedtakFattet!!.ansvarligEnhet, actualRequest.journalfoerendeEnhet)
+        assertEquals(vedtak.ansvarligEnhet, actualRequest.journalfoerendeEnhet)
     }
 
     private fun opprettVedtaksbrev() = Brev(
@@ -104,16 +95,11 @@ internal class DokarkivServiceTest {
         erVedtaksbrev = true
     )
 
-    private fun opprettVedtak() = VedtakDto(
+    private fun opprettVedtak() = VedtakTilJournalfoering(
         vedtakId = 1,
-        status = VedtakStatus.FATTET_VEDTAK,
-        virkningstidspunkt = YearMonth.now(),
-        behandling = Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.randomUUID()),
-        type = VedtakType.INNVILGELSE,
-        sak = VSak("ident", SakType.BARNEPENSJON, 1),
-        vedtakFattet = VedtakFattet("Z12345", "4808", Tidspunkt.now()),
-        utbetalingsperioder = emptyList(),
-        attestasjon = null
+        behandlingId = UUID.randomUUID(),
+        soekerIdent = "ident",
+        ansvarligEnhet = "4808"
     )
 
     companion object {

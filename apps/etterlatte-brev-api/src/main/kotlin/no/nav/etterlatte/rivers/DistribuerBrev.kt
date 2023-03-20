@@ -1,7 +1,6 @@
 package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
@@ -23,8 +22,7 @@ import org.slf4j.LoggerFactory
 
 internal class DistribuerBrev(
     private val rapidsConnection: RapidsConnection,
-    private val distribusjonService: DistribusjonService,
-    private val brevService: BrevService
+    private val distribusjonService: DistribusjonService
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)
 

@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
@@ -37,7 +38,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class JournalfoerVedtaksbrevTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
@@ -64,34 +65,23 @@ internal class JournalfoerVedtaksbrevTest {
         )
         val response = JournalpostResponse("1234", null, null, true, emptyList())
 
-        every { vedtaksbrevService.journalfoerVedtaksbrev(any()) } returns Pair(brev, response)
+        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
+        every { vedtaksbrevService.journalfoerVedtaksbrev(any(), any()) } returns Pair(brev, response)
 
         val vedtak = opprettVedtak()
-
-        val melding = JsonMessage.newMessage(
-            mapOf(
-                EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
-                "vedtak" to vedtak
-            )
-        )
+        val melding = opprettMelding(vedtak)
 
         val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        val vedtakCapture = slot<VedtakDto>()
-        verify(exactly = 1) { vedtaksbrevService.journalfoerVedtaksbrev(capture(vedtakCapture)) }
+        val vedtakCapture = slot<VedtakTilJournalfoering>()
+        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
+        verify(exactly = 1) { vedtaksbrevService.journalfoerVedtaksbrev(any(), capture(vedtakCapture)) }
 
         val vedtakActual = vedtakCapture.captured
 
         assertEquals(vedtak.vedtakId, vedtakActual.vedtakId)
-        assertEquals(vedtak.virkningstidspunkt, vedtakActual.virkningstidspunkt)
-        assertEquals(vedtak.sak, vedtakActual.sak)
-        assertEquals(vedtak.behandling, vedtakActual.behandling)
-        assertEquals(vedtak.type, vedtakActual.type)
-        assertEquals(vedtak.utbetalingsperioder, vedtakActual.utbetalingsperioder)
-        assertEquals(vedtak.vedtakFattet!!.ansvarligSaksbehandler, vedtakActual.vedtakFattet!!.ansvarligSaksbehandler)
-        assertEquals(vedtak.vedtakFattet!!.ansvarligEnhet, vedtakActual.vedtakFattet!!.ansvarligEnhet)
-        assertEquals(vedtak.attestasjon!!.attestant, vedtakActual.attestasjon!!.attestant)
-        assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.attestasjon!!.attesterendeEnhet)
+        assertEquals(vedtak.behandling.id, vedtakActual.behandlingId)
+        assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.ansvarligEnhet)
 
         val actualMessage = inspektoer.message(0)
         assertEquals(BrevEventTypes.JOURNALFOERT.toString(), actualMessage.get(EVENT_NAME_KEY).asText())
@@ -99,6 +89,31 @@ internal class JournalfoerVedtaksbrevTest {
         assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
         assertEquals(adresse.toJson(), actualMessage.get("mottakerAdresse").toJson())
+    }
+
+    @Test
+    fun `Brev er allerede journalfoert`() {
+        val adresse = Adresse("Fornavn", "Etternavn", "Testgaten 13", "1234", "OSLO")
+        val brev = Brev(
+            1,
+            BEHANDLING_ID,
+            "fnr",
+            "tittel",
+            Status.JOURNALFOERT,
+            Mottaker(STOR_SNERK, null, adresse),
+            true
+        )
+
+        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
+
+        val vedtak = opprettVedtak()
+        val melding = opprettMelding(vedtak)
+
+        val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
+
+        assertEquals(0, inspektoer.size)
+
+        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
     }
 
     @Test
@@ -115,6 +130,15 @@ internal class JournalfoerVedtaksbrevTest {
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         verify { vedtaksbrevService wasNot Called }
+    }
+
+    private fun opprettMelding(vedtak: VedtakDto): JsonMessage {
+        return JsonMessage.newMessage(
+            mapOf(
+                EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
+                "vedtak" to vedtak
+            )
+        )
     }
 
     private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {

@@ -16,11 +16,11 @@ import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class VedtaksbrevService(
     private val db: BrevRepository,
@@ -72,12 +72,7 @@ class VedtaksbrevService(
         }
     }
 
-    fun journalfoerVedtaksbrev(vedtak: VedtakDto): Pair<Brev, JournalpostResponse> {
-        val behandlingId = vedtak.behandling.id
-
-        val vedtaksbrev = hentVedtaksbrev(behandlingId)
-            ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
-
+    fun journalfoerVedtaksbrev(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): Pair<Brev, JournalpostResponse> {
         if (vedtaksbrev.status != Status.FERDIGSTILT) {
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
@@ -128,6 +123,6 @@ class VedtaksbrevService(
         )
     }
 
-    private fun hentVedtaksbrev(behandlingId: UUID): Brev? =
+    fun hentVedtaksbrev(behandlingId: UUID): Brev? =
         db.hentBrevForBehandling(behandlingId).find { it.erVedtaksbrev }
 }

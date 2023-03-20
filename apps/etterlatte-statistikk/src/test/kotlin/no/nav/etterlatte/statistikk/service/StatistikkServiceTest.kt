@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
@@ -33,7 +34,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 class StatistikkServiceTest {
 
@@ -222,6 +223,7 @@ fun vedtak(
     attestasjon: Attestasjon? = null
 ): VedtakDto = VedtakDto(
     vedtakId = vedtakId,
+    status = VedtakStatus.ATTESTERT,
     virkningstidspunkt = virk,
     sak = Sak(ident = ident, sakType = sakType, id = sakId),
     behandling = Behandling(type = behandlingType, id = behandlingId),

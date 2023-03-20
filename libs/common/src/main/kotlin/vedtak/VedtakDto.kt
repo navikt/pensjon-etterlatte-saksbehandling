@@ -10,6 +10,7 @@ import java.util.Objects.isNull
 
 data class VedtakDto(
     val vedtakId: Long,
+    val status: VedtakStatus,
     val virkningstidspunkt: YearMonth,
     val sak: Sak,
     val behandling: Behandling,
@@ -18,6 +19,14 @@ data class VedtakDto(
     val attestasjon: Attestasjon?,
     val utbetalingsperioder: List<Utbetalingsperiode>
 )
+
+enum class VedtakStatus {
+    OPPRETTET,
+    FATTET_VEDTAK,
+    ATTESTERT,
+    RETURNERT,
+    IVERKSATT
+}
 
 data class Behandling(
     val type: BehandlingType,

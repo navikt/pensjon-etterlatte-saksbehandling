@@ -30,6 +30,7 @@
   ],
   "vedtak": {
     "vedtakId": 217,
+    "status": "ATTESTERT",
     "virkningstidspunkt": "2022-09",
     "sak": {
       "ident": "18111159498",

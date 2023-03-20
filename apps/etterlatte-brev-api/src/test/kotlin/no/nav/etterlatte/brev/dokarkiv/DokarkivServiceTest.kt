@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -105,6 +106,7 @@ internal class DokarkivServiceTest {
 
     private fun opprettVedtak() = VedtakDto(
         vedtakId = 1,
+        status = VedtakStatus.FATTET_VEDTAK,
         virkningstidspunkt = YearMonth.now(),
         behandling = Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.randomUUID()),
         type = VedtakType.INNVILGELSE,

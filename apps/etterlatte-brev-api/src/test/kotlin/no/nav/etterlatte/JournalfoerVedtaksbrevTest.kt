@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -119,6 +120,7 @@ internal class JournalfoerVedtaksbrevTest {
     private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {
         return VedtakDto(
             vedtakId = 1L,
+            status = VedtakStatus.ATTESTERT,
             virkningstidspunkt = YearMonth.now(),
             sak = Sak("Z123456", SakType.BARNEPENSJON, 2L),
             behandling = Behandling(behandlingType, UUID.randomUUID()),

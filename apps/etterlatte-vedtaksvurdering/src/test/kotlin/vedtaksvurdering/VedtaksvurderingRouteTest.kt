@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -24,6 +25,7 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -40,6 +42,7 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -65,9 +68,14 @@ internal class VedtaksvurderingRouteTest {
             buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
+    @AfterEach
+    fun afterEach() {
+        confirmVerified()
+        clearAllMocks()
+    }
+
     @BeforeEach
     fun beforeEach() {
-        clearAllMocks()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
     }
 
@@ -111,8 +119,6 @@ internal class VedtaksvurderingRouteTest {
             behandlingKlient.harTilgangTilBehandling(any(), any())
             vedtaksvurderingService.hentVedtak(any())
         }
-
-        confirmVerified()
     }
 
     @Test
@@ -135,8 +141,6 @@ internal class VedtaksvurderingRouteTest {
             behandlingKlient.harTilgangTilBehandling(any(), any())
             vedtaksvurderingService.hentVedtak(any())
         }
-
-        confirmVerified()
     }
 
     @Test
@@ -180,8 +184,6 @@ internal class VedtaksvurderingRouteTest {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
                 vedtaksvurderingService.hentVedtak(any())
             }
-
-            confirmVerified()
         }
     }
 
@@ -215,8 +217,6 @@ internal class VedtaksvurderingRouteTest {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
                 vedtaksvurderingService.hentVedtak(any())
             }
-
-            confirmVerified()
         }
     }
 
@@ -248,8 +248,6 @@ internal class VedtaksvurderingRouteTest {
                 behandlingKlient.harTilgangTilSak(any(), any())
                 vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(any(), any())
             }
-
-            confirmVerified()
         }
     }
 
@@ -294,8 +292,6 @@ internal class VedtaksvurderingRouteTest {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
                 vedtaksvurderingService.opprettEllerOppdaterVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
             }
-
-            confirmVerified()
         }
     }
 
@@ -343,25 +339,25 @@ internal class VedtaksvurderingRouteTest {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
                 vedtaksvurderingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
             }
-
-            confirmVerified()
         }
     }
 
     @Test
     fun `skal attestere vedtak`() {
+        val attestertVedtakKommentar = AttesterVedtakDto("Alt ser fint ut")
         val attestertVedtak = vedtak().copy(
             status = VedtakStatus.ATTESTERT,
             vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now())
         )
-        coEvery { vedtaksvurderingService.attesterVedtak(any(), any()) } returns attestertVedtak
+        coEvery { vedtaksvurderingService.attesterVedtak(any(), any(), any()) } returns attestertVedtak
 
         testApplication {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
             val vedtak = client.post("/api/vedtak/${UUID.randomUUID()}/attester") {
+                setBody(attestertVedtakKommentar.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
             }.let {
@@ -391,10 +387,12 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.attesterVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
+                vedtaksvurderingService.attesterVedtak(
+                    any(),
+                    match { it == attestertVedtakKommentar.kommentar },
+                    match { it.ident() == SAKSBEHANDLER_1 }
+                )
             }
-
-            confirmVerified()
         }
     }
 
@@ -447,8 +445,31 @@ internal class VedtaksvurderingRouteTest {
                     match { it == begrunnelse }
                 )
             }
+        }
+    }
 
-            confirmVerified()
+    @Test
+    fun `skal tilbakestille vedtak`() {
+        val tilbakestiltVedtak = vedtak().copy(
+            status = VedtakStatus.RETURNERT
+        )
+        coEvery { vedtaksvurderingService.tilbakestillIkkeIverksatteVedtak(any()) } returns tilbakestiltVedtak
+
+        testApplication {
+            environment { config = applicationConfig }
+            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+
+            client.patch("/api/vedtak/tilbakestill/${UUID.randomUUID()}") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.let {
+                it.status shouldBe HttpStatusCode.OK
+            }
+
+            coVerify(exactly = 1) {
+                behandlingKlient.harTilgangTilBehandling(any(), any())
+                vedtaksvurderingService.tilbakestillIkkeIverksatteVedtak(any())
+            }
         }
     }
 

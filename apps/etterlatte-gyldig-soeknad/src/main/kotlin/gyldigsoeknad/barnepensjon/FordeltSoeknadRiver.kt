@@ -5,7 +5,6 @@ import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
-import no.nav.etterlatte.libs.common.event.SoeknadJournalfoert
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.OPPFYLT
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -28,13 +27,10 @@ internal class FordeltSoeknadRiver(
 
     init {
         River(rapidsConnection).apply {
-            eventName("soeknad_innsendt")
+            eventName("trenger_behandling")
             correlationId()
-            validate { it.demandValue(FordelerFordelt.soeknadFordeltKey, true) }
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
-            validate { it.requireKey(SoeknadJournalfoert.dokarkivKey) }
-            validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
         }.register(this)
     }
@@ -48,7 +44,7 @@ internal class FordeltSoeknadRiver(
                 val personGalleri = gyldigSoeknadService.hentPersongalleriFraSoeknad(soeknad)
                 val gyldighetsVurdering = gyldigSoeknadService.vurderGyldighet(personGalleri)
                 logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
-                val sakId = packet[GyldigSoeknadVurdert.sakIdKey].longValue()
+                val sakId = behandlingClient.skaffSak(personGalleri.soeker, "BARNEPENSJON")
 
                 val behandlingId = behandlingClient.initierBehandling(sakId, soeknad.mottattDato, personGalleri)
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
@@ -56,6 +52,7 @@ internal class FordeltSoeknadRiver(
 
                 context.publish(
                     packet.apply {
+                        set(GyldigSoeknadVurdert.sakIdKey, sakId)
                         set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
                         set(GyldigSoeknadVurdert.gyldigInnsenderKey, gyldighetsVurdering.resultat == OPPFYLT)
                     }.toJson()

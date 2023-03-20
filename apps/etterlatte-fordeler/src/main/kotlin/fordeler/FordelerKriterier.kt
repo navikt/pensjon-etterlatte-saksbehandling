@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import java.time.LocalDate
 
 private const val NORGE = "NOR"
 
@@ -40,6 +41,7 @@ enum class FordelerKriterie(val forklaring: String) {
     AVDOED_VAR_IKKE_BOSATT_I_NORGE("Avdød var ikke bosatt i Norge"),
     AVDOED_ER_IKKE_FORELDER_TIL_BARN("Avdød er ikke forelder til barnet"),
     AVDOED_HAR_ADRESSEBESKYTTELSE("Avdød har adressebeskyttelse"),
+    AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID("Avdød har dødsdato for langt tilbake i tid"),
 
     GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE("Gjenlevende er ikke bosatt i Norge"),
     GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE("Gjenlevende har ikke samme adresse som barnet"),
@@ -89,6 +91,9 @@ class FordelerKriterier {
         Kriterie(FordelerKriterie.AVDOED_HAR_HATT_UTLANDSOPPHOLD) { harHuketAvForUtenlandsopphold(it) },
         Kriterie(FordelerKriterie.AVDOED_HAR_YRKESSKADE) { harHuketAvForYrkesskade(it) },
         Kriterie(FordelerKriterie.AVDOED_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(avdoed) },
+        Kriterie(FordelerKriterie.AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID) {
+            harDoedsdatoForLangtTilbakeITid(avdoed)
+        },
 
         // Gjenlevende
         Kriterie(FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(gjenlevende) },
@@ -134,6 +139,9 @@ class FordelerKriterier {
     private fun personErIkkeRegistrertDoed(person: Person): Boolean {
         return person.doedsdato == null
     }
+
+    private fun harDoedsdatoForLangtTilbakeITid(avdoed: Person): Boolean =
+        avdoed.doedsdato?.isBefore(LocalDate.of(2022, 6, 1)) ?: false
 
     private fun gjenlevendeHarIkkeForeldreansvar(barn: Person, gjenlevende: Person): Boolean {
         return barn.familieRelasjon?.ansvarligeForeldre

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDate.now
+import java.time.LocalDate.of
 import java.time.LocalDateTime
 
 internal class FordelerKriterierTest {
@@ -348,6 +349,17 @@ internal class FordelerKriterierTest {
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED))
+    }
+
+    @Test
+    fun `avdoed med doedsdato foer juni 2022 er ikke en gyldig kandidat`() {
+        val barn = mockPerson()
+        val avdoed = mockPerson(doedsdato = of(2022, 5, 15))
+        val gjenlevende = mockPerson()
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID))
     }
 
     @Test

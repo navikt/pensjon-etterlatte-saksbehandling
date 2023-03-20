@@ -73,9 +73,7 @@ class BehandlingsHendelser(
                     "BEHANDLING:${hendelse.second.name}",
                     mapOf(
                         CORRELATION_ID_KEY to correlationId,
-                        BehandlingRiverKey.behandlingObjectKey to behandling,
-                        BehandlingRiverKey.sakIdKey to behandling.sak.id,
-                        BehandlingRiverKey.persongalleriKey to behandling.persongalleri
+                        BehandlingRiverKey.behandlingObjectKey to behandling
                     )
                 ).toJson()
             ).also { (partition, offset) ->

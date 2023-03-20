@@ -8,12 +8,12 @@ import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { useAppSelector } from '~store/Store'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
-import { TrygdetidOppsummert } from '~components/behandling/trygdetid/TrygdetidOppsummert'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { hentTrygdetid, ITrygdetid, opprettTrygdetid } from '~shared/api/trygdetid'
 import { useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBeregnet'
 
 export const Trygdetid = () => {
   const { behandlingId } = useParams()
@@ -57,10 +57,8 @@ export const Trygdetid = () => {
             </Heading>
           </ContentHeader>
           <TrygdetidGrunnlag trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
-
           <TrygdetidGrunnlag trygdetid={trygdetid} setTrygdetid={setTrygdetid} erFremtidigTrygdetid={true} />
-
-          <TrygdetidOppsummert trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
+          <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
         </>
       )}
       {isPending(trygdetidStatus) && <Spinner visible={true} label={'Henter trygdetid'} />}
@@ -70,7 +68,7 @@ export const Trygdetid = () => {
       {behandles ? (
         <BehandlingHandlingKnapper>
           <Button variant="primary" size="medium" className="button" onClick={next}>
-            {handlinger.START.navn}
+            {handlinger.NESTE.navn}
           </Button>
         </BehandlingHandlingKnapper>
       ) : (

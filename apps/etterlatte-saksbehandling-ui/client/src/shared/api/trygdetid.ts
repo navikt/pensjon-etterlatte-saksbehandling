@@ -24,16 +24,18 @@ export interface ITrygdetid {
 }
 
 export interface IOppsummertTrygdetid {
-  nasjonalTrygdetid: number | null
-  fremtidigTrygdetid: number | null
-  totalt: number | null
+  nasjonalTrygdetid: number
+  fremtidigTrygdetid: number
+  totalt: number
 }
 
 export interface ITrygdetidGrunnlag {
+  id: string | null
   type: ITrygdetidType
   bosted: string
-  periodeTil: string | null
   periodeFra: string | null
+  periodeTil: string | null
+  kilde: string
 }
 
 export enum ITrygdetidType {

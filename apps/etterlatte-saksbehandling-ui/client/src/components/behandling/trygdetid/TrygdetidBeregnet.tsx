@@ -11,16 +11,16 @@ type Props = {
   trygdetid: ITrygdetid
   setTrygdetid: (trygdetid: ITrygdetid) => void
 }
-export const TrygdetidOppsummert: React.FC<Props> = ({ trygdetid, setTrygdetid }) => {
+export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid, setTrygdetid }) => {
   const { behandlingId: behandlingsId } = useParams()
-  const [nasjonalTrygdetid, setNasjonalTrygdetid] = useState<number | null>(
-    trygdetid.oppsummertTrygdetid == null ? null : trygdetid.oppsummertTrygdetid.nasjonalTrygdetid
+  const [nasjonalTrygdetid, setNasjonalTrygdetid] = useState<number>(
+    trygdetid.oppsummertTrygdetid == null ? 0 : trygdetid.oppsummertTrygdetid.nasjonalTrygdetid
   )
-  const [fremtidigTrygdetid, setFremtidigTrygdetid] = useState<number | null>(
-    trygdetid.oppsummertTrygdetid == null ? null : trygdetid.oppsummertTrygdetid.fremtidigTrygdetid
+  const [fremtidigTrygdetid, setFremtidigTrygdetid] = useState<number>(
+    trygdetid.oppsummertTrygdetid == null ? 0 : trygdetid.oppsummertTrygdetid.fremtidigTrygdetid
   )
-  const [oppsummertTrygdetid, setOppsummertTrygdetid] = useState<number | null>(
-    trygdetid.oppsummertTrygdetid == null ? null : trygdetid.oppsummertTrygdetid.totalt
+  const [oppsummertTrygdetid, setOppsummertTrygdetid] = useState<number>(
+    trygdetid.oppsummertTrygdetid == null ? 0 : trygdetid.oppsummertTrygdetid.totalt
   )
   const [oppsummertTrygdetidStatus, requestLagreOppsummertTrygdetid] = useApiCall(lagreOppsummertTrygdetid)
 
@@ -47,34 +47,38 @@ export const TrygdetidOppsummert: React.FC<Props> = ({ trygdetid, setTrygdetid }
     <>
       <ContentHeader>
         <Heading spacing size="medium" level="2">
-          Oppsummert trygdetid
+          Total trygdetid
         </Heading>
         <TrygdetidForm onSubmit={onSubmit}>
           <FormWrapper>
             <TextField
-              label="Nasjonal trygdetid"
-              size="small"
+              label="Nasjonal trygdetid (år)"
+              size="medium"
               type="number"
+              value={nasjonalTrygdetid!!}
               onChange={(e) => setNasjonalTrygdetid(Number(e.target.value))}
             />
             <TextField
-              label="Fremtidig trygdetid"
-              size="small"
+              label="Fremtidig trygdetid (år)"
+              size="medium"
               type="number"
+              value={fremtidigTrygdetid!!}
               onChange={(e) => setFremtidigTrygdetid(Number(e.target.value))}
             />
             <TextField
-              label="Sum trygdetid"
-              size="small"
+              label="Sum trygdetid (år)"
+              size="medium"
               type="number"
+              value={oppsummertTrygdetid!!}
               onChange={(e) => setOppsummertTrygdetid(Number(e.target.value))}
             />
+
+            <FormKnapper>
+              <Button loading={isPending(oppsummertTrygdetidStatus)} type="submit">
+                Lagre
+              </Button>
+            </FormKnapper>
           </FormWrapper>
-          <FormKnapper>
-            <Button loading={isPending(oppsummertTrygdetidStatus)} type="submit">
-              Lagre
-            </Button>
-          </FormKnapper>
         </TrygdetidForm>
       </ContentHeader>
     </>

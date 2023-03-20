@@ -1,5 +1,5 @@
 import { ContentHeader } from '~shared/styled'
-import { Button, Heading, TextField } from '@navikt/ds-react'
+import { Button, Heading, Label, Select, TextField } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ITrygdetid, ITrygdetidGrunnlag, ITrygdetidType, lagreTrygdetidgrunnlag } from '~shared/api/trygdetid'
@@ -9,25 +9,42 @@ import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import { Calender } from '@navikt/ds-icons'
 import { useParams } from 'react-router-dom'
+import { TrygdetidPeriode } from '~components/behandling/trygdetid/TrygdetidPeriode'
 
 type Props = {
   trygdetid: ITrygdetid
   setTrygdetid: (trygdetid: ITrygdetid) => void
   erFremtidigTrygdetid?: boolean
 }
-export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, erFremtidigTrygdetid = false }) => {
-  const { behandlingId } = useParams()
 
-  const [nyttTrygdetidgrunnlag, setNyttTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>({
+const initialState = (erFremtidigTrygdetid: boolean) => {
+  return {
+    id: null,
     type: erFremtidigTrygdetid ? ITrygdetidType.FREMTIDIG_TRYGDETID : ITrygdetidType.NASJONAL_TRYGDETID,
     bosted: '',
     periodeFra: null,
     periodeTil: null,
-  })
+    kilde: '',
+  }
+}
+
+export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, erFremtidigTrygdetid = false }) => {
+  const { behandlingId } = useParams()
+
+  const [nyttTrygdetidgrunnlag, setNyttTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>(
+    initialState(erFremtidigTrygdetid)
+  )
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
 
   const fraDatoPickerRef: any = useRef(null)
   const tilDatoPickerRef: any = useRef(null)
+
+  const toggleDatepicker = (ref: any) => {
+    return () => {
+      ref.current.setOpen(true)
+      ref.current.setFocus()
+    }
+  }
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -38,6 +55,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
         nyttTrygdetidgrunnlag: nyttTrygdetidgrunnlag!,
       },
       (respons) => {
+        setNyttTrygdetidgrunnlag(initialState(erFremtidigTrygdetid))
         setTrygdetid(respons)
       }
     )
@@ -59,33 +77,38 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
         </Heading>
       </ContentHeader>
       <Innhold>
-        <OppsummeringListe>
+        <TrygdetidPerioder>
           {trygdetid.grunnlag.filter(relevantGrunnlag).map((grunnlag) => (
-            <li key={grunnlag.bosted}>
-              {grunnlag.bosted} fra {grunnlag.periodeTil} til {grunnlag.periodeTil}
-            </li>
+            <TrygdetidPeriode key={grunnlag.id} grunnlag={grunnlag} />
           ))}
-        </OppsummeringListe>
+        </TrygdetidPerioder>
         <TrygdetidForm onSubmit={onSubmit}>
           <FormWrapper>
-            <TextField
-              label="Bosted"
-              size="small"
-              type="text"
-              value={nyttTrygdetidgrunnlag?.bosted}
-              onChange={(e) =>
-                setNyttTrygdetidgrunnlag({
-                  ...nyttTrygdetidgrunnlag,
-                  bosted: e.target.value,
-                })
-              }
-            />
+            <Land>
+              <Select
+                label="Land"
+                value={nyttTrygdetidgrunnlag?.bosted}
+                key={erFremtidigTrygdetid ? `${nyttTrygdetidgrunnlag?.bosted}-1` : `${nyttTrygdetidgrunnlag?.bosted}-1`}
+                onChange={(e) =>
+                  setNyttTrygdetidgrunnlag({
+                    ...nyttTrygdetidgrunnlag,
+                    bosted: e.target.value,
+                  })
+                }
+                autoComplete="off"
+              >
+                <option value="">Velg land</option>
+                <option key={erFremtidigTrygdetid ? 'Norge-1' : 'Norge-0'} value="Norge">
+                  Norge
+                </option>
+              </Select>
+            </Land>
 
-            <Datovelger>
-              <div>
-                <DatoLabel>Fra dato</DatoLabel>
+            <DatoSection>
+              <Label>Fra dato</Label>
+              <Datovelger>
                 <DatePicker
-                  ref={tilDatoPickerRef}
+                  ref={fraDatoPickerRef}
                   dateFormat={'dd.MM.yyyy'}
                   placeholderText={'dd.mm.åååå'}
                   selected={
@@ -93,7 +116,6 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
                   }
                   locale="nb"
                   autoComplete="off"
-                  showMonthYearPicker
                   onChange={(e) =>
                     setNyttTrygdetidgrunnlag({
                       ...nyttTrygdetidgrunnlag,
@@ -101,16 +123,23 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
                     })
                   }
                 />
-              </div>
-              <KalenderIkon tabIndex={0} role="button" title="Åpne datovelger" aria-label="Åpne datovelger">
-                <Calender color="white" />
-              </KalenderIkon>{' '}
-            </Datovelger>
-            <Datovelger>
-              <div>
-                <DatoLabel>Til dato</DatoLabel>
+                <KalenderIkon
+                  tabIndex={0}
+                  onKeyPress={toggleDatepicker(fraDatoPickerRef)}
+                  onClick={toggleDatepicker(fraDatoPickerRef)}
+                  role="button"
+                  title="Åpne datovelger"
+                  aria-label="Åpne datovelger"
+                >
+                  <Calender color="white" />
+                </KalenderIkon>
+              </Datovelger>
+            </DatoSection>
+            <DatoSection>
+              <Label>Til dato</Label>
+              <Datovelger>
                 <DatePicker
-                  ref={fraDatoPickerRef}
+                  ref={tilDatoPickerRef}
                   dateFormat={'dd.MM.yyyy'}
                   placeholderText={'dd.mm.åååå'}
                   selected={
@@ -118,7 +147,6 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
                   }
                   locale="nb"
                   autoComplete="off"
-                  showMonthYearPicker
                   onChange={(e) =>
                     setNyttTrygdetidgrunnlag({
                       ...nyttTrygdetidgrunnlag,
@@ -126,14 +154,35 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
                     })
                   }
                 />
-              </div>
-              <KalenderIkon tabIndex={0} role="button" title="Åpne datovelger" aria-label="Åpne datovelger">
-                <Calender color="white" />
-              </KalenderIkon>{' '}
-            </Datovelger>
+                <KalenderIkon
+                  tabIndex={0}
+                  onKeyPress={toggleDatepicker(tilDatoPickerRef)}
+                  onClick={toggleDatepicker(tilDatoPickerRef)}
+                  role="button"
+                  title="Åpne datovelger"
+                  aria-label="Åpne datovelger"
+                >
+                  <Calender color="white" />
+                </KalenderIkon>
+              </Datovelger>
+            </DatoSection>
+            <Kilde>
+              <TextField
+                label="Kilde"
+                size="medium"
+                type="text"
+                value={nyttTrygdetidgrunnlag.kilde}
+                onChange={(e) =>
+                  setNyttTrygdetidgrunnlag({
+                    ...nyttTrygdetidgrunnlag,
+                    kilde: e.target.value,
+                  })
+                }
+              />
+            </Kilde>
           </FormWrapper>
           <FormKnapper>
-            <Button loading={isPending(trygdetidgrunnlagStatus)} type="submit">
+            <Button size="medium" loading={isPending(trygdetidgrunnlagStatus)} type="submit">
               Lagre
             </Button>
           </FormKnapper>
@@ -145,28 +194,32 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
   )
 }
 
-const OppsummeringListe = styled.ul`
+const TrygdetidPerioder = styled.ul`
   margin: 0 0 2em 2em;
 `
 const TrygdetidForm = styled.form`
   display: flex;
 `
 
+const Land = styled.div`
+  width: 250px;
+`
+
+const Kilde = styled.div`
+  width: 250px;
+`
+
 const Datovelger = styled.div`
   display: flex;
   align-items: flex-end;
-  margin-bottom: 12px;
-  align-self: flex-end;
 
   input {
     border-right: none;
     border-radius: 4px 0 0 4px;
+    width: 160px;
     height: 48px;
     text-indent: 4px;
   }
-`
-const DatoLabel = styled.label`
-  max-width: 1em;
 `
 
 const KalenderIkon = styled.div`
@@ -177,4 +230,9 @@ const KalenderIkon = styled.div`
   border-radius: 0 4px 4px 0;
   height: 48px;
   line-height: 42px;
+`
+
+const DatoSection = styled.section`
+  display: grid;
+  gap: 0.5em;
 `

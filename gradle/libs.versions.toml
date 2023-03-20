@@ -17,7 +17,7 @@ cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = 
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.0.0" }
 database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.16.0" }
-database-postgresql = { module = "org.postgresql:postgresql", version = "42.5.4" }
+database-postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
 jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }

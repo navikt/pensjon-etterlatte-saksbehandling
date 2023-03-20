@@ -61,7 +61,10 @@ export const Vurdering = ({
     const resultatIkkeValgt = vilkaarForm.resultat == undefined
     resultatIkkeValgt ? setRadioError('Du må velge et svar') : setRadioError(undefined)
 
-    const unntakIkkeValgt = vilkaarForm.resultat == VurderingsResultat.IKKE_OPPFYLT && !vilkaarForm.vilkaarsUnntakType
+    const unntakIkkeValgt =
+      vilkaarForm.resultat == VurderingsResultat.IKKE_OPPFYLT &&
+      !vilkaarForm.vilkaarsUnntakType &&
+      vilkaar.unntaksvilkaar.length > 0
     unntakIkkeValgt ? setUnntakRadioError('Du må velge et unntak') : setUnntakRadioError(undefined)
 
     const manglerKommentar = MIN_KOMMENTAR_LENGDE > (vilkaarForm.kommentar?.length ?? 0)

@@ -126,7 +126,7 @@ class ApplicationBuilder {
                     }
                 })
                 JournalfoerVedtaksbrev(this, vedtaksbrevService)
-                DistribuerBrev(this, distribusjonService, brevService)
+                DistribuerBrev(this, distribusjonService)
             }
 
     private fun getSaksbehandlere(): Map<String, String> {

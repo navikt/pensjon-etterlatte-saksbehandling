@@ -4,7 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.libs.common.brev.model.Adresse
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
@@ -18,13 +17,12 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class DistribuerBrevTest {
     private val distribusjonService = mockk<DistribusjonServiceImpl>(relaxed = true)
-    private val brevService = mockk<BrevService>()
 
-    private val inspector = TestRapid().apply { DistribuerBrev(this, distribusjonService, brevService) }
+    private val inspector = TestRapid().apply { DistribuerBrev(this, distribusjonService) }
 
     private val brevId = 100L
     private val journalpostId = "11111"

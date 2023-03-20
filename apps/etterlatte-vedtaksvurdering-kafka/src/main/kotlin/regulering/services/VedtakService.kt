@@ -53,7 +53,7 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
 
     override fun tilbakestillVedtak(behandlingId: UUID) {
         runBlocking {
-            vedtakKlient.patch("$url/api/vedtak/$behandlingId")
+            vedtakKlient.patch("$url/api/vedtak/tilbakestill/$behandlingId")
         }
     }
 }

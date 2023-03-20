@@ -42,8 +42,8 @@ spec:
             day: 7
             hour: 2
           databases:
-          - name: fordeling
-            envVarPrefix: DB
+            - name: fordeling
+              envVarPrefix: DB
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -58,6 +58,8 @@ spec:
       value: http://etterlatte-pdltjenester/person
     - name: PDL_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: FEATURE_MAX_FORDELING_TIL_DOFFEN
+      value: "0"
   accessPolicy:
     outbound:
       rules:

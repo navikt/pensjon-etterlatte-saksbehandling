@@ -13,6 +13,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { formaterVurderingsResultat } from '~components/behandling/vilkaarsvurdering/utils'
 
 const MIN_KOMMENTAR_LENGDE = 1
+const INGEN_VILKAAR_OPPFYLT = 'ingen_vilkaar_oppfylt'
 
 interface VilkaarForm {
   resultat: VurderingsResultat | null
@@ -48,6 +49,7 @@ export const Vurdering = ({
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
   const [vilkaarutkast, setVilkaarutkast] = useState<VilkaarForm>(initiellForm(vilkaar))
   const [radioError, setRadioError] = useState<string>()
+  const [unntakRadioError, setUnntakRadioError] = useState<string>()
   const [kommentarError, setKommentarError] = useState<string>()
   const [, postVurderVilkaar] = useApiCall(vurderVilkaar)
   const [, postSlettVurdering] = useApiCall(slettVurdering)
@@ -56,18 +58,26 @@ export const Vurdering = ({
     : 'Er hovedvilkår oppfylt?' // TODO denne burde vi kunne bli kvitt når BP får spørsmål som en del av vilkår
 
   const valider = (vilkaarForm: VilkaarForm): vilkaarForm is VilkaarFormValidert => {
-    vilkaarForm.resultat ? setRadioError(undefined) : setRadioError('Du må velge et svar')
-    MIN_KOMMENTAR_LENGDE > (vilkaarForm.kommentar?.length ?? 0)
-      ? setKommentarError('Du må oppgi en begrunnelse')
-      : setKommentarError(undefined)
-    return vilkaarForm.resultat !== undefined && (vilkaarForm?.kommentar ?? '').length >= MIN_KOMMENTAR_LENGDE
+    const resultatIkkeValgt = vilkaarForm.resultat == undefined
+    resultatIkkeValgt ? setRadioError('Du må velge et svar') : setRadioError(undefined)
+
+    const unntakIkkeValgt =
+      vilkaarForm.resultat == VurderingsResultat.IKKE_OPPFYLT &&
+      !vilkaarForm.vilkaarsUnntakType &&
+      vilkaar.unntaksvilkaar.length > 0
+    unntakIkkeValgt ? setUnntakRadioError('Du må velge et unntak') : setUnntakRadioError(undefined)
+
+    const manglerKommentar = MIN_KOMMENTAR_LENGDE > (vilkaarForm.kommentar?.length ?? 0)
+    manglerKommentar ? setKommentarError('Du må oppgi en begrunnelse') : setKommentarError(undefined)
+
+    return !resultatIkkeValgt && !unntakIkkeValgt && !manglerKommentar
   }
 
   const vilkaarVurdert = (values: VilkaarFormValidert, onSuccess?: () => void) => {
     const unntaksvilkaar =
       values.resultat == VurderingsResultat.IKKE_OPPFYLT &&
       values.vilkaarsUnntakType &&
-      values.vilkaarsUnntakType !== ''
+      values.vilkaarsUnntakType !== INGEN_VILKAAR_OPPFYLT
         ? {
             unntaksvilkaar: {
               type: values.vilkaarsUnntakType,
@@ -181,7 +191,10 @@ export const Vurdering = ({
                 size="small"
                 className="radioGroup"
                 onChange={(event) => {
-                  setVilkaarutkast({ ...vilkaarutkast, resultat: VurderingsResultat[event as VurderingsResultat] })
+                  setVilkaarutkast({
+                    ...vilkaarutkast,
+                    resultat: VurderingsResultat[event as VurderingsResultat],
+                  })
                   setRadioError(undefined)
                 }}
                 value={vilkaarutkast.resultat}
@@ -204,8 +217,15 @@ export const Vurdering = ({
                       legend="Er unntak fra hovedvilkåret oppfylt?"
                       size="small"
                       className="radioGroup"
-                      onChange={(type) => setVilkaarutkast({ ...vilkaarutkast, vilkaarsUnntakType: type })}
+                      onChange={(type) => {
+                        setVilkaarutkast({
+                          ...vilkaarutkast,
+                          vilkaarsUnntakType: type,
+                        })
+                        setUnntakRadioError(undefined)
+                      }}
                       value={vilkaarutkast.vilkaarsUnntakType}
+                      error={unntakRadioError}
                     >
                       <div className="flex">
                         {vilkaar.unntaksvilkaar.map((unntakvilkaar) => (
@@ -213,7 +233,7 @@ export const Vurdering = ({
                             {unntakvilkaar.tittel}
                           </Radio>
                         ))}
-                        <Radio key="Nei" value="">
+                        <Radio key="Nei" value={INGEN_VILKAAR_OPPFYLT}>
                           Nei, ingen av unntakene er oppfylt
                         </Radio>
                       </div>

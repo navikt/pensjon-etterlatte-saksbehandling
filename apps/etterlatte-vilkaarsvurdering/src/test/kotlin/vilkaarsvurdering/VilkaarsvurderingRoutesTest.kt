@@ -136,7 +136,9 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals("§ 18-4", vilkaar.hovedvilkaar.lovreferanse.paragraf)
             assertEquals("Dødsfall forelder", vilkaar.hovedvilkaar.tittel)
             assertEquals(
-                "En eller begge foreldrene er registrert død",
+                """
+                    For å ha rett på ytelsen må en eller begge foreldre være registrer død i folkeregisteret eller hos utenlandske myndigheter.
+                """.trimIndent(),
                 vilkaar.hovedvilkaar.beskrivelse
             )
             assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-4", vilkaar.hovedvilkaar.lovreferanse.lenke)

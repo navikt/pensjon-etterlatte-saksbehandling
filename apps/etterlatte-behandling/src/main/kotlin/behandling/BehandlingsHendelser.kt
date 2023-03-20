@@ -24,7 +24,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 enum class BehandlingHendelseType {
-    OPPRETTET, AVBRUTT, GYLDIG_FREMSATT
+    OPPRETTET, AVBRUTT
 }
 
 class BehandlingsHendelser(
@@ -73,9 +73,7 @@ class BehandlingsHendelser(
                     "BEHANDLING:${hendelse.second.name}",
                     mapOf(
                         CORRELATION_ID_KEY to correlationId,
-                        BehandlingRiverKey.behandlingObjectKey to behandling,
-                        BehandlingRiverKey.sakIdKey to behandling.sak.id,
-                        BehandlingRiverKey.persongalleriKey to behandling.persongalleri
+                        BehandlingRiverKey.behandlingObjectKey to behandling
                     )
                 ).toJson()
             ).also { (partition, offset) ->

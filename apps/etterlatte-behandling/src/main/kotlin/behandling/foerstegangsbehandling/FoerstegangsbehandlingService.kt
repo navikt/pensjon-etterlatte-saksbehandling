@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 interface FoerstegangsbehandlingService {
     fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling?
@@ -126,10 +126,6 @@ class RealFoerstegangsbehandlingService(
             val foerstegangsbehandlingAggregat = foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
             foerstegangsbehandlingAggregat.lagreGyldighetproeving(gyldighetsproeving)
             foerstegangsbehandlingAggregat
-        }.also {
-            runBlocking {
-                behandlingHendelser.send(it.lagretBehandling.id to BehandlingHendelseType.GYLDIG_FREMSATT)
-            }
         }
     }
 

@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -308,7 +309,7 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
     }
 
     override fun navAnsattKlient(): NavAnsattKlient {
-        return NavAnsattKlient(
+        return NavAnsattKlientImpl(
             httpClientClientCredentials(
                 azureAppClientId = config.getString("azure.app.client.id"),
                 azureAppJwk = config.getString("azure.app.jwk"),

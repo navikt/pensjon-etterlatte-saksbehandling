@@ -37,7 +37,6 @@ kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.2" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "1.1.16" }
 
-
 kotlinx-coroutinescore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-version" }
 kotlinx-coroutinestest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-version" }
 

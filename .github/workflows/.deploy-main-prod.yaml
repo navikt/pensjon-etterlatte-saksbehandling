@@ -1,0 +1,25 @@
+name: .deploy-main.yaml
+
+on:
+  workflow_call:
+    inputs:
+      applikasjon:
+        description: 'Navnet på applikasjonen'
+        required: true
+        type: string
+
+env:
+  image: ghcr.io/${{ github.repository }}/etterlatte-${{ inputs.applikasjon }}:main
+
+jobs:
+  deploy-main:
+    name: deploy-main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: apps/etterlatte-${{ inputs.applikasjon }}/.nais/dev.yaml
+          VAR: image=${{ env.image }}

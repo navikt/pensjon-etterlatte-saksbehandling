@@ -19,6 +19,7 @@ import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversik
 import { KildePdl } from '~shared/types/kilde'
 import { formaterKildePdl } from '../../utils'
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 interface Props {
   behandlingId: string
@@ -27,6 +28,7 @@ interface Props {
   avdoedDoedsdato: string | undefined
   avdoedDoedsdatoKilde: KildePdl | undefined
   soeknadMottattDato: string
+  sakstype: ISaksType
 }
 
 const Virkningstidspunkt = (props: Props) => {
@@ -92,10 +94,17 @@ const Virkningstidspunkt = (props: Props) => {
         status={Boolean(props.virkningstidspunkt) ? 'success' : 'warning'}
       >
         <div>
-          <Beskrivelse>
-            Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for
-            opptil tre år før søknaden er mottatt.
-          </Beskrivelse>
+          {props.sakstype == ISaksType.BARNEPENSJON ? (
+            <Beskrivelse>
+              Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for
+              opptil tre år før søknaden er mottatt.
+            </Beskrivelse>
+          ) : (
+            <Beskrivelse>
+              Omstillingsstønad kan innvilges fra og med måneden etter dødsfallet, men kan som hovedregel ikke gis for
+              mer enn tre måneder før søknaden er mottatt hos NAV.
+            </Beskrivelse>
+          )}
           <InfobokserWrapper>
             <InfoWrapper>
               <Info

@@ -48,6 +48,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               avdoedDoedsdatoKilde={behandling.familieforhold?.avdoede?.kilde}
               soeknadMottattDato={behandling.soeknadMottattDato}
               behandlingId={behandling.id}
+              sakstype={behandling.sakType}
             />
           </>
         )}

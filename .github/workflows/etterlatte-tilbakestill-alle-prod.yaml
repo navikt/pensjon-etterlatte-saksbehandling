@@ -64,10 +64,10 @@ jobs:
     with:
       applikasjon: saksbehandling-ui
     secrets: inherit
-  tilbakestill-statistikk:
+  tilbakestill-egne-ansatte-lytter:
     uses: ./.github/workflows/.deploy-main.yaml
     with:
-      applikasjon: statistikk
+      applikasjon: egne-ansatte-lytter
     secrets: inherit
   tilbakestill-tilbakekreving:
     uses: ./.github/workflows/.deploy-main.yaml

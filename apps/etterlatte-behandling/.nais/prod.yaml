@@ -29,12 +29,6 @@ spec:
         databases:
           - name: sakogbehandlinger
             envVarPrefix: DB
-
-  startup:
-    initialDelay: 7
-    failureThreshold: 10
-    periodSeconds: 5
-    path: /health/started
   liveness:
     initialDelay: 5
     path: /health/isalive

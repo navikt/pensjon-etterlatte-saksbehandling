@@ -34,13 +34,17 @@ data class Mottaker(
         // todo: Må legge til støtte for utenlandske adresser. Er kun adresselinje 1 hvis innland. linje 2 og 3 hvis utland
         fun fraRegoppslag(regoppslag: RegoppslagResponseDTO) = Mottaker(
             navn = regoppslag.navn,
-            adresse = regoppslag.adresse.adresselinje1,
+            adresse = """
+                ${regoppslag.adresse.adresselinje1}, ${regoppslag.adresse.postnummer} ${regoppslag.adresse.poststed?.capitalize()}
+            """.trimIndent(),
             postnummer = regoppslag.adresse.postnummer,
             poststed = regoppslag.adresse.poststed,
             land = regoppslag.adresse.land
         )
     }
 }
+
+fun String.capitalize(): String = this.lowercase().replaceFirstChar { char -> char.titlecase() }
 
 data class Avsender(
     val kontor: String,

@@ -30,4 +30,4 @@ jobs:
           - vilkaarsvurdering
     uses: ./.github/workflows/.deploy-main.yaml
     with:
-      applikasjon: ${{ matrix.app }}
+      applikasjon: ${{ matrix.applikasjon }}

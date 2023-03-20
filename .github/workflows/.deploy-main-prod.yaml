@@ -13,7 +13,7 @@ env:
 
 jobs:
   deploy-main:
-    name: deploy-main
+    name: deploy-main-prod
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

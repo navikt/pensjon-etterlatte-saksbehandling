@@ -14,8 +14,8 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
-import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.bruker
@@ -104,7 +104,7 @@ fun Route.vedtaksvurderingRoute(service: VedtaksvurderingService, behandlingKlie
             }
         }
 
-        patch("/tilbakestill/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        patch("/{$BEHANDLINGSID_CALL_PARAMETER}/tilbakestill") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
                 service.tilbakestillIkkeIverksatteVedtak(behandlingId)

@@ -459,7 +459,7 @@ internal class VedtaksvurderingRouteTest {
             environment { config = applicationConfig }
             application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
 
-            client.patch("/api/vedtak/tilbakestill/${UUID.randomUUID()}") {
+            client.patch("/api/vedtak/${UUID.randomUUID()}/tilbakestill") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
             }.let {

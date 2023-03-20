@@ -390,23 +390,18 @@ class IntegrationTest : BehandlingIntegrationTest() {
         kotlin.runCatching { sleep(2000) }
         assertNotNull(behandlingOpprettet)
         val rapid = beanFactory.rapidSingleton
-        assertEquals(5, rapid.publiserteMeldinger.size)
+        assertEquals(4, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue()
         )
         assertEquals(
-            "BEHANDLING:GYLDIG_FREMSATT",
+            "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
         )
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue()
-        )
-        assertEquals(
-            "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue()
-
         )
         assertEquals(
             "BEHANDLING:AVBRUTT",

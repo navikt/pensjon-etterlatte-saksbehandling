@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
-import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
@@ -49,7 +48,6 @@ class ApplicationBuilder {
         }
         .build().apply {
             GrunnlagHendelser(this, grunnlagService)
-            BehandlingHendelser(this)
         }
 
     fun start() = setReady().also { rapidsConnection.start() }

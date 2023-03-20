@@ -7,11 +7,15 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.OPPFYLT
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
@@ -71,6 +75,8 @@ internal class InnsendtSoeknadRiver(
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
                 logger.info("Behandling {} startet på sak {}", behandlingId, sakId)
 
+                sendOpplysningsbehov(sakId, personGalleri, context, packet)
+
                 context.publish(
                     packet.apply {
                         set(GyldigSoeknadVurdert.sakIdKey, sakId)
@@ -82,6 +88,39 @@ internal class InnsendtSoeknadRiver(
             } catch (e: Exception) {
                 logger.error("Gyldighetsvurdering av søknad om omstillingsstønad feilet", e)
             }
+        }
+    }
+
+    private fun sendOpplysningsbehov(
+        sakId: Long,
+        persongalleri: Persongalleri,
+        context: MessageContext,
+        packet: JsonMessage
+    ) {
+        context.publish(
+            JsonMessage.newMessage(
+                mapOf(
+                    BEHOV_NAME_KEY to Opplysningstype.SOEKER_PDL_V1,
+                    "sakId" to sakId,
+                    "fnr" to persongalleri.soeker,
+                    "rolle" to PersonRolle.GJENLEVENDE,
+                    CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY]
+                )
+            ).toJson()
+        )
+
+        persongalleri.avdoed.forEach { fnr ->
+            context.publish(
+                JsonMessage.newMessage(
+                    mapOf(
+                        BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1,
+                        "sakId" to sakId,
+                        "fnr" to fnr,
+                        "rolle" to PersonRolle.AVDOED,
+                        CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY]
+                    )
+                ).toJson()
+            )
         }
     }
 

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
-import no.nav.etterlatte.libs.common.behandling.VedtakStatus
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 

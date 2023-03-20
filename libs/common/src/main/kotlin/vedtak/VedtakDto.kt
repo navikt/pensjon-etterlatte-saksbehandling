@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.common.vedtak
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
@@ -20,6 +19,14 @@ data class VedtakDto(
     val attestasjon: Attestasjon?,
     val utbetalingsperioder: List<Utbetalingsperiode>
 )
+
+enum class VedtakStatus {
+    OPPRETTET,
+    FATTET_VEDTAK,
+    ATTESTERT,
+    RETURNERT,
+    IVERKSATT
+}
 
 data class Behandling(
     val type: BehandlingType,

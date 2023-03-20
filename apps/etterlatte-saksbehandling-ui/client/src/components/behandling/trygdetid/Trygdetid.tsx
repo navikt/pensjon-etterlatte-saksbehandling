@@ -5,7 +5,6 @@ import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/Beh
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
-import { useAppSelector } from '~store/Store'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
@@ -14,11 +13,13 @@ import { useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBeregnet'
+import { Content, ContentHeader } from '~shared/styled'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-export const Trygdetid = () => {
+export const Trygdetid = (props: { behandling: IDetaljertBehandling }) => {
+  const { behandling } = props
   const { behandlingId } = useParams()
 
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling.status)
   const { next } = useBehandlingRoutes()
 

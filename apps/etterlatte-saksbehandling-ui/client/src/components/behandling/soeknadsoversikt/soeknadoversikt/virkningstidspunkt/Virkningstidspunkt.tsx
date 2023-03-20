@@ -101,8 +101,8 @@ const Virkningstidspunkt = (props: Props) => {
             </Beskrivelse>
           ) : (
             <Beskrivelse>
-              Omstillingsstønad kan innvilges fra og med måneden etter dødsfallet, men kan som hovedregel ikke gis for
-              mer enn tre måneder før søknaden er mottatt hos NAV.
+              Omstillingsstønad kan innvilges fra og med den første i måneden etter dødsfallet, men kan som hovedregel
+              ikke gis for mer enn tre måneder før søknaden er mottatt hos NAV.
             </Beskrivelse>
           )}
           <InfobokserWrapper>

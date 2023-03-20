@@ -8,8 +8,10 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.DateTime
+import java.time.LocalDate
+import java.util.*
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -20,27 +22,46 @@ class ApplicationContext {
 
 class InMemoryDs {
 
-    companion object TrygdetidGrunnlagTable : Table() {
-        val bosted = varchar("bosted", 10)
+    object TrygdetidTable : Table() {
+        val behandlingsId = uuid("behandling_id")
+        val nasjonalTrygdetid = integer("nasjonalTrygdetid").nullable()
+        val fremtidigTrygdetid = integer("fremtidigTrygdetid").nullable()
+        val oppsummertTrygdetid = integer("oppsummertTrygdetid").nullable()
+    }
+    var trygdetidTable = TrygdetidTable
+
+    object TrygdetidGrunnlagTable : Table() {
+        val behandlingsId = uuid("behandling_id")
+        val id = uuid("id")
+        val trygdetidType = varchar("type", 50)
+        val bosted = varchar("bosted", 50)
         val periodeFra = date("periodeFra")
         val periodeTil = date("periodeTil")
+        val kilde = varchar("kilde", 50)
     }
 
-    var trygdetidTable = TrygdetidGrunnlagTable
+    var trygdetidGrunnlagTable = TrygdetidGrunnlagTable
 
     fun migrate() {
         Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "org.h2.Driver")
         transaction {
-            SchemaUtils.create(TrygdetidGrunnlagTable)
+            SchemaUtils.create(TrygdetidTable, TrygdetidGrunnlagTable)
             fillDb()
         }
     }
 
     private fun fillDb() {
         trygdetidTable.insert {
+            it[behandlingsId] = UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31")
+        }
+        trygdetidGrunnlagTable.insert {
+            it[behandlingsId] = UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31")
+            it[id] = UUID.randomUUID()
+            it[trygdetidType] = "NASJONAL_TRYGDETID"
             it[bosted] = "Norge"
-            it[periodeFra] = DateTime.now()
-            it[periodeTil] = DateTime.now()
+            it[periodeFra] = LocalDate.now()
+            it[periodeTil] = LocalDate.now()
+            it[kilde] = "PDL"
         }
     }
 }

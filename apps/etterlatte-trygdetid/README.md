@@ -1,18 +1,10 @@
-# etterlatte-vilkaarsvurdering
+# etterlatte-trygdetid
 
-Tjeneste som tilbyr endepunkter for å hente ut vilkår for en behandling og sette dem til oppfylt / ikke oppfylt.
-
-Det som støttes så langt er
-- Hovedvilkår
-- Unntaksvilkår
-
-Utestående funksjonalitet er
-- Grunnlag på vilkår
-- Automatiserte vilkårsvurdering
+Tjeneste for å opprette trygdetidsgrunnlag og beregne total trygdetid.
 
 ## Kjøre lokalt
 
-1. Start Kafka og Mock-OAuth2-Server lokalt ved å kjøre `docker-compose up -d`
+1. Mock-OAuth2-Server lokalt ved å kjøre `docker-compose up -d`
 2. Sett følgende miljøvariabler ved oppstart av applikasjon:
 ```
 AZURE_APP_WELL_KNOWN_URL=http://localhost:8082/azure/.well-known/openid-configuration;
@@ -23,30 +15,30 @@ DB_PASSWORD=postgres;
 HTTP_PORT=8088;
 ```
 
-## Kjøre med auth mot dev-gcp
+## Kjøre lokalt med auth mot dev-gcp
 1. Kjør scriptet `get-secret.sh` fra prosjektets [rotmappe](../..).
 ```
-./get-secret.sh apps/etterlatte-vilkaarsvurdering
+./get-secret.sh apps/etterlatte-trygdetid
 ```
-2. Kjør opp en proxy mot postgres i dev: `nais postgres proxy etterlatte-vilkaarsvurdering`, eller kjør opp en lokal 
+2. Kjør opp en proxy mot postgres i dev: `nais postgres proxy etterlatte-trygdetid`, eller kjør opp en lokal 
    instans med `docker-compose up -d`.
-3. Kopier inn følgende environment variabler i IntelliJ (merk at passord må kommenteres bort mot databasen dersom man bruker proxy):
+3. Kopier inn følgende environment variabler i IntelliJ:
 ```
-DB_JDBC_URL=jdbc:postgresql://localhost:5432/vilkaarsvurdering?user=FORNAVN.ETTERNAVN@nav.no;
+DB_JDBC_URL=jdbc:postgresql://localhost:5432/trygdetid?user=FORNAVN.ETTERNAVN@nav.no;
 DB_PASSWORD=postgres;
 DB_USERNAME=postgres;
 ETTERLATTE_BEHANDLING_CLIENT_ID=59967ac8-009c-492e-a618-e5a0f6b3e4e4;
 ETTERLATTE_BEHANDLING_URL=https://etterlatte-behandling.dev.intern.nav.no;
 ETTERLATTE_GRUNNLAG_CLIENT_ID=ce96a301-13db-4409-b277-5b27f464d08b;
 ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.dev.intern.nav.no/api;
-HTTP_PORT=8087
+HTTP_PORT=8088
 ```
 4. Om du skal kjøre med frontend og wonderwall må du også kjøre (fra rotmappe):
 `./get-secret.sh apps/etterlatte-saksbehandling-ui`
 og legge til følgende linjer nederst i `.env.dev-gcp` fila til saksbehandling-ui.
 ```
-VILKAARSVURDERING_API_URL=http://host.docker.internal:8087
-VILKAARSVURDERING_API_SCOPE=app://<VILKAARSVURDERING_CLIENT_ID>/.default // Se .env.dev-gcp fila du opprettet i steg 1.
+TRYGDETID_API_URL=http://host.docker.internal:8087
+TRYGDETID_API_SCOPE=api://<TRYGDETID_CLIENT_ID>/.default // Se .env.dev-gcp fila du opprettet i steg 1.
 ```
 
 ### Teste mot REST-endepunkter
@@ -62,5 +54,5 @@ curl --location --request POST 'http://localhost:8082/azure/token' \
 ```
 
 #### Kjøre request
-- Url: `http://localhost:8080/api/vilkaarsvurdering`
+- Url: `http://localhost:8088/api/trygdetid`
 - Header: `Authorization: Bearer $token`

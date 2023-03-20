@@ -1,38 +1,42 @@
-import { Content, ContentHeader } from '~shared/styled'
-import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, Heading, TextField } from '@navikt/ds-react'
-import { Innhold } from '~components/behandling/trygdetid/styled'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Button, Heading } from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
-import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { handlinger } from '~components/behandling/handlinger/typer'
+import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { hentTrygdetid, ITrygdetid, ITrygdetidGrunnlag, lagreTrygdetidgrunnlag } from '~shared/api/trygdetid'
-import React, { FormEvent, useEffect, useState } from 'react'
+import { hentTrygdetid, ITrygdetid, opprettTrygdetid } from '~shared/api/trygdetid'
+import { useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import styled from 'styled-components'
+import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBeregnet'
+import { Content, ContentHeader } from '~shared/styled'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 export const Trygdetid = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
+  const { behandlingId } = useParams()
+
   const behandles = hentBehandlesFraStatus(behandling.status)
   const { next } = useBehandlingRoutes()
 
   const [trygdetidStatus, fetchTrygdetid] = useApiCall(hentTrygdetid)
+  const [, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
 
-  const [nyttTrygdetidgrunnlag, setNyttTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>()
-  const [trygdetidgrunnlagStatus, fetchLagretrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    fetchLagretrygdetidgrunnlag(nyttTrygdetidgrunnlag!)
-  }
-
   useEffect(() => {
-    fetchTrygdetid(null, (trygdetid: ITrygdetid) => {
-      setTrygdetid(trygdetid)
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
+    fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
+      if (trygdetid == null) {
+        requestOpprettTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
+          setTrygdetid(trygdetid)
+        })
+      } else {
+        setTrygdetid(trygdetid)
+      }
     })
   }, [])
 
@@ -47,47 +51,25 @@ export const Trygdetid = (props: { behandling: IDetaljertBehandling }) => {
       </ContentHeader>
 
       {trygdetid && (
-        <Innhold>
-          <OppsummeringListe>
-            {trygdetid.grunnlag.map((grunnlag) => (
-              <li key={grunnlag.bosted}>
-                {grunnlag.bosted} fra {grunnlag.periodeTil} til {grunnlag.periodeTil}
-              </li>
-            ))}
-          </OppsummeringListe>
-          <form onSubmit={onSubmit}>
-            <FormWrapper>
-              <TextField
-                label="Nytt trygdegrunnlag"
-                size="small"
-                type="text"
-                value={nyttTrygdetidgrunnlag?.bosted}
-                onChange={(e) =>
-                  setNyttTrygdetidgrunnlag({
-                    bosted: e.target.value,
-                    periodeTil: '2023-03-10T00:00:00.000+01:00',
-                    periodeFra: '2023-03-10T00:00:00.000+01:00',
-                  })
-                }
-              />
-            </FormWrapper>
-            <FormKnapper>
-              <Button loading={isPending(trygdetidgrunnlagStatus)} type="submit">
-                Lagre
-              </Button>
-            </FormKnapper>
-          </form>
-        </Innhold>
+        <>
+          <ContentHeader>
+            <Heading spacing size="medium" level="3">
+              Grunnlag trygdetid
+            </Heading>
+          </ContentHeader>
+          <TrygdetidGrunnlag trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
+          <TrygdetidGrunnlag trygdetid={trygdetid} setTrygdetid={setTrygdetid} erFremtidigTrygdetid={true} />
+          <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
+        </>
       )}
-
       {isPending(trygdetidStatus) && <Spinner visible={true} label={'Henter trygdetid'} />}
       {isFailure(trygdetidStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
-      {isFailure(trygdetidgrunnlagStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      <Border />
 
       {behandles ? (
         <BehandlingHandlingKnapper>
           <Button variant="primary" size="medium" className="button" onClick={next}>
-            {handlinger.START.navn}
+            {handlinger.NESTE.navn}
           </Button>
         </BehandlingHandlingKnapper>
       ) : (
@@ -96,17 +78,3 @@ export const Trygdetid = (props: { behandling: IDetaljertBehandling }) => {
     </Content>
   )
 }
-const FormKnapper = styled.div`
-  margin-top: 1rem;
-  display: flex;
-  gap: 1rem;
-`
-const FormWrapper = styled.div`
-  max-width: 20rem;
-  display: flex;
-  gap: 1rem;
-  flex-direction: column;
-`
-const OppsummeringListe = styled.ul`
-  margin: 0 0 2em 2em;
-`

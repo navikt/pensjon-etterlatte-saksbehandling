@@ -38,11 +38,12 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
     <BeslutningWrapper>
       <ButtonWrapper>
         <Button variant="primary" size="medium" className="button" onClick={() => setModalisOpen(true)}>
-          Iverksett vedtak
+          Iverksett vedtak og send brev
         </Button>
       </ButtonWrapper>
       <GeneriskModal
-        tekst="Er du sikker på at du vil iverksette vedtaket?"
+        tittel="Er du sikker på at du vil iverksette vedtaket?"
+        beskrivelse="Vedtaksbrevet sendes ut automatisk ved iverksettelse"
         tekstKnappJa="Ja, iverksett vedtak"
         tekstKnappNei=" Nei, gå tilbake"
         onYesClick={attester}

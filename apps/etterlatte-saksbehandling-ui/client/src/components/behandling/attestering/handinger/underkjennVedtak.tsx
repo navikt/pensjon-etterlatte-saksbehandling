@@ -38,7 +38,7 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandling, kommentar, valgt
         </Button>
       </ButtonWrapper>
       <GeneriskModal
-        tekst="Er du sikker på at vil underkjenne vedtak og sende i retur til saksbehandler?"
+        tittel="Er du sikker på at vil underkjenne vedtak og sende i retur til saksbehandler?"
         tekstKnappJa="Ja, send i retur"
         tekstKnappNei=" Nei, gå tilbake"
         onYesClick={underkjenn}

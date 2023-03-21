@@ -60,6 +60,16 @@ spec:
       value: http://etterlatte-vedtaksvurdering
     - name: GRUNNLAG_API_URL
       value: http://etterlatte-grunnlag
+    - name: BREV_API_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-brev-api/.default
+    - name: VILKAARSVURDERING_API_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default
+    - name: BEHANDLING_API_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: VEDTAK_API_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+    - name: GRUNNLAG_API_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
   accessPolicy:
     outbound:
       external:

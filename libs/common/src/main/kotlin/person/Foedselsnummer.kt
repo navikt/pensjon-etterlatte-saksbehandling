@@ -97,7 +97,6 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
      */
     private fun isTestNorgeNumber(): Boolean = Character.getNumericValue(value[2]) >= 8
 
-
     /**
      * Sjekker om fødselsnummeret er av typen "Felles Nasjonalt Hjelpenummer".
      *
@@ -123,7 +122,7 @@ internal fun firesifretAarstallFraTosifret(year: Int, individnummer: Int): Int {
         (year + 1900)
     } else if ((individnummer < 750) && (54 < year)) {
         (year + 1800)
-    } else if ( year < 40) {
+    } else if (year < 40) {
         year + 2000
     } else if (900 <= individnummer) {
         year + 1900

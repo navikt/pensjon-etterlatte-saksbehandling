@@ -32,12 +32,11 @@ internal class FordeltSoeknadRiver(
 
     init {
         River(rapidsConnection).apply {
-            eventName("soeknad_innsendt")
+            eventName("trenger_behandling")
             correlationId()
-            validate { it.demandValue(FordelerFordelt.soeknadFordeltKey, true) }
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
-            validate { it.rejectKey(GyldigSoeknadVurdert.sakIdKey) }
+            validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
         }.register(this)
     }
 
@@ -50,8 +49,8 @@ internal class FordeltSoeknadRiver(
                 val personGalleri = gyldigSoeknadService.hentPersongalleriFraSoeknad(soeknad)
                 val gyldighetsVurdering = gyldigSoeknadService.vurderGyldighet(personGalleri)
                 logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
-
                 val sakId = behandlingClient.skaffSak(personGalleri.soeker, "BARNEPENSJON")
+
                 val behandlingId = behandlingClient.initierBehandling(sakId, soeknad.mottattDato, personGalleri)
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
                 logger.info("Behandling {} startet på sak {}", behandlingId, sakId)

@@ -45,6 +45,10 @@ spec:
       value: http://etterlatte-pdltjenester/person
     - name: PDL_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: BEHANDLING_URL
+      value: http://etterlatte-behandling/
     - name: FEATURE_MAX_FORDELING_TIL_DOFFEN
       value: "-1"
   accessPolicy:
@@ -52,3 +56,4 @@ spec:
       rules:
         - application: etterlatte-pdltjenester
         - application: etterlatte-gyldig-soeknad
+        - application: etterlatte-behandling

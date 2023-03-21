@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
+import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -43,16 +44,17 @@ internal class Fordeler(
 
     init {
         River(rapidsConnection).apply {
-            eventName("soeknad_innsendt")
-            validate { it.demandValue("@skjema_info.type", "BARNEPENSJON") }
-            validate { it.demandValue("@skjema_info.versjon", "2") }
-            validate { it.requireKey("@skjema_info") }
-            validate { it.requireKey("@template") }
-            validate { it.requireKey("@lagret_soeknad_id") }
-            validate { it.requireKey("@hendelse_gyldig_til") }
-            validate { it.requireKey("@adressebeskyttelse") }
-            validate { it.requireKey("@fnr_soeker") }
-            validate { it.rejectKey("@dokarkivRetur") }
+            eventName(SoeknadInnsendt.eventName)
+            validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "BARNEPENSJON") }
+            validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "2") }
+            validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
+            validate { it.requireKey(SoeknadInnsendt.templateKey) }
+            validate { it.requireKey(SoeknadInnsendt.lagretSoeknadIdKey) }
+            validate { it.requireKey(SoeknadInnsendt.hendelseGyldigTilKey) }
+            validate { it.requireKey(SoeknadInnsendt.adressebeskyttelseKey) }
+            validate { it.requireKey(SoeknadInnsendt.fnrSoekerKey) }
+            validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
+            validate { it.rejectKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.rejectKey(FordelerFordelt.soeknadFordeltKey) }
             correlationId()
         }.register(this)
@@ -65,8 +67,14 @@ internal class Fordeler(
 
                 when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
                     FordelerResultat.GyldigForBehandling -> {
-                        logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling")
+                        logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Doffen")
+                        val sakIdForSoeknad = fordelerService.hentSakId(
+                            packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
+                            SakType.BARNEPENSJON
+                        )
+                        packet.leggPaaSakId(sakIdForSoeknad)
                         context.publish(packet.leggPaaFordeltStatus(true).toJson())
+
                         fordelerMetricLogger.logMetricFordelt()
                         lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
                             ?.let { context.publish(it) }
@@ -134,6 +142,10 @@ internal class Fordeler(
         this[FordelerFordelt.soeknadFordeltKey] = fordelt
         correlationId = getCorrelationId()
         return this
+    }
+
+    private fun JsonMessage.leggPaaSakId(sakId: Long): JsonMessage = this.apply {
+        this[GyldigSoeknadVurdert.sakIdKey] = sakId
     }
 
     private fun JsonMessage.soeknadId(): Long = get(SoeknadInnsendt.lagretSoeknadIdKey).longValue()

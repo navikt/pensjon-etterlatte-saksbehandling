@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.FNR_1
 import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_3
+import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -25,11 +26,13 @@ internal class FordelerServiceTest {
 
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val fordelerRepo = mockk<FordelerRepository>()
+    private val behandlingKlient = mockk<BehandlingKlient>()
     private val fordelerService = FordelerService(
         FordelerKriterier(),
         pdlTjenesterKlient,
         fordelerRepo,
-        maxFordelingTilDoffen = Long.MAX_VALUE
+        maxFordelingTilDoffen = Long.MAX_VALUE,
+        behandlingKlient = behandlingKlient
     )
 
     @Test
@@ -153,7 +156,8 @@ internal class FordelerServiceTest {
             FordelerKriterier(),
             pdlTjenesterKlient,
             fordelerRepo,
-            maxFordelingTilDoffen = 10
+            maxFordelingTilDoffen = 10,
+            behandlingKlient = behandlingKlient
         )
 
         val barnFnr = Foedselsnummer.of(FNR_1)
@@ -197,7 +201,8 @@ internal class FordelerServiceTest {
             FordelerKriterier(),
             pdlTjenesterKlient,
             fordelerRepo,
-            maxFordelingTilDoffen = 10
+            maxFordelingTilDoffen = 10,
+            behandlingKlient = behandlingKlient
         )
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
@@ -239,7 +244,8 @@ internal class FordelerServiceTest {
             FordelerKriterier(),
             pdlTjenesterKlient,
             fordelerRepo,
-            maxFordelingTilDoffen = 10
+            maxFordelingTilDoffen = 10,
+            behandlingKlient = behandlingKlient
         )
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit

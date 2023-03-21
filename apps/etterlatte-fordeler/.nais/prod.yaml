@@ -59,7 +59,12 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: FEATURE_MAX_FORDELING_TIL_DOFFEN
       value: "0"
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+    - name: BEHANDLING_URL
+      value: http://etterlatte-behandling/
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
+        - application: etterlatte-behandling

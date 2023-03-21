@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FordeltSoeknadRiverTest {
@@ -76,7 +76,7 @@ internal class FordeltSoeknadRiverTest {
         assertEquals(persongalleri.avdoed.single(), inspector.message(2).get("fnr").asText())
         assertEquals(PersonRolle.AVDOED.name, inspector.message(2).get("rolle").asText())
 
-        assertEquals("soeknad_innsendt", inspector.message(3).get(EVENT_NAME_KEY).asText())
+        assertEquals("trenger_behandling", inspector.message(3).get(EVENT_NAME_KEY).asText())
         assertEquals(sakId, inspector.message(3).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals(id.toString(), inspector.message(3).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
         assertEquals(true, inspector.message(3).get(GyldigSoeknadVurdert.gyldigInnsenderKey).asBoolean())

@@ -44,7 +44,7 @@ Om du skal kjøre med frontend og wonderwall må du også kjøre (fra [rotmappe]
 Copy-paste dette inn i "environment variables".
 
 ```
-ETTERLATTE_BRREG_URL=host.docker.internal:9091;
+BRREG_URL=https://data.brreg.no
 ETTERLATTE_GRUNNLAG_CLIENT_ID=ce96a301-13db-4409-b277-5b27f464d08b;
 ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.dev.intern.nav.no;
 ETTERLATTE_PDFGEN_URL=http://host.docker.internal:8081/api/v1/genpdf/brev;

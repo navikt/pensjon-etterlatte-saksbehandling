@@ -6,7 +6,6 @@ include(
     "apps:etterlatte-fordeler",
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-behandling",
-    "apps:etterlatte-brreg",
     "apps:etterlatte-gyldig-soeknad",
     "apps:etterlatte-opplysninger-fra-soeknad",
     "apps:etterlatte-opplysninger-fra-pdl",

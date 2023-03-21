@@ -1,29 +1,25 @@
-package no.nav.etterlatte.brev.adresse
+package no.nav.etterlatte.brev.adresse.enhetsregister
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.github.benmanes.caffeine.cache.Caffeine
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
 
-class BrregService(private val httpClient: HttpClient, private val url: String) {
+class BrregService(private val klient: BrregKlient) {
     private val logger = LoggerFactory.getLogger(BrregService::class.java)
 
     private val cache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofDays(1))
         .build<LocalDate, List<Enhet>>()
 
-    suspend fun hentStatsforvalterListe(): List<Enhet> {
+    suspend fun hentAlleStatsforvaltere(): List<Enhet> {
         val enheter = cache.getIfPresent(LocalDate.now())
 
         return if (!enheter.isNullOrEmpty()) {
-            logger.info("Fant cachet liste over statsforvaltere (antall ${enheter.size}")
+            logger.info("Fant cachet liste over statsforvaltere (antall ${enheter.size})")
             enheter
         } else {
-            val nyListe = httpClient.get("$url/enheter/statsforvalter").body<List<Enhet>>()
+            val nyListe = klient.hentEnheter()
 
             if (nyListe.isEmpty()) {
                 logger.error("Tom liste i respons fra etterlatte-brreg ... ")
@@ -37,9 +33,3 @@ class BrregService(private val httpClient: HttpClient, private val url: String) 
         }
     }
 }
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Enhet(
-    val organisasjonsnummer: String,
-    val navn: String
-)

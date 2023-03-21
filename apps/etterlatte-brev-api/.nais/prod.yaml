@@ -60,8 +60,8 @@ spec:
     max: 1
     min: 1
   env:
-    - name: ETTERLATTE_BRREG_URL
-      value: http://etterlatte-brreg
+    - name: BRREG_URL
+      value: https://data.brreg.no
     - name: NORG2_URL
       value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1
     - name: ETTERLATTE_PDFGEN_URL
@@ -108,7 +108,6 @@ spec:
     outbound:
       rules:
         - application: ey-pdfgen
-        - application: etterlatte-brreg
         - application: etterlatte-pdl-proxy
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
@@ -118,6 +117,7 @@ spec:
         - host: saf.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: dokdistfordeling.prod-fss-pub.nais.io
+        - host: data.brreg.no
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal

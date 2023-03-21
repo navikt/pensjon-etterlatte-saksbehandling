@@ -24,7 +24,12 @@ internal class StartUthentingFraSoeknad(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandAny(EVENT_NAME_KEY, listOf(SoeknadInnsendt.eventNameInnsendt, "trenger_behandling")) }
+            validate {
+                it.demandAny(
+                    EVENT_NAME_KEY,
+                    listOf(SoeknadInnsendt.eventNameInnsendt, SoeknadInnsendt.eventNameBehandlingBehov)
+                )
+            }
             correlationId()
             validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }

@@ -44,7 +44,7 @@ internal class Fordeler(
 
     init {
         River(rapidsConnection).apply {
-            eventName(SoeknadInnsendt.eventName)
+            eventName(SoeknadInnsendt.eventNameInnsendt)
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "BARNEPENSJON") }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "2") }
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }

@@ -11,6 +11,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.getClientAccessToken
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.toJson
@@ -150,7 +151,7 @@ fun opprettSoeknadJson(
 
     return JsonMessage.newMessage(
         mapOf(
-            "@event_name" to "trenger_behandling",
+            "@event_name" to SoeknadInnsendt.eventNameBehandlingBehov,
             "@skjema_info" to objectMapper.readValue<ObjectNode>(skjemaInfo),
             "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
             "@template" to "soeknad",

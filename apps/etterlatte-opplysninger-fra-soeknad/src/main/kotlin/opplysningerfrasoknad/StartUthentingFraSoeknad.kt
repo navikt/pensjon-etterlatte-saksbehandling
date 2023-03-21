@@ -1,10 +1,11 @@
 package no.nav.etterlatte.opplysningerfrasoknad
 
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -23,7 +24,12 @@ internal class StartUthentingFraSoeknad(
 
     init {
         River(rapidsConnection).apply {
-            eventName("soeknad_innsendt")
+            validate {
+                it.demandAny(
+                    EVENT_NAME_KEY,
+                    listOf(SoeknadInnsendt.eventNameInnsendt, SoeknadInnsendt.eventNameBehandlingBehov)
+                )
+            }
             correlationId()
             validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }

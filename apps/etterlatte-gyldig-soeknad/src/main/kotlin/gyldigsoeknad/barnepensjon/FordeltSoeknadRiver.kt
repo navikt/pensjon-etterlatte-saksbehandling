@@ -32,7 +32,7 @@ internal class FordeltSoeknadRiver(
 
     init {
         River(rapidsConnection).apply {
-            eventName("trenger_behandling")
+            eventName(SoeknadInnsendt.eventNameBehandlingBehov)
             correlationId()
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }

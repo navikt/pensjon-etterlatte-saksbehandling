@@ -63,12 +63,12 @@ class VedtaksbrevService(
         val vedtaksbrev = hentVedtaksbrev(behandlingId)
             ?: throw IllegalArgumentException("Vedtaksbrev ikke funnet. Avbryter ferdigstilling/attestering.")
 
-        return if (vedtaksbrev.status in listOf(Status.OPPRETTET, Status.OPPDATERT)) {
-            db.oppdaterStatus(vedtaksbrev.id, Status.FERDIGSTILT)
-        } else if (vedtaksbrev.status == Status.FERDIGSTILT) {
-            true // Ignorer hvis brev allerede er ferdigstilt
-        } else {
-            throw IllegalArgumentException("Kan ikke ferdigstille vedtaksbrev med status ${vedtaksbrev.status}")
+        return when (vedtaksbrev.status) {
+            in listOf(Status.OPPRETTET, Status.OPPDATERT) -> db.oppdaterStatus(vedtaksbrev.id, Status.FERDIGSTILT)
+            Status.FERDIGSTILT -> true // Ignorer hvis brev allerede er ferdigstilt
+            else -> throw IllegalArgumentException(
+                "Kan ikke ferdigstille vedtaksbrev (id=${vedtaksbrev.id}) med status ${vedtaksbrev.status}"
+            )
         }
     }
 

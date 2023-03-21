@@ -54,6 +54,7 @@ export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; famili
             familieforhold.avdoede.opplysning.doedsdato.toString()
           )}
           visHistorikk={true}
+          adresseDoedstidspunkt={false}
         />
       </PersonInfoWrapper>
     </PersonBorder>

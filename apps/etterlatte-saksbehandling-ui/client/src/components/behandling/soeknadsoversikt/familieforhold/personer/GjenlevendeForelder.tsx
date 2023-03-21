@@ -28,7 +28,7 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.foedselsnummer} />
-        <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} />
+        <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} adresseDoedstidspunkt={false} />
       </PersonInfoWrapper>
     </PersonBorder>
   )

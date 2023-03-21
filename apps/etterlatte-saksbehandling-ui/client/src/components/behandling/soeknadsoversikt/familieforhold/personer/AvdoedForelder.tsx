@@ -26,7 +26,7 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.foedselsnummer} />
-        <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} />
+        <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={true} />
       </PersonInfoWrapper>
     </PersonBorder>
   )

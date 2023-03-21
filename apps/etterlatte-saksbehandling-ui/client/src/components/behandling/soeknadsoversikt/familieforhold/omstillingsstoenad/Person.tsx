@@ -1,0 +1,53 @@
+import { IPdlPerson } from '~shared/types/Person'
+import { People } from '@navikt/ds-icons'
+import { format } from 'date-fns'
+import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
+import { BodyShort, Detail, Heading } from '@navikt/ds-react'
+import styled from 'styled-components'
+import { KildePdl } from '~shared/types/kilde'
+import { formaterFnr } from '~utils/formattering'
+
+const PersonBorder = styled.div`
+  padding: 1.2em 1em 1em 0em;
+  display: flex;
+`
+
+const IconWrapper = styled.span`
+  width: 2.5rem;
+`
+
+const PersonInfoWrapper = styled.div`
+  display: grid;
+  gap: 0.5rem;
+`
+
+type Props = {
+  person: IPdlPerson
+  kilde: KildePdl
+  avdoed?: boolean
+}
+
+export const Person: React.FC<Props> = ({ person, kilde, avdoed = false }) => {
+  return (
+    <PersonBorder>
+      <IconWrapper>
+        <People fontSize={'26px'} />
+      </IconWrapper>
+      <PersonInfoWrapper>
+        <Heading size={'small'} level={'3'}>
+          {avdoed ? 'Avdød' : 'Gjenlevende'}
+        </Heading>
+        <BodyShort>
+          {`${person.fornavn} ${person.etternavn}`} ({formaterFnr(person.foedselsnummer)})
+        </BodyShort>
+        <div>
+          <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
+          <Detail>{`${kilde.type.toUpperCase()} ${format(
+            new Date(kilde.tidspunktForInnhenting),
+            'dd.MM.yyyy'
+          )}`}</Detail>
+        </div>
+      </PersonInfoWrapper>
+    </PersonBorder>
+  )
+}

@@ -50,3 +50,8 @@ export const formaterSakstype = (sakstype: ISaksType): string => {
       return 'Omstillingsstønad'
   }
 }
+
+export const formaterFnr = (fnr: String) => {
+  if (fnr.length === 11) return fnr.replace(/\d{6}(?=.)/g, '$& ')
+  return fnr
+}

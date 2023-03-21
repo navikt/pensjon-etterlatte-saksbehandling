@@ -135,8 +135,7 @@ class FordelerKriterier {
     }
 
     private fun harDoedsdatoForLangtTilbakeITid(avdoed: Person): Boolean =
-        //Lagt på 2 år for testformål, må endres tilbake
-        avdoed.doedsdato?.isBefore(LocalDate.of(2020, 6, 1)) ?: false
+        avdoed.doedsdato?.isBefore(LocalDate.of(2022, 6, 1)) ?: false
 
     private fun gjenlevendeHarIkkeForeldreansvar(barn: Person, gjenlevende: Person): Boolean {
         return barn.familieRelasjon?.ansvarligeForeldre

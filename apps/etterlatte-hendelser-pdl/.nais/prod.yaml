@@ -1,0 +1,44 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-hendelser-pdl
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  strategy:
+    type: Recreate
+  kafka:
+    pool: nav-prod
+  azure:
+    application:
+      enabled: true
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.etterlatteytelser
+    - name: KAFKA_RESET_POLICY
+      value: earliest
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: dodsmeldingfraleesah
+    - name: LEESAH_KAFKA_GROUP_ID
+      value: "etterlatte-v1"
+    - name: LEESAH_TOPIC_PERSON
+      value: "pdl.leesah-v1"
+    - name: PDL_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-pdltjenester

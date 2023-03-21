@@ -58,7 +58,7 @@ spec:
     - name: PDL_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: FEATURE_MAX_FORDELING_TIL_DOFFEN
-      value: "0"
+      value: "1"
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEHANDLING_URL

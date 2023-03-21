@@ -36,7 +36,7 @@ internal class InnsendtSoeknadRiver(
 
     init {
         River(rapidsConnection).apply {
-            eventName(SoeknadInnsendt.eventName)
+            eventName(SoeknadInnsendt.eventNameInnsendt)
             correlationId()
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.OMSTILLINGSSTOENAD.name) }

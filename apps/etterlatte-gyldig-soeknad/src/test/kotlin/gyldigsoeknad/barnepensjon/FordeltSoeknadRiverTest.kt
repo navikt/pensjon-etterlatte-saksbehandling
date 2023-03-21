@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -76,7 +77,7 @@ internal class FordeltSoeknadRiverTest {
         assertEquals(persongalleri.avdoed.single(), inspector.message(2).get("fnr").asText())
         assertEquals(PersonRolle.AVDOED.name, inspector.message(2).get("rolle").asText())
 
-        assertEquals("trenger_behandling", inspector.message(3).get(EVENT_NAME_KEY).asText())
+        assertEquals(SoeknadInnsendt.eventNameBehandlingBehov, inspector.message(3).get(EVENT_NAME_KEY).asText())
         assertEquals(sakId, inspector.message(3).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals(id.toString(), inspector.message(3).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
         assertEquals(true, inspector.message(3).get(GyldigSoeknadVurdert.gyldigInnsenderKey).asBoolean())

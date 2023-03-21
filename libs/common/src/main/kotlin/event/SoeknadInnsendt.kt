@@ -10,8 +10,8 @@ interface ISoeknadInnsendt {
     val adressebeskyttelseKey get() = "@adressebeskyttelse"
     val fnrSoekerKey get() = "@fnr_soeker"
     val dokarkivReturKey get() = "@dokarkivRetur"
+    val eventNameInnsendt get() = "soeknad_innsendt"
+    val eventNameBehandlingBehov get() = "trenger_behandling"
 }
 
-object SoeknadInnsendt : ISoeknadInnsendt {
-    val eventName: String get() = "soeknad_innsendt"
-}
+object SoeknadInnsendt : ISoeknadInnsendt

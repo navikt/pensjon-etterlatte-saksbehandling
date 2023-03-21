@@ -11,6 +11,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.logger
@@ -103,7 +104,7 @@ private fun opprettSoeknadJson(ytelse: String, gjenlevendeFnr: String, avdoedFnr
             Tidspunkt.now().toLocalDatetimeUTC()
         )
     } else {
-        eventName = "trenger_behandling"
+        eventName = SoeknadInnsendt.eventNameBehandlingBehov
         soeker = barnFnr
         skjemaInfo = opprettSkjemaInfoBarnepensjon(
             gjenlevendeFnr,

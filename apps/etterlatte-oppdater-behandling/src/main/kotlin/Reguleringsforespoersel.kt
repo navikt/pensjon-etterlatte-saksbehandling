@@ -35,7 +35,13 @@ internal class Reguleringsforespoersel(
             withFeilhaandtering(packet, context, REGULERING_EVENT_NAME) {
                 logger.info("Leser reguleringsfoerespoersel for dato ${packet.dato}")
 
-                val tilbakemigrerte = behandlingService.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
+                val tilbakemigrerte =
+                    behandlingService.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert().also { sakIdListe ->
+                        logger.info(
+                            "Tilbakemigrert ${sakIdListe.ider.size} behandlinger:\n" +
+                                sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" }
+                        )
+                    }
                 behandlingService.hentAlleSaker().saker.forEach {
                     packet.eventName = FINN_LOEPENDE_YTELSER
                     packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)

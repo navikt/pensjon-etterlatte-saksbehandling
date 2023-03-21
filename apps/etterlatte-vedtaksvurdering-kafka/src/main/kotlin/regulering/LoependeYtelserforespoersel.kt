@@ -47,7 +47,12 @@ internal class LoependeYtelserforespoersel(
 
                 val tilbakestilteBehandlinger = packet.tilbakestilteBehandlinger
                 tilbakestilteBehandlinger.forEach {
-                    vedtak.tilbakestillVedtak(it)
+                    try {
+                        vedtak.tilbakestillVedtak(it)
+                        logger.info("Tilbakestilt vedtak for behandling $it")
+                    } catch (e: Exception) {
+                        logger.error("Tilbakestilling av vedtak feilet for behandling $it")
+                    }
                 }
 
                 val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)

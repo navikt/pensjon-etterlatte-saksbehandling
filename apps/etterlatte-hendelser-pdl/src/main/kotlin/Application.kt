@@ -11,8 +11,6 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import no.nav.etterlatte.hendelserpdl.leesah.KafkaConsumerHendelserPdl
 import no.nav.etterlatte.hendelserpdl.leesah.LivsHendelserTilRapid
 import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
@@ -25,6 +23,7 @@ import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import org.slf4j.LoggerFactory
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
 fun main() {
@@ -69,12 +68,21 @@ fun startLeesahLytter(env: Map<String, String>) {
     val topic = env.getValue("KAFKA_RAPID_TOPIC")
     // Gcpkafkaconfig burde renames?
     val kafkaProducer = GcpKafkaConfig.fromEnv(env).rapidsAndRiversProducer(topic)
-    withLogContext {
-        GlobalScope.launch {
+    val closed = AtomicBoolean()
+
+    Thread {
+        withLogContext {
             try {
                 val kafkaConsumerHendelserPdl = KafkaConsumerHendelserPdl(
                     PersonHendelseFordeler(LivsHendelserTilRapid(kafkaProducer), pdlService),
-                    env
+                    env,
+                    closed
+                )
+                Runtime.getRuntime().addShutdownHook(
+                    Thread {
+                        closed.set(true)
+                        kafkaConsumerHendelserPdl.getConsumer().wakeup(); // trådsikker
+                    }
                 )
                 while (true) {
                     kafkaConsumerHendelserPdl.stream()

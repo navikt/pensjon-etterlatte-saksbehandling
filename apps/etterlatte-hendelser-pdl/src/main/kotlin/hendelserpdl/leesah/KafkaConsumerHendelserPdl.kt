@@ -1,17 +1,17 @@
 package no.nav.etterlatte.hendelserpdl.leesah
 
-import kotlinx.coroutines.delay
 import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.slf4j.LoggerFactory
+import org.apache.kafka.common.errors.WakeupException
 import java.time.Duration
+import java.util.concurrent.atomic.AtomicBoolean
 
 class KafkaConsumerHendelserPdl(
     private val personHendelseFordeler: PersonHendelseFordeler,
     env: Map<String, String>,
+    private val closed: AtomicBoolean,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment()
 ) {
-    private val logger = LoggerFactory.getLogger(this.javaClass.name)
     private var antallMeldinger = 0
     private val leesahtopic = env["LEESAH_TOPIC_PERSON"]
     private val consumer: KafkaConsumer<String, Personhendelse>
@@ -19,22 +19,26 @@ class KafkaConsumerHendelserPdl(
         consumer = KafkaConsumer<String, Personhendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env)).also {
             it.subscribe(listOf(leesahtopic))
         }
-        Runtime.getRuntime().addShutdownHook(Thread { consumer.close() })
     }
 
-    suspend fun stream(): Int {
-        val meldinger = consumer.poll(Duration.ofSeconds(10L))
-        meldinger.forEach {
-            personHendelseFordeler.haandterHendelse(it.value())
-        }
+    fun getConsumer() = consumer
+
+    fun stream() {
         try {
-            consumer.commitSync()
-        } catch (e: Exception) {
-            logger.error("Kunne ikke committe offsett")
-            throw e
+            while (!closed.get()) {
+                val meldinger = consumer.poll(Duration.ofSeconds(10L))
+                meldinger.forEach {
+                    personHendelseFordeler.haandterHendelse(it.value())
+                }
+                consumer.commitSync()
+                antallMeldinger += meldinger.count()
+                if (meldinger.isEmpty) Thread.sleep(500L)
+            }
+        } catch (e: WakeupException) {
+            // Ignore exception if closing
+            if (!closed.get()) throw e
+        } finally {
+            consumer.close()
         }
-        antallMeldinger += meldinger.count()
-        if (meldinger.isEmpty) delay(500)
-        return antallMeldinger
     }
 }

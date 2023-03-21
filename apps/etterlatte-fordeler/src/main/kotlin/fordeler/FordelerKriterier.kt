@@ -1,12 +1,6 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.aktiv
-import no.nav.etterlatte.libs.common.person.alder
-import no.nav.etterlatte.libs.common.person.nyeste
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -141,7 +135,8 @@ class FordelerKriterier {
     }
 
     private fun harDoedsdatoForLangtTilbakeITid(avdoed: Person): Boolean =
-        avdoed.doedsdato?.isBefore(LocalDate.of(2022, 6, 1)) ?: false
+        //Lagt på 2 år for testformål, må endres tilbake
+        avdoed.doedsdato?.isBefore(LocalDate.of(2020, 6, 1)) ?: false
 
     private fun gjenlevendeHarIkkeForeldreansvar(barn: Person, gjenlevende: Person): Boolean {
         return barn.familieRelasjon?.ansvarligeForeldre

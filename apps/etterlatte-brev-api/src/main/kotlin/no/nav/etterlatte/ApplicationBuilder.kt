@@ -13,9 +13,10 @@ import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.adresse.BrregService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
+import no.nav.etterlatte.brev.adresse.enhetsregister.BrregKlient
+import no.nav.etterlatte.brev.adresse.enhetsregister.BrregService
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.brevRoute
@@ -71,7 +72,7 @@ class ApplicationBuilder {
         )
     }
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env.requireEnvValue("ETTERLATTE_PDFGEN_URL"))
-    private val brregService = BrregService(httpClient(), env.requireEnvValue("ETTERLATTE_BRREG_URL"))
+    private val brregService = BrregService(BrregKlient(httpClient(), env.requireEnvValue("BRREG_URL")))
     private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
     private val navansattKlient = NavansattKlient(proxyClient, env.requireEnvValue("NAVANSATT_URL"))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
@@ -136,8 +137,6 @@ class ApplicationBuilder {
             object : TypeReference<Map<String, String>>() {}
         )
     }
-
-    private fun sendToRapid(message: String) = rapidsConnection.publish(message)
 
     fun start() = setReady().also { rapidsConnection.start() }
 

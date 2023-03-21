@@ -41,9 +41,6 @@ Tjeneste som holder styr på behandlinger.
 [etterlatte-brev-api](apps/etterlatte-brev-api) \
 Ktor og Rapid app for å håndtere generering av brev, brevmaler og sende videre til distribusjon.
 
-[etterlatte-brreg](apps/etterlatte-brreg) \
-App med API for å hente data fra enhetsregisteret.
-
 [etterlatte-fordeler](apps/etterlatte-fordeler) \
 Fordeler aktuelle saker inn til behandling i ny applikasjon.
 
@@ -108,8 +105,6 @@ behandling -.- t3[/"Behandling uten grunnlag"/]:::msg -.-> grunnlag
 subgraph registere["Registere"]
     pdl["PDL-tjenester"]
     inntektskomponenten
-    MEDL
-    BRREG
 end
 
 opplysninger-fra-soeknad:::kafka -.- t5[/"Ny opplysning"/]:::msg -.-> grunnlag:::app

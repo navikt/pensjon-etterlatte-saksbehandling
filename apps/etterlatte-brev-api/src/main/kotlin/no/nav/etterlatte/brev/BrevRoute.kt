@@ -14,7 +14,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.brev.adresse.BrregService
+import no.nav.etterlatte.brev.adresse.enhetsregister.BrregService
 import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
@@ -40,7 +40,7 @@ fun Route.brevRoute(service: BrevService, brregService: BrregService, behandling
         }
 
         get("mottakere") {
-            val statsforvaltere = brregService.hentStatsforvalterListe().map {
+            val statsforvaltere = brregService.hentAlleStatsforvaltere().map {
                 AvsenderMottaker(it.organisasjonsnummer, idType = "ORGNR", it.navn)
             }
 

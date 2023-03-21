@@ -31,9 +31,9 @@ class BrevService(
         val brev = db.hentBrev(id)
 
         if (brev.status != Status.OPPRETTET && brev.status != Status.OPPDATERT) {
-            throw RuntimeException("Brev er ferdigstilt og kan ikke slettes!")
+            throw RuntimeException("Brev (id=$id) er ferdigstilt og kan ikke slettes!")
         } else if (brev.erVedtaksbrev) {
-            throw RuntimeException("Vedtaksbrev kan ikke slettes!")
+            throw RuntimeException("Vedtaksbrev (id=$id) kan ikke slettes!")
         }
 
         return db.slett(id)
@@ -73,16 +73,16 @@ class BrevService(
 
         val brev = db.hentBrev(id)
         if (brev.status == Status.FERDIGSTILT) {
-            logger.warn("Brev med id=$id er allerede markert som ferdigstilt. Avbryter ferdigstilling!")
+            logger.warn("Brev (id=$id) er allerede markert som ferdigstilt. Avbryter ferdigstilling!")
             return true
         }
 
         return db.oppdaterStatus(id, Status.FERDIGSTILT)
             .also {
                 if (it) {
-                    logger.info("Brev status er satt til ${Status.FERDIGSTILT}")
+                    logger.info("Brev (id=$id) status er satt til ${Status.FERDIGSTILT}")
                 } else {
-                    logger.error("Kunne ikke sette brev status til ${Status.FERDIGSTILT}")
+                    logger.error("Kunne ikke sette brev (id=$id) status til ${Status.FERDIGSTILT}")
                 }
             }
     }

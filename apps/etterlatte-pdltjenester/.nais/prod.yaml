@@ -43,3 +43,5 @@ spec:
         - application: etterlatte-fordeler
         - application: etterlatte-opplysninger-fra-pdl
         - application: etterlatte-gyldig-soeknad
+        - application: etterlatte-hendelser-pdl
+        - application: etterlatte-behandling

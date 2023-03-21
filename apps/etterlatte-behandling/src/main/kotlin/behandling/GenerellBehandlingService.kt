@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
@@ -51,14 +50,11 @@ interface GenerellBehandlingService {
 
     fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse>
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
-    fun alleSakIderForSoekerMedFnr(fnr: String): List<Long>
     fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
     suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
         bruker: Bruker
     ): DetaljertBehandlingDto
-
-    fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>>
 
     suspend fun hentBehandlingMedEnkelPersonopplysning(
         behandlingId: UUID,
@@ -328,18 +324,6 @@ class RealGenerellBehandlingService(
     override fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling> {
         return inTransaction {
             behandlinger.alleBehandlingerForSoekerMedFnr(fnr)
-        }
-    }
-
-    override fun alleSakIderForSoekerMedFnr(fnr: String): List<Long> {
-        return inTransaction {
-            behandlinger.alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr)
-        }
-    }
-
-    override fun hentSakerOgRollerMedFnrIPersongalleri(fnr: String): List<Pair<Saksrolle, Long>> {
-        return inTransaction {
-            behandlinger.sakerOgRollerMedFnrIPersongalleri(fnr)
         }
     }
 }

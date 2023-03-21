@@ -120,7 +120,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.get("/behandlinger/$behandlingId") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
+            }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
                 it.body<DetaljertBehandling>()
             }
@@ -141,7 +141,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                         Tidspunkt.now().toLocalDatetimeUTC()
                     )
                 )
-            }.let {
+            }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
@@ -307,6 +307,8 @@ class IntegrationTest : BehandlingIntegrationTest() {
                         endringstype = Endringstype.OPPRETTET
                     )
                 )
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.post("/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
@@ -322,6 +324,30 @@ class IntegrationTest : BehandlingIntegrationTest() {
                         endringstype = Endringstype.OPPRETTET
                     )
                 )
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger/foerstegangsbehandling") {
+                addAuthToken(tokenServiceUser)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    BehandlingsBehov(
+                        1,
+                        Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                        Tidspunkt.now().toLocalDatetimeUTC().toString()
+                    )
+
+                )
+            }.let {
+                assertEquals(HttpStatusCode.OK, it.status)
+                UUID.fromString(it.body())
+            }
+
+            client.post("/api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
+                addAuthToken(tokenSaksbehandler)
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
@@ -334,6 +360,8 @@ class IntegrationTest : BehandlingIntegrationTest() {
                         endringstype = Endringstype.OPPRETTET
                     )
                 )
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.post("/api/behandlinger/${sak.id}/manueltopphoer") {
@@ -354,34 +382,10 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 it.body<ManueltOpphoerResponse>()
             }
 
-            val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger/foerstegangsbehandling") {
-                addAuthToken(tokenServiceUser)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    BehandlingsBehov(
-                        1,
-                        Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
-                        Tidspunkt.now().toLocalDatetimeUTC().toString()
-                    )
-
-                )
-            }.let {
-                assertEquals(HttpStatusCode.OK, it.status)
-                UUID.fromString(it.body())
-            }
-
-            client.post("api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
+            client.get("/behandlinger/$behandlingId") {
                 addAuthToken(tokenSaksbehandler)
             }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            client.get("/behandlinger/foerstegangsbehandling?behandlingsid=$behandlingIdNyFoerstegangsbehandling") {
-                addAuthToken(tokenSaksbehandler)
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-                val result = it.body<DetaljertBehandling>()
-                assertEquals(BehandlingStatus.AVBRUTT, result.status)
+                assertEquals(HttpStatusCode.NotFound, it.status) // 404 pga adressebeskyttelse
             }
         }
 
@@ -400,12 +404,12 @@ class IntegrationTest : BehandlingIntegrationTest() {
             objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
         )
         assertEquals(
-            "BEHANDLING:OPPRETTET",
+            "BEHANDLING:AVBRUTT",
             objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue()
         )
         assertEquals(
-            "BEHANDLING:AVBRUTT",
-            objectMapper.readTree(rapid.publiserteMeldinger.last().verdi)["@event_name"].textValue()
+            "BEHANDLING:OPPRETTET",
+            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue()
         )
         beanFactory.dataSource().connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }

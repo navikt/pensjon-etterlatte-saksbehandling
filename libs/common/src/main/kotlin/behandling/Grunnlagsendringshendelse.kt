@@ -9,7 +9,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class Grunnlagsendringshendelse(
     val id: UUID,
@@ -40,6 +40,16 @@ enum class GrunnlagsendringStatus {
         fun relevantForSaksbehandler() = listOf(SJEKKET_AV_JOBB, TATT_MED_I_BEHANDLING, VURDERT_SOM_IKKE_RELEVANT)
     }
 }
+
+data class PersonMedSakerOgRoller(
+    val fnr: String,
+    val sakerOgRoller: List<SakOgRolle>
+)
+
+data class SakOgRolle(
+    val sakId: Long,
+    val rolle: Saksrolle
+)
 
 enum class Saksrolle {
     SOEKER,

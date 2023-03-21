@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -626,63 +625,6 @@ internal class BehandlingDaoIntegrationTest {
 
             assertEquals(expected, actual)
         }
-    }
-
-    @Test
-    fun `skal hente ut saksnr og rolle for saker hvor et fnr opptrer`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-        val sak2 = sakRepo.opprettSak("321", SakType.BARNEPENSJON).id
-
-        listOf(
-            opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sak1,
-                persongalleri = Persongalleri(
-                    soeker = "11111",
-                    innsender = "22222",
-                    soesken = listOf("33333", "44444"),
-                    avdoed = listOf("55555"),
-                    gjenlevende = listOf("66666")
-                )
-            ),
-            opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sak1,
-                persongalleri = Persongalleri(
-                    soeker = "77777",
-                    innsender = "88888",
-                    soesken = listOf("99999"),
-                    avdoed = listOf("00000"),
-                    gjenlevende = listOf("01010")
-                )
-            ),
-            opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sak2,
-                persongalleri = Persongalleri(
-                    soeker = "11111",
-                    innsender = "11111",
-                    soesken = listOf("11111", "04040", "05050"),
-                    avdoed = listOf("06060", "11111"),
-                    gjenlevende = listOf("11111")
-                )
-            )
-        ).forEach {
-            behandlingRepo.opprettBehandling(it)
-        }
-
-        val sakerOgRoller = behandlingRepo.sakerOgRollerMedFnrIPersongalleri("11111")
-        assertEquals(5, sakerOgRoller.size)
-        assertEquals(Saksrolle.SOEKER, sakerOgRoller[0].first)
-        assertEquals(sak1, sakerOgRoller[0].second)
-        assertEquals(Saksrolle.AVDOED, sakerOgRoller[1].first)
-        assertEquals(sak2, sakerOgRoller[1].second)
-        assertEquals(Saksrolle.GJENLEVENDE, sakerOgRoller[2].first)
-        assertEquals(sak2, sakerOgRoller[2].second)
-        assertEquals(Saksrolle.SOEKER, sakerOgRoller[3].first)
-        assertEquals(sak2, sakerOgRoller[3].second)
-        assertEquals(Saksrolle.SOESKEN, sakerOgRoller[4].first)
-        assertEquals(sak2, sakerOgRoller[4].second)
     }
 
     @Test

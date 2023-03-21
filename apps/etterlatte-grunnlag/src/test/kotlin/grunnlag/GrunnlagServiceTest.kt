@@ -2,8 +2,11 @@ package no.nav.etterlatte.grunnlag
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import lagGrunnlagHendelse
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
@@ -340,5 +343,139 @@ internal class GrunnlagServiceTest {
         Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
         Assertions.assertEquals(2, opplysningsgrunnlag.soeker.size)
         Assertions.assertEquals(0, opplysningsgrunnlag.familie.size)
+    }
+
+    @Nested
+    inner class `Test uthenting av saker og roller for person` {
+        private val gjenlevendeFnr = TRIVIELL_MIDTPUNKT
+
+        private val barnepensjonSoeker1 = BLAAOEYD_SAKS
+        private val grunnlaghendelse1 = lagGrunnlagHendelse(
+            sakId = 1,
+            hendelseNummer = 1,
+            opplysningType = PERSONGALLERI_V1,
+            verdi = Persongalleri(
+                soeker = barnepensjonSoeker1.value,
+                innsender = gjenlevendeFnr.value,
+                soesken = listOf(
+                    GOEYAL_KRONJUVEL.value,
+                    GROENN_STAUDE.value
+                ),
+                avdoed = listOf(STOR_SNERK.value),
+                gjenlevende = listOf(gjenlevendeFnr.value)
+            ).toJsonNode()
+        )
+
+        private val barnepensjonSoeker2 = GOEYAL_KRONJUVEL
+        private val grunnlaghendelse2 = lagGrunnlagHendelse(
+            sakId = 2,
+            hendelseNummer = 2,
+            opplysningType = PERSONGALLERI_V1,
+            verdi = Persongalleri(
+                soeker = barnepensjonSoeker2.value,
+                innsender = gjenlevendeFnr.value,
+                soesken = listOf(
+                    BLAAOEYD_SAKS.value,
+                    GROENN_STAUDE.value
+                ),
+                avdoed = listOf(STOR_SNERK.value),
+                gjenlevende = listOf(gjenlevendeFnr.value)
+            ).toJsonNode()
+        )
+
+        private val grunnlaghendelse3 = lagGrunnlagHendelse(
+            sakId = 3,
+            hendelseNummer = 3,
+            opplysningType = PERSONGALLERI_V1,
+            verdi = Persongalleri(
+                soeker = gjenlevendeFnr.value,
+                innsender = gjenlevendeFnr.value,
+                avdoed = listOf(STOR_SNERK.value)
+            ).toJsonNode()
+        )
+
+        @Test
+        fun `Hent sak og rolle for person hvor det finnes to soesken`() {
+            every { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(any()) } returns listOf(
+                grunnlaghendelse1,
+                grunnlaghendelse2
+            )
+
+            /*
+            * Barn 1 søker barnepensjon og har rolle søsken i annen sak
+            */
+            val barn1 = grunnlagService.hentSakerOgRoller(barnepensjonSoeker1)
+            Assertions.assertEquals(2, barn1.sakerOgRoller.size)
+            Assertions.assertEquals(barnepensjonSoeker1.value, barn1.fnr)
+
+            val barn1ErSoekerIEgenSak = barn1.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
+            Assertions.assertEquals(grunnlaghendelse1.sakId, barn1ErSoekerIEgenSak.sakId)
+
+            val barn1ErSoeskenIAnnenSak = barn1.sakerOgRoller.single { it.rolle == Saksrolle.SOESKEN }
+            Assertions.assertEquals(grunnlaghendelse2.sakId, barn1ErSoeskenIAnnenSak.sakId)
+
+            /*
+            * Barn 2 søker barnepensjon og har rolle søsken i annen sak
+            */
+            val barn2 = grunnlagService.hentSakerOgRoller(barnepensjonSoeker2)
+            Assertions.assertEquals(2, barn2.sakerOgRoller.size)
+            Assertions.assertEquals(barnepensjonSoeker2.value, barn2.fnr)
+
+            val barn2ErSoekerIEgenSak = barn2.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
+            Assertions.assertEquals(grunnlaghendelse2.sakId, barn2ErSoekerIEgenSak.sakId)
+
+            val barn2ErSoeskenIAnnenSak = barn2.sakerOgRoller.single { it.rolle == Saksrolle.SOESKEN }
+            Assertions.assertEquals(grunnlaghendelse1.sakId, barn2ErSoeskenIAnnenSak.sakId)
+
+            verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker1) }
+            verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker2) }
+        }
+
+        @Test
+        fun `Hent sak og rolle for gjenlevende person med barn`() {
+            every { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr) } returns listOf(
+                grunnlaghendelse1,
+                grunnlaghendelse2,
+                grunnlaghendelse3
+            )
+
+            val gjenlevende = grunnlagService.hentSakerOgRoller(gjenlevendeFnr)
+            Assertions.assertEquals(3, gjenlevende.sakerOgRoller.size)
+            Assertions.assertEquals(gjenlevendeFnr.value, gjenlevende.fnr)
+
+            val gjenlevendeSomForelder = gjenlevende.sakerOgRoller.filter { it.rolle == Saksrolle.GJENLEVENDE }
+            Assertions.assertEquals(2, gjenlevendeSomForelder.size)
+
+            val gjenlevendeErSoeker = gjenlevende.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
+            Assertions.assertEquals(grunnlaghendelse3.sakId, gjenlevendeErSoeker.sakId)
+
+            verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr) }
+        }
+
+        @Test
+        fun `Hent sak og rolle for person kun har tilknytning til saker hvor soesken soeker barnepensjon`() {
+            val soeskenFnr = GROENN_STAUDE
+
+            every { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) } returns listOf(
+                grunnlaghendelse1,
+                grunnlaghendelse2
+            )
+
+            val soesken = grunnlagService.hentSakerOgRoller(soeskenFnr)
+            Assertions.assertEquals(2, soesken.sakerOgRoller.size)
+            Assertions.assertTrue(soesken.sakerOgRoller.all { it.rolle == Saksrolle.SOESKEN })
+
+            verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) }
+        }
+    }
+
+    companion object {
+        val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
+        val STOR_SNERK = Foedselsnummer.of("11057523044")
+
+        // barn
+        val BLAAOEYD_SAKS = Foedselsnummer.of("05111850870")
+        val GOEYAL_KRONJUVEL = Foedselsnummer.of("27121779531")
+        val GROENN_STAUDE = Foedselsnummer.of("09011350027")
     }
 }

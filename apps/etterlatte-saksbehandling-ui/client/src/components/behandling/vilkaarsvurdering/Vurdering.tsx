@@ -111,6 +111,7 @@ export const Vurdering = ({
     postSlettVurdering({ behandlingId: behandlingId, type: vilkaar.id }, (data) => {
       oppdaterVilkaar(data)
       onSuccess?.()
+      setVilkaarutkast({ resultat: null, kommentar: '', vilkaarsUnntakType: '' })
     })
 
   const reset = (onSuccess?: () => void) => {

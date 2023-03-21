@@ -1,0 +1,44 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-gyldig-soeknad
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+  liveness:
+    initialDelay: 5
+    path: /isalive
+  readiness:
+    initialDelay: 5
+    path: /isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  kafka:
+    pool: nav-prod
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.etterlatteytelser
+    - name: KAFKA_RESET_POLICY
+      #sette tilbake til none senere
+      value: earliest
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+    - name: PDLTJENESTER_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+        - application: etterlatte-pdltjenester

@@ -35,6 +35,12 @@ const initiellForm = (vilkaar: Vilkaar): VilkaarForm => ({
     '',
 })
 
+const nullstillForm = (): VilkaarForm => ({
+  resultat: null,
+  kommentar: '',
+  vilkaarsUnntakType: '',
+})
+
 export const Vurdering = ({
   vilkaar,
   oppdaterVilkaar,
@@ -111,6 +117,7 @@ export const Vurdering = ({
     postSlettVurdering({ behandlingId: behandlingId, type: vilkaar.id }, (data) => {
       oppdaterVilkaar(data)
       onSuccess?.()
+      setVilkaarutkast(nullstillForm())
     })
 
   const reset = (onSuccess?: () => void) => {

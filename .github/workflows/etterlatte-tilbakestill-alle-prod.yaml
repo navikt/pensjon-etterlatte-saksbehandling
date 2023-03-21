@@ -23,7 +23,6 @@ jobs:
           - saksbehandling-ui
           - statistikk
           - egne-ansatte-lytter
-          - tilbakekreving
           - utbetaling
           - vedtaksvurdering
           - vilkaarsvurdering

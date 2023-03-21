@@ -17,7 +17,7 @@ spec:
   strategy:
     type: Recreate
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   azure:
     application:
       enabled: true
@@ -27,7 +27,7 @@ spec:
     min: 1
   env:
     - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY
       value: latest
     - name: KAFKA_CONSUMER_GROUP_ID
@@ -37,7 +37,7 @@ spec:
     - name: LEESAH_TOPIC_PERSON
       value: "pdl.leesah-v1"
     - name: PDL_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+      value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
   accessPolicy:
     outbound:
       rules:

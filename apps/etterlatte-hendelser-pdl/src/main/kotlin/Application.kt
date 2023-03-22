@@ -10,7 +10,6 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.DelicateCoroutinesApi
 import no.nav.etterlatte.hendelserpdl.leesah.KafkaConsumerHendelserPdl
 import no.nav.etterlatte.hendelserpdl.leesah.LivsHendelserTilRapid
 import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
@@ -45,13 +44,12 @@ class Server() {
     )
     fun run() {
         val env = System.getenv().toMutableMap()
-        startLeesahLytter(env)
+        startLeesahKonsumer(env)
         setReady().also { engine.start(true) }
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
-fun startLeesahLytter(env: Map<String, String>) {
+fun startLeesahKonsumer(env: Map<String, String>) {
     val logger = LoggerFactory.getLogger(Application::class.java)
     val pdlTjenester: HttpClient by lazy {
         httpClientClientCredentials(

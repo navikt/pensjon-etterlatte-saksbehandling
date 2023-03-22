@@ -21,13 +21,11 @@ class OpplysningsgrunnlagMapper(
             assert(alleOpplysningerErAvSammeType(hendelser.map { it.opplysning }))
         }
 
-        val opplysning: Opplysning<JsonNode> = hendelser.first().let {
-            if (it.opplysning.erPeriodisert()) {
-                Opplysning.Periodisert.create(hendelser.map { it.opplysning })
-            } else {
-                hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
-                    .let { Opplysning.Konstant.create(it.opplysning) }
-            }
+        val opplysning: Opplysning<JsonNode> = if (hendelser.any { it.opplysning.periode != null }) {
+            Opplysning.Periodisert.create(hendelser.map { it.opplysning })
+        } else {
+            hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
+                .let { Opplysning.Konstant.create(it.opplysning) }
         }
 
         val opplysningstype: Opplysningstype

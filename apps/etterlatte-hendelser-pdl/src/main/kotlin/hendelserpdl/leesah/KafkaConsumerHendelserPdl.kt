@@ -1,6 +1,5 @@
 package no.nav.etterlatte.hendelserpdl.leesah
 
-import io.ktor.server.application.Application
 import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.WakeupException
@@ -14,15 +13,13 @@ class KafkaConsumerHendelserPdl(
     private val closed: AtomicBoolean,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment()
 ) {
-    val logger = LoggerFactory.getLogger(Application::class.java)
+    val logger = LoggerFactory.getLogger(KafkaConsumerHendelserPdl::class.java)
 
     private var antallMeldinger = 0
     private val leesahtopic = env["LEESAH_TOPIC_PERSON"]
     private val consumer: KafkaConsumer<String, Personhendelse>
     init {
-        consumer = KafkaConsumer<String, Personhendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env)).also {
-            it.subscribe(listOf(leesahtopic))
-        }
+        consumer = KafkaConsumer<String, Personhendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env))
     }
 
     fun getAntallMeldinger() = antallMeldinger
@@ -30,6 +27,8 @@ class KafkaConsumerHendelserPdl(
 
     fun stream() {
         try {
+            logger.info("Starter kafka konsumer")
+            consumer.subscribe(listOf(leesahtopic))
             while (!closed.get()) {
                 val meldinger = consumer.poll(Duration.ofSeconds(10L))
                 meldinger.forEach {

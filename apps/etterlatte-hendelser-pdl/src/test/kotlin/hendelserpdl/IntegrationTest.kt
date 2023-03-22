@@ -206,7 +206,6 @@ class IntegrationTest {
             }
         }
         kafkaConsumerWrapper.stream()
-        println(thread.isAlive)
         thread.join()
 
         verify(exactly = 3) { rapidsKafkaProducer.publiser(any(), any()) }

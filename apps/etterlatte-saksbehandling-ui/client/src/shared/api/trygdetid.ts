@@ -19,6 +19,7 @@ export const lagreOppsummertTrygdetid = async (args: {
   apiClient.post(`/trygdetid/${args.behandlingsId}/beregnet`, { ...args.beregnetTrygdetid })
 
 export interface ITrygdetid {
+  id: string
   beregnetTrygdetid: IBeregnetTrygdetid | null
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
 }
@@ -31,6 +32,7 @@ export interface IBeregnetTrygdetid {
 
 export interface ITrygdetidGrunnlag {
   id: string | null
+  trygdetidId: string
   type: ITrygdetidType
   bosted: string
   periodeFra: string | null

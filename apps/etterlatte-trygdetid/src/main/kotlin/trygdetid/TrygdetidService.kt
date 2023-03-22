@@ -16,8 +16,8 @@ class TrygdetidService(val trygdetidRepository: TrygdetidRepository) {
     }
 
     fun lagreTrygdetidGrunnlag(behandlingsId: UUID, trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid =
-        trygdetidRepository.lagreTrygdetidGrunnlag(behandlingsId, trygdetidGrunnlag)
+        trygdetidRepository.opprettTrygdetidGrunnlag(behandlingsId, trygdetidGrunnlag)
 
     fun lagreBeregnetTrygdetid(behandlingsId: UUID, beregnetTrygdetid: BeregnetTrygdetid): Trygdetid =
-        trygdetidRepository.lagreBeregnetTrygdetid(behandlingsId, beregnetTrygdetid)
+        trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingsId, beregnetTrygdetid)
 }

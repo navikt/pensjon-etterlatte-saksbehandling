@@ -65,12 +65,14 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
 }
 
 data class TrygdetidDto(
+    val id: UUID,
     val beregnetTrygdetid: BeregnetTrygdetidDto?,
     val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>
 )
 
 fun Trygdetid.toDto(): TrygdetidDto =
     TrygdetidDto(
+        id = id,
         beregnetTrygdetid = beregnetTrygdetid?.let {
             BeregnetTrygdetidDto(
                 nasjonal = beregnetTrygdetid.nasjonal,
@@ -96,6 +98,7 @@ fun BeregnetTrygdetidDto.fromDto(): BeregnetTrygdetid =
 
 data class TrygdetidGrunnlagDto(
     val id: UUID?,
+    val trygdetidId: UUID,
     val type: String,
     val bosted: String,
     val periodeFra: LocalDate,
@@ -106,6 +109,7 @@ data class TrygdetidGrunnlagDto(
 fun TrygdetidGrunnlagDto.fromDto(): TrygdetidGrunnlag =
     TrygdetidGrunnlag(
         id = id ?: UUID.randomUUID(),
+        trygdetidId = trygdetidId,
         type = TrygdetidType.valueOf(type),
         bosted = bosted,
         periode = TrygdetidPeriode(periodeFra, periodeTil),
@@ -115,6 +119,7 @@ fun TrygdetidGrunnlagDto.fromDto(): TrygdetidGrunnlag =
 fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
     return TrygdetidGrunnlagDto(
         id = id,
+        trygdetidId = trygdetidId,
         type = type.name,
         bosted = bosted,
         periodeFra = periode.fra,

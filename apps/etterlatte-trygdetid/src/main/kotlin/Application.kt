@@ -5,6 +5,7 @@ import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.trygdetid.config.ApplicationContext
@@ -39,7 +40,7 @@ class Server(private val context: ApplicationContext) {
     }
 
     fun run() = with(context) {
-        datasource.migrate()
+        dataSource.migrate()
         setReady()
         engine.start(true)
     }

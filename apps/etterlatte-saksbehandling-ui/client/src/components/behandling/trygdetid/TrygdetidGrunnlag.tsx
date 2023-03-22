@@ -17,9 +17,10 @@ type Props = {
   erFremtidigTrygdetid?: boolean
 }
 
-const initialState = (erFremtidigTrygdetid: boolean) => {
+const initialState = (erFremtidigTrygdetid: boolean, trygdetidId: string) => {
   return {
     id: null,
+    trygdetidId: trygdetidId,
     type: erFremtidigTrygdetid ? ITrygdetidType.FREMTIDIG : ITrygdetidType.NASJONAL,
     bosted: '',
     periodeFra: null,
@@ -32,7 +33,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
   const { behandlingId } = useParams()
 
   const [nyttTrygdetidgrunnlag, setNyttTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>(
-    initialState(erFremtidigTrygdetid)
+    initialState(erFremtidigTrygdetid, trygdetid.id)
   )
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
 
@@ -55,7 +56,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
         nyttTrygdetidgrunnlag: nyttTrygdetidgrunnlag!,
       },
       (respons) => {
-        setNyttTrygdetidgrunnlag(initialState(erFremtidigTrygdetid))
+        setNyttTrygdetidgrunnlag(initialState(erFremtidigTrygdetid, trygdetid.id))
         setTrygdetid(respons)
       }
     )

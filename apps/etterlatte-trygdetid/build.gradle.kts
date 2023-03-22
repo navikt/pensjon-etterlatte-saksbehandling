@@ -1,5 +1,6 @@
 plugins {
     id("etterlatte.common")
+    id("etterlatte.postgres")
 }
 
 repositories {
@@ -14,10 +15,6 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
 
     implementation("com.h2database:h2:2.1.214")
-    implementation("org.jetbrains.exposed:exposed-core:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-dao:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-java-time:0.41.1")
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercore)
@@ -33,4 +30,8 @@ dependencies {
     implementation(libs.jackson.datatypejsr310)
     implementation(libs.jackson.modulekotlin)
     implementation(libs.database.kotliquery)
+
+    testImplementation(libs.test.testcontainer.jupiter)
+    testImplementation(libs.test.testcontainer.postgresql)
+    testImplementation(libs.test.kotest.assertionscore)
 }

@@ -1,117 +1,139 @@
 package no.nav.etterlatte.trygdetid
 
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.trygdetid.config.InMemoryDs
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.bosted
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.kilde
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.periodeFra
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.periodeTil
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidGrunnlagTable.trygdetidType
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidTable.behandlingsId
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidTable.fremtidigTrygdetid
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidTable.nasjonalTrygdetid
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidTable.opprettet
-import no.nav.etterlatte.trygdetid.config.InMemoryDs.TrygdetidTable.totalTrygdetid
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
-import java.time.Instant
+import kotliquery.Row
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import java.util.*
+import javax.sql.DataSource
 
-class TrygdetidRepository(private val dataSource: InMemoryDs) {
+class TrygdetidRepository(private val dataSource: DataSource) {
 
-    fun hentTrygdetid(behandlingsId: UUID): Trygdetid? {
-        return transaction {
-            val result = dataSource.trygdetidTable.select(dataSource.trygdetidTable.behandlingsId eq behandlingsId)
-            result.firstOrNull()?.let {
-                val trygdetidId = it[dataSource.trygdetidTable.id]
-                val trygdetidgrunnlag = hentTrygdetidGrunnlag(trygdetidId)
-                it.toTrygdetid(trygdetidgrunnlag)
-            }
+    fun hentTrygdetid(behandlingId: UUID): Trygdetid? =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement = """
+                    SELECT id, behandling_id, trygdetid_nasjonal, trygdetid_fremtidig, trygdetid_total 
+                    FROM trygdetid 
+                    WHERE behandling_id = :behandlingId
+                """.trimIndent(),
+                paramMap = mapOf("behandlingId" to behandlingId)
+            )
+                .let { query ->
+                    session.run(
+                        query.map { row ->
+                            val trygdetidId = row.uuid("id")
+                            val trygdetidGrunnlag = hentTrygdetidGrunnlag(trygdetidId)
+                            row.toTrygdetid(trygdetidGrunnlag)
+                        }.asSingle
+                    )
+                }
         }
-    }
+
+    private fun hentTrygdetidGrunnlag(trygdetidId: UUID): List<TrygdetidGrunnlag> =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement = """
+                    SELECT id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde 
+                    FROM trygdetid_grunnlag
+                    WHERE trygdetid_id = :trygdetidId
+                """.trimIndent(),
+                paramMap = mapOf("trygdetidId" to trygdetidId)
+            )
+                .let { query ->
+                    session.run(
+                        query.map { row -> row.toTrygdetidGrunnlag() }.asList
+                    )
+                }
+        }
 
     private fun hentTrygdtidNotNull(behandlingsId: UUID) =
         hentTrygdetid(behandlingsId)
-            ?: throw RuntimeException("Fant ikke trygdetid for ${InMemoryDs.TrygdetidTable.behandlingsId}")
+            ?: throw RuntimeException("Fant ikke trygdetid for $behandlingsId")
 
-    private fun ResultRow.toTrygdetid(trygdetidGrunnlag: List<TrygdetidGrunnlag>): Trygdetid {
-        return Trygdetid(
-            id = this[InMemoryDs.TrygdetidTable.id],
-            behandlingId = this[behandlingsId],
-            opprettet = Tidspunkt(this[opprettet]),
-            beregnetTrygdetid = this[nasjonalTrygdetid]?.let {
+    fun opprettTrygdetid(behandlingId: UUID): Trygdetid =
+        using(sessionOf(dataSource)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = """
+                        INSERT INTO trygdetid(id, behandling_id) VALUES(:id, :behandlingId)
+                    """.trimIndent(),
+                    paramMap = mapOf(
+                        "id" to UUID.randomUUID(),
+                        "behandlingId" to behandlingId
+                    )
+                )
+                    .let { query -> tx.update(query) }
+            }
+        }.let { hentTrygdtidNotNull(behandlingId) }
+
+    fun opprettTrygdetidGrunnlag(behandlingId: UUID, trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid =
+        using(sessionOf(dataSource)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = """
+                        INSERT INTO trygdetid_grunnlag(id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde) 
+                        VALUES(:id, :trygdetidId, :type, :bosted, :periodeFra, :periodeTil, :kilde)
+                    """.trimIndent(),
+                    paramMap = mapOf(
+                        "id" to trygdetidGrunnlag.id,
+                        "trygdetidId" to trygdetidGrunnlag.trygdetidId,
+                        "type" to trygdetidGrunnlag.type.name,
+                        "bosted" to trygdetidGrunnlag.bosted,
+                        "periodeFra" to trygdetidGrunnlag.periode.fra,
+                        "periodeTil" to trygdetidGrunnlag.periode.til,
+                        "kilde" to trygdetidGrunnlag.kilde
+                    )
+                )
+                    .let { query -> tx.update(query) }
+            }
+        }.let { hentTrygdtidNotNull(behandlingId) }
+
+    fun oppdaterBeregnetTrygdetid(behandlingId: UUID, beregnetTrygdetid: BeregnetTrygdetid): Trygdetid =
+        using(sessionOf(dataSource)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = """
+                        UPDATE trygdetid 
+                        SET trygdetid_nasjonal = :trygdetidNasjonal, trygdetid_fremtidig = :trygdetidFremtidig, 
+                            trygdetid_total = :trygdetidTotal 
+                        WHERE behandling_id = :behandlingId
+                    """.trimIndent(),
+                    paramMap = mapOf(
+                        "behandlingId" to behandlingId,
+                        "trygdetidNasjonal" to beregnetTrygdetid.nasjonal,
+                        "trygdetidFremtidig" to beregnetTrygdetid.fremtidig,
+                        "trygdetidTotal" to beregnetTrygdetid.total
+                    )
+                )
+                    .let { query -> tx.update(query) }
+            }
+        }.let { hentTrygdtidNotNull(behandlingId) }
+
+    private fun Row.toTrygdetid(trygdetidGrunnlag: List<TrygdetidGrunnlag>) =
+        Trygdetid(
+            id = uuid("id"),
+            behandlingId = uuid("behandling_id"),
+            beregnetTrygdetid = intOrNull("trygdetid_nasjonal")?.let {
                 BeregnetTrygdetid(
-                    nasjonal = this[nasjonalTrygdetid]!!,
-                    fremtidig = this[fremtidigTrygdetid]!!,
-                    total = this[totalTrygdetid]!!
+                    nasjonal = it,
+                    fremtidig = int("trygdetid_fremtidig"),
+                    total = int("trygdetid_total")
                 )
             },
             trygdetidGrunnlag = trygdetidGrunnlag
         )
-    }
 
-    private fun hentTrygdetidGrunnlag(trygdetidId: UUID): List<TrygdetidGrunnlag> {
-        return transaction {
-            dataSource.trygdetidGrunnlagTable.select(
-                dataSource.trygdetidGrunnlagTable.trygdetidId eq trygdetidId
-            ).map {
-                it.toTrygdetidGrunnlag()
-            }
-        }
-    }
-
-    private fun ResultRow.toTrygdetidGrunnlag(): TrygdetidGrunnlag {
-        return TrygdetidGrunnlag(
-            id = this[InMemoryDs.TrygdetidGrunnlagTable.id],
-            bosted = this[bosted],
-            type = TrygdetidType.valueOf(this[trygdetidType]),
-            periode = TrygdetidPeriode(fra = this[periodeFra], til = this[periodeTil]),
-            kilde = this[kilde]
+    private fun Row.toTrygdetidGrunnlag() =
+        TrygdetidGrunnlag(
+            id = uuid("id"),
+            trygdetidId = uuid("trygdetid_id"),
+            type = string("type").let { TrygdetidType.valueOf(it) },
+            bosted = string("bosted"),
+            periode = TrygdetidPeriode(
+                fra = localDate("periode_fra"),
+                til = localDate("periode_til")
+            ),
+            kilde = string("kilde")
         )
-    }
-
-    fun opprettTrygdetid(behandlingsId: UUID): Trygdetid {
-        transaction {
-            dataSource.trygdetidTable.insert {
-                it[this.id] = UUID.randomUUID()
-                it[this.behandlingsId] = behandlingsId
-                it[this.opprettet] = Instant.now() // TODO denne skal hentes fra tidspunkt
-            }
-        }
-        return hentTrygdtidNotNull(behandlingsId)
-    }
-
-    fun lagreTrygdetidGrunnlag(behandlingsId: UUID, trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
-        val trygdetid = hentTrygdtidNotNull(behandlingsId)
-
-        transaction {
-            dataSource.trygdetidGrunnlagTable.insert {
-                it[id] = trygdetidGrunnlag.id
-                it[trygdetidId] = trygdetid.id
-                it[trygdetidType] = trygdetidGrunnlag.type.name
-                it[bosted] = trygdetidGrunnlag.bosted
-                it[periodeFra] = trygdetidGrunnlag.periode.fra
-                it[periodeTil] = trygdetidGrunnlag.periode.til
-                it[kilde] = trygdetidGrunnlag.kilde
-            }
-        }
-        return hentTrygdtidNotNull(behandlingsId)
-    }
-
-    fun lagreBeregnetTrygdetid(behandlingsId: UUID, beregnetTrygdetid: BeregnetTrygdetid): Trygdetid {
-        transaction {
-            dataSource.trygdetidTable.update({
-                dataSource.trygdetidTable.behandlingsId eq behandlingsId
-            }) {
-                it[nasjonalTrygdetid] = beregnetTrygdetid.nasjonal
-                it[fremtidigTrygdetid] = beregnetTrygdetid.fremtidig
-                it[this.totalTrygdetid] = beregnetTrygdetid.total
-            }
-        }
-        return hentTrygdtidNotNull(behandlingsId)
-    }
 }

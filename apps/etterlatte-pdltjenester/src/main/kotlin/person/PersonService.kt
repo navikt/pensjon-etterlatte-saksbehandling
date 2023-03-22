@@ -3,12 +3,15 @@ package no.nav.etterlatte.person
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
+import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlResponseError
+import no.nav.etterlatte.pdl.mapper.GeografiskTilknytningMapper
 import no.nav.etterlatte.pdl.mapper.PersonMapper
 import org.slf4j.LoggerFactory
 
@@ -83,15 +86,14 @@ class PersonService(
                     throw PdlFantIkkePerson("Fant ikke personen ${hentFolkeregisterIdentRequest.ident}")
                 } else {
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente folkeregisterident " +
-                            "for ${hentFolkeregisterIdentRequest.ident} fra PDL: $pdlFeil"
+                        "Kunne ikke hente folkeregisterident ${hentFolkeregisterIdentRequest.ident} fra PDL: $pdlFeil"
                     )
                 }
             } else {
                 try {
-                    val folkeregisterIdent: String = it.data.hentIdenter.identer
-                        .filter { it.gruppe == "FOLKEREGISTERIDENT" }
-                        .first { !it.historisk }.ident
+                    val folkeregisterIdent: String =
+                        it.data.hentIdenter.identer.filter { identer -> identer.gruppe == "FOLKEREGISTERIDENT" }
+                            .first { identer -> !identer.historisk }.ident
                     FolkeregisterIdent(folkeregisterident = Foedselsnummer.of(folkeregisterIdent))
                 } catch (e: Exception) {
                     throw PdlForesporselFeilet(
@@ -102,6 +104,27 @@ class PersonService(
         }
     }
 
-    fun List<PdlResponseError>.asFormatertFeil() = this.joinToString(", ")
-    fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
+    suspend fun hentGeografiskTilknytning(
+        hentGeografiskTilknytningRequest: HentGeografiskTilknytningRequest
+    ): GeografiskTilknytning {
+        logger.info("Henter geografisk tilknytning med fnr=${hentGeografiskTilknytningRequest.foedselsnummer} fra PDL")
+
+        return pdlKlient.hentGeografiskTilknytning(hentGeografiskTilknytningRequest.foedselsnummer).let {
+            if (it.data?.hentGeografiskTilknytning == null) {
+                val pdlFeil = it.errors?.asFormatertFeil()
+                if (it.errors?.personIkkeFunnet() == true) {
+                    throw PdlFantIkkePerson("Fant ikke personen ${hentGeografiskTilknytningRequest.foedselsnummer}")
+                } else {
+                    throw PdlForesporselFeilet(
+                        "Kunne ikke hente fnr=${hentGeografiskTilknytningRequest.foedselsnummer} fra PDL: $pdlFeil"
+                    )
+                }
+            } else {
+                GeografiskTilknytningMapper.mapGeografiskTilknytning(it.data.hentGeografiskTilknytning)
+            }
+        }
+    }
+
+    private fun List<PdlResponseError>.asFormatertFeil() = this.joinToString(", ")
+    private fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
 }

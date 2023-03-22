@@ -109,6 +109,12 @@ data class AvdoedesBarn(
     }
 }
 
+data class GeografiskTilknytning(
+    val kommune: String? = null,
+    val bydel: String? = null,
+    val land: String? = null
+)
+
 data class VergemaalEllerFremtidsfullmakt(
     val embete: String?,
     val type: String?,

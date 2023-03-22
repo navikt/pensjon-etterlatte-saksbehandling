@@ -23,7 +23,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
         get {
             // withBehandlingId() TODO
             withParam(BEHANDLINGSID_CALL_PARAMETER) {
-                logger.info("Henter trygdetid")
+                logger.info("Henter trygdetid for behandling $behandlingsId")
                 val trygdetid = trygdetidService.hentTrygdetid(behandlingsId)
                 if (trygdetid != null) {
                     call.respond(trygdetid.toDto())
@@ -36,7 +36,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
         post {
             // withBehandlingId() TODO
             withParam(BEHANDLINGSID_CALL_PARAMETER) {
-                logger.info("Oppretter trygdetid")
+                logger.info("Oppretter trygdetid for behandling $behandlingsId")
                 val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId)
                 call.respond(trygdetid.toDto())
             }
@@ -45,19 +45,19 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
         post("/grunnlag") {
             // withBehandlingId() TODO
             withParam(BEHANDLINGSID_CALL_PARAMETER) {
-                logger.info("Lagre trygdetidgrunnlag")
+                logger.info("Oppretter nytt trygdetidgrunnlag for behandling $behandlingsId")
                 val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
                 val trygdetid = trygdetidService.lagreTrygdetidGrunnlag(behandlingsId, trygdetidgrunnlagDto.fromDto())
                 call.respond(trygdetid.toDto())
             }
         }
 
-        post("/oppsummert") {
+        post("/beregnet") {
             // withBehandlingId() TODO
             withParam(BEHANDLINGSID_CALL_PARAMETER) {
-                logger.info("Lagre oppsummert trygdetid")
-                val oppsummertTrygdetid = call.receive<OppsummertTrygdetidDto>()
-                val trygdetid = trygdetidService.lagreOppsummertTrygdetid(behandlingsId, oppsummertTrygdetid.fromDto())
+                logger.info("Lagrer beregnet trygdetid for behandling $behandlingsId")
+                val oppsummertTrygdetid = call.receive<BeregnetTrygdetidDto>()
+                val trygdetid = trygdetidService.lagreBeregnetTrygdetid(behandlingsId, oppsummertTrygdetid.fromDto())
                 call.respond(trygdetid.toDto())
             }
         }
@@ -65,33 +65,33 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
 }
 
 data class TrygdetidDto(
-    val oppsummertTrygdetid: OppsummertTrygdetidDto?,
-    val grunnlag: List<TrygdetidGrunnlagDto>
+    val beregnetTrygdetid: BeregnetTrygdetidDto?,
+    val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>
 )
 
 fun Trygdetid.toDto(): TrygdetidDto =
     TrygdetidDto(
-        oppsummertTrygdetid = oppsummertTrygdetid?.let {
-            OppsummertTrygdetidDto(
-                nasjonalTrygdetid = oppsummertTrygdetid.nasjonalTrygdetid,
-                fremtidigTrygdetid = oppsummertTrygdetid.fremtidigTrygdetid,
-                totalt = oppsummertTrygdetid.totalt
+        beregnetTrygdetid = beregnetTrygdetid?.let {
+            BeregnetTrygdetidDto(
+                nasjonal = beregnetTrygdetid.nasjonal,
+                fremtidig = beregnetTrygdetid.fremtidig,
+                total = beregnetTrygdetid.total
             )
         },
-        grunnlag = grunnlag.map { it.toDto() }
+        trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() }
     )
 
-data class OppsummertTrygdetidDto(
-    val nasjonalTrygdetid: Int,
-    val fremtidigTrygdetid: Int,
-    val totalt: Int
+data class BeregnetTrygdetidDto(
+    val nasjonal: Int,
+    val fremtidig: Int,
+    val total: Int
 )
 
-fun OppsummertTrygdetidDto.fromDto(): OppsummertTrygdetid =
-    OppsummertTrygdetid(
-        nasjonalTrygdetid = nasjonalTrygdetid,
-        fremtidigTrygdetid = fremtidigTrygdetid,
-        totalt = totalt
+fun BeregnetTrygdetidDto.fromDto(): BeregnetTrygdetid =
+    BeregnetTrygdetid(
+        nasjonal = nasjonal,
+        fremtidig = fremtidig,
+        total = total
     )
 
 data class TrygdetidGrunnlagDto(
@@ -105,21 +105,20 @@ data class TrygdetidGrunnlagDto(
 
 fun TrygdetidGrunnlagDto.fromDto(): TrygdetidGrunnlag =
     TrygdetidGrunnlag(
-        id ?: UUID.randomUUID(),
-        TrygdetidType.valueOf(type),
-        bosted,
-        periodeFra,
-        periodeTil,
-        kilde
+        id = id ?: UUID.randomUUID(),
+        type = TrygdetidType.valueOf(type),
+        bosted = bosted,
+        periode = TrygdetidPeriode(periodeFra, periodeTil),
+        kilde = kilde
     )
 
 fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
     return TrygdetidGrunnlagDto(
-        id,
-        type.name,
-        bosted,
-        periodeFra,
-        periodeTil,
-        kilde
+        id = id,
+        type = type.name,
+        bosted = bosted,
+        periodeFra = periode.fra,
+        periodeTil = periode.til,
+        kilde = kilde
     )
 }

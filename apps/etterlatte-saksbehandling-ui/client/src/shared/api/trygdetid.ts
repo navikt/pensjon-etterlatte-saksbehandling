@@ -14,19 +14,19 @@ export const lagreTrygdetidgrunnlag = async (args: {
 
 export const lagreOppsummertTrygdetid = async (args: {
   behandlingsId: string
-  oppsummertTrygdetid: IOppsummertTrygdetid
+  beregnetTrygdetid: IBeregnetTrygdetid
 }): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.post(`/trygdetid/${args.behandlingsId}/oppsummert`, { ...args.oppsummertTrygdetid })
+  apiClient.post(`/trygdetid/${args.behandlingsId}/beregnet`, { ...args.beregnetTrygdetid })
 
 export interface ITrygdetid {
-  oppsummertTrygdetid: IOppsummertTrygdetid | null
-  grunnlag: ITrygdetidGrunnlag[]
+  beregnetTrygdetid: IBeregnetTrygdetid | null
+  trygdetidGrunnlag: ITrygdetidGrunnlag[]
 }
 
-export interface IOppsummertTrygdetid {
-  nasjonalTrygdetid: number
-  fremtidigTrygdetid: number
-  totalt: number
+export interface IBeregnetTrygdetid {
+  nasjonal: number
+  fremtidig: number
+  total: number
 }
 
 export interface ITrygdetidGrunnlag {
@@ -39,7 +39,7 @@ export interface ITrygdetidGrunnlag {
 }
 
 export enum ITrygdetidType {
-  NASJONAL_TRYGDETID = 'NASJONAL_TRYGDETID',
-  FREMTIDIG_TRYGDETID = 'FREMTIDIG_TRYGDETID',
-  UTENLANDS_TRYGDETID = 'UTENLANDS_TRYGDETID',
+  NASJONAL = 'NASJONAL',
+  FREMTIDIG = 'FREMTIDIG',
+  UTLAND = 'UTLAND',
 }

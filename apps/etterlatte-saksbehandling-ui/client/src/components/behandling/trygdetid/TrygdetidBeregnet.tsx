@@ -14,13 +14,13 @@ type Props = {
 export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid, setTrygdetid }) => {
   const { behandlingId: behandlingsId } = useParams()
   const [nasjonalTrygdetid, setNasjonalTrygdetid] = useState<number>(
-    trygdetid.oppsummertTrygdetid == null ? 0 : trygdetid.oppsummertTrygdetid.nasjonalTrygdetid
+    trygdetid.beregnetTrygdetid == null ? 0 : trygdetid.beregnetTrygdetid.nasjonal
   )
   const [fremtidigTrygdetid, setFremtidigTrygdetid] = useState<number>(
-    trygdetid.oppsummertTrygdetid == null ? 0 : trygdetid.oppsummertTrygdetid.fremtidigTrygdetid
+    trygdetid.beregnetTrygdetid == null ? 0 : trygdetid.beregnetTrygdetid.fremtidig
   )
   const [oppsummertTrygdetid, setOppsummertTrygdetid] = useState<number>(
-    trygdetid.oppsummertTrygdetid == null ? 0 : trygdetid.oppsummertTrygdetid.totalt
+    trygdetid.beregnetTrygdetid == null ? 0 : trygdetid.beregnetTrygdetid.total
   )
   const [oppsummertTrygdetidStatus, requestLagreOppsummertTrygdetid] = useApiCall(lagreOppsummertTrygdetid)
 
@@ -31,10 +31,10 @@ export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid, setTrygdetid }) 
     requestLagreOppsummertTrygdetid(
       {
         behandlingsId,
-        oppsummertTrygdetid: {
-          nasjonalTrygdetid: nasjonalTrygdetid,
-          fremtidigTrygdetid: fremtidigTrygdetid,
-          totalt: oppsummertTrygdetid,
+        beregnetTrygdetid: {
+          nasjonal: nasjonalTrygdetid,
+          fremtidig: fremtidigTrygdetid,
+          total: oppsummertTrygdetid,
         },
       },
       (respons) => {

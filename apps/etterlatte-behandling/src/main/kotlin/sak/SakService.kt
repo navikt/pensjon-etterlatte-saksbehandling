@@ -62,6 +62,11 @@ class RealSakService(private val dao: SakDao, private val pdlKlient: PdlKlient, 
         return !this.sjekkOmFnrHarEnSakMedAdresseBeskyttelse(foedselsnummer.value)
     }
 
+    private fun finnEnhet(person: String, tema: String) =
+        pdlKlient.hentGeografiskTilknytning(person).geografiskTilknytning()?.let {
+            norg2Klient.hentEnheterForOmraade(tema, it).firstOrNull()
+        }
+
     override fun finnEllerOpprettSak(person: String, type: SakType): Sak {
         val eksisterendeSak = finnSak(person, type)
 

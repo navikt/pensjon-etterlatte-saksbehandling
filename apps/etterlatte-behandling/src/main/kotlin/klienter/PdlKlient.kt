@@ -50,7 +50,7 @@ class PdlKlientImpl(
         logger.info("Henter geografisk tilknytning for $fnr")
         val request = HentGeografiskTilknytningRequest(fnr)
         val response = runBlocking {
-            pdl_app.post("$url/geografisktilknyttning") {
+            pdl_app.post("$url/geografisktilknytning") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }.body<GeografiskTilknytning>()

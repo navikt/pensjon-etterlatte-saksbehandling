@@ -19,6 +19,11 @@ data class PdlFolkeregisterIdentRequest(
     val variables: PdlFolkeregisterIdentVariables
 )
 
+data class PdlGeografiskTilknytningRequest(
+    val query: String,
+    val variables: PdlGeografiskTilknytningIdentVariables
+)
+
 data class PdlVariables(
     val ident: String,
     val bostedsadresse: Boolean,
@@ -55,6 +60,10 @@ data class PdlFolkeregisterIdentVariables(
     val historikk: Boolean
 )
 
+data class PdlGeografiskTilknytningIdentVariables(
+    val ident: String
+)
+
 data class PdlPersonResponse(
     val data: PdlPersonResponseData? = null,
     val errors: List<PdlResponseError>? = null
@@ -68,6 +77,15 @@ data class PdlPersonResponseBolk(
 data class PdlFolkeregisterIdentResponse(
     val data: PdlFolkegisterIdentData? = null,
     val errors: List<PdlResponseError>? = null
+)
+
+data class PdlGeografiskTilknytningResponse(
+    val data: PdlGeografiskTilknytningData? = null,
+    val errors: List<PdlResponseError>? = null
+)
+
+data class PdlGeografiskTilknytningData(
+    val hentGeografiskTilknytning: PdlGeografiskTilknytning? = null
 )
 
 data class PdlFolkegisterIdentData(
@@ -415,4 +433,15 @@ data class PdlVergeEllerFullmektig(
     val navn: PdlPersonnavn?,
     val omfang: String?,
     val omfangetErInnenPersonligOmraade: Boolean
+)
+
+enum class PdlGtType {
+    KOMMUNE, BYDEL, UTLAND, UDEFINERT
+}
+
+data class PdlGeografiskTilknytning(
+    val gtBydel: String?,
+    val gtKommune: String?,
+    val gtLand: String?,
+    val gtType: PdlGtType?
 )

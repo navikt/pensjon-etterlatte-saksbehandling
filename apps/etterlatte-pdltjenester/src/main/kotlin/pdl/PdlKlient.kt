@@ -96,6 +96,28 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
+    suspend fun hentGeografiskTilknytning(ident: Foedselsnummer): PdlGeografiskTilknytningResponse {
+        var request = PdlGeografiskTilknytningRequest(
+            query = getQuery("/pdl/hentGeografisktilknyttning.graphql"),
+            variables = PdlGeografiskTilknytningIdentVariables(
+                ident = ident.value
+            )
+        )
+        logger.info("Henter geografisk tilknyttning for fnr = $ident fra PDL")
+        return retry<PdlGeografiskTilknytningResponse> {
+            httpClient.post(apiUrl) {
+                header("Tema", TEMA)
+                accept(Json)
+                setBody(TextContent(request.toJson(), Json))
+            }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.exceptions.last()
+            }
+        }
+    }
+
     private fun getQuery(name: String): String {
         return javaClass.getResource(name)!!
             .readText()

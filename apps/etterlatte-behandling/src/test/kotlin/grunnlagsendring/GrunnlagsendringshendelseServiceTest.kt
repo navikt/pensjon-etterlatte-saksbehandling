@@ -14,9 +14,9 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
-import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlientImpl
-import no.nav.etterlatte.grunnlagsendring.klienter.hentDoedsdato
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
+import no.nav.etterlatte.klienter.PdlKlientImpl
+import no.nav.etterlatte.klienter.hentDoedsdato
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus

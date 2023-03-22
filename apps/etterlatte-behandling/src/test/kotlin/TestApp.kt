@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -77,7 +78,11 @@ class LocalAppBeanFactory(
         HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
-                    if (request.url.fullPath.startsWith("/")) {
+                    if (request.url.fullPath.contains("geografisktilknytning")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = GeografiskTilknytning(kommune = "0301").toJson()
+                        respond(json, headers = headers)
+                    } else if (request.url.fullPath.startsWith("/")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         val json = javaClass.getResource("")!!.readText() // TODO: endre name
                         respond(json, headers = headers)

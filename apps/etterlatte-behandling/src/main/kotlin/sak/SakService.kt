@@ -55,27 +55,13 @@ class RealSakService(private val dao: SakDao, private val pdlKlient: PdlKlient, 
         }
     }
 
-    override fun finnEllerOpprettSak(person: String, type: SakType): Sak {
-        val eksisterendeSak = finnSak(person, type)
-
-        return if (eksisterendeSak != null) {
-            eksisterendeSak
-        } else {
-            val sak = dao.opprettSak(person, type)
-
-            val geografiskTilknytning = pdlKlient.hentGeografiskTilknytning(person)
-
-            geografiskTilknytning.geografiskTilknytning()?.let { omraade ->
-                val bestEnhet = norg2Klient.hentEnheterForOmraade(type.tema, omraade)
-
-                bestEnhet.firstOrNull()?.let {
-                    // TODO Update Sak med enhet
-                }
-            }
-
-            sak
+    private fun finnEnhet(person: String, tema: String) =
+        pdlKlient.hentGeografiskTilknytning(person).geografiskTilknytning()?.let {
+            norg2Klient.hentEnheterForOmraade(tema, it).firstOrNull()
         }
-    }
+
+    override fun finnEllerOpprettSak(person: String, type: SakType) =
+        finnSak(person, type) ?: dao.opprettSak(person, type, finnEnhet(person, type.tema)?.enhetNr)
 
     override fun finnSak(person: String, type: SakType): Sak? {
         return finnSakerForPerson(person).find { it.sakType == type }

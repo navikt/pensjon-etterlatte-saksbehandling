@@ -31,11 +31,14 @@ class SakDao(private val connection: () -> Connection) {
         }
     }
 
-    fun opprettSak(fnr: String, type: SakType): Sak {
+    fun opprettSak(fnr: String, type: SakType, enhet: String? = null): Sak {
         val statement =
-            connection().prepareStatement("INSERT INTO sak(sakType, fnr) VALUES(?, ?) RETURNING id, sakType, fnr")
+            connection().prepareStatement(
+                "INSERT INTO sak(sakType, fnr, enhet) VALUES(?, ?, ?) RETURNING id, sakType, fnr"
+            )
         statement.setString(1, type.name)
         statement.setString(2, fnr)
+        statement.setString(3, enhet)
         return requireNotNull(
             statement.executeQuery().singleOrNull {
                 Sak(

@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -163,7 +164,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
 
 class Norg2KlientTest : Norg2Klient {
     override fun hentEnheterForOmraade(tema: String, omraade: String): List<ArbeidsFordelingEnhet> {
-        TODO("Not yet implemented")
+        return listOf(ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817"))
     }
 }
 
@@ -231,7 +232,11 @@ class TestBeanFactory(
     override fun pdlHttpClient(): HttpClient = HttpClient(MockEngine) {
         engine {
             addHandler { request ->
-                if (request.url.fullPath.startsWith("/")) {
+                if (request.url.fullPath.contains("geografisktilknytning")) {
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    val json = GeografiskTilknytning(kommune = "0301").toJson()
+                    respond(json, headers = headers)
+                } else if (request.url.fullPath.startsWith("/")) {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     val json = javaClass.getResource("")!!.readText() // TODO: endre name
                     respond(json, headers = headers)

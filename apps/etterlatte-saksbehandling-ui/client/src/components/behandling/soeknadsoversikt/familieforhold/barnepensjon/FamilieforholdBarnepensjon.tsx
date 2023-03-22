@@ -6,6 +6,7 @@ import { SoeskenListe } from './../personer/Soesken'
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetproving } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Foreldre } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Foreldre'
+import { ErrorMessage } from '@navikt/ds-react'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -18,16 +19,20 @@ export const FamilieforholdBarnepensjon: React.FC<PropsFamilieforhold> = ({ beha
     )?.resultat === VurderingsResultat.OPPFYLT
 
   if (behandling.familieforhold == null || behandling.søker == null) {
-    return <div style={{ color: 'red' }}>Familieforhold kan ikke hentes ut</div>
+    return (
+      <FamilieforholdWrapper>
+        <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>
+      </FamilieforholdWrapper>
+    )
   }
 
   const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
 
   return (
     <>
-      {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
-        <>
-          <FamilieforholdWrapper>
+      <FamilieforholdWrapper>
+        {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
+          <>
             <Barn person={behandling.søker} doedsdato={doedsdato} />
             <DashedBorder />
             <Foreldre
@@ -38,19 +43,15 @@ export const FamilieforholdBarnepensjon: React.FC<PropsFamilieforhold> = ({ beha
             />
             <DashedBorder />
             <SoeskenListe soekerFnr={behandling.søker.foedselsnummer} familieforhold={behandling.familieforhold!!} />
-          </FamilieforholdWrapper>
-        </>
-      ) : (
-        <>
-          <FamilieforholdWrapper>
-            <GjenlevendeForelder
-              person={behandling.familieforhold?.gjenlevende.opplysning}
-              innsenderErGjenlevendeForelder={innsenderErGjenlevende}
-              doedsdato={doedsdato}
-            />
-          </FamilieforholdWrapper>
-        </>
-      )}
+          </>
+        ) : (
+          <GjenlevendeForelder
+            person={behandling.familieforhold?.gjenlevende.opplysning}
+            innsenderErGjenlevendeForelder={innsenderErGjenlevende}
+            doedsdato={doedsdato}
+          />
+        )}
+      </FamilieforholdWrapper>
       <Border />
     </>
   )

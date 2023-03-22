@@ -83,6 +83,8 @@ spec:
       value: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e
     - name: AZUREAD_STRENGT_FORTROLIG_GROUPID
       value: ad7b87a6-9180-467c-affc-20a566b0fec0
+    - name: NORG2_URL
+      value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1
   accessPolicy:
     outbound:
       rules:

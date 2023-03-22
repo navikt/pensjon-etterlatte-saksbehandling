@@ -196,7 +196,6 @@ class IntegrationTest {
 
         val thread = thread(start = true) {
             while (true) {
-                println(kafkaConsumerWrapper.getAntallMeldinger())
                 if (kafkaConsumerWrapper.getAntallMeldinger() >= 3) {
                     closed.set(true)
                     kafkaConsumerWrapper.getConsumer().wakeup()

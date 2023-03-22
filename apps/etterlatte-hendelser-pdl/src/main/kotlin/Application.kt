@@ -80,7 +80,7 @@ fun startLeesahKonsumer(env: Map<String, String>) {
                 Runtime.getRuntime().addShutdownHook(
                     Thread {
                         closed.set(true)
-                        kafkaConsumerHendelserPdl.getConsumer().wakeup(); // trådsikker
+                        kafkaConsumerHendelserPdl.getConsumer().wakeup(); // trådsikker, aborter konsumer fra polling
                     }
                 )
 

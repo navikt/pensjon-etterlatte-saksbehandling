@@ -135,7 +135,7 @@ abstract class CommonFactory : BeanFactory {
         return revurderingFactory
     }
 
-    override fun sakService(): SakService = RealSakService(sakDao())
+    override fun sakService(): SakService = RealSakService(sakDao(), pdlKlient(), norg2HttpClient())
 
     override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
         SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()))

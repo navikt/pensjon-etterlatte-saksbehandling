@@ -113,7 +113,14 @@ data class GeografiskTilknytning(
     val kommune: String? = null,
     val bydel: String? = null,
     val land: String? = null
-)
+) {
+    fun geografiskTilknytning() = when {
+        bydel != null -> bydel
+        kommune != null -> kommune
+        land != null -> land
+        else -> null
+    }
+}
 
 data class VergemaalEllerFremtidsfullmakt(
     val embete: String?,

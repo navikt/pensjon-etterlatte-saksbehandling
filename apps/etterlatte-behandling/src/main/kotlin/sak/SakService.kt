@@ -1,6 +1,8 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.klienter.PdlKlient
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -18,7 +20,8 @@ interface SakService : PersonTilgangsSjekk {
     fun sjekkOmSakHarAdresseBeskyttelse(sakId: Long): Boolean
 }
 
-class RealSakService(private val dao: SakDao) : SakService {
+class RealSakService(private val dao: SakDao, private val pdlKlient: PdlKlient, private val norg2Klient: Norg2Klient) :
+    SakService {
 
     override fun hentSaker(): List<Sak> {
         return dao.hentSaker()
@@ -61,7 +64,24 @@ class RealSakService(private val dao: SakDao) : SakService {
 
     override fun finnEllerOpprettSak(person: String, type: SakType): Sak {
         val eksisterendeSak = finnSak(person, type)
-        return eksisterendeSak ?: dao.opprettSak(person, type)
+
+        return if (eksisterendeSak != null) {
+            eksisterendeSak
+        } else {
+            val sak = dao.opprettSak(person, type)
+
+            val geografiskTilknytning = pdlKlient.hentGeografiskTilknytning(person)
+
+            geografiskTilknytning.geografiskTilknytning()?.let { omraade ->
+                val bestEnhet = norg2Klient.hentEnheterForOmraade(type.tema, omraade)
+
+                bestEnhet.firstOrNull()?.let {
+                    // TODO Update Sak med enhet
+                }
+            }
+
+            sak
+        }
     }
 
     override fun finnSak(person: String, type: SakType): Sak? {

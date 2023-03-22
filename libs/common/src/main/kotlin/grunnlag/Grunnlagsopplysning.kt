@@ -51,8 +51,6 @@ open class Grunnlagsopplysning<T>(
         return "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning. Id: $id"
     }
 
-    fun erPeriodisert() = periode != null
-
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,

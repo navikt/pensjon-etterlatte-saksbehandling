@@ -3,6 +3,11 @@ package no.nav.etterlatte
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
+import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
@@ -15,6 +20,8 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehan
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
@@ -25,12 +32,14 @@ import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlient
-import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlientImpl
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.klienter.PdlKlient
+import no.nav.etterlatte.klienter.PdlKlientImpl
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -84,6 +93,7 @@ interface BeanFactory {
     fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
     fun getSaksbehandlerGroupIdsByKey(): Map<String, String?>
+    fun norg2HttpClient(): Norg2Klient
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -266,7 +276,7 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-            Duration.of(1, ChronoUnit.MINUTES).toMillis()
+                Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "
@@ -279,5 +289,19 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
             periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
             minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()
         ).schedule()
+    }
+
+    override fun norg2HttpClient(): Norg2Klient {
+        val client = HttpClient(OkHttp) {
+            expectSuccess = true
+            install(ContentNegotiation) {
+                jackson()
+            }
+            defaultRequest {
+                header(X_CORRELATION_ID, getCorrelationId())
+            }
+        }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+
+        return Norg2KlientImpl(client, env.getValue("NORG2_URL"))
     }
 }

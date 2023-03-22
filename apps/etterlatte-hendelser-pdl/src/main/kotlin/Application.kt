@@ -10,9 +10,6 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import no.nav.etterlatte.hendelserpdl.leesah.KafkaConsumerHendelserPdl
 import no.nav.etterlatte.hendelserpdl.leesah.LivsHendelserTilRapid
 import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
@@ -25,6 +22,7 @@ import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import org.slf4j.LoggerFactory
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
 fun main() {
@@ -46,13 +44,12 @@ class Server() {
     )
     fun run() {
         val env = System.getenv().toMutableMap()
-        startLeesahLytter(env)
+        startLeesahKonsumer(env)
         setReady().also { engine.start(true) }
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
-fun startLeesahLytter(env: Map<String, String>) {
+fun startLeesahKonsumer(env: Map<String, String>) {
     val logger = LoggerFactory.getLogger(Application::class.java)
     val pdlTjenester: HttpClient by lazy {
         httpClientClientCredentials(
@@ -69,20 +66,29 @@ fun startLeesahLytter(env: Map<String, String>) {
     val topic = env.getValue("KAFKA_RAPID_TOPIC")
     // Gcpkafkaconfig burde renames?
     val kafkaProducer = GcpKafkaConfig.fromEnv(env).rapidsAndRiversProducer(topic)
-    withLogContext {
-        GlobalScope.launch {
+    val closed = AtomicBoolean()
+    closed.set(false)
+
+    Thread {
+        withLogContext {
             try {
                 val kafkaConsumerHendelserPdl = KafkaConsumerHendelserPdl(
                     PersonHendelseFordeler(LivsHendelserTilRapid(kafkaProducer), pdlService),
-                    env
+                    env,
+                    closed
                 )
-                while (true) {
-                    kafkaConsumerHendelserPdl.stream()
-                }
+                Runtime.getRuntime().addShutdownHook(
+                    Thread {
+                        closed.set(true)
+                        kafkaConsumerHendelserPdl.getConsumer().wakeup(); // trådsikker, aborter konsumer fra polling
+                    }
+                )
+
+                kafkaConsumerHendelserPdl.stream()
             } catch (e: Exception) {
                 logger.error("App avsluttet med en feil", e)
                 exitProcess(1)
             }
         }
-    }
+    }.start()
 }

@@ -1,40 +1,50 @@
 package no.nav.etterlatte.hendelserpdl.leesah
 
-import kotlinx.coroutines.delay
 import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.errors.WakeupException
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.util.concurrent.atomic.AtomicBoolean
 
 class KafkaConsumerHendelserPdl(
     private val personHendelseFordeler: PersonHendelseFordeler,
     env: Map<String, String>,
+    private val closed: AtomicBoolean,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment()
 ) {
-    private val logger = LoggerFactory.getLogger(this.javaClass.name)
+    val logger = LoggerFactory.getLogger(KafkaConsumerHendelserPdl::class.java)
+
     private var antallMeldinger = 0
     private val leesahtopic = env["LEESAH_TOPIC_PERSON"]
     private val consumer: KafkaConsumer<String, Personhendelse>
     init {
-        consumer = KafkaConsumer<String, Personhendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env)).also {
-            it.subscribe(listOf(leesahtopic))
-        }
-        Runtime.getRuntime().addShutdownHook(Thread { consumer.close() })
+        consumer = KafkaConsumer<String, Personhendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env))
     }
 
-    suspend fun stream(): Int {
-        val meldinger = consumer.poll(Duration.ofSeconds(10L))
-        meldinger.forEach {
-            personHendelseFordeler.haandterHendelse(it.value())
-        }
+    fun getAntallMeldinger() = antallMeldinger
+    fun getConsumer() = consumer
+
+    fun stream() {
         try {
-            consumer.commitSync()
-        } catch (e: Exception) {
-            logger.error("Kunne ikke committe offsett")
-            throw e
+            logger.info("Starter kafka konsumer")
+            consumer.subscribe(listOf(leesahtopic))
+            while (!closed.get()) {
+                val meldinger = consumer.poll(Duration.ofSeconds(10L))
+                meldinger.forEach {
+                    personHendelseFordeler.haandterHendelse(it.value())
+                }
+                consumer.commitSync()
+
+                antallMeldinger += meldinger.count()
+                if (meldinger.isEmpty) Thread.sleep(500L)
+            }
+        } catch (e: WakeupException) {
+            // Ignorerer exception hvis vi stenger ned
+            if (!closed.get()) throw e
+        } finally {
+            logger.info("Lukker kafkaconsumer")
+            consumer.close()
         }
-        antallMeldinger += meldinger.count()
-        if (meldinger.isEmpty) delay(500)
-        return antallMeldinger
     }
 }

@@ -13,7 +13,6 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.mockk.spyk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.hendelserpdl.leesah.KafkaConsumerConfiguration
 import no.nav.etterlatte.hendelserpdl.leesah.KafkaConsumerHendelserPdl
@@ -39,6 +38,8 @@ import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class IntegrationTest {
@@ -58,169 +59,182 @@ class IntegrationTest {
 
     @Test
     fun testDoedshendelse() {
-        runBlocking {
-            val leesahKafkaProducer: KafkaProducer<String, Personhendelse> = producerForLeesah()
-            mockEndpoint()
-            val rapidsKafkaProducer = spyk(
-                LocalKafkaConfig(kafkaEnv.brokersURL).rapidsAndRiversProducer("etterlatte.dodsmelding")
-            )
-            val livsHendelserTilRapid = spyk(LivsHendelserTilRapid(rapidsKafkaProducer))
-            val kafkaConsumerWrapper = KafkaConsumerHendelserPdl(
-                PersonHendelseFordeler(livsHendelserTilRapid, pdlService),
-                mapOf(
-                    "KAFKA_BROKERS" to kafkaEnv.brokersURL,
-                    "LEESAH_KAFKA_GROUP_ID" to "etterlatte-v1",
-                    "KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!,
-                    "LEESAH_TOPIC_PERSON" to pdlPersonTopic
-                ),
-                KafkaConsumerEnvironmentTest()
-            )
+        val leesahKafkaProducer: KafkaProducer<String, Personhendelse> = producerForLeesah()
+        mockEndpoint()
+        val rapidsKafkaProducer = spyk(
+            LocalKafkaConfig(kafkaEnv.brokersURL).rapidsAndRiversProducer("etterlatte.dodsmelding")
+        )
+        val livsHendelserTilRapid = spyk(LivsHendelserTilRapid(rapidsKafkaProducer))
+        val closed = AtomicBoolean()
+        closed.set(false)
+        val kafkaConsumerWrapper = KafkaConsumerHendelserPdl(
+            PersonHendelseFordeler(livsHendelserTilRapid, pdlService),
+            mapOf(
+                "KAFKA_BROKERS" to kafkaEnv.brokersURL,
+                "LEESAH_KAFKA_GROUP_ID" to "etterlatte-v1",
+                "KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!,
+                "LEESAH_TOPIC_PERSON" to pdlPersonTopic
+            ),
+            closed,
+            KafkaConsumerEnvironmentTest()
+        )
 
-            val doedsfall = Doedsfall(LocalDate.of(2022, 1, 1))
-            leesahKafkaProducer.send(
-                ProducerRecord(
-                    pdlPersonTopic,
-                    1,
-                    "x",
-                    Personhendelse(
-                        "1",
-                        listOf("1234567"),
-                        "",
-                        Instant.now(),
-                        "DOEDSFALL_V1",
-                        Endringstype.OPPRETTET,
-                        null,
-                        null,
-                        null,
-                        doedsfall,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
+        val doedsfall = Doedsfall(LocalDate.of(2022, 1, 1))
+        leesahKafkaProducer.send(
+            ProducerRecord(
+                pdlPersonTopic,
+                1,
+                "x",
+                Personhendelse(
+                    "1",
+                    listOf("1234567"),
+                    "",
+                    Instant.now(),
+                    "DOEDSFALL_V1",
+                    Endringstype.OPPRETTET,
+                    null,
+                    null,
+                    null,
+                    doedsfall,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
 
-                    )
                 )
             )
-            kafkaConsumerWrapper.stream()
+        )
 
-            val utflyttingFraNorge = UtflyttingFraNorge(
-                "Sverige",
-                null,
-                LocalDate.of(2022, 8, 8)
-            )
-            leesahKafkaProducer.send(
-                ProducerRecord(
-                    pdlPersonTopic,
-                    1,
-                    "x",
-                    Personhendelse(
-                        "1",
-                        listOf("1234567"),
-                        "",
-                        Instant.now(),
-                        "UTFLYTTING_FRA_NORGE",
-                        Endringstype.OPPRETTET,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        utflyttingFraNorge,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
+        val utflyttingFraNorge = UtflyttingFraNorge(
+            "Sverige",
+            null,
+            LocalDate.of(2022, 8, 8)
+        )
+        leesahKafkaProducer.send(
+            ProducerRecord(
+                pdlPersonTopic,
+                1,
+                "x",
+                Personhendelse(
+                    "1",
+                    listOf("1234567"),
+                    "",
+                    Instant.now(),
+                    "UTFLYTTING_FRA_NORGE",
+                    Endringstype.OPPRETTET,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    utflyttingFraNorge,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
 
-                    )
                 )
             )
-            kafkaConsumerWrapper.stream()
-            val forelderBarnRelasjon = ForelderBarnRelasjon(
-                "12345678911",
-                "MOR",
-                "BARN",
-                null
-            )
-            leesahKafkaProducer.send(
-                ProducerRecord(
-                    pdlPersonTopic,
-                    Personhendelse(
-                        "1",
-                        listOf("1234567"),
-                        "",
-                        Instant.now(),
-                        "FORELDERBARNRELASJON_V1",
-                        Endringstype.OPPRETTET,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        forelderBarnRelasjon,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+        )
+
+        val forelderBarnRelasjon = ForelderBarnRelasjon(
+            "12345678911",
+            "MOR",
+            "BARN",
+            null
+        )
+        leesahKafkaProducer.send(
+            ProducerRecord(
+                pdlPersonTopic,
+                Personhendelse(
+                    "1",
+                    listOf("1234567"),
+                    "",
+                    Instant.now(),
+                    "FORELDERBARNRELASJON_V1",
+                    Endringstype.OPPRETTET,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    forelderBarnRelasjon,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
                 )
             )
-            val PDLfnr = "70078749472"
-            kafkaConsumerWrapper.stream()
-            verify(exactly = 3) { rapidsKafkaProducer.publiser(any(), any()) }
-            verify {
-                livsHendelserTilRapid.personErDod(
-                    PDLfnr,
-                    doedsfall.doedsdato.toString(),
-                    no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
-                )
+        )
+        val PDLfnr = "70078749472"
+
+        val thread = thread(start = true) {
+            while (true) {
+                if (kafkaConsumerWrapper.getAntallMeldinger() >= 3) {
+                    closed.set(true)
+                    kafkaConsumerWrapper.getConsumer().wakeup()
+                    return@thread
+                }
+                Thread.sleep(800L) // Må stå så ikke denne spiser all cpu, tester er egentlig single threaded
             }
+        }
+        kafkaConsumerWrapper.stream()
+        thread.join()
 
-            verify {
-                livsHendelserTilRapid.personUtflyttingFraNorge(
-                    PDLfnr,
-                    utflyttingFraNorge.tilflyttingsland,
-                    utflyttingFraNorge.tilflyttingsstedIUtlandet,
-                    utflyttingFraNorge.utflyttingsdato.toString(),
-                    no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
-                )
-            }
+        verify(exactly = 3) { rapidsKafkaProducer.publiser(any(), any()) }
+        verify {
+            livsHendelserTilRapid.personErDod(
+                PDLfnr,
+                doedsfall.doedsdato.toString(),
+                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+            )
+        }
 
-            verify {
-                livsHendelserTilRapid.forelderBarnRelasjon(
-                    PDLfnr,
-                    forelderBarnRelasjon.relatertPersonsIdent,
-                    forelderBarnRelasjon.relatertPersonsRolle,
-                    forelderBarnRelasjon.minRolleForPerson,
-                    forelderBarnRelasjon.relatertPersonUtenFolkeregisteridentifikator?.toString(),
-                    no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
-                )
-            }
+        verify {
+            livsHendelserTilRapid.personUtflyttingFraNorge(
+                PDLfnr,
+                utflyttingFraNorge.tilflyttingsland,
+                utflyttingFraNorge.tilflyttingsstedIUtlandet,
+                utflyttingFraNorge.utflyttingsdato.toString(),
+                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+            )
+        }
+
+        verify {
+            livsHendelserTilRapid.forelderBarnRelasjon(
+                PDLfnr,
+                forelderBarnRelasjon.relatertPersonsIdent,
+                forelderBarnRelasjon.relatertPersonsRolle,
+                forelderBarnRelasjon.minRolleForPerson,
+                forelderBarnRelasjon.relatertPersonUtenFolkeregisteridentifikator?.toString(),
+                no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+            )
         }
     }
 

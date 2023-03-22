@@ -13,7 +13,9 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.FNR_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.fnr
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.withBehandlingId
@@ -58,8 +60,8 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        get("/person/{fnr}/saker}") {
-            withFoedselsnummer(call.parameters["fnr"].toString(), behandlingKlient) {
+        get("/person/{$FNR_CALL_PARAMETER}/saker}") {
+            withFoedselsnummer(fnr, behandlingKlient) {
                 val saksliste = grunnlagService.hentAlleSakerForIdent(it)
 
                 if (saksliste.isNotEmpty()) {
@@ -69,12 +71,12 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 }
             }
         }
-        get("/person/{fnr}/roller}") {
-            withFoedselsnummer(call.parameters["fnr"].toString(), behandlingKlient) {
-                val sakOgRoller = grunnlagService.hentSakerOgRoller(it)
+        get("/person/{$FNR_CALL_PARAMETER}/roller}") {
+            withFoedselsnummer(fnr, behandlingKlient) {
+                val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(it)
 
-                if (sakOgRoller.sakerOgRoller.isNotEmpty()) {
-                    call.respond(sakOgRoller)
+                if (personMedSakOgRoller.sakerOgRoller.isNotEmpty()) {
+                    call.respond(personMedSakOgRoller)
                 } else {
                     call.respond(HttpStatusCode.NoContent)
                 }

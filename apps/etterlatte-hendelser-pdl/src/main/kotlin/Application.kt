@@ -67,6 +67,7 @@ fun startLeesahKonsumer(env: Map<String, String>) {
     // Gcpkafkaconfig burde renames?
     val kafkaProducer = GcpKafkaConfig.fromEnv(env).rapidsAndRiversProducer(topic)
     val closed = AtomicBoolean()
+    closed.set(false)
 
     Thread {
         withLogContext {
@@ -82,13 +83,12 @@ fun startLeesahKonsumer(env: Map<String, String>) {
                         kafkaConsumerHendelserPdl.getConsumer().wakeup(); // trådsikker
                     }
                 )
-                while (true) {
-                    kafkaConsumerHendelserPdl.stream()
-                }
+
+                kafkaConsumerHendelserPdl.stream()
             } catch (e: Exception) {
                 logger.error("App avsluttet med en feil", e)
                 exitProcess(1)
             }
         }
-    }
+    }.start()
 }

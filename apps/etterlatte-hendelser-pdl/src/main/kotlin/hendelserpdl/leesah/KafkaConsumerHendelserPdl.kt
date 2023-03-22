@@ -25,6 +25,7 @@ class KafkaConsumerHendelserPdl(
         }
     }
 
+    fun getAntallMeldinger() = antallMeldinger
     fun getConsumer() = consumer
 
     fun stream() {
@@ -35,6 +36,7 @@ class KafkaConsumerHendelserPdl(
                     personHendelseFordeler.haandterHendelse(it.value())
                 }
                 consumer.commitSync()
+
                 antallMeldinger += meldinger.count()
                 if (meldinger.isEmpty) Thread.sleep(500L)
             }

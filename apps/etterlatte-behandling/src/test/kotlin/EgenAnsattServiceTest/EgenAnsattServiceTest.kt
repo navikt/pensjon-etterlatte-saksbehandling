@@ -1,11 +1,18 @@
 package no.nav.etterlatte
 
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.egenansatt.EgenAnsattService
+import no.nav.etterlatte.klienter.PdlKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -34,6 +41,10 @@ class EgenAnsattServiceTest {
     private lateinit var sakService: SakService
     private lateinit var egenAnsattService: EgenAnsattService
 
+    @MockK private lateinit var pdlKlient: PdlKlient
+
+    @MockK private lateinit var norg2Klient: Norg2Klient
+
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
@@ -46,10 +57,17 @@ class EgenAnsattServiceTest {
             password = postgreSQLContainer.password
         ).apply { migrate() }
 
+        MockKAnnotations.init(this)
+
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        sakService = spyk(RealSakService(sakRepo))
+        sakService = spyk(RealSakService(sakRepo, pdlKlient, norg2Klient))
         egenAnsattService = EgenAnsattService(sakService)
+
+        every { pdlKlient.hentGeografiskTilknytning(any()) } returns GeografiskTilknytning(kommune = "0301")
+        every {
+            norg2Klient.hentEnheterForOmraade("EYB", "0301")
+        } returns listOf(ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817"))
     }
 
     @BeforeEach

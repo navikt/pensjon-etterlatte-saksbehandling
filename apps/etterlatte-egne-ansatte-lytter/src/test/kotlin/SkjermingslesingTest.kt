@@ -55,7 +55,7 @@ class SkjermingslesingTest {
         )
         runBlocking(Dispatchers.Default) {
             val job = launch {
-                kafkaConsumerEgneAnsatte.poll()
+                kafkaConsumerEgneAnsatte.stream()
             }
             job.cancelAndJoin()
         }

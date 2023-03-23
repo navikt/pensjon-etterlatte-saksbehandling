@@ -34,10 +34,9 @@ internal fun Route.sakRoutes(
         }
     }
 
-    get("personer/{ident}/saker/{type}") {
-        val ident = requireNotNull(call.parameters["ident"])
+    get("personer/{$FNR_CALL_PARAMETER}/saker/{type}") {
         val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
-        call.respond(inTransaction { sakService.finnEllerOpprettSak(ident, type) })
+        call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr, type) })
     }
 
     route("/api/personer/{$FNR_CALL_PARAMETER}") {

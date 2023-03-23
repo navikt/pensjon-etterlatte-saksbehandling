@@ -15,7 +15,7 @@ class KafkaConsumerEgneAnsatte(
     private var behandlingKlient: BehandlingKlient,
     private val closed: AtomicBoolean,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
-    private var pollTimeoutInSeconds: Duration = Duration.ofSeconds(8L)
+    private var pollTimeoutInSeconds: Duration = Duration.ofSeconds(10L)
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
     private val kafkaProperties: Properties = kafkaEnvironment.generateKafkaConsumerProperties(env)

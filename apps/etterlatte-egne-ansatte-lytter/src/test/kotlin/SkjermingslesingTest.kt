@@ -20,8 +20,10 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 class SkjermingslesingTest {
 
@@ -36,22 +38,28 @@ class SkjermingslesingTest {
         )
     }
 
+    @Test
     fun `Les skjermingshendelse og post det til behandlingsapp`() {
         val skjermingsProducer: KafkaProducer<String, String> = generateSkjermingsProducer()
         val fnr = "70078749472"
         skjermingsProducer.send(ProducerRecord(pdlPersonTopic, fnr, "value"))
         val behandlingKlient = mockk<BehandlingKlient>()
         every { behandlingKlient.haandterHendelse(any()) } just runs
+
+        val closed = AtomicBoolean()
+        closed.set(false)
+
         val kafkaConsumerEgneAnsatte = KafkaConsumerEgneAnsatte(
-            mapOf(
+            env = mapOf(
                 "KAFKA_BROKERS" to kafkaEnv.brokersURL,
                 "SKJERMING_GROUP_ID" to "etterlatte-v1",
                 "KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!,
                 "SKJERMING_TOPIC" to pdlPersonTopic
             ),
-            behandlingKlient,
-            KafkaConsumerEnvironmentTest(),
-            Duration.ofSeconds(20L)
+            behandlingKlient = behandlingKlient,
+            closed = closed,
+            kafkaEnvironment = KafkaConsumerEnvironmentTest(),
+            pollTimeoutInSeconds = Duration.ofSeconds(4L)
         )
         runBlocking(Dispatchers.Default) {
             val job = launch {

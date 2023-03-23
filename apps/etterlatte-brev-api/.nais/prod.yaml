@@ -88,6 +88,8 @@ spec:
       value: prod-fss:etterlatte:etterlatte-proxy
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
       value: api://prod-fss.etterlatte.etterlatte-proxy/.default
+    - name: NAVANSATT_OUTBOUND_SCOPE
+      value: api://prod-fss.pensjondeployer.navansatt/.default
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL

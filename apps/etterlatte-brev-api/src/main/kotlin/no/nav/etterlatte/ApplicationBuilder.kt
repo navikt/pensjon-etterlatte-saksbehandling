@@ -63,18 +63,29 @@ class ApplicationBuilder {
     }
 
     private val proxyClient: HttpClient by lazy {
-        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.proxy")
+        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
         httpClientClientCredentials(
             azureAppClientId = inntektsConfig.getString("clientId"),
             azureAppJwk = inntektsConfig.getString("clientJwk"),
             azureAppWellKnownUrl = inntektsConfig.getString("wellKnownUrl"),
-            azureAppScope = inntektsConfig.getString("outbound")
+            azureAppScope = config.getString("proxy.outbound")
         )
     }
+
+    private val navanssattKlient: HttpClient by lazy {
+        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
+        httpClientClientCredentials(
+            azureAppClientId = inntektsConfig.getString("clientId"),
+            azureAppJwk = inntektsConfig.getString("clientJwk"),
+            azureAppWellKnownUrl = inntektsConfig.getString("wellKnownUrl"),
+            azureAppScope = config.getString("navansatt.outbound")
+        )
+    }
+
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env.requireEnvValue("ETTERLATTE_PDFGEN_URL"))
     private val brregService = BrregService(BrregKlient(httpClient(), env.requireEnvValue("BRREG_URL")))
     private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
-    private val navansattKlient = NavansattKlient(proxyClient, env.requireEnvValue("NAVANSATT_URL"))
+    private val navansattKlient = NavansattKlient(navanssattKlient, env.requireEnvValue("NAVANSATT_URL"))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())

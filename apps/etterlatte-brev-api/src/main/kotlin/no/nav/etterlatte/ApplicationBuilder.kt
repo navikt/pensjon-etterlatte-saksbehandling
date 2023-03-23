@@ -63,21 +63,21 @@ class ApplicationBuilder {
     }
 
     private val proxyClient: HttpClient by lazy {
-        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
+        val clientCredentialsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
         httpClientClientCredentials(
-            azureAppClientId = inntektsConfig.getString("clientId"),
-            azureAppJwk = inntektsConfig.getString("clientJwk"),
-            azureAppWellKnownUrl = inntektsConfig.getString("wellKnownUrl"),
+            azureAppClientId = clientCredentialsConfig.getString("clientId"),
+            azureAppJwk = clientCredentialsConfig.getString("clientJwk"),
+            azureAppWellKnownUrl = clientCredentialsConfig.getString("wellKnownUrl"),
             azureAppScope = config.getString("proxy.outbound")
         )
     }
 
     private val navanssattKlient: HttpClient by lazy {
-        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
+        val clientCredentialsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
         httpClientClientCredentials(
-            azureAppClientId = inntektsConfig.getString("clientId"),
-            azureAppJwk = inntektsConfig.getString("clientJwk"),
-            azureAppWellKnownUrl = inntektsConfig.getString("wellKnownUrl"),
+            azureAppClientId = clientCredentialsConfig.getString("clientId"),
+            azureAppJwk = clientCredentialsConfig.getString("clientJwk"),
+            azureAppWellKnownUrl = clientCredentialsConfig.getString("wellKnownUrl"),
             azureAppScope = config.getString("navansatt.outbound")
         )
     }

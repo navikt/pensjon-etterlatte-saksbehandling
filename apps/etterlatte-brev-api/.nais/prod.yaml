@@ -118,6 +118,7 @@ spec:
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: dokdistfordeling.prod-fss-pub.nais.io
         - host: data.brreg.no
+        - host: navansatt.prod-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal

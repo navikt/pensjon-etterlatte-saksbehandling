@@ -5,6 +5,7 @@ import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/so
 import { format } from 'date-fns'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
+import { DatoFormat } from '~utils/formattering'
 
 export const SivilstatusWrapper = styled.span`
   min-width: 60%;
@@ -41,7 +42,7 @@ export const Sivilstatus: React.FC<Props> = ({ familieforhold }) => {
           <Table.Body>
             <Table.Row>
               <Table.DataCell>{sivilstatus}</Table.DataCell>
-              <Table.DataCell>{format(new Date(), 'dd.MM.yyyy')}</Table.DataCell>
+              <Table.DataCell>{format(new Date(), DatoFormat.DAG_MAANED_AAR)}</Table.DataCell>
               <Table.DataCell></Table.DataCell>
               <Table.DataCell></Table.DataCell>
             </Table.Row>

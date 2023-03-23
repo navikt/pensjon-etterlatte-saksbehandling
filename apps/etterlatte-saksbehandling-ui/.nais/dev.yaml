@@ -62,6 +62,8 @@ spec:
       value: http://etterlatte-grunnlag
     - name: BREV_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-brev-api/.default
+    - name: BEREGNING_API_URL
+      value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
     - name: VILKAARSVURDERING_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default
     - name: BEHANDLING_API_SCOPE
@@ -70,6 +72,8 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
     - name: GRUNNLAG_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
+    - name: BEREGNING_API_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-beregning/.default
   accessPolicy:
     outbound:
       external:

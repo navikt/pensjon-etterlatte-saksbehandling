@@ -18,7 +18,6 @@ data class BeregnetTrygdetid(
 
 data class TrygdetidGrunnlag(
     val id: UUID,
-    val trygdetidId: UUID,
     val type: TrygdetidType,
     val bosted: String,
     val periode: TrygdetidPeriode,

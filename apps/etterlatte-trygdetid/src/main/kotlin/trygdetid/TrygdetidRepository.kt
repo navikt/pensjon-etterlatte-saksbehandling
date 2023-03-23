@@ -30,27 +30,6 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 }
         }
 
-    private fun hentTrygdetidGrunnlag(trygdetidId: UUID): List<TrygdetidGrunnlag> =
-        using(sessionOf(dataSource)) { session ->
-            queryOf(
-                statement = """
-                    SELECT id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde 
-                    FROM trygdetid_grunnlag
-                    WHERE trygdetid_id = :trygdetidId
-                """.trimIndent(),
-                paramMap = mapOf("trygdetidId" to trygdetidId)
-            )
-                .let { query ->
-                    session.run(
-                        query.map { row -> row.toTrygdetidGrunnlag() }.asList
-                    )
-                }
-        }
-
-    private fun hentTrygdtidNotNull(behandlingsId: UUID) =
-        hentTrygdetid(behandlingsId)
-            ?: throw RuntimeException("Fant ikke trygdetid for $behandlingsId")
-
     fun opprettTrygdetid(behandlingId: UUID): Trygdetid =
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
@@ -70,6 +49,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     fun opprettTrygdetidGrunnlag(behandlingId: UUID, trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid =
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
+                val trygdetid = hentTrygdtidNotNull(behandlingId)
+
                 queryOf(
                     statement = """
                         INSERT INTO trygdetid_grunnlag(id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde) 
@@ -77,7 +58,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     """.trimIndent(),
                     paramMap = mapOf(
                         "id" to trygdetidGrunnlag.id,
-                        "trygdetidId" to trygdetidGrunnlag.trygdetidId,
+                        "trygdetidId" to trygdetid.id,
                         "type" to trygdetidGrunnlag.type.name,
                         "bosted" to trygdetidGrunnlag.bosted,
                         "periodeFra" to trygdetidGrunnlag.periode.fra,
@@ -110,6 +91,27 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             }
         }.let { hentTrygdtidNotNull(behandlingId) }
 
+    private fun hentTrygdetidGrunnlag(trygdetidId: UUID): List<TrygdetidGrunnlag> =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement = """
+                    SELECT id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde 
+                    FROM trygdetid_grunnlag
+                    WHERE trygdetid_id = :trygdetidId
+                """.trimIndent(),
+                paramMap = mapOf("trygdetidId" to trygdetidId)
+            )
+                .let { query ->
+                    session.run(
+                        query.map { row -> row.toTrygdetidGrunnlag() }.asList
+                    )
+                }
+        }
+
+    private fun hentTrygdtidNotNull(behandlingsId: UUID) =
+        hentTrygdetid(behandlingsId)
+            ?: throw Exception("Fant ikke trygdetid for $behandlingsId")
+
     private fun Row.toTrygdetid(trygdetidGrunnlag: List<TrygdetidGrunnlag>) =
         Trygdetid(
             id = uuid("id"),
@@ -127,7 +129,6 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     private fun Row.toTrygdetidGrunnlag() =
         TrygdetidGrunnlag(
             id = uuid("id"),
-            trygdetidId = uuid("trygdetid_id"),
             type = string("type").let { TrygdetidType.valueOf(it) },
             bosted = string("bosted"),
             periode = TrygdetidPeriode(

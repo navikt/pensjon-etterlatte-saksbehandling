@@ -9,7 +9,6 @@ import java.util.*
 
 fun trygdetidGrunnlag(trygdetidId: UUID) = TrygdetidGrunnlag(
     id = UUID.randomUUID(),
-    trygdetidId = trygdetidId,
     type = TrygdetidType.NASJONAL,
     bosted = "Norge",
     periode = TrygdetidPeriode(

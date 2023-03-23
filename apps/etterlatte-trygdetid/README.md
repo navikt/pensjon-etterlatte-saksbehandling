@@ -15,14 +15,14 @@ DB_PASSWORD=postgres;
 HTTP_PORT=8088;
 ```
 
-## Kjøre lokalt med auth mot dev-gcp
+## Kjøre lokalt med auth mot dev-gcp og evnt db fra dev-gcp
 1. Kjør scriptet `get-secret.sh` fra prosjektets [rotmappe](../..).
 ```
 ./get-secret.sh apps/etterlatte-trygdetid
 ```
 2. Kjør opp en proxy mot postgres i dev: `nais postgres proxy etterlatte-trygdetid`, eller kjør opp en lokal 
    instans med `docker-compose up -d`.
-3. Kopier inn følgende environment variabler i IntelliJ:
+3. Kopier inn følgende environment variabler i IntelliJ (merk at dersom man kjører proxy mot dev, fungerer det å ta inn DB_PASSWORD):
 ```
 DB_JDBC_URL=jdbc:postgresql://localhost:5432/trygdetid?user=FORNAVN.ETTERNAVN@nav.no;
 DB_PASSWORD=postgres;
@@ -40,6 +40,7 @@ og legge til følgende linjer nederst i `.env.dev-gcp` fila til saksbehandling-u
 TRYGDETID_API_URL=http://host.docker.internal:8087
 TRYGDETID_API_SCOPE=api://<TRYGDETID_CLIENT_ID>/.default // Se .env.dev-gcp fila du opprettet i steg 1.
 ```
+5. Legg til `.env.dev-gcp` som `Env-file` under `Run configurations` i Intellij
 
 ### Teste mot REST-endepunkter
 

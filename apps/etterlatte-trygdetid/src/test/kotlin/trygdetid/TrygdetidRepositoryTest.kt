@@ -29,8 +29,7 @@ internal class TrygdetidRepositoryTest {
     fun beforeAll() {
         postgres.start()
         dataSource = DataSourceBuilder.createDataSource(postgres.jdbcUrl, postgres.username, postgres.password)
-        repository = TrygdetidRepository(dataSource)
-        dataSource.migrate()
+        repository = TrygdetidRepository(dataSource.apply { migrate() })
     }
 
     @AfterAll
@@ -93,8 +92,6 @@ internal class TrygdetidRepositoryTest {
     }
 
     private fun cleanDatabase() {
-        dataSource.connection.use {
-            it.prepareStatement("TRUNCATE trygdetid CASCADE").apply { execute() }
-        }
+        dataSource.connection.use { it.prepareStatement("TRUNCATE trygdetid CASCADE").apply { execute() } }
     }
 }

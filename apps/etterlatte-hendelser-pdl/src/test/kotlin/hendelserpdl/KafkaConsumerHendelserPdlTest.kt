@@ -1,11 +1,13 @@
 package no.nav.etterlatte.hendelserpdl
 
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.hendelserpdl.leesah.ILivsHendelserRapid
 import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
@@ -23,9 +25,15 @@ internal class KafkaConsumerHendelserPdlTest {
         val pdlMock = mockk<PdlService>()
         val livshendelserRapid = mockk<ILivsHendelserRapid>()
         val personHendelseFordeler = PersonHendelseFordeler(livshendelserRapid, pdlMock)
-        personHendelseFordeler.haandterHendelse(Personhendelse().apply { put("opplysningstype", "Ikke dodsmelding") })
+        runBlocking {
+            personHendelseFordeler.haandterHendelse(
+                Personhendelse().apply {
+                    put("opplysningstype", "Ikke dodsmelding")
+                }
+            )
+        }
 
-        verify(exactly = 0) { pdlMock.hentFolkeregisterIdentifikator(any()) }
+        coVerify(exactly = 0) { pdlMock.hentFolkeregisterIdentifikator(any()) }
     }
 
     @Test
@@ -74,9 +82,10 @@ internal class KafkaConsumerHendelserPdlTest {
             }
         )
         val personHendelseFordeler = PersonHendelseFordeler(iLivsHendelserRapid, pdlMock)
-
-        gyldigeHendelser.forEach {
-            personHendelseFordeler.haandterHendelse(it)
+        runBlocking {
+            gyldigeHendelser.forEach {
+                personHendelseFordeler.haandterHendelse(it)
+            }
         }
 
         verify(exactly = 1) { iLivsHendelserRapid.personErDod(any(), any(), any()) }

@@ -1,5 +1,8 @@
 package no.nav.etterlatte.hendelserpdl.leesah
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.WakeupException
@@ -31,8 +34,15 @@ class KafkaConsumerHendelserPdl(
             consumer.subscribe(listOf(leesahtopic))
             while (!closed.get()) {
                 val meldinger = consumer.poll(Duration.ofSeconds(10L))
-                meldinger.forEach {
-                    personHendelseFordeler.haandterHendelse(it.value())
+                runBlocking {
+                    val ventbareHendelser = meldinger.map {
+                        async(context = Dispatchers.Default) {
+                            personHendelseFordeler.haandterHendelse(it.value())
+                        }
+                    }
+                    ventbareHendelser.forEach {
+                        it.await()
+                    }
                 }
                 consumer.commitSync()
 

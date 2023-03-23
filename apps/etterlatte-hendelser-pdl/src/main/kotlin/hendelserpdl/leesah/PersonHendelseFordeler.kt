@@ -14,7 +14,7 @@ class PersonHendelseFordeler(
 ) {
     private val log: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
 
-    fun haandterHendelse(personhendelse: Personhendelse) {
+    suspend fun haandterHendelse(personhendelse: Personhendelse) {
         when (personhendelse.opplysningstype) {
             LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(personhendelse)
             LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(
@@ -33,7 +33,7 @@ class PersonHendelseFordeler(
         }
     }
 
-    private fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
+    private suspend fun haandterAdressebeskyttelse(personhendelse: Personhendelse) {
         val hendelseType = "Adressebeskyttelse"
         val gradering = personhendelse.adressebeskyttelse?.gradering
         if (gradering == null || gradering == no.nav.person.pdl.leesah.adressebeskyttelse.Gradering.UGRADERT) {
@@ -58,7 +58,7 @@ class PersonHendelseFordeler(
         }
     }
 
-    private fun haandterForelderBarnRelasjon(personhendelse: Personhendelse) {
+    private suspend fun haandterForelderBarnRelasjon(personhendelse: Personhendelse) {
         val hendelseType = "Forelder-barn-relasjon-hendelse"
         try {
             val personnummer =
@@ -81,7 +81,7 @@ class PersonHendelseFordeler(
         }
     }
 
-    private fun haandterDoedsendelse(personhendelse: Personhendelse) {
+    private suspend fun haandterDoedsendelse(personhendelse: Personhendelse) {
         val hendelseType = "Doedshendelse"
         try {
             val personnummer =
@@ -103,7 +103,7 @@ class PersonHendelseFordeler(
         }
     }
 
-    private fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
+    private suspend fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
         val hendelseType = "Utflytting fra Norge-hendelse"
         try {
             val personnummer =

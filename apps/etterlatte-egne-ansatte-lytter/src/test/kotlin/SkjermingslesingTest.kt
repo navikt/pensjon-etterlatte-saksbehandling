@@ -5,10 +5,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
@@ -61,13 +57,11 @@ class SkjermingslesingTest {
             kafkaEnvironment = KafkaConsumerEnvironmentTest(),
             pollTimeoutInSeconds = Duration.ofSeconds(4L)
         )
-        runBlocking(Dispatchers.Default) {
-            val job = launch {
-                kafkaConsumerEgneAnsatte.stream()
-            }
-            job.cancelAndJoin()
-        }
+
+        kafkaConsumerEgneAnsatte.stream()
+
         verify { behandlingKlient.haandterHendelse(any()) }
+        verify { behandlingKlient.postTilBehandling(fnr, true) }
     }
 
     private fun generateSkjermingsProducer() = KafkaProducer<String, String>(

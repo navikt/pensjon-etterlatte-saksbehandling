@@ -5,8 +5,9 @@ import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
 import { differenceInYears, format, parse } from 'date-fns'
 import { CopyToClipboard } from '@navikt/ds-react-internal'
-import { formaterFnr } from '~utils/formattering'
+import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
+import { IconSize } from '~shared/types/Icon'
 
 const FnrWrapper = styled.div`
   display: flex;
@@ -23,7 +24,7 @@ export const BarneListe: React.FC<Props> = ({ familieforhold }) => {
     <div>
       <FlexHeader>
         <IconWrapper>
-          <Child fontSize={'26px'} />
+          <Child fontSize={IconSize.DEFAULT} />
         </IconWrapper>
         <Heading size={'small'} level={'3'}>
           Barn
@@ -52,7 +53,7 @@ export const BarneListe: React.FC<Props> = ({ familieforhold }) => {
 }
 
 const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: IFamilieforhold }) => {
-  const foedselsdato = parse(String(barn.foedselsdato), 'yyyy-MM-dd', new Date())
+  const foedselsdato = parse(String(barn.foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date())
   const alder = differenceInYears(new Date(), foedselsdato)
 
   const navn = `${barn.fornavn} ${barn.etternavn} (${alder} år)`
@@ -60,8 +61,10 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: I
   const aktivAdresse: IAdresse | undefined = barn.bostedsadresse?.find((adresse: IAdresse) => adresse.aktiv)
   const adresse = `${aktivAdresse?.adresseLinje1}, ${aktivAdresse?.postnr ?? ''} ${aktivAdresse?.poststed ?? ''}`
   const periode = aktivAdresse
-    ? `${format(new Date(aktivAdresse!!.gyldigFraOgMed!!), 'dd.MM.yyyy')} - ${
-        aktivAdresse?.gyldigTilOgMed ? format(new Date(aktivAdresse!!.gyldigTilOgMed!!), 'dd.MM.yyyy') : 'nå'
+    ? `${format(new Date(aktivAdresse!!.gyldigFraOgMed!!), DatoFormat.DAG_MAANED_AAR)} - ${
+        aktivAdresse?.gyldigTilOgMed
+          ? format(new Date(aktivAdresse!!.gyldigTilOgMed!!), DatoFormat.DAG_MAANED_AAR)
+          : 'nå'
       }`
     : 'Mangler adresse'
 

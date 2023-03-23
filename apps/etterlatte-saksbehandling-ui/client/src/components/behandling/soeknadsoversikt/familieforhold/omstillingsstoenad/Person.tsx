@@ -5,7 +5,8 @@ import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
 import { BodyShort, Detail, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { KildePdl } from '~shared/types/kilde'
-import { formaterFnr } from '~utils/formattering'
+import { DatoFormat, formaterFnr } from '~utils/formattering'
+import { IconSize } from '~shared/types/Icon'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -31,7 +32,7 @@ export const Person: React.FC<Props> = ({ person, kilde, avdoed = false }) => {
   return (
     <PersonBorder>
       <IconWrapper>
-        <People fontSize={'26px'} />
+        <People fontSize={IconSize.DEFAULT} />
       </IconWrapper>
       <PersonInfoWrapper>
         <Heading size={'small'} level={'3'}>
@@ -44,7 +45,7 @@ export const Person: React.FC<Props> = ({ person, kilde, avdoed = false }) => {
           <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
           <Detail>{`${kilde.type.toUpperCase()} ${format(
             new Date(kilde.tidspunktForInnhenting),
-            'dd.MM.yyyy'
+            DatoFormat.DAG_MAANED_AAR
           )}`}</Detail>
         </div>
       </PersonInfoWrapper>

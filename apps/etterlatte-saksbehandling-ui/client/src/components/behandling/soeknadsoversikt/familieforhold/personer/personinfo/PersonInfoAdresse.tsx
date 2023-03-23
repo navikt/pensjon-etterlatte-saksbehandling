@@ -3,10 +3,12 @@ import { TextButton } from './TextButton'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { PersonDetailWrapper, Historikk } from '~components/behandling/soeknadsoversikt/styled'
 import { IAdresse } from '~shared/types/IAdresse'
+import { Label } from '@navikt/ds-react'
 
 type Props = {
   adresser: Readonly<IAdresse[]> | undefined
   visHistorikk: boolean
+  adresseDoedstidspunkt: boolean
 }
 
 export const PersonInfoAdresse: React.FC<Props> = (props) => {
@@ -26,9 +28,7 @@ export const PersonInfoAdresse: React.FC<Props> = (props) => {
 
   return (
     <PersonDetailWrapper adresse={true}>
-      <div>
-        <strong>{props.visHistorikk ? 'Bostedadresse' : 'Bostedadresse dødsfallstidspunkt'}</strong>
-      </div>
+      <Label as={'p'}>{props.adresseDoedstidspunkt ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</Label>
       {sisteEllerAktivAdresse ? (
         <span>
           {sisteEllerAktivAdresse.adresseLinje1}, {sisteEllerAktivAdresse.postnr} {sisteEllerAktivAdresse.poststed}

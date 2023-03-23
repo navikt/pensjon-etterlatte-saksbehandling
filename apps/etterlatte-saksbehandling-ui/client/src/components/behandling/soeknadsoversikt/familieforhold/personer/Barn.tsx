@@ -28,7 +28,7 @@ export const Barn: React.FC<Props> = ({ person, doedsdato }) => {
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.foedselsnummer} />
-        <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} />
+        <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} adresseDoedstidspunkt={false} />
         {aktivAdresse && (
           <PersonDetailWrapper adresse={true}>
             <div>

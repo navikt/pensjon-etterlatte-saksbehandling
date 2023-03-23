@@ -2,7 +2,7 @@ import { ContentHeader } from '~shared/styled'
 import { Button, Heading, Label, Select, TextField } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { ITrygdetid, ITrygdetidGrunnlag, ITrygdetidType, lagreTrygdetidgrunnlag } from '~shared/api/trygdetid'
+import { ITrygdetid, ITrygdetidGrunnlag, ITrygdetidGrunnlagType, lagreTrygdetidgrunnlag } from '~shared/api/trygdetid'
 import React, { FormEvent, useRef, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
@@ -14,14 +14,13 @@ import { TrygdetidPeriode } from '~components/behandling/trygdetid/TrygdetidPeri
 type Props = {
   trygdetid: ITrygdetid
   setTrygdetid: (trygdetid: ITrygdetid) => void
-  erFremtidigTrygdetid?: boolean
+  trygdetidGrunnlagType: ITrygdetidGrunnlagType
 }
 
-const initialState = (erFremtidigTrygdetid: boolean, trygdetidId: string) => {
+const initialState = (type: ITrygdetidGrunnlagType) => {
   return {
     id: null,
-    trygdetidId: trygdetidId,
-    type: erFremtidigTrygdetid ? ITrygdetidType.FREMTIDIG : ITrygdetidType.NASJONAL,
+    type: type,
     bosted: '',
     periodeFra: null,
     periodeTil: null,
@@ -29,14 +28,12 @@ const initialState = (erFremtidigTrygdetid: boolean, trygdetidId: string) => {
   }
 }
 
-export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, erFremtidigTrygdetid = false }) => {
+export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, trygdetidGrunnlagType }) => {
   const { behandlingId } = useParams()
-
   const [nyttTrygdetidgrunnlag, setNyttTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>(
-    initialState(erFremtidigTrygdetid, trygdetid.id)
+    initialState(trygdetidGrunnlagType)
   )
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
-
   const fraDatoPickerRef: any = useRef(null)
   const tilDatoPickerRef: any = useRef(null)
 
@@ -53,43 +50,42 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
     requestLagreTrygdetidgrunnlag(
       {
         behandlingsId: behandlingId,
-        nyttTrygdetidgrunnlag: nyttTrygdetidgrunnlag!,
+        nyttTrygdetidgrunnlag: nyttTrygdetidgrunnlag,
       },
       (respons) => {
-        setNyttTrygdetidgrunnlag(initialState(erFremtidigTrygdetid, trygdetid.id))
+        setNyttTrygdetidgrunnlag(initialState(trygdetidGrunnlagType))
         setTrygdetid(respons)
       }
     )
-  }
-
-  const relevantGrunnlag = (grunnlag: ITrygdetidGrunnlag) => {
-    if (erFremtidigTrygdetid) {
-      return grunnlag.type === ITrygdetidType.FREMTIDIG
-    } else {
-      return grunnlag.type !== ITrygdetidType.FREMTIDIG
-    }
   }
 
   return (
     <>
       <ContentHeader>
         <Heading spacing size="medium" level="3">
-          {erFremtidigTrygdetid ? 'Fremtidig trygdetid' : 'Faktisk trygdetid'}
+          {
+            {
+              [ITrygdetidGrunnlagType.NASJONAL]: 'Faktisk trygdetid',
+              [ITrygdetidGrunnlagType.FREMTIDIG]: 'Fremtidig trygdetid',
+            }[trygdetidGrunnlagType]
+          }
         </Heading>
       </ContentHeader>
       <Innhold>
         <TrygdetidPerioder>
-          {trygdetid.trygdetidGrunnlag.filter(relevantGrunnlag).map((grunnlag) => (
-            <TrygdetidPeriode key={grunnlag.id} grunnlag={grunnlag} />
-          ))}
+          {trygdetid.trygdetidGrunnlag
+            .filter((grunnlag) => grunnlag.type == trygdetidGrunnlagType)
+            .map((grunnlag) => (
+              <TrygdetidPeriode key={grunnlag.id} grunnlag={grunnlag} />
+            ))}
         </TrygdetidPerioder>
         <TrygdetidForm onSubmit={onSubmit}>
           <FormWrapper>
             <Land>
               <Select
                 label="Land"
-                value={nyttTrygdetidgrunnlag?.bosted}
-                key={erFremtidigTrygdetid ? `${nyttTrygdetidgrunnlag?.bosted}-1` : `${nyttTrygdetidgrunnlag?.bosted}-1`}
+                value={nyttTrygdetidgrunnlag.bosted}
+                key={`${nyttTrygdetidgrunnlag.bosted}-${trygdetidGrunnlagType}`}
                 onChange={(e) =>
                   setNyttTrygdetidgrunnlag({
                     ...nyttTrygdetidgrunnlag,
@@ -99,7 +95,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
                 autoComplete="off"
               >
                 <option value="">Velg land</option>
-                <option key={erFremtidigTrygdetid ? 'Norge-1' : 'Norge-0'} value="Norge">
+                <option key={`NORGE-${trygdetidGrunnlagType}`} value="NORGE">
                   Norge
                 </option>
               </Select>
@@ -113,7 +109,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
                   dateFormat={'dd.MM.yyyy'}
                   placeholderText={'dd.mm.åååå'}
                   selected={
-                    nyttTrygdetidgrunnlag?.periodeFra == null ? null : new Date(nyttTrygdetidgrunnlag.periodeFra)
+                    nyttTrygdetidgrunnlag.periodeFra == null ? null : new Date(nyttTrygdetidgrunnlag.periodeFra)
                   }
                   locale="nb"
                   autoComplete="off"
@@ -144,7 +140,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, er
                   dateFormat={'dd.MM.yyyy'}
                   placeholderText={'dd.mm.åååå'}
                   selected={
-                    nyttTrygdetidgrunnlag?.periodeTil == null ? null : new Date(nyttTrygdetidgrunnlag.periodeTil)
+                    nyttTrygdetidgrunnlag.periodeTil == null ? null : new Date(nyttTrygdetidgrunnlag.periodeTil)
                   }
                   locale="nb"
                   autoComplete="off"

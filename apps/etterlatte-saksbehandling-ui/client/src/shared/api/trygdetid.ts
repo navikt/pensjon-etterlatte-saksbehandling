@@ -20,6 +20,7 @@ export const lagreOppsummertTrygdetid = async (args: {
 
 export interface ITrygdetid {
   id: string
+  behandlingId: string
   beregnetTrygdetid: IBeregnetTrygdetid | null
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
 }
@@ -32,16 +33,14 @@ export interface IBeregnetTrygdetid {
 
 export interface ITrygdetidGrunnlag {
   id: string | null
-  trygdetidId: string
-  type: ITrygdetidType
+  type: ITrygdetidGrunnlagType
   bosted: string
   periodeFra: string | null
   periodeTil: string | null
   kilde: string
 }
 
-export enum ITrygdetidType {
+export enum ITrygdetidGrunnlagType {
   NASJONAL = 'NASJONAL',
   FREMTIDIG = 'FREMTIDIG',
-  UTLAND = 'UTLAND',
 }

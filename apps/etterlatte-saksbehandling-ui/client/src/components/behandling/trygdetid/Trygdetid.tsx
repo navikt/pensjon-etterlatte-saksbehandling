@@ -8,7 +8,7 @@ import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { hentTrygdetid, ITrygdetid, opprettTrygdetid } from '~shared/api/trygdetid'
+import { hentTrygdetid, ITrygdetid, ITrygdetidGrunnlagType, opprettTrygdetid } from '~shared/api/trygdetid'
 import { useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -57,8 +57,16 @@ export const Trygdetid = (props: { behandling: IDetaljertBehandling }) => {
               Grunnlag trygdetid
             </Heading>
           </ContentHeader>
-          <TrygdetidGrunnlag trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
-          <TrygdetidGrunnlag trygdetid={trygdetid} setTrygdetid={setTrygdetid} erFremtidigTrygdetid={true} />
+          <TrygdetidGrunnlag
+            trygdetid={trygdetid}
+            setTrygdetid={setTrygdetid}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.NASJONAL}
+          />
+          <TrygdetidGrunnlag
+            trygdetid={trygdetid}
+            setTrygdetid={setTrygdetid}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+          />
           <TrygdetidBeregnet trygdetid={trygdetid} setTrygdetid={setTrygdetid} />
         </>
       )}

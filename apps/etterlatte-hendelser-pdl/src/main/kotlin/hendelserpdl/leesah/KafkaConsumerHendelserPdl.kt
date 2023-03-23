@@ -35,12 +35,12 @@ class KafkaConsumerHendelserPdl(
             while (!closed.get()) {
                 val meldinger = consumer.poll(Duration.ofSeconds(10L))
                 runBlocking {
-                    val map = meldinger.map {
+                    val ventbareHendelser = meldinger.map {
                         async(context = Dispatchers.Default) {
                             personHendelseFordeler.haandterHendelse(it.value())
                         }
                     }
-                    map.forEach {
+                    ventbareHendelser.forEach {
                         it.await()
                     }
                 }

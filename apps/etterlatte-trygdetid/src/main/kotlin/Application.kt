@@ -31,7 +31,7 @@ class Server(private val context: ApplicationContext) {
                 config = HoconApplicationConfig(context.config)
                 module {
                     restModule(sikkerLogg) {
-                        trygdetid(trygdetidService)
+                        trygdetid(trygdetidService, behandlingKlient)
                     }
                 }
                 connector { port = properties.httpPort }

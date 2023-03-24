@@ -12,17 +12,17 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
-import no.nav.etterlatte.libs.common.withParam
+import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import java.time.LocalDate
 import java.util.*
 
-fun Route.trygdetid(trygdetidService: TrygdetidService) {
+fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: BehandlingKlient) {
     route("/api/trygdetid/{$BEHANDLINGSID_CALL_PARAMETER}") {
         val logger = application.log
 
         get {
-            // withBehandlingId() TODO
-            withParam(BEHANDLINGSID_CALL_PARAMETER) {
+            withBehandlingId(behandlingKlient) {
                 logger.info("Henter trygdetid for behandling $behandlingsId")
                 val trygdetid = trygdetidService.hentTrygdetid(behandlingsId)
                 if (trygdetid != null) {
@@ -34,8 +34,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
         }
 
         post {
-            // withBehandlingId() TODO
-            withParam(BEHANDLINGSID_CALL_PARAMETER) {
+            withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter trygdetid for behandling $behandlingsId")
                 val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId)
                 call.respond(trygdetid.toDto())
@@ -43,8 +42,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
         }
 
         post("/grunnlag") {
-            // withBehandlingId() TODO
-            withParam(BEHANDLINGSID_CALL_PARAMETER) {
+            withBehandlingId(behandlingKlient) {
                 logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingsId")
                 val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
                 val trygdetid =
@@ -54,8 +52,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService) {
         }
 
         post("/beregnet") {
-            // withBehandlingId() TODO
-            withParam(BEHANDLINGSID_CALL_PARAMETER) {
+            withBehandlingId(behandlingKlient) {
                 logger.info("Oppdaterer beregnet trygdetid for behandling $behandlingsId")
                 val beregnetTrygdetid = call.receive<BeregnetTrygdetidDto>()
                 val trygdetid =

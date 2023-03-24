@@ -8,6 +8,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
+import no.nav.etterlatte.common.EnhetException
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -36,7 +37,12 @@ internal fun Route.sakRoutes(
 
     get("personer/{$FNR_CALL_PARAMETER}/saker/{type}") {
         val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
-        call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr, type) })
+
+        try {
+            call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr, type) })
+        } catch (exception: EnhetException) {
+            call.respond(HttpStatusCode.NotFound, exception.message)
+        }
     }
 
     route("/api/personer/{$FNR_CALL_PARAMETER}") {

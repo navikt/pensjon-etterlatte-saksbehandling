@@ -12,6 +12,7 @@ object GeografiskTilknytningMapper {
             PdlGtType.KOMMUNE -> GeografiskTilknytning(kommune = geografiskTilknytning.gtKommune)
             PdlGtType.BYDEL -> GeografiskTilknytning(bydel = geografiskTilknytning.gtBydel)
             PdlGtType.UTLAND -> GeografiskTilknytning(land = geografiskTilknytning.gtLand)
+            PdlGtType.UDEFINERT -> GeografiskTilknytning(ukjent = true)
             else -> GeografiskTilknytning()
         }
 }

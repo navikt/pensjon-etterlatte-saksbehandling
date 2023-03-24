@@ -1,9 +1,15 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.IngenEnhetFunnetException
+import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.klienter.PdlKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import org.slf4j.LoggerFactory
 
 interface SakService {
     fun hentSaker(): List<Sak>
@@ -19,6 +25,7 @@ interface SakService {
 
 class RealSakService(private val dao: SakDao, private val pdlKlient: PdlKlient, private val norg2Klient: Norg2Klient) :
     SakService {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun hentSaker(): List<Sak> {
         return dao.hentSaker()
@@ -55,13 +62,34 @@ class RealSakService(private val dao: SakDao, private val pdlKlient: PdlKlient, 
         }
     }
 
-    private fun finnEnhet(person: String, tema: String) =
-        pdlKlient.hentGeografiskTilknytning(person).geografiskTilknytning()?.let {
-            norg2Klient.hentEnheterForOmraade(tema, it).firstOrNull()
+    private fun finnEnhetForTemaOgOmraade(tema: String, omraade: String): ArbeidsFordelingEnhet {
+        val enheter = norg2Klient.hentEnheterForOmraade(tema, omraade)
+
+        return when {
+            enheter.isEmpty() -> throw IngenEnhetFunnetException(omraade, tema).also { logger.warn(it.message) }
+            else -> enheter.first()
         }
+    }
+
+    private fun finnEnhetForPersonOgTema(person: String, tema: String): ArbeidsFordelingEnhet? {
+        val tilknytning = pdlKlient.hentGeografiskTilknytning(person)
+        val geografiskTilknytning = tilknytning.geografiskTilknytning()
+
+        return when {
+            tilknytning.ukjent -> ArbeidsFordelingEnhet(Enheter.DEFAULT.navn, Enheter.DEFAULT.enhetNr)
+            geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
+                Foedselsnummer.of(person),
+                tema
+            ).also {
+                logger.warn(it.message)
+            }
+
+            else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
+        }
+    }
 
     override fun finnEllerOpprettSak(person: String, type: SakType) =
-        finnSak(person, type) ?: dao.opprettSak(person, type, finnEnhet(person, type.tema)?.enhetNr)
+        finnSak(person, type) ?: dao.opprettSak(person, type, finnEnhetForPersonOgTema(person, type.tema)?.enhetNr)
 
     override fun finnSak(person: String, type: SakType): Sak? {
         return finnSakerForPerson(person).find { it.sakType == type }

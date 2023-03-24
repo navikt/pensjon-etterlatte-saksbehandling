@@ -112,7 +112,8 @@ data class AvdoedesBarn(
 data class GeografiskTilknytning(
     val kommune: String? = null,
     val bydel: String? = null,
-    val land: String? = null
+    val land: String? = null,
+    val ukjent: Boolean = false
 ) {
     fun geografiskTilknytning() = when {
         bydel != null -> bydel

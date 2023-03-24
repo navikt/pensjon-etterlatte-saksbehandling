@@ -120,12 +120,12 @@ internal class VilkaarsvurderingServiceTest {
             vilkaar.grunnlag shouldNotBe null
             vilkaar.grunnlag shouldHaveSize 2
 
-            requireNotNull(vilkaar.grunnlag.get(0)).let {
+            vilkaar.grunnlag[0].let {
                 it.opplysningsType shouldBe VilkaarOpplysningType.SOEKER_FOEDSELSDATO
                 val opplysning: LocalDate = objectMapper.readValue(it.opplysning!!.toJson())
                 opplysning shouldBe grunnlag.soeker.hentFoedselsdato()?.verdi
             }
-            requireNotNull(vilkaar.grunnlag.get(1)).let {
+            vilkaar.grunnlag[1].let {
                 it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
                 val opplysning: LocalDate? = objectMapper.readValue(it.opplysning!!.toJson())
                 opplysning shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
@@ -273,7 +273,7 @@ internal class VilkaarsvurderingServiceTest {
             every { behandlingType } returns BehandlingType.REVURDERING
             every { soeker } returns "10095512345"
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-            every { revurderingsaarsak } returns RevurderingAarsak.SOEKER_DOD
+            every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
         }
 
         val vilkaarsvurdering = runBlocking {

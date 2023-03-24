@@ -8,7 +8,6 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
-import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -86,7 +85,7 @@ class RealManueltOpphoerService(
             }
 
             when (forrigeBehandling) {
-                is Foerstegangsbehandling, is Revurdering, is Regulering -> OpprettBehandling(
+                is Foerstegangsbehandling, is Revurdering -> OpprettBehandling(
                     type = BehandlingType.MANUELT_OPPHOER,
                     sakId = forrigeBehandling.sak.id,
                     status = BehandlingStatus.OPPRETTET,

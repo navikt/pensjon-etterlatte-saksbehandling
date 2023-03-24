@@ -33,11 +33,9 @@ internal class JournalfoerVedtaksbrev(
             validate { it.requireKey("vedtak.sak.ident") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
-                it.rejectValues(
-                    "vedtak.behandling.type",
-                    listOf(BehandlingType.MANUELT_OPPHOER.name, BehandlingType.OMREGNING.name)
-                )
+                it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
             }
+            validate { it.rejectValue("vedtak.brevutsending", false) }
         }.register(this)
     }
 

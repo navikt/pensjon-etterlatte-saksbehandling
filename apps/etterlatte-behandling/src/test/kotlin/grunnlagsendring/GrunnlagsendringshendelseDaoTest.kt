@@ -315,7 +315,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.REVURDERING,
             sakId = sak1,
-            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+            revurderingAarsak = RevurderingAarsak.REGULERING
         )
         behandlingRepo.opprettBehandling(opprettBehandling)
 

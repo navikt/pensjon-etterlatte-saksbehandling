@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -118,25 +119,17 @@ internal class BehandlingDaoIntegrationTest {
             type = BehandlingType.REVURDERING,
             sakId = sak1,
             persongalleri = persongalleri(),
-            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+            revurderingAarsak = RevurderingAarsak.REGULERING,
+            prosesstype = Prosesstype.MANUELL
         )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
         val opprettetBehandling = requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Revurdering
 
         assertEquals(opprettBehandling.id, opprettetBehandling.id)
-        assertEquals(
-            opprettBehandling.persongalleri.avdoed,
-            opprettetBehandling.persongalleri.avdoed
-        )
-        assertEquals(
-            opprettBehandling.persongalleri.soesken,
-            opprettetBehandling.persongalleri.soesken
-        )
-        assertEquals(
-            opprettBehandling.opprettet,
-            opprettetBehandling.behandlingOpprettet.toTidspunkt()
-        )
+        assertEquals(opprettBehandling.persongalleri.avdoed, opprettetBehandling.persongalleri.avdoed)
+        assertEquals(opprettBehandling.persongalleri.soesken, opprettetBehandling.persongalleri.soesken)
+        assertEquals(opprettBehandling.opprettet, opprettetBehandling.behandlingOpprettet.toTidspunkt())
     }
 
     @Test
@@ -265,7 +258,7 @@ internal class BehandlingDaoIntegrationTest {
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.REVURDERING,
             sakId = sak1,
-            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+            revurderingAarsak = RevurderingAarsak.REGULERING
         ).also {
             behandlingRepo.opprettBehandling(it)
         }
@@ -318,7 +311,8 @@ internal class BehandlingDaoIntegrationTest {
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.REVURDERING,
             sakId = sak1,
-            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+            revurderingAarsak = RevurderingAarsak.REGULERING,
+            prosesstype = Prosesstype.AUTOMATISK
         ).also {
             behandlingRepo.opprettBehandling(it)
         }
@@ -353,7 +347,8 @@ internal class BehandlingDaoIntegrationTest {
                 opprettBehandling(
                     type = BehandlingType.REVURDERING,
                     sakId = sak1,
-                    revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                    revurderingAarsak = RevurderingAarsak.REGULERING,
+                    prosesstype = Prosesstype.AUTOMATISK
                 )
             )
         }
@@ -384,7 +379,8 @@ internal class BehandlingDaoIntegrationTest {
                 opprettBehandling(
                     type = BehandlingType.REVURDERING,
                     sakId = sak1,
-                    revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                    revurderingAarsak = RevurderingAarsak.REGULERING,
+                    prosesstype = Prosesstype.MANUELL
                 )
             )
         }
@@ -462,7 +458,7 @@ internal class BehandlingDaoIntegrationTest {
                 type = BehandlingType.REVURDERING,
                 sakId = sakBarnepensjon.id,
                 persongalleri = persongalleri(soeker = brukerFnr),
-                revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                revurderingAarsak = RevurderingAarsak.REGULERING
             )
         )
 
@@ -509,7 +505,8 @@ internal class BehandlingDaoIntegrationTest {
                 opprettBehandling(
                     type = BehandlingType.REVURDERING,
                     sakId = sak,
-                    revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                    revurderingAarsak = RevurderingAarsak.REGULERING,
+                    prosesstype = Prosesstype.MANUELL
                 )
             )
         }

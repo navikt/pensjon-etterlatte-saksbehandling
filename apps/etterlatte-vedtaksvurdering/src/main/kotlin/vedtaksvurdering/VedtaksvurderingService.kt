@@ -284,7 +284,6 @@ class VedtaksvurderingService(
                 }
             }
 
-            BehandlingType.OMREGNING -> VedtakType.ENDRING
             BehandlingType.MANUELT_OPPHOER -> VedtakType.OPPHOER
         }
     }
@@ -329,11 +328,6 @@ class VedtaksvurderingService(
             when (behandling.behandlingType) {
                 BehandlingType.MANUELT_OPPHOER -> Triple(behandling, null, null)
 
-                BehandlingType.OMREGNING -> {
-                    val beregning = beregningKlient.hentBeregning(behandlingId, bruker)
-                    Triple(behandling, null, beregning)
-                }
-
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, bruker)
                     when (vilkaarsvurdering?.resultat?.utfall) {
@@ -353,7 +347,12 @@ class VedtaksvurderingService(
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
-    private fun lagStatistikkMelding(vedtakhendelse: KafkaHendelseType, vedtak: Vedtak, tekniskTid: LocalDateTime) =
+    private fun lagStatistikkMelding(
+        vedtakhendelse: KafkaHendelseType,
+        vedtak: Vedtak,
+        tekniskTid: LocalDateTime,
+        extraParams: Map<String, Any>? = null
+    ) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to vedtakhendelse.toString(),

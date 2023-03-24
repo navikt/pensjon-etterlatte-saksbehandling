@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -59,7 +60,8 @@ fun opprettBehandling(
     virkningstidspunkt: Virkningstidspunkt? = null,
     revurderingAarsak: RevurderingAarsak? = null,
     opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
-    fritekstAarsak: String? = null
+    fritekstAarsak: String? = null,
+    prosesstype: Prosesstype? = null
 ) = OpprettBehandling(
     type = type,
     sakId = sakId,
@@ -71,7 +73,8 @@ fun opprettBehandling(
     virkningstidspunkt = virkningstidspunkt,
     revurderingsAarsak = revurderingAarsak,
     opphoerAarsaker = opphoerAarsaker,
-    fritekstAarsak = fritekstAarsak
+    fritekstAarsak = fritekstAarsak,
+    prosesstype = prosesstype
 )
 
 fun foerstegangsbehandling(
@@ -114,7 +117,8 @@ fun revurdering(
     revurderingAarsak: RevurderingAarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
     vilkaarStatus: VilkaarsvurderingUtfall? = VilkaarsvurderingUtfall.OPPFYLT,
-    virkningstidspunkt: Virkningstidspunkt? = null
+    virkningstidspunkt: Virkningstidspunkt? = null,
+    prosesstype: Prosesstype = Prosesstype.MANUELL
 ) = Revurdering(
     id = id,
     sak = Sak(
@@ -129,7 +133,8 @@ fun revurdering(
     revurderingsaarsak = revurderingAarsak,
     kommerBarnetTilgode = kommerBarnetTilgode,
     vilkaarUtfall = vilkaarStatus,
-    virkningstidspunkt = virkningstidspunkt
+    virkningstidspunkt = virkningstidspunkt,
+    prosesstype = prosesstype
 )
 
 fun manueltOpphoer(

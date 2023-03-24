@@ -120,22 +120,17 @@ internal class BehandlingTest {
     }
 
     @Test
-    fun `kan ga fra VILKAARSVURDERT til FATTET VEDTAK hvis vilkaarutfall er ikke oppfylt`() {
-        behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
-            .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.IKKE_OPPFYLT).tilFattetVedtak()
-    }
-
-    @Test
-    fun `kan ikke ga fra VILKAARSVURDERT til FATTET VEDTAK hvis vilkaarutfall oppfylt eller null`() {
+    fun `kan ikke ga fra VILKAARSVURDERT til FATTET VEDTAK`() {
         val fyltUtBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
             .oppdaterGyldighetsproeving(gyldighetsResultat)
 
-        assertThrows<IllegalArgumentException> { fyltUtBehandling.tilVilkaarsvurdert(null).tilFattetVedtak() }
-        assertThrows<IllegalArgumentException> {
+        assertThrows<TilstandException.UgyldigtTilstand> { fyltUtBehandling.tilVilkaarsvurdert(null).tilFattetVedtak() }
+        assertThrows<TilstandException.UgyldigtTilstand> {
             fyltUtBehandling.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilFattetVedtak()
+        }
+        assertThrows<TilstandException.UgyldigtTilstand> {
+            fyltUtBehandling.tilVilkaarsvurdert(VilkaarsvurderingUtfall.IKKE_OPPFYLT).tilFattetVedtak()
         }
     }
 

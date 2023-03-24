@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
-import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -60,27 +59,22 @@ class RealRevurderingService(
             when (forrigeBehandling) {
                 is Foerstegangsbehandling -> revurderingFactory.opprettRevurdering(
                     forrigeBehandling.sak.id,
-                    forrigeBehandling.persongalleri,
+                    forrigeBehandling,
                     revurderingAarsak
                 )
 
                 is Revurdering -> revurderingFactory.opprettRevurdering(
                     forrigeBehandling.sak.id,
-                    forrigeBehandling.persongalleri,
+                    forrigeBehandling,
                     revurderingAarsak
                 )
 
-                is ManueltOpphoer -> revurderingFactory.opprettRevurdering(
-                    forrigeBehandling.sak.id,
-                    forrigeBehandling.persongalleri,
-                    revurderingAarsak
-                )
-
-                is Regulering -> revurderingFactory.opprettRevurdering(
-                    forrigeBehandling.sak.id,
-                    forrigeBehandling.persongalleri,
-                    revurderingAarsak
-                )
+                is ManueltOpphoer ->
+                    revurderingFactory.opprettRevurdering(
+                        forrigeBehandling.sak.id,
+                        forrigeBehandling,
+                        revurderingAarsak
+                    )
             }
         }
             .also {

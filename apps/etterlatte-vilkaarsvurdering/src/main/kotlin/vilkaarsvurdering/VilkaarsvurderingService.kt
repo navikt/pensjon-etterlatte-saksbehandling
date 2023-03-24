@@ -4,7 +4,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -148,17 +147,10 @@ class VilkaarsvurderingService(
     ): List<Vilkaar> = when (behandling.sakType) {
         SakType.BARNEPENSJON ->
             when (behandling.behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING ->
-                    BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                BehandlingType.REVURDERING -> BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
 
-                BehandlingType.REVURDERING ->
-                    vilkaarRevurderingBarnepensjon(
-                        requireNotNull(behandling.revurderingsaarsak),
-                        grunnlag,
-                        virkningstidspunkt
-                    )
-
-                BehandlingType.OMREGNING, BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
+                BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
                     "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                 )
             }
@@ -168,7 +160,8 @@ class VilkaarsvurderingService(
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
                     OmstillingstoenadVilkaar.inngangsvilkaar()
 
-                else -> throw IllegalArgumentException(
+                BehandlingType.REVURDERING,
+                BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
                     "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                 )
             }
@@ -197,20 +190,6 @@ class VilkaarsvurderingService(
             val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, bruker) }
 
             Pair(behandling, grunnlag.await())
-        }
-    }
-
-    private fun vilkaarRevurderingBarnepensjon(
-        revurderingAarsak: RevurderingAarsak,
-        grunnlag: Grunnlag,
-        virkningstidspunkt: Virkningstidspunkt
-    ): List<Vilkaar> {
-        logger.info("Vilkårsvurdering har revurderingsårsak $revurderingAarsak")
-        return when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
-            RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
-                "Du kan ikke ha et manuelt opphør på en revurdering"
-            )
         }
     }
 }

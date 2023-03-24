@@ -132,6 +132,19 @@ internal class JournalfoerVedtaksbrevTest {
         verify { vedtaksbrevService wasNot Called }
     }
 
+    @Test
+    fun `Attestering av sak med brevutsending false skal ikke sende ut brev`() {
+        /* TODO ai: Lag regulering som ikke skal sende ut brev */
+        val vedtak = opprettVedtak(BehandlingType.REVURDERING)
+
+        val melding =
+            JsonMessage.newMessage(mapOf(EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(), "vedtak" to vedtak))
+
+        testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
+
+        verify { vedtaksbrevService wasNot Called }
+    }
+
     private fun opprettMelding(vedtak: VedtakDto): JsonMessage {
         return JsonMessage.newMessage(
             mapOf(

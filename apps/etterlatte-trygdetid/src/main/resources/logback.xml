@@ -5,7 +5,16 @@
         </encoder>
     </appender>
 
+    <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
     <root level="INFO">
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="STDOUT_JSON"/>
     </root>
+
+    <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="org.apache.kafka" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
+    <include resource="logback-secure.xml"/>
 </configuration>

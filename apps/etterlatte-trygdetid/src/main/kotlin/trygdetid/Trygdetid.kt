@@ -1,13 +1,11 @@
 package no.nav.etterlatte.trygdetid
 
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.*
 
 data class Trygdetid(
     val id: UUID,
     val behandlingId: UUID,
-    val opprettet: Tidspunkt,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag>,
     val beregnetTrygdetid: BeregnetTrygdetid?
 )

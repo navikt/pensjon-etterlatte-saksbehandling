@@ -21,7 +21,16 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
-
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-trygdetid
+        databases:
+          - name: trygdetid
+            envVarPrefix: DB
+        flags:
+          - name: max_connections
+            value: "100"
   azure:
     application:
       enabled: true
@@ -35,8 +44,8 @@ spec:
 
   replicas:
     cpuThresholdPercentage: 90
-    max: 1
-    min: 1
+    max: 4
+    min: 2
   env:
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling

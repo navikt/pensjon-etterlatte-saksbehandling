@@ -4,7 +4,6 @@ updates:
   # KOTLIN BACKEND
   # ==============
 
-  # Kjører sjekk hver måned for generelle oppdateringer
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
@@ -12,19 +11,11 @@ updates:
       day: "sunday"
     open-pull-requests-limit: 10
 
-  # Daglig sjekk (limit=0) for å sikre sikkerhetsoppdateringer
-  - package-ecosystem: "gradle"
-    directory: "/"
-    schedule:
-      interval: "daily" 
-    open-pull-requests-limit: 0
-
 
   # =============
   # FRONTEND ROOT
   # =============
-  
-  # Kjører sjekk hver måned for generelle oppdateringer
+
   - package-ecosystem: "npm"
     directory: "/apps/etterlatte-saksbehandling-ui/"
     schedule:
@@ -32,18 +23,11 @@ updates:
       day: "sunday"
     open-pull-requests-limit: 10
 
-  # Daglig sjekk (limit=0) for å sikre sikkerhetsoppdateringer
-  - package-ecosystem: "npm"
-    directory: "/apps/etterlatte-saksbehandling-ui/"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 0
 
   # ===============
   # FRONTEND CLIENT
   # ===============
 
-  # Kjører sjekk hver måned for generelle oppdateringer
   - package-ecosystem: "npm"
     directory: "/apps/etterlatte-saksbehandling-ui/client"
     schedule:
@@ -51,18 +35,11 @@ updates:
       day: "sunday"
     open-pull-requests-limit: 10
 
-  # Daglig sjekk (limit=0) for å sikre sikkerhetsoppdateringer
-  - package-ecosystem: "npm"
-    directory: "/apps/etterlatte-saksbehandling-ui/client"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 0
 
   # ===============
   # FRONTEND SERVER
   # ===============
-  
-  # Kjører sjekk hver måned for generelle oppdateringer
+
   - package-ecosystem: "npm"
     directory: "/apps/etterlatte-saksbehandling-ui/server"
     schedule:
@@ -70,18 +47,11 @@ updates:
       day: "sunday"
     open-pull-requests-limit: 10
 
-  # Daglig sjekk (limit=0) for å sikre sikkerhetsoppdateringer
-  - package-ecosystem: "npm"
-    directory: "/apps/etterlatte-saksbehandling-ui/server"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 0
 
   # ==============
   # GITHUB ACTIONS
   # ==============
 
-  # Kjører sjekk hver måned for generelle oppdateringer
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

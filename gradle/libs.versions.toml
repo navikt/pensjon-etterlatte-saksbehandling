@@ -30,7 +30,7 @@ jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xm
 jakartabind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "2.3.3" }
 jakartabind-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version = "2.3.7" }
 
-kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.3.2" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.4.0" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.1" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.3.1" }
 kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.2" }

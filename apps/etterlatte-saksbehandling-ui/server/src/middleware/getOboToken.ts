@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import { logger } from '../utils/logger'
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { AdConfig } from '../config/config'
 
 export const tokenMiddleware = (scope: string) => async (req: Request, res: Response, next: NextFunction) => {
@@ -27,7 +27,7 @@ export const getOboToken = async (bearerToken: string, scope: string): Promise<s
       requested_token_use: 'on_behalf_of',
     }
 
-    const response = await fetch(AdConfig.tokenEndpoint!!, {
+    const response = await fetch(AdConfig.tokenEndpoint, {
       method: 'post',
       body: Object.keys(body)
         .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(body[key]))

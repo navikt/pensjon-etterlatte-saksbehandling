@@ -62,6 +62,8 @@ spec:
       value: http://etterlatte-grunnlag
     - name: BEREGNING_API_URL
       value: http://etterlatte-beregning
+    - name: TRYGDETID_API_URL
+      value: http://etterlatte-trygdetid
     - name: BREV_API_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-brev-api/.default
     - name: VILKAARSVURDERING_API_SCOPE
@@ -74,6 +76,8 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
     - name: BEREGNING_API_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-beregning/.default
+    - name: TRYGDETID_API_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-trygdetid/.default
   accessPolicy:
     outbound:
       external:

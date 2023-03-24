@@ -77,6 +77,6 @@ fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
                 logger.error("App avsluttet med en feil", e)
                 exitProcess(1)
             }
-        }
+        }.start()
     }
 }

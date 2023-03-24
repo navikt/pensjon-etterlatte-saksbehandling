@@ -19,11 +19,8 @@ type Props = {
 
 const initialState = (type: ITrygdetidGrunnlagType) => {
   return {
-    id: null,
     type: type,
     bosted: '',
-    periodeFra: null,
-    periodeTil: null,
     kilde: '',
   }
 }

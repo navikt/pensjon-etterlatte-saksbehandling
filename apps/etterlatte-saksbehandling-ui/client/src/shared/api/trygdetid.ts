@@ -21,7 +21,7 @@ export const lagreOppsummertTrygdetid = async (args: {
 export interface ITrygdetid {
   id: string
   behandlingId: string
-  beregnetTrygdetid: IBeregnetTrygdetid | null
+  beregnetTrygdetid?: IBeregnetTrygdetid
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
 }
 
@@ -32,11 +32,11 @@ export interface IBeregnetTrygdetid {
 }
 
 export interface ITrygdetidGrunnlag {
-  id: string | null
+  id?: string
   type: ITrygdetidGrunnlagType
   bosted: string
-  periodeFra: string | null
-  periodeTil: string | null
+  periodeFra?: string
+  periodeTil?: string
   kilde: string
 }
 

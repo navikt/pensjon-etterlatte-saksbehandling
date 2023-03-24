@@ -8,15 +8,13 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import org.slf4j.LoggerFactory
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
 fun main() {
@@ -44,7 +42,6 @@ class Server {
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
@@ -55,14 +52,31 @@ fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
         azureAppScope = config.getString("behandling.azure.scope")
     )
     val behandlingKlient = BehandlingKlient(behandlingHttpClient = behandlingHttpClient)
+
+    val closed = AtomicBoolean()
+    closed.set(false)
+
     withLogContext {
-        GlobalScope.launch {
+        Thread {
             try {
-                KafkaConsumerEgneAnsatte(env = env, behandlingKlient = behandlingKlient).poll()
+                val kafkaConsumerEgneAnsatte = KafkaConsumerEgneAnsatte(
+                    env = env,
+                    closed = closed,
+                    behandlingKlient = behandlingKlient
+                )
+
+                Runtime.getRuntime().addShutdownHook(
+                    Thread {
+                        closed.set(true)
+                        kafkaConsumerEgneAnsatte.getConsumer().wakeup(); // trådsikker, aborter konsumer fra polling
+                    }
+                )
+
+                kafkaConsumerEgneAnsatte.stream()
             } catch (e: Exception) {
                 logger.error("App avsluttet med en feil", e)
                 exitProcess(1)
             }
-        }
+        }.start()
     }
 }

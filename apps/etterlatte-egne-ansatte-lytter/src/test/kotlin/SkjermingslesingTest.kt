@@ -4,11 +4,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.spyk
 import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
@@ -20,8 +17,12 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 
 class SkjermingslesingTest {
 
@@ -36,29 +37,43 @@ class SkjermingslesingTest {
         )
     }
 
+    @Test
     fun `Les skjermingshendelse og post det til behandlingsapp`() {
-        val skjermingsProducer: KafkaProducer<String, String> = generateSkjermingsProducer()
+        val skjermingsProducer: KafkaProducer<String, String> = spyk(generateSkjermingsProducer())
         val fnr = "70078749472"
         skjermingsProducer.send(ProducerRecord(pdlPersonTopic, fnr, "value"))
         val behandlingKlient = mockk<BehandlingKlient>()
         every { behandlingKlient.haandterHendelse(any()) } just runs
+
+        val closed = AtomicBoolean()
+        closed.set(false)
+
         val kafkaConsumerEgneAnsatte = KafkaConsumerEgneAnsatte(
-            mapOf(
+            env = mapOf(
                 "KAFKA_BROKERS" to kafkaEnv.brokersURL,
                 "SKJERMING_GROUP_ID" to "etterlatte-v1",
                 "KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!,
                 "SKJERMING_TOPIC" to pdlPersonTopic
             ),
-            behandlingKlient,
-            KafkaConsumerEnvironmentTest(),
-            Duration.ofSeconds(20L)
+            behandlingKlient = behandlingKlient,
+            closed = closed,
+            kafkaEnvironment = KafkaConsumerEnvironmentTest(),
+            pollTimeoutInSeconds = Duration.ofSeconds(4L)
         )
-        runBlocking(Dispatchers.Default) {
-            val job = launch {
-                kafkaConsumerEgneAnsatte.poll()
+        val thread = thread(start = true) {
+            while (true) {
+                if (kafkaConsumerEgneAnsatte.getAntallMeldinger() >= 1) {
+                    closed.set(true)
+                    kafkaConsumerEgneAnsatte.getConsumer().wakeup()
+                    return@thread
+                }
+                Thread.sleep(800L) // Må stå så ikke denne spiser all cpu, tester er egentlig single threaded
             }
-            job.cancelAndJoin()
         }
+        kafkaConsumerEgneAnsatte.stream()
+        thread.join()
+        verify(exactly = 1) { skjermingsProducer.send(any(), any()) }
+        assertEquals(kafkaConsumerEgneAnsatte.getAntallMeldinger(), 1)
         verify { behandlingKlient.haandterHendelse(any()) }
     }
 

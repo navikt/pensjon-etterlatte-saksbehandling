@@ -29,7 +29,7 @@ fun main() {
     Server().run()
 }
 
-class Server() {
+class Server {
     private val engine = embeddedServer(
         factory = CIO,
         environment = applicationEngineEnvironment {
@@ -73,9 +73,9 @@ fun startLeesahKonsumer(env: Map<String, String>) {
         withLogContext {
             try {
                 val kafkaConsumerHendelserPdl = KafkaConsumerHendelserPdl(
-                    PersonHendelseFordeler(LivsHendelserTilRapid(kafkaProducer), pdlService),
-                    env,
-                    closed
+                    personHendelseFordeler = PersonHendelseFordeler(LivsHendelserTilRapid(kafkaProducer), pdlService),
+                    env = env,
+                    closed = closed
                 )
                 Runtime.getRuntime().addShutdownHook(
                     Thread {

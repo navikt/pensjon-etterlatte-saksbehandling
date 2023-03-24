@@ -33,6 +33,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
@@ -206,7 +207,7 @@ class IntegrationTest {
         }
         kafkaConsumerWrapper.stream()
         thread.join()
-
+        Assertions.assertEquals(kafkaConsumerWrapper.getAntallMeldinger(), 3)
         verify(exactly = 3) { rapidsKafkaProducer.publiser(any(), any()) }
         verify {
             livsHendelserTilRapid.personErDod(

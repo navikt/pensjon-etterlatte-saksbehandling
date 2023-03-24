@@ -76,7 +76,7 @@ spec:
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
     - name: BEHANDLING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
 
   accessPolicy:
     inbound:

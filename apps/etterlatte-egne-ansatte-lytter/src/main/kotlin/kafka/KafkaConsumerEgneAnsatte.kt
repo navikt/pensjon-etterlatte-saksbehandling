@@ -28,7 +28,7 @@ class KafkaConsumerEgneAnsatte(
 
     fun stream() {
         try {
-            logger.info("Starter kafka konsumer")
+            logger.info("Starter KafkaConsumerEgneAnsatte")
             consumer.subscribe(listOf(skjermingTopic))
             while (!closed.get()) {
                 val meldinger: ConsumerRecords<String, String> = consumer.poll(pollTimeoutInSeconds)
@@ -44,7 +44,7 @@ class KafkaConsumerEgneAnsatte(
             // Ignorerer exception hvis vi stenger ned
             if (!closed.get()) throw e
         } finally {
-            logger.info("Lukker kafkaconsumer")
+            logger.info("Lukker KafkaConsumerEgneAnsatte")
             consumer.close()
         }
     }

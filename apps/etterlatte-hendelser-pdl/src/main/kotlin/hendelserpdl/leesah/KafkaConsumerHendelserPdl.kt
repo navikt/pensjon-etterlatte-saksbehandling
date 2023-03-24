@@ -27,7 +27,7 @@ class KafkaConsumerHendelserPdl(
 
     fun stream() {
         try {
-            logger.info("Starter kafka konsumer")
+            logger.info("Starter KafkaConsumerHendelserPdl konsumer")
             consumer.subscribe(listOf(leesahtopic))
             while (!closed.get()) {
                 val meldinger = consumer.poll(Duration.ofSeconds(10L))
@@ -43,7 +43,7 @@ class KafkaConsumerHendelserPdl(
             // Ignorerer exception hvis vi stenger ned
             if (!closed.get()) throw e
         } finally {
-            logger.info("Lukker kafkaconsumer")
+            logger.info("Lukker KafkaConsumerHendelserPdl kafkaconsumer")
             consumer.close()
         }
     }

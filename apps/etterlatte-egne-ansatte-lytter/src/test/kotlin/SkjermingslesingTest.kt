@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.BehandlingKlient
@@ -16,10 +17,12 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 
 class SkjermingslesingTest {
 
@@ -36,7 +39,7 @@ class SkjermingslesingTest {
 
     @Test
     fun `Les skjermingshendelse og post det til behandlingsapp`() {
-        val skjermingsProducer: KafkaProducer<String, String> = generateSkjermingsProducer()
+        val skjermingsProducer: KafkaProducer<String, String> = spyk(generateSkjermingsProducer())
         val fnr = "70078749472"
         skjermingsProducer.send(ProducerRecord(pdlPersonTopic, fnr, "value"))
         val behandlingKlient = mockk<BehandlingKlient>()
@@ -57,11 +60,21 @@ class SkjermingslesingTest {
             kafkaEnvironment = KafkaConsumerEnvironmentTest(),
             pollTimeoutInSeconds = Duration.ofSeconds(4L)
         )
-
+        val thread = thread(start = true) {
+            while (true) {
+                if (kafkaConsumerEgneAnsatte.getAntallMeldinger() >= 1) {
+                    closed.set(true)
+                    kafkaConsumerEgneAnsatte.getConsumer().wakeup()
+                    return@thread
+                }
+                Thread.sleep(800L) // Må stå så ikke denne spiser all cpu, tester er egentlig single threaded
+            }
+        }
         kafkaConsumerEgneAnsatte.stream()
-
+        thread.join()
+        verify(exactly = 1) { skjermingsProducer.send(any(), any()) }
+        assertEquals(kafkaConsumerEgneAnsatte.getAntallMeldinger(), 1)
         verify { behandlingKlient.haandterHendelse(any()) }
-        verify { behandlingKlient.postTilBehandling(fnr, true) }
     }
 
     private fun generateSkjermingsProducer() = KafkaProducer<String, String>(

@@ -21,7 +21,7 @@ class GrunnlagKlientImpl(
 ) : GrunnlagKlient {
 
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
-        return grunnlagHttpClient.get("$url/api/grunnlag/grunnlag/$sakId") {
+        return grunnlagHttpClient.get("$url/api/grunnlag/$sakId") {
             accept(ContentType.Application.Json)
         }.body()
     }

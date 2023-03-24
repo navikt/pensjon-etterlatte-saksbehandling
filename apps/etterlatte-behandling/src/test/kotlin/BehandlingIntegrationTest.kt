@@ -239,7 +239,7 @@ class TestBeanFactory(
     override fun grunnlagHttpClient(): HttpClient = HttpClient(MockEngine) {
         engine {
             addHandler { request ->
-                if (request.url.fullPath.contains("api/grunnlag")) {
+                if (request.url.fullPath.matches(Regex("api/grunnlag/[0-9]{11}"))) {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     respond(Grunnlag.empty().toJson(), headers = headers)
                 } else if (request.url.fullPath.endsWith("/roller")) {

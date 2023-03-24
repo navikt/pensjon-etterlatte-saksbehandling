@@ -8,10 +8,10 @@ export const appConf: IAppConf = {
 
 export const AdConfig = {
   clientId: requireEnvValue('AZURE_APP_CLIENT_ID'),
-  clientSecret: requireEnvValue('AZURE_APP_CLIENT_SECRE'),
+  clientSecret: requireEnvValue('AZURE_APP_CLIENT_SECRET'),
   audience: requireEnvValue('AZURE_APP_CLIENT_ID'),
-  issuer: requireEnvValue('AZURE_OPENID_CONFIG_ISSUE'),
-  tokenEndpoint: requireEnvValue('AZURE_OPENID_CONFIG_TOKEN_ENDPOIN'),
+  issuer: requireEnvValue('AZURE_OPENID_CONFIG_ISSUER'),
+  tokenEndpoint: requireEnvValue('AZURE_OPENID_CONFIG_TOKEN_ENDPOINT'),
 }
 
 function hentApiConfigFraEnv(): typeof API_CONFIG_FROM_ENV {

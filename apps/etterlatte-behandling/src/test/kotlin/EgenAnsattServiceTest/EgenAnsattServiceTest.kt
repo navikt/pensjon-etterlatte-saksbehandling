@@ -1,8 +1,6 @@
 package no.nav.etterlatte
 
-import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
@@ -41,10 +39,6 @@ class EgenAnsattServiceTest {
     private lateinit var sakService: SakService
     private lateinit var egenAnsattService: EgenAnsattService
 
-    @MockK private lateinit var pdlKlient: PdlKlient
-
-    @MockK private lateinit var norg2Klient: Norg2Klient
-
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
@@ -57,7 +51,8 @@ class EgenAnsattServiceTest {
             password = postgreSQLContainer.password
         ).apply { migrate() }
 
-        MockKAnnotations.init(this)
+        val pdlKlient = mockk<PdlKlient>()
+        val norg2Klient = mockk<Norg2Klient>()
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }

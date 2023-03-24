@@ -10,6 +10,7 @@ import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -28,31 +29,36 @@ class Norg2KlientImpl(private val client: HttpClient, private val url: String) :
         .build<ArbeidsFordelingRequest, List<ArbeidsFordelingEnhet>>()
 
     override fun hentEnheterForOmraade(tema: String, omraade: String): List<ArbeidsFordelingEnhet> =
-        hent(ArbeidsFordelingRequest(tema, omraade))
+        hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(tema, omraade))
 
-    private fun hent(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> = try {
-        val cachedInfo = cache.getIfPresent(request)
+    private fun hentArbeidsfordelingForOmraadeOgTema(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> =
+        try {
+            val cachedInfo = cache.getIfPresent(request)
 
-        if (cachedInfo != null) {
-            logger.info("Fant cachet enheter for tema og omraade $request")
-            cachedInfo
-        } else {
-            logger.info("Henter enheter for tema og omraade $request")
+            if (cachedInfo != null) {
+                logger.info(
+                    "Fant cachet enheter for tema ${
+                        request.tema
+                    } og omraade ${request.geografiskOmraade}"
+                )
+                cachedInfo
+            } else {
+                logger.info("Henter enheter for tema og omraade $request")
 
-            runBlocking {
-                val response = client.get("$url/api/v1/arbeidsfordeling/enheter/bestmatch") {
-                    header("x_correlation_id", getXCorrelationId())
-                    header("Nav_Call_Id", getXCorrelationId())
-                }
+                runBlocking {
+                    val response = client.get("$url/api/v1/arbeidsfordeling/enheter/bestmatch") {
+                        header(X_CORRELATION_ID, getXCorrelationId())
+                        header("Nav_Call_Id", getXCorrelationId())
+                    }
 
-                if (response.status.isSuccess()) {
-                    response.body<List<ArbeidsFordelingEnhet>>().also { cache.put(request, it) }
-                } else {
-                    throw ResponseException(response, "Ukjent feil fra norg2 api")
+                    if (response.status.isSuccess()) {
+                        response.body<List<ArbeidsFordelingEnhet>>().also { cache.put(request, it) }
+                    } else {
+                        throw ResponseException(response, "Ukjent feil fra norg2 api")
+                    }
                 }
             }
+        } catch (exception: Exception) {
+            throw RuntimeException("Feil i kall mot norg2 med tema og omraade: $request", exception)
         }
-    } catch (exception: Exception) {
-        throw RuntimeException("Feil i kall mot norg2 med tema og omraade: $request", exception)
-    }
 }

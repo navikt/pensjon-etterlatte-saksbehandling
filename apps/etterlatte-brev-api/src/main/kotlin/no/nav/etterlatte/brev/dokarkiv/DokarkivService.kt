@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.dokarkiv
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.libs.common.brev.model.Brev
-import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.journalpost.DokumentVariant
@@ -17,7 +16,7 @@ import no.nav.etterlatte.libs.common.journalpost.Sak
 import no.nav.etterlatte.libs.common.journalpost.Sakstype
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
-import java.util.Base64
+import java.util.*
 
 interface DokarkivService {
     fun journalfoer(vedtaksbrev: Brev, vedtak: VedtakTilJournalfoering): JournalpostResponse
@@ -50,7 +49,7 @@ class DokarkivServiceImpl(
             tittel = vedtaksbrev.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
             behandlingstema = BEHANDLINGSTEMA_BP,
-            avsenderMottaker = vedtaksbrev.mottaker.tilAvsenderMottaker(),
+            avsenderMottaker = AvsenderMottaker(vedtak.soekerIdent),
             bruker = Bruker(vedtak.soekerIdent),
             eksternReferanseId = "${vedtaksbrev.behandlingId}.${vedtaksbrev.id}",
             sak = Sak(Sakstype.FAGSAK, vedtaksbrev.behandlingId.toString()),
@@ -66,13 +65,4 @@ class DokarkivServiceImpl(
         brevkode = BREV_KODE,
         dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(this)))
     )
-
-    private fun Mottaker.tilAvsenderMottaker() = when {
-        foedselsnummer != null -> AvsenderMottaker(id = foedselsnummer!!.value)
-        orgnummer != null -> AvsenderMottaker(id = orgnummer, idType = "ORGNR")
-        adresse != null -> {
-            AvsenderMottaker(id = null, navn = adresse!!.navn, idType = null, land = adresse!!.land)
-        }
-        else -> throw Exception("Ingen brevmottaker spesifisert")
-    }
 }

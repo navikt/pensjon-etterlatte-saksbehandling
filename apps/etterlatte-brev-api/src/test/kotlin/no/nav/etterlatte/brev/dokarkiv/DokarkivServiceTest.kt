@@ -50,7 +50,7 @@ internal class DokarkivServiceTest {
     }
 
     @Test
-    fun `Journalfoering`() {
+    fun `journalfoer brevet med barnet som mottaker`() {
         every { mockDb.hentBrevInnhold(any()) } returns BrevInnhold("mal", Spraak.NB, "".toByteArray())
         coEvery { mockKlient.opprettJournalpost(any(), any()) } returns JournalpostResponse("id", "OK", "melding", true)
 
@@ -69,7 +69,7 @@ internal class DokarkivServiceTest {
         assertEquals(JournalPostType.UTGAAENDE, actualRequest.journalpostType)
         assertEquals(BEHANDLINGSTEMA_BP, actualRequest.behandlingstema)
 
-        assertEquals(vedtaksbrev.mottaker.foedselsnummer!!.value, actualRequest.avsenderMottaker.id)
+        assertEquals(vedtak.soekerIdent, actualRequest.avsenderMottaker.id)
 
         assertEquals(Bruker(vedtak.soekerIdent), actualRequest.bruker)
         assertEquals("${vedtaksbrev.behandlingId}.${vedtaksbrev.id}", actualRequest.eksternReferanseId)

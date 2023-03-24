@@ -27,13 +27,13 @@ class GrunnlagKlientImpl(
     }
 
     override suspend fun hentAlleSakIder(fnr: String): Set<Long> {
-        return grunnlagHttpClient.get("$url/api/person/$fnr/saker") {
+        return grunnlagHttpClient.get("$url/api/grunnlag/person/$fnr/saker") {
             accept(ContentType.Application.Json)
         }.body()
     }
 
     override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller {
-        return grunnlagHttpClient.get("$url/api/person/$fnr/roller") {
+        return grunnlagHttpClient.get("$url/api/grunnlag/person/$fnr/roller") {
             accept(ContentType.Application.Json)
         }.body()
     }

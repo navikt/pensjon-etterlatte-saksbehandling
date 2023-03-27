@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.mockPerson
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -34,8 +34,8 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle)
-        Assertions.assertEquals("Ola", resultat.fornavn.verdi)
-        Assertions.assertEquals("Nordmann", resultat.etternavn.verdi)
+        assertEquals("Ola", resultat.fornavn.verdi)
+        assertEquals("Nordmann", resultat.etternavn.verdi)
     }
 
     @Test
@@ -45,7 +45,7 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentDoedsdato()
-        Assertions.assertEquals(mockPerson().doedsdato?.verdi, resultat)
+        assertEquals(mockPerson().doedsdato?.verdi, resultat)
     }
 
     @Test
@@ -57,7 +57,7 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentAnsvarligeForeldre()
-        Assertions.assertEquals(familierelasjon.ansvarligeForeldre, resultat)
+        assertEquals(familierelasjon.ansvarligeForeldre, resultat)
     }
 
     @Test
@@ -69,7 +69,7 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentBarn()
-        Assertions.assertEquals(familierelasjon.barn, resultat)
+        assertEquals(familierelasjon.barn, resultat)
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentUtland()
-        Assertions.assertEquals(utland, resultat)
+        assertEquals(utland, resultat)
     }
 
     private fun mockHttpClient(personRespons: PersonDTO): HttpClient {

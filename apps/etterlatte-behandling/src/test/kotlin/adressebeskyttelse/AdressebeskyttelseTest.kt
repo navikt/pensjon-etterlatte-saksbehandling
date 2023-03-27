@@ -10,11 +10,13 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.behandling.BehandlingsBehov
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -60,8 +62,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(beanFactory)
             }
 
-            val sak: Sak = client.get("personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -145,9 +149,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(beanFactory)
             }
 
-            val sak: Sak = client.get("personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 it.body()
@@ -175,8 +180,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.get("api/personer/$fnr/behandlinger") {
+            client.post("api/personer/behandlinger") {
                 addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -193,14 +200,18 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 )
             }
 
-            client.get("api/personer/$fnr/behandlinger") {
+            client.post("api/personer/behandlinger") {
                 addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
             }
 
-            client.get("api/personer/$fnr/behandlinger") {
+            client.post("api/personer/behandlinger") {
                 addAuthToken(systemBruker)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -224,9 +235,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(beanFactory)
             }
 
-            val sak: Sak = client.get("personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 it.body()

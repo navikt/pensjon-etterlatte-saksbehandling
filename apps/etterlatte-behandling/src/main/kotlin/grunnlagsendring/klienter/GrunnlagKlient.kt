@@ -4,7 +4,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 
@@ -27,14 +31,18 @@ class GrunnlagKlientImpl(
     }
 
     override suspend fun hentAlleSakIder(fnr: String): Set<Long> {
-        return grunnlagHttpClient.get("$url/api/grunnlag/person/$fnr/saker") {
+        return grunnlagHttpClient.post("$url/api/grunnlag/person/saker") {
             accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            setBody(FoedselsnummerDTO(fnr))
         }.body()
     }
 
     override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller {
-        return grunnlagHttpClient.get("$url/api/grunnlag/person/$fnr/roller") {
+        return grunnlagHttpClient.post("$url/api/grunnlag/person/roller") {
             accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            setBody(FoedselsnummerDTO(fnr))
         }.body()
     }
 }

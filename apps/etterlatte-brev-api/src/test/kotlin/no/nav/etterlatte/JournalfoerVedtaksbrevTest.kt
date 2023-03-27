@@ -135,7 +135,6 @@ internal class JournalfoerVedtaksbrevTest {
 
     @Test
     fun `Attestering av sak med brevutsending false skal ikke sende ut brev`() {
-        /* TODO ai: Lag regulering som ikke skal sende ut brev */
         val vedtak = opprettVedtak(BehandlingType.REVURDERING)
 
         val melding =

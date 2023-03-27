@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal sealed class TilstandException : IllegalStateException() {
-    internal object UgyldigtTilstand : TilstandException()
+    internal object UgyldigTilstand : TilstandException()
     internal object IkkeFyltUt : TilstandException()
 }
 
@@ -49,7 +49,7 @@ sealed class Behandling {
             return block()
         } else {
             logger.info("behandling ($id) med status $status kan ikke redigeres")
-            throw TilstandException.UgyldigtTilstand
+            throw TilstandException.UgyldigTilstand
         }
     }
 
@@ -58,7 +58,7 @@ sealed class Behandling {
             return block()
         } else {
             logger.info("Ugyldig operasjon på behandling ($id) med status $status")
-            throw TilstandException.UgyldigtTilstand
+            throw TilstandException.UgyldigTilstand
         }
     }
 
@@ -67,7 +67,7 @@ sealed class Behandling {
             return block()
         } else {
             logger.info("Ugyldig operasjon på behandling ($id) med status $status")
-            throw TilstandException.UgyldigtTilstand
+            throw TilstandException.UgyldigTilstand
         }
     }
 

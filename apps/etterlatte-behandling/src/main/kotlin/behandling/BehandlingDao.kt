@@ -155,16 +155,18 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
-        val stmt = connection().prepareStatement(
-            """
+        with(connection()) {
+            val stmt = prepareStatement(
+                """
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
-                WHERE status not in (${
-            BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
-            }) RETURNING id, sak_id
-            """.trimIndent()
-        )
-        return SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
+                WHERE status <> ALL (?) RETURNING id, sak_id
+                """.trimIndent()
+            )
+            stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
+
+            return SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
+        }
     }
 
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(

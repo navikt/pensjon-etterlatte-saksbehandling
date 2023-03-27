@@ -78,7 +78,7 @@ internal class BehandlingTest {
             .tilBeregnet()
             .tilFattetVedtak()
 
-        assertThrows<TilstandException.UgyldigtTilstand> {
+        assertThrows<TilstandException.UgyldigTilstand> {
             behandlingTilAttestering.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
         }
     }
@@ -94,8 +94,8 @@ internal class BehandlingTest {
             .tilAttestert()
             .tilIverksatt()
 
-        assertThrows<TilstandException.UgyldigtTilstand> { iverksattBehandling.tilReturnert() }
-        assertThrows<TilstandException.UgyldigtTilstand> {
+        assertThrows<TilstandException.UgyldigTilstand> { iverksattBehandling.tilReturnert() }
+        assertThrows<TilstandException.UgyldigTilstand> {
             iverksattBehandling.oppdaterKommerBarnetTilgode(
                 kommerBarnetTilgode
             )
@@ -125,11 +125,11 @@ internal class BehandlingTest {
             .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
             .oppdaterGyldighetsproeving(gyldighetsResultat)
 
-        assertThrows<TilstandException.UgyldigtTilstand> { fyltUtBehandling.tilVilkaarsvurdert(null).tilFattetVedtak() }
-        assertThrows<TilstandException.UgyldigtTilstand> {
+        assertThrows<TilstandException.UgyldigTilstand> { fyltUtBehandling.tilVilkaarsvurdert(null).tilFattetVedtak() }
+        assertThrows<TilstandException.UgyldigTilstand> {
             fyltUtBehandling.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilFattetVedtak()
         }
-        assertThrows<TilstandException.UgyldigtTilstand> {
+        assertThrows<TilstandException.UgyldigTilstand> {
             fyltUtBehandling.tilVilkaarsvurdert(VilkaarsvurderingUtfall.IKKE_OPPFYLT).tilFattetVedtak()
         }
     }
@@ -193,7 +193,7 @@ internal class BehandlingTest {
             .tilFattetVedtak()
             .tilReturnert()
 
-        assertThrows<TilstandException.UgyldigtTilstand> {
+        assertThrows<TilstandException.UgyldigTilstand> {
             behandling.tilAttestert()
         }
     }
@@ -208,7 +208,7 @@ internal class BehandlingTest {
             .tilFattetVedtak()
             .tilReturnert()
 
-        assertThrows<TilstandException.UgyldigtTilstand> {
+        assertThrows<TilstandException.UgyldigTilstand> {
             behandling.tilIverksatt()
         }
     }

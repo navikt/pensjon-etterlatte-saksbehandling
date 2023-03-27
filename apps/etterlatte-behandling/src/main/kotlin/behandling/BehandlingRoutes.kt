@@ -83,7 +83,7 @@ internal fun Route.behandlingRoutes(
             try {
                 foerstegangsbehandlingService.lagreKommerBarnetTilgode(behandlingsId, kommerBarnetTilgode)
                 call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
-            } catch (e: TilstandException.UgyldigtTilstand) {
+            } catch (e: TilstandException.UgyldigTilstand) {
                 call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
             }
         }
@@ -149,7 +149,7 @@ internal fun Route.behandlingRoutes(
                     status = HttpStatusCode.OK,
                     text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
                 )
-            } catch (e: TilstandException.UgyldigtTilstand) {
+            } catch (e: TilstandException.UgyldigTilstand) {
                 call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
             }
         }

@@ -63,18 +63,29 @@ class ApplicationBuilder {
     }
 
     private val proxyClient: HttpClient by lazy {
-        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.proxy")
+        val clientCredentialsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
         httpClientClientCredentials(
-            azureAppClientId = inntektsConfig.getString("clientId"),
-            azureAppJwk = inntektsConfig.getString("clientJwk"),
-            azureAppWellKnownUrl = inntektsConfig.getString("wellKnownUrl"),
-            azureAppScope = inntektsConfig.getString("outbound")
+            azureAppClientId = clientCredentialsConfig.getString("clientId"),
+            azureAppJwk = clientCredentialsConfig.getString("clientJwk"),
+            azureAppWellKnownUrl = clientCredentialsConfig.getString("wellKnownUrl"),
+            azureAppScope = config.getString("proxy.outbound")
         )
     }
+
+    private val navansattHttpKlient: HttpClient by lazy {
+        val clientCredentialsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
+        httpClientClientCredentials(
+            azureAppClientId = clientCredentialsConfig.getString("clientId"),
+            azureAppJwk = clientCredentialsConfig.getString("clientJwk"),
+            azureAppWellKnownUrl = clientCredentialsConfig.getString("wellKnownUrl"),
+            azureAppScope = config.getString("navansatt.outbound")
+        )
+    }
+
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env.requireEnvValue("ETTERLATTE_PDFGEN_URL"))
     private val brregService = BrregService(BrregKlient(httpClient(), env.requireEnvValue("BRREG_URL")))
     private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
-    private val navansattKlient = NavansattKlient(proxyClient, env.requireEnvValue("NAVANSATT_URL"))
+    private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue("NAVANSATT_URL"))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())

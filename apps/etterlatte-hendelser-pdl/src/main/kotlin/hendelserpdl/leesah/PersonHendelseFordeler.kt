@@ -55,6 +55,7 @@ class PersonHendelseFordeler(
             }
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
+            throw e
         }
     }
 
@@ -78,6 +79,7 @@ class PersonHendelseFordeler(
             }
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
+            throw e
         }
     }
 
@@ -100,6 +102,7 @@ class PersonHendelseFordeler(
             )
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
+            throw e
         }
     }
 
@@ -124,6 +127,7 @@ class PersonHendelseFordeler(
             )
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
+            throw e
         }
     }
 

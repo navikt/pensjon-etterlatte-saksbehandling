@@ -31,7 +31,7 @@ class PdlHendelserTest {
     @Test
     fun `skal lytte paa utflytting-hendelse fra pdl og kalle paa etterlatte-behandling`() {
         val utflyttingHendelse = slot<UtflyttingsHendelse>()
-        every { behandlingService.sendUtflyttingshendelse(capture(utflyttingHendelse)) }
+        every { behandlingService.sendUtflyttingshendelse(capture(utflyttingHendelse)) } returns Unit
         inspector.apply { sendTestMessage(readFile("/utflyttingHendelse.json")) }
 
         assertEquals("70078749472", utflyttingHendelse.captured.fnr)

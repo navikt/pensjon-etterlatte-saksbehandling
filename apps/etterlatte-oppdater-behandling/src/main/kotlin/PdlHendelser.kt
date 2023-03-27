@@ -67,6 +67,7 @@ internal class PdlHendelser(
                 }
             } catch (e: Exception) {
                 logger.error("Feil oppstod under lesing / sending av hendelse til behandling ", e)
+                throw e
             }
         }
 }

@@ -40,7 +40,7 @@ jobs:
 
   deploy-to-prod-gcp:
     name: prod-gcp
-    if: ${{ github.event.inputs.deploy-prod == 'true' }} # Tvinge manuell prod deploy inntil videre
+    if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
     needs: deploy-to-dev-gcp
     runs-on: ubuntu-latest
     steps:

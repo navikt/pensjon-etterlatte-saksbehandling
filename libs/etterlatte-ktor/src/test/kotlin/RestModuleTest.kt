@@ -199,6 +199,20 @@ class RestModuleTest {
     }
 
     @Test
+    fun `skjulAllePotensielleFnr fjerner alle forekomster av nøyaktig 11 tall på rad fra tekst`() {
+        val potensieltTelefonnummer = "004722225555"
+        val tekstMedTilfeldigeTall = "qwerty99991231231231299uiopasdf 2134 arstdhnei 111"
+        val noeyaktigElleveTall = "12345678901"
+        val potensieltLoggentry = "<- 200 GET /api/12111111111/person/12111111111/roller"
+
+        assertEquals(potensieltTelefonnummer, skjulAllePotensielleFnr(potensieltTelefonnummer))
+        assertEquals(tekstMedTilfeldigeTall, skjulAllePotensielleFnr(tekstMedTilfeldigeTall))
+        assertEquals("***********", skjulAllePotensielleFnr(noeyaktigElleveTall))
+        assertTrue(potensieltLoggentry.contains("12111111111"))
+        assertFalse(skjulAllePotensielleFnr(potensieltLoggentry).contains("12111111111"))
+    }
+
+    @Test
     fun `Skal finne deserialiseringsexceptions i nestede exceptions`() {
         assertFalse(Exception("Hello").erDeserialiseringsException())
         assertFalse(Exception("Hello", OutOfMemoryError()).erDeserialiseringsException())

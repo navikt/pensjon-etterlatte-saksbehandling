@@ -3,9 +3,11 @@ package no.nav.etterlatte.vedtaksvurdering
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -121,6 +123,7 @@ class VedtaksvurderingService(
 
         verifiserGyldigBehandlingStatus(behandlingKlient.attester(behandlingId, bruker), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
+        val (behandling, _, _) = hentDataForVedtak(behandlingId, bruker)
 
         val attestertVedtak = repository.attesterVedtak(
             behandlingId,
@@ -142,7 +145,13 @@ class VedtaksvurderingService(
             lagStatistikkMelding(
                 vedtakhendelse = KafkaHendelseType.ATTESTERT,
                 vedtak = attestertVedtak,
-                tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDatetimeUTC()
+                tekniskTid = attestertVedtak.attestasjon.tidspunkt.toLocalDatetimeUTC(),
+                mapOf(
+                    SKAL_SENDE_BREV to when (behandling.revurderingsaarsak) {
+                        RevurderingAarsak.REGULERING -> false
+                        null -> true
+                    }
+                )
             ),
             behandlingId
         )
@@ -358,7 +367,7 @@ class VedtaksvurderingService(
                 EVENT_NAME_KEY to vedtakhendelse.toString(),
                 "vedtak" to vedtak.toDto(),
                 TEKNISK_TID_KEY to tekniskTid
-            )
+            ) + (extraParams ?: emptyMap())
         ).toJson()
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? =

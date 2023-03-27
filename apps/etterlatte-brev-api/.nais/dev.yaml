@@ -77,7 +77,7 @@ spec:
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
       value: api://dev-fss.etterlatte.etterlatte-proxy/.default
     - name: NAVANSATT_OUTBOUND_SCOPE
-      value: api://dev-fss.pensjondeployer.navansatt/.default
+      value: api://dev-fss.teampensjon.navansatt/.default
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL

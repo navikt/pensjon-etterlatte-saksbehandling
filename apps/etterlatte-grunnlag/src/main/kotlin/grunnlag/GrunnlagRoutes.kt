@@ -60,7 +60,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        get("/person/{$FNR_CALL_PARAMETER}/saker}") {
+        get("/person/{$FNR_CALL_PARAMETER}/saker") {
             withFoedselsnummer(fnr, behandlingKlient) {
                 val saksliste = grunnlagService.hentAlleSakerForIdent(it)
 
@@ -71,7 +71,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 }
             }
         }
-        get("/person/{$FNR_CALL_PARAMETER}/roller}") {
+        get("/person/{$FNR_CALL_PARAMETER}/roller") {
             withFoedselsnummer(fnr, behandlingKlient) {
                 val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(it)
 

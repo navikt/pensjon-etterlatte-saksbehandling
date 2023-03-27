@@ -72,7 +72,7 @@ class ApplicationBuilder {
         )
     }
 
-    private val navanssattKlient: HttpClient by lazy {
+    private val navansattHttpKlient: HttpClient by lazy {
         val clientCredentialsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
         httpClientClientCredentials(
             azureAppClientId = clientCredentialsConfig.getString("clientId"),
@@ -85,7 +85,7 @@ class ApplicationBuilder {
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env.requireEnvValue("ETTERLATTE_PDFGEN_URL"))
     private val brregService = BrregService(BrregKlient(httpClient(), env.requireEnvValue("BRREG_URL")))
     private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
-    private val navansattKlient = NavansattKlient(navanssattKlient, env.requireEnvValue("NAVANSATT_URL"))
+    private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue("NAVANSATT_URL"))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())

@@ -28,7 +28,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
-import java.util.*
+import java.util.UUID
 
 fun Application.restModule(
     sikkerLogg: Logger,
@@ -45,7 +45,11 @@ fun Application.restModule(
     install(CallLogging) {
         level = Level.INFO
         filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics")) }
-        format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
+        format { call ->
+            skjulAllePotensielleFnr(
+                "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}"
+            )
+        }
         callIdMdc(CORRELATION_ID)
     }
 
@@ -88,3 +92,10 @@ internal fun Throwable.erDeserialiseringsException(): Boolean {
 
     return this.cause?.erDeserialiseringsException() ?: false
 }
+
+/**
+ * Bruker en regex med negativ lookbehind (?<!) og negativ lookahead (?!) for å matche alle forekomster av
+ * nøyaktig 11 tall på rad ([ikke tall før, 11 tall, ikke tall etter] er tolkningen til regex'en), og bytte de
+ * ut med 11 *. Ser ikke på "gyldigheten" til det som er potensielle fnr, bare fjerner alle slike forekomster.
+ */
+fun skjulAllePotensielleFnr(url: String): String = url.replace(Regex("(?<!\\d)\\d{11}(?!\\d)"), "***********")

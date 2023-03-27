@@ -10,6 +10,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -21,6 +22,7 @@ import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.VurderingMedBegrunnelseJson
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
@@ -86,8 +88,10 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }.apply {
                 assertEquals(HttpStatusCode.NotFound, status)
             }
-            val sak: Sak = client.get("/personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = client.post("/personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.apply {
                 assertEquals(HttpStatusCode.OK, status)
             }.body()

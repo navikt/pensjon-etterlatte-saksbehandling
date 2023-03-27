@@ -13,9 +13,8 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.FNR_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.fnr
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.withBehandlingId
@@ -60,17 +59,19 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        get("/person/{$FNR_CALL_PARAMETER}/saker") {
+        post("/person/saker") {
+            val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
+            val fnr = foedselsnummerDTO.foedselsnummer
             withFoedselsnummer(fnr, behandlingKlient) {
                 val saksliste = grunnlagService.hentAlleSakerForIdent(it)
-
                 call.respond(saksliste)
             }
         }
-        get("/person/{$FNR_CALL_PARAMETER}/roller") {
+        post("/person/roller") {
+            val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
+            val fnr = foedselsnummerDTO.foedselsnummer
             withFoedselsnummer(fnr, behandlingKlient) {
                 val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(it)
-
                 call.respond(personMedSakOgRoller)
             }
         }
@@ -111,10 +112,6 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
         }
     }
 }
-
-internal data class FoedselsnummerDTO(
-    val foedselsnummer: String
-)
 
 private data class SoeskenMedIBeregningDTO(
     val soeskenMedIBeregning: List<SoeskenMedIBeregning>

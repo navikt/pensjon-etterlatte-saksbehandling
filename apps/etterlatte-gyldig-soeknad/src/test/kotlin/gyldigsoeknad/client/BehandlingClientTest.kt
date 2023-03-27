@@ -88,6 +88,6 @@ internal class BehandlingClientTest {
         val skaffSakResultat = behandlingsservice.skaffSak("22", "barnepensjon")
 
         assertEquals(1, skaffSakResultat)
-        assertEquals("http://behandlingsservice/personer/22/saker/barnepensjon", requestList[0].url.toString())
+        assertEquals("http://behandlingsservice/personer/saker/barnepensjon", requestList[0].url.toString())
     }
 }

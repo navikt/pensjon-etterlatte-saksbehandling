@@ -100,6 +100,10 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     }
 }
 
+data class FoedselsnummerDTO(
+    val foedselsnummer: String
+)
+
 interface BehandlingTilgangsSjekk {
     suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean
 }

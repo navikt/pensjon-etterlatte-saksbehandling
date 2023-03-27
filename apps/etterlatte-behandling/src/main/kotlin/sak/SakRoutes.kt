@@ -13,11 +13,9 @@ import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.FNR_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.fnr
 
 internal fun Route.sakRoutes(
     sakService: SakService,
@@ -44,7 +42,7 @@ internal fun Route.sakRoutes(
         call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr, type) })
     }
 
-    route("/api/personer/{$FNR_CALL_PARAMETER}") {
+    route("/api/personer/") {
         post("behandlinger") {
             val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
             val fnr = foedselsnummerDTO.foedselsnummer

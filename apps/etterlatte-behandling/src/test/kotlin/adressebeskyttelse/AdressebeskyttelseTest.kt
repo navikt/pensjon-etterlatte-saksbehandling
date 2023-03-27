@@ -62,8 +62,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(beanFactory)
             }
 
-            val sak: Sak = client.get("personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -147,9 +149,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(beanFactory)
             }
 
-            val sak: Sak = client.get("personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 it.body()
@@ -232,9 +235,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(beanFactory)
             }
 
-            val sak: Sak = client.get("personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 it.body()

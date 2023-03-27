@@ -27,31 +27,31 @@ const LOKAL_API_CONFIG = () => {
   return {
     vilkaarsvurdering: {
       url: 'https://etterlatte-vilkaarsvurdering.dev.intern.nav.no',
-      scope: 'api://f4cf400f-8ef9-406f-baf1-8218f8f7edac/.default',
+      scope: 'api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default',
     },
     behandling: {
       url: 'https://etterlatte-behandling.dev.intern.nav.no',
-      scope: 'api://59967ac8-009c-492e-a618-e5a0f6b3e4e4/.default',
+      scope: 'api://dev-gcp.etterlatte.etterlatte-behandling/.default',
     },
     grunnlag: {
       url: 'https://etterlatte-grunnlag.dev.intern.nav.no',
-      scope: 'api://ce96a301-13db-4409-b277-5b27f464d08b/.default',
+      scope: 'api://dev-gcp.etterlatte.etterlatte-grunnlag/.default',
     },
     brev: {
       url: 'https://etterlatte-brev-api.dev.intern.nav.no',
-      scope: 'api://d6add52a-5807-49cd-a181-76908efee836/.default',
+      scope: 'api://dev-gcp.etterlatte.etterlatte-brev-api/.default',
     },
     beregning: {
       url: 'https://etterlatte-beregning.dev.intern.nav.no',
-      scope: 'api://b07cf335-11fb-4efa-bd46-11f51afd5052/.default',
+      scope: 'api://dev-gcp.etterlatte.etterlatte-beregning/.default',
     },
     vedtak: {
       url: 'https://etterlatte-vedtaksvurdering.dev.intern.nav.no',
-      scope: 'api://069b1b2c-0a06-4cc9-8418-f100b8ff71be/.default',
+      scope: 'api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default',
     },
     trygdetid: {
       url: 'https://etterlatte-trygdetid.dev.intern.nav.no',
-      scope: 'api://8385435e-f3d7-45ec-be59-ebd1c71df735/.default',
+      scope: 'api://dev-gcp.etterlatte.etterlatte-trygdetid/.default',
     },
   }
 }

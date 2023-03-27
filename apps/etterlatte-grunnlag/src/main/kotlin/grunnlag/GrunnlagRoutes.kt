@@ -64,22 +64,14 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             withFoedselsnummer(fnr, behandlingKlient) {
                 val saksliste = grunnlagService.hentAlleSakerForIdent(it)
 
-                if (saksliste.isNotEmpty()) {
-                    call.respond(saksliste)
-                } else {
-                    call.respond(HttpStatusCode.NoContent)
-                }
+                call.respond(saksliste)
             }
         }
         get("/person/{$FNR_CALL_PARAMETER}/roller") {
             withFoedselsnummer(fnr, behandlingKlient) {
                 val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(it)
 
-                if (personMedSakOgRoller.sakerOgRoller.isNotEmpty()) {
-                    call.respond(personMedSakOgRoller)
-                } else {
-                    call.respond(HttpStatusCode.NoContent)
-                }
+                call.respond(personMedSakOgRoller)
             }
         }
 

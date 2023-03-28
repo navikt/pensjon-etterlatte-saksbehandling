@@ -9,18 +9,18 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.libs.common.brev.model.Brev
-import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
-import no.nav.etterlatte.libs.common.brev.model.Mottaker
-import no.nav.etterlatte.libs.common.brev.model.Status
-import no.nav.etterlatte.libs.common.journalpost.Bruker
-import no.nav.etterlatte.libs.common.journalpost.DokumentVariant
-import no.nav.etterlatte.libs.common.journalpost.JournalPostType
-import no.nav.etterlatte.libs.common.journalpost.JournalpostKoder.Companion.BEHANDLINGSTEMA_BP
-import no.nav.etterlatte.libs.common.journalpost.JournalpostKoder.Companion.BREV_KODE
-import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
-import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
-import no.nav.etterlatte.libs.common.journalpost.Sakstype
+import no.nav.etterlatte.brev.journalpost.Bruker
+import no.nav.etterlatte.brev.journalpost.DokumentVariant
+import no.nav.etterlatte.brev.journalpost.JournalPostType
+import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BEHANDLINGSTEMA_BP
+import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
+import no.nav.etterlatte.brev.journalpost.JournalpostRequest
+import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.journalpost.Sakstype
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
-import no.nav.etterlatte.libs.common.journalpost.Sak as JSak
+import no.nav.etterlatte.brev.journalpost.Sak as JSak
 
 internal class DokarkivServiceTest {
 

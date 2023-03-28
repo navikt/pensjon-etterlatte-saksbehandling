@@ -187,7 +187,13 @@ internal class GrunnlagRoutesKtTest {
             application {
                 restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
-            val actualResponse = client.get("api/grunnlag/person/${SOEKER_FOEDSELSNUMMER.value}/roller") {
+            val httpClient = createClient {
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+            val actualResponse = httpClient.post("api/grunnlag/person/roller") {
+                setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                 headers {
                     append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     append(HttpHeaders.Authorization, "Bearer $systemBruker")

@@ -47,7 +47,6 @@ internal class InnsendtSoeknadRiverTest {
         assertEquals("soeknad_innsendt", inspector.message(2).get(EVENT_NAME_KEY).asText())
         assertEquals(sakId, inspector.message(2).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals(id.toString(), inspector.message(2).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
-        assertEquals(false, inspector.message(2).get(GyldigSoeknadVurdert.gyldigInnsenderKey).asBoolean())
 
         assertEquals(3, inspector.size)
     }

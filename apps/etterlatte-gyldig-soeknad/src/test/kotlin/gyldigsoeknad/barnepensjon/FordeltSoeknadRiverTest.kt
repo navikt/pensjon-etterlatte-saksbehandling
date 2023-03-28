@@ -80,7 +80,6 @@ internal class FordeltSoeknadRiverTest {
         assertEquals(SoeknadInnsendt.eventNameBehandlingBehov, inspector.message(3).get(EVENT_NAME_KEY).asText())
         assertEquals(sakId, inspector.message(3).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals(id.toString(), inspector.message(3).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
-        assertEquals(true, inspector.message(3).get(GyldigSoeknadVurdert.gyldigInnsenderKey).asBoolean())
 
         assertEquals(4, inspector.size)
     }

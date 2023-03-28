@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.OPPFYLT
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -81,7 +80,6 @@ internal class InnsendtSoeknadRiver(
                     packet.apply {
                         set(GyldigSoeknadVurdert.sakIdKey, sakId)
                         set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
-                        set(GyldigSoeknadVurdert.gyldigInnsenderKey, gyldighetsVurdering.resultat == OPPFYLT)
                     }.toJson()
                 )
                 logger.info("Vurdert gyldighet av søknad om omstillingsstønad er fullført")

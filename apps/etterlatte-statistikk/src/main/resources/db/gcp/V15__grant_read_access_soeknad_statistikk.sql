@@ -1,0 +1,1 @@
+GRANT SELECT ON soeknad_statistikk TO bigquery_import;

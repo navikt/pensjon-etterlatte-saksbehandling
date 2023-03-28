@@ -1,7 +1,6 @@
 package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType

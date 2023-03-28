@@ -5,7 +5,7 @@ import { formaterStringDato } from '~utils/formattering'
 import DokumentModal from './dokumentModal'
 import Spinner from '~shared/Spinner'
 
-const colonner = ['Journalpost id', 'Tittel', 'Avsender', 'Dato', 'Status', 'Type', '']
+const colonner = ['Journalpost id', 'Tittel', 'Avsender/Mottaker', 'Dato', 'Status', 'Type', '']
 
 export const Dokumentliste = ({
   dokumenter,

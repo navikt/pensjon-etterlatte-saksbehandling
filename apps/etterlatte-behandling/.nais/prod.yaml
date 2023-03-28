@@ -94,6 +94,7 @@ spec:
         - application: etterlatte-vedtaksvurdering
       external:
         - host: navansatt.prod-fss-pub.nais.io
+        - host: norg2.prod-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

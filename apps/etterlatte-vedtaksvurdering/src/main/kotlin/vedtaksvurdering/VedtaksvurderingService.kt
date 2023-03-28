@@ -360,14 +360,14 @@ class VedtaksvurderingService(
         vedtakhendelse: KafkaHendelseType,
         vedtak: Vedtak,
         tekniskTid: LocalDateTime,
-        extraParams: Map<String, Any>? = null
+        extraParams: Map<String, Any> = emptyMap()
     ) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to vedtakhendelse.toString(),
                 "vedtak" to vedtak.toDto(),
                 TEKNISK_TID_KEY to tekniskTid
-            ) + (extraParams ?: emptyMap())
+            ) + extraParams
         ).toJson()
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? =

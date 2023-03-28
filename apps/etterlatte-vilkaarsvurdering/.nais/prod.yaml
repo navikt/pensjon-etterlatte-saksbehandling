@@ -75,6 +75,8 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
+        - application: etterlatte-vilkaarsvurdering-kafka
+
     outbound:
       rules:
         - application: etterlatte-behandling

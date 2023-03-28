@@ -7,8 +7,8 @@ cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.0" }
 jackson-version = "2.14.2"
 jupiter-version = "5.9.2"
 kotlinx-version = "1.6.4"
-ktor2-version = "2.2.2"
-navfelles-token-version = "3.0.2"
+ktor2-version = "2.2.4"
+navfelles-token-version = "3.0.8"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.17.6"
 
@@ -16,7 +16,7 @@ testcontainer-version = "1.17.6"
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.5" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.0.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.16.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.16.1" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -64,11 +64,11 @@ ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2
 ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 
-logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "1.7.30" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.5" }
+logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.7" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.6" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "6.6" }
 
-metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.10.3" }
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.10.5" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 

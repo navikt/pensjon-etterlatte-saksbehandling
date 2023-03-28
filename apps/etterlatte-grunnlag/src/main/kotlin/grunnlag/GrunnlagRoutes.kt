@@ -63,7 +63,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
             val fnr = foedselsnummerDTO.foedselsnummer
             withFoedselsnummer(fnr, behandlingKlient) {
-                val saksliste = grunnlagService.hentAlleSakerForIdent(it)
+                val saksliste = grunnlagService.hentAlleSakerForFnr(it)
                 call.respond(saksliste)
             }
         }

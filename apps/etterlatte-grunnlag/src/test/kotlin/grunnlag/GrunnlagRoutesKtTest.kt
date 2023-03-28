@@ -1,11 +1,17 @@
 package no.nav.etterlatte.grunnlag
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
@@ -18,6 +24,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -166,7 +173,8 @@ internal class GrunnlagRoutesKtTest {
     @Test
     fun `roller tilknyttet person`() {
         val response = PersonMedSakerOgRoller(
-            SOEKER_FOEDSELSNUMMER.value, listOf(
+            SOEKER_FOEDSELSNUMMER.value,
+            listOf(
                 SakOgRolle(1, Saksrolle.SOEKER)
             )
         )
@@ -197,7 +205,7 @@ internal class GrunnlagRoutesKtTest {
     @Test
     fun `saker tilknyttet person`() {
         val response: Set<Long> = setOf(1, 2, 3)
-        every { grunnlagService.hentAlleSakerForIdent(any()) } returns response
+        every { grunnlagService.hentAlleSakerForFnr(any()) } returns response
 
         testApplication {
             environment {
@@ -206,9 +214,15 @@ internal class GrunnlagRoutesKtTest {
             application {
                 restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
-            val actualResponse = client.get("api/grunnlag/person/${SOEKER_FOEDSELSNUMMER.value}/saker") {
+            val httpClient = createClient {
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+            val actualResponse = httpClient.post("api/grunnlag/person/saker") {
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                 headers {
-                    append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     append(HttpHeaders.Authorization, "Bearer $systemBruker")
                 }
             }
@@ -217,7 +231,7 @@ internal class GrunnlagRoutesKtTest {
             Assertions.assertEquals(serialize(response), actualResponse.body<String>())
         }
 
-        verify(exactly = 1) { grunnlagService.hentAlleSakerForIdent(any()) }
+        verify(exactly = 1) { grunnlagService.hentAlleSakerForFnr(any()) }
         coVerify { behandlingKlient wasNot Called }
     }
 }

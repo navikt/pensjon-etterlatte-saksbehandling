@@ -79,13 +79,3 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
     begrunnelse: args.begrunnelse,
   })
 }
-
-interface GrunnlagResponse {
-  response: string
-}
-
-export const slettPeriodeForAvdoedesMedlemskap = async (
-  behandlingsId: string,
-  saksbehandlerPeriodeId: string
-): Promise<ApiResponse<GrunnlagResponse>> =>
-  apiClient.delete<GrunnlagResponse>(`/grunnlag/saksbehandler/periode/${behandlingsId}/${saksbehandlerPeriodeId}`)

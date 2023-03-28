@@ -92,8 +92,8 @@ fun Application.module(beanFactory: BeanFactory) {
                 behandlingIdHarAdressebeskyttelse = { behandlingId ->
                     sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
                 }
-                fnrHarAdressebeskyttelse = { fnr ->
-                    sakServiceAdressebeskyttelse.sjekkOmSakHarAdresseBeskyttelse(fnr)
+                sakIdHarAdressebeskyttelse = { sakId ->
+                    sakServiceAdressebeskyttelse.sjekkOmSakHarAdresseBeskyttelse(sakId)
                 }
             }
         }

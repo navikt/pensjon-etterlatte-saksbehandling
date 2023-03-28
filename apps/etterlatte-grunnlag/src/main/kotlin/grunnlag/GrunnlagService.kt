@@ -45,7 +45,7 @@ interface GrunnlagService {
     )
 
     fun hentSakerOgRoller(fnr: Foedselsnummer): PersonMedSakerOgRoller
-    fun hentAlleSakerForIdent(fnr: Foedselsnummer): Set<Long>
+    fun hentAlleSakerForFnr(fnr: Foedselsnummer): Set<Long>
 }
 
 class RealGrunnlagService(
@@ -117,7 +117,7 @@ class RealGrunnlagService(
             .let { PersonMedSakerOgRoller(fnr.value, it) }
     }
 
-    override fun hentAlleSakerForIdent(fnr: Foedselsnummer): Set<Long> =
+    override fun hentAlleSakerForFnr(fnr: Foedselsnummer): Set<Long> =
         opplysningDao.finnAlleSakerForPerson(fnr)
 
     private fun mapTilRolle(fnr: String, persongalleri: Persongalleri): Saksrolle = when (fnr) {

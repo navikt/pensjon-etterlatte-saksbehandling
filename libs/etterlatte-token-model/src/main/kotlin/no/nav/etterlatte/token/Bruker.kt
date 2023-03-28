@@ -10,7 +10,7 @@ sealed class Bruker {
         private fun erSystembruker(oid: String?, sub: String?) = (oid == sub) && (oid != null)
         fun of(accessToken: String, saksbehandler: String?, oid: String?, sub: String?): Bruker {
             return if (erSystembruker(oid = oid, sub = sub)) {
-                System(oid!!, sub!!)
+                SystemBruker(oid!!, sub!!)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, saksbehandler)
             } else {
@@ -22,7 +22,7 @@ sealed class Bruker {
     }
 }
 
-data class System(val oid: String, val sub: String) : Bruker() {
+data class SystemBruker(val oid: String, val sub: String) : Bruker() {
     override fun ident() = Fagsaksystem.EY.navn
 
     override fun saksbehandlerEnhet(saksbehandlere: Map<String, String>) = Fagsaksystem.EY.enhet

@@ -1,9 +1,16 @@
 package no.nav.etterlatte.dokument
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
@@ -18,6 +25,7 @@ import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -73,8 +81,14 @@ internal class DokumentRouteTest {
                     )
                 }
             }
-
-            val response = client.get("/api/dokumenter/$fnr") {
+            val httpClient = createClient {
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+            val response = httpClient.post("/api/dokumenter") {
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 

@@ -154,11 +154,6 @@ class StatistikkServiceTest {
             kommerBarnetTilgode = null,
             revurderingsaarsak = null
         )
-        coEvery { behandlingKlient.hentSak(sakId) } returns Sak(
-            ident = "12312312312",
-            sakType = SakType.BARNEPENSJON,
-            id = sakId
-        )
 
         val beregningKlient = mockk<BeregningKlient>()
 

@@ -5,13 +5,11 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.sak.Sak
 import java.util.UUID
 
 interface BehandlingKlient {
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
     suspend fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling
-    suspend fun hentSak(sakId: Long): Sak
 }
 
 class BehandlingKlientImpl(
@@ -29,15 +27,6 @@ class BehandlingKlientImpl(
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente behandling med id $behandlingId fra Behandling", e)
-        }
-    }
-
-    override suspend fun hentSak(sakId: Long): Sak {
-        return try {
-            behandlingHttpClient.get("$behandlingUrl/saker/$sakId")
-                .body()
-        } catch (e: Exception) {
-            throw KunneIkkeHenteFraBehandling("Kunne ikke hente sak med id $sakId fra Behandling", e)
         }
     }
 }

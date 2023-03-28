@@ -17,7 +17,7 @@ import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.token.Bruker
-import no.nav.etterlatte.token.System
+import no.nav.etterlatte.token.SystemBruker
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
@@ -46,7 +46,7 @@ class DownstreamResourceClient(
     private suspend fun hentTokenFraAD(
         bruker: Bruker,
         scopes: List<String>
-    ): Result<AccessToken, ThrowableErrorMessage> = if (bruker is System) {
+    ): Result<AccessToken, ThrowableErrorMessage> = if (bruker is SystemBruker) {
         azureAdClient.getAccessTokenForResource(scopes)
     } else {
         azureAdClient

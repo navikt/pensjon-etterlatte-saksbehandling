@@ -19,7 +19,7 @@ internal fun Route.tilgangRoutes(sakService: SakService, sakServiceAdressebeskyt
     route("/$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()
-            val harTilgang = !sakService.sjekkOmSakHarAdresseBeskyttelse(fnr)
+            val harTilgang = !sakService.sjekkOmFnrHarEnSakMedAdresseBeskyttelse(fnr)
             call.respond(harTilgang)
         }
 

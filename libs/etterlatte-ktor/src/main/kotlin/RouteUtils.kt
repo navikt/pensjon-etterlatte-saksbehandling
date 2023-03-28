@@ -8,6 +8,7 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.token.SystemBruker
 import java.util.*
 
 const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
@@ -19,6 +20,7 @@ inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
         "BehandlingsId er ikke i path params"
     )
 
+// Denne skal vi unngå å bruke, skal legges i request body med en post
 inline val PipelineContext<*, ApplicationCall>.fnr: String
     get() = call.parameters[FNR_CALL_PARAMETER] ?: throw NullPointerException(
         "Fnr er ikke i path params"
@@ -82,6 +84,17 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     }
 }
 
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
+    onSuccess: () -> Unit
+) {
+    when (bruker) {
+        is SystemBruker -> {
+            onSuccess()
+        }
+        else -> call.respond(HttpStatusCode.NotFound)
+    }
+}
+
 suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     param: String,
     onSuccess: (value: UUID) -> Unit
@@ -99,6 +112,10 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
         call.respond(HttpStatusCode.BadRequest, "$param var null, forventet en UUID")
     }
 }
+
+data class FoedselsnummerDTO(
+    val foedselsnummer: String
+)
 
 interface BehandlingTilgangsSjekk {
     suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean

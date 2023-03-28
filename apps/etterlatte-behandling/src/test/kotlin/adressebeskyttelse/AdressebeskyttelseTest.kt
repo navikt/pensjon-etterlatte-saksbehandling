@@ -10,11 +10,13 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.behandling.BehandlingsBehov
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -60,8 +62,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(beanFactory)
             }
 
-            val sak: Sak = client.get("personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -136,7 +140,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             environment {
                 config = hoconApplicationConfig
             }
-            val client = createClient {
+            val httpClient = createClient {
                 install(ContentNegotiation) {
                     jackson { registerModule(JavaTimeModule()) }
                 }
@@ -145,16 +149,17 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(beanFactory)
             }
 
-            val sak: Sak = client.get("personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = httpClient.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 it.body()
             }
             Assertions.assertNotNull(sak.id)
 
-            val behandlingId = client.post("/behandlinger/foerstegangsbehandling") {
+            val behandlingId = httpClient.post("/behandlinger/foerstegangsbehandling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -169,19 +174,21 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 UUID.fromString(it.body())
             }
 
-            client.get("/behandlinger/$behandlingId") {
+            httpClient.get("/behandlinger/$behandlingId") {
                 addAuthToken(tokenSaksbehandler)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.get("api/personer/$fnr/behandlinger") {
+            httpClient.post("api/personer/behandlinger") {
                 addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
+            httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(tokenServiceUser)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -193,14 +200,18 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 )
             }
 
-            client.get("api/personer/$fnr/behandlinger") {
+            httpClient.post("api/personer/behandlinger") {
                 addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
             }
 
-            client.get("api/personer/$fnr/behandlinger") {
+            httpClient.post("api/personer/behandlinger") {
                 addAuthToken(systemBruker)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -224,9 +235,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(beanFactory)
             }
 
-            val sak: Sak = client.get("personer/$fnr/saker/${SakType.BARNEPENSJON}") {
+            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 it.body()
@@ -281,6 +293,52 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 it.body()
             }
             Assertions.assertFalse(harIkkeTilgang)
+        }
+    }
+
+    @Test
+    fun `Skal kunne hente saker på fnr før adressebeskyttelse`() {
+        val fnr = Foedselsnummer.of("08071272487").value
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            val httpClient = createClient {
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+            application {
+                module(beanFactory)
+            }
+
+            val sak: Sak = httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.OK, status)
+            }.body()
+
+            httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                addAuthToken(tokenServiceUser)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Adressebeskyttelse(
+                        fnr = fnr,
+                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                        endringstype = Endringstype.OPPRETTET
+                    )
+                )
+            }
+
+            httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.NotFound, status)
+            }
         }
     }
 }

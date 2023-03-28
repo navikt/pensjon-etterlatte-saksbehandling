@@ -2,19 +2,24 @@ package no.nav.etterlatte.sak
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.FNR_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.fnr
+import no.nav.etterlatte.libs.common.kunSystembruker
+import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.libs.common.withFoedselsnummer
 
 internal fun Route.sakRoutes(
     sakService: SakService,
@@ -23,39 +28,53 @@ internal fun Route.sakRoutes(
 ) {
     route("/saker") {
         get {
-            call.respond(Saker(inTransaction { sakService.hentSaker() }))
+            kunSystembruker {
+                call.respond(Saker(inTransaction { sakService.hentSaker() }))
+            }
         }
 
-        get("/{id}") {
+        get("/{$SAKID_CALL_PARAMETER}") {
             val sak = inTransaction {
-                sakService.finnSak(requireNotNull(call.parameters["id"]).toLong())
+                sakService.finnSak(sakId)
             }
             call.respond(sak ?: HttpStatusCode.NotFound)
         }
     }
 
-    get("personer/{$FNR_CALL_PARAMETER}/saker/{type}") {
-        val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
-        call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr, type) })
+    post("personer/saker/{type}") {
+        val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
+        val fnr = foedselsnummerDTO.foedselsnummer
+        withFoedselsnummer(fnr, sakService) {
+            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
+            call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr, type) })
+        }
     }
 
-    route("/api/personer/{$FNR_CALL_PARAMETER}") {
-        get("behandlinger") {
-            val behandlinger = sakService.finnSaker(fnr)
-                .map { sak ->
-                    generellBehandlingService.hentBehandlingerISak(sak.id).map {
-                        it.toBehandlingSammendrag()
-                    }.let { BehandlingListe(it) }
-                }
-            call.respond(behandlinger)
+    route("/api/personer/") {
+        post("behandlinger") {
+            val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
+            val fnr = foedselsnummerDTO.foedselsnummer
+            withFoedselsnummer(fnr, sakService) {
+                val behandlinger = sakService.finnSaker(fnr)
+                    .map { sak ->
+                        generellBehandlingService.hentBehandlingerISak(sak.id).map {
+                            it.toBehandlingSammendrag()
+                        }.let { BehandlingListe(it) }
+                    }
+                call.respond(behandlinger)
+            }
         }
 
-        get("grunnlagsendringshendelser") {
-            call.respond(
-                sakService.finnSaker(fnr).map { sak ->
-                    GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
-                }
-            )
+        post("grunnlagsendringshendelser") {
+            val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
+            val fnr = foedselsnummerDTO.foedselsnummer
+            withFoedselsnummer(fnr, sakService) {
+                call.respond(
+                    sakService.finnSaker(fnr).map { sak ->
+                        GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
+                    }
+                )
+            }
         }
     }
 }

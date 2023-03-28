@@ -1,9 +1,12 @@
 package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.token.Saksbehandler
 
-interface SakService {
+interface SakService : PersonTilgangsSjekk {
     fun hentSaker(): List<Sak>
     fun finnSaker(person: String): List<Sak>
     fun finnEllerOpprettSak(person: String, type: SakType): Sak
@@ -11,7 +14,7 @@ interface SakService {
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
     fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean)
-    fun sjekkOmSakHarAdresseBeskyttelse(fnr: String): Boolean
+    fun sjekkOmFnrHarEnSakMedAdresseBeskyttelse(fnr: String): Boolean
     fun sjekkOmSakHarAdresseBeskyttelse(sakId: Long): Boolean
 }
 
@@ -39,7 +42,7 @@ class RealSakService(private val dao: SakDao) : SakService {
         }
     }
 
-    override fun sjekkOmSakHarAdresseBeskyttelse(fnr: String): Boolean {
+    override fun sjekkOmFnrHarEnSakMedAdresseBeskyttelse(fnr: String): Boolean {
         val sakIder = this.finnSaker(fnr).map { it.id }
         return inTransaction {
             dao.enAvSakeneHarAdresseBeskyttelse(sakIder)
@@ -50,6 +53,10 @@ class RealSakService(private val dao: SakDao) : SakService {
         return inTransaction {
             dao.enAvSakeneHarAdresseBeskyttelse(listOf(sakId))
         }
+    }
+
+    override suspend fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean {
+        return !this.sjekkOmFnrHarEnSakMedAdresseBeskyttelse(foedselsnummer.value)
     }
 
     override fun finnEllerOpprettSak(person: String, type: SakType): Sak {

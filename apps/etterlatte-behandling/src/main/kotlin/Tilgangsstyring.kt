@@ -11,13 +11,13 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.FNR_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.bruker
-import no.nav.etterlatte.token.System
+import no.nav.etterlatte.token.SystemBruker
 
 class PluginConfiguration {
     var behandlingIdHarAdressebeskyttelse: (behandlingId: String) -> Boolean = { false }
-    var fnrHarAdressebeskyttelse: (fnr: String) -> Boolean = { false }
+    var sakIdHarAdressebeskyttelse: (sakId: String) -> Boolean = { false }
 }
 
 private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
@@ -43,7 +43,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
 ) {
     on(AdressebeskyttelseHook) { call ->
         val bruker = call.bruker
-        if (bruker is System) {
+        if (bruker is SystemBruker) {
             return@on
         }
         if (call.request.uri.contains(TILGANG_ROUTE_PATH)) {
@@ -58,13 +58,14 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
             return@on
         }
 
-        val fnr = call.parameters[FNR_CALL_PARAMETER]
-        if (!fnr.isNullOrEmpty()) {
-            if (pluginConfig.fnrHarAdressebeskyttelse(fnr)) {
+        val sakId = call.parameters[SAKID_CALL_PARAMETER]
+        if (!sakId.isNullOrEmpty()) {
+            if (pluginConfig.sakIdHarAdressebeskyttelse(sakId)) {
                 call.respond(HttpStatusCode.NotFound)
             }
             return@on
         }
+
         return@on
     }
 }

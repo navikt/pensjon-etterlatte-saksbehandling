@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":libs:etterlatte-sporingslogg"))
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:etterlatte-jobs"))
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercore)
@@ -44,4 +45,5 @@ dependencies {
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
+    testImplementation(project(":libs:etterlatte-funksjonsbrytere"))
 }

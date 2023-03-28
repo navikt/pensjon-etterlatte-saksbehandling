@@ -11,6 +11,8 @@ import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
@@ -119,6 +121,14 @@ class LocalAppBeanFactory(
 
     override fun norg2HttpClient(): Norg2Klient {
         return Norg2KlientTest()
+    }
+
+    override fun featureToggleService(): FeatureToggleService {
+        return FeatureToggleService.initialiser(
+            mapOf(
+                FeatureToggleServiceProperties.ENABLED.navn to "false"
+            )
+        )
     }
 
     override fun leaderElection() = LeaderElection(

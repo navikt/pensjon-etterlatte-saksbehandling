@@ -5,6 +5,8 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.klienter.PdlKlient
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
@@ -12,6 +14,12 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
+
+enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
+    OpprettMedEnhetId("pensjon-etterlatte.opprett-sak-med-enhet-id");
+
+    override fun key() = key
+}
 
 interface SakService : PersonTilgangsSjekk {
     fun hentSaker(): List<Sak>
@@ -25,7 +33,12 @@ interface SakService : PersonTilgangsSjekk {
     fun sjekkOmSakHarAdresseBeskyttelse(sakId: Long): Boolean
 }
 
-class RealSakService(private val dao: SakDao, private val pdlKlient: PdlKlient, private val norg2Klient: Norg2Klient) :
+class RealSakService(
+    private val dao: SakDao,
+    private val pdlKlient: PdlKlient,
+    private val norg2Klient: Norg2Klient,
+    private val featureToggleService: FeatureToggleService
+) :
     SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -78,19 +91,23 @@ class RealSakService(private val dao: SakDao, private val pdlKlient: PdlKlient, 
     }
 
     private fun finnEnhetForPersonOgTema(person: String, tema: String): ArbeidsFordelingEnhet? {
-        val tilknytning = pdlKlient.hentGeografiskTilknytning(person)
-        val geografiskTilknytning = tilknytning.geografiskTilknytning()
+        if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
+            val tilknytning = pdlKlient.hentGeografiskTilknytning(person)
+            val geografiskTilknytning = tilknytning.geografiskTilknytning()
 
-        return when {
-            tilknytning.ukjent -> ArbeidsFordelingEnhet(Enheter.DEFAULT.navn, Enheter.DEFAULT.enhetNr)
-            geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
-                Foedselsnummer.of(person),
-                tema
-            ).also {
-                logger.warn(it.message)
+            return when {
+                tilknytning.ukjent -> ArbeidsFordelingEnhet(Enheter.DEFAULT.navn, Enheter.DEFAULT.enhetNr)
+                geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
+                    Foedselsnummer.of(person),
+                    tema
+                ).also {
+                    logger.warn(it.message)
+                }
+
+                else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
             }
-
-            else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
+        } else {
+            return null
         }
     }
 

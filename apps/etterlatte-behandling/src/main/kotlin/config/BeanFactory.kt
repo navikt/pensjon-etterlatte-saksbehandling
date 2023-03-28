@@ -28,6 +28,8 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -92,6 +94,7 @@ interface BeanFactory {
     fun sporingslogg(): Sporingslogg
     fun getSaksbehandlerGroupIdsByKey(): Map<String, String?>
     fun norg2HttpClient(): Norg2Klient
+    fun featureToggleService(): FeatureToggleService
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -135,7 +138,12 @@ abstract class CommonFactory : BeanFactory {
         return revurderingFactory
     }
 
-    override fun sakService(): SakService = RealSakService(sakDao(), pdlKlient(), norg2HttpClient())
+    override fun sakService(): SakService = RealSakService(
+        sakDao(),
+        pdlKlient(),
+        norg2HttpClient(),
+        featureToggleService()
+    )
 
     override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
         SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()))
@@ -292,5 +300,18 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
         }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
         return Norg2KlientImpl(client, env.getValue("NORG2_URL"))
+    }
+
+    override fun featureToggleService(): FeatureToggleService {
+        return FeatureToggleService.initialiser(
+            mapOf(
+                FeatureToggleServiceProperties.ENABLED.navn to config.getString("funksjonsbrytere.enabled"),
+                FeatureToggleServiceProperties.APPLICATIONNAME.navn to config.getString(
+                    "funksjonsbrytere.unleash.applicationName"
+                ),
+                FeatureToggleServiceProperties.URI.navn to config.getString("funksjonsbrytere.unleash.uri"),
+                FeatureToggleServiceProperties.CLUSTER.navn to config.getString("funksjonsbrytere.unleash.cluster")
+            )
+        )
     }
 }

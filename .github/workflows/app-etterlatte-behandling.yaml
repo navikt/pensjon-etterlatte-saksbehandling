@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-behandling/**
       - libs/common/**
+      - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
@@ -32,6 +33,7 @@ on:
     paths:
       - apps/etterlatte-behandling/**
       - libs/common/**
+      - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**

@@ -8,26 +8,32 @@ import io.getunleash.util.UnleashConfig
 import org.slf4j.LoggerFactory
 import java.net.URI
 
-fun initialiser(env: Map<String, String>): FeatureToggleService {
-    val enabled = env.getOrDefault(Properties.ENABLED.navn, false) as Boolean
-    return if (enabled) {
-        UnleashFeatureToggleService(
-            Unleash(
-                enabled = true,
-                uri = URI(env[Properties.URI.navn] ?: throw IllegalArgumentException("Unleash-URI er ikke definert")),
-                cluster = env[Properties.CLUSTER.navn]
-                    ?: throw IllegalArgumentException("Unleash-cluster er ikke definert"),
-                applicationName = env[Properties.APPLICATIONNAME.navn]
-                    ?: throw IllegalArgumentException("Unleash-applikasjonsnavn er ikke definert")
-            )
-        )
-    } else {
-        DummyFeatureToggleService()
-    }
-}
-
 interface FeatureToggleService {
     fun isEnabled(toggleId: FeatureToggle, defaultValue: Boolean): Boolean
+
+    companion object {
+        fun initialiser(env: Map<String, String>): FeatureToggleService {
+            val enabled = env.getOrDefault(FeatureToggleServiceProperties.ENABLED.navn, "false").toBoolean()
+            return if (enabled) {
+                UnleashFeatureToggleService(
+                    Unleash(
+                        enabled = true,
+                        uri = URI(
+                            env[FeatureToggleServiceProperties.URI.navn] ?: throw IllegalArgumentException(
+                                "Unleash-URI er ikke definert"
+                            )
+                        ),
+                        cluster = env[FeatureToggleServiceProperties.CLUSTER.navn]
+                            ?: throw IllegalArgumentException("Unleash-cluster er ikke definert"),
+                        applicationName = env[FeatureToggleServiceProperties.APPLICATIONNAME.navn]
+                            ?: throw IllegalArgumentException("Unleash-applikasjonsnavn er ikke definert")
+                    )
+                )
+            } else {
+                DummyFeatureToggleService()
+            }
+        }
+    }
 }
 
 class UnleashFeatureToggleService(private val unleash: Unleash) : FeatureToggleService {

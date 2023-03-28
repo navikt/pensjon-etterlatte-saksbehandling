@@ -403,32 +403,32 @@
   resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-2.8.3.tgz#ed18b605a91f0162757bad1fbcc028bb2db7a975"
   integrity sha512-s0MCa2k4g/3DbsN90QY4YpKEyt+lQFCVPDcNsLBEnnEWHYHByeNbXaRHU6N963TuYNkvEfpKYzSGr0JlYOV8Pg==
 
-"@navikt/ds-css-internal@^2.7.2":
-  version "2.7.2"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-2.7.2.tgz#cd8f0ebcb2c237be349ba5f95db01da18e28ba9e"
-  integrity sha512-pODUABGA39V1PtRse6DHwKMdw5r+fONet8FkoTE+NcOZqKrS6nvm8OKkxjG2HuMLANBqAD9KV9512SDDAm+hgg==
+"@navikt/ds-css-internal@^2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-2.8.3.tgz#fe6aa35cb70beb99f9519d1c678ea5d481d3547a"
+  integrity sha512-ZdSc4WkhMHY0FpyCwfaBuHoGFxmcXRCXhyb4XKbQpSD2OaCoitsXARBvMvTz05/HWvNJxWVoDf73k4c02GaUfw==
 
-"@navikt/ds-css@^2.7.2":
-  version "2.7.2"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.7.2.tgz#314ac2c3bd03cd307572be7e6a649313fc71da18"
-  integrity sha512-IcaL2R9Dh8LkR4utewtrH535CPDRy4Zfm94KcGowpuBEPDY67Q5lazuTaJTZvsu5MJbqJGTJbac+i7Cw/nPDPQ==
+"@navikt/ds-css@^2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.8.3.tgz#0059eafb004b35e79d84107e24d0c3239e370c3c"
+  integrity sha512-B8xGzajBHH6MDp9x4To97ec8OKt7Mmx9O7jyoTIL0PJOZppa2rv3S8rtDQOqwrFMdXzb6VHzDimpY1TBZ68yAw==
 
-"@navikt/ds-icons@^2.7.2", "@navikt/ds-icons@^2.8.3":
+"@navikt/ds-icons@^2.8.3":
   version "2.8.3"
   resolved "https://registry.yarnpkg.com/@navikt/ds-icons/-/ds-icons-2.8.3.tgz#7666b1478afd0699221d78c252074d459f1a2388"
   integrity sha512-/ps/U8EkNNDSxbsOYCPM0WqD24sjME035qd9vCR8DN3lZ3PCCtdeIA7Mfl5PLBMBy6kVdPOXeU8YFJSa/IYFJg==
 
-"@navikt/ds-react-internal@^2.7.2":
-  version "2.7.2"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react-internal/-/ds-react-internal-2.7.2.tgz#a9237f0f968004cc662d705a13a6ae4818b3492e"
-  integrity sha512-VRkTfz8bSpD3/u0Y3bkcboHpDR3UTnpI4G+LqTHtUBQWblobwg7OtqJyZCfDem6LzWajEwRwE5s95nz6clFYmA==
+"@navikt/ds-react-internal@^2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react-internal/-/ds-react-internal-2.8.3.tgz#6aa6a72ad9bb0d17930f2a3b22118985a1683620"
+  integrity sha512-CHdv9+qnSNoQ9Oy7nV5pEp+Usf7FNUUhtPTsDBRm00DNewMHI/3KhKhUYmtlfzRXbTi/Q7mnLEgbwiRM+ebwZA==
   dependencies:
-    "@navikt/ds-icons" "^2.7.2"
-    "@navikt/ds-react" "^2.7.2"
+    "@navikt/ds-icons" "^2.8.3"
+    "@navikt/ds-react" "^2.8.3"
     clsx "^1.1.1"
     copy-to-clipboard "^3.3.1"
 
-"@navikt/ds-react@^2.7.2", "@navikt/ds-react@^2.8.3":
+"@navikt/ds-react@^2.8.3":
   version "2.8.3"
   resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-2.8.3.tgz#38dcfdbbc62133654b52076497c7764d5e0ed813"
   integrity sha512-NL56Zo5Va/Djw5B+ImYErBGlHihzkPeOYmZFGB5A/JFQxfLJpu/sjYlCaXgCj12XMIFu9ARkj5Dz81JCAm2UCA==
@@ -3152,10 +3152,10 @@ react-fast-compare@^3.0.1:
   resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-3.2.0.tgz#641a9da81b6a6320f270e89724fb45a0b39e43bb"
   integrity sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA==
 
-react-hook-form@^7.43.2:
-  version "7.43.2"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.43.2.tgz#d8ff71956dc3de258dce19d4b1c7e1c6a0188e67"
-  integrity sha512-NvD3Oe2Y9hhqo2R4I4iJigDzSLpdMnzUpNMxlnzTbdiT7NT3BW0GxWCzEtwPudZMUPbZhNcSy1EcGAygyhDORg==
+react-hook-form@^7.43.7:
+  version "7.43.7"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.43.7.tgz#88b8bc257635d706955e19c05254fb492fa77ad1"
+  integrity sha512-38yehQkQQ5uufaPKFScs7jhLE8n3+LG9H/BZfFAiBL2+7piDmw/BrdNJV4irzMaPnWZGhmGLHVICHXNVGIuXZg==
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -33,11 +34,9 @@ internal class JournalfoerVedtaksbrev(
             validate { it.requireKey("vedtak.sak.ident") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
-                it.rejectValues(
-                    "vedtak.behandling.type",
-                    listOf(BehandlingType.MANUELT_OPPHOER.name, BehandlingType.OMREGNING.name)
-                )
+                it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
             }
+            validate { it.rejectValue(SKAL_SENDE_BREV, false) }
         }.register(this)
     }
 

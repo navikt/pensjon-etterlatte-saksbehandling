@@ -18,7 +18,6 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.regulering.ReguleringFactory
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
@@ -68,9 +67,9 @@ class RealGenerellBehandlingServiceTest {
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlinger() } returns listOf(
-                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING),
                 foerstegangsbehandling(sakId = 2),
-                revurdering(sakId = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sakId = 3, revurderingAarsak = RevurderingAarsak.REGULERING),
                 foerstegangsbehandling(sakId = 4)
             )
         }
@@ -81,7 +80,6 @@ class RealGenerellBehandlingServiceTest {
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
             RevurderingFactory(behandlingerMock, hendelserMock),
-            ReguleringFactory(behandlingerMock, hendelserMock),
             hendelserMock,
             manueltOpphoerMock,
             mockk(),
@@ -113,7 +111,6 @@ class RealGenerellBehandlingServiceTest {
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
             RevurderingFactory(behandlingerMock, hendelserMock),
-            ReguleringFactory(behandlingerMock, hendelserMock),
             hendelserMock,
             manueltOpphoerMock,
             mockk(),
@@ -129,7 +126,7 @@ class RealGenerellBehandlingServiceTest {
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(1) } returns listOf(
-                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING),
                 foerstegangsbehandling(sakId = 1)
             )
         }
@@ -140,7 +137,6 @@ class RealGenerellBehandlingServiceTest {
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
             RevurderingFactory(behandlingerMock, hendelserMock),
-            ReguleringFactory(behandlingerMock, hendelserMock),
             hendelserMock,
             manueltOpphoerMock,
             mockk(),
@@ -361,7 +357,7 @@ class RealGenerellBehandlingServiceTest {
         val behandling2 = revurdering(
             sakId = 1,
             status = BehandlingStatus.BEREGNET,
-            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+            revurderingAarsak = RevurderingAarsak.REGULERING
         )
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(any()) } returns listOf(behandling1, behandling2)
@@ -412,10 +408,6 @@ class RealGenerellBehandlingServiceTest {
             hendelser = hendelseDao ?: mockk()
         ),
         revurderingFactory = RevurderingFactory(
-            behandlinger = behandlinger ?: mockk(),
-            hendelser = hendelseDao ?: mockk()
-        ),
-        reguleringFactory = ReguleringFactory(
             behandlinger = behandlinger ?: mockk(),
             hendelser = hendelseDao ?: mockk()
         ),

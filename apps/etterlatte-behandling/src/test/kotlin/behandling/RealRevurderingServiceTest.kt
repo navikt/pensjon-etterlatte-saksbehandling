@@ -53,10 +53,10 @@ class RealRevurderingServiceTest {
             every { hentBehandling(id) } returns revurdering(
                 id = id,
                 sakId = 1,
-                revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                revurderingAarsak = RevurderingAarsak.REGULERING
             )
         }
-        val hendelserMock = mockk<HendelseDao>() {
+        val hendelserMock = mockk<HendelseDao> {
             every { behandlingOpprettet(any()) } returns Unit
         }
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
@@ -77,11 +77,11 @@ class RealRevurderingServiceTest {
     fun `skal hente alle revurderinger`() {
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerAvType(type = BehandlingType.REVURDERING) } returns listOf(
-                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                revurdering(sakId = 2, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                revurdering(sakId = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                revurdering(sakId = 4, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                revurdering(sakId = 5, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
+                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING),
+                revurdering(sakId = 2, revurderingAarsak = RevurderingAarsak.REGULERING),
+                revurdering(sakId = 3, revurderingAarsak = RevurderingAarsak.REGULERING),
+                revurdering(sakId = 4, revurderingAarsak = RevurderingAarsak.REGULERING),
+                revurdering(sakId = 5, revurderingAarsak = RevurderingAarsak.REGULERING)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
@@ -106,17 +106,17 @@ class RealRevurderingServiceTest {
         val forrigeBehandling = foerstegangsbehandling(sakId = 1)
         val doedsHendelse = Doedshendelse("12345678911", LocalDate.of(2022, 1, 1), Endringstype.OPPRETTET)
         val revurdering =
-            revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
+            revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING)
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { opprettBehandling(capture(behandlingOpprettes)) } returns Unit
             every { hentBehandling(capture(behandlingHentes)) } returns revurdering
         }
-        val hendelserMock = mockk<HendelseDao>() {
+        val hendelserMock = mockk<HendelseDao> {
             every { behandlingOpprettet(any()) } returns Unit
         }
 
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>() {
+        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>> {
             coEvery { send(capture(hendelse)) } returns Unit
         }
         val sut = RealRevurderingService(
@@ -129,7 +129,7 @@ class RealRevurderingServiceTest {
             sut.startRevurdering(
                 forrigeBehandling,
                 doedsHendelse,
-                RevurderingAarsak.SOEKER_DOD
+                RevurderingAarsak.REGULERING
             )
 
         assertAll(

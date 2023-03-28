@@ -12,6 +12,7 @@ const val SOEKNAD_ID_KEY = "soeknad_id"
 const val SAK_TYPE_KEY = "sak_type"
 const val FEILENDE_KRITERIER_KEY = "feilende_kriterier"
 const val GYLDIG_FOR_BEHANDLING_KEY = "gyldig_for_behandling"
+const val SKAL_SENDE_BREV = "skal_sende_brev"
 
 fun River.eventName(eventName: String) {
     validate { it.demandValue(EVENT_NAME_KEY, eventName) }

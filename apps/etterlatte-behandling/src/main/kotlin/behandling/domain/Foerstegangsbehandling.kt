@@ -78,9 +78,7 @@ data class Foerstegangsbehandling(
             BehandlingStatus.BEREGNET,
             BehandlingStatus.RETURNERT
         )
-    ) {
-        endreTilStatus(BehandlingStatus.BEREGNET)
-    }
+    ) { endreTilStatus(BehandlingStatus.BEREGNET) }
 
     override fun tilFattetVedtak(): Foerstegangsbehandling {
         if (!erFyltUt()) {
@@ -88,18 +86,7 @@ data class Foerstegangsbehandling(
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisTilstandEr(
-            listOf(
-                BehandlingStatus.BEREGNET,
-                BehandlingStatus.VILKAARSVURDERT,
-                BehandlingStatus.RETURNERT
-            )
-        ) {
-            require(vilkaarUtfall != null)
-            if (status == BehandlingStatus.VILKAARSVURDERT) {
-                require(vilkaarUtfall == VilkaarsvurderingUtfall.IKKE_OPPFYLT)
-            }
-
+        return hvisTilstandEr(listOf(BehandlingStatus.BEREGNET, BehandlingStatus.RETURNERT)) {
             endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
         }
     }

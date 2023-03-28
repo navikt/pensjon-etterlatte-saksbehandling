@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -126,6 +127,24 @@ internal class JournalfoerVedtaksbrevTest {
                 "vedtak" to vedtak
             )
         )
+
+        testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
+
+        verify { vedtaksbrevService wasNot Called }
+    }
+
+    @Test
+    fun `Attestering av sak med brevutsending false skal ikke sende ut brev`() {
+        val vedtak = opprettVedtak(BehandlingType.REVURDERING)
+
+        val melding =
+            JsonMessage.newMessage(
+                mapOf(
+                    EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
+                    "vedtak" to vedtak,
+                    SKAL_SENDE_BREV to false
+                )
+            )
 
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 

@@ -1,14 +1,15 @@
 package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.behandling.GenerellBehandlingService
-import no.nav.etterlatte.behandling.regulering.ReguleringFactory
+import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import java.time.LocalDate
 import java.util.*
 
 class OmregningService(
-    private val reguleringFactory: ReguleringFactory,
+    private val revurderingFactory: RevurderingFactory,
     private val behandlingService: GenerellBehandlingService
 ) {
     fun opprettOmregning(
@@ -19,12 +20,19 @@ class OmregningService(
         val forrigeBehandling = behandlingService.hentSenestIverksatteBehandling(sakId)
             ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
         val behandlingId = inTransaction {
-            reguleringFactory.opprettRegulering(
-                sakId = sakId,
-                forrigeBehandling = forrigeBehandling,
-                fradato = fradato,
-                prosesstype = prosesstype
-            )
+            when (prosesstype) {
+                Prosesstype.AUTOMATISK -> revurderingFactory.opprettAutomatiskRevurdering(
+                    sakId = sakId,
+                    forrigeBehandling = forrigeBehandling,
+                    fradato = fradato,
+                    revurderingAarsak = RevurderingAarsak.REGULERING
+                )
+                Prosesstype.MANUELL -> revurderingFactory.opprettRevurdering(
+                    sakId = sakId,
+                    forrigeBehandling = forrigeBehandling,
+                    revurderingAarsak = RevurderingAarsak.REGULERING
+                )
+            }
         }.lagretBehandling.id
 
         return Pair(behandlingId, forrigeBehandling.id)

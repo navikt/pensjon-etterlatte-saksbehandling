@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
@@ -165,7 +166,8 @@ internal class OppgaveDaoTest {
 
     private fun lagRegulering(prosesstype: Prosesstype, fnr: String, sakId: Long): OpprettBehandling {
         return OpprettBehandling(
-            type = BehandlingType.OMREGNING,
+            type = BehandlingType.REVURDERING,
+            revurderingsAarsak = RevurderingAarsak.REGULERING,
             sakId = sakId,
             status = BehandlingStatus.OPPRETTET,
             persongalleri = Persongalleri(
@@ -179,7 +181,6 @@ internal class OppgaveDaoTest {
             kommerBarnetTilgode = null,
             vilkaarUtfall = null,
             virkningstidspunkt = null,
-            revurderingsAarsak = null,
             opphoerAarsaker = listOf(),
             fritekstAarsak = null,
             prosesstype = prosesstype

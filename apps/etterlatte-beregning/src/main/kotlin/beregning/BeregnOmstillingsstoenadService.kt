@@ -45,7 +45,7 @@ class BeregnOmstillingsstoenadService(
         logger.info("Beregner omstillingsstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.OMREGNING ->
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
                 beregnOmstillingsstoenad(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {

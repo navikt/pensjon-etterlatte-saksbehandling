@@ -9,7 +9,6 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
-import no.nav.etterlatte.behandling.domain.Regulering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -156,16 +155,18 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
-        val stmt = connection().prepareStatement(
-            """
+        with(connection()) {
+            val stmt = prepareStatement(
+                """
                 UPDATE behandling
                 SET status = '${BehandlingStatus.VILKAARSVURDERT}'
-                WHERE status not in (${
-                BehandlingStatus.skalIkkeOmregnesVedGRegulering().joinToString(", ") { "'$it'" }
-            }) RETURNING id, sak_id
-            """.trimIndent()
-        )
-        return SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
+                WHERE status <> ALL (?) RETURNING id, sak_id
+                """.trimIndent()
+            )
+            stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
+
+            return SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
+        }
     }
 
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(
@@ -198,18 +199,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
-        kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
-        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) }
-    )
-
-    private fun asRegulering(rs: ResultSet) = Regulering(
-        id = rs.getObject("id") as UUID,
-        sak = mapSak(rs),
-        behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
-        sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
-        persongalleri = hentPersongalleri(rs),
-        status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
         vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
@@ -327,7 +316,6 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun ResultSet.tilBehandling(key: String?) = when (key) {
         BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
         BehandlingType.REVURDERING.name -> asRevurdering(this)
-        BehandlingType.OMREGNING.name -> asRegulering(this)
         BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
         else -> null
     }

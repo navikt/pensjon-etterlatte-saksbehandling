@@ -1,9 +1,10 @@
 package no.nav.etterlatte.behandling.regulering
 
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import java.time.LocalDate
 import java.util.*
 
 class RevurderingFactory(private val behandlinger: BehandlingDao, private val hendelser: HendelseDao) {
@@ -12,14 +13,29 @@ class RevurderingFactory(private val behandlinger: BehandlingDao, private val he
 
     fun opprettRevurdering(
         sakId: Long,
-        persongalleri: Persongalleri,
+        forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak
     ): RevurderingAggregat =
-        RevurderingAggregat.opprettRevurdering(
-            sakId,
-            persongalleri,
-            revurderingAarsak,
-            behandlinger,
-            hendelser
+        RevurderingAggregat.opprettManuellRevurdering(
+            sak = sakId,
+            forrigeBehandling = forrigeBehandling,
+            revurderingAarsak = revurderingAarsak,
+            behandlinger = behandlinger,
+            hendelser = hendelser
+        )
+
+    fun opprettAutomatiskRevurdering(
+        sakId: Long,
+        forrigeBehandling: Behandling,
+        fradato: LocalDate,
+        revurderingAarsak: RevurderingAarsak
+    ): RevurderingAggregat =
+        RevurderingAggregat.opprettAutomatiskRevurdering(
+            sak = sakId,
+            forrigeBehandling = forrigeBehandling,
+            fraDato = fradato,
+            behandlinger = behandlinger,
+            hendelser = hendelser,
+            revurderingAarsak = revurderingAarsak
         )
 }

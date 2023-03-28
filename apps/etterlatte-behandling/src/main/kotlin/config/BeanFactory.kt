@@ -20,7 +20,6 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.OmregningService
-import no.nav.etterlatte.behandling.regulering.ReguleringFactory
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
@@ -48,7 +47,7 @@ import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import java.util.Timer
+import java.util.*
 import javax.sql.DataSource
 
 interface BeanFactory {
@@ -72,7 +71,6 @@ interface BeanFactory {
     fun behandlingHendelser(): BehandlingsHendelser
     fun foerstegangsbehandlingFactory(): FoerstegangsbehandlingFactory
     fun revurderingFactory(): RevurderingFactory
-    fun reguleringFactory(): ReguleringFactory
     fun pdlHttpClient(): HttpClient
     fun pdlKlient(): PdlKlient
     fun leaderElection(): LeaderElection
@@ -107,10 +105,6 @@ abstract class CommonFactory : BeanFactory {
         RevurderingFactory(behandlingDao(), hendelseDao())
     }
 
-    private val reguleringFactory: ReguleringFactory by lazy {
-        ReguleringFactory(behandlingDao(), hendelseDao())
-    }
-
     private val oppgaveService: OppgaveService by lazy {
         OppgaveServiceImpl(oppgaveDao())
     }
@@ -129,10 +123,6 @@ abstract class CommonFactory : BeanFactory {
 
     override fun revurderingFactory(): RevurderingFactory {
         return revurderingFactory
-    }
-
-    override fun reguleringFactory(): ReguleringFactory {
-        return reguleringFactory
     }
 
     override fun sakService(): SakService = RealSakService(sakDao())
@@ -164,7 +154,6 @@ abstract class CommonFactory : BeanFactory {
             behandlingHendelser().nyHendelse,
             foerstegangsbehandlingFactory(),
             revurderingFactory(),
-            reguleringFactory(),
             hendelseDao(),
             manueltOpphoerService(),
             vedtakKlient(),
@@ -213,7 +202,7 @@ abstract class CommonFactory : BeanFactory {
     override fun sporingslogg(): Sporingslogg = Sporingslogg()
 
     override fun omregningService(): OmregningService =
-        OmregningService(reguleringFactory = reguleringFactory(), behandlingService = generellBehandlingService())
+        OmregningService(behandlingService = generellBehandlingService(), revurderingFactory = revurderingFactory())
 }
 
 class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory() {

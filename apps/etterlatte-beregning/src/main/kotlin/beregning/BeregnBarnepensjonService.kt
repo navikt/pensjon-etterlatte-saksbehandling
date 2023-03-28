@@ -48,7 +48,7 @@ class BeregnBarnepensjonService(
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.OMREGNING ->
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
                 beregnBarnepensjon(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {
@@ -59,8 +59,8 @@ class BeregnBarnepensjonService(
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.OPPFYLT ->
                         beregnBarnepensjon(behandling.id, grunnlag, beregningsgrunnlag, virkningstidspunkt)
-                    VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
-                        opphoer(behandling.id, grunnlag, virkningstidspunkt)
+
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
                 }
             }
 

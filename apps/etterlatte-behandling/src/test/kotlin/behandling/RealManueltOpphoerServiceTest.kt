@@ -65,7 +65,7 @@ internal class RealManueltOpphoerServiceTest {
                 sakId = sakId
             )
         }
-        val hendelserMock = mockk<HendelseDao>() {
+        val hendelserMock = mockk<HendelseDao> {
             every { behandlingOpprettet(any()) } returns Unit
         }
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
@@ -115,10 +115,10 @@ internal class RealManueltOpphoerServiceTest {
                 )
             }
         }
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>() {
+        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>> {
             coEvery { send(capture(hendelse_slot)) } returns Unit
         }
-        val hendelserMock = mockk<HendelseDao>() {
+        val hendelserMock = mockk<HendelseDao> {
             every { behandlingOpprettet(any()) } returns Unit
         }
         val sut = RealManueltOpphoerService(
@@ -182,7 +182,7 @@ internal class RealManueltOpphoerServiceTest {
                         Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken),
                         "begrunnelse"
                     ),
-                    revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                    revurderingAarsak = RevurderingAarsak.REGULERING
                 ),
                 revurdering(
                     sakId = sakId,
@@ -193,7 +193,7 @@ internal class RealManueltOpphoerServiceTest {
                         Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken),
                         "begrunnelse"
                     ),
-                    revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                    revurderingAarsak = RevurderingAarsak.REGULERING
                 )
             )
             every { opprettBehandling(capture(opprettetManueltOpphoerSlot)) } just runs

@@ -45,7 +45,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: andstor/file-existence-action@v2
+        id: check_files
+        with:
+          files: "apps/${{ github.workflow }}/.nais/prod.yaml"
       - uses: nais/deploy/actions/deploy@v1
+        if: steps.check_files.outputs.files_exists == 'true'
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp

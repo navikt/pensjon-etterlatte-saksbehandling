@@ -62,7 +62,7 @@ spec:
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEHANDLING_URL
-      value: http://etterlatte-behandling/
+      value: http://etterlatte-behandling
   accessPolicy:
     outbound:
       rules:

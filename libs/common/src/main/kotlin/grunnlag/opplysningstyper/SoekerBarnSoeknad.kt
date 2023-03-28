@@ -1,9 +1,9 @@
 package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
+import no.nav.etterlatte.libs.common.innsendtsoeknad.OmsorgspersonType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OmsorgspersonType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 
 data class SoekerBarnSoeknad(
     val type: PersonType,

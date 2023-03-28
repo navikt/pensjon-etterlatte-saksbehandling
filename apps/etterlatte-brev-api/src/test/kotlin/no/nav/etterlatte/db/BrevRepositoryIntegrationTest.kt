@@ -1,10 +1,10 @@
 package no.nav.etterlatte.db
 
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.libs.common.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.database.DataSourceBuilder

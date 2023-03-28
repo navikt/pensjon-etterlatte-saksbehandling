@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 
 data class Utbetalingsinformasjon(
     val bankkontoType: BankkontoType?,

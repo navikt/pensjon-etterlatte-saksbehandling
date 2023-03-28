@@ -5,15 +5,15 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.UtbetalingsInformasjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.BetingetOpplysning
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.EnumSvar
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BetingetOpplysning
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.EnumSvar
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.UtbetalingsInformasjon
 import java.util.*
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold as UtenlandsoppholdOpplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld

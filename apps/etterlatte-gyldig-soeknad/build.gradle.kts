@@ -5,7 +5,8 @@ plugins {
 
 dependencies {
     implementation(project(":libs:common"))
-    implementation("no.nav.etterlatte:common:2022.09.27-14.09.182856a1fda5")
+    implementation(Etterlatte.Common)
+
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-ktor"))
 

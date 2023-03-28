@@ -10,12 +10,12 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerOmstillingSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
 import org.junit.jupiter.api.Assertions

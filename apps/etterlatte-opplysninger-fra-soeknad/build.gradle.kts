@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":libs:common"))
+    implementation(Etterlatte.Common)
 
     testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)

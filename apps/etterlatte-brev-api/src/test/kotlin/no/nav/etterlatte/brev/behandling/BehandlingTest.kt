@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
 import grunnlag.innsenderSoeknad
-import no.nav.etterlatte.libs.common.brev.model.Spraak
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype

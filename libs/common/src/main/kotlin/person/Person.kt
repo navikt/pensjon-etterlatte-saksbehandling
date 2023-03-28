@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.OppholdUtlandType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period

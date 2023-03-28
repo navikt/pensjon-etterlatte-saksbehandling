@@ -6,10 +6,10 @@ import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.IkkeGyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.UgyldigHendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException

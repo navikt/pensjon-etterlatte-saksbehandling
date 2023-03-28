@@ -12,10 +12,10 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerOmstillingS
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 
 internal object OmstillingsstoenadUthenter {

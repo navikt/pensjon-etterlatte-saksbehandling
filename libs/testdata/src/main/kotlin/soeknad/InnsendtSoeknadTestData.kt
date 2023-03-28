@@ -1,24 +1,24 @@
 package soeknad
 
+import no.nav.etterlatte.libs.common.innsendtsoeknad.AndreYtelser
+import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoede
+import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoedeType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.Kontaktinfo
+import no.nav.etterlatte.libs.common.innsendtsoeknad.SivilstatusType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
+import no.nav.etterlatte.libs.common.innsendtsoeknad.UtbetalingsInformasjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.BetingetOpplysning
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.DatoSvar
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.EnumSvar
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.FritekstSvar
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Gjenlevende
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Innsender
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Opplysning
+import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.AndreYtelser
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BetingetOpplysning
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.DatoSvar
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.EnumSvar
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.ForholdTilAvdoede
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.ForholdTilAvdoedeType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.FritekstSvar
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Gjenlevende
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Innsender
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Kontaktinfo
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Opplysning
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SivilstatusType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.UtbetalingsInformasjon
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.omstillingsstoenad.Omstillingsstoenad
 import java.time.LocalDate
 
 object InnsendtSoeknadTestData {
@@ -81,13 +81,11 @@ object InnsendtSoeknadTestData {
                     svar = "Et sted 31",
                     spoersmaal = "adresse"
                 ),
-                bostedsAdresse = BetingetOpplysning(
-                    svar = EnumSvar(
-                        verdi = JaNeiVetIkke.NEI,
-                        innhold = "Nei"
+                bostedsAdresse = Opplysning(
+                    svar = FritekstSvar(
+                        innhold = "bostedadresse"
                     ),
-                    spoersmaal = "Bor søker i et annet land enn Norge?",
-                    opplysning = null
+                    spoersmaal = "bostedadresse"
                 ),
                 kontaktinfo = Kontaktinfo(
                     telefonnummer = Opplysning(

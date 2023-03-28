@@ -19,8 +19,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
+import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*

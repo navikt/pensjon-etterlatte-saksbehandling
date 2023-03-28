@@ -3,6 +3,13 @@ plugins {
 }
 
 repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
+        credentials {
+            username = "token"
+            password = System.getenv("GITHUB_TOKEN")
+        }
+    }
     mavenCentral()
 }
 
@@ -12,7 +19,7 @@ dependencies {
 
     api(libs.bundles.jackson)
 
-    implementation("no.nav.etterlatte:common:2022.09.27-14.09.182856a1fda5")
+    implementation(Etterlatte.Common)
 
     compileOnly(libs.logging.slf4japi)
     testImplementation(libs.logging.slf4japi)

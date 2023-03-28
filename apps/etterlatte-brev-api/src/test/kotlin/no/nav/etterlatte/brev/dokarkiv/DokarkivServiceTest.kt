@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.journalpost.Sakstype
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.brev.model.Spraak
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator

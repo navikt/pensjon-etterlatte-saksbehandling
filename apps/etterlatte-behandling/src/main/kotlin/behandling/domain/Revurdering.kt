@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.* //ktlint-disable
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -13,7 +14,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class Revurdering(
     override val id: UUID,
@@ -37,47 +38,77 @@ data class Revurdering(
         }
 
     override fun tilOpprettet(): Revurdering {
-        return hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }.copy(vilkaarUtfall = null)
+        if (prosesstype == Prosesstype.AUTOMATISK) {
+            return endreTilStatus(OPPRETTET).copy(vilkaarUtfall = null)
+        }
+
+        return hvisRedigerbar { endreTilStatus(OPPRETTET) }.copy(vilkaarUtfall = null)
     }
 
     override fun tilVilkaarsvurdert(utfall: VilkaarsvurderingUtfall?): Revurdering {
+        if (prosesstype == Prosesstype.AUTOMATISK) {
+            return endreTilStatus(VILKAARSVURDERT).copy(vilkaarUtfall = utfall)
+        }
+
         if (!erFyltUt()) {
             logger.info("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert")
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }.copy(vilkaarUtfall = utfall)
+        return hvisRedigerbar { endreTilStatus(VILKAARSVURDERT) }.copy(vilkaarUtfall = utfall)
     }
 
-    override fun tilBeregnet(): Revurdering = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.VILKAARSVURDERT,
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.RETURNERT
-        )
-    ) { endreTilStatus(BehandlingStatus.BEREGNET) }
+    override fun tilBeregnet(): Revurdering {
+        if (prosesstype == Prosesstype.AUTOMATISK) {
+            return endreTilStatus(BEREGNET)
+        }
+
+        return hvisTilstandEr(listOf(VILKAARSVURDERT, BEREGNET, RETURNERT)) { endreTilStatus(BEREGNET) }
+    }
 
     override fun tilFattetVedtak(): Revurdering {
+        if (prosesstype == Prosesstype.AUTOMATISK) {
+            return endreTilStatus(FATTET_VEDTAK)
+        }
+
         if (!erFyltUt()) {
             logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisTilstandEr(listOf(BehandlingStatus.BEREGNET, BehandlingStatus.RETURNERT)) {
-            endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
+        return hvisTilstandEr(listOf(BEREGNET, RETURNERT)) {
+            endreTilStatus(FATTET_VEDTAK)
         }
     }
 
-    override fun tilAttestert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        endreTilStatus(BehandlingStatus.ATTESTERT)
+    override fun tilAttestert(): Revurdering {
+        if (prosesstype == Prosesstype.AUTOMATISK) {
+            return endreTilStatus(ATTESTERT)
+        }
+
+        return hvisTilstandEr(FATTET_VEDTAK) {
+            endreTilStatus(ATTESTERT)
+        }
     }
 
-    override fun tilReturnert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        endreTilStatus(BehandlingStatus.RETURNERT)
+    override fun tilReturnert(): Revurdering {
+        if (prosesstype == Prosesstype.AUTOMATISK) {
+            return endreTilStatus(RETURNERT)
+        }
+
+        return hvisTilstandEr(FATTET_VEDTAK) {
+            endreTilStatus(RETURNERT)
+        }
     }
 
-    override fun tilIverksatt() = hvisTilstandEr(BehandlingStatus.ATTESTERT) {
-        endreTilStatus(BehandlingStatus.IVERKSATT)
+    override fun tilIverksatt(): Revurdering {
+        if (prosesstype == Prosesstype.AUTOMATISK) {
+            return endreTilStatus(IVERKSATT)
+        }
+
+        return hvisTilstandEr(ATTESTERT) {
+            endreTilStatus(IVERKSATT)
+        }
     }
 
     private fun endreTilStatus(status: BehandlingStatus) =

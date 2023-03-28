@@ -13,7 +13,7 @@ import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 import no.nav.etterlatte.brev.model.MottakerRequest as BrevMottaker
 
 class BrevService(

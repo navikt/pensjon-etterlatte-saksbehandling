@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
-import java.util.*
+import java.util.UUID
 
 typealias BrevID = Long
 

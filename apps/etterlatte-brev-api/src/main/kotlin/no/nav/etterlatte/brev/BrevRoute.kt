@@ -21,7 +21,8 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+
+import no.nav.etterlatte.libs.common.brev.model.Spraak
 import no.nav.etterlatte.libs.common.withBehandlingId
 import org.slf4j.LoggerFactory
 

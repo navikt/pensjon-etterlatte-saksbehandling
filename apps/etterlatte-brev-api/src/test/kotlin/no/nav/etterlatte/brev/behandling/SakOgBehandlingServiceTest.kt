@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
+import grunnlag.innsenderSoeknad
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -14,14 +15,12 @@ import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.brev.model.Spraak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -167,12 +166,7 @@ internal class SakOgBehandlingServiceTest {
         opplysningsmapSakOverrides = mapOf(
             Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
             Opplysningstype.INNSENDER_SOEKNAD_V1 to opprettOpplysning(
-                InnsenderSoeknad(
-                    PersonType.INNSENDER,
-                    "Innsend",
-                    "Innsender",
-                    FNR
-                ).toJsonNode()
+                innsenderSoeknad(FNR.value).toJsonNode()
             )
         )
     ).hentOpplysningsgrunnlag()

@@ -1,13 +1,11 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
+import grunnlag.innsenderSoeknad
+import no.nav.etterlatte.libs.common.brev.model.Spraak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -93,12 +91,7 @@ internal class BehandlingTest {
         opplysningsmapSakOverrides = mapOf(
             Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
             Opplysningstype.INNSENDER_SOEKNAD_V1 to opprettOpplysning(
-                InnsenderSoeknad(
-                    PersonType.INNSENDER,
-                    "Innsend",
-                    "Innsender",
-                    Folkeregisteridentifikator.of("11057523044")
-                ).toJsonNode()
+                innsenderSoeknad("11057523044").toJsonNode()
             )
         )
     ).hentOpplysningsgrunnlag()

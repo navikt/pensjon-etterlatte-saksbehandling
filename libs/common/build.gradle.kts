@@ -12,6 +12,8 @@ dependencies {
 
     api(libs.bundles.jackson)
 
+    implementation("no.nav.etterlatte:common:2022.09.27-14.09.182856a1fda5")
+
     compileOnly(libs.logging.slf4japi)
     testImplementation(libs.logging.slf4japi)
     testImplementation(libs.logging.logbackclassic)

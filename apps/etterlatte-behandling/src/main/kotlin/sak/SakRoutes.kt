@@ -8,7 +8,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.KunSystembruker
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
@@ -18,8 +17,9 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.withFoedselsnummerBehandling
+import no.nav.etterlatte.libs.common.withFoedselsnummer
 
 internal fun Route.sakRoutes(
     sakService: SakService,
@@ -28,7 +28,7 @@ internal fun Route.sakRoutes(
 ) {
     route("/saker") {
         get {
-            KunSystembruker {
+            kunSystembruker {
                 call.respond(Saker(inTransaction { sakService.hentSaker() }))
             }
         }
@@ -44,10 +44,7 @@ internal fun Route.sakRoutes(
     post("personer/saker/{type}") {
         val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
         val fnr = foedselsnummerDTO.foedselsnummer
-        withFoedselsnummerBehandling(
-            fnr,
-            { fnrInbound -> sakService.sjekkOmFnrPaaSakHarAdresseBeskyttelse(fnrInbound) }
-        ) {
+        withFoedselsnummer(fnr, sakService) {
             val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
             call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr, type) })
         }
@@ -57,12 +54,7 @@ internal fun Route.sakRoutes(
         post("behandlinger") {
             val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
             val fnr = foedselsnummerDTO.foedselsnummer
-            withFoedselsnummerBehandling(
-                fnr,
-                sjekkOmFnrPaaSakHarAdresseBeskyttelse = {
-                    sakService.sjekkOmFnrPaaSakHarAdresseBeskyttelse(fnr)
-                }
-            ) {
+            withFoedselsnummer(fnr, sakService) {
                 val behandlinger = sakService.finnSaker(fnr)
                     .map { sak ->
                         generellBehandlingService.hentBehandlingerISak(sak.id).map {
@@ -76,12 +68,7 @@ internal fun Route.sakRoutes(
         post("grunnlagsendringshendelser") {
             val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
             val fnr = foedselsnummerDTO.foedselsnummer
-            withFoedselsnummerBehandling(
-                fnr,
-                sjekkOmFnrPaaSakHarAdresseBeskyttelse = {
-                    sakService.sjekkOmFnrPaaSakHarAdresseBeskyttelse(fnr)
-                }
-            ) {
+            withFoedselsnummer(fnr, sakService) {
                 call.respond(
                     sakService.finnSaker(fnr).map { sak ->
                         GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))

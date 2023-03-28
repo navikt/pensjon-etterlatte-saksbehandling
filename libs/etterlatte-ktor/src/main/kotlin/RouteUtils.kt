@@ -8,6 +8,7 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.token.SystemBruker
 import java.util.*
 
 const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
@@ -80,6 +81,17 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
             }
         }
         else -> onSuccess(foedselsnummer)
+    }
+}
+
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(
+    onSuccess: () -> Unit
+) {
+    when (bruker) {
+        is SystemBruker -> {
+            onSuccess()
+        }
+        else -> call.respond(HttpStatusCode.NotFound)
     }
 }
 

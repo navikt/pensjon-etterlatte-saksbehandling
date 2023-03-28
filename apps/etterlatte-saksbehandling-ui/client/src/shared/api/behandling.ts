@@ -8,11 +8,11 @@ import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
-  return apiClient.get(`/personer/${fnr}/behandlinger`)
+  return apiClient.post(`/personer/behandlinger`, { foedselsnummer: fnr })
 }
 
 export const hentGrunnlagsendringshendelserForPerson = async (fnr: string): Promise<ApiResponse<any>> => {
-  return apiClient.get(`/personer/${fnr}/grunnlagsendringshendelser`)
+  return apiClient.post(`/personer/grunnlagsendringshendelser`, { foedselsnummer: fnr })
 }
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {

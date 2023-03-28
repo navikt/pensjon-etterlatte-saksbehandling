@@ -3,11 +3,6 @@ package no.nav.etterlatte
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
-import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
@@ -39,8 +34,6 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.klienter.PdlKlient
 import no.nav.etterlatte.klienter.PdlKlientImpl
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -289,17 +282,7 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
     }
 
     override fun norg2HttpClient(): Norg2Klient {
-        val client = HttpClient(OkHttp) {
-            expectSuccess = true
-            install(ContentNegotiation) {
-                jackson()
-            }
-            defaultRequest {
-                header(X_CORRELATION_ID, getCorrelationId())
-            }
-        }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
-
-        return Norg2KlientImpl(client, env.getValue("NORG2_URL"))
+        return Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL"))
     }
 
     override fun featureToggleService(): FeatureToggleService {

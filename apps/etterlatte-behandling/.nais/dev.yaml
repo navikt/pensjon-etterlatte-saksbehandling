@@ -82,6 +82,8 @@ spec:
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
         - application: etterlatte-vedtaksvurdering
+      external:
+        - host: navansatt.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

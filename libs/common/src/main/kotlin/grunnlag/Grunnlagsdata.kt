@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
@@ -59,7 +60,7 @@ fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentPeriodisertOpplysnin
 fun Grunnlagsdata<JsonNode>.hentDeltbostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(DELTBOSTEDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentKontaktadresse() = this.hentKonstantOpplysning<List<Adresse>>(KONTAKTADRESSE)
 fun Grunnlagsdata<JsonNode>.hentOppholdsadresse() = this.hentKonstantOpplysning<List<Adresse>>(OPPHOLDSADRESSE)
-fun Grunnlagsdata<JsonNode>.hentSivilstatus() = this.hentKonstantOpplysning<Sivilstatus>(SIVILSTATUS)
+fun Grunnlagsdata<JsonNode>.hentSivilstatus() = this.hentKonstantOpplysning<List<Sivilstand>>(SIVILSTATUS)
 fun Grunnlagsdata<JsonNode>.hentStatsborgerskap() = this.hentKonstantOpplysning<String>(STATSBORGERSKAP)
 fun Grunnlagsdata<JsonNode>.hentUtland() = this.hentKonstantOpplysning<Utland>(UTLAND)
 fun Grunnlagsdata<JsonNode>.hentFamilierelasjon() = this.hentKonstantOpplysning<FamilieRelasjon>(FAMILIERELASJON)

@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
@@ -23,7 +23,7 @@ data class PersonDTO(
     var deltBostedsadresse: List<OpplysningDTO<Adresse>>?,
     var kontaktadresse: List<OpplysningDTO<Adresse>>?,
     var oppholdsadresse: List<OpplysningDTO<Adresse>>?,
-    val sivilstatus: OpplysningDTO<Sivilstatus>?,
+    val sivilstatus: List<OpplysningDTO<Sivilstand>>?,
     val statsborgerskap: OpplysningDTO<String>?,
     var utland: OpplysningDTO<Utland>?,
     var familieRelasjon: OpplysningDTO<FamilieRelasjon>?,
@@ -43,7 +43,7 @@ data class PersonDTO(
         deltBostedsadresse = deltBostedsadresse?.map { it.verdi },
         kontaktadresse = kontaktadresse?.map { it.verdi },
         oppholdsadresse = oppholdsadresse?.map { it.verdi },
-        sivilstatus = sivilstatus?.verdi,
+        sivilstatus = sivilstatus?.map { it.verdi },
         statsborgerskap = statsborgerskap?.verdi,
         utland = utland?.verdi,
         familieRelasjon = familieRelasjon?.verdi,

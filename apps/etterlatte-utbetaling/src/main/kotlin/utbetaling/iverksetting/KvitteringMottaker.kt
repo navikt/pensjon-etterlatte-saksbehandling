@@ -8,11 +8,11 @@ import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT
-import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.sakId

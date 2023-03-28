@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.distribusjon
+package no.nav.etterlatte.brev.distribusjon
 
 import no.nav.etterlatte.libs.common.person.Adresse
 

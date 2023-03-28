@@ -19,10 +19,10 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
-import no.nav.etterlatte.libs.common.brev.model.Brev
-import no.nav.etterlatte.libs.common.brev.model.Mottaker
-import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule

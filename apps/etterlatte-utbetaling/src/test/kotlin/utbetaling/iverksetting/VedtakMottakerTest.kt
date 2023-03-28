@@ -4,9 +4,9 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT
-import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
+import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus

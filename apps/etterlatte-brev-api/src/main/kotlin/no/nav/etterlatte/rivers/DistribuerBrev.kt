@@ -1,12 +1,12 @@
 package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.brev.distribusjon.DistribusjonService
-import no.nav.etterlatte.libs.common.brev.model.Adresse
-import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
-import no.nav.etterlatte.libs.common.distribusjon.BestillingsID
-import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
-import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
+import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
+import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
+import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY

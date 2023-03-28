@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.journalpost
+package no.nav.etterlatte.brev.journalpost
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 

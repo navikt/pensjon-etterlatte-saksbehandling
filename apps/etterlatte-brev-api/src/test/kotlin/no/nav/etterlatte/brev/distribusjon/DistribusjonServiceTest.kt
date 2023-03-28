@@ -8,11 +8,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.libs.common.brev.model.Status
-import no.nav.etterlatte.libs.common.distribusjon.DistribuerJournalpostRequest
-import no.nav.etterlatte.libs.common.distribusjon.DistribuerJournalpostResponse
-import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
-import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals

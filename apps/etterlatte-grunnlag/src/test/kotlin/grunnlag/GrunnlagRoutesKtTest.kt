@@ -166,7 +166,8 @@ internal class GrunnlagRoutesKtTest {
     @Test
     fun `roller tilknyttet person`() {
         val response = PersonMedSakerOgRoller(
-            SOEKER_FOEDSELSNUMMER.value, listOf(
+            SOEKER_FOEDSELSNUMMER.value,
+            listOf(
                 SakOgRolle(1, Saksrolle.SOEKER)
             )
         )

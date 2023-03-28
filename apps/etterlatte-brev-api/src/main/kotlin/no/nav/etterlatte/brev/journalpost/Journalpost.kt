@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.journalpost
+package no.nav.etterlatte.brev.journalpost
 
 data class JournalpostInfo(
     val tittel: String,

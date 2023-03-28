@@ -5,7 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.Avsender
-import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.MottakerRequest
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
 
 class AdresseService(
@@ -13,9 +13,9 @@ class AdresseService(
     private val navansattKlient: NavansattKlient,
     private val regoppslagKlient: RegoppslagKlient
 ) {
-    suspend fun hentMottakerAdresse(ident: String): Mottaker =
+    suspend fun hentMottakerAdresse(ident: String): MottakerRequest =
         regoppslagKlient.hentMottakerAdresse(ident).let {
-            Mottaker.fraRegoppslag(it)
+            MottakerRequest.fraRegoppslag(it)
         }
 
     suspend fun hentAvsenderEnhet(navEnhetNr: String, saksbehandlerNavn: String): Avsender {

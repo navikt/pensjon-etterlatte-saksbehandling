@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.dokument
 
-import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
+import no.nav.etterlatte.brev.journalpost.BrukerIdType
 
 data class JournalpostResponse(
     val data: DokumentoversiktBruker? = null,

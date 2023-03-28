@@ -4,17 +4,17 @@ import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.AnnetBrevRequest
 import no.nav.etterlatte.brev.model.Attestant
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.libs.common.brev.model.Brev
-import no.nav.etterlatte.libs.common.brev.model.BrevID
-import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
-import no.nav.etterlatte.libs.common.brev.model.Mottaker
-import no.nav.etterlatte.libs.common.brev.model.Status
-import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import org.slf4j.LoggerFactory
 import java.util.UUID
-import no.nav.etterlatte.brev.model.Mottaker as BrevMottaker
+import no.nav.etterlatte.brev.model.MottakerRequest as BrevMottaker
 
 class BrevService(
     private val db: BrevRepository,

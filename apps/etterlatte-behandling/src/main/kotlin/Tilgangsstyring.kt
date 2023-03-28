@@ -57,7 +57,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
             }
             return@on
         }
-        // TODO: har vi en test på dette?
+
         val sakId = call.parameters[SAKID_CALL_PARAMETER]
         if (!sakId.isNullOrEmpty()) {
             if (pluginConfig.sakIdHarAdressebeskyttelse(sakId)) {

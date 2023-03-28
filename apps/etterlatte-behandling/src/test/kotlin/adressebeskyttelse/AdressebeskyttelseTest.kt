@@ -295,4 +295,50 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             Assertions.assertFalse(harIkkeTilgang)
         }
     }
+
+    @Test
+    fun `Skal kunne hente saker på fnr før adressebeskyttelse`() {
+        val fnr = Foedselsnummer.of("08071272487").value
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            val httpClient = createClient {
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+            application {
+                module(beanFactory)
+            }
+
+            val sak: Sak = httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.OK, status)
+            }.body()
+
+            httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                addAuthToken(tokenServiceUser)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Adressebeskyttelse(
+                        fnr = fnr,
+                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                        endringstype = Endringstype.OPPRETTET
+                    )
+                )
+            }
+
+            httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.NotFound, status)
+            }
+        }
+    }
 }

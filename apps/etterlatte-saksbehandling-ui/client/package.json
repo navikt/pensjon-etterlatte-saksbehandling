@@ -10,10 +10,10 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@navikt/ds-css": "^2.7.2",
-    "@navikt/ds-css-internal": "^2.7.2",
+    "@navikt/ds-css": "^2.8.3",
+    "@navikt/ds-css-internal": "^2.8.3",
     "@navikt/ds-react": "^2.8.3",
-    "@navikt/ds-react-internal": "^2.7.2",
+    "@navikt/ds-react-internal": "^2.8.3",
     "@navikt/navspa": "^6.0.1",
     "@reduxjs/toolkit": "^1.9.3",
     "bowser": "^2.11.0",
@@ -22,7 +22,7 @@
     "react": "^18.2.0",
     "react-datepicker": "^4.8.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.43.2",
+    "react-hook-form": "^7.43.7",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.9.0",
     "react-table": "^7.8.0",

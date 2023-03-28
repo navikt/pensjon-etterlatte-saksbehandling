@@ -84,7 +84,7 @@ fun lagEnkelopplysningerFraPDL(
         leggTilOpplysning(FOEDSELSDATO, personDTO.foedselsdato)
         leggTilOpplysning(FOEDELAND, personDTO.foedeland)
         leggTilOpplysning(DOEDSDATO, personDTO.doedsdato)
-        leggTilOpplysning(SIVILSTATUS, personDTO.sivilstatus)
+        leggTilOpplysninger(SIVILSTATUS, personDTO.sivilstatus)
         leggTilOpplysning(STATSBORGERSKAP, personDTO.statsborgerskap)
         leggTilOpplysning(UTLAND, personDTO.utland)
         leggTilOpplysning(FAMILIERELASJON, personDTO.familieRelasjon)

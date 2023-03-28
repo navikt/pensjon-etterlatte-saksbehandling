@@ -34,7 +34,6 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
-import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Utland
@@ -71,8 +70,10 @@ fun Grunnlagsdata<JsonNode>.hentVergemaalellerfremtidsfullmakt() =
 fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<PersonRolle>(PERSONROLLE)
 fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() =
     this.hentPeriodisertOpplysning<UtenlandsoppholdOpplysninger>(UTENLANDSOPPHOLD)
+
 fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() =
     this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
+
 fun Grunnlagsdata<JsonNode>.hentSoeskenjustering() =
     this.hentKonstantOpplysning<Beregningsgrunnlag>(SOESKEN_I_BEREGNINGEN)
 

@@ -19,7 +19,7 @@ inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
         "BehandlingsId er ikke i path params"
     )
 
-// Denne skal vi unngå å bruke
+// Denne skal vi unngå å bruke, skal legges i request body med en post
 inline val PipelineContext<*, ApplicationCall>.fnr: String
     get() = call.parameters[FNR_CALL_PARAMETER] ?: throw NullPointerException(
         "Fnr er ikke i path params"

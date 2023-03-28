@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
@@ -46,6 +47,13 @@ object PersonMapper {
             kontaktadresse = hentPerson.kontaktadresse?.let { AdresseMapper.mapKontaktadresse(ppsKlient, it) },
             statsborgerskap = statsborgerskap?.land,
             sivilstatus = sivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
+            sivilstand = hentPerson.sivilstand?.map {
+                Sivilstand(
+                    sivilstatus = it.type.let { type -> Sivilstatus.valueOf(type.name) },
+                    relatertVedSiviltilstand = it.relatertVedSivilstand?.let { Foedselsnummer.of(it) },
+                    gyldigFraOgMed = it.gyldigFraOgMed
+                )
+            },
             utland = UtlandMapper.mapUtland(hentPerson),
             familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle),
             avdoedesBarn = if (personRolle == PersonRolle.AVDOED) {

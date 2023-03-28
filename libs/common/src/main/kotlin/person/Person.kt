@@ -30,6 +30,7 @@ data class Person(
     var kontaktadresse: List<Adresse>?,
     var oppholdsadresse: List<Adresse>?,
     val sivilstatus: Sivilstatus?,
+    val sivilstand: List<Sivilstand>?,
     val statsborgerskap: String?,
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?,
@@ -83,6 +84,12 @@ enum class Sivilstatus {
     SKILT_PARTNER,
     GJENLEVENDE_PARTNER
 }
+
+data class Sivilstand(
+    val sivilstatus: Sivilstatus?,
+    val relatertVedSiviltilstand: Foedselsnummer?,
+    val gyldigFraOgMed: LocalDate?
+)
 
 data class Utland(
     val innflyttingTilNorge: List<InnflyttingTilNorge>?,

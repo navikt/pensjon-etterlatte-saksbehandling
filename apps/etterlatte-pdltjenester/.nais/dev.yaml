@@ -39,7 +39,7 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: pdl-api.dev-fss-pub.nais.io
+        - host: "pdl-api.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: etterlatte-fordeler

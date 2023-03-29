@@ -10,7 +10,7 @@ enum class FellesFeatureToggle(private val key: String) : FeatureToggle {
     override fun key() = key
 }
 
-enum class Properties(val navn: String) {
+enum class FeatureToggleServiceProperties(val navn: String) {
     ENABLED("funksjonsbrytere.enabled"),
     URI("funksjonsbrytere.uri"),
     CLUSTER("NAIS_CLUSTER_NAME"),

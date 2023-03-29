@@ -8,8 +8,6 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
-  ingresses:
-    - "https://etterlatte-vilkaarsvurdering.intern.nav.no"
   liveness:
     initialDelay: 5
     path: /health/isalive

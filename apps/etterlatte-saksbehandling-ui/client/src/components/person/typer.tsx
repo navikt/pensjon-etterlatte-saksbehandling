@@ -38,6 +38,7 @@ export enum AarsaksTyper {
   SOEKER_DOD = 'SOEKER_DOD',
   MANUELT_OPPHOER = 'MANUELT_OPPHOER',
   SOEKNAD = 'SOEKNAD',
+  REGULERING = 'REGULERING',
 }
 
 export type GrunnlagsendringsType = SamsvarMellomGrunnlagOgPdl['type']
@@ -91,11 +92,11 @@ export interface AnsvarligeForeldreSamsvar {
 
 export type SamsvarMellomGrunnlagOgPdl = DoedsdatoSamsvar | UtlandSamsvar | BarnSamsvar | AnsvarligeForeldreSamsvar
 
-export type GrunnlagsendringStatus = typeof GRUNNLAGSENDRING_STATUS[number]
+export type GrunnlagsendringStatus = (typeof GRUNNLAGSENDRING_STATUS)[number]
 
 const SAKSROLLER = ['SOEKER', 'INNSENDER', 'SOESKEN', 'AVDOED', 'GJENLEVENDE', 'UKJENT'] as const
 
-export type Saksrolle = typeof SAKSROLLER[number]
+export type Saksrolle = (typeof SAKSROLLER)[number]
 
 export interface GrunnlagsendringsListe {
   hendelser: Grunnlagsendringshendelse[]

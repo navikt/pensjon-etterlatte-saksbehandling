@@ -87,6 +87,8 @@ function mapAarsak(aarsak: AarsaksTyper) {
       return 'Søker er død'
     case AarsaksTyper.SOEKNAD:
       return 'Søknad'
+    case AarsaksTyper.REGULERING:
+      return 'Automatisk regulering'
   }
 }
 

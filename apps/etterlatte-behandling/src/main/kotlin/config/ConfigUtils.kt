@@ -13,7 +13,7 @@ fun samle(config: Config, env: Map<String, String>): Map<String, String> {
     return conf + env
 }
 
-fun unwrap(set: MutableSet<Pair<String, String>>, pair: Pair<String, Any?>): Set<Pair<String, String>> {
+private fun unwrap(set: MutableSet<Pair<String, String>>, pair: Pair<String, Any?>): Set<Pair<String, String>> {
     if (pair.second is Map<*, *>) {
         (pair.second as Map<*, *>).entries.forEach {
             set.addAll(
@@ -25,8 +25,19 @@ fun unwrap(set: MutableSet<Pair<String, String>>, pair: Pair<String, Any?>): Set
         }
         return set
     }
+    if (pair.second is List<*>) {
+        (pair.second as List<*>).forEach {
+            set.addAll(
+                unwrap(
+                    set,
+                    Pair(pair.first, it)
+                )
+            )
+        }
+        return set
+    }
     if (pair.second is String) {
-        set.add(Pair(pair.first, pair.second.toString()))
+        return mutableSetOf(Pair(pair.first, pair.second.toString()))
     }
     return set
 }

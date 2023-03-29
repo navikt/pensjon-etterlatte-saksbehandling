@@ -9,28 +9,28 @@ fun samle(config: Config, env: Map<String, String>): Map<String, String> {
         .map { unwrap(mutableSetOf(), Node(it.first, it.second.unwrapped())) }
         .filter { it.isNotEmpty() }
         .flatten()
-        .associate { it.key to it.value!!.toString() }
+        .associate { it.key to it.value.toString() }
     return conf + env
 }
 
-private fun unwrap(set: MutableSet<Node>, pair: Node): Set<Node> = when (pair.value) {
-    is Map<*, *> -> set.addAllAndReturn(unwrapMap(pair.value, pair))
-    is Collection<*> -> set.addAllAndReturn(unwrapCollection(pair.value, pair))
-    is String -> mutableSetOf(Node(pair.key, pair.value.toString()))
+private fun unwrap(set: MutableSet<Node>, node: Node): Set<Node> = when (node.value) {
+    is Map<*, *> -> set.addAllAndReturn(unwrapMap(node.value, node.key))
+    is Collection<*> -> set.addAllAndReturn(unwrapCollection(node.value, node.key))
+    is String -> mutableSetOf(Node(node.key, node.value.toString()))
     else -> set
 }
 
-private fun unwrapCollection(value: Collection<*>, pair: Node) = value.flatMap {
+private fun unwrapCollection(value: Collection<Any?>, key: String) = value.flatMap {
     unwrap(
         mutableSetOf(),
-        Node(pair.key, it)
+        Node(key, it)
     )
 }
 
-private fun unwrapMap(value: Map<*, *>, pair: Node) = value.entries.flatMap {
+private fun unwrapMap(value: Map<*, *>, key: String) = value.entries.flatMap {
     unwrap(
         mutableSetOf(),
-        Node(pair.key + "." + it.key.toString(), it.value)
+        Node(key + "." + it.key.toString(), it.value)
     )
 }
 

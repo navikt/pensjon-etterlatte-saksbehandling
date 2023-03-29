@@ -14,7 +14,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
-val rootLogger: Logger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME)
 
 fun main() {
     ApplicationContext().let { Server(it).run() }

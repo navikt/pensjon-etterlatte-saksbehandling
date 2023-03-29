@@ -416,3 +416,31 @@ data class PdlVergeEllerFullmektig(
     val omfang: String?,
     val omfangetErInnenPersonligOmraade: Boolean
 )
+
+data class PdlGeografiskTilknytningIdentVariables(
+    val ident: String
+)
+data class PdlGeografiskTilknytningRequest(
+    val query: String,
+    val variables: PdlGeografiskTilknytningIdentVariables
+)
+
+enum class PdlGtType {
+    KOMMUNE, BYDEL, UTLAND, UDEFINERT
+}
+
+data class PdlGeografiskTilknytning(
+    val gtBydel: String?,
+    val gtKommune: String?,
+    val gtLand: String?,
+    val gtType: PdlGtType?
+)
+
+data class PdlGeografiskTilknytningData(
+    val hentGeografiskTilknytning: PdlGeografiskTilknytning? = null
+)
+
+data class PdlGeografiskTilknytningResponse(
+    val data: PdlGeografiskTilknytningData? = null,
+    val errors: List<PdlResponseError>? = null
+)

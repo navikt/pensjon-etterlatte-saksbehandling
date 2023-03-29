@@ -16,6 +16,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
+import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -24,6 +25,7 @@ import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.mockFolkeregisterident
+import no.nav.etterlatte.mockGeografiskTilknytning
 import no.nav.etterlatte.mockPerson
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -142,6 +144,36 @@ class PersonRouteTest {
     }
 
     @Test
+    fun `skal returnere geografisk tilknytning`() {
+        val hentGeografiskTilknytningRequest = HentGeografiskTilknytningRequest(
+            foedselsnummer = TRIVIELL_MIDTPUNKT
+        )
+
+        coEvery {
+            personService.hentGeografiskTilknytning(hentGeografiskTilknytningRequest)
+        } returns mockGeografiskTilknytning()
+
+        testApplication {
+            environment {
+                config = applicationConfig
+            }
+            application {
+                restModule(log) { personRoute(personService) }
+            }
+
+            val response = client.post(GEOGRAFISKTILKNYTNING_ENDEPUNKT) {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(hentGeografiskTilknytningRequest.toJson())
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            coVerify { personService.hentGeografiskTilknytning(any()) }
+            confirmVerified(personService)
+        }
+    }
+
+    @Test
     fun `skal returne 500 naar kall mot person feiler`() {
         val hentPersonRequest = HentPersonRequest(
             foedselsnummer = TRIVIELL_MIDTPUNKT,
@@ -221,6 +253,7 @@ class PersonRouteTest {
         const val PERSON_ENDEPUNKT = "/person"
         const val PERSON_ENDEPUNKT_V2 = "/person/v2"
         const val FOLKEREGISTERIDENT_ENDEPUNKT = "/folkeregisterident"
+        const val GEOGRAFISKTILKNYTNING_ENDEPUNKT = "/geografisktilknyttning"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -70,3 +71,5 @@ fun mockPerson(
 )
 
 fun mockFolkeregisterident(fnr: String) = FolkeregisterIdent(Foedselsnummer.of(fnr))
+
+fun mockGeografiskTilknytning() = GeografiskTilknytning(kommune = "0301", ukjent = false)

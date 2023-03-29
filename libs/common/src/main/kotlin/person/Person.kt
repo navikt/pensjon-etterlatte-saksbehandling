@@ -140,6 +140,20 @@ data class UtenlandsoppholdOpplysninger(
     val pensjonsutbetaling: String?
 )
 
+data class GeografiskTilknytning(
+    val kommune: String? = null,
+    val bydel: String? = null,
+    val land: String? = null,
+    val ukjent: Boolean = false
+) {
+    fun geografiskTilknytning() = when {
+        bydel != null -> bydel
+        kommune != null -> kommune
+        land != null -> land
+        else -> null
+    }
+}
+
 fun Person.alder(): Int? {
     return foedselsdato?.let { Period.between(foedselsdato, LocalDate.now()).years }
 }

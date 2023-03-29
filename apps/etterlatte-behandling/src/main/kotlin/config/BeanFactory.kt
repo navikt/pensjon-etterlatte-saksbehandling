@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
+import no.nav.etterlatte.config.samle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
@@ -285,6 +286,6 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
     }
 
     override fun featureToggleService(): FeatureToggleService {
-        return FeatureToggleService.initialiser(env)
+        return FeatureToggleService.initialiser(samle(config, env))
     }
 }

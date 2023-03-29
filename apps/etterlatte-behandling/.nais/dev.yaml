@@ -85,6 +85,7 @@ spec:
       external:
         - host: navansatt.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
+        - host: unleash.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

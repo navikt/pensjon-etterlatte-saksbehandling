@@ -1,23 +1,51 @@
 package no.nav.etterlatte.trygdetid
 
+import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import java.util.*
 
-class TrygdetidService(val trygdetidRepository: TrygdetidRepository) {
-
-    // TODO Legg ti tilstandsjekk på samtlige
-
+class TrygdetidService(
+    private val trygdetidRepository: TrygdetidRepository,
+    private val behandlingKlient: BehandlingKlient
+) {
     fun hentTrygdetid(behandlingsId: UUID): Trygdetid? = trygdetidRepository.hentTrygdetid(behandlingsId)
 
-    fun opprettTrygdetid(behandlingsId: UUID): Trygdetid {
-        trygdetidRepository.hentTrygdetid(behandlingsId)?.let {
-            throw IllegalArgumentException("Trygdetid finnes allerede for behandling $behandlingsId")
+    suspend fun opprettTrygdetid(behandlingId: UUID, bruker: Bruker): Trygdetid =
+        tilstandssjekk(behandlingId, bruker) {
+            trygdetidRepository.hentTrygdetid(behandlingId)?.let {
+                throw IllegalArgumentException("Trygdetid finnes allerede for behandling $behandlingId")
+            }
+            trygdetidRepository.opprettTrygdetid(behandlingId)
         }
-        return trygdetidRepository.opprettTrygdetid(behandlingsId)
+
+    suspend fun lagreTrygdetidGrunnlag(
+        behandlingId: UUID,
+        bruker: Bruker,
+        trygdetidGrunnlag: TrygdetidGrunnlag
+    ): Trygdetid =
+        tilstandssjekk(behandlingId, bruker) {
+            trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+        }
+
+    suspend fun lagreBeregnetTrygdetid(
+        behandlingId: UUID,
+        bruker: Bruker,
+        beregnetTrygdetid: BeregnetTrygdetid
+    ): Trygdetid =
+        tilstandssjekk(behandlingId, bruker) {
+            trygdetidFastsatt(behandlingId, bruker)
+            trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
+        }
+
+    private suspend fun trygdetidFastsatt(behandlingId: UUID, bruker: Bruker) =
+        behandlingKlient.fastsettTrygdetid(behandlingId, bruker, true)
+
+    private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {
+        val kanFastsetteTrygdetid = behandlingKlient.fastsettTrygdetid(behandlingId, bruker, false)
+        return if (kanFastsetteTrygdetid) {
+            block()
+        } else {
+            throw Exception("Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand")
+        }
     }
-
-    fun lagreTrygdetidGrunnlag(behandlingsId: UUID, trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid =
-        trygdetidRepository.opprettTrygdetidGrunnlag(behandlingsId, trygdetidGrunnlag)
-
-    fun lagreBeregnetTrygdetid(behandlingsId: UUID, beregnetTrygdetid: BeregnetTrygdetid): Trygdetid =
-        trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingsId, beregnetTrygdetid)
 }

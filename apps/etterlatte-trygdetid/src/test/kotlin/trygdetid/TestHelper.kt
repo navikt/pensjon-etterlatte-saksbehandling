@@ -1,14 +1,23 @@
 package trygdetid
 
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetid
+import no.nav.etterlatte.trygdetid.Trygdetid
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import java.time.LocalDate
 import java.util.*
+import java.util.UUID.randomUUID
+
+fun trygdetid(behandlingId: UUID = randomUUID(), beregnetTrygdetid: BeregnetTrygdetid? = null) = Trygdetid(
+    id = randomUUID(),
+    behandlingId = behandlingId,
+    trygdetidGrunnlag = emptyList(),
+    beregnetTrygdetid = beregnetTrygdetid
+)
 
 fun trygdetidGrunnlag(trygdetidId: UUID) = TrygdetidGrunnlag(
-    id = UUID.randomUUID(),
+    id = randomUUID(),
     type = TrygdetidType.NASJONAL,
     bosted = "Norge",
     periode = TrygdetidPeriode(

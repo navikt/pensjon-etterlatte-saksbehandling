@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import java.time.LocalDate
 import java.util.*
@@ -36,7 +37,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
         post {
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter trygdetid for behandling $behandlingsId")
-                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId)
+                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId, bruker)
                 call.respond(trygdetid.toDto())
             }
         }
@@ -46,7 +47,11 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
                 logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingsId")
                 val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
                 val trygdetid =
-                    trygdetidService.lagreTrygdetidGrunnlag(behandlingsId, trygdetidgrunnlagDto.toTrygdetidGrunnlag())
+                    trygdetidService.lagreTrygdetidGrunnlag(
+                        behandlingsId,
+                        bruker,
+                        trygdetidgrunnlagDto.toTrygdetidGrunnlag()
+                    )
                 call.respond(trygdetid.toDto())
             }
         }
@@ -56,7 +61,11 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
                 logger.info("Oppdaterer beregnet trygdetid for behandling $behandlingsId")
                 val beregnetTrygdetid = call.receive<BeregnetTrygdetidDto>()
                 val trygdetid =
-                    trygdetidService.lagreBeregnetTrygdetid(behandlingsId, beregnetTrygdetid.toBeregnetTrygdetid())
+                    trygdetidService.lagreBeregnetTrygdetid(
+                        behandlingsId,
+                        bruker,
+                        beregnetTrygdetid.toBeregnetTrygdetid()
+                    )
                 call.respond(trygdetid.toDto())
             }
         }

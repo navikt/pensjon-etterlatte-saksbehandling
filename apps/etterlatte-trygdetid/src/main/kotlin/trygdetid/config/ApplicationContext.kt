@@ -17,5 +17,5 @@ class ApplicationContext {
         password = properties.dbPassword
     )
     val behandlingKlient = BehandlingKlient(config, httpClient())
-    val trygdetidService = TrygdetidService(TrygdetidRepository(dataSource))
+    val trygdetidService = TrygdetidService(TrygdetidRepository(dataSource), behandlingKlient)
 }

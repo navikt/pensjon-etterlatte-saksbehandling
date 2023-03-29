@@ -36,6 +36,8 @@ fun Application.restModule(
     config: ApplicationConfig = environment.config,
     routes: Route.() -> Unit
 ) {
+    sikkerLogg.info("Sikkerlogg logger fra restModule")
+
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }

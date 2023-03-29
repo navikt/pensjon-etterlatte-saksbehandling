@@ -24,7 +24,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             variables = toPdlVariables(fnr, rolle)
         )
 
-        return retry<PdlPersonResponse>(times = 10) {
+        return retry<PdlPersonResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 header("Tema", TEMA)
                 accept(Json)

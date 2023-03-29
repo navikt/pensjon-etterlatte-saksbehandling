@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class RevurderingAggregat(
     id: UUID,
@@ -105,5 +105,5 @@ class RevurderingAggregat(
         )
     }
 
-    fun serialiserbarUtgave() = lagretBehandling.copy()
+    fun serialiserbarUtgave() = lagretBehandling.kopier()
 }

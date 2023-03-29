@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class BehandlingDao(private val connection: () -> Connection) {
 
@@ -191,19 +191,20 @@ class BehandlingDao(private val connection: () -> Connection) {
         soesken = rs.getString("soesken").let { objectMapper.readValue(it) }
     )
 
-    private fun asRevurdering(rs: ResultSet) = Revurdering(
-        id = rs.getObject("id") as UUID,
-        sak = mapSak(rs),
-        behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
-        sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
-        persongalleri = hentPersongalleri(rs),
-        status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-        revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
-        kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
-        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-        prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
-    )
+    private fun asRevurdering(rs: ResultSet): Revurdering =
+        Revurdering.opprett(
+            id = rs.getObject("id") as UUID,
+            sak = mapSak(rs),
+            behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
+            sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
+            persongalleri = hentPersongalleri(rs),
+            status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
+            revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
+            kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
+            vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
+            virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+            prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
+        )
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
         id = rs.getObject("id") as UUID,

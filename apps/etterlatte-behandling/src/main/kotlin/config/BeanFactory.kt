@@ -24,7 +24,6 @@ import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -286,15 +285,6 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
     }
 
     override fun featureToggleService(): FeatureToggleService {
-        return FeatureToggleService.initialiser(
-            mapOf(
-                FeatureToggleServiceProperties.ENABLED.navn to config.getString("funksjonsbrytere.enabled"),
-                FeatureToggleServiceProperties.APPLICATIONNAME.navn to config.getString(
-                    "funksjonsbrytere.unleash.applicationName"
-                ),
-                FeatureToggleServiceProperties.URI.navn to config.getString("funksjonsbrytere.unleash.uri"),
-                FeatureToggleServiceProperties.CLUSTER.navn to config.getString("funksjonsbrytere.unleash.cluster")
-            )
-        )
+        return FeatureToggleService.initialiser(env)
     }
 }

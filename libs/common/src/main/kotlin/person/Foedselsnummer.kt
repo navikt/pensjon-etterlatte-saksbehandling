@@ -25,7 +25,7 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
             try {
                 Foedselsnummer(fnr!!.replace(Regex("[^0-9]"), ""))
             } catch (e: Exception) {
-                throw InvalidFoedselsnummer(fnr, e)
+                throw InvalidFoedselsnummerException(fnr, e)
             }
 
         fun isValid(fnr: String?): Boolean =
@@ -130,4 +130,7 @@ internal fun firesifretAarstallFraTosifret(year: Int, individnummer: Int): Int {
         throw IllegalArgumentException("Ingen gyldig årstall funnet for individnummer $individnummer")
     }
 }
-class InvalidFoedselsnummer(value: String?, cause: Throwable) : Exception("Ugyldig fødselsnummer $value", cause)
+class InvalidFoedselsnummerException(value: String?, cause: Throwable) : Exception(
+    "Ugyldig fødselsnummer $value",
+    cause
+)

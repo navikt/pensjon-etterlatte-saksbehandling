@@ -1,7 +1,7 @@
 package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.common.person.firesifretAarstallFraTosifret
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -44,7 +44,7 @@ internal class FoedselsnummerTest {
 
     @Test
     fun `Sjekk diverse ugyldige numeriske verdier`() {
-        assertThrows<InvalidFoedselsnummer> {
+        assertThrows<InvalidFoedselsnummerException> {
             Foedselsnummer.of("1234")
         }
 
@@ -56,7 +56,7 @@ internal class FoedselsnummerTest {
 
         assertAll(
             ugyldigeFnrListe.map {
-                { assertThrows<InvalidFoedselsnummer> { Foedselsnummer.of(it) } }
+                { assertThrows<InvalidFoedselsnummerException> { Foedselsnummer.of(it) } }
             }
         )
     }
@@ -89,8 +89,8 @@ internal class FoedselsnummerTest {
 
     @Test
     fun `Sjekk diverse ugyldige tekst verdier`() {
-        assertThrows<InvalidFoedselsnummer> { Foedselsnummer.of("") }
-        assertThrows<InvalidFoedselsnummer> { Foedselsnummer.of("hei") }
+        assertThrows<InvalidFoedselsnummerException> { Foedselsnummer.of("") }
+        assertThrows<InvalidFoedselsnummerException> { Foedselsnummer.of("hei") }
     }
 
     @Test

@@ -20,13 +20,20 @@ interface FeatureToggleService {
                         enabled = true,
                         uri = URI(
                             env[FeatureToggleServiceProperties.URI.navn] ?: throw IllegalArgumentException(
-                                "Unleash-URI er ikke definert"
+                                "Unleash-URI er ikke definert i konfig-parameter " +
+                                    FeatureToggleServiceProperties.URI.navn
                             )
                         ),
                         cluster = env[FeatureToggleServiceProperties.CLUSTER.navn]
-                            ?: throw IllegalArgumentException("Unleash-cluster er ikke definert"),
+                            ?: throw IllegalArgumentException(
+                                "Unleash-cluster er ikke definert i konfig-parameter " +
+                                    FeatureToggleServiceProperties.CLUSTER.navn
+                            ),
                         applicationName = env[FeatureToggleServiceProperties.APPLICATIONNAME.navn]
-                            ?: throw IllegalArgumentException("Unleash-applikasjonsnavn er ikke definert")
+                            ?: throw IllegalArgumentException(
+                                "Unleash-applikasjonsnavn er ikke definert i konfig-parameter " +
+                                    FeatureToggleServiceProperties.APPLICATIONNAME.navn
+                            )
                     )
                 )
             } else {

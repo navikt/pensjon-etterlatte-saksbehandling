@@ -38,6 +38,11 @@ fun main() {
 }
 
 class Server(private val beanFactory: BeanFactory) {
+
+    init {
+        sikkerLogg.info("SikkerLogg: etterlatte-behandling oppstart")
+    }
+
     private val engine = embeddedServer(
         factory = CIO,
         environment = applicationEngineEnvironment {

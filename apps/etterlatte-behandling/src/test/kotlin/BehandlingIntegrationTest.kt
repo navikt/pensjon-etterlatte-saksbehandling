@@ -12,8 +12,10 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.config.HoconApplicationConfig
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
@@ -161,6 +163,12 @@ class GrunnlagKlientTest : GrunnlagKlient {
     }
 }
 
+class Norg2KlientTest : Norg2Klient {
+    override fun hentEnheterForOmraade(tema: String, omraade: String): List<ArbeidsFordelingEnhet> {
+        return listOf(ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817"))
+    }
+}
+
 class TestBeanFactory(
     private val jdbcUrl: String,
     private val username: String,
@@ -291,5 +299,9 @@ class TestBeanFactory(
                 FeatureToggleServiceProperties.ENABLED.navn to "false"
             )
         )
+    }
+
+    override fun norg2HttpClient(): Norg2Klient {
+        return Norg2KlientTest()
     }
 }

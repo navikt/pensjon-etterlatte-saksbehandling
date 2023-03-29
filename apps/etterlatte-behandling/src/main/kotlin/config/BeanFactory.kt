@@ -15,6 +15,8 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehan
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
@@ -85,6 +87,7 @@ interface BeanFactory {
     fun sporingslogg(): Sporingslogg
     fun getSaksbehandlerGroupIdsByKey(): Map<String, String?>
     fun featureToggleService(): FeatureToggleService
+    fun norg2HttpClient(): Norg2Klient
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -284,5 +287,9 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
                 FeatureToggleServiceProperties.CLUSTER.navn to config.getString("funksjonsbrytere.unleash.cluster")
             )
         )
+    }
+
+    override fun norg2HttpClient(): Norg2Klient {
+        return Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL"))
     }
 }

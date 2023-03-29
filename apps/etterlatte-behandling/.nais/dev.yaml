@@ -73,6 +73,8 @@ spec:
       value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
     - name: AZUREAD_STRENGT_FORTROLIG_GROUPID
       value: 5ef775f2-61f8-4283-bf3d-8d03f428aa14
+    - name: NORG2_URL
+      value: https://norg2.dev-fss-pub.nais.io/norg2/api/v1
   accessPolicy:
     outbound:
       rules:
@@ -82,6 +84,7 @@ spec:
         - application: etterlatte-vedtaksvurdering
       external:
         - host: unleash.nais.io
+        - host: norg2.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

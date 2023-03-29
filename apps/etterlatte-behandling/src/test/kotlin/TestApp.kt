@@ -10,6 +10,8 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
@@ -126,4 +128,12 @@ class LocalAppBeanFactory(
         },
         me = "me"
     )
+
+    override fun featureToggleService(): FeatureToggleService {
+        return FeatureToggleService.initialiser(
+            mapOf(
+                FeatureToggleServiceProperties.ENABLED.navn to "false"
+            )
+        )
+    }
 }

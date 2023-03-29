@@ -21,6 +21,8 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -82,6 +84,7 @@ interface BeanFactory {
     fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
     fun getSaksbehandlerGroupIdsByKey(): Map<String, String?>
+    fun featureToggleService(): FeatureToggleService
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -268,5 +271,18 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
             periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
             minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()
         ).schedule()
+    }
+
+    override fun featureToggleService(): FeatureToggleService {
+        return FeatureToggleService.initialiser(
+            mapOf(
+                FeatureToggleServiceProperties.ENABLED.navn to config.getString("funksjonsbrytere.enabled"),
+                FeatureToggleServiceProperties.APPLICATIONNAME.navn to config.getString(
+                    "funksjonsbrytere.unleash.applicationName"
+                ),
+                FeatureToggleServiceProperties.URI.navn to config.getString("funksjonsbrytere.unleash.uri"),
+                FeatureToggleServiceProperties.CLUSTER.navn to config.getString("funksjonsbrytere.unleash.cluster")
+            )
+        )
     }
 }

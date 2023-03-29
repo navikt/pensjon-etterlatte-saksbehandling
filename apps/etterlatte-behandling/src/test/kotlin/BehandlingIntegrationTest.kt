@@ -15,6 +15,8 @@ import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -282,4 +284,12 @@ class TestBeanFactory(
         },
         me = "me"
     )
+
+    override fun featureToggleService(): FeatureToggleService {
+        return FeatureToggleService.initialiser(
+            mapOf(
+                FeatureToggleServiceProperties.ENABLED.navn to "false"
+            )
+        )
+    }
 }

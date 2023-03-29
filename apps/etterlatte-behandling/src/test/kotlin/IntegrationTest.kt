@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.VurderingMedBegrunnelseJson
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -50,13 +51,14 @@ import no.nav.etterlatte.sak.Sak
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.lang.Thread.sleep
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class IntegrationTest : BehandlingIntegrationTest() {
@@ -82,6 +84,8 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 }
             }
             application { module(beanFactory) }
+
+            assertTrue(beanFactory.featureToggleService().isEnabled(FellesFeatureToggle.NoOperationToggle, false))
 
             client.get("/saker/$fnr") {
                 addAuthToken(tokenSaksbehandler)

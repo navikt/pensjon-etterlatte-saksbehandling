@@ -3,8 +3,8 @@ import { BodyShort, Loader, Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPerson, INVALID_FNR } from '../api/person'
-import { ErrorColored, InformationColored, People } from '@navikt/ds-icons'
-import { isFailure, isSuccess, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { ErrorColored, InformationColored } from '@navikt/ds-icons'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 
 export const Search = () => {
   const navigate = useNavigate()
@@ -28,10 +28,11 @@ export const Search = () => {
     }
   }, [searchInput])
 
-  const goToPerson = () => {
-    navigate(`/person/${searchInput}`)
-    reset()
-  }
+  useEffect(() => {
+    if (isSuccess(personStatus)) {
+      navigate(`/person/${searchInput}`)
+    }
+  }, [personStatus])
 
   return (
     <SearchWrapper>
@@ -62,19 +63,6 @@ export const Search = () => {
           </span>
           <SearchResult>
             <BodyShort className="text">Tast inn gyldig fødselsnummer</BodyShort>
-          </SearchResult>
-        </Dropdown>
-      )}
-
-      {isSuccess(personStatus) && !feilInput && (
-        <Dropdown>
-          <span className="icon">
-            <People />
-          </span>
-          <SearchResult link={true} onClick={goToPerson}>
-            <BodyShort className="text">
-              {personStatus.data.fornavn} {personStatus.data.etternavn}
-            </BodyShort>
           </SearchResult>
         </Dropdown>
       )}

@@ -11,7 +11,8 @@ class ConfigUtilsTest {
         val conf = ConfigFactory.load()
         val env = mapOf(
             "key1" to "value1",
-            "funksjonsbrytere.enabled" to "false"
+            "funksjonsbrytere.enabled" to "false",
+            "ETTERLATTE_GRUNNLAG_CLIENT_ID" to "jwkt"
         )
         val samla = samle(conf, env)
         Assertions.assertEquals("false", samla["funksjonsbrytere.enabled"])

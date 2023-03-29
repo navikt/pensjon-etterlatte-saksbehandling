@@ -35,7 +35,7 @@ spec:
     - name: PDL_OUTBOUND_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
     - name: PPS_URL
-      value: https://pensjon-parallelle-sannheter.dev.intern.nav.no
+      value: http://pensjon-person.pensjon-parallelle-sannheter
   accessPolicy:
     outbound:
       rules:

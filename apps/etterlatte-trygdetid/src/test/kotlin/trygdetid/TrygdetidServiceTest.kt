@@ -2,9 +2,9 @@ package trygdetid
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -28,6 +28,7 @@ internal class TrygdetidServiceTest {
 
     @BeforeEach
     fun beforeEach() {
+        clearAllMocks()
         coEvery { behandlingKlient.fastsettTrygdetid(any(), any(), false) } returns true
     }
 
@@ -44,6 +45,8 @@ internal class TrygdetidServiceTest {
         val trygdetid = service.hentTrygdetid(behandlingId)
 
         trygdetid shouldNotBe null
+
+        verify(exactly = 1) { repository.hentTrygdetid(any()) }
     }
 
     @Test
@@ -54,6 +57,8 @@ internal class TrygdetidServiceTest {
         val trygdetid = service.hentTrygdetid(behandlingId)
 
         trygdetid shouldBe null
+
+        verify(exactly = 1) { repository.hentTrygdetid(any()) }
     }
 
     @Test
@@ -66,9 +71,11 @@ internal class TrygdetidServiceTest {
             service.opprettTrygdetid(behandlingId, Saksbehandler("token", "ident"))
         }
 
-        verify { repository.hentTrygdetid(any()) }
-        verify { repository.opprettTrygdetid(any()) }
-        coVerify { behandlingKlient.fastsettTrygdetid(any(), any(), any()) }
+        coVerify(exactly = 1) {
+            behandlingKlient.fastsettTrygdetid(any(), any(), any())
+            repository.hentTrygdetid(any())
+            repository.opprettTrygdetid(any())
+        }
     }
 
     @Test
@@ -82,8 +89,10 @@ internal class TrygdetidServiceTest {
             }
         }
 
-        verify { repository.hentTrygdetid(any()) }
-        coVerify { behandlingKlient.fastsettTrygdetid(any(), any(), any()) }
+        coVerify(exactly = 1) {
+            repository.hentTrygdetid(any())
+            behandlingKlient.fastsettTrygdetid(any(), any(), any())
+        }
     }
 
     @Test
@@ -97,7 +106,7 @@ internal class TrygdetidServiceTest {
             }
         }
 
-        coVerify { behandlingKlient.fastsettTrygdetid(any(), any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.fastsettTrygdetid(any(), any(), any()) }
     }
 
     @Test
@@ -115,8 +124,10 @@ internal class TrygdetidServiceTest {
             )
         }
 
-        coVerify { behandlingKlient.fastsettTrygdetid(any(), any(), any()) }
-        coVerify { repository.opprettTrygdetidGrunnlag(any(), any()) }
+        coVerify(exactly = 1) {
+            behandlingKlient.fastsettTrygdetid(any(), any(), any())
+            repository.opprettTrygdetidGrunnlag(any(), any())
+        }
     }
 
     @Test
@@ -153,7 +164,7 @@ internal class TrygdetidServiceTest {
                 beregnetTrygdetid
             )
         }
-        coVerifyOrder {
+        coVerify(exactly = 1) {
             behandlingKlient.fastsettTrygdetid(any(), any(), false)
             behandlingKlient.fastsettTrygdetid(any(), any(), true)
             repository.oppdaterBeregnetTrygdetid(any(), any())
@@ -176,7 +187,7 @@ internal class TrygdetidServiceTest {
             }
         }
 
-        coVerify {
+        coVerify(exactly = 1) {
             behandlingKlient.fastsettTrygdetid(any(), any(), false)
         }
     }

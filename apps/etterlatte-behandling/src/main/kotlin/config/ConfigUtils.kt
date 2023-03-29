@@ -15,12 +15,12 @@ fun samle(config: Config, env: Map<String, String>): Map<String, String> {
 
 private fun unwrap(set: MutableSet<Node>, pair: Node): Set<Node> = when (pair.value) {
     is Map<*, *> -> set.addAllAndReturn(unwrapMap(pair.value, pair))
-    is List<*> -> set.addAllAndReturn(unwrapList(pair.value, pair))
+    is Collection<*> -> set.addAllAndReturn(unwrapCollection(pair.value, pair))
     is String -> mutableSetOf(Node(pair.key, pair.value.toString()))
     else -> set
 }
 
-private fun unwrapList(value: List<*>, pair: Node) = value.flatMap {
+private fun unwrapCollection(value: Collection<*>, pair: Node) = value.flatMap {
     unwrap(
         mutableSetOf(),
         Node(pair.key, it)

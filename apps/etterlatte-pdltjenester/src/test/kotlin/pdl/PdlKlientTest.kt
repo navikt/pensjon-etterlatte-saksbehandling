@@ -88,6 +88,18 @@ internal class PdlKlientTest {
         }
     }
 
+    @Test
+    fun `hentGeografiskTilknytning returnerer geografisk tilknytning`() {
+        mockEndpoint("/pdl/geografisk_tilknytning.json")
+
+        runBlocking {
+            val personResponse = pdlKlient.hentGeografiskTilknytning(STOR_SNERK)
+
+            assertEquals("0301", personResponse.data?.hentGeografiskTilknytning?.gtKommune)
+            assertEquals(PdlGtType.KOMMUNE, personResponse.data?.hentGeografiskTilknytning?.gtType)
+        }
+    }
+
     private fun mockEndpoint(jsonUrl: String) {
         val httpClient = HttpClient(MockEngine) {
             expectSuccess = true

@@ -6,14 +6,13 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.content.TextContent
 import io.ktor.http.ContentType.Application.Json
+import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
-import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 
 class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) {
@@ -28,7 +27,8 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             httpClient.post(apiUrl) {
                 header("Tema", TEMA)
                 accept(Json)
-                setBody(TextContent(request.toJson(), Json))
+                contentType(Json)
+                setBody(request)
             }.body()
         }.let {
             when (it) {
@@ -62,7 +62,8 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             httpClient.post(apiUrl) {
                 header("Tema", TEMA)
                 accept(Json)
-                setBody(TextContent(request.toJson(), Json))
+                contentType(Json)
+                setBody(request)
             }.body()
         }.let {
             when (it) {
@@ -86,7 +87,33 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             httpClient.post(apiUrl) {
                 header("Tema", TEMA)
                 accept(Json)
-                setBody(TextContent(request.toJson(), Json))
+                contentType(Json)
+                setBody(request)
+            }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.exceptions.last()
+            }
+        }
+    }
+
+    suspend fun hentGeografiskTilknytning(ident: Foedselsnummer): PdlGeografiskTilknytningResponse {
+        val request = PdlGeografiskTilknytningRequest(
+            query = getQuery("/pdl/hentGeografiskTilknytning.graphql"),
+            variables = PdlGeografiskTilknytningIdentVariables(
+                ident = ident.value
+            )
+        )
+
+        logger.info("Henter geografisk tilknyttning for fnr = $ident fra PDL")
+
+        return retry<PdlGeografiskTilknytningResponse> {
+            httpClient.post(apiUrl) {
+                header("Tema", TEMA)
+                accept(Json)
+                contentType(Json)
+                setBody(request)
             }.body()
         }.let {
             when (it) {

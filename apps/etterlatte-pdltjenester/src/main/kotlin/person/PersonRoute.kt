@@ -10,6 +10,7 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
+import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 
 fun Route.personRoute(service: PersonService) {
@@ -50,6 +51,21 @@ fun Route.personRoute(service: PersonService) {
 
             try {
                 service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest).let { call.respond(it) }
+            } catch (e: PdlFantIkkePerson) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+    }
+
+    route("geografisktilknyttning") {
+        val logger = application.log
+
+        post {
+            val hentGeografiskTilknytningRequest = call.receive<HentGeografiskTilknytningRequest>()
+            logger.info("Henter geografisk tilknyttning med fnr=${hentGeografiskTilknytningRequest.foedselsnummer}")
+
+            try {
+                service.hentGeografiskTilknytning(hentGeografiskTilknytningRequest).let { call.respond(it) }
             } catch (e: PdlFantIkkePerson) {
                 call.respond(HttpStatusCode.NotFound)
             }

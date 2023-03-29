@@ -7,12 +7,17 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
+import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.mockResponse
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlFolkeregisterIdentResponse
+import no.nav.etterlatte.pdl.PdlGeografiskTilknytning
+import no.nav.etterlatte.pdl.PdlGeografiskTilknytningData
+import no.nav.etterlatte.pdl.PdlGeografiskTilknytningResponse
+import no.nav.etterlatte.pdl.PdlGtType
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlPersonResponse
@@ -38,6 +43,16 @@ internal class PersonServiceTest {
         val personBolkResponse: PdlPersonResponseBolk = mockResponse("/pdl/personBolk.json")
         val personIdentResponse: PdlFolkeregisterIdentResponse = mockResponse("/pdl/folkeregisterident.json")
         val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
+        val geografiskTilknytning = PdlGeografiskTilknytningResponse(
+            data = PdlGeografiskTilknytningData(
+                PdlGeografiskTilknytning(
+                    gtKommune = "0301",
+                    gtBydel = null,
+                    gtLand = null,
+                    gtType = PdlGtType.KOMMUNE
+                )
+            )
+        )
 
         coEvery { pdlKlient.hentPerson(any(), any()) } returns personResponse
         coEvery { pdlKlient.hentPersonBolk(any()) } returns personBolkResponse
@@ -51,6 +66,7 @@ internal class PersonServiceTest {
         coEvery { ppsKlient.avklarBostedsadresse(any()) } returns hentPerson.bostedsadresse?.first()
         coEvery { ppsKlient.avklarKontaktadresse(any()) } returns hentPerson.kontaktadresse?.first()
         coEvery { ppsKlient.avklarOppholdsadresse(any()) } returns hentPerson.oppholdsadresse?.first()
+        coEvery { pdlKlient.hentGeografiskTilknytning(any()) } returns geografiskTilknytning
     }
 
     @AfterEach
@@ -191,5 +207,17 @@ internal class PersonServiceTest {
                 personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest(PersonIdent("1234")))
             }
         }
+    }
+
+    @Test
+    fun `skal mappe geografisk tilknytning`() {
+        val tilknytning = runBlocking {
+            personService.hentGeografiskTilknytning(
+                HentGeografiskTilknytningRequest(TRIVIELL_MIDTPUNKT)
+            )
+        }
+
+        assertEquals(tilknytning.ukjent, false)
+        assertEquals(tilknytning.geografiskTilknytning(), "0301")
     }
 }

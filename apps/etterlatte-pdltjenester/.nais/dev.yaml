@@ -39,7 +39,8 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: pdl-api.dev-fss-pub.nais.io
+        - host: "pdl-api.dev-fss-pub.nais.io"
+        - host: "pensjon-parallelle-sannheter.dev.intern.nav.no"
     inbound:
       rules:
         - application: etterlatte-fordeler

@@ -38,6 +38,8 @@ spec:
       value: https://pensjon-parallelle-sannheter.dev.intern.nav.no
   accessPolicy:
     outbound:
+      rules:
+        - application: pensjon-parallelle-sannheter
       external:
         - host: "pdl-api.dev-fss-pub.nais.io"
     inbound:

@@ -8,4 +8,4 @@ data class KommerBarnetTilgode(
     val kilde: Grunnlagsopplysning.Saksbehandler
 )
 
-enum class JaNeiVetIkke { JA, NEI, VET_IKKE }
+enum class JaNeiVetIkke { JA, NEI }

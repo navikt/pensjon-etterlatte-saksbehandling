@@ -19,7 +19,7 @@ dependencies {
 
     api(libs.bundles.jackson)
 
-    implementation(Etterlatte.Common)
+    implementation(libs.etterlatte.common)
 
     compileOnly(libs.logging.slf4japi)
     testImplementation(libs.logging.slf4japi)

@@ -64,6 +64,8 @@ ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2
 ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 
+etterlatte-common = { module = "no.nav.etterlatte:common", version = "2023.03.28-16.21.c37f68b0da69" }
+
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.7" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.6" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "6.6" }

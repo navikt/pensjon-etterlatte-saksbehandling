@@ -8,7 +8,7 @@ dependencies {
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-ktor"))
-    implementation(Etterlatte.Common)
+    implementation(libs.etterlatte.common)
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)

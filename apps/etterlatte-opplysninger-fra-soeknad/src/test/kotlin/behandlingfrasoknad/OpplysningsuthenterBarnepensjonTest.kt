@@ -34,7 +34,7 @@ internal class OpplysningsuthenterBarnepensjonTest {
         val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
             objectMapper.treeToValue(
                 objectMapper.readTree(
-                    javaClass.getResource("/melding.json")!!.readText()
+                    OpplysningsuthenterBarnepensjonTest::class.java.getResource("/melding.json")!!.readText()
                 )!!["@skjema_info"]
             ),
             SoeknadType.BARNEPENSJON

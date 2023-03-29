@@ -119,7 +119,7 @@ fun revurdering(
     vilkaarStatus: VilkaarsvurderingUtfall? = VilkaarsvurderingUtfall.OPPFYLT,
     virkningstidspunkt: Virkningstidspunkt? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL
-) = Revurdering(
+) = Revurdering.opprett(
     id = id,
     sak = Sak(
         ident = persongalleri.soeker,

@@ -1,5 +1,6 @@
 package behandling.domain
 
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
@@ -24,7 +25,7 @@ internal class RevurderingTest {
 
     @Test
     fun `regulering kan endre tilstander`() {
-        Revurdering(
+        Revurdering.opprett(
             id = UUID.randomUUID(),
             sak = Sak(
                 ident = "",
@@ -122,7 +123,7 @@ internal class RevurderingTest {
             assertKanGaaTilAlleStatuser(fattet)
         }
 
-        private fun assertKanGaaTilAlleStatuser(revurdering: Revurdering) {
+        private fun assertKanGaaTilAlleStatuser(revurdering: Behandling) {
             Assertions.assertEquals(BehandlingStatus.OPPRETTET, revurdering.tilOpprettet().status)
             Assertions.assertEquals(
                 BehandlingStatus.VILKAARSVURDERT,
@@ -137,7 +138,7 @@ internal class RevurderingTest {
     }
 }
 
-private fun opprettetRevurdering(prosesstype: Prosesstype) = Revurdering(
+private fun opprettetRevurdering(prosesstype: Prosesstype) = Revurdering.opprett(
     id = UUID.randomUUID(),
     sak = Sak(ident = "", sakType = SakType.BARNEPENSJON, id = 1),
     behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),

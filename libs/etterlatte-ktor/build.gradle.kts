@@ -14,7 +14,6 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-token-model"))
-    // implementation(project(":libs:etterlatte-helsesjekk")) TODO: Hva skjer her?
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)

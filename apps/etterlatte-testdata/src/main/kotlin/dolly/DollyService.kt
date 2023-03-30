@@ -13,6 +13,7 @@ class DollyService(
      * Returnerer ID-en på testgruppen dersom den eksisterer. Hvis ikke må gruppen opprettes manuelt.
      */
     fun hentTestGruppe(username: String, accessToken: String): Long? = runBlocking {
+        logger.info("henter brukere")
         val brukere = dollyClient.hentDollyBrukere(accessToken)
         logger.info("brukere: ${brukere.size}")
         val bruker = brukere

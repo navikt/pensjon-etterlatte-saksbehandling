@@ -38,7 +38,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
         get() = {
             get {
                 val accessToken = getClientAccessToken()
-                logger.info("got accesstoken $accessToken")
+                logger.info("got accesstoken")
                 val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)
                 logger.info("got gruppeid $gruppeId")
 

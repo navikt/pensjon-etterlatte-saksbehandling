@@ -20,7 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.brev.dokument.JournalpostResponse
+import no.nav.etterlatte.brev.dokument.HentJournalposterResult
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
@@ -63,7 +63,7 @@ internal class DokumentRouteTest {
 
     @Test
     fun `Endepunkt for uthenting av alle dokumenter tilknyttet brukeren`() {
-        coEvery { journalpostService.hentDokumenter(any(), any(), any()) } returns JournalpostResponse(null, null)
+        coEvery { journalpostService.hentDokumenter(any(), any(), any()) } returns HentJournalposterResult()
         coEvery { behandlingKlient.harTilgangTilPerson(any(), any()) } returns true
 
         val token = accessToken
@@ -95,7 +95,7 @@ internal class DokumentRouteTest {
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
-        coVerify(exactly = 1) { journalpostService.hentDokumenter(fnr, BrukerIdType.FNR, token) }
+        coVerify(exactly = 1) { journalpostService.hentDokumenter(fnr, BrukerIdType.FNR, any()) }
     }
 
     @Test

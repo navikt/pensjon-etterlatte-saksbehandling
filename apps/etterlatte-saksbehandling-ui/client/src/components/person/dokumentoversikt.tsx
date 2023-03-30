@@ -19,7 +19,7 @@ export const Dokumentoversikt = (props: { fnr: string; liten?: boolean }) => {
       const res = await hentDokumenter(props.fnr)
 
       if (res.status === 'ok') {
-        setDokumenter(res.data.data.dokumentoversiktBruker.journalposter)
+        setDokumenter(res.data)
         setDokumenterHentet(true)
       } else {
         setError(true)

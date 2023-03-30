@@ -5,20 +5,26 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
+import io.ktor.http.isSuccess
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
+import no.nav.etterlatte.token.Bruker
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import java.util.UUID
+import java.util.*
 
 /*
 * SAF (Sak- og Arkiv Facade)
@@ -28,6 +34,7 @@ class SafClient(
     private val baseUrl: String,
     private val safScope: String
 ) : SafService {
+    private val logger = LoggerFactory.getLogger(SafService::class.java)
 
     private val configLocation: String? = null
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
@@ -50,8 +57,8 @@ class SafClient(
     override suspend fun hentDokumenter(
         fnr: String,
         idType: BrukerIdType,
-        accessToken: String
-    ): JournalpostResponse {
+        bruker: Bruker
+    ): HentJournalposterResult {
         val request = GraphqlRequest(
             query = getQuery("/graphql/journalpost.graphql"),
             variables = DokumentOversiktBrukerVariables(
@@ -63,12 +70,33 @@ class SafClient(
             )
         )
 
-        return retry<JournalpostResponse> {
-            httpClient.post("$baseUrl/graphql") {
-                header("Authorization", "Bearer ${getToken(accessToken)}")
+        return retry {
+            val res = httpClient.post("$baseUrl/graphql") {
+                header("Authorization", "Bearer ${getToken(bruker.accessToken())}")
                 accept(ContentType.Application.Json)
                 setBody(TextContent(request.toJson(), ContentType.Application.Json))
-            }.body()
+            }
+
+            if (res.status.isSuccess()) {
+                val journalposter: List<Journalpost> = res.body<JournalpostResponse>()
+                    .data?.dokumentoversiktBruker?.journalposter ?: emptyList()
+
+                HentJournalposterResult(journalposter = journalposter)
+            } else if (res.status == HttpStatusCode.Forbidden) {
+                val error = res.bodyAsText()
+                logger.warn(
+                    "Saksbehandler ${bruker.ident()} har ikke tilgang til å hente journalposter for bruker: $error"
+                )
+
+                HentJournalposterResult(
+                    error = HentJournalposterResult.Error(
+                        HttpStatusCode.Forbidden,
+                        error
+                    )
+                )
+            } else {
+                throw ResponseException(res, "Ukjent feil oppsto ved henting av journalposter")
+            }
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content

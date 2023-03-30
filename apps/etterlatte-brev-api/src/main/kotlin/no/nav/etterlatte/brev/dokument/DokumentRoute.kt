@@ -19,8 +19,13 @@ fun Route.dokumentRoute(safService: SafService, behandlingKlient: BehandlingKlie
             val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
             val fnr = foedselsnummerDTO.foedselsnummer
             withFoedselsnummer(fnr, behandlingKlient) { foedselsnummer ->
-                val innhold = safService.hentDokumenter(foedselsnummer.value, BrukerIdType.FNR, bruker.accessToken())
-                call.respond(innhold)
+                val result = safService.hentDokumenter(foedselsnummer.value, BrukerIdType.FNR, bruker)
+
+                if (result.error == null) {
+                    call.respond(result.journalposter)
+                } else {
+                    call.respond(result.error.statusCode, result.error.message)
+                }
             }
         }
 

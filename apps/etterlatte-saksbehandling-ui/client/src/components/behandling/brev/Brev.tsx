@@ -57,7 +57,7 @@ export const Brev = (props: { behandling: IDetaljertBehandling }) => {
 
     hentDokumenter(fnr)
       .then((res) => {
-        if (res.status === 'ok') setInnkommendeBrevListe(res.data.data.dokumentoversiktBruker.journalposter)
+        if (res.status === 'ok') setInnkommendeBrevListe(res.data)
         else throw Error(res.error)
       })
       .catch(() => setInnkommendeError(true))

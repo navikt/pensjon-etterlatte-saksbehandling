@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.MottakerRequest
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
+import no.nav.etterlatte.token.Fagsaksystem
 
 class AdresseService(
     private val norg2Klient: Norg2Klient,
@@ -27,24 +28,51 @@ class AdresseService(
     suspend fun hentEnhet(navEnhetNr: String): Norg2Enhet = norg2Klient.hentEnhet(navEnhetNr)
 
     suspend fun hentAvsenderOgAttestant(vedtak: ForenkletVedtak): Pair<Avsender, Attestant?> = coroutineScope {
-        val avsender = vedtak.saksbehandler.let {
-            val saksbehandlerNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).navn }
-            val saksbehandlerEnhet = async { hentEnhet(it.enhet) }
+        val avsender = hentAvsender(vedtak)
 
-            mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await())
-        }
-
-        val attestant = vedtak.attestant?.let {
-            val attestantNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).navn }
-            val attestantEnhet = async { hentEnhet(it.enhet).navn ?: "NAV" }
-
-            Attestant(attestantNavn.await(), attestantEnhet.await())
-        }
+        val attestant = hentAttestant(vedtak)
 
         Pair(
             avsender,
             attestant
         )
+    }
+
+    private suspend fun hentAvsender(vedtak: ForenkletVedtak): Avsender {
+        if (vedtak.saksbehandler.ident == Fagsaksystem.EY.navn) {
+            return Avsender(
+                kontor = "",
+                adresse = "",
+                postnummer = "",
+                telefon = "",
+                saksbehandler = Fagsaksystem.EY.navn
+            )
+        }
+        return vedtak.saksbehandler.let {
+            coroutineScope {
+                val saksbehandlerNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).navn }
+                val saksbehandlerEnhet = async { hentEnhet(it.enhet) }
+
+                mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await())
+            }
+        }
+    }
+
+    private suspend fun hentAttestant(vedtak: ForenkletVedtak): Attestant? {
+        if (vedtak.attestant?.ident == Fagsaksystem.EY.navn) {
+            return Attestant(
+                navn = Fagsaksystem.EY.navn,
+                kontor = ""
+            )
+        }
+        return coroutineScope {
+            vedtak.attestant?.let {
+                val attestantNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).navn }
+                val attestantEnhet = async { hentEnhet(it.enhet).navn ?: "NAV" }
+
+                Attestant(attestantNavn.await(), attestantEnhet.await())
+            }
+        }
     }
 
     private fun mapTilAvsender(enhet: Norg2Enhet, saksbehandlerNavn: String): Avsender {

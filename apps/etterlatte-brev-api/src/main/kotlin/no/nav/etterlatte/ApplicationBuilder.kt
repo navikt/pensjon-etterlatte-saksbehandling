@@ -39,9 +39,9 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rivers.DistribuerBrev
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
 import no.nav.etterlatte.security.ktor.clientCredential

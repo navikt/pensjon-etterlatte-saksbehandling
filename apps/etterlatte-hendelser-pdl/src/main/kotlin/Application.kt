@@ -18,9 +18,9 @@ import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.requireEnvValue
-import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess

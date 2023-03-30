@@ -10,9 +10,9 @@ import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger

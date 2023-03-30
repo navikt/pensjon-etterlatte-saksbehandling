@@ -42,12 +42,12 @@ spec:
     - name: KAFKA_TARGET_TOPIC
       value: etterlatte.dodsmelding
     - name: DOLLY_CLIENT_ID
-      value: dev-gcp.dolly.dolly-backend
+      value: dev-gcp.dolly.dolly-backend-dev
     - name: DOLLY_RESOURCE_URL
-      value: http://dolly-backend/api/v1
+      value: http://dolly-backend-dev/api/v1
   accessPolicy:
     outbound:
       rules:
-        - application: dolly-backend
+        - application: dolly-backend-dev
           namespace: dolly
           cluster: dev-gcp

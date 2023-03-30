@@ -1,13 +1,14 @@
 package no.nav.etterlatte.brev.adresse
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -53,11 +54,10 @@ class Norg2Klient(
         val response = klient.get("$apiUrl/enhet/$enhet/kontaktinformasjon")
 
         return if (response.status == HttpStatusCode.OK) {
-            val body = response.body<Any>()
+            val body = response.body<String>()
             logger.warn(response.status.value.toString())
-            logger.warn(body.toString())
-            logger.warn(body.toJson())
-            body as Norg2Kontaktinfo
+            logger.warn(body)
+            objectMapper.readValue(body)
         } else {
             val err = response.body<Norg2Error>()
 

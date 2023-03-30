@@ -166,6 +166,7 @@ private fun mockPerson(
     kontaktadresse = null,
     oppholdsadresse = null,
     sivilstatus = null,
+    sivilstand = null,
     statsborgerskap = null,
     utland = null,
     familieRelasjon = FamilieRelasjon(null, null, null),

@@ -60,6 +60,7 @@ class BesvarOpplysningsbehovTest {
             kontaktadresse = listOf(),
             oppholdsadresse = listOf(),
             sivilstatus = null,
+            sivilstand = null,
             statsborgerskap = OpplysningDTO("Norsk", UUID.randomUUID().toString()),
             utland = null,
             familieRelasjon = null,

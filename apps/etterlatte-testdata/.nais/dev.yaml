@@ -42,7 +42,7 @@ spec:
     - name: KAFKA_TARGET_TOPIC
       value: etterlatte.dodsmelding
     - name: DOLLY_CLIENT_ID
-      value: cf878fa5-aa6b-4bc5-bb2e-40b27e6c0149
+      value: dev-gcp.dolly.dolly-backend
     - name: DOLLY_RESOURCE_URL
       value: http://dolly-backend/api/v1
   accessPolicy:

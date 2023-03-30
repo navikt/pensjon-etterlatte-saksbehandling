@@ -9,6 +9,7 @@ import io.ktor.client.request.header
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.brev.adresse.AdresseException
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
+import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -28,6 +29,15 @@ class NavansattKlient(
         if (saksbehandlerCache != null) {
             logger.info("Fant cachet saksbehandler med ident $ident")
             saksbehandlerCache
+        } else if (ident == Fagsaksystem.EY.navn) {
+            logger.info("Saksbehandler er systemet")
+            SaksbehandlerInfo(
+                ident = Fagsaksystem.EY.navn,
+                navn = "",
+                fornavn = "",
+                etternavn = "",
+                epost = ""
+            )
         } else {
             logger.info("Henter info om saksbehandler med ident $ident")
 

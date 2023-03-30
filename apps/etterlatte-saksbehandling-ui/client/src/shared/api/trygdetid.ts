@@ -8,9 +8,9 @@ export const opprettTrygdetid = async (behandlingsId: string): Promise<ApiRespon
 
 export const lagreTrygdetidgrunnlag = async (args: {
   behandlingsId: string
-  nyttTrygdetidgrunnlag: ITrygdetidGrunnlag
+  trygdetidgrunnlag: ITrygdetidGrunnlag
 }): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag`, { ...args.nyttTrygdetidgrunnlag })
+  apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag`, { ...args.trygdetidgrunnlag })
 
 export const lagreOppsummertTrygdetid = async (args: {
   behandlingsId: string
@@ -37,6 +37,7 @@ export interface ITrygdetidGrunnlag {
   bosted: string
   periodeFra?: string
   periodeTil?: string
+  trygdetid?: number
   kilde: string
 }
 

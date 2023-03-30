@@ -52,7 +52,7 @@ export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid, setTrygdetid }) 
         <TrygdetidForm onSubmit={onSubmit}>
           <FormWrapper>
             <TextField
-              label="Nasjonal trygdetid (år)"
+              label="Faktisk trygdetid (år)"
               size="medium"
               type="text"
               inputMode="numeric"

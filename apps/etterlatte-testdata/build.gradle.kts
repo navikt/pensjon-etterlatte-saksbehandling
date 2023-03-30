@@ -18,6 +18,8 @@ dependencies {
     implementation(libs.ktor2.clientjackson)
     implementation(libs.ktor2.auth)
     implementation(libs.ktor2.mustache)
+    implementation(libs.ktor2.calllogging)
+    implementation(libs.ktor2.statuspages)
 
     implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.bundles.jackson)

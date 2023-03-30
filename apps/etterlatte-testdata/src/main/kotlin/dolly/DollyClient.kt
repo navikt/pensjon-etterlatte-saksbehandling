@@ -12,6 +12,8 @@ import io.ktor.client.request.setBody
 import io.ktor.http.HttpHeaders
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 interface DollyClient {
     suspend fun hentDollyBrukere(accessToken: String): List<Bruker>
@@ -29,12 +31,16 @@ interface DollyClient {
 }
 
 class DollyClientImpl(config: Config, private val httpClient: HttpClient) : DollyClient {
+    private val logger: Logger = LoggerFactory.getLogger(DollyClientImpl::class.java)
+
     private val dollyUrl = config.getString("dolly.resource.url")
 
-    override suspend fun hentDollyBrukere(accessToken: String): List<Bruker> =
-        httpClient.get("$dollyUrl/bruker") {
+    override suspend fun hentDollyBrukere(accessToken: String): List<Bruker> {
+        logger.info("henter dollyting på url: $dollyUrl")
+        return httpClient.get("$dollyUrl/bruker") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
         }.body()
+    }
 
     override suspend fun hentBrukersGrupper(brukerId: String, accessToken: String): HentGruppeResponse =
         httpClient.get("$dollyUrl/gruppe?brukerId=$brukerId") {

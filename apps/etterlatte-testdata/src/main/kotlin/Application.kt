@@ -15,11 +15,13 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
+import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.principal
@@ -31,8 +33,10 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.mustache.Mustache
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.path
 import io.ktor.server.request.receive
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -106,6 +110,12 @@ fun main() {
                 install(CallLogging) {
                     level = org.slf4j.event.Level.INFO
                     filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics")) }
+                }
+                install(StatusPages) {
+                    exception<Throwable> { call, cause ->
+                        call.application.log.error("En feil oppstod: ${cause.message}", cause)
+                        call.respond(HttpStatusCode.InternalServerError, "En intern feil har oppstått")
+                    }
                 }
 
                 if (localDevelopment) {

@@ -29,7 +29,7 @@ internal class TrygdetidServiceTest {
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
-        coEvery { behandlingKlient.beregn(any(), any(), false) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), false) } returns true
     }
 
     @AfterEach
@@ -72,7 +72,7 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.beregn(any(), any(), any())
+            behandlingKlient.kanBeregnes(any(), any(), any())
             repository.hentTrygdetid(any())
             repository.opprettTrygdetid(any())
         }
@@ -91,14 +91,14 @@ internal class TrygdetidServiceTest {
 
         coVerify(exactly = 1) {
             repository.hentTrygdetid(any())
-            behandlingKlient.beregn(any(), any(), any())
+            behandlingKlient.kanBeregnes(any(), any(), any())
         }
     }
 
     @Test
     fun `skal feile ved opprettelse av trygdetid dersom behandling er i feil tilstand`() {
         val behandlingId = randomUUID()
-        coEvery { behandlingKlient.beregn(any(), any(), false) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), false) } returns false
 
         runBlocking {
             assertThrows<Exception> {
@@ -106,7 +106,7 @@ internal class TrygdetidServiceTest {
             }
         }
 
-        coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), any()) }
     }
 
     @Test
@@ -125,7 +125,7 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.beregn(any(), any(), any())
+            behandlingKlient.kanBeregnes(any(), any(), any())
             repository.opprettTrygdetidGrunnlag(any(), any())
         }
     }
@@ -135,7 +135,7 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         val trygdetid = trygdetid(behandlingId)
         val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
-        coEvery { behandlingKlient.beregn(any(), any(), false) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), false) } returns false
 
         runBlocking {
             assertThrows<Exception> {
@@ -147,7 +147,7 @@ internal class TrygdetidServiceTest {
             }
         }
 
-        coVerify { behandlingKlient.beregn(any(), any(), any()) }
+        coVerify { behandlingKlient.kanBeregnes(any(), any(), any()) }
     }
 
     @Test
@@ -155,7 +155,6 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         val beregnetTrygdetid = beregnetTrygdetid(10, 10, 20)
         every { repository.oppdaterBeregnetTrygdetid(any(), any()) } returns trygdetid(behandlingId, beregnetTrygdetid)
-        coEvery { behandlingKlient.beregn(any(), any(), true) } returns true
 
         runBlocking {
             service.lagreBeregnetTrygdetid(
@@ -165,8 +164,7 @@ internal class TrygdetidServiceTest {
             )
         }
         coVerify(exactly = 1) {
-            behandlingKlient.beregn(any(), any(), false)
-            behandlingKlient.beregn(any(), any(), true)
+            behandlingKlient.kanBeregnes(any(), any(), false)
             repository.oppdaterBeregnetTrygdetid(any(), any())
         }
     }
@@ -175,7 +173,7 @@ internal class TrygdetidServiceTest {
     fun `skal feile ved lagring av beregnet trygdetid hvis behandling er i feil tilstand`() {
         val behandlingId = randomUUID()
         val beregnetTrygdetid = beregnetTrygdetid(10, 10, 20)
-        coEvery { behandlingKlient.beregn(any(), any(), false) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), false) } returns false
 
         runBlocking {
             assertThrows<Exception> {
@@ -188,7 +186,7 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.beregn(any(), any(), false)
+            behandlingKlient.kanBeregnes(any(), any(), false)
         }
     }
 }

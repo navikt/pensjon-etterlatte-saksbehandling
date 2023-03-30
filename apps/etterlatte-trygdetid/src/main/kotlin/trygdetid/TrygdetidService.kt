@@ -24,6 +24,7 @@ class TrygdetidService(
         trygdetidGrunnlag: TrygdetidGrunnlag
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
+            // TODO hvis status er "forbi" trygdetid bør dette sette tilstand tilbake til trygdetid?
             trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
         }
 
@@ -33,11 +34,12 @@ class TrygdetidService(
         beregnetTrygdetid: BeregnetTrygdetid
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
+            // TODO hvis status er "forbi" trygdetid bør dette sette tilstand tilbake til trygdetid?
             trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
         }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {
-        val kanFastsetteTrygdetid = behandlingKlient.beregn(behandlingId, bruker, false)
+        val kanFastsetteTrygdetid = behandlingKlient.kanBeregnes(behandlingId, bruker, false)
         return if (kanFastsetteTrygdetid) {
             block()
         } else {

@@ -22,6 +22,7 @@ import no.nav.etterlatte.hendelserpdl.pdl.PdlService
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.doedsfall.Doedsfall
@@ -276,9 +277,7 @@ class IntegrationTest {
                 addHandler { request ->
                     if (request.url.fullPath.startsWith("/")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                        val json = "{\n" +
-                            "  \"folkeregisterident\": \"70078749472\"\n" +
-                            "}"
+                        val json = mapOf("folkeregisterident" to "70078749472", "type" to "FOLKEREGISTERIDENT").toJson()
                         respond(json, headers = headers)
                     } else {
                         error(request.url.fullPath)

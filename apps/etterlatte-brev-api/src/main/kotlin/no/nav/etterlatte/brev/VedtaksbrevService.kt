@@ -89,7 +89,7 @@ class VedtaksbrevService(
     private suspend fun opprettEllerOppdater(behandling: Behandling): UlagretBrev {
         val (avsender, attestant) = adresseService.hentAvsenderOgAttestant(behandling.vedtak)
 
-        val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr)
+        val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.soeker.fnr)
 
         val vedtakType = behandling.vedtak.type
 
@@ -109,9 +109,9 @@ class VedtaksbrevService(
             tittel = "Vedtak om ${vedtakType.name.lowercase()}",
             behandling.spraak,
             Mottaker(
-                foedselsnummer = Foedselsnummer.of(behandling.persongalleri.innsender.fnr),
+                foedselsnummer = Foedselsnummer.of(behandling.persongalleri.soeker.fnr),
                 adresse = Adresse(
-                    navn = behandling.persongalleri.innsender.navn,
+                    navn = behandling.persongalleri.soeker.navn,
                     adresse = mottaker.adresse,
                     postnummer = mottaker.postnummer,
                     poststed = mottaker.poststed,

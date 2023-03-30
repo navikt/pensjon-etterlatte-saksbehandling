@@ -37,11 +37,11 @@ import java.util.UUID.randomUUID
 val kilde = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, "opplysningsId1")
 val statiskUuid = randomUUID()!!
 
-val AVDOED_Folkeregisteridentifikator = Folkeregisteridentifikator.of("01448203510")
-val GJENLEVENDE_Folkeregisteridentifikator = Folkeregisteridentifikator.of("29106323621")
-val SOEKER_Folkeregisteridentifikator = Folkeregisteridentifikator.of("16021254243")
-val HELSOESKEN_Folkeregisteridentifikator = Folkeregisteridentifikator.of("06051250220")
-val HALVSOESKEN_Folkeregisteridentifikator = Folkeregisteridentifikator.of("09011076618")
+val AVDOED_FOLKEREGISTERIDENTIFIKATOR = Folkeregisteridentifikator.of("01448203510")
+val GJENLEVENDE_FOLKEREGISTERIDENTIFIKATOR = Folkeregisteridentifikator.of("29106323621")
+val SOEKER_FOLKEREGISTERIDENTIFIKATOR = Folkeregisteridentifikator.of("16021254243")
+val HELSOESKEN_FOLKEREGISTERIDENTIFIKATOR = Folkeregisteridentifikator.of("06051250220")
+val HALVSOESKEN_FOLKEREGISTERIDENTIFIKATOR = Folkeregisteridentifikator.of("09011076618")
 val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("20127905941")
 
 val ADRESSE_DEFAULT =
@@ -64,16 +64,16 @@ val ADRESSE_DEFAULT =
 
 internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Søker", "Barn").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, SOEKER_Folkeregisteridentifikator.toJsonNode()),
+    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOLKEREGISTERIDENTIFIKATOR.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        SOEKER_Folkeregisteridentifikator.getBirthDate().toJsonNode()
+        SOEKER_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().toJsonNode()
     ),
     FOEDSELSAAR to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        SOEKER_Folkeregisteridentifikator.getBirthDate().year.toJsonNode()
+        SOEKER_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().year.toJsonNode()
     ),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, Adressebeskyttelse.UGRADERT.toJsonNode()),
@@ -94,8 +94,8 @@ internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
         randomUUID(),
         kilde,
         FamilieRelasjon(
-            ansvarligeForeldre = listOf(AVDOED_Folkeregisteridentifikator, GJENLEVENDE_Folkeregisteridentifikator),
-            foreldre = listOf(AVDOED_Folkeregisteridentifikator, GJENLEVENDE_Folkeregisteridentifikator),
+            ansvarligeForeldre = listOf(AVDOED_FOLKEREGISTERIDENTIFIKATOR, GJENLEVENDE_FOLKEREGISTERIDENTIFIKATOR),
+            foreldre = listOf(AVDOED_FOLKEREGISTERIDENTIFIKATOR, GJENLEVENDE_FOLKEREGISTERIDENTIFIKATOR),
             barn = null
         ).toJsonNode()
     )
@@ -103,16 +103,16 @@ internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
 
 internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Hel", "Søsken").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_Folkeregisteridentifikator.toJsonNode()),
+    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOLKEREGISTERIDENTIFIKATOR.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        HELSOESKEN_Folkeregisteridentifikator.getBirthDate().toJsonNode()
+        HELSOESKEN_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().toJsonNode()
     ),
     FOEDSELSAAR to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        HELSOESKEN_Folkeregisteridentifikator.getBirthDate().year.toJsonNode()
+        HELSOESKEN_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().year.toJsonNode()
     ),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, Adressebeskyttelse.UGRADERT.toJsonNode()),
@@ -133,8 +133,8 @@ internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNod
         randomUUID(),
         kilde,
         FamilieRelasjon(
-            ansvarligeForeldre = listOf(AVDOED_Folkeregisteridentifikator, GJENLEVENDE_Folkeregisteridentifikator),
-            foreldre = listOf(AVDOED_Folkeregisteridentifikator, GJENLEVENDE_Folkeregisteridentifikator),
+            ansvarligeForeldre = listOf(AVDOED_FOLKEREGISTERIDENTIFIKATOR, GJENLEVENDE_FOLKEREGISTERIDENTIFIKATOR),
+            foreldre = listOf(AVDOED_FOLKEREGISTERIDENTIFIKATOR, GJENLEVENDE_FOLKEREGISTERIDENTIFIKATOR),
             barn = null
         ).toJsonNode()
     )
@@ -142,16 +142,16 @@ internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNod
 
 internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Halv", "Søsken").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_Folkeregisteridentifikator.toJsonNode()),
+    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOLKEREGISTERIDENTIFIKATOR.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        HALVSOESKEN_Folkeregisteridentifikator.getBirthDate().toJsonNode()
+        HALVSOESKEN_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().toJsonNode()
     ),
     FOEDSELSAAR to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        HALVSOESKEN_Folkeregisteridentifikator.getBirthDate().year.toJsonNode()
+        HALVSOESKEN_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().year.toJsonNode()
     ),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, Adressebeskyttelse.UGRADERT.toJsonNode()),
@@ -172,8 +172,8 @@ internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
         randomUUID(),
         kilde,
         FamilieRelasjon(
-            ansvarligeForeldre = listOf(AVDOED_Folkeregisteridentifikator, HALVSOESKEN_ANNEN_FORELDER),
-            foreldre = listOf(AVDOED_Folkeregisteridentifikator, HALVSOESKEN_ANNEN_FORELDER),
+            ansvarligeForeldre = listOf(AVDOED_FOLKEREGISTERIDENTIFIKATOR, HALVSOESKEN_ANNEN_FORELDER),
+            foreldre = listOf(AVDOED_FOLKEREGISTERIDENTIFIKATOR, HALVSOESKEN_ANNEN_FORELDER),
             barn = null
         ).toJsonNode()
     )
@@ -181,16 +181,16 @@ internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
 
 internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Død", "Far").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, AVDOED_Folkeregisteridentifikator.toJsonNode()),
+    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOLKEREGISTERIDENTIFIKATOR.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        AVDOED_Folkeregisteridentifikator.getBirthDate().toJsonNode()
+        AVDOED_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().toJsonNode()
     ),
     FOEDSELSAAR to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        AVDOED_Folkeregisteridentifikator.getBirthDate().year.toJsonNode()
+        AVDOED_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().year.toJsonNode()
     ),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     DOEDSDATO to Opplysning.Konstant(randomUUID(), kilde, LocalDateTime.parse("2022-08-17T00:00:00").toJsonNode()),
@@ -221,23 +221,23 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
         FamilieRelasjon(
             ansvarligeForeldre = emptyList(),
             foreldre = emptyList(),
-            barn = listOf(SOEKER_Folkeregisteridentifikator, HELSOESKEN_Folkeregisteridentifikator)
+            barn = listOf(SOEKER_FOLKEREGISTERIDENTIFIKATOR, HELSOESKEN_FOLKEREGISTERIDENTIFIKATOR)
         ).toJsonNode()
     )
 )
 
 internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Levende", "Mor").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_Folkeregisteridentifikator.toJsonNode()),
+    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOLKEREGISTERIDENTIFIKATOR.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        GJENLEVENDE_Folkeregisteridentifikator.getBirthDate().toJsonNode()
+        GJENLEVENDE_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().toJsonNode()
     ),
     FOEDSELSAAR to Opplysning.Konstant(
         randomUUID(),
         kilde,
-        GJENLEVENDE_Folkeregisteridentifikator.getBirthDate().year.toJsonNode()
+        GJENLEVENDE_FOLKEREGISTERIDENTIFIKATOR.getBirthDate().year.toJsonNode()
     ),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, Adressebeskyttelse.UGRADERT.toJsonNode()),
@@ -261,7 +261,7 @@ internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
         FamilieRelasjon(
             ansvarligeForeldre = emptyList(),
             foreldre = emptyList(),
-            barn = listOf(SOEKER_Folkeregisteridentifikator, HELSOESKEN_Folkeregisteridentifikator)
+            barn = listOf(SOEKER_FOLKEREGISTERIDENTIFIKATOR, HELSOESKEN_FOLKEREGISTERIDENTIFIKATOR)
         ).toJsonNode()
     )
 )

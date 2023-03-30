@@ -16,7 +16,7 @@ import java.time.temporal.ChronoUnit
  */
 class Folkeregisteridentifikator private constructor(@JsonValue val value: String) {
     init {
-        require(FoedselsnummerValidator.isValid(value))
+        require(FolkeregisteridentifikatorValidator.isValid(value))
     }
 
     companion object {
@@ -30,7 +30,7 @@ class Folkeregisteridentifikator private constructor(@JsonValue val value: Strin
             }
 
         fun isValid(fnr: String?): Boolean =
-            FoedselsnummerValidator.isValid(fnr!!.replace(Regex("[^0-9]"), ""))
+            FolkeregisteridentifikatorValidator.isValid(fnr!!.replace(Regex("[^0-9]"), ""))
     }
 
     /**

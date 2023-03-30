@@ -26,7 +26,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_Folkeregisteridentifikator
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOLKEREGISTERIDENTIFIKATOR
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -183,14 +183,14 @@ internal class GrunnlagDaoIntegrationTest {
             meta = objectMapper.createObjectNode(),
             opplysning = ADRESSE_DEFAULT.first().toJsonNode(),
             attestering = null,
-            fnr = SOEKER_Folkeregisteridentifikator,
+            fnr = SOEKER_FOLKEREGISTERIDENTIFIKATOR,
             periode = Periode(
                 fom = YearMonth.of(2022, 1),
                 tom = YearMonth.of(2022, 12)
             )
         )
 
-        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning, SOEKER_Folkeregisteridentifikator)
+        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning, SOEKER_FOLKEREGISTERIDENTIFIKATOR)
         val expected = OpplysningDao.GrunnlagHendelse(opplysning, 1, 1).toJson()
         val actual = opplysningRepo.hentAlleGrunnlagForSak(1).first().toJson()
 

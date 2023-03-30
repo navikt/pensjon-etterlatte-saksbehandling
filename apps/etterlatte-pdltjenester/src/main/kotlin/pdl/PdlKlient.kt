@@ -9,6 +9,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -78,7 +79,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             query = getQuery("/pdl/hentFolkeregisterIdent.graphql"),
             variables = PdlFolkeregisterIdentVariables(
                 ident = ident.value,
-                grupper = listOf("FOLKEREGISTERIDENT"),
+                grupper = listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn),
                 historikk = true
             )
         )

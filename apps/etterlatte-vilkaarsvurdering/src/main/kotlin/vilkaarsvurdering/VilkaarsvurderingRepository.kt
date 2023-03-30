@@ -22,7 +22,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
-import no.nav.etterlatte.libs.database.tidspunkt
+import no.nav.etterlatte.libs.database.timeStamp
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -274,7 +274,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 VilkaarsvurderingResultat(
                     utfall = VilkaarsvurderingUtfall.valueOf(utfall),
                     kommentar = stringOrNull("resultat_kommentar"),
-                    tidspunkt = tidspunkt("resultat_tidspunkt").toLocalDatetimeUTC(),
+                    tidspunkt = timeStamp("resultat_tidspunkt").toLocalDatetimeUTC(),
                     saksbehandler = string("resultat_saksbehandler")
                 )
             }
@@ -292,7 +292,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             vurdering = stringOrNull("resultat_kommentar")?.let { kommentar ->
                 VilkaarVurderingData(
                     kommentar = kommentar,
-                    tidspunkt = tidspunkt("resultat_tidspunkt").toLocalDatetimeUTC(),
+                    tidspunkt = timeStamp("resultat_tidspunkt").toLocalDatetimeUTC(),
                     saksbehandler = string("resultat_saksbehandler")
                 )
             },

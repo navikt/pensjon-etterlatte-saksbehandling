@@ -7,15 +7,15 @@ import rapidsandrivers.RapidsAndRiversAppBuilder
 
 fun <A : RapidsAndRiversAppBuilder> startRapidApplication(
     appBuilder: (env: Miljoevariabler) -> A,
-    also: (rc: RapidsConnection, service: A) -> Unit
+    createRiverConsumer: (rc: RapidsConnection, service: A) -> Unit
 ) {
     System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }.also { env ->
-        appBuilder.invoke(Miljoevariabler(env)).also { ab ->
+        appBuilder(Miljoevariabler(env)).also { ab ->
             RapidApplication.create(env)
                 .also {
-                    also.invoke(it, ab)
+                    createRiverConsumer(it, ab)
                 }.start()
         }
     }

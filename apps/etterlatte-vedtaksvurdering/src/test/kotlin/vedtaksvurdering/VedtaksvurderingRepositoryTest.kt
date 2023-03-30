@@ -7,7 +7,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -67,7 +67,7 @@ internal class VedtaksvurderingRepositoryTest {
             vedtak shouldNotBe null
             id shouldNotBe null
             status shouldBe VedtakStatus.OPPRETTET
-            soeker shouldBe Foedselsnummer.of(FNR_1)
+            soeker shouldBe Folkeregisteridentifikator.of(FNR_1)
             sakId shouldBe 1L
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null

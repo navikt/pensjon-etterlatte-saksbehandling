@@ -1,7 +1,7 @@
 package no.nav.etterlatte.person
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.libs.common.person.FoedselsnummerValidator.Companion.isValid
+import no.nav.etterlatte.libs.common.person.FolkeregisteridentifikatorValidator.Companion.isValid
 import org.junit.jupiter.api.Test
 
 internal class FoedselsnummerValidatorTest {

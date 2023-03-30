@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.S
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -108,7 +108,7 @@ internal class GrunnlagDaoIntegrationTest {
     @Test
     fun `kan legge til en personopplysning`() {
         val uuid = UUID.randomUUID()
-        val fnr = Foedselsnummer.of("13082819155")
+        val fnr = Folkeregisteridentifikator.of("13082819155")
 
         lagGrunnlagsopplysning(
             uuid = uuid,
@@ -303,14 +303,14 @@ internal class GrunnlagDaoIntegrationTest {
     }
 
     private companion object {
-        val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
-        val STOR_SNERK = Foedselsnummer.of("11057523044")
-        val GROENN_KOPP = Foedselsnummer.of("29018322402")
-        val SMEKKER_GYNGEHEST = Foedselsnummer.of("11078431921")
+        val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
+        val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+        val GROENN_KOPP = Folkeregisteridentifikator.of("29018322402")
+        val SMEKKER_GYNGEHEST = Folkeregisteridentifikator.of("11078431921")
 
         // barn
-        val BLAAOEYD_SAKS = Foedselsnummer.of("05111850870")
-        val GOEYAL_KRONJUVEL = Foedselsnummer.of("27121779531")
-        val GROENN_STAUDE = Foedselsnummer.of("09011350027")
+        val BLAAOEYD_SAKS = Folkeregisteridentifikator.of("05111850870")
+        val GOEYAL_KRONJUVEL = Folkeregisteridentifikator.of("27121779531")
+        val GROENN_STAUDE = Folkeregisteridentifikator.of("09011350027")
     }
 }

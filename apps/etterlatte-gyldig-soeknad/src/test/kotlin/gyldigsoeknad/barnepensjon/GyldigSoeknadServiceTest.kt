@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlagTyper.Innse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -137,8 +137,11 @@ internal class GyldigSoeknadServiceTest {
         val soeknad = objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
 
         val gjenlevendeFnr = "03108718357"
-        val foreldreFnrMedGjenlevende = listOf(Foedselsnummer.of(gjenlevendeFnr), Foedselsnummer.of("22128202440"))
-        val foreldreFnrUtenGjenlevende = listOf(Foedselsnummer.of("22128202440"))
+        val foreldreFnrMedGjenlevende = listOf(
+            Folkeregisteridentifikator.of(gjenlevendeFnr),
+            Folkeregisteridentifikator.of("22128202440")
+        )
+        val foreldreFnrUtenGjenlevende = listOf(Folkeregisteridentifikator.of("22128202440"))
         val gjenlevende = listOf(PersonInfoGyldighet("navn navnulfsen", gjenlevendeFnr))
         val innsender = PersonInfoGyldighet("innsendernavn", "03108718357")
 
@@ -152,7 +155,7 @@ private fun mockPerson(
 ) = Person(
     fornavn = "Test",
     etternavn = "Testulfsen",
-    foedselsnummer = Foedselsnummer.of("19078504903"),
+    foedselsnummer = Folkeregisteridentifikator.of("19078504903"),
     foedselsdato = LocalDate.parse("2020-06-10"),
     foedselsaar = 1985,
     foedeland = null,

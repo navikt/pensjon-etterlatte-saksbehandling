@@ -10,7 +10,7 @@ import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.retry
@@ -43,4 +43,4 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
     }
 }
 
-data class PersonFinnesIkkeException(val fnr: Foedselsnummer) : Exception()
+data class PersonFinnesIkkeException(val fnr: Folkeregisteridentifikator) : Exception()

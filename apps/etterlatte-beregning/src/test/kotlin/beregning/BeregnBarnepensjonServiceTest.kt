@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -233,7 +233,7 @@ internal class BeregnBarnepensjonServiceTest {
                 kilde,
                 Beregningsgrunnlag(
                     soesken.map {
-                        SoeskenMedIBeregning(Foedselsnummer.of(it), true)
+                        SoeskenMedIBeregning(Folkeregisteridentifikator.of(it), true)
                     }
                 ).toJsonNode()
             )

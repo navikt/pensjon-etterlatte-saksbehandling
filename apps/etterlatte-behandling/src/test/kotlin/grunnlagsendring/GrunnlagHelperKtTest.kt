@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
@@ -167,14 +167,14 @@ internal class GrunnlagHelperKtTest {
             registersReferanse = null,
             opplysningId = "opplysningsId1"
         )
-        val SOEKER_FOEDSELSNUMMER = Foedselsnummer.of("30106519672")
-        val HELSOESKEN_FOEDSELSNUMMER = Foedselsnummer.of("01018100157")
+        val SOEKER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("30106519672")
+        val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01018100157")
         val OPPLYSNINGSTYPE_FOEDSELSNUMMER_HELSOESKEN = Opplysningstype.FOEDSELSNUMMER to Opplysning.Konstant(
             UUID.randomUUID(),
             KILDE,
             HELSOESKEN_FOEDSELSNUMMER.toJsonNode()
         )
-        val AVDOED_FOEDSELSNUMMER = Foedselsnummer.of("07081177656")
-        val GJENLEVENDE_FOEDSELSNUMMER = Foedselsnummer.of("06048010820")
+        val AVDOED_FOEDSELSNUMMER = Folkeregisteridentifikator.of("07081177656")
+        val GJENLEVENDE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("06048010820")
     }
 }

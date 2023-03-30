@@ -34,7 +34,7 @@ import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -257,7 +257,7 @@ fun personOpplysning(
 ) = Person(
     fornavn = "Test",
     etternavn = "Testulfsen",
-    foedselsnummer = Foedselsnummer.of("19078504903"),
+    foedselsnummer = Folkeregisteridentifikator.of("19078504903"),
     foedselsdato = LocalDate.parse("2020-06-10"),
     foedselsaar = 1985,
     foedeland = null,
@@ -281,8 +281,8 @@ fun kommerBarnetTilgode(
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("S01")
 ) = KommerBarnetTilgode(svar, begrunnelse, kilde)
 
-val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
-val STOR_SNERK = Foedselsnummer.of("11057523044")
+val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
+val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
 fun mockPerson(
     utland: Utland? = null,
     familieRelasjon: FamilieRelasjon? = null,

@@ -8,7 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Utland
@@ -31,7 +31,7 @@ class PdlKlientImpl(
 
     override fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): PersonDTO {
         logger.info("Henter Pdl-modell for ${rolle.name}")
-        val personRequest = HentPersonRequest(Foedselsnummer.of(foedselsnummer), rolle)
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle)
         val response = runBlocking {
             pdl_app.post("$url/person/v2") {
                 contentType(ContentType.Application.Json)
@@ -44,8 +44,9 @@ class PdlKlientImpl(
 
 fun PersonDTO.hentDoedsdato(): LocalDate? = this.doedsdato?.verdi
 
-fun PersonDTO.hentAnsvarligeForeldre(): List<Foedselsnummer>? = this.familieRelasjon?.verdi?.ansvarligeForeldre
+fun PersonDTO.hentAnsvarligeForeldre(): List<Folkeregisteridentifikator>? =
+    this.familieRelasjon?.verdi?.ansvarligeForeldre
 
-fun PersonDTO.hentBarn(): List<Foedselsnummer>? = this.familieRelasjon?.verdi?.barn
+fun PersonDTO.hentBarn(): List<Folkeregisteridentifikator>? = this.familieRelasjon?.verdi?.barn
 
 fun PersonDTO.hentUtland(): Utland? = this.utland?.verdi

@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -37,12 +37,12 @@ import java.util.UUID.randomUUID
 val kilde = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, "opplysningsId1")
 val statiskUuid = randomUUID()!!
 
-val AVDOED_FOEDSELSNUMMER = Foedselsnummer.of("01448203510")
-val GJENLEVENDE_FOEDSELSNUMMER = Foedselsnummer.of("29106323621")
-val SOEKER_FOEDSELSNUMMER = Foedselsnummer.of("16021254243")
-val HELSOESKEN_FOEDSELSNUMMER = Foedselsnummer.of("06051250220")
-val HALVSOESKEN_FOEDSELSNUMMER = Foedselsnummer.of("09011076618")
-val HALVSOESKEN_ANNEN_FORELDER = Foedselsnummer.of("20127905941")
+val AVDOED_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01448203510")
+val GJENLEVENDE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("29106323621")
+val SOEKER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16021254243")
+val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("06051250220")
+val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("09011076618")
+val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("20127905941")
 
 val ADRESSE_DEFAULT =
     listOf(

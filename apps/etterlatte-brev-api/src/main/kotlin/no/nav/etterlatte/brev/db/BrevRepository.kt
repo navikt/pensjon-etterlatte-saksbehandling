@@ -15,7 +15,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -172,7 +172,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
         tittel = getString("tittel"),
         status = Status.valueOf(getString("status_id")),
         mottaker = Mottaker(
-            foedselsnummer = getString("foedselsnummer")?.let { Foedselsnummer.of(it) },
+            foedselsnummer = getString("foedselsnummer")?.let { Folkeregisteridentifikator.of(it) },
             orgnummer = getString("orgnummer"),
             adresse = getString("navn")?.let {
                 Adresse(

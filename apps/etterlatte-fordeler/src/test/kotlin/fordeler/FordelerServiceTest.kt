@@ -9,7 +9,7 @@ import no.nav.etterlatte.FNR_3
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
@@ -37,9 +37,9 @@ internal class FordelerServiceTest {
 
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 0
@@ -81,9 +81,9 @@ internal class FordelerServiceTest {
 
     @Test
     fun `skal ikke fordele hendelse som ikke oppfyller alle kriterier`() {
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
 
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
@@ -160,9 +160,9 @@ internal class FordelerServiceTest {
             behandlingKlient = behandlingKlient
         )
 
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 10
@@ -207,9 +207,9 @@ internal class FordelerServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
 
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
@@ -250,9 +250,9 @@ internal class FordelerServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
 
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),

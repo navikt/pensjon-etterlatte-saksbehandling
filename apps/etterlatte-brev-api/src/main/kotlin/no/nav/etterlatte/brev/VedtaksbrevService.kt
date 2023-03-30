@@ -14,7 +14,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
@@ -109,7 +109,7 @@ class VedtaksbrevService(
             tittel = "Vedtak om ${vedtakType.name.lowercase()}",
             behandling.spraak,
             Mottaker(
-                foedselsnummer = Foedselsnummer.of(behandling.persongalleri.innsender.fnr),
+                foedselsnummer = Folkeregisteridentifikator.of(behandling.persongalleri.innsender.fnr),
                 adresse = Adresse(
                     navn = behandling.persongalleri.innsender.navn,
                     adresse = mottaker.adresse,

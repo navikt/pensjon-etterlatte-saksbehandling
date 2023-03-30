@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class HentPersonRequest(
-    val foedselsnummer: Foedselsnummer,
+    val foedselsnummer: Folkeregisteridentifikator,
     val rolle: PersonRolle
 )
 

@@ -9,7 +9,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
-    suspend fun hentPerson(fnr: Foedselsnummer, rolle: PersonRolle): PdlPersonResponse {
+    suspend fun hentPerson(fnr: Folkeregisteridentifikator, rolle: PersonRolle): PdlPersonResponse {
         val request = PdlGraphqlRequest(
             query = getQuery("/pdl/hentPerson.graphql"),
             variables = toPdlVariables(fnr, rolle)
@@ -39,7 +39,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
     }
 
     // TODO utvide til rolleliste?
-    suspend fun hentPersonBolk(fnr: List<Foedselsnummer>): PdlPersonResponseBolk {
+    suspend fun hentPersonBolk(fnr: List<Folkeregisteridentifikator>): PdlPersonResponseBolk {
         val request = PdlGraphqlBolkRequest(
             query = getQuery("/pdl/hentPersonBolk.graphql"),
             variables = PdlBolkVariables(
@@ -98,7 +98,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
-    suspend fun hentGeografiskTilknytning(ident: Foedselsnummer): PdlGeografiskTilknytningResponse {
+    suspend fun hentGeografiskTilknytning(ident: Folkeregisteridentifikator): PdlGeografiskTilknytningResponse {
         val request = PdlGeografiskTilknytningRequest(
             query = getQuery("/pdl/hentGeografiskTilknytning.graphql"),
             variables = PdlGeografiskTilknytningIdentVariables(
@@ -129,7 +129,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             .replace(Regex("[\n\t]"), "")
     }
 
-    private fun toPdlVariables(fnr: Foedselsnummer, rolle: PersonRolle) =
+    private fun toPdlVariables(fnr: Folkeregisteridentifikator, rolle: PersonRolle) =
         when (rolle) {
             PersonRolle.BARN ->
                 PdlVariables(

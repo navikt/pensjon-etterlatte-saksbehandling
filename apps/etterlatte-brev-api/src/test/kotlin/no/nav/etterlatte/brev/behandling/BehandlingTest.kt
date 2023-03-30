@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -97,7 +97,7 @@ internal class BehandlingTest {
                     PersonType.INNSENDER,
                     "Innsend",
                     "Innsender",
-                    Foedselsnummer.of("11057523044")
+                    Folkeregisteridentifikator.of("11057523044")
                 ).toJsonNode()
             )
         )

@@ -1,8 +1,8 @@
 package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
@@ -93,7 +93,7 @@ class PersonService(
                     val folkeregisterIdent: String = it.data.hentIdenter.identer
                         .filter { it.gruppe == "FOLKEREGISTERIDENT" }
                         .first { !it.historisk }.ident
-                    FolkeregisterIdent(folkeregisterident = Foedselsnummer.of(folkeregisterIdent))
+                    FolkeregisterIdent(folkeregisterident = Folkeregisteridentifikator.of(folkeregisterIdent))
                 } catch (e: Exception) {
                     throw PdlForesporselFeilet(
                         "Fant ingen folkeregisterident for ${request.ident} fra PDL"

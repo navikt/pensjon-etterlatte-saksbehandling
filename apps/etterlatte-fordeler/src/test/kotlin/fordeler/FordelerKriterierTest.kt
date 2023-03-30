@@ -7,7 +7,7 @@ import no.nav.etterlatte.SVERIGE
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
@@ -38,7 +38,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = null,
                 ansvarligeForeldre = null,
-                foreldre = listOf(Foedselsnummer.of(FNR_2))
+                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
             )
         )
         val avdoed = mockPerson(
@@ -50,7 +50,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(barn.foedselsnummer),
                 ansvarligeForeldre = null,
-                foreldre = listOf(Foedselsnummer.of(FNR_2))
+                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
             )
         )
         val gjenlevende = mockPerson(
@@ -126,7 +126,7 @@ internal class FordelerKriterierTest {
                     embete = "tjoho",
                     type = "mindreaarig",
                     vergeEllerFullmektig = VergeEllerFullmektig(
-                        motpartsPersonident = Foedselsnummer.of("08026800685"),
+                        motpartsPersonident = Folkeregisteridentifikator.of("08026800685"),
                         navn = "Birger",
                         omfang = "personligeOgOekonomiskeInteresser",
                         omfangetErInnenPersonligOmraade = true
@@ -245,7 +245,10 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
-                barn = listOf(Foedselsnummer.of(barn.foedselsnummer.value), Foedselsnummer.of(FNR_1)),
+                barn = listOf(
+                    Folkeregisteridentifikator.of(barn.foedselsnummer.value),
+                    Folkeregisteridentifikator.of(FNR_1)
+                ),
                 ansvarligeForeldre = null,
                 foreldre = null
             )
@@ -266,7 +269,10 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
-                barn = listOf(Foedselsnummer.of(barn.foedselsnummer.value), Foedselsnummer.of("12101376212")),
+                barn = listOf(
+                    Folkeregisteridentifikator.of(barn.foedselsnummer.value),
+                    Folkeregisteridentifikator.of("12101376212")
+                ),
                 ansvarligeForeldre = null,
                 foreldre = null
             )
@@ -285,7 +291,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = null,
                 ansvarligeForeldre = null,
-                foreldre = listOf(Foedselsnummer.of(FNR_2))
+                foreldre = listOf(Folkeregisteridentifikator.of(FNR_2))
             )
         )
         val avdoed = mockPerson(
@@ -488,7 +494,7 @@ internal class FordelerKriterierTest {
     fun `gjenlevende uten foreldreansvar er ikke en gyldig kandidat`() {
         val barn = mockPerson(
             familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(Foedselsnummer.of(FNR_5)),
+                ansvarligeForeldre = listOf(Folkeregisteridentifikator.of(FNR_5)),
                 foreldre = null,
                 barn = null
             )

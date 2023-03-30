@@ -30,7 +30,7 @@ import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
@@ -356,7 +356,7 @@ internal class VedtaksbrevServiceTest {
     private companion object {
         private const val SAK_ID = 123L
         private val BEHANDLING_ID = UUID.randomUUID()
-        private val STOR_SNERK = Foedselsnummer.of("11057523044")
+        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
         private const val PORSGRUNN = "0805"
     }
 }

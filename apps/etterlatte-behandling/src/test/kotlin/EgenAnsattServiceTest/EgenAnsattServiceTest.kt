@@ -5,7 +5,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -72,9 +72,9 @@ class EgenAnsattServiceTest {
 
     @Test
     fun test() {
-        val fnr = Foedselsnummer.of("08071272487").value
+        val fnr = Folkeregisteridentifikator.of("08071272487").value
         sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON)
-        val fnr2 = Foedselsnummer.of("19078504903").value
+        val fnr2 = Folkeregisteridentifikator.of("19078504903").value
         sakService.finnEllerOpprettSak(fnr2, SakType.BARNEPENSJON)
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))

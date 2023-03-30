@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
@@ -31,7 +31,7 @@ class OpplysningDao(private val datasource: DataSource) {
             opplysningType = Opplysningstype.valueOf(getString("opplysning_type")),
             meta = objectMapper.createObjectNode(),
             opplysning = getString("opplysning").deSerialize()!!,
-            fnr = getString("fnr")?.let { Foedselsnummer.of(it) },
+            fnr = getString("fnr")?.let { Folkeregisteridentifikator.of(it) },
             periode = getString("fom")?.let { fom ->
                 Periode(
                     fom = YearMonth.parse(fom),
@@ -75,7 +75,10 @@ class OpplysningDao(private val datasource: DataSource) {
             }.executeQuery().toList { asGrunnlagshendelse() }
     }
 
-    fun finnNyesteOpplysningPaaFnr(fnr: Foedselsnummer, opplysningType: Opplysningstype): GrunnlagHendelse? =
+    fun finnNyesteOpplysningPaaFnr(
+        fnr: Folkeregisteridentifikator,
+        opplysningType: Opplysningstype
+    ): GrunnlagHendelse? =
         connection.use {
             it.prepareStatement(
                 """
@@ -123,7 +126,7 @@ class OpplysningDao(private val datasource: DataSource) {
     fun leggOpplysningTilGrunnlag(
         sakId: Long,
         behandlingsopplysning: Grunnlagsopplysning<JsonNode>,
-        fnr: Foedselsnummer? = null
+        fnr: Folkeregisteridentifikator? = null
     ): Long =
         connection.use {
             it.prepareStatement(
@@ -144,7 +147,7 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().apply { next() }.getLong("hendelsenummer")
         }
 
-    fun finnAllePersongalleriHvorPersonFinnes(fnr: Foedselsnummer): List<GrunnlagHendelse> =
+    fun finnAllePersongalleriHvorPersonFinnes(fnr: Folkeregisteridentifikator): List<GrunnlagHendelse> =
         connection.use {
             it.prepareStatement(
                 """
@@ -158,7 +161,7 @@ class OpplysningDao(private val datasource: DataSource) {
             }.executeQuery().toList { asGrunnlagshendelse() }
         }
 
-    fun finnAlleSakerForPerson(fnr: Foedselsnummer): Set<Long> =
+    fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<Long> =
         connection.use {
             it.prepareStatement(
                 """

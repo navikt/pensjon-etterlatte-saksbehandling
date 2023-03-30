@@ -70,3 +70,11 @@ spec:
       value: "true"
     - name: KONSISTENSAVSTEMMING_ENABLED
       value: "true"
+  accessPolicy:
+    outbound:
+      external:
+        - host: mpls04.adeo.no
+          ports:
+            - name: mq
+              port: 1414
+              protocol: TCP

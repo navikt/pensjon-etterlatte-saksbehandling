@@ -25,7 +25,7 @@ const PersonInfoWrapper = styled.div`
 type Props = {
   person: IPdlPerson
   kilde: KildePdl
-  avdoed: boolean
+  avdoed?: boolean
 }
 
 export const Person: React.FC<Props> = ({ person, kilde, avdoed = false }) => {

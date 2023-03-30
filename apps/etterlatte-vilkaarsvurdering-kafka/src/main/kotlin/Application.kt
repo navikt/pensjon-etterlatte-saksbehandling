@@ -8,7 +8,7 @@ import rapidsandrivers.getRapidEnv
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also {
-        Vilkaarsvurder(it, AppBuilder(Miljoevariabler(rapidEnv)).lagVilkaarsvurderingKlient())
+    RapidApplication.create(rapidEnv).also { rapidsConnection ->
+        Vilkaarsvurder(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv)).lagVilkaarsvurderingKlient())
     }.start()
 }

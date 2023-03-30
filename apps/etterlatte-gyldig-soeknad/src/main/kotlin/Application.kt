@@ -10,15 +10,15 @@ import rapidsandrivers.getRapidEnv
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also {
+    RapidApplication.create(rapidEnv).also { rapidsConnection ->
         val ab = AppBuilder(Miljoevariabler(rapidEnv))
         FordeltSoeknadRiver(
-            it,
+            rapidsConnection,
             GyldigSoeknadService(ab.createPdlClient()),
             ab.createBehandlingClient()
         )
         InnsendtSoeknadRiver(
-            it,
+            rapidsConnection,
             ab.createBehandlingClient()
         )
     }.start()

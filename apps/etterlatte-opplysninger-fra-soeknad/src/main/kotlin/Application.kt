@@ -7,6 +7,8 @@ import rapidsandrivers.getRapidEnv
 
 fun main() {
     RapidApplication.create(getRapidEnv())
-        .also { StartUthentingFraSoeknad(it, Opplysningsuthenter()) }
+        .also { rapidsConnection ->
+            StartUthentingFraSoeknad(rapidsConnection, Opplysningsuthenter())
+        }
         .start()
 }

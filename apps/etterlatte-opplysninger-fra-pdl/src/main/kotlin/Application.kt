@@ -8,7 +8,7 @@ import rapidsandrivers.getRapidEnv
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also {
-        BesvarOpplysningsbehov(it, AppBuilder(Miljoevariabler(rapidEnv)).createPdlService())
+    RapidApplication.create(rapidEnv).also { rapidsConnection ->
+        BesvarOpplysningsbehov(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv)).createPdlService())
     }.start()
 }

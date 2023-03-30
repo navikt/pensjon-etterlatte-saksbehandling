@@ -13,10 +13,10 @@ val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also {
+    RapidApplication.create(rapidEnv).also { rapidsConnection ->
         val ab = AppBuilder(Miljoevariabler(rapidEnv))
         Fordeler(
-            rapidsConnection = it,
+            rapidsConnection = rapidsConnection,
             fordelerService = FordelerService(
                 fordelerKriterier = FordelerKriterier(),
                 pdlTjenesterKlient = ab.pdlTjenesterKlient(),

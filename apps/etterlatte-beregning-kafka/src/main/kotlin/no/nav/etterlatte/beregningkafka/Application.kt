@@ -8,7 +8,7 @@ import rapidsandrivers.getRapidEnv
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also {
-        OmregningHendelser(it, AppBuilder(Miljoevariabler(rapidEnv)).createBeregningService())
+    RapidApplication.create(rapidEnv).also { rapidsConnection ->
+        OmregningHendelser(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv)).createBeregningService())
     }.start()
 }

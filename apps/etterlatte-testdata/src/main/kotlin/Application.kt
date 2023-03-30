@@ -72,7 +72,7 @@ val objectMapper: ObjectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-val logger: Logger = LoggerFactory.getLogger("BEY001")
+val logger: Logger = LoggerFactory.getLogger("testdata")
 val localDevelopment = env["DEV"].toBoolean()
 val httpClient = httpClient()
 val config: Config = ConfigFactory.load()

@@ -6,18 +6,18 @@ import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.pdl.PdlSivilstand
 
-object SivilstatusMapper {
+object SivilstandMapper {
 
-    fun mapSivilstatus(
+    fun mapSivilstand(
         sivilstander: List<PdlSivilstand>
     ): List<Sivilstand> = runBlocking {
-        // Legg til parallelle sannheter
-
         sivilstander.map {
             Sivilstand(
                 sivilstatus = it.type.let { type -> Sivilstatus.valueOf(type.name) },
                 relatertVedSiviltilstand = it.relatertVedSivilstand?.let { Foedselsnummer.of(it) },
-                gyldigFraOgMed = it.gyldigFraOgMed
+                gyldigFraOgMed = it.gyldigFraOgMed,
+                bekreftelsesdato = it.bekreftelsesdato,
+                kilde = it.metadata.master
             )
         }
     }

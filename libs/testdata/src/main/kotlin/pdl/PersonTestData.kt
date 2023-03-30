@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKontaktadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.hentOppholdsadresse
+import no.nav.etterlatte.libs.common.grunnlag.hentSivilstand
 import no.nav.etterlatte.libs.common.grunnlag.hentSivilstatus
 import no.nav.etterlatte.libs.common.grunnlag.hentStatsborgerskap
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
@@ -38,6 +39,7 @@ fun personTestData(
     kontaktadresse = opplysningsmap.hentKontaktadresse()?.verdi,
     oppholdsadresse = opplysningsmap.hentOppholdsadresse()?.verdi,
     sivilstatus = opplysningsmap.hentSivilstatus()?.verdi,
+    sivilstand = opplysningsmap.hentSivilstand()?.verdi,
     statsborgerskap = opplysningsmap.hentStatsborgerskap()?.verdi,
     utland = opplysningsmap.hentUtland()?.verdi,
     familieRelasjon = opplysningsmap.hentFamilierelasjon()?.verdi,

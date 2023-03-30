@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.K
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.OPPHOLDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTATUS
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
@@ -84,7 +85,8 @@ fun lagEnkelopplysningerFraPDL(
         leggTilOpplysning(FOEDSELSDATO, personDTO.foedselsdato)
         leggTilOpplysning(FOEDELAND, personDTO.foedeland)
         leggTilOpplysning(DOEDSDATO, personDTO.doedsdato)
-        leggTilOpplysninger(SIVILSTATUS, personDTO.sivilstatus)
+        leggTilOpplysning(SIVILSTATUS, personDTO.sivilstatus)
+        leggTilOpplysninger(SIVILSTAND, personDTO.sivilstand)
         leggTilOpplysning(STATSBORGERSKAP, personDTO.statsborgerskap)
         leggTilOpplysning(UTLAND, personDTO.utland)
         leggTilOpplysning(FAMILIERELASJON, personDTO.familieRelasjon)

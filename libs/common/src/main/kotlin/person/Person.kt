@@ -29,7 +29,8 @@ data class Person(
     var deltBostedsadresse: List<Adresse>?,
     var kontaktadresse: List<Adresse>?,
     var oppholdsadresse: List<Adresse>?,
-    val sivilstatus: List<Sivilstand>?,
+    val sivilstatus: Sivilstatus?,
+    val sivilstand: List<Sivilstand>?,
     val statsborgerskap: String?,
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?,
@@ -85,9 +86,11 @@ enum class Sivilstatus {
 }
 
 data class Sivilstand(
-    val sivilstatus: Sivilstatus?,
+    val sivilstatus: Sivilstatus,
     val relatertVedSiviltilstand: Foedselsnummer?,
-    val gyldigFraOgMed: LocalDate?
+    val gyldigFraOgMed: LocalDate?,
+    val bekreftelsesdato: LocalDate?,
+    val kilde: String
 )
 
 data class Utland(

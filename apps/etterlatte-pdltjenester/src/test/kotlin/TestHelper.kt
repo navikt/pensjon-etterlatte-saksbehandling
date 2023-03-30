@@ -63,6 +63,7 @@ fun mockPerson(
     kontaktadresse = listOf(),
     oppholdsadresse = listOf(),
     sivilstatus = null,
+    sivilstand = null,
     statsborgerskap = OpplysningDTO("Norsk", UUID.randomUUID().toString()),
     utland = utland?.let { OpplysningDTO(utland, UUID.randomUUID().toString()) },
     familieRelasjon = familieRelasjon?.let { OpplysningDTO(it, UUID.randomUUID().toString()) },

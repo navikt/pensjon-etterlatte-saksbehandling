@@ -21,6 +21,7 @@ data class TrygdetidGrunnlag(
     val type: TrygdetidType,
     val bosted: String,
     val periode: TrygdetidPeriode,
+    val trygdetid: Int,
     val kilde: String
 )
 

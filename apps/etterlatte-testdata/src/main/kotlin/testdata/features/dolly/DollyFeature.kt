@@ -40,7 +40,6 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                 val accessToken = getClientAccessToken()
                 logger.info("got accesstoken")
                 val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)
-                logger.info("got gruppeid $gruppeId")
 
                 call.respond(
                     MustacheContent(

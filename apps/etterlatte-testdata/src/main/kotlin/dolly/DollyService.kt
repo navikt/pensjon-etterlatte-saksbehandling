@@ -13,14 +13,12 @@ class DollyService(
      * Returnerer ID-en på testgruppen dersom den eksisterer. Hvis ikke må gruppen opprettes manuelt.
      */
     fun hentTestGruppe(username: String, accessToken: String): Long? = runBlocking {
-        logger.info("henter brukere")
         val brukere = dollyClient.hentDollyBrukere(accessToken)
         logger.info("brukere: ${brukere.size}")
         val bruker = brukere
             .filter { bruker -> bruker.brukerId != null }
             .find { it.epost?.uppercase() == username.uppercase() }
             ?: throw Exception("Bruker med epost = $username finnes ikke i Dolly.")
-        logger.info("bruker navident: ${bruker.navIdent}")
 
         dollyClient.hentBrukersGrupper(bruker.brukerId!!, accessToken).contents
             .find { it.navn == testdataGruppe.navn }?.id

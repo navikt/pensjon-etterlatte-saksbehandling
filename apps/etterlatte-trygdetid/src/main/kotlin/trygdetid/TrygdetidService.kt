@@ -39,7 +39,7 @@ class TrygdetidService(
         }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {
-        val kanFastsetteTrygdetid = behandlingKlient.kanBeregnes(behandlingId, bruker, false)
+        val kanFastsetteTrygdetid = behandlingKlient.kanBeregnes(behandlingId, bruker)
         return if (kanFastsetteTrygdetid) {
             block()
         } else {

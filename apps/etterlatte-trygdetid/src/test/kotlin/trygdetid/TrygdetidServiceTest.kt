@@ -10,7 +10,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -29,7 +28,7 @@ internal class TrygdetidServiceTest {
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), false) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any()) } returns true
     }
 
     @AfterEach
@@ -46,7 +45,7 @@ internal class TrygdetidServiceTest {
 
         trygdetid shouldNotBe null
 
-        verify(exactly = 1) { repository.hentTrygdetid(any()) }
+        verify(exactly = 1) { repository.hentTrygdetid(behandlingId) }
     }
 
     @Test
@@ -58,7 +57,7 @@ internal class TrygdetidServiceTest {
 
         trygdetid shouldBe null
 
-        verify(exactly = 1) { repository.hentTrygdetid(any()) }
+        verify(exactly = 1) { repository.hentTrygdetid(behandlingId) }
     }
 
     @Test
@@ -68,13 +67,13 @@ internal class TrygdetidServiceTest {
         every { repository.opprettTrygdetid(any()) } returns trygdetid(behandlingId)
 
         runBlocking {
-            service.opprettTrygdetid(behandlingId, Saksbehandler("token", "ident"))
+            service.opprettTrygdetid(behandlingId, saksbehandler)
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.kanBeregnes(any(), any(), any())
-            repository.hentTrygdetid(any())
-            repository.opprettTrygdetid(any())
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentTrygdetid(behandlingId)
+            repository.opprettTrygdetid(behandlingId)
         }
     }
 
@@ -85,28 +84,28 @@ internal class TrygdetidServiceTest {
 
         runBlocking {
             assertThrows<IllegalArgumentException> {
-                service.opprettTrygdetid(behandlingId, Saksbehandler("token", "ident"))
+                service.opprettTrygdetid(behandlingId, saksbehandler)
             }
         }
 
         coVerify(exactly = 1) {
-            repository.hentTrygdetid(any())
-            behandlingKlient.kanBeregnes(any(), any(), any())
+            repository.hentTrygdetid(behandlingId)
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
         }
     }
 
     @Test
     fun `skal feile ved opprettelse av trygdetid dersom behandling er i feil tilstand`() {
         val behandlingId = randomUUID()
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), false) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any()) } returns false
 
         runBlocking {
             assertThrows<Exception> {
-                service.opprettTrygdetid(behandlingId, Saksbehandler("token", "ident"))
+                service.opprettTrygdetid(behandlingId, saksbehandler)
             }
         }
 
-        coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.kanBeregnes(behandlingId, saksbehandler) }
     }
 
     @Test
@@ -119,14 +118,14 @@ internal class TrygdetidServiceTest {
         runBlocking {
             service.lagreTrygdetidGrunnlag(
                 behandlingId,
-                Saksbehandler("token", "ident"),
+                saksbehandler,
                 trygdetidGrunnlag
             )
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.kanBeregnes(any(), any(), any())
-            repository.opprettTrygdetidGrunnlag(any(), any())
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
         }
     }
 
@@ -135,19 +134,19 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         val trygdetid = trygdetid(behandlingId)
         val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), false) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any()) } returns false
 
         runBlocking {
             assertThrows<Exception> {
                 service.lagreTrygdetidGrunnlag(
                     behandlingId,
-                    Saksbehandler("token", "ident"),
+                    saksbehandler,
                     trygdetidGrunnlag
                 )
             }
         }
 
-        coVerify { behandlingKlient.kanBeregnes(any(), any(), any()) }
+        coVerify { behandlingKlient.kanBeregnes(behandlingId, saksbehandler) }
     }
 
     @Test
@@ -159,13 +158,13 @@ internal class TrygdetidServiceTest {
         runBlocking {
             service.lagreBeregnetTrygdetid(
                 behandlingId,
-                Saksbehandler("token", "ident"),
+                saksbehandler,
                 beregnetTrygdetid
             )
         }
         coVerify(exactly = 1) {
-            behandlingKlient.kanBeregnes(any(), any(), false)
-            repository.oppdaterBeregnetTrygdetid(any(), any())
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
         }
     }
 
@@ -173,20 +172,20 @@ internal class TrygdetidServiceTest {
     fun `skal feile ved lagring av beregnet trygdetid hvis behandling er i feil tilstand`() {
         val behandlingId = randomUUID()
         val beregnetTrygdetid = beregnetTrygdetid(10, 10, 20)
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), false) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any()) } returns false
 
         runBlocking {
             assertThrows<Exception> {
                 service.lagreBeregnetTrygdetid(
                     behandlingId,
-                    Saksbehandler("token", "ident"),
+                    saksbehandler,
                     beregnetTrygdetid
                 )
             }
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.kanBeregnes(any(), any(), false)
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
         }
     }
 }

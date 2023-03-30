@@ -21,16 +21,15 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
-import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
-import no.nav.etterlatte.libs.database.tidspunkt
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(private val ds: DataSource) {
+    private val logger = LoggerFactory.getLogger(VilkaarsvurderingRepository::class.java)
 
-    private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(ds)
     private val delvilkaarRepository = DelvilkaarRepository()
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
@@ -48,10 +47,15 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
 
     private fun hentNonNull(behandlingId: UUID, tx: TransactionalSession): Vilkaarsvurdering {
         val params = mapOf("behandling_id" to behandlingId)
-        return repositoryWrapper.hentMedKotliquery(Queries.hentVilkaarsvurdering, params, tx) { row ->
-            val vilkaarsvurderingId = row.uuid("id")
-            row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, tx))
-        } ?: throw NullPointerException("Forventet å hente en vilkaarsvurdering men var null.")
+        return queryOf(statement = Queries.hentVilkaarsvurdering, paramMap = params)
+            .let {
+                tx.run(
+                    it.map { row ->
+                        row.toVilkaarsvurdering(hentVilkaar(row.uuid("id"), tx))
+                    }.asSingle
+                )
+            }
+            ?: throw NullPointerException("Forventet å hente en vilkaarsvurdering men var null.")
     }
 
     fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
@@ -167,17 +171,22 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         behandlingId: UUID,
         vurdertVilkaar: VurdertVilkaar
     ): Vilkaarsvurdering {
-        repositoryWrapper.oppdater(
-            query = Queries.lagreVilkaarResultat,
-            params = mapOf(
-                "id" to vurdertVilkaar.vilkaarId,
-                "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
-                "resultat_tidspunkt" to vurdertVilkaar.vurdering.tidspunkt.toTidspunkt().toTimestamp(),
-                "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
-            ),
-            loggtekst = "Lagrer vilkårresultat",
-            ekstra = { delvilkaarRepository.oppdaterDelvilkaar(vurdertVilkaar, it) }
-        )
+        using(sessionOf(ds)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = Queries.lagreVilkaarResultat,
+                    paramMap = mapOf(
+                        "id" to vurdertVilkaar.vilkaarId,
+                        "resultat_kommentar" to vurdertVilkaar.vurdering.kommentar,
+                        "resultat_tidspunkt" to vurdertVilkaar.vurdering.tidspunkt.toTidspunkt().toTimestamp(),
+                        "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler
+                    )
+                )
+                    .also { logger.info("Lagrer vilkårresultat") }
+                    .let { tx.run(it.asUpdate) }
+                    .also { delvilkaarRepository.oppdaterDelvilkaar(vurdertVilkaar, tx) }
+            }
+        }
         return hentNonNull(behandlingId)
     }
 
@@ -274,7 +283,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                 VilkaarsvurderingResultat(
                     utfall = VilkaarsvurderingUtfall.valueOf(utfall),
                     kommentar = stringOrNull("resultat_kommentar"),
-                    tidspunkt = tidspunkt("resultat_tidspunkt").toLocalDatetimeUTC(),
+                    tidspunkt = sqlTimestamp("resultat_tidspunkt").toTidspunkt().toLocalDatetimeUTC(),
                     saksbehandler = string("resultat_saksbehandler")
                 )
             }
@@ -292,7 +301,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
             vurdering = stringOrNull("resultat_kommentar")?.let { kommentar ->
                 VilkaarVurderingData(
                     kommentar = kommentar,
-                    tidspunkt = tidspunkt("resultat_tidspunkt").toLocalDatetimeUTC(),
+                    tidspunkt = sqlTimestamp("resultat_tidspunkt").toTidspunkt().toLocalDatetimeUTC(),
                     saksbehandler = string("resultat_saksbehandler")
                 )
             },

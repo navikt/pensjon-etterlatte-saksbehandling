@@ -7,21 +7,17 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.BehandlingId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.SakId
 import org.slf4j.LoggerFactory
-import java.util.*
 import javax.sql.DataSource
 
-class TilbakekrevingDao(
-    val dataSource: DataSource
-) {
+class TilbakekrevingDao(private val dataSource: DataSource) {
     fun lagreMottattKravgrunnlag(
         mottattKravgrunnlag: Tilbakekreving.MottattKravgrunnlag
     ): Tilbakekreving.MottattKravgrunnlag =
@@ -36,42 +32,17 @@ class TilbakekrevingDao(
                         """,
                     paramMap = with(mottattKravgrunnlag) {
                         mapOf(
-                            "sak_id" to sakId.value.param<Long>(),
-                            "behandling_id" to behandlingId.value.param<UUID>(),
-                            "kravgrunnlag_id" to kravgrunnlagId.value.param<Long>(),
+                            "sak_id" to sakId.value.param(),
+                            "behandling_id" to behandlingId.value.param(),
+                            "kravgrunnlag_id" to kravgrunnlagId.value.param(),
                             "opprettet" to mottattKravgrunnlag.opprettet.toTimestamp().param(),
-                            "kravgrunnlag" to kravgrunnlag.toJson().param<String>()
+                            "kravgrunnlag" to kravgrunnlag.toJson().param()
                         )
                     }
                 ).let { tx.run(it.asUpdate) }
             }
         }
             .let { hentTilbakekreving(mottattKravgrunnlag.kravgrunnlagId.value) as Tilbakekreving.MottattKravgrunnlag }
-
-    fun lagreFattetVedtak(
-        fattetVedtak: Tilbakekreving.FattetVedtak,
-        tidspunkt: Tidspunkt
-    ): Tilbakekreving.FattetVedtak =
-        using(sessionOf(dataSource)) { session ->
-            session.transaction { tx ->
-                logger.info("Lagrer fattet vedtak for vedtakId=${fattetVedtak.kravgrunnlag.vedtakId.value}")
-
-                queryOf(
-                    statement = """
-                        UPDATE tilbakekreving
-                        SET vedtak = to_json(:vedtak::json)
-                        WHERE kravgrunnlag_id = :kravgrunnlag_id
-                        """,
-                    paramMap =
-                    mapOf(
-                        "kravgrunnlag_id" to fattetVedtak.kravgrunnlagId.value
-                    )
-                ).let { tx.run(it.asUpdate) }
-            }
-        }
-            .let { hentTilbakekreving(fattetVedtak.kravgrunnlagId.value) as Tilbakekreving.FattetVedtak }
-
-    // TODO lagre attestasjon
 
     fun hentTilbakekreving(kravgrunnlagId: Long): Tilbakekreving? =
         using(sessionOf(dataSource)) { session ->
@@ -81,7 +52,7 @@ class TilbakekrevingDao(
                     FROM tilbakekreving 
                     WHERE kravgrunnlag_id = :kravgrunnlag_id
                     """,
-                paramMap = mapOf("kravgrunnlag_id" to kravgrunnlagId.param<Long>())
+                paramMap = mapOf("kravgrunnlag_id" to kravgrunnlagId.param())
             )
                 .let {
                     session.run(
@@ -103,7 +74,7 @@ class TilbakekrevingDao(
                         sakId = SakId(long("sak_id")),
                         behandlingId = BehandlingId(uuid("behandling_id"), Kravgrunnlag.UUID30("")), // TODO
                         kravgrunnlagId = KravgrunnlagId(long("kravgrunnlag_id")),
-                        opprettet = tidspunkt("opprettet"),
+                        opprettet = sqlTimestamp("opprettet").toTidspunkt(),
                         kravgrunnlag = objectMapper.readValue(string("kravgrunnlag")),
                         vedtak = objectMapper.readValue(vedtak),
                         attestasjon = objectMapper.readValue(attestasjon)
@@ -114,7 +85,7 @@ class TilbakekrevingDao(
                         sakId = SakId(row.long("sak_id")),
                         behandlingId = BehandlingId(row.uuid("behandling_id"), Kravgrunnlag.UUID30("")), // TODO
                         kravgrunnlagId = KravgrunnlagId(row.long("kravgrunnlag_id")),
-                        opprettet = tidspunkt("opprettet"),
+                        opprettet = sqlTimestamp("opprettet").toTidspunkt(),
                         kravgrunnlag = objectMapper.readValue(string("kravgrunnlag")),
                         vedtak = objectMapper.readValue(vedtak)
                     )
@@ -124,7 +95,7 @@ class TilbakekrevingDao(
                         sakId = SakId(row.long("sak_id")),
                         behandlingId = BehandlingId(row.uuid("behandling_id"), Kravgrunnlag.UUID30("")), // TODO
                         kravgrunnlagId = KravgrunnlagId(row.long("kravgrunnlag_id")),
-                        opprettet = tidspunkt("opprettet"),
+                        opprettet = sqlTimestamp("opprettet").toTidspunkt(),
                         kravgrunnlag = objectMapper.readValue(kravgrunnlag)
                     )
                 }

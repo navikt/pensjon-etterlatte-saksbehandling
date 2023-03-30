@@ -30,14 +30,17 @@ data class MottakerRequest(
             land = adresse.land
         )
 
-        // todo: Må legge til støtte for utenlandske adresser. Er kun adresselinje 1 hvis innland. linje 2 og 3 hvis utland
         fun fraRegoppslag(regoppslag: RegoppslagResponseDTO) = MottakerRequest(
             navn = regoppslag.navn,
-            adresse = """
-                ${regoppslag.adresse.adresselinje1}, ${regoppslag.adresse.postnummer} ${regoppslag.adresse.poststed?.capitalize()}
-            """.trimIndent(),
+            adresse = regoppslag.adresse.let {
+                listOfNotNull(
+                    it.adresselinje1,
+                    it.adresselinje2,
+                    it.adresselinje3
+                ).joinToString(", ")
+            },
             postnummer = regoppslag.adresse.postnummer,
-            poststed = regoppslag.adresse.poststed,
+            poststed = regoppslag.adresse.poststed?.capitalize(),
             land = regoppslag.adresse.land
         )
     }

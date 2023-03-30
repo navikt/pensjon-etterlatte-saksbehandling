@@ -29,7 +29,6 @@ export const tagColors: Record<
   [SoeknadTypeFilter.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,
   [IBehandlingsType.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
   [IBehandlingsType.REVURDERING]: Variants.ALT3_FILLED,
-  [IBehandlingsType.OMREGNING]: Variants.ALT3_FILLED,
   [IBehandlingsType.MANUELT_OPPHOER]: Variants.ALT3_FILLED,
   [ISaksType.BARNEPENSJON]: Variants.INFO,
   [ISaksType.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,

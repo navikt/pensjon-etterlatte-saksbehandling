@@ -4,10 +4,10 @@ package no.nav.etterlatte.libs.common.person
 value class NavPersonIdent(val ident: String) {
 
     init {
-        if (!ident.matches(Regex.fromLiteral("^\\d{11}$"))) {
+        if (!ident.matches(Regex("^\\d{11}$"))) {
             throw IllegalArgumentException("Fikk en verdi som ikke er en Npid")
         }
-        val month = ident.substring(2..3).toInt()
+        val month = ident.substring(2 until 4).toInt()
         if (month < 21 || month > 32) {
             throw IllegalArgumentException("Fikk en verdi som ikke er en Npid")
         }

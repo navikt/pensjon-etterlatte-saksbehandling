@@ -49,6 +49,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.getRapidEnv
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -59,9 +60,7 @@ class ApplicationBuilder {
         sikkerLogg.info("SikkerLogg: etterlatte-brev-api oppstart")
     }
 
-    private val env = System.getenv().toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }
+    private val env = getRapidEnv()
 
     private val proxyClient: HttpClient by lazy {
         val clientCredentialsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")

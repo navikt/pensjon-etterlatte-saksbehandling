@@ -5,9 +5,8 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(props: Miljoevariabler) : RapidsAndRiversAppBuilder(props) {
+class AppBuilder(props: Miljoevariabler) {
     private val vedtakUrl = requireNotNull(props["ETTERLATTE_VEDTAK_URL"])
     private val env = System.getenv()
 

@@ -1,11 +1,14 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.rapidsandrivers.startRapidApplication
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.vilkaarsvurdering.AppBuilder
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsvurder
-import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.RapidApplication
+import rapidsandrivers.getRapidEnv
 
-fun main() = startRapidApplication(
-    { AppBuilder(it) },
-    { rc: RapidsConnection, ab: AppBuilder -> Vilkaarsvurder(rc, ab.lagVilkaarsvurderingKlient()) }
-)
+fun main() {
+    val rapidEnv = getRapidEnv()
+    RapidApplication.create(rapidEnv).also {
+        Vilkaarsvurder(it, AppBuilder(Miljoevariabler(rapidEnv)).lagVilkaarsvurderingKlient())
+    }.start()
+}

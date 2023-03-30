@@ -33,13 +33,14 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import rapidsandrivers.getRapidEnv
 import java.time.Duration
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
-    val rapidsConnection: RapidsConnection = RapidApplication.create(System.getenv().withConsumerGroupId())
+    val rapidsConnection: RapidsConnection = RapidApplication.create(getRapidEnv())
 ) {
     val clock = utcKlokke()
 
@@ -164,8 +165,3 @@ private fun kjoereplanKonsistensavstemming() = setOf(
     30.oktober(2023),
     22.november(2023)
 )
-
-private fun Map<String, String>.withConsumerGroupId() =
-    this.toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }

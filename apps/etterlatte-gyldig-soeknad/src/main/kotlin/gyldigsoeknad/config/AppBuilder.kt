@@ -6,9 +6,8 @@ import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.client.PdlClient
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(props: Miljoevariabler) : RapidsAndRiversAppBuilder(props) {
+class AppBuilder(props: Miljoevariabler) {
     fun createPdlClient(): PdlClient {
         return PdlClient(pdlTjenester, "http://etterlatte-pdltjenester")
     }

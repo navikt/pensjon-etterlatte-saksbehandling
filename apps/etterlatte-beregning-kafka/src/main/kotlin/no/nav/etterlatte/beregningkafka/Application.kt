@@ -2,10 +2,13 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.beregningkafka.AppBuilder
 import no.nav.etterlatte.beregningkafka.OmregningHendelser
-import no.nav.etterlatte.rapidsandrivers.startRapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.helse.rapids_rivers.RapidApplication
+import rapidsandrivers.getRapidEnv
 
-fun main() = startRapidApplication(
-    { AppBuilder(it) },
-    { rc: RapidsConnection, ab: AppBuilder -> OmregningHendelser(rc, ab.createBeregningService()) }
-)
+fun main() {
+    val rapidEnv = getRapidEnv()
+    RapidApplication.create(rapidEnv).also {
+        OmregningHendelser(it, AppBuilder(Miljoevariabler(rapidEnv)).createBeregningService())
+    }.start()
+}

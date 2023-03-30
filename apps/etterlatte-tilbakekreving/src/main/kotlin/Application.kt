@@ -10,6 +10,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.getRapidEnv
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -22,7 +23,7 @@ fun main() {
 fun rapidApplication(
     applicationContext: ApplicationContext,
     rapidsConnection: RapidsConnection =
-        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(System.getenv().withConsumerGroupId()))
+        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
             .withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(ConfigFactory.load())) {
                     tilbakekreving(applicationContext.tilbakekrevingService)
@@ -42,9 +43,4 @@ fun rapidApplication(
             }
         })
         rapidsConnection
-    }
-
-private fun Map<String, String>.withConsumerGroupId() =
-    this.toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }

@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(props: Miljoevariabler) : RapidsAndRiversAppBuilder(props) {
+class AppBuilder(props: Miljoevariabler) {
 
     private val beregningapp: HttpClient by lazy {
         httpClientClientCredentials(

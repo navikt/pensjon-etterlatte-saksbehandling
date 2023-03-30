@@ -46,7 +46,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.random.Random
 
 internal class VedtaksbrevServiceTest {
@@ -320,6 +320,7 @@ internal class VedtaksbrevServiceTest {
 
     private fun opprettVedtak() = VedtakTilJournalfoering(
         vedtakId = 1234,
+        sakId = 4,
         behandlingId = BEHANDLING_ID,
         soekerIdent = "ident",
         ansvarligEnhet = "ansvarlig enhet"

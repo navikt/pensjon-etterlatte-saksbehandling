@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 import no.nav.etterlatte.brev.journalpost.Sak as JSak
 
 internal class DokarkivServiceTest {
@@ -73,7 +73,7 @@ internal class DokarkivServiceTest {
 
         assertEquals(Bruker(vedtak.soekerIdent), actualRequest.bruker)
         assertEquals("${vedtaksbrev.behandlingId}.${vedtaksbrev.id}", actualRequest.eksternReferanseId)
-        assertEquals(JSak(Sakstype.FAGSAK, vedtaksbrev.behandlingId.toString()), actualRequest.sak)
+        assertEquals(JSak(Sakstype.FAGSAK, vedtak.sakId.toString()), actualRequest.sak)
 
         val dokument = actualRequest.dokumenter.single()
         assertEquals(vedtaksbrev.tittel, dokument.tittel)
@@ -97,6 +97,7 @@ internal class DokarkivServiceTest {
 
     private fun opprettVedtak() = VedtakTilJournalfoering(
         vedtakId = 1,
+        sakId = 4,
         behandlingId = UUID.randomUUID(),
         soekerIdent = "ident",
         ansvarligEnhet = "4808"

@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 class VedtaksbrevService(
     private val db: BrevRepository,
@@ -95,8 +95,9 @@ class VedtaksbrevService(
 
         val brevRequest = when (vedtakType) {
             VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
+            VedtakType.ENDRING -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
             VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
-            else -> throw Exception("Vedtakstype er ikke støttet: $vedtakType")
+            VedtakType.OPPHOER -> throw Exception("Vedtakstype er ikke støttet: $vedtakType")
         }
 
         val pdf = pdfGenerator.genererPdf(brevRequest)

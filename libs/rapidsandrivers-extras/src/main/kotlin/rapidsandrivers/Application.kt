@@ -9,14 +9,11 @@ fun <A : RapidsAndRiversAppBuilder> startRapidApplication(
     appBuilder: (env: Miljoevariabler) -> A,
     createRiverConsumer: (rc: RapidsConnection, service: A) -> Unit
 ) {
-    System.getenv().toMutableMap().apply {
+    val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }.also { env ->
-        appBuilder(Miljoevariabler(env)).also { ab ->
-            RapidApplication.create(env)
-                .also {
-                    createRiverConsumer(it, ab)
-                }.start()
-        }
     }
+    val ab = appBuilder(Miljoevariabler(env))
+    val rapidsConnection = RapidApplication.create(env)
+    createRiverConsumer(rapidsConnection, ab)
+    rapidsConnection.start()
 }

@@ -45,7 +45,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         }
     }
 
-    suspend fun fastsettTrygdetid(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean {
+    suspend fun beregn(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean {
         logger.info("Sjekker om behandling med behandlingId=$behandlingId kan beregnes")
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/trygdetid")
 

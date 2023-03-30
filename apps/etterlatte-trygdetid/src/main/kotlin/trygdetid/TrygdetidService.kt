@@ -33,15 +33,11 @@ class TrygdetidService(
         beregnetTrygdetid: BeregnetTrygdetid
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
-            trygdetidFastsatt(behandlingId, bruker)
             trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
         }
 
-    private suspend fun trygdetidFastsatt(behandlingId: UUID, bruker: Bruker) =
-        behandlingKlient.fastsettTrygdetid(behandlingId, bruker, true)
-
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {
-        val kanFastsetteTrygdetid = behandlingKlient.fastsettTrygdetid(behandlingId, bruker, false)
+        val kanFastsetteTrygdetid = behandlingKlient.beregn(behandlingId, bruker, false)
         return if (kanFastsetteTrygdetid) {
             block()
         } else {

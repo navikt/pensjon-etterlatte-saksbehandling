@@ -12,7 +12,7 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
 
   return (
     <StegMenyWrapper role="navigation">
-      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
         <>
           <li>
             <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
@@ -36,7 +36,7 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
           <Separator aria-hidden={'true'} />
         </>
       )}
-      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && sakType === ISaksType.OMSTILLINGSSTOENAD && (
+      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && sakType === ISaksType.OMSTILLINGSSTOENAD && (
         <>
           <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.OPPRETTET) })}>
             <NavLink to="trygdetid">Trygdetid</NavLink>
@@ -44,7 +44,7 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
           <Separator aria-hidden={'true'} />
         </>
       )}
-      {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
         <>
           <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
             <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
@@ -55,7 +55,7 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
       <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
-      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && behandlingType !== IBehandlingsType.OMREGNING && (
+      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
         <>
           <Separator aria-hidden={'true'} />
           <li

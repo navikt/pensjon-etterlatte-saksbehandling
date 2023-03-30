@@ -114,7 +114,6 @@ function resultatTekst(behandling: IBehandlingsammendrag): string {
     case IBehandlingsType.MANUELT_OPPHOER:
       return behandling.status === IBehandlingStatus.AVBRUTT ? 'Avbrutt' : 'Opphørt: Må behandles i Pesys'
     case IBehandlingsType.REVURDERING:
-    case IBehandlingsType.OMREGNING:
     default:
       return ''
   }

@@ -4,10 +4,9 @@ import classNames from 'classnames'
 import { Next } from '@navikt/ds-icons'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { kanGaaTilStatus } from '~components/behandling/felles/utils'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
-  const { behandlingType, sakType, status } = props.behandling
+  const { behandlingType, status } = props.behandling
   const stegErDisabled = (steg: IBehandlingStatus) => !kanGaaTilStatus(status).includes(steg)
 
   return (
@@ -32,14 +31,6 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
         <>
           <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.VILKAARSVURDERT) })}>
             <NavLink to="vilkaarsvurdering">Vilkårsvurdering</NavLink>
-          </li>
-          <Separator aria-hidden={'true'} />
-        </>
-      )}
-      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && sakType === ISaksType.OMSTILLINGSSTOENAD && (
-        <>
-          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
-            <NavLink to="trygdetid">Trygdetid</NavLink>
           </li>
           <Separator aria-hidden={'true'} />
         </>

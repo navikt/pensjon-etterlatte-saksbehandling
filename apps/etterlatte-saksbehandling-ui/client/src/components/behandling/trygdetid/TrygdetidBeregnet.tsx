@@ -1,6 +1,5 @@
 import React, { FormEvent, useState } from 'react'
 import { Button, Heading, TextField } from '@navikt/ds-react'
-import { ContentHeader } from '~shared/styled'
 import { FormKnapper, FormWrapper } from '~components/behandling/trygdetid/styled'
 import { ITrygdetid, lagreOppsummertTrygdetid } from '~shared/api/trygdetid'
 import { useParams } from 'react-router-dom'
@@ -44,10 +43,9 @@ export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid, setTrygdetid }) 
   }
 
   return (
-    <>
-      <ContentHeader>
-        <Heading spacing size="medium" level="2">
-          Total trygdetid
+    <TrygdetidSum>
+        <Heading spacing size="small" level="3">
+            Sum faktisk og fremtidig trygdetid
         </Heading>
         <TrygdetidForm onSubmit={onSubmit}>
           <FormWrapper>
@@ -79,17 +77,20 @@ export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid, setTrygdetid }) 
               onChange={(e) => setOppsummertTrygdetid(Number(e.target.value))}
             />
 
-            <FormKnapper>
-              <Button loading={isPending(oppsummertTrygdetidStatus)} type="submit">
-                Lagre
-              </Button>
-            </FormKnapper>
-          </FormWrapper>
-        </TrygdetidForm>
-      </ContentHeader>
-    </>
+          <FormKnapper>
+            <Button loading={isPending(oppsummertTrygdetidStatus)} type="submit">
+              Lagre
+            </Button>
+          </FormKnapper>
+        </FormWrapper>
+      </TrygdetidForm>
+    </TrygdetidSum>
   )
 }
+
+const TrygdetidSum = styled.div`
+  padding-bottom: 4em;
+`
 
 const TrygdetidForm = styled.form`
   margin-left: auto;

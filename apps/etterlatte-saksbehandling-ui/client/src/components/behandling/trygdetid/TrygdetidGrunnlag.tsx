@@ -1,4 +1,3 @@
-import { ContentHeader } from '~shared/styled'
 import { Button, Heading, Label, Select, TextField } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
@@ -58,17 +57,15 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
   }
 
   return (
-    <>
-      <ContentHeader>
-        <Heading spacing size="medium" level="3">
+    <TrygdetidGrunnlagWrapper>
+      <Heading spacing size="small" level="3">
+        {
           {
-            {
-              [ITrygdetidGrunnlagType.NASJONAL]: 'Faktisk trygdetid',
-              [ITrygdetidGrunnlagType.FREMTIDIG]: 'Fremtidig trygdetid',
-            }[trygdetidGrunnlagType]
-          }
-        </Heading>
-      </ContentHeader>
+            [ITrygdetidGrunnlagType.NASJONAL]: 'Faktisk trygdetid',
+            [ITrygdetidGrunnlagType.FREMTIDIG]: 'Fremtidig trygdetid',
+          }[trygdetidGrunnlagType]
+        }
+      </Heading>
       <Innhold>
         <TrygdetidForm onSubmit={onSubmit}>
           <FormWrapper>
@@ -150,20 +147,24 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
                 </KalenderIkon>
               </Datovelger>
             </DatoSection>
-            <TextField
-              label={
-                trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG ? 'Fremtidig trygdetid' : 'Faktisk trygdetid'
-              }
-              size="medium"
-              type="number"
-              value={trygdetidgrunnlag.trygdetid == null ? undefined : trygdetidgrunnlag.trygdetid}
-              onChange={(e) =>
-                setTrygdetidgrunnlag({
-                  ...trygdetidgrunnlag,
-                  trygdetid: Number(e.target.value),
-                })
-              }
-            />
+            <TrygdetidInput>
+              <TextField
+                label={
+                  trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG
+                    ? 'Fremtidig trygdetid'
+                    : 'Faktisk trygdetid'
+                }
+                size="medium"
+                type="number"
+                value={trygdetidgrunnlag.trygdetid == null ? undefined : trygdetidgrunnlag.trygdetid}
+                onChange={(e) =>
+                  setTrygdetidgrunnlag({
+                    ...trygdetidgrunnlag,
+                    trygdetid: Number(e.target.value),
+                  })
+                }
+              />
+            </TrygdetidInput>
             {trygdetidGrunnlagType !== ITrygdetidGrunnlagType.FREMTIDIG && (
               <Kilde>
                 <TextField
@@ -190,9 +191,13 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
       </Innhold>
 
       {isFailure(trygdetidgrunnlagStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
-    </>
+    </TrygdetidGrunnlagWrapper>
   )
 }
+
+const TrygdetidGrunnlagWrapper = styled.div`
+  padding-bottom: 2em;
+`
 
 const TrygdetidForm = styled.form`
   display: flex;
@@ -203,6 +208,10 @@ const Land = styled.div`
 `
 
 const Kilde = styled.div`
+  width: 250px;
+`
+
+const TrygdetidInput = styled.div`
   width: 250px;
 `
 

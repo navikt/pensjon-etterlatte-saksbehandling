@@ -10,8 +10,6 @@ import { Vedtaksbrev } from './vedtaksbrev/Vedtaksbrev'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -28,7 +26,6 @@ const behandlingRoutes = (
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt behandling={behandling} /> },
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
-  { path: 'trygdetid', element: <Trygdetid behandling={behandling} /> },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
   { path: 'beregne', element: <Beregne behandling={behandling} /> },
   { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
@@ -94,12 +91,8 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
 function finnRoutesFoerstegangbehandling(behandling: IBehandlingReducer): Array<behandlingRouteTypes> {
   const routes: Array<behandlingRouteTypes> = ['soeknadsoversikt', 'vilkaarsvurdering', 'brev']
   if (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT) {
-    if (behandling.sakType == ISaksType.OMSTILLINGSSTOENAD) {
-      routes.push('trygdetid')
-    }
     routes.push('beregningsgrunnlag')
     routes.push('beregne')
   }
-
   return routes
 }

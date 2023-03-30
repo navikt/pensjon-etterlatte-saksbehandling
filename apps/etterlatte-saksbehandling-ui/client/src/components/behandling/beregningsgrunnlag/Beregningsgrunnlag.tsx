@@ -5,7 +5,6 @@ import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { BodyShort, Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { Content, ContentHeader } from '~shared/styled'
-import Trygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
@@ -27,7 +26,6 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
           </BodyShort>
         </HeadingWrapper>
       </ContentHeader>
-      <Trygdetid />
       {
         {
           [ISaksType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon behandling={behandling} />,

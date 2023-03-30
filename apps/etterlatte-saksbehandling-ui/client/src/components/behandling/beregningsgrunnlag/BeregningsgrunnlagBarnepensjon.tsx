@@ -25,6 +25,7 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import Trygdetid from '~components/behandling/beregningsgrunnlag/Trygdetid'
 
 interface FormValues {
   foedselsnummer: string
@@ -88,6 +89,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
   return (
     <>
+      <Trygdetid />
       <ContentHeader>
         <HeadingWrapper>
           <Heading level="2" size="medium">

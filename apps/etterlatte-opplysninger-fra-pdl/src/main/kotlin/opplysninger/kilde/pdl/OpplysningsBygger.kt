@@ -26,13 +26,13 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.V
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 
-class Opplysningsbolk(private val fnr: Foedselsnummer, private val innhentetTidspunkt: Tidspunkt) {
+class Opplysningsbolk(private val fnr: Folkeregisteridentifikator, private val innhentetTidspunkt: Tidspunkt) {
     private val opplysninger = mutableListOf<Grunnlagsopplysning<out Any>>()
     fun leggTilOpplysninger(
         opplysningstype: Opplysningstype,
@@ -66,7 +66,7 @@ fun lagEnkelopplysningerFraPDL(
     person: Person,
     personDTO: PersonDTO,
     opplysningsbehov: Opplysningstype, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1
-    fnr: Foedselsnummer
+    fnr: Folkeregisteridentifikator
 ): List<Grunnlagsopplysning<*>> {
     val tidspunktForInnhenting = Tidspunkt.now()
     val opplysningsbolk = Opplysningsbolk(fnr, tidspunktForInnhenting)
@@ -88,7 +88,7 @@ fun lagEnkelopplysningerFraPDL(
         leggTilOpplysning(STATSBORGERSKAP, personDTO.statsborgerskap)
         leggTilOpplysning(UTLAND, personDTO.utland)
         leggTilOpplysning(FAMILIERELASJON, personDTO.familieRelasjon)
-        leggTilOpplysning(FOEDSELSNUMMER, personDTO.foedselsnummer)
+        leggTilOpplysning(FOEDSELSNUMMER, personDTO.folkeregisteridentifikator)
         leggTilOpplysning(FOEDSELSAAR, personDTO.foedselsaar)
         leggTilOpplysning(PERSONROLLE, OpplysningDTO(personRolle, null))
         personDTO.avdoedesBarn?.let { leggTilOpplysning(AVDOEDESBARN, OpplysningDTO(it, null)) }

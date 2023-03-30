@@ -20,13 +20,13 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.S
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_Folkeregisteridentifikator
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -108,7 +108,7 @@ internal class GrunnlagDaoIntegrationTest {
     @Test
     fun `kan legge til en personopplysning`() {
         val uuid = UUID.randomUUID()
-        val fnr = Foedselsnummer.of("13082819155")
+        val fnr = Folkeregisteridentifikator.of("13082819155")
 
         lagGrunnlagsopplysning(
             uuid = uuid,
@@ -183,14 +183,14 @@ internal class GrunnlagDaoIntegrationTest {
             meta = objectMapper.createObjectNode(),
             opplysning = ADRESSE_DEFAULT.first().toJsonNode(),
             attestering = null,
-            fnr = SOEKER_FOEDSELSNUMMER,
+            fnr = SOEKER_Folkeregisteridentifikator,
             periode = Periode(
                 fom = YearMonth.of(2022, 1),
                 tom = YearMonth.of(2022, 12)
             )
         )
 
-        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning, SOEKER_FOEDSELSNUMMER)
+        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning, SOEKER_Folkeregisteridentifikator)
         val expected = OpplysningDao.GrunnlagHendelse(opplysning, 1, 1).toJson()
         val actual = opplysningRepo.hentAlleGrunnlagForSak(1).first().toJson()
 
@@ -303,14 +303,14 @@ internal class GrunnlagDaoIntegrationTest {
     }
 
     private companion object {
-        val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
-        val STOR_SNERK = Foedselsnummer.of("11057523044")
-        val GROENN_KOPP = Foedselsnummer.of("29018322402")
-        val SMEKKER_GYNGEHEST = Foedselsnummer.of("11078431921")
+        val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
+        val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+        val GROENN_KOPP = Folkeregisteridentifikator.of("29018322402")
+        val SMEKKER_GYNGEHEST = Folkeregisteridentifikator.of("11078431921")
 
         // barn
-        val BLAAOEYD_SAKS = Foedselsnummer.of("05111850870")
-        val GOEYAL_KRONJUVEL = Foedselsnummer.of("27121779531")
-        val GROENN_STAUDE = Foedselsnummer.of("09011350027")
+        val BLAAOEYD_SAKS = Folkeregisteridentifikator.of("05111850870")
+        val GOEYAL_KRONJUVEL = Folkeregisteridentifikator.of("27121779531")
+        val GROENN_STAUDE = Folkeregisteridentifikator.of("09011350027")
     }
 }

@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.person.FoedselsnummerValidator.Companion.isValid
 import org.junit.jupiter.api.Test
 
-internal class FoedselsnummerValidatorTest {
+internal class FolkeregisteridentifikatorValidatorTest {
 
     @Test
     fun `Sjekk diverse gyldige test fnr`() {

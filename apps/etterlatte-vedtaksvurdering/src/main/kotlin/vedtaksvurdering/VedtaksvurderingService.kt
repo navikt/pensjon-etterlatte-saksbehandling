@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
@@ -234,7 +234,7 @@ class VedtaksvurderingService(
         vilkaarsvurdering: VilkaarsvurderingDto?
     ): Vedtak {
         val opprettetVedtak = OpprettVedtak(
-            soeker = behandling.soeker.let { Foedselsnummer.of(it) },
+            soeker = behandling.soeker.let { Folkeregisteridentifikator.of(it) },
             sakId = behandling.sak,
             sakType = behandling.sakType,
             behandlingId = behandling.id,

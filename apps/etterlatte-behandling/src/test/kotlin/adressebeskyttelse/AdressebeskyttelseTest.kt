@@ -22,7 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.module
@@ -47,7 +47,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal kunne se på en vanlig behandling før adressebeskyttelse men ikke etter med mindre systembruker`() {
-        val fnr = Foedselsnummer.of("08071272487").value
+        val fnr = Folkeregisteridentifikator.of("08071272487").value
 
         testApplication {
             environment {
@@ -134,7 +134,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal kunne hente behandlinger på fnr før adressebeskyttelse`() {
-        val fnr = Foedselsnummer.of("08071272487").value
+        val fnr = Folkeregisteridentifikator.of("08071272487").value
 
         testApplication {
             environment {
@@ -220,7 +220,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
     @Test
     fun `skal kunne aksessere tilgangsroutes også etter adressebeskyttelse`() {
-        val fnr = Foedselsnummer.of("08071272487").value
+        val fnr = Folkeregisteridentifikator.of("08071272487").value
 
         testApplication {
             environment {
@@ -298,7 +298,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal kunne hente saker på fnr før adressebeskyttelse`() {
-        val fnr = Foedselsnummer.of("08071272487").value
+        val fnr = Folkeregisteridentifikator.of("08071272487").value
         testApplication {
             environment {
                 config = hoconApplicationConfig

@@ -19,7 +19,7 @@ fun Route.personRoute(service: PersonService) {
 
         post {
             val hentPersonRequest = call.receive<HentPersonRequest>()
-            logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
+            logger.info("Henter person med fnr=${hentPersonRequest.folkeregisteridentifikator}")
 
             try {
                 service.hentPerson(hentPersonRequest).let { call.respond(it) }
@@ -31,7 +31,7 @@ fun Route.personRoute(service: PersonService) {
         route("/v2") {
             post {
                 val hentPersonRequest = call.receive<HentPersonRequest>()
-                logger.info("Henter personopplysning med fnr=${hentPersonRequest.foedselsnummer}")
+                logger.info("Henter personopplysning med fnr=${hentPersonRequest.folkeregisteridentifikator}")
 
                 try {
                     service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
@@ -62,7 +62,9 @@ fun Route.personRoute(service: PersonService) {
 
         post {
             val hentGeografiskTilknytningRequest = call.receive<HentGeografiskTilknytningRequest>()
-            logger.info("Henter geografisk tilknyttning med fnr=${hentGeografiskTilknytningRequest.foedselsnummer}")
+            logger.info(
+                "Henter geografisk tilknyttning med fnr=${hentGeografiskTilknytningRequest.folkeregisteridentifikator}"
+            )
 
             try {
                 service.hentGeografiskTilknytning(hentGeografiskTilknytningRequest).let { call.respond(it) }

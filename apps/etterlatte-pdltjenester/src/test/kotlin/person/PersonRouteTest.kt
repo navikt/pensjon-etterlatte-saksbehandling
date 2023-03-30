@@ -57,7 +57,7 @@ class PersonRouteTest {
     @Test
     fun `skal returnere person`() {
         val hentPersonRequest = HentPersonRequest(
-            foedselsnummer = TRIVIELL_MIDTPUNKT,
+            folkeregisteridentifikator = TRIVIELL_MIDTPUNKT,
             rolle = PersonRolle.BARN
         )
 
@@ -86,7 +86,7 @@ class PersonRouteTest {
     @Test
     fun `skal returnere personopplysninger paa version 2`() {
         val hentPersonRequest = HentPersonRequest(
-            foedselsnummer = TRIVIELL_MIDTPUNKT,
+            folkeregisteridentifikator = TRIVIELL_MIDTPUNKT,
             rolle = PersonRolle.BARN
         )
 
@@ -146,7 +146,7 @@ class PersonRouteTest {
     @Test
     fun `skal returnere geografisk tilknytning`() {
         val hentGeografiskTilknytningRequest = HentGeografiskTilknytningRequest(
-            foedselsnummer = TRIVIELL_MIDTPUNKT
+            folkeregisteridentifikator = TRIVIELL_MIDTPUNKT
         )
 
         coEvery {
@@ -176,7 +176,7 @@ class PersonRouteTest {
     @Test
     fun `skal returne 500 naar kall mot person feiler`() {
         val hentPersonRequest = HentPersonRequest(
-            foedselsnummer = TRIVIELL_MIDTPUNKT,
+            folkeregisteridentifikator = TRIVIELL_MIDTPUNKT,
             rolle = PersonRolle.BARN
         )
 

@@ -3,7 +3,7 @@ package no.nav.etterlatte.beregning.regler.barnepensjon
 import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.regler.og
 
 data class AvdoedForelder(val trygdetid: Beregningstall)
 data class BarnepensjonGrunnlag(
-    val soeskenKull: FaktumNode<List<Foedselsnummer>>,
+    val soeskenKull: FaktumNode<List<Folkeregisteridentifikator>>,
     val avdoedForelder: FaktumNode<AvdoedForelder>
 )
 

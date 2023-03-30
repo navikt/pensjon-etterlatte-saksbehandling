@@ -84,8 +84,8 @@ internal class PersonServiceTest {
 
         assertNotNull(person.avdoedesBarn)
         assertEquals(2, person.avdoedesBarn?.size)
-        assertTrue(person.avdoedesBarn?.get(0)?.foedselsnummer?.value in expectedBarnFnr)
-        assertTrue(person.avdoedesBarn?.get(1)?.foedselsnummer?.value in expectedBarnFnr)
+        assertTrue(person.avdoedesBarn?.get(0)?.folkeregisteridentifikator?.value in expectedBarnFnr)
+        assertTrue(person.avdoedesBarn?.get(1)?.folkeregisteridentifikator?.value in expectedBarnFnr)
     }
 
     @Test

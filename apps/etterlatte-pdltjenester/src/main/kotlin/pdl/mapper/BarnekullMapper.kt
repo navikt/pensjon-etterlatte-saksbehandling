@@ -1,6 +1,6 @@
 package no.nav.etterlatte.pdl.mapper
 
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
@@ -20,12 +20,18 @@ object BarnekullMapper {
             ?.groupBy { it.relatertPersonsIdent }
             ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
             ?.map {
-                (Foedselsnummer.of(it.value?.relatertPersonsIdent))
+                (Folkeregisteridentifikator.of(it.value?.relatertPersonsIdent))
             }
 
         return barnFnr?.let { fnr ->
             pdlKlient.hentPersonBolk(fnr).data?.hentPersonBolk?.map {
-                PersonMapper.mapPerson(ppsKlient, pdlKlient, Foedselsnummer.of(it.ident), PersonRolle.BARN, it.person!!)
+                PersonMapper.mapPerson(
+                    ppsKlient,
+                    pdlKlient,
+                    Folkeregisteridentifikator.of(it.ident),
+                    PersonRolle.BARN,
+                    it.person!!
+                )
             }
         }
     }

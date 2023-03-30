@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
@@ -17,7 +17,7 @@ object PersonMapper {
     fun mapPerson(
         ppsKlient: ParallelleSannheterKlient,
         pdlKlient: PdlKlient,
-        fnr: Foedselsnummer,
+        fnr: Folkeregisteridentifikator,
         personRolle: PersonRolle,
         hentPerson: PdlHentPerson
     ): Person = runBlocking {
@@ -31,7 +31,7 @@ object PersonMapper {
         Person(
             fornavn = navn.fornavn,
             etternavn = navn.etternavn,
-            foedselsnummer = fnr,
+            folkeregisteridentifikator = fnr,
             foedselsdato = foedsel.foedselsdato,
             foedselsaar = foedsel.foedselsaar,
             doedsdato = doedsfall?.doedsdato,
@@ -64,7 +64,7 @@ object PersonMapper {
     fun mapOpplysningsperson(
         ppsKlient: ParallelleSannheterKlient,
         pdlKlient: PdlKlient,
-        fnr: Foedselsnummer,
+        fnr: Folkeregisteridentifikator,
         personRolle: PersonRolle,
         hentPerson: PdlHentPerson
     ): PersonDTO = runBlocking {
@@ -78,7 +78,7 @@ object PersonMapper {
         PersonDTO(
             fornavn = OpplysningDTO(navn.fornavn, navn.metadata.opplysningsId),
             etternavn = OpplysningDTO(navn.etternavn, navn.metadata.opplysningsId),
-            foedselsnummer = OpplysningDTO(fnr, null),
+            folkeregisteridentifikator = OpplysningDTO(fnr, null),
             foedselsdato = foedsel.foedselsdato?.let { OpplysningDTO(it, foedsel.metadata.opplysningsId) },
             foedselsaar = OpplysningDTO(foedsel.foedselsaar, foedsel.metadata.opplysningsId),
             doedsdato = doedsfall?.doedsdato?.let { OpplysningDTO(it, doedsfall.metadata.opplysningsId) },

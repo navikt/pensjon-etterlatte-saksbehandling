@@ -10,7 +10,7 @@ import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.retry
@@ -21,7 +21,7 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
     private val logger = LoggerFactory.getLogger(PdlTjenesterKlient::class.java)
 
     suspend fun hentPerson(hentPersonRequest: HentPersonRequest): Person {
-        logger.info("Henter person med ${hentPersonRequest.foedselsnummer} fra pdltjenester")
+        logger.info("Henter person med ${hentPersonRequest.folkeregisteridentifikator} fra pdltjenester")
         return retry<Person> {
             client.post(apiUrl) {
                 accept(Json)
@@ -34,7 +34,7 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
                 is RetryResult.Failure -> {
                     val exception = it.exceptions.last()
                     if (exception is ClientRequestException && exception.response.status == HttpStatusCode.NotFound) {
-                        throw PersonFinnesIkkeException(hentPersonRequest.foedselsnummer)
+                        throw PersonFinnesIkkeException(hentPersonRequest.folkeregisteridentifikator)
                     }
                     throw it.exceptions.last()
                 }
@@ -43,4 +43,4 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
     }
 }
 
-data class PersonFinnesIkkeException(val fnr: Foedselsnummer) : Exception()
+data class PersonFinnesIkkeException(val fnr: Folkeregisteridentifikator) : Exception()

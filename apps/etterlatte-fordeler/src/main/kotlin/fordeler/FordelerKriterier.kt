@@ -114,7 +114,7 @@ class FordelerKriterier {
     )
 
     private fun ikkeForelderTilBarn(avdoed: Person, barn: Person): Boolean {
-        return barn.familieRelasjon?.foreldre?.let { avdoed.foedselsnummer !in it } ?: true
+        return barn.familieRelasjon?.foreldre?.let { avdoed.folkeregisteridentifikator !in it } ?: true
     }
 
     private fun harAdressebeskyttelse(person: Person): Boolean {
@@ -145,7 +145,7 @@ class FordelerKriterier {
 
     private fun gjenlevendeHarIkkeForeldreansvar(barn: Person, gjenlevende: Person): Boolean {
         return barn.familieRelasjon?.ansvarligeForeldre
-            ?.none { it == gjenlevende.foedselsnummer } == true
+            ?.none { it == gjenlevende.folkeregisteridentifikator } == true
     }
 
     private fun ikkeGyldigBostedsAdresseINorge(person: Person): Boolean {
@@ -196,9 +196,9 @@ class FordelerKriterier {
     }
 
     private fun innsenderIkkeForelder(barnepensjon: Barnepensjon): Boolean {
-        return barnepensjon.innsender.foedselsnummer !in barnepensjon.foreldre
+        return barnepensjon.innsender.folkeregisteridentifikator !in barnepensjon.foreldre
             .filter { it.type == PersonType.GJENLEVENDE_FORELDER }
-            .map { it.foedselsnummer }
+            .map { it.folkeregisteridentifikator }
     }
 
     private fun harHuketAvForVerge(barnepensjon: Barnepensjon): Boolean {
@@ -224,7 +224,7 @@ class FordelerKriterier {
     }
 
     private fun barnHarForGamleSoesken(barn: Person, avdoed: Person, alder: Int = 14): Boolean {
-        return avdoed.familieRelasjon?.barn?.minus(barn.foedselsnummer)?.let { avdoedAndreBarn ->
+        return avdoed.familieRelasjon?.barn?.minus(barn.folkeregisteridentifikator)?.let { avdoedAndreBarn ->
             avdoedAndreBarn.any { it.getAge() > alder }
         } ?: false
     }

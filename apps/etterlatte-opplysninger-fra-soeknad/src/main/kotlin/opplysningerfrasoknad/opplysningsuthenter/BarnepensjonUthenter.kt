@@ -35,7 +35,7 @@ internal object BarnepensjonUthenter {
     fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any?>> {
         val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)
         val kilde = Grunnlagsopplysning.Privatperson(
-            barnepensjonssoknad.innsender.foedselsnummer.svar.value,
+            barnepensjonssoknad.innsender.folkeregisteridentifikator.svar.value,
             barnepensjonssoknad.mottattDato.toTidspunkt()
         )
 
@@ -71,16 +71,17 @@ internal object BarnepensjonUthenter {
                     )
                 }
 
-                JaNeiVetIkke.NEI -> hentAvdoedForelder(barnepensjonssoknad)?.foedselsnummer?.svar?.let { avdoedFnr ->
-                    listOf(
-                        Grunnlagsopplysning.empty(
-                            Opplysningstype.UTENLANDSOPPHOLD,
-                            kilde,
-                            avdoedFnr,
-                            YearMonth.from(avdoedFnr.getBirthDate())
+                JaNeiVetIkke.NEI ->
+                    hentAvdoedForelder(barnepensjonssoknad)?.folkeregisteridentifikator?.svar?.let { avdoedFnr ->
+                        listOf(
+                            Grunnlagsopplysning.empty(
+                                Opplysningstype.UTENLANDSOPPHOLD,
+                                kilde,
+                                avdoedFnr,
+                                YearMonth.from(avdoedFnr.getBirthDate())
+                            )
                         )
-                    )
-                }
+                    }
 
                 JaNeiVetIkke.VET_IKKE -> emptyList()
             }
@@ -109,7 +110,7 @@ internal object BarnepensjonUthenter {
         return Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Privatperson(
-                barnepensjon.innsender.foedselsnummer.svar.value,
+                barnepensjon.innsender.folkeregisteridentifikator.svar.value,
                 barnepensjon.mottattDato.toTidspunkt()
             ),
             opplysningsType,
@@ -153,7 +154,7 @@ internal object BarnepensjonUthenter {
                 type = PersonType.BARN,
                 fornavn = barnepensjon.soeker.fornavn.svar,
                 etternavn = barnepensjon.soeker.etternavn.svar,
-                foedselsnummer = barnepensjon.soeker.foedselsnummer.svar,
+                folkeregisteridentifikator = barnepensjon.soeker.folkeregisteridentifikator.svar,
                 statsborgerskap = barnepensjon.soeker.statsborgerskap.svar,
                 utenlandsadresse = UtenlandsadresseBarn(
                     adresse?.svar?.verdi,
@@ -165,14 +166,14 @@ internal object BarnepensjonUthenter {
                         it.type,
                         it.fornavn.svar,
                         it.etternavn.svar,
-                        it.foedselsnummer.svar
+                        it.folkeregisteridentifikator.svar
                     )
                 },
                 verge = Verge(
                     barnepensjon.soeker.verge?.svar?.verdi,
                     barnepensjon.soeker.verge?.opplysning?.fornavn?.svar,
                     barnepensjon.soeker.verge?.opplysning?.etternavn?.svar,
-                    barnepensjon.soeker.verge?.opplysning?.foedselsnummer?.svar
+                    barnepensjon.soeker.verge?.opplysning?.folkeregisteridentifikator?.svar
                 ),
                 omsorgPerson = barnepensjon.soeker.dagligOmsorg?.svar?.verdi
             )
@@ -191,7 +192,7 @@ internal object BarnepensjonUthenter {
                     PersonType.GJENLEVENDE_FORELDER,
                     forelder.fornavn.svar,
                     forelder.etternavn.svar,
-                    forelder.foedselsnummer.svar,
+                    forelder.folkeregisteridentifikator.svar,
                     forelder.adresse.svar,
                     forelder.statsborgerskap.svar,
                     forelder.kontaktinfo.telefonnummer.svar.innhold
@@ -211,7 +212,7 @@ internal object BarnepensjonUthenter {
                 PersonType.INNSENDER,
                 barnepensjon.innsender.fornavn.svar,
                 barnepensjon.innsender.etternavn.svar,
-                barnepensjon.innsender.foedselsnummer.svar
+                barnepensjon.innsender.folkeregisteridentifikator.svar
             )
         )
     }
@@ -261,13 +262,13 @@ internal object BarnepensjonUthenter {
             barnepensjon,
             Opplysningstype.PERSONGALLERI_V1,
             Persongalleri(
-                soeker = barnepensjon.soeker.foedselsnummer.svar.value,
-                innsender = barnepensjon.innsender.foedselsnummer.svar.value,
-                soesken = barnepensjon.soesken.map { it.foedselsnummer.svar.value },
+                soeker = barnepensjon.soeker.folkeregisteridentifikator.svar.value,
+                innsender = barnepensjon.innsender.folkeregisteridentifikator.svar.value,
+                soesken = barnepensjon.soesken.map { it.folkeregisteridentifikator.svar.value },
                 avdoed = barnepensjon.foreldre.filter { it.type == PersonType.AVDOED }
-                    .map { it.foedselsnummer.svar.value },
+                    .map { it.folkeregisteridentifikator.svar.value },
                 gjenlevende = barnepensjon.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }
-                    .map { it.foedselsnummer.svar.value }
+                    .map { it.folkeregisteridentifikator.svar.value }
             )
         )
     }

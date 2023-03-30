@@ -60,7 +60,7 @@ internal class OpplysningsuthenterBarnepensjonTest {
                 assertEquals("fn", fornavn)
                 assertEquals("en", etternavn)
                 assertEquals(PersonType.AVDOED, type)
-                assertEquals("22128202440", foedselsnummer.value)
+                assertEquals("22128202440", folkeregisteridentifikator.value)
                 assertEquals(LocalDate.of(2022, Month.JANUARY, 1), doedsdato)
                 assertEquals("Norge", statsborgerskap)
                 assertEquals(JaNeiVetIkke.NEI, utenlandsopphold.harHattUtenlandsopphold)
@@ -75,11 +75,11 @@ internal class OpplysningsuthenterBarnepensjonTest {
                 assertEquals(PersonType.BARN, type)
                 assertEquals("kirsten", fornavn)
                 assertEquals("jakobsen", etternavn)
-                assertEquals("12101376212", foedselsnummer.value)
+                assertEquals("12101376212", folkeregisteridentifikator.value)
                 assertEquals("Norge", statsborgerskap)
                 assertEquals(JaNeiVetIkke.NEI, utenlandsadresse.adresseIUtlandet)
                 assertEquals("GØYAL", foreldre[0].fornavn)
-                assertEquals("22128202440", foreldre[1].foedselsnummer.value)
+                assertEquals("22128202440", foreldre[1].folkeregisteridentifikator.value)
                 assertEquals(JaNeiVetIkke.NEI, verge.barnHarVerge)
                 assertNull(omsorgPerson)
             }
@@ -91,7 +91,7 @@ internal class OpplysningsuthenterBarnepensjonTest {
             .apply {
                 assertEquals("GØYAL", fornavn)
                 assertEquals("HØYSTAKK", etternavn)
-                assertEquals("03108718357", foedselsnummer.value)
+                assertEquals("03108718357", folkeregisteridentifikator.value)
                 assertEquals(PersonType.GJENLEVENDE_FORELDER, type)
                 assertEquals("Sannergata 6C, 0557 Oslo", adresse)
                 assertEquals("Norge", statsborgerskap)
@@ -106,7 +106,7 @@ internal class OpplysningsuthenterBarnepensjonTest {
                 assertEquals(PersonType.INNSENDER, type)
                 assertEquals("GØYAL", fornavn)
                 assertEquals("HØYSTAKK", etternavn)
-                assertEquals("03108718357", foedselsnummer.value)
+                assertEquals("03108718357", folkeregisteridentifikator.value)
             }
     }
 

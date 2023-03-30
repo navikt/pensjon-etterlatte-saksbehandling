@@ -28,12 +28,14 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
         logger.info("Hent persongalleri fra søknad")
 
         return Persongalleri(
-            soeker = soeknad.soeker.foedselsnummer.svar.value,
-            innsender = soeknad.innsender.foedselsnummer.svar.value,
-            soesken = soeknad.soesken.map { it.foedselsnummer.svar.value },
-            avdoed = soeknad.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },
+            soeker = soeknad.soeker.folkeregisteridentifikator.svar.value,
+            innsender = soeknad.innsender.folkeregisteridentifikator.svar.value,
+            soesken = soeknad.soesken.map { it.folkeregisteridentifikator.svar.value },
+            avdoed = soeknad.foreldre.filter {
+                it.type == PersonType.AVDOED
+            }.map { it.folkeregisteridentifikator.svar.value },
             gjenlevende = soeknad.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }
-                .map { it.foedselsnummer.svar.value }
+                .map { it.folkeregisteridentifikator.svar.value }
         )
     }
 

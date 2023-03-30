@@ -53,10 +53,10 @@ data class GrunnlagTestData(
     )
 
     fun hentPersonGalleri(): Persongalleri = Persongalleri(
-        soeker = soeker.foedselsnummer.value,
-        innsender = gjenlevende.foedselsnummer.value,
-        soesken = listOf(soesken.foedselsnummer.value, halvsoesken.foedselsnummer.value),
-        avdoed = listOf(avdoed.foedselsnummer.value),
-        gjenlevende = listOf(gjenlevende.foedselsnummer.value)
+        soeker = soeker.folkeregisteridentifikator.value,
+        innsender = gjenlevende.folkeregisteridentifikator.value,
+        soesken = listOf(soesken.folkeregisteridentifikator.value, halvsoesken.folkeregisteridentifikator.value),
+        avdoed = listOf(avdoed.folkeregisteridentifikator.value),
+        gjenlevende = listOf(gjenlevende.folkeregisteridentifikator.value)
     )
 }

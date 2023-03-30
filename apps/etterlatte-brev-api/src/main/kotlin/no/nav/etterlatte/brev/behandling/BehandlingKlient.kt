@@ -7,7 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -41,7 +41,10 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         }
     }
 
-    override suspend fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean {
+    override suspend fun harTilgangTilPerson(
+        folkeregisteridentifikator: Folkeregisteridentifikator,
+        bruker: Saksbehandler
+    ): Boolean {
         try {
             return downstreamResourceClient
                 .post(
@@ -50,7 +53,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                         url = "$resourceUrl/tilgang/person"
                     ),
                     bruker = bruker,
-                    postBody = foedselsnummer.value
+                    postBody = folkeregisteridentifikator.value
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

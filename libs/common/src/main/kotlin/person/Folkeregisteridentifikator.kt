@@ -12,8 +12,9 @@ import java.time.temporal.ChronoUnit
  * Everyone on the Norwegian National Registry has a national identity number.
  *
  * @see <a href="https://www.skatteetaten.no/person/folkeregister/fodsel-og-navnevalg/barn-fodt-i-norge/fodselsnummer">Skatteetaten om fødselsnummer</a>
+ * Både DNR og FNR
  */
-class Foedselsnummer private constructor(@JsonValue val value: String) {
+class Folkeregisteridentifikator private constructor(@JsonValue val value: String) {
     init {
         require(FoedselsnummerValidator.isValid(value))
     }
@@ -21,9 +22,9 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
     companion object {
         @JvmStatic
         @JsonCreator
-        fun of(fnr: String?): Foedselsnummer =
+        fun of(fnr: String?): Folkeregisteridentifikator =
             try {
-                Foedselsnummer(fnr!!.replace(Regex("[^0-9]"), ""))
+                Folkeregisteridentifikator(fnr!!.replace(Regex("[^0-9]"), ""))
             } catch (e: Exception) {
                 throw InvalidFoedselsnummerException(fnr, e)
             }
@@ -106,7 +107,7 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
 
     private fun isFhNumber(): Boolean = Character.getNumericValue(value[0]) in 8..9
 
-    override fun equals(other: Any?): Boolean = this.value == (other as? Foedselsnummer)?.value
+    override fun equals(other: Any?): Boolean = this.value == (other as? Folkeregisteridentifikator)?.value
 
     override fun hashCode(): Int = this.value.hashCode()
 

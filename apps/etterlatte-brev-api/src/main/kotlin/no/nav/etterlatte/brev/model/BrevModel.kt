@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import java.util.UUID
 
@@ -27,12 +27,12 @@ data class Adresse(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
-    val foedselsnummer: Foedselsnummer? = null,
+    val folkeregisteridentifikator: Folkeregisteridentifikator? = null,
     val orgnummer: String? = null,
     val adresse: Adresse? = null
 ) {
     init {
-        if (foedselsnummer == null && orgnummer == null && adresse == null) {
+        if (folkeregisteridentifikator == null && orgnummer == null && adresse == null) {
             throw IllegalArgumentException("Enten fødselsnummer, orgnummer eller adresse må være spesifisert")
         }
     }

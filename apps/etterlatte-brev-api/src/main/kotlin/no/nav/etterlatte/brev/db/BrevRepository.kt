@@ -15,7 +15,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -75,7 +75,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
             it.prepareStatement(OPPDATER_MOTTAKER_QUERY)
                 .apply {
-                    setString(1, brev.mottaker.foedselsnummer?.value)
+                    setString(1, brev.mottaker.folkeregisteridentifikator?.value)
                     setString(2, brev.mottaker.orgnummer)
                     setString(3, brev.mottaker.adresse?.navn)
                     setString(4, brev.mottaker.adresse?.adresse)
@@ -98,7 +98,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
                     setString(2, ulagretBrev.soekerFnr)
                     setString(3, ulagretBrev.tittel)
                     setBoolean(4, ulagretBrev.erVedtaksbrev)
-                    setString(5, ulagretBrev.mottaker.foedselsnummer?.value)
+                    setString(5, ulagretBrev.mottaker.folkeregisteridentifikator?.value)
                     setString(6, ulagretBrev.mottaker.orgnummer)
                     setString(7, ulagretBrev.mottaker.adresse?.navn)
                     setString(8, ulagretBrev.mottaker.adresse?.adresse)
@@ -172,7 +172,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
         tittel = getString("tittel"),
         status = Status.valueOf(getString("status_id")),
         mottaker = Mottaker(
-            foedselsnummer = getString("foedselsnummer")?.let { Foedselsnummer.of(it) },
+            folkeregisteridentifikator = getString("foedselsnummer")?.let { Folkeregisteridentifikator.of(it) },
             orgnummer = getString("orgnummer"),
             adresse = getString("navn")?.let {
                 Adresse(

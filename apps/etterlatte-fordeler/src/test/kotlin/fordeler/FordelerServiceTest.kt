@@ -9,7 +9,7 @@ import no.nav.etterlatte.FNR_3
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
@@ -37,14 +37,16 @@ internal class FordelerServiceTest {
 
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 0
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == barnFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
@@ -53,12 +55,16 @@ internal class FordelerServiceTest {
             )
         )
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == avdoedFnr })
+        } returns mockPerson(
             doedsdato = LocalDate.parse("2023-01-01"),
             bostedsadresse = mockNorskAdresse()
         )
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == etterlattFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr),
@@ -81,14 +87,16 @@ internal class FordelerServiceTest {
 
     @Test
     fun `skal ikke fordele hendelse som ikke oppfyller alle kriterier`() {
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
 
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == barnFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
@@ -97,11 +105,15 @@ internal class FordelerServiceTest {
             )
         )
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == avdoedFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse()
         )
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == etterlattFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr),
@@ -160,14 +172,16 @@ internal class FordelerServiceTest {
             behandlingKlient = behandlingKlient
         )
 
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 10
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == barnFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
@@ -176,12 +190,16 @@ internal class FordelerServiceTest {
             )
         )
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == avdoedFnr })
+        } returns mockPerson(
             doedsdato = LocalDate.parse("2022-01-01"),
             bostedsadresse = mockNorskAdresse()
         )
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == etterlattFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr),
@@ -207,11 +225,13 @@ internal class FordelerServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
 
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == barnFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
@@ -221,12 +241,14 @@ internal class FordelerServiceTest {
         )
 
         coEvery {
-            pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr })
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == avdoedFnr })
         } throws PersonFinnesIkkeException(
             avdoedFnr
         )
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == etterlattFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr),
@@ -250,11 +272,13 @@ internal class FordelerServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
 
-        val barnFnr = Foedselsnummer.of(FNR_1)
-        val avdoedFnr = Foedselsnummer.of(FNR_2)
-        val etterlattFnr = Foedselsnummer.of(FNR_3)
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == barnFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
@@ -264,10 +288,12 @@ internal class FordelerServiceTest {
         )
 
         coEvery {
-            pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr })
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == avdoedFnr })
         } throws IllegalArgumentException("Dette er ugyldig format")
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+        coEvery {
+            pdlTjenesterKlient.hentPerson(match { it.folkeregisteridentifikator == etterlattFnr })
+        } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr),

@@ -5,7 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.SystemBruker
@@ -69,8 +69,8 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
 suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     fnr: String,
     personTilgangsSjekk: PersonTilgangsSjekk,
-    onSuccess: (fnr: Foedselsnummer) -> Unit
-) = Foedselsnummer.of(fnr).let { foedselsnummer ->
+    onSuccess: (fnr: Folkeregisteridentifikator) -> Unit
+) = Folkeregisteridentifikator.of(fnr).let { foedselsnummer ->
     when (bruker) {
         is Saksbehandler -> {
             val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)
@@ -126,5 +126,8 @@ interface SakTilgangsSjekk {
 }
 
 interface PersonTilgangsSjekk {
-    suspend fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean
+    suspend fun harTilgangTilPerson(
+        folkeregisteridentifikator: Folkeregisteridentifikator,
+        bruker: Saksbehandler
+    ): Boolean
 }

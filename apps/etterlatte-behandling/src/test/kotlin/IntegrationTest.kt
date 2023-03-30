@@ -41,7 +41,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -71,7 +71,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun verdikjedetest() {
-        val fnr = Foedselsnummer.of("08071272487").value
+        val fnr = Folkeregisteridentifikator.of("08071272487").value
         var behandlingOpprettet: UUID? = null
 
         testApplication {

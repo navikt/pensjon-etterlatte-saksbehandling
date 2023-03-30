@@ -33,7 +33,7 @@ internal fun avdoedOpplysning(avdoed: Avdoed): AvdoedSoeknad {
         type = PersonType.AVDOED,
         fornavn = avdoed.fornavn.svar,
         etternavn = avdoed.etternavn.svar,
-        foedselsnummer = avdoed.foedselsnummer.svar,
+        folkeregisteridentifikator = avdoed.folkeregisteridentifikator.svar,
         doedsdato = avdoed.datoForDoedsfallet.svar.innhold,
         statsborgerskap = avdoed.statsborgerskap.svar.innhold,
         utenlandsopphold = UtenlandsoppholdOpplysningstype(

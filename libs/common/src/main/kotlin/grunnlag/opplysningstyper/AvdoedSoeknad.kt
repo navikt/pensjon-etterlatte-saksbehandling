@@ -1,6 +1,6 @@
 package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
@@ -10,7 +10,7 @@ data class AvdoedSoeknad(
     val type: PersonType,
     val fornavn: String,
     val etternavn: String,
-    val foedselsnummer: Foedselsnummer,
+    val folkeregisteridentifikator: Folkeregisteridentifikator,
     val doedsdato: LocalDate,
     val statsborgerskap: String,
     val utenlandsopphold: Utenlandsopphold,

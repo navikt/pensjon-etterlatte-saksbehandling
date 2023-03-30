@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.P
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -49,7 +49,7 @@ internal class GrunnlagServiceTest {
         private val nyttNavn = Navn("Mohammed", "Ali")
         private val nyFødselsdag = LocalDate.of(2013, 12, 24)
 
-        private fun lagGrunnlagForPerson(fnr: Foedselsnummer, personRolle: PersonRolle) = listOf(
+        private fun lagGrunnlagForPerson(fnr: Folkeregisteridentifikator, personRolle: PersonRolle) = listOf(
             lagGrunnlagHendelse(
                 1,
                 1,
@@ -90,7 +90,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `skal hente opptil versjon av grunnlag`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.foedselsnummer, PersonRolle.BARN)
+            val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.folkeregisteridentifikator, PersonRolle.BARN)
 
             every { opplysningerMock.finnGrunnlagOpptilVersjon(1, 4) } returns grunnlagshendelser
 
@@ -106,7 +106,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `skal mappe om dataen fra DB til søker`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.foedselsnummer, PersonRolle.BARN)
+            val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.folkeregisteridentifikator, PersonRolle.BARN)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
@@ -122,7 +122,10 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `skal mappe om dataen fra DB til avdød`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.avdoed.foedselsnummer, PersonRolle.AVDOED)
+            val grunnlagshendelser = lagGrunnlagForPerson(
+                testData.avdoed.folkeregisteridentifikator,
+                PersonRolle.AVDOED
+            )
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
@@ -139,7 +142,10 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `skal mappe om dataen fra DB til gjenlevende`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.gjenlevende.foedselsnummer, PersonRolle.GJENLEVENDE)
+            val grunnlagshendelser = lagGrunnlagForPerson(
+                testData.gjenlevende.folkeregisteridentifikator,
+                PersonRolle.GJENLEVENDE
+            )
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
@@ -156,7 +162,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `skal mappe om dataen fra DB til søsken`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.soesken.foedselsnummer, PersonRolle.BARN)
+            val grunnlagshendelser = lagGrunnlagForPerson(testData.soesken.folkeregisteridentifikator, PersonRolle.BARN)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
@@ -180,7 +186,7 @@ internal class GrunnlagServiceTest {
                 hendelseNummer = 1,
                 opplysningType = FOEDELAND,
                 id = statiskUuid,
-                fnr = testData.soeker.foedselsnummer,
+                fnr = testData.soeker.folkeregisteridentifikator,
                 verdi = "Norge".toJsonNode(),
                 kilde = kilde
             ),
@@ -189,7 +195,7 @@ internal class GrunnlagServiceTest {
                 hendelseNummer = 2,
                 opplysningType = FOEDELAND,
                 id = statiskUuid,
-                fnr = testData.soeker.foedselsnummer,
+                fnr = testData.soeker.folkeregisteridentifikator,
                 verdi = "Sverige".toJsonNode(),
                 kilde = kilde
             )
@@ -244,7 +250,7 @@ internal class GrunnlagServiceTest {
                     meta = objectMapper.createObjectNode(),
                     opplysning = bostedsadresse1.toJsonNode(),
                     attestering = null,
-                    fnr = testData.soeker.foedselsnummer,
+                    fnr = testData.soeker.folkeregisteridentifikator,
                     periode = Periode(
                         fom = bostedsadresse1.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
                         tom = bostedsadresse1.gyldigTilOgMed?.let { YearMonth.of(it.year, it.month) }
@@ -261,7 +267,7 @@ internal class GrunnlagServiceTest {
                     meta = objectMapper.createObjectNode(),
                     opplysning = bostedsadresse2.toJsonNode(),
                     attestering = null,
-                    fnr = testData.soeker.foedselsnummer,
+                    fnr = testData.soeker.folkeregisteridentifikator,
                     periode = Periode(
                         fom = bostedsadresse2.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
                         tom = bostedsadresse2.gyldigTilOgMed?.let { YearMonth.of(it.year, it.month) }
@@ -304,7 +310,7 @@ internal class GrunnlagServiceTest {
             1,
             PERSONGALLERI_V1,
             id = statiskUuid,
-            fnr = testData.soeker.foedselsnummer,
+            fnr = testData.soeker.folkeregisteridentifikator,
             verdi = testData.hentPersonGalleri().toJsonNode(),
             kilde = kilde
         )
@@ -315,7 +321,7 @@ internal class GrunnlagServiceTest {
                 2,
                 NAVN,
                 id = statiskUuid,
-                fnr = testData.soeker.foedselsnummer,
+                fnr = testData.soeker.folkeregisteridentifikator,
                 verdi = Navn("Per", "Persson").toJsonNode(),
                 kilde = kilde
             ),
@@ -324,7 +330,7 @@ internal class GrunnlagServiceTest {
                 2,
                 PERSONROLLE,
                 id = statiskUuid,
-                fnr = testData.soeker.foedselsnummer,
+                fnr = testData.soeker.folkeregisteridentifikator,
                 verdi = PersonRolle.BARN.toJsonNode(),
                 kilde = kilde
             ),
@@ -470,12 +476,12 @@ internal class GrunnlagServiceTest {
     }
 
     companion object {
-        val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
-        val STOR_SNERK = Foedselsnummer.of("11057523044")
+        val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
+        val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
 
         // barn
-        val BLAAOEYD_SAKS = Foedselsnummer.of("05111850870")
-        val GOEYAL_KRONJUVEL = Foedselsnummer.of("27121779531")
-        val GROENN_STAUDE = Foedselsnummer.of("09011350027")
+        val BLAAOEYD_SAKS = Folkeregisteridentifikator.of("05111850870")
+        val GOEYAL_KRONJUVEL = Folkeregisteridentifikator.of("27121779531")
+        val GROENN_STAUDE = Folkeregisteridentifikator.of("09011350027")
     }
 }

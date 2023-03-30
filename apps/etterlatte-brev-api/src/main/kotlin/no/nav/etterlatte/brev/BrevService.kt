@@ -41,7 +41,9 @@ class BrevService(
 
     suspend fun opprett(mottaker: Mottaker, mal: Mal, enhet: String): BrevInnhold {
         val brevMottaker = when {
-            mottaker.foedselsnummer != null -> adresseService.hentMottakerAdresse(mottaker.foedselsnummer!!.value)
+            mottaker.folkeregisteridentifikator != null -> adresseService.hentMottakerAdresse(
+                mottaker.folkeregisteridentifikator!!.value
+            )
             mottaker.orgnummer != null -> adresseService.hentMottakerAdresse(mottaker.orgnummer!!)
             mottaker.adresse != null -> BrevMottaker.fraAdresse(adresse = mottaker.adresse!!)
             else -> throw Exception("Ingen brevmottaker spesifisert")

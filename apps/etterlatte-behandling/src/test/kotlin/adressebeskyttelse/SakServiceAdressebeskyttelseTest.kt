@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
@@ -51,7 +51,7 @@ class SakServiceAdressebeskyttelseTest {
 
     @Test
     fun `Skal kunne sette adressebeskyttelse på sak`() {
-        val fnr = Foedselsnummer.of("08071272487").value
+        val fnr = Folkeregisteridentifikator.of("08071272487").value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
 
         sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)

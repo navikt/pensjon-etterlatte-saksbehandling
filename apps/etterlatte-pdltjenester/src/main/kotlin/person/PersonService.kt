@@ -1,8 +1,8 @@
 package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
@@ -25,23 +25,23 @@ class PersonService(
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
     suspend fun hentPerson(request: HentPersonRequest): Person {
-        logger.info("Henter person med fnr=${request.foedselsnummer} fra PDL")
+        logger.info("Henter person med fnr=${request.folkeregisteridentifikator} fra PDL")
 
-        return pdlKlient.hentPerson(request.foedselsnummer, request.rolle).let {
+        return pdlKlient.hentPerson(request.folkeregisteridentifikator, request.rolle).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
-                    throw PdlFantIkkePerson("Fant ikke personen ${request.foedselsnummer}")
+                    throw PdlFantIkkePerson("Fant ikke personen ${request.folkeregisteridentifikator}")
                 } else {
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente person med fnr=${request.foedselsnummer} fra PDL: $pdlFeil"
+                        "Kunne ikke hente person med fnr=${request.folkeregisteridentifikator} fra PDL: $pdlFeil"
                     )
                 }
             } else {
                 PersonMapper.mapPerson(
                     ppsKlient = ppsKlient,
                     pdlKlient = pdlKlient,
-                    fnr = request.foedselsnummer,
+                    fnr = request.folkeregisteridentifikator,
                     personRolle = request.rolle,
                     hentPerson = it.data.hentPerson
                 )
@@ -50,23 +50,23 @@ class PersonService(
     }
 
     suspend fun hentOpplysningsperson(request: HentPersonRequest): PersonDTO {
-        logger.info("Henter opplysninger for person med fnr=${request.foedselsnummer} fra PDL")
+        logger.info("Henter opplysninger for person med fnr=${request.folkeregisteridentifikator} fra PDL")
 
-        return pdlKlient.hentPerson(request.foedselsnummer, request.rolle).let {
+        return pdlKlient.hentPerson(request.folkeregisteridentifikator, request.rolle).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
-                    throw PdlFantIkkePerson("Fant ikke personen ${request.foedselsnummer}")
+                    throw PdlFantIkkePerson("Fant ikke personen ${request.folkeregisteridentifikator}")
                 } else {
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente opplysninger for ${request.foedselsnummer} fra PDL: $pdlFeil"
+                        "Kunne ikke hente opplysninger for ${request.folkeregisteridentifikator} fra PDL: $pdlFeil"
                     )
                 }
             } else {
                 PersonMapper.mapOpplysningsperson(
                     ppsKlient = ppsKlient,
                     pdlKlient = pdlKlient,
-                    fnr = request.foedselsnummer,
+                    fnr = request.folkeregisteridentifikator,
                     personRolle = request.rolle,
                     hentPerson = it.data.hentPerson
                 )
@@ -93,7 +93,7 @@ class PersonService(
                     val folkeregisterIdent: String = it.data.hentIdenter.identer
                         .filter { it.gruppe == "FOLKEREGISTERIDENT" }
                         .first { !it.historisk }.ident
-                    FolkeregisterIdent(folkeregisterident = Foedselsnummer.of(folkeregisterIdent))
+                    FolkeregisterIdent(folkeregisterident = Folkeregisteridentifikator.of(folkeregisterIdent))
                 } catch (e: Exception) {
                     throw PdlForesporselFeilet(
                         "Fant ingen folkeregisterident for ${request.ident} fra PDL"
@@ -104,16 +104,16 @@ class PersonService(
     }
 
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): GeografiskTilknytning {
-        logger.info("Henter geografisk tilknytning med fnr=${request.foedselsnummer} fra PDL")
+        logger.info("Henter geografisk tilknytning med fnr=${request.folkeregisteridentifikator} fra PDL")
 
-        return pdlKlient.hentGeografiskTilknytning(request.foedselsnummer).let {
+        return pdlKlient.hentGeografiskTilknytning(request.folkeregisteridentifikator).let {
             if (it.data?.hentGeografiskTilknytning == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
-                    throw PdlFantIkkePerson("Fant ikke personen ${request.foedselsnummer}")
+                    throw PdlFantIkkePerson("Fant ikke personen ${request.folkeregisteridentifikator}")
                 } else {
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente fnr=${request.foedselsnummer} fra PDL: $pdlFeil"
+                        "Kunne ikke hente fnr=${request.folkeregisteridentifikator} fra PDL: $pdlFeil"
                     )
                 }
             } else {

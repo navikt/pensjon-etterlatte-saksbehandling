@@ -100,19 +100,23 @@ class FordelerService(
 
     private fun hentGjenlevendeRequest(soeknad: Barnepensjon) =
         HentPersonRequest(
-            foedselsnummer = soeknad.foreldre.first { it.type == PersonType.GJENLEVENDE_FORELDER }.foedselsnummer.svar,
+            folkeregisteridentifikator = soeknad.foreldre.first {
+                it.type == PersonType.GJENLEVENDE_FORELDER
+            }.folkeregisteridentifikator.svar,
             rolle = PersonRolle.GJENLEVENDE
         )
 
     private fun hentAvdoedRequest(soeknad: Barnepensjon) =
         HentPersonRequest(
-            foedselsnummer = soeknad.foreldre.first { it.type == PersonType.AVDOED }.foedselsnummer.svar,
+            folkeregisteridentifikator = soeknad.foreldre.first {
+                it.type == PersonType.AVDOED
+            }.folkeregisteridentifikator.svar,
             rolle = PersonRolle.AVDOED
         )
 
     private fun hentBarnRequest(soeknad: Barnepensjon) =
         HentPersonRequest(
-            foedselsnummer = soeknad.soeker.foedselsnummer.svar,
+            folkeregisteridentifikator = soeknad.soeker.folkeregisteridentifikator.svar,
             rolle = PersonRolle.BARN
         )
 

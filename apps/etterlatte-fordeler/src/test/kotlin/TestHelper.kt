@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utland
@@ -43,7 +43,7 @@ fun mockPerson(
 ) = Person(
     fornavn = "Ola",
     etternavn = "Nordmann",
-    foedselsnummer = Foedselsnummer.of(fnr),
+    folkeregisteridentifikator = Folkeregisteridentifikator.of(fnr),
     foedselsaar = foedselsaar,
     foedselsdato = foedselsdato,
     doedsdato = doedsdato,

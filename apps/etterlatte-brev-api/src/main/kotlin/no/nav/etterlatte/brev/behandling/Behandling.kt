@@ -68,7 +68,7 @@ data class Persongalleri(
 fun Grunnlagsopplysning<InnsenderSoeknad>.mapInnsender(): Innsender = with(this.opplysning) {
     Innsender(
         navn = "$fornavn $etternavn",
-        fnr = foedselsnummer.value
+        fnr = folkeregisteridentifikator.value
     )
 }
 
@@ -97,7 +97,7 @@ fun Grunnlag.mapInnsender(): Innsender = with(this.sak) {
 
     Innsender(
         navn = innsender.let { "${it.fornavn} ${it.etternavn}" },
-        fnr = innsender.foedselsnummer.value
+        fnr = innsender.folkeregisteridentifikator.value
     )
 }
 

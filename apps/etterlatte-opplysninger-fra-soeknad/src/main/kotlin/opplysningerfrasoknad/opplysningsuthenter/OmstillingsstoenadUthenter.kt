@@ -44,7 +44,7 @@ internal object OmstillingsstoenadUthenter {
 
     private fun kilde(soknad: Omstillingsstoenad): Grunnlagsopplysning.Kilde {
         return Grunnlagsopplysning.Privatperson(
-            soknad.innsender.foedselsnummer.svar.value,
+            soknad.innsender.folkeregisteridentifikator.svar.value,
             soknad.mottattDato.toTidspunkt()
         )
     }
@@ -60,7 +60,7 @@ internal object OmstillingsstoenadUthenter {
             PersonType.GJENLEVENDE,
             soeker.fornavn.svar,
             soeker.etternavn.svar,
-            soeker.foedselsnummer.svar,
+            soeker.folkeregisteridentifikator.svar,
             soeker.adresse?.svar,
             soeker.statsborgerskap.svar,
             soeker.kontaktinfo.telefonnummer.svar.innhold,
@@ -74,7 +74,7 @@ internal object OmstillingsstoenadUthenter {
             PersonType.INNSENDER,
             soknad.innsender.fornavn.svar,
             soknad.innsender.etternavn.svar,
-            soknad.innsender.foedselsnummer.svar
+            soknad.innsender.folkeregisteridentifikator.svar
         )
         return lagOpplysning(Opplysningstype.INNSENDER_SOEKNAD_V1, kilde(soknad), opplysning, null)
     }
@@ -101,9 +101,9 @@ internal object OmstillingsstoenadUthenter {
 
     private fun personGalleri(soknad: Omstillingsstoenad): Grunnlagsopplysning<Persongalleri> {
         val opplysning = Persongalleri(
-            soeker = soknad.soeker.foedselsnummer.svar.value,
-            innsender = soknad.innsender.foedselsnummer.svar.value,
-            avdoed = listOf(soknad.avdoed.foedselsnummer.svar.value)
+            soeker = soknad.soeker.folkeregisteridentifikator.svar.value,
+            innsender = soknad.innsender.folkeregisteridentifikator.svar.value,
+            avdoed = listOf(soknad.avdoed.folkeregisteridentifikator.svar.value)
         )
         return lagOpplysning(Opplysningstype.PERSONGALLERI_V1, kilde(soknad), opplysning, null)
     }

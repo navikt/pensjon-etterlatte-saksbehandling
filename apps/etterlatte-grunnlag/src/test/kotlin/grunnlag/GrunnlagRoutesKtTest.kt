@@ -32,7 +32,7 @@ import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_Folkeregisteridentifikator
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -173,7 +173,7 @@ internal class GrunnlagRoutesKtTest {
     @Test
     fun `roller tilknyttet person`() {
         val response = PersonMedSakerOgRoller(
-            SOEKER_FOEDSELSNUMMER.value,
+            SOEKER_Folkeregisteridentifikator.value,
             listOf(
                 SakOgRolle(1, Saksrolle.SOEKER)
             )
@@ -193,7 +193,7 @@ internal class GrunnlagRoutesKtTest {
                 }
             }
             val actualResponse = httpClient.post("api/grunnlag/person/roller") {
-                setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
+                setBody(FoedselsnummerDTO(SOEKER_Folkeregisteridentifikator.value))
                 headers {
                     append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     append(HttpHeaders.Authorization, "Bearer $systemBruker")
@@ -227,7 +227,7 @@ internal class GrunnlagRoutesKtTest {
             }
             val actualResponse = httpClient.post("api/grunnlag/person/saker") {
                 contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
+                setBody(FoedselsnummerDTO(SOEKER_Folkeregisteridentifikator.value))
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $systemBruker")
                 }

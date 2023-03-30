@@ -1,7 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utland
 import java.time.LocalDate
 
@@ -15,8 +15,8 @@ fun samsvarDoedsdatoer(
 )
 
 fun samsvarAnsvarligeForeldre(
-    ansvarligeForeldrePdl: List<Foedselsnummer>?,
-    ansvarligeForeldreGrunnlag: List<Foedselsnummer>?
+    ansvarligeForeldrePdl: List<Folkeregisteridentifikator>?,
+    ansvarligeForeldreGrunnlag: List<Folkeregisteridentifikator>?
 ) = SamsvarMellomPdlOgGrunnlag.AnsvarligeForeldre(
     fraPdl = ansvarligeForeldrePdl,
     fraGrunnlag = ansvarligeForeldreGrunnlag,
@@ -24,8 +24,8 @@ fun samsvarAnsvarligeForeldre(
 )
 
 fun samsvarBarn(
-    barnPdl: List<Foedselsnummer>?,
-    barnGrunnlag: List<Foedselsnummer>?
+    barnPdl: List<Folkeregisteridentifikator>?,
+    barnGrunnlag: List<Folkeregisteridentifikator>?
 ) = SamsvarMellomPdlOgGrunnlag.Barn(
     fraPdl = barnPdl,
     fraGrunnlag = barnGrunnlag,

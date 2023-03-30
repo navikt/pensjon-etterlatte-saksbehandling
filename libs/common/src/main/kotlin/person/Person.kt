@@ -11,7 +11,7 @@ import java.time.Period
 data class Person(
     val fornavn: String,
     val etternavn: String,
-    val foedselsnummer: Foedselsnummer,
+    val folkeregisteridentifikator: Folkeregisteridentifikator,
     val foedselsdato: LocalDate?,
     val foedselsaar: Int,
     val foedeland: String?,
@@ -93,9 +93,9 @@ data class UtflyttingFraNorge(
 )
 
 data class FamilieRelasjon(
-    val ansvarligeForeldre: List<Foedselsnummer>?,
-    val foreldre: List<Foedselsnummer>?,
-    val barn: List<Foedselsnummer>?
+    val ansvarligeForeldre: List<Folkeregisteridentifikator>?,
+    val foreldre: List<Folkeregisteridentifikator>?,
+    val barn: List<Folkeregisteridentifikator>?
 )
 
 data class AvdoedesBarn(
@@ -116,14 +116,14 @@ data class VergemaalEllerFremtidsfullmakt(
 )
 
 data class VergeEllerFullmektig(
-    val motpartsPersonident: Foedselsnummer?,
+    val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: String?,
     val omfang: String?,
     val omfangetErInnenPersonligOmraade: Boolean
 )
 
 data class FolkeregisterIdent(
-    val folkeregisterident: Foedselsnummer
+    val folkeregisterident: Folkeregisteridentifikator
 )
 
 data class Utenlandsadresse(

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.pdl.mapper
 
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
 import no.nav.etterlatte.pdl.PdlHentPerson
@@ -19,7 +19,7 @@ object FamilieRelasjonMapper {
                         ?.groupBy { it.ansvarlig }
                         ?.mapValues { it.value.maxByOrNull { fa -> fa.metadata.sisteRegistrertDato() } }
                         ?.map {
-                            (Foedselsnummer.of(it.value?.ansvarlig))
+                            (Folkeregisteridentifikator.of(it.value?.ansvarlig))
                         }
                 else -> null
             },
@@ -30,7 +30,7 @@ object FamilieRelasjonMapper {
                         ?.groupBy { it.relatertPersonsIdent }
                         ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                         ?.map {
-                            (Foedselsnummer.of(it.value?.relatertPersonsIdent))
+                            (Folkeregisteridentifikator.of(it.value?.relatertPersonsIdent))
                         }
                 else -> null
             },
@@ -41,7 +41,7 @@ object FamilieRelasjonMapper {
                         ?.groupBy { it.relatertPersonsIdent }
                         ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                         ?.map {
-                            (Foedselsnummer.of(it.value?.relatertPersonsIdent))
+                            (Folkeregisteridentifikator.of(it.value?.relatertPersonsIdent))
                         }
                 else -> null
             }

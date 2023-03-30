@@ -4,7 +4,7 @@ import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
@@ -18,7 +18,7 @@ internal fun lagGrunnlagsopplysning(
     ),
     uuid: UUID = UUID.randomUUID(),
     verdi: JsonNode = objectMapper.createObjectNode(),
-    fnr: Foedselsnummer? = null
+    fnr: Folkeregisteridentifikator? = null
 ) = Grunnlagsopplysning(
     uuid,
     kilde,
@@ -34,7 +34,7 @@ internal fun lagGrunnlagHendelse(
     hendelseNummer: Long,
     opplysningType: Opplysningstype,
     id: UUID = UUID.randomUUID(),
-    fnr: Foedselsnummer? = null,
+    fnr: Folkeregisteridentifikator? = null,
     verdi: JsonNode = objectMapper.createObjectNode(),
     kilde: Grunnlagsopplysning.Kilde = Grunnlagsopplysning.Pdl(
         navn = "pdl",

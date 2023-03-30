@@ -31,7 +31,7 @@ import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
@@ -45,7 +45,9 @@ import java.time.LocalDate
 typealias Grunnlagsdata<T> = Map<Opplysningstype, Opplysning<T>>
 
 fun Grunnlagsdata<JsonNode>.hentNavn() = this.hentKonstantOpplysning<Navn>(NAVN)
-fun Grunnlagsdata<JsonNode>.hentFoedselsnummer() = this.hentKonstantOpplysning<Foedselsnummer>(FOEDSELSNUMMER)
+fun Grunnlagsdata<JsonNode>.hentFoedselsnummer() = this.hentKonstantOpplysning<Folkeregisteridentifikator>(
+    FOEDSELSNUMMER
+)
 fun Grunnlagsdata<JsonNode>.hentFoedselsdato() = this.hentKonstantOpplysning<LocalDate>(FOEDSELSDATO)
 fun Grunnlagsdata<JsonNode>.hentFoedselsaar() = this.hentKonstantOpplysning<Int>(FOEDSELSAAR)
 fun Grunnlagsdata<JsonNode>.hentFoedeland() = this.hentKonstantOpplysning<String>(FOEDELAND)

@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
@@ -50,7 +50,7 @@ internal class BesvarOpplysningsbehov(
                     person = person,
                     personDTO = opplysningsperson,
                     opplysningsbehov = opplysningstype,
-                    fnr = Foedselsnummer.of(fnr)
+                    fnr = Folkeregisteridentifikator.of(fnr)
                 )
                 context.publish(packet.toJson())
 

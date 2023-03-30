@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -19,8 +19,8 @@ import java.util.*
 
 object TestHelper
 
-val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
-val STOR_SNERK = Foedselsnummer.of("11057523044")
+val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
+val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
 
 inline fun <reified T> mockResponse(fil: String): T {
     val json = TestHelper::class.java.getResource(fil)!!.readText()
@@ -34,7 +34,7 @@ fun mockPerson(
 ) = PersonDTO(
     fornavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
     etternavn = OpplysningDTO(verdi = "Nordmann", opplysningsid = null),
-    foedselsnummer = OpplysningDTO(TRIVIELL_MIDTPUNKT, null),
+    folkeregisteridentifikator = OpplysningDTO(TRIVIELL_MIDTPUNKT, null),
     foedselsdato = OpplysningDTO(LocalDate.now().minusYears(20), UUID.randomUUID().toString()),
     foedselsaar = OpplysningDTO(verdi = 2000, opplysningsid = null),
     foedeland = OpplysningDTO("Norge", UUID.randomUUID().toString()),
@@ -70,6 +70,6 @@ fun mockPerson(
     vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) }
 )
 
-fun mockFolkeregisterident(fnr: String) = FolkeregisterIdent(Foedselsnummer.of(fnr))
+fun mockFolkeregisterident(fnr: String) = FolkeregisterIdent(Folkeregisteridentifikator.of(fnr))
 
 fun mockGeografiskTilknytning() = GeografiskTilknytning(kommune = "0301", ukjent = false)

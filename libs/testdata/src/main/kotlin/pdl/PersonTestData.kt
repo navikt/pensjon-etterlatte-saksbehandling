@@ -27,7 +27,7 @@ fun personTestData(
 ): Person = Person(
     fornavn = opplysningsmap.hentNavn()!!.verdi.fornavn,
     etternavn = opplysningsmap.hentNavn()!!.verdi.etternavn,
-    foedselsnummer = opplysningsmap.hentFoedselsnummer()!!.verdi,
+    folkeregisteridentifikator = opplysningsmap.hentFoedselsnummer()!!.verdi,
     foedselsdato = opplysningsmap.hentFoedselsdato()!!.verdi,
     foedselsaar = opplysningsmap.hentFoedselsaar()!!.verdi,
     foedeland = opplysningsmap.hentFoedeland()?.verdi,

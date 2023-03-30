@@ -2,7 +2,7 @@ package vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
@@ -265,7 +265,7 @@ private fun lagVedtak(
         behandlingId = UUID.randomUUID(),
         beregning = null,
         vilkaarsvurdering = null,
-        soeker = Foedselsnummer.of(FNR_1),
+        soeker = Folkeregisteridentifikator.of(FNR_1),
         virkningstidspunkt = virkningsDato.let { YearMonth.from(it) },
         status = vedtakStatus,
         type = vedtakType,

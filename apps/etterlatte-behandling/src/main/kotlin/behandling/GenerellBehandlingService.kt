@@ -21,7 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
@@ -245,7 +245,7 @@ class RealGenerellBehandlingService(
         }
     }
 
-    private fun loggRequest(bruker: Bruker, fnr: Foedselsnummer) =
+    private fun loggRequest(bruker: Bruker, fnr: Folkeregisteridentifikator) =
         sporingslogg.logg(
             Sporingsrequest(
                 kallendeApplikasjon = "behandling",

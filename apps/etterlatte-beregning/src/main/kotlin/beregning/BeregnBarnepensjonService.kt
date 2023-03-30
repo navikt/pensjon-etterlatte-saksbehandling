@@ -159,7 +159,9 @@ class BeregnBarnepensjonService(
         soeskenJustering: Opplysning.Konstant<Beregningsgrunnlag>
     ) = BarnepensjonGrunnlag(
         soeskenKull = FaktumNode(
-            verdi = soeskenJustering.verdi.beregningsgrunnlag.filter { it.skalBrukes }.map { it.foedselsnummer },
+            verdi = soeskenJustering.verdi.beregningsgrunnlag.filter {
+                it.skalBrukes
+            }.map { it.folkeregisteridentifikator },
             kilde = soeskenJustering.kilde,
             beskrivelse = "Søsken i kullet"
         ),

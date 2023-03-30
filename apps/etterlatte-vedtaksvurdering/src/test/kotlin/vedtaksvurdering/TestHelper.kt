@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -34,7 +34,7 @@ fun opprettVedtak(
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode()
 ) = OpprettVedtak(
-    soeker = Foedselsnummer.of(FNR_1),
+    soeker = Folkeregisteridentifikator.of(FNR_1),
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
@@ -62,7 +62,7 @@ fun vedtak(
 ) = Vedtak(
     id = 1L,
     status = VedtakStatus.OPPRETTET,
-    soeker = Foedselsnummer.of(FNR_1),
+    soeker = Folkeregisteridentifikator.of(FNR_1),
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,

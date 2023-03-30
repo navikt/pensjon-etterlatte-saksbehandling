@@ -57,10 +57,10 @@ internal class InnsendtSoeknadRiver(
 
                 // Persongalleri skal utgå
                 val personGalleri = Persongalleri(
-                    soeker = soeknad.soeker.foedselsnummer.svar.value,
-                    innsender = soeknad.innsender.foedselsnummer.svar.value,
-                    avdoed = listOf(soeknad.avdoed.foedselsnummer.svar.value),
-                    soesken = soeknad.barn.map { it.foedselsnummer.svar.value }
+                    soeker = soeknad.soeker.folkeregisteridentifikator.svar.value,
+                    innsender = soeknad.innsender.folkeregisteridentifikator.svar.value,
+                    avdoed = listOf(soeknad.avdoed.folkeregisteridentifikator.svar.value),
+                    soesken = soeknad.barn.map { it.folkeregisteridentifikator.svar.value }
                 )
 
                 // Skal vurderes manuelt av saksbehandler

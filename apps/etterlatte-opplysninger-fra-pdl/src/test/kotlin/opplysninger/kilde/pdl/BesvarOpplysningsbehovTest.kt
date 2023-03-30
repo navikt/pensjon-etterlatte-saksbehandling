@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -31,7 +31,7 @@ class BesvarOpplysningsbehovTest {
         ) = PersonDTO(
             fornavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
             etternavn = OpplysningDTO(verdi = "Nordmann", opplysningsid = null),
-            foedselsnummer = OpplysningDTO(Foedselsnummer.of(fnr), null),
+            folkeregisteridentifikator = OpplysningDTO(Folkeregisteridentifikator.of(fnr), null),
             foedselsdato = OpplysningDTO(LocalDate.now().minusYears(20), UUID.randomUUID().toString()),
             foedselsaar = OpplysningDTO(verdi = 2000, opplysningsid = null),
             foedeland = OpplysningDTO("Norge", UUID.randomUUID().toString()),

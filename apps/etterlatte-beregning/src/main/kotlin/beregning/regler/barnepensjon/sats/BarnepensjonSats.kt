@@ -5,7 +5,7 @@ import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
@@ -32,7 +32,7 @@ val grunnbeloep: Regel<BarnepensjonGrunnlag, Grunnbeloep> = RegelMeta(
     regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP")
 ) velgNyesteGyldige historiskeGrunnbeloep
 
-val soeskenIKullet: Regel<BarnepensjonGrunnlag, List<Foedselsnummer>> = finnFaktumIGrunnlag(
+val soeskenIKullet: Regel<BarnepensjonGrunnlag, List<Folkeregisteridentifikator>> = finnFaktumIGrunnlag(
     gjelderFra = BP_1967_DATO,
     beskrivelse = "Søskenkull fra grunnlaget",
     finnFaktum = BarnepensjonGrunnlag::soeskenKull,

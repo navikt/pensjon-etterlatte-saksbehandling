@@ -7,6 +7,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -52,7 +53,11 @@ class Norg2Klient(
         val response = klient.get("$apiUrl/enhet/$enhet/kontaktinformasjon")
 
         return if (response.status == HttpStatusCode.OK) {
-            response.body()
+            val body = response.body<Any>()
+            logger.warn(response.status.value.toString())
+            logger.warn(body.toString())
+            logger.warn(body.toJson())
+            body as Norg2Kontaktinfo
         } else {
             val err = response.body<Norg2Error>()
 

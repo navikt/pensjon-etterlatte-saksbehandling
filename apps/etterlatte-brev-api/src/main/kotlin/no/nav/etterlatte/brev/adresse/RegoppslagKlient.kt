@@ -9,6 +9,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -38,7 +39,10 @@ class RegoppslagKlient(
 
             if (response.status.isSuccess()) {
                 response.body<RegoppslagResponseDTO>()
-                    .also { cache.put(ident, it) }
+                    .also {
+                        sikkerLogg.info("Respons fra regoppslag: $it")
+                        cache.put(ident, it)
+                    }
             } else {
                 throw ResponseException(response, "Ukjent feil fra navansatt api")
             }

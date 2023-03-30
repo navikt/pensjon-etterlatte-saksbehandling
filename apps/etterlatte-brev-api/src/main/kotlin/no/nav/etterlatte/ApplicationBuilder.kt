@@ -50,9 +50,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+
 class ApplicationBuilder {
     private val config = ConfigFactory.load()
-    val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
     init {
         sikkerLogg.info("SikkerLogg: etterlatte-brev-api oppstart")

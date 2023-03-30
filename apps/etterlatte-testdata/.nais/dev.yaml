@@ -48,4 +48,4 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: https://dolly-backend.dev.intern.nav.no
+        - host: dolly-backend.dev.intern.nav.no

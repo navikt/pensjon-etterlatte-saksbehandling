@@ -1,12 +1,13 @@
 package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.NavPersonIdent
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
@@ -75,13 +76,13 @@ class PersonService(
         }
     }
 
-    suspend fun hentFolkeregisterIdent(request: HentFolkeregisterIdentRequest): FolkeregisterIdent {
+    suspend fun hentFolkeregisterIdent(request: HentFolkeregisterIdentRequest): PdlIdentifikator {
         logger.info("Henter folkeregisterident for ident=${request.ident} fra PDL")
 
-        return pdlKlient.hentFolkeregisterIdent(request.ident).let {
-            if (it.data?.hentIdenter == null) {
-                val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.personIkkeFunnet() == true) {
+        return pdlKlient.hentFolkeregisterIdent(request.ident).let { identResponse ->
+            if (identResponse.data?.hentIdenter == null) {
+                val pdlFeil = identResponse.errors?.asFormatertFeil()
+                if (identResponse.errors?.personIkkeFunnet() == true) {
                     throw PdlFantIkkePerson("Fant ikke personen ${request.ident}")
                 } else {
                     throw PdlForesporselFeilet(
@@ -91,13 +92,24 @@ class PersonService(
                 }
             } else {
                 try {
-                    val folkeregisterIdent: String = it.data.hentIdenter.identer
-                        .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
-                        .first { !it.historisk }.ident
-                    FolkeregisterIdent(folkeregisterident = Folkeregisteridentifikator.of(folkeregisterIdent))
+                    val folkeregisterIdent: String? = identResponse.data.hentIdenter.identer
+                        .filter { it.gruppe == PdlIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
+                        .firstOrNull { !it.historisk }?.ident
+                    if (folkeregisterIdent != null) {
+                        PdlIdentifikator.FolkeregisterIdent(
+                            folkeregisterident = Folkeregisteridentifikator.of(
+                                folkeregisterIdent
+                            )
+                        )
+                    } else {
+                        val npid: String = identResponse.data.hentIdenter.identer
+                            .filter {it.gruppe == PdlIdentGruppeTyper.NPID.navn }
+                            .first { !it.historisk }.ident
+                        PdlIdentifikator.Npid(NavPersonIdent(npid))
+                    }
                 } catch (e: Exception) {
                     throw PdlForesporselFeilet(
-                        "Fant ingen folkeregisterident for ${request.ident} fra PDL"
+                        "Fant ingen pdlidentifikator for ${request.ident} fra PDL"
                     )
                 }
             }

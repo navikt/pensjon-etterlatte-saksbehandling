@@ -3,6 +3,7 @@ package no.nav.etterlatte.hendelserpdl.leesah
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.person.pdl.leesah.Personhendelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -43,6 +44,13 @@ class PersonHendelseFordeler(
         try {
             val personnummer =
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            if (personnummer !is PdlIdentifikator.FolkeregisterIdent) {
+                log.info(
+                    "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
+                        "som identifikator"
+                )
+                return
+            }
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             personhendelse.adressebeskyttelse.let {
                 postHendelser.haandterAdressebeskyttelse(
@@ -64,7 +72,13 @@ class PersonHendelseFordeler(
         try {
             val personnummer =
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
-
+            if (personnummer !is PdlIdentifikator.FolkeregisterIdent) {
+                log.info(
+                    "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
+                        "som identifikator"
+                )
+                return
+            }
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             personhendelse.forelderBarnRelasjon.let {
                 postHendelser.forelderBarnRelasjon(
@@ -88,7 +102,13 @@ class PersonHendelseFordeler(
         try {
             val personnummer =
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
-
+            if (personnummer !is PdlIdentifikator.FolkeregisterIdent) {
+                log.info(
+                    "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
+                        "som identifikator"
+                )
+                return
+            }
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             postHendelser.personErDod(
                 fnr = personnummer.folkeregisterident.value,
@@ -111,7 +131,13 @@ class PersonHendelseFordeler(
         try {
             val personnummer =
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
-
+            if (personnummer !is PdlIdentifikator.FolkeregisterIdent) {
+                log.info(
+                    "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
+                        "som identifikator"
+                )
+                return
+            }
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             postHendelser.personUtflyttingFraNorge(
                 fnr = personnummer.folkeregisterident.value,

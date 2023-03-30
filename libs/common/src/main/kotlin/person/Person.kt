@@ -1,6 +1,8 @@
 package no.nav.etterlatte.libs.common.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
@@ -128,9 +130,19 @@ data class VergeEllerFullmektig(
     val omfangetErInnenPersonligOmraade: Boolean
 )
 
-data class FolkeregisterIdent(
-    val folkeregisterident: Folkeregisteridentifikator
-)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+sealed class PdlIdentifikator {
+
+    @JsonTypeName("FOLKEREGISTERIDENT")
+    data class FolkeregisterIdent(
+        val folkeregisterident: Folkeregisteridentifikator
+    ) : PdlIdentifikator()
+
+    @JsonTypeName("NPID")
+    data class Npid(
+        val npid: NavPersonIdent
+    ) : PdlIdentifikator()
+}
 
 data class Utenlandsadresse(
     val harHattUtenlandsopphold: JaNeiVetIkke,

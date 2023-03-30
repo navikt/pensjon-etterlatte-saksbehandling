@@ -6,14 +6,14 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface Pdl {
-    suspend fun hentFolkeregisterIdentifikator(ident: String): FolkeregisterIdent
+    suspend fun hentFolkeregisterIdentifikator(ident: String): PdlIdentifikator
 }
 
 class PdlService(
@@ -25,7 +25,7 @@ class PdlService(
         val logger: Logger = LoggerFactory.getLogger(PdlService::class.java)
     }
 
-    override suspend fun hentFolkeregisterIdentifikator(ident: String): FolkeregisterIdent {
+    override suspend fun hentFolkeregisterIdentifikator(ident: String): PdlIdentifikator {
         logger.info("Henter folkeregisteridentifikator")
         try {
             return pdl_app.post("$url/folkeregisterident") {

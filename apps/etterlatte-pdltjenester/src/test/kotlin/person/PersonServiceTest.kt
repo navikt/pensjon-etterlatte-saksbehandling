@@ -9,6 +9,7 @@ import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.mockResponse
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 
 internal class PersonServiceTest {
 
@@ -196,6 +198,9 @@ internal class PersonServiceTest {
                 )
             }
         val expectedFolkeregisterIdent = "70078749472"
+        if (personIdentResponse !is PdlIdentifikator.FolkeregisterIdent) {
+            fail("Fikk ikke folkeregisteridentifikator")
+        }
         assertEquals(expectedFolkeregisterIdent, personIdentResponse.folkeregisterident.value)
     }
 

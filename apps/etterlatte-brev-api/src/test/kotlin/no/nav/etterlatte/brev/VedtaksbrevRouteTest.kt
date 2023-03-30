@@ -23,7 +23,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.tilgangssjekk.BehandlingKlient
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -181,7 +181,7 @@ internal class VedtaksbrevRouteTest {
 
     companion object {
         private const val CLIENT_ID = "mock-client-id"
-        private val STOR_SNERK = Foedselsnummer.of("11057523044")
+        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
         private val BEHANDLING_ID = UUID.randomUUID()
     }
 }

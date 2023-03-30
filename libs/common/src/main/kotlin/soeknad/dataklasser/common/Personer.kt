@@ -2,7 +2,7 @@ package no.nav.etterlatte.libs.common.soeknad.dataklasser.common
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -23,7 +23,7 @@ interface Person {
     val type: PersonType
     val fornavn: Opplysning<String>
     val etternavn: Opplysning<String>
-    val foedselsnummer: Opplysning<Foedselsnummer>
+    val foedselsnummer: Opplysning<Folkeregisteridentifikator>
 }
 
 enum class PersonType {
@@ -40,7 +40,7 @@ enum class PersonType {
 data class Innsender(
     override val fornavn: Opplysning<String>,
     override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>
+    override val foedselsnummer: Opplysning<Folkeregisteridentifikator>
 ) : Person {
     override val type: PersonType = PersonType.INNSENDER
 }
@@ -48,7 +48,7 @@ data class Innsender(
 data class GjenlevendeForelder(
     override val fornavn: Opplysning<String>,
     override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>,
+    override val foedselsnummer: Opplysning<Folkeregisteridentifikator>,
 
     val adresse: Opplysning<String>,
     val statsborgerskap: Opplysning<String>,
@@ -60,7 +60,7 @@ data class GjenlevendeForelder(
 data class Forelder(
     override val fornavn: Opplysning<String>,
     override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>
+    override val foedselsnummer: Opplysning<Folkeregisteridentifikator>
 ) : Person {
     override val type: PersonType = PersonType.FORELDER
 }
@@ -68,7 +68,7 @@ data class Forelder(
 data class Barn(
     override val fornavn: Opplysning<String>,
     override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>,
+    override val foedselsnummer: Opplysning<Folkeregisteridentifikator>,
 
     val statsborgerskap: Opplysning<String>,
     val utenlandsAdresse: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, Utenlandsadresse?>?,
@@ -82,7 +82,7 @@ data class Barn(
 data class Gjenlevende(
     override val fornavn: Opplysning<String>,
     override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>,
+    override val foedselsnummer: Opplysning<Folkeregisteridentifikator>,
 
     val statsborgerskap: Opplysning<String>,
     val sivilstatus: Opplysning<String>,
@@ -104,7 +104,7 @@ data class Gjenlevende(
 data class Avdoed(
     override val fornavn: Opplysning<String>,
     override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>,
+    override val foedselsnummer: Opplysning<Folkeregisteridentifikator>,
 
     val datoForDoedsfallet: Opplysning<DatoSvar>,
     val statsborgerskap: Opplysning<FritekstSvar>,
@@ -121,7 +121,7 @@ data class Avdoed(
 data class Verge(
     val fornavn: Opplysning<String>?,
     val etternavn: Opplysning<String>?,
-    val foedselsnummer: Opplysning<Foedselsnummer>?
+    val foedselsnummer: Opplysning<Folkeregisteridentifikator>?
 ) {
     val type = PersonType.VERGE
 }
@@ -129,7 +129,7 @@ data class Verge(
 data class Samboer(
     override val fornavn: Opplysning<String>,
     override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>,
+    override val foedselsnummer: Opplysning<Folkeregisteridentifikator>,
 
     val fellesBarnEllertidligereGift: Opplysning<EnumSvar<JaNeiVetIkke>>,
     val inntekt: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, SamboerInntekt?>?

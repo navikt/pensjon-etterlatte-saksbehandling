@@ -3,7 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -18,7 +18,7 @@ import java.time.YearMonth
 import java.util.*
 
 data class OpprettVedtak(
-    val soeker: Foedselsnummer,
+    val soeker: Folkeregisteridentifikator,
     val sakId: Long,
     val sakType: SakType,
     val behandlingId: UUID,
@@ -33,7 +33,7 @@ data class OpprettVedtak(
 
 data class Vedtak(
     val id: Long,
-    val soeker: Foedselsnummer,
+    val soeker: Folkeregisteridentifikator,
     val sakId: Long,
     val sakType: SakType,
     val behandlingId: UUID,

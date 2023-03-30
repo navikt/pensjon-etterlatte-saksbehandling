@@ -3,7 +3,7 @@ package no.nav.etterlatte.libs.common.pdl
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utland
@@ -13,7 +13,7 @@ import java.time.LocalDate
 data class PersonDTO(
     val fornavn: OpplysningDTO<String>,
     val etternavn: OpplysningDTO<String>,
-    val foedselsnummer: OpplysningDTO<Foedselsnummer>,
+    val foedselsnummer: OpplysningDTO<Folkeregisteridentifikator>,
     val foedselsdato: OpplysningDTO<LocalDate>?,
     val foedselsaar: OpplysningDTO<Int>,
     val foedeland: OpplysningDTO<String>?,

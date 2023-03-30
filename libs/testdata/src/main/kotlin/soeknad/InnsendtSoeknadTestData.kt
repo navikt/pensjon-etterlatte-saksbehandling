@@ -1,6 +1,6 @@
 package soeknad
 
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.AndreYtelser
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
@@ -37,7 +37,7 @@ object InnsendtSoeknadTestData {
                     spoersmaal = "Etternavn"
                 ),
                 foedselsnummer = Opplysning(
-                    svar = Foedselsnummer.of("03108718357"),
+                    svar = Folkeregisteridentifikator.of("03108718357"),
                     spoersmaal = "Fødselsnummer"
                 )
             ),
@@ -69,7 +69,7 @@ object InnsendtSoeknadTestData {
                 fornavn = Opplysning(svar = "Kirsten", spoersmaal = "Spoersmal"),
                 etternavn = Opplysning(svar = "Jakobsen", spoersmaal = "Etternavn"),
                 foedselsnummer = Opplysning(
-                    svar = Foedselsnummer.of("26058411891"),
+                    svar = Folkeregisteridentifikator.of("26058411891"),
                     spoersmaal = "Barnets fødselsnummer / d-nummer"
                 ),
                 statsborgerskap = Opplysning(
@@ -166,7 +166,7 @@ object InnsendtSoeknadTestData {
                 fornavn = Opplysning(svar = "Bernt", spoersmaal = null),
                 etternavn = Opplysning(svar = "Jakobsen", spoersmaal = null),
                 foedselsnummer = Opplysning(
-                    svar = Foedselsnummer.of("22128202440"),
+                    svar = Folkeregisteridentifikator.of("22128202440"),
                     spoersmaal = "Barnets fødselsnummer / d-nummer"
                 ),
                 datoForDoedsfallet = Opplysning(

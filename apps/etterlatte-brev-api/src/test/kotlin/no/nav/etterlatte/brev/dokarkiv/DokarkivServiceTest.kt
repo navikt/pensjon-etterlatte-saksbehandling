@@ -21,7 +21,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.junit.jupiter.api.AfterEach
@@ -104,6 +104,6 @@ internal class DokarkivServiceTest {
     )
 
     companion object {
-        private val STOR_SNERK = Foedselsnummer.of("11057523044")
+        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
     }
 }

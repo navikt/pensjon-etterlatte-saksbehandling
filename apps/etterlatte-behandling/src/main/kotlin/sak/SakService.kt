@@ -3,7 +3,7 @@ package no.nav.etterlatte.sak
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.token.Saksbehandler
 
 interface SakService : PersonTilgangsSjekk {
@@ -55,7 +55,10 @@ class RealSakService(private val dao: SakDao) : SakService {
         }
     }
 
-    override suspend fun harTilgangTilPerson(foedselsnummer: Foedselsnummer, bruker: Saksbehandler): Boolean {
+    override suspend fun harTilgangTilPerson(
+        foedselsnummer: Folkeregisteridentifikator,
+        bruker: Saksbehandler
+    ): Boolean {
         return !this.sjekkOmFnrHarEnSakMedAdresseBeskyttelse(foedselsnummer.value)
     }
 

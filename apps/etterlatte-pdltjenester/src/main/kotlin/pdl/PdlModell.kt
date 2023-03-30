@@ -1,6 +1,6 @@
 package no.nav.etterlatte.pdl
 
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -411,7 +411,7 @@ data class PdlVergemaalEllerFremtidsfullmakt(
 )
 
 data class PdlVergeEllerFullmektig(
-    val motpartsPersonident: Foedselsnummer?,
+    val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: PdlPersonnavn?,
     val omfang: String?,
     val omfangetErInnenPersonligOmraade: Boolean

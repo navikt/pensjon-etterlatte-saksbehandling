@@ -17,7 +17,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -175,7 +175,7 @@ internal class JournalfoerVedtaksbrevTest {
     }
 
     private companion object {
-        private val STOR_SNERK = Foedselsnummer.of("11057523044")
+        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
         private val BEHANDLING_ID = UUID.randomUUID()
     }
 }

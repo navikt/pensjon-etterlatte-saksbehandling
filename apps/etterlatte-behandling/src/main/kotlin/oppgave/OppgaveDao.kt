@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -53,7 +53,7 @@ class OppgaveDao(private val connection: () -> Connection) {
                     behandlingStatus = BehandlingStatus.valueOf(getString("status")),
                     sakId = getLong("sak_id"),
                     sakType = enumValueOf(getString("sakType")),
-                    fnr = Foedselsnummer.of(getString("fnr")),
+                    fnr = Folkeregisteridentifikator.of(getString("fnr")),
                     registrertDato = mottattDato,
                     behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
                     antallSoesken = antallSoesken(getString("soesken"))
@@ -91,7 +91,7 @@ class OppgaveDao(private val connection: () -> Connection) {
                     behandlingStatus = BehandlingStatus.valueOf(getString("status")),
                     sakId = getLong("sak_id"),
                     sakType = enumValueOf(getString("sakType")),
-                    fnr = Foedselsnummer.of(getString("fnr")),
+                    fnr = Folkeregisteridentifikator.of(getString("fnr")),
                     registrertDato = mottattDato,
                     behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
                     antallSoesken = antallSoesken(getString("soesken"))
@@ -121,7 +121,7 @@ class OppgaveDao(private val connection: () -> Connection) {
                     sakId = getLong("sak_id"),
                     sakType = SakType.valueOf(getString("sakType")),
                     registrertDato = registrertDato,
-                    fnr = Foedselsnummer.of(getString("fnr")),
+                    fnr = Folkeregisteridentifikator.of(getString("fnr")),
                     grunnlagsendringsType = GrunnlagsendringsType.valueOf(getString("type")),
                     gjelderRolle = Saksrolle.enumVedNavnEllerUkjent(getString("hendelse_gjelder_rolle"))
                 )

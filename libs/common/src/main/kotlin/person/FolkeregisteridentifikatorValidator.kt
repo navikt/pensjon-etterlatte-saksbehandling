@@ -1,6 +1,6 @@
 package no.nav.etterlatte.libs.common.person
 
-class FoedselsnummerValidator {
+class FolkeregisteridentifikatorValidator {
     companion object {
         private val controlDigits1 = intArrayOf(3, 7, 6, 1, 8, 9, 4, 5, 2)
         private val controlDigits2 = intArrayOf(5, 4, 3, 2, 7, 6, 5, 4, 3, 2)

@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 
 class OpplysningsgrunnlagMapper(
     private val grunnlaghendelser: List<OpplysningDao.GrunnlagHendelse>,
@@ -30,7 +30,7 @@ class OpplysningsgrunnlagMapper(
 
         val opplysningstype: Opplysningstype
             get() = hendelser.first().opplysning.opplysningType
-        val fnr: Foedselsnummer?
+        val fnr: Folkeregisteridentifikator?
             get() = hendelser.first().opplysning.fnr
 
         private fun alleOpplysningerErAvSammeType(opplysninger: List<Grunnlagsopplysning<*>>): Boolean {

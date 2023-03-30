@@ -12,7 +12,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.FNR_1
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.readFile
@@ -54,7 +54,7 @@ class PdlTjenesterKlientTest {
         val person = runBlocking {
             pdlTjenesterKlient.hentPerson(
                 HentPersonRequest(
-                    foedselsnummer = Foedselsnummer.of(FNR_1),
+                    foedselsnummer = Folkeregisteridentifikator.of(FNR_1),
                     rolle = PersonRolle.BARN
                 )
             )

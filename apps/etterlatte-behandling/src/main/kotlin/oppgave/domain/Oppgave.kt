@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.*
@@ -20,7 +20,7 @@ sealed class Oppgave {
     abstract val sakType: SakType
     abstract val registrertDato: Tidspunkt
     abstract val fristDato: LocalDate
-    abstract val fnr: Foedselsnummer
+    abstract val fnr: Folkeregisteridentifikator
     abstract val handling: Handling
     abstract val oppgaveStatus: OppgaveStatus
     abstract val oppgaveType: OppgaveType
@@ -29,7 +29,7 @@ sealed class Oppgave {
         override val sakId: Long,
         override val sakType: SakType,
         override val registrertDato: Tidspunkt,
-        override val fnr: Foedselsnummer,
+        override val fnr: Folkeregisteridentifikator,
         val behandlingId: UUID,
         val behandlingsType: BehandlingType,
         val behandlingStatus: BehandlingStatus,
@@ -52,7 +52,7 @@ sealed class Oppgave {
         override val sakId: Long,
         override val sakType: SakType,
         override val registrertDato: Tidspunkt,
-        override val fnr: Foedselsnummer,
+        override val fnr: Folkeregisteridentifikator,
         val grunnlagsendringsType: GrunnlagsendringsType,
         val gjelderRolle: Saksrolle
     ) : Oppgave() {

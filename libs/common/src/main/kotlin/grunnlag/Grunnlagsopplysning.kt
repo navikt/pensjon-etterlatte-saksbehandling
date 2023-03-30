@@ -9,7 +9,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 import java.util.*
@@ -21,14 +21,14 @@ open class Grunnlagsopplysning<T>(
     val meta: ObjectNode,
     val opplysning: T,
     val attestering: Kilde? = null,
-    val fnr: Foedselsnummer? = null,
+    val fnr: Folkeregisteridentifikator? = null,
     val periode: Periode? = null
 ) {
     companion object {
         fun empty(
             opplysningType: Opplysningstype,
             kilde: Kilde,
-            fnr: Foedselsnummer,
+            fnr: Folkeregisteridentifikator,
             fom: YearMonth?,
             tom: YearMonth? = null
         ): Grunnlagsopplysning<out Any?> {

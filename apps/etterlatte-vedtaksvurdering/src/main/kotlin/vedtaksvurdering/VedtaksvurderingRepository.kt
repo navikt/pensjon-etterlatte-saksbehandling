@@ -9,7 +9,7 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -234,7 +234,7 @@ class VedtaksvurderingRepository(val datasource: DataSource) {
         sakType = SakType.valueOf(string("saktype")),
         behandlingId = uuid("behandlingid"),
         behandlingType = BehandlingType.valueOf(string("behandlingtype")),
-        soeker = string("fnr").let { Foedselsnummer.of(it) },
+        soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
         status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
         type = string("type").let { VedtakType.valueOf(it) },
         virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },

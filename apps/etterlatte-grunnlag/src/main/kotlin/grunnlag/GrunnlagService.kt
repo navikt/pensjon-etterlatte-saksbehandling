@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.sporingslogg.Decision
@@ -28,9 +28,13 @@ import java.util.UUID
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
-    fun hentOpplysningstypeNavnFraFnr(fnr: Foedselsnummer, navIdent: String): NavnOpplysningDTO?
+    fun hentOpplysningstypeNavnFraFnr(fnr: Folkeregisteridentifikator, navIdent: String): NavnOpplysningDTO?
     fun lagreNyeSaksopplysninger(sak: Long, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
-    fun lagreNyePersonopplysninger(sak: Long, fnr: Foedselsnummer, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
+    fun lagreNyePersonopplysninger(
+        sak: Long,
+        fnr: Folkeregisteridentifikator,
+        nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>
+    )
     fun hentOpplysningsgrunnlag(sak: Long): Grunnlag?
     fun hentOpplysningsgrunnlagMedVersjon(sak: Long, versjon: Long): Grunnlag?
     fun hentOpplysningsgrunnlag(
@@ -44,8 +48,8 @@ interface GrunnlagService {
         bruker: Bruker
     )
 
-    fun hentSakerOgRoller(fnr: Foedselsnummer): PersonMedSakerOgRoller
-    fun hentAlleSakerForFnr(fnr: Foedselsnummer): Set<Long>
+    fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
+    fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long>
 }
 
 class RealGrunnlagService(
@@ -110,14 +114,14 @@ class RealGrunnlagService(
         lagreNyeSaksopplysninger(sakId, opplysning)
     }
 
-    override fun hentSakerOgRoller(fnr: Foedselsnummer): PersonMedSakerOgRoller {
+    override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
         return opplysningDao.finnAllePersongalleriHvorPersonFinnes(fnr)
             .map { it.sakId to deserialize<Persongalleri>(it.opplysning.opplysning.toJson()) }
             .map { (sakId, persongalleri) -> SakOgRolle(sakId, rolle = mapTilRolle(fnr.value, persongalleri)) }
             .let { PersonMedSakerOgRoller(fnr.value, it) }
     }
 
-    override fun hentAlleSakerForFnr(fnr: Foedselsnummer): Set<Long> =
+    override fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long> =
         opplysningDao.finnAlleSakerForPerson(fnr)
 
     private fun mapTilRolle(fnr: String, persongalleri: Persongalleri): Saksrolle = when (fnr) {
@@ -132,7 +136,7 @@ class RealGrunnlagService(
         opplysningsType: Opplysningstype,
         kilde: Grunnlagsopplysning.Kilde,
         opplysning: T,
-        fnr: Foedselsnummer? = null,
+        fnr: Folkeregisteridentifikator? = null,
         periode: Periode? = null
     ): Grunnlagsopplysning<T> {
         return Grunnlagsopplysning(
@@ -150,7 +154,7 @@ class RealGrunnlagService(
         return opplysningDao.finnNyesteGrunnlag(sak, opplysningstype)?.opplysning
     }
 
-    override fun hentOpplysningstypeNavnFraFnr(fnr: Foedselsnummer, navIdent: String): NavnOpplysningDTO? {
+    override fun hentOpplysningstypeNavnFraFnr(fnr: Folkeregisteridentifikator, navIdent: String): NavnOpplysningDTO? {
         val opplysning = opplysningDao.finnNyesteOpplysningPaaFnr(fnr, Opplysningstype.NAVN)?.let {
             val navn: Navn = deserialize(it.opplysning.opplysning.toString())
             NavnOpplysningDTO(
@@ -169,7 +173,7 @@ class RealGrunnlagService(
 
     override fun lagreNyePersonopplysninger(
         sak: Long,
-        fnr: Foedselsnummer,
+        fnr: Folkeregisteridentifikator,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>
     ) {
         logger.info("Oppretter et grunnlag")

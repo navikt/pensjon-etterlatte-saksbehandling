@@ -2,7 +2,7 @@ package no.nav.etterlatte.beregning.regler
 
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
@@ -22,7 +22,7 @@ fun barnepensjonGrunnlag(
     soeskenKull: List<String> = emptyList(),
     trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID)
 ) = BarnepensjonGrunnlag(
-    soeskenKull = FaktumNode(soeskenKull.map { Foedselsnummer.of(it) }, kilde, "søskenkull"),
+    soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
     avdoedForelder = FaktumNode(AvdoedForelder(trygdetid = trygdeTid), kilde, "trygdetid")
 )
 

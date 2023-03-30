@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.P
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -49,7 +49,7 @@ internal class GrunnlagServiceTest {
         private val nyttNavn = Navn("Mohammed", "Ali")
         private val nyFødselsdag = LocalDate.of(2013, 12, 24)
 
-        private fun lagGrunnlagForPerson(fnr: Foedselsnummer, personRolle: PersonRolle) = listOf(
+        private fun lagGrunnlagForPerson(fnr: Folkeregisteridentifikator, personRolle: PersonRolle) = listOf(
             lagGrunnlagHendelse(
                 1,
                 1,
@@ -470,12 +470,12 @@ internal class GrunnlagServiceTest {
     }
 
     companion object {
-        val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
-        val STOR_SNERK = Foedselsnummer.of("11057523044")
+        val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
+        val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
 
         // barn
-        val BLAAOEYD_SAKS = Foedselsnummer.of("05111850870")
-        val GOEYAL_KRONJUVEL = Foedselsnummer.of("27121779531")
-        val GROENN_STAUDE = Foedselsnummer.of("09011350027")
+        val BLAAOEYD_SAKS = Folkeregisteridentifikator.of("05111850870")
+        val GOEYAL_KRONJUVEL = Folkeregisteridentifikator.of("27121779531")
+        val GROENN_STAUDE = Folkeregisteridentifikator.of("09011350027")
     }
 }

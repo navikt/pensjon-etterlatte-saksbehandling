@@ -11,15 +11,6 @@ export enum PersonStatus {
   ETTERLATT = 'Etterlatt',
 }
 
-export interface JournalpostResponse {
-  data: {
-    dokumentoversiktBruker: {
-      journalposter: Journalpost[]
-    }
-  }
-  errors: any
-}
-
 export interface Journalpost {
   journalpostId: string
   tittel: string

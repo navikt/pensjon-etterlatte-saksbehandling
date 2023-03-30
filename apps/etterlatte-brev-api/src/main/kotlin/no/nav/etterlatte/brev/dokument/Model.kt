@@ -1,6 +1,17 @@
 package no.nav.etterlatte.brev.dokument
 
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
+
+data class HentJournalposterResult(
+    val journalposter: List<Journalpost> = emptyList(),
+    val error: Error? = null
+) {
+    data class Error(
+        val statusCode: HttpStatusCode = HttpStatusCode.InternalServerError,
+        val message: String
+    )
+}
 
 data class JournalpostResponse(
     val data: DokumentoversiktBruker? = null,

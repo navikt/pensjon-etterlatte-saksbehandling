@@ -10,6 +10,7 @@ data class BeregningDTO(
     val beregningId: UUID,
     val behandlingId: UUID,
     val type: Beregningstype,
+    val tull: String,
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: Tidspunkt,
     val grunnlagMetadata: Metadata

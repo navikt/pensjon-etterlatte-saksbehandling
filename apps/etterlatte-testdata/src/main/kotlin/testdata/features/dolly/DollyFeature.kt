@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.producer
@@ -23,10 +22,13 @@ import no.nav.etterlatte.testdata.JsonMessage
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.usernameFraToken
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.OffsetDateTime
 import java.util.*
 
 class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
+    private val logger: Logger = LoggerFactory.getLogger(DollyFeature::class.java)
     override val beskrivelse: String
         get() = "Opprett søknad automatisk via Dolly"
     override val path: String
@@ -36,7 +38,9 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
         get() = {
             get {
                 val accessToken = getClientAccessToken()
+                logger.info("got accesstoken $accessToken")
                 val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)
+                logger.info("got gruppeid $gruppeId")
 
                 call.respond(
                     MustacheContent(

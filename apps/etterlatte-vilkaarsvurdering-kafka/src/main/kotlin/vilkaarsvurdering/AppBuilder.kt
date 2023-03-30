@@ -5,9 +5,8 @@ import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingServiceImpl
-import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(props: Miljoevariabler) : RapidsAndRiversAppBuilder(props) {
+class AppBuilder(props: Miljoevariabler) {
     private val config: Config = ConfigFactory.load()
     private val vilkaarsvurderingHttpKlient = httpClientClientCredentials(
         azureAppClientId = config.getString("azure.app.client.id"),

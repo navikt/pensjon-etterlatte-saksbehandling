@@ -22,13 +22,14 @@ import no.nav.etterlatte.statistikk.service.SoeknadStatistikkServiceImpl
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import rapidsandrivers.getRapidEnv
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 class ApplicationContext {
     private val env = System.getenv()
-    val rapidsConnection: RapidsConnection = RapidApplication.create(env.withConsumerGroupId())
+    val rapidsConnection: RapidsConnection = RapidApplication.create(getRapidEnv())
 
     private val statistikkService: StatistikkService by lazy {
         StatistikkService(statistikkRepository, sakstatistikkRepository, behandlingKlient, beregningKlient)
@@ -102,8 +103,3 @@ class ApplicationContext {
         )
     }
 }
-
-private fun Map<String, String>.withConsumerGroupId() =
-    this.toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }

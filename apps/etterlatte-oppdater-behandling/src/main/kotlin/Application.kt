@@ -1,14 +1,16 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.rapidsandrivers.startRapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.helse.rapids_rivers.RapidApplication
+import rapidsandrivers.getRapidEnv
 
-fun main() = startRapidApplication(
-    { AppBuilder(it) },
-    { rc: RapidsConnection, ab: AppBuilder ->
+fun main() {
+    val rapidEnv = getRapidEnv()
+    RapidApplication.create(rapidEnv).also { rapidsConnection ->
+        val ab = AppBuilder(Miljoevariabler(rapidEnv))
         val behandlingservice = ab.createBehandlingService()
-        PdlHendelser(rc, behandlingservice)
-        OmregningsHendelser(rc, behandlingservice)
-        Reguleringsforespoersel(rc, behandlingservice)
-    }
-)
+        PdlHendelser(rapidsConnection, behandlingservice)
+        OmregningsHendelser(rapidsConnection, behandlingservice)
+        Reguleringsforespoersel(rapidsConnection, behandlingservice)
+    }.start()
+}

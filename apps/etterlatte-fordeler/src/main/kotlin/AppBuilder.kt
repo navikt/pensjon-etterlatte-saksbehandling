@@ -7,9 +7,8 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
-import rapidsandrivers.RapidsAndRiversAppBuilder
 
-class AppBuilder(private val env: Miljoevariabler) : RapidsAndRiversAppBuilder(env) {
+class AppBuilder(private val env: Miljoevariabler) {
 
     internal fun pdlTjenesterKlient() = PdlTjenesterKlient(
         client = pdlTjenesterHttpClient,

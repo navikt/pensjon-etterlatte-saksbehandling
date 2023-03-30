@@ -17,7 +17,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 internal class JournalfoerVedtaksbrev(
     private val rapidsConnection: RapidsConnection,
@@ -31,6 +31,7 @@ internal class JournalfoerVedtaksbrev(
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.vedtakId") }
             validate { it.requireKey("vedtak.behandling.id") }
+            validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey("vedtak.sak.ident") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
@@ -45,6 +46,7 @@ internal class JournalfoerVedtaksbrev(
             withLogContext {
                 val vedtak = VedtakTilJournalfoering(
                     vedtakId = packet["vedtak.vedtakId"].asLong(),
+                    sakId = packet["vedtak.sak.id"].asLong(),
                     behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText()),
                     soekerIdent = packet["vedtak.sak.ident"].asText(),
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText()
@@ -97,6 +99,7 @@ internal class JournalfoerVedtaksbrev(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class VedtakTilJournalfoering(
     val vedtakId: Long,
+    val sakId: Long,
     val behandlingId: UUID,
     val soekerIdent: String,
     val ansvarligEnhet: String

@@ -9,7 +9,6 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
-    implementation(project(":libs:etterlatte-helsesjekk"))
 
     implementation(libs.ktor2.clientjackson)
     implementation(libs.ktor2.clientcontentnegotiation)

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.helsesjekk
+package no.nav.etterlatte.libs.ktor
 
 import io.ktor.http.HttpStatusCode
 

@@ -34,7 +34,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
-import no.nav.etterlatte.libs.helsesjekk.setReady
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals

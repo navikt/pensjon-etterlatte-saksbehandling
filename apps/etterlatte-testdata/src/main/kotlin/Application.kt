@@ -29,7 +29,9 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.mustache.Mustache
+import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.path
 import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
@@ -58,6 +60,7 @@ import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.event.Level
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 
 private val env = System.getenv()
@@ -100,6 +103,10 @@ fun main() {
             module {
                 install(Mustache) {
                     mustacheFactory = DefaultMustacheFactory("templates")
+                }
+                install(CallLogging) {
+                    level = org.slf4j.event.Level.INFO
+                    filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics")) }
                 }
 
                 if (localDevelopment) {

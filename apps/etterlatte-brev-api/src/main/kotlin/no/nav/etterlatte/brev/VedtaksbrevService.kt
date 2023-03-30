@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.EndringBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
@@ -95,7 +96,7 @@ class VedtaksbrevService(
 
         val brevRequest = when (vedtakType) {
             VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
-            VedtakType.ENDRING -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
+            VedtakType.ENDRING -> EndringBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
             VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
             VedtakType.OPPHOER -> throw Exception("Vedtakstype er ikke støttet: $vedtakType")
         }

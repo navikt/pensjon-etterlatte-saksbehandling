@@ -34,7 +34,16 @@ export interface IPdlPerson {
   avdoedesBarn?: IPdlPerson[]
   familieRelasjon?: IFamilieRelasjon
   sivilstatus?: Sivilstatus
+  sivilstand?: Sivilstand[]
   // ...
+}
+
+export interface Sivilstand {
+  sivilstatus: Sivilstatus
+  relatertVedSiviltilstand?: string
+  gyldigFraOgMed?: Date
+  bekreftetDato?: Date
+  kilde: string
 }
 
 enum Sivilstatus {

@@ -1,6 +1,6 @@
 import { Heart } from '@navikt/ds-icons'
 import { Heading, Table } from '@navikt/ds-react'
-import { IFamilieforhold } from '~shared/types/Person'
+import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { format } from 'date-fns'
 import styled from 'styled-components'
@@ -14,10 +14,11 @@ export const SivilstatusWrapper = styled.span`
 
 type Props = {
   familieforhold: IFamilieforhold
+  avdoed: IPdlPerson
 }
 
-export const Sivilstatus: React.FC<Props> = ({ familieforhold }) => {
-  const sivilstatus = familieforhold.gjenlevende.opplysning.sivilstatus
+export const Sivilstatus: React.FC<Props> = ({ familieforhold, avdoed }) => {
+  const sivilstand = familieforhold.gjenlevende.opplysning.sivilstand
 
   return (
     <SivilstatusWrapper>
@@ -40,12 +41,34 @@ export const Sivilstatus: React.FC<Props> = ({ familieforhold }) => {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            <Table.Row>
-              <Table.DataCell>{sivilstatus}</Table.DataCell>
-              <Table.DataCell>{format(new Date(), DatoFormat.DAG_MAANED_AAR)}</Table.DataCell>
-              <Table.DataCell></Table.DataCell>
-              <Table.DataCell></Table.DataCell>
-            </Table.Row>
+            {sivilstand ? (
+              sivilstand?.map((ss, index) => (
+                <Table.Row key={index}>
+                  <Table.DataCell>{ss.sivilstatus}</Table.DataCell>
+                  <Table.DataCell>
+                    {ss.gyldigFraOgMed
+                      ? format(new Date(ss.gyldigFraOgMed), DatoFormat.DAG_MAANED_AAR)
+                      : ' Mangler dato'}
+                  </Table.DataCell>
+                  <Table.DataCell>
+                    {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
+                      ? `${avdoed.fornavn} ${avdoed.etternavn}`
+                      : 'Annen person'}
+                  </Table.DataCell>
+                  <Table.DataCell>
+                    {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
+                      ? format(new Date(avdoed.doedsdato), DatoFormat.DAG_MAANED_AAR)
+                      : ''}
+                  </Table.DataCell>
+                </Table.Row>
+              ))
+            ) : (
+              <Table.Row>
+                <Table.DataCell aria-colspan={4} colSpan={4} align={'center'}>
+                  Mangler data om sivilstatus
+                </Table.DataCell>
+              </Table.Row>
+            )}
           </Table.Body>
         </Table>
       </TableWrapper>

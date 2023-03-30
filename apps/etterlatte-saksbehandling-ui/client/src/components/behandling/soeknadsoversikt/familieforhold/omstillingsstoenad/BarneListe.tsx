@@ -42,9 +42,17 @@ export const BarneListe: React.FC<Props> = ({ familieforhold }) => {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {barneListe.map((barn, i) => {
-              return <BarnRow key={i + barn.foedselsnummer} barn={barn} familieforhold={familieforhold} />
-            })}
+            {barneListe.length ? (
+              barneListe.map((barn, i) => {
+                return <BarnRow key={i + barn.foedselsnummer} barn={barn} familieforhold={familieforhold} />
+              })
+            ) : (
+              <Table.Row>
+                <Table.DataCell colSpan={5} aria-colspan={5} align={'center'}>
+                  Avdøde har ingen barn
+                </Table.DataCell>
+              </Table.Row>
+            )}
           </Table.Body>
         </Table>
       </TableWrapper>

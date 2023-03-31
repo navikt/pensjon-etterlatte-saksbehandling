@@ -41,7 +41,7 @@ jobs:
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           image_suffix: demo
           dockerfile: docker/Dockerfile
-          docker-context: apps/${{ github.workflow }}
+          docker_context: apps/${{ github.workflow }}
           tag: ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}
       - name: Print docker tag
         run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY

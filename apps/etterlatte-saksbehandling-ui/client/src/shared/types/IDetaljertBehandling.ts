@@ -22,6 +22,7 @@ export interface IDetaljertBehandling {
   familieforhold?: IFamilieforhold
   behandlingType: IBehandlingsType
   søker?: IPdlPerson
+  prosesstype: IProsesstype
 }
 
 export enum IBehandlingsType {
@@ -73,6 +74,11 @@ export interface Virkningstidspunkt {
   dato: string
   kilde: KildeSaksbehandler
   begrunnelse: string
+}
+
+export enum IProsesstype {
+  MANUELL = 'MANUELL',
+  AUTOMATISK = 'AUTOMATISK',
 }
 
 export enum VilkaarsType {

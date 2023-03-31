@@ -18,7 +18,7 @@ import {
 } from '~shared/api/vilkaarsvurdering'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, IDetaljertBehandling, IProsesstype } from '~shared/types/IDetaljertBehandling'
 
 interface VilkaarOption {
   value: string
@@ -97,8 +97,14 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     })
 
     const fetchVedtaksbrev = async () => {
-      const brevResponse = await opprettEllerOppdaterBrevForVedtak(sak, behandlingId!!)
+      const skalIkkeHenteVedtaksbrev =
+        props.behandling.behandlingType === IBehandlingsType.REVURDERING &&
+        props.behandling.prosesstype === IProsesstype.AUTOMATISK
+      if (skalIkkeHenteVedtaksbrev) {
+        return
+      }
 
+      const brevResponse = await opprettEllerOppdaterBrevForVedtak(sak, behandlingId!!)
       if (brevResponse.status === 'ok') {
         setVedtaksbrev(brevResponse.data)
       } else {

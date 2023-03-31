@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -84,5 +85,19 @@ class SakDaoTest {
             AdressebeskyttelseGradering.UGRADERT
         )
         Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
+    }
+
+    @Test
+    fun `kan opprett sak uten enhet`() {
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
+
+        Assertions.assertNull(opprettSak.enhet)
+    }
+
+    @Test
+    fun `kan opprett sak med enhet`() {
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.DEFAULT.enhetNr)
+
+        Assertions.assertEquals(Enheter.DEFAULT.enhetNr, opprettSak.enhet)
     }
 }

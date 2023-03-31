@@ -2,6 +2,7 @@ package no.nav.etterlatte.fordeler
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
@@ -68,16 +69,24 @@ internal class Fordeler(
                 when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
                     FordelerResultat.GyldigForBehandling -> {
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Doffen")
-                        val sakIdForSoeknad = fordelerService.hentSakId(
-                            packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
-                            SakType.BARNEPENSJON
-                        )
-                        packet.leggPaaSakId(sakIdForSoeknad)
-                        context.publish(packet.leggPaaFordeltStatus(true).toJson())
+                        try {
+                            fordelerService.hentSakId(
+                                packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
+                                SakType.BARNEPENSJON
+                            )
+                        } catch (e: ResponseException) {
+                            logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
 
-                        fordelerMetricLogger.logMetricFordelt()
-                        lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
-                            ?.let { context.publish(it) }
+                            // Svelg slik at Innsendt søknad vil retry
+                            null
+                        }?.let { sakIdForSoeknad ->
+                            packet.leggPaaSakId(sakIdForSoeknad)
+                            context.publish(packet.leggPaaFordeltStatus(true).toJson())
+
+                            fordelerMetricLogger.logMetricFordelt()
+                            lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
+                                ?.let { context.publish(it) }
+                        }
                     }
 
                     is FordelerResultat.IkkeGyldigForBehandling -> {

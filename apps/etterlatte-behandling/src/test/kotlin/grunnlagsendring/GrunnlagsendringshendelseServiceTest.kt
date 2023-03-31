@@ -12,10 +12,10 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.common.klienter.PdlKlientImpl
+import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
-import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlientImpl
-import no.nav.etterlatte.grunnlagsendring.klienter.hentDoedsdato
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

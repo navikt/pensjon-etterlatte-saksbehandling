@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -63,5 +64,9 @@ fun PersonDTO.hentAnsvarligeForeldre(): List<Folkeregisteridentifikator>? =
     this.familieRelasjon?.verdi?.ansvarligeForeldre
 
 fun PersonDTO.hentBarn(): List<Folkeregisteridentifikator>? = this.familieRelasjon?.verdi?.barn
+
+fun PersonDTO.hentVergemaal(): List<VergemaalEllerFremtidsfullmakt>? = this.vergemaalEllerFremtidsfullmakt?.map {
+    it.verdi
+}
 
 fun PersonDTO.hentUtland(): Utland? = this.utland?.verdi

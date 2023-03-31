@@ -12,6 +12,7 @@ import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
 import no.nav.etterlatte.common.klienter.hentBarn
 import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.common.klienter.hentUtland
+import no.nav.etterlatte.common.klienter.hentVergemaal
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -231,12 +232,12 @@ class GrunnlagsendringshendelseService(
             }
 
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> {
-                val pdlBarn = pdlData.hentBarn()
-                val grunnlagBarn = grunnlag?.barn(rolle)
+                val pdlVergemaal = pdlData.hentVergemaal()
+                val grunnlagVergemaal = grunnlag?.vergemaalellerfremtidsfullmakt(rolle)
                 SamsvarMellomPdlOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
-                    pdlBarn,
-                    grunnlagBarn,
-                    samsvar = pdlBarn erLikRekkefoelgeIgnorert grunnlagBarn
+                    fraPdl = pdlVergemaal,
+                    fraGrunnlag = grunnlagVergemaal,
+                    samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal
                 )
             }
         }

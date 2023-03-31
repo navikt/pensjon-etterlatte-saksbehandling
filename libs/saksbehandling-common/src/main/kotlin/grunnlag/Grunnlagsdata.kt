@@ -68,7 +68,7 @@ fun Grunnlagsdata<JsonNode>.hentUtland() = this.hentKonstantOpplysning<Utland>(U
 fun Grunnlagsdata<JsonNode>.hentFamilierelasjon() = this.hentKonstantOpplysning<FamilieRelasjon>(FAMILIERELASJON)
 fun Grunnlagsdata<JsonNode>.hentAvdoedesbarn() = this.hentKonstantOpplysning<AvdoedesBarn>(AVDOEDESBARN)
 fun Grunnlagsdata<JsonNode>.hentVergemaalellerfremtidsfullmakt() =
-    this.hentKonstantOpplysning<VergemaalEllerFremtidsfullmakt>(VERGEMAALELLERFREMTIDSFULLMAKT)
+    this.hentKonstantOpplysning<List<VergemaalEllerFremtidsfullmakt>>(VERGEMAALELLERFREMTIDSFULLMAKT)
 
 fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<PersonRolle>(PERSONROLLE)
 fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() =

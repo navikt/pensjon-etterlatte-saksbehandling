@@ -5,11 +5,12 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class Grunnlagsendringshendelse(
     val id: UUID,
@@ -90,8 +91,8 @@ sealed class SamsvarMellomPdlOgGrunnlag {
 
     @JsonTypeName("VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1")
     data class VergemaalEllerFremtidsfullmaktForhold(
-        val fraPdl: List<Folkeregisteridentifikator>?,
-        val fraGrunnlag: List<Folkeregisteridentifikator>?,
+        val fraPdl: List<VergemaalEllerFremtidsfullmakt>?,
+        val fraGrunnlag: List<VergemaalEllerFremtidsfullmakt>?,
         override val samsvar: Boolean
     ) : SamsvarMellomPdlOgGrunnlag()
 

@@ -4,7 +4,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Person'
 import { BarneListe } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/BarneListe'
-import { Sivilstatus } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Sivilstatus'
+import { Sivilstand } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Sivilstand'
 import { ErrorMessage } from '@navikt/ds-react'
 
 export interface PropsFamilieforhold {
@@ -20,31 +20,24 @@ export const FamilieforholdOmstillingsstoenad: React.FC<PropsFamilieforhold> = (
     )
   }
 
+  const gjenlevende = behandling.familieforhold.gjenlevende
+  const avdoede = behandling.familieforhold.avdoede
+
   return (
     <>
       <FamilieforholdWrapper>
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
           <>
             <FamilieforholdVoksne>
-              <Person
-                person={behandling.familieforhold.avdoede.opplysning}
-                kilde={behandling.familieforhold.avdoede.kilde}
-                avdoed
-              />
+              <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed />
 
-              <Person
-                person={behandling.familieforhold.gjenlevende.opplysning}
-                kilde={behandling.familieforhold.gjenlevende.kilde}
-              />
+              <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} />
             </FamilieforholdVoksne>
-            <Sivilstatus familieforhold={behandling.familieforhold!!} />
+            <Sivilstand familieforhold={behandling.familieforhold!!} avdoed={avdoede.opplysning} />
             <BarneListe familieforhold={behandling.familieforhold!!} />
           </>
         ) : (
-          <Person
-            person={behandling.familieforhold.gjenlevende.opplysning}
-            kilde={behandling.familieforhold.gjenlevende.kilde}
-          />
+          <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} />
         )}
       </FamilieforholdWrapper>
       <Border />

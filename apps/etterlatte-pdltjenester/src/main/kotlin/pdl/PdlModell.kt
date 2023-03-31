@@ -226,6 +226,7 @@ data class PdlSivilstand(
     val type: PdlSivilstandstype,
     val gyldigFraOgMed: LocalDate? = null,
     val relatertVedSivilstand: String? = null,
+    val bekreftelsesdato: LocalDate? = null,
     val metadata: PdlMetadata
 )
 

@@ -46,7 +46,7 @@ export const FamilieforholdBarnepensjon: React.FC<PropsFamilieforhold> = ({ beha
           </>
         ) : (
           <GjenlevendeForelder
-            person={behandling.familieforhold?.gjenlevende.opplysning}
+            person={behandling.familieforhold.gjenlevende.opplysning}
             innsenderErGjenlevendeForelder={innsenderErGjenlevende}
             doedsdato={doedsdato}
           />

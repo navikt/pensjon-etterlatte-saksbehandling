@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -36,6 +37,7 @@ fun mockPerson(
     statsborgerskap: String = NORGE,
     foedeland: String = NORGE,
     sivilstatus: Sivilstatus = Sivilstatus.UGIFT,
+    sivilstand: Sivilstand? = null,
     utland: Utland? = null,
     bostedsadresse: Adresse? = null,
     familieRelasjon: FamilieRelasjon? = null,
@@ -55,6 +57,7 @@ fun mockPerson(
     statsborgerskap = statsborgerskap,
     foedeland = foedeland,
     sivilstatus = sivilstatus,
+    sivilstand = sivilstand?.let { listOf(sivilstand) } ?: emptyList(),
     utland = utland,
     familieRelasjon = familieRelasjon,
     avdoedesBarn = null,

@@ -24,7 +24,7 @@ object PersonMapper {
         val navn = ppsKlient.avklarNavn(hentPerson.navn)
         val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
         val statsborgerskap = hentPerson.statsborgerskap?.let { ppsKlient.avklarStatsborgerskap(it) }
-        val sivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
+        val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
         val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
         val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
 
@@ -45,7 +45,8 @@ object PersonMapper {
             },
             kontaktadresse = hentPerson.kontaktadresse?.let { AdresseMapper.mapKontaktadresse(ppsKlient, it) },
             statsborgerskap = statsborgerskap?.land,
-            sivilstatus = sivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
+            sivilstatus = ppsSivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
+            sivilstand = hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) },
             utland = UtlandMapper.mapUtland(hentPerson),
             familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle),
             avdoedesBarn = if (personRolle == PersonRolle.AVDOED) {
@@ -71,7 +72,7 @@ object PersonMapper {
         val navn = ppsKlient.avklarNavn(hentPerson.navn)
         val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
         val statsborgerskap = hentPerson.statsborgerskap?.let { ppsKlient.avklarStatsborgerskap(it) }
-        val sivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
+        val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
         val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
         val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
 
@@ -96,12 +97,14 @@ object PersonMapper {
             kontaktadresse = hentPerson.kontaktadresse?.let { AdresseMapper.mapKontaktadresse(ppsKlient, it) }
                 ?.map { OpplysningDTO(it, null) },
             statsborgerskap = statsborgerskap?.let { OpplysningDTO(it.land, it.metadata.opplysningsId) },
-            sivilstatus = sivilstand?.let {
+            sivilstatus = ppsSivilstand?.let {
                 OpplysningDTO(
                     Sivilstatus.valueOf(it.type.name),
                     it.metadata.opplysningsId
                 )
             },
+            sivilstand = hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) }
+                ?.map { OpplysningDTO(it, null) },
             utland = OpplysningDTO(UtlandMapper.mapUtland(hentPerson), null),
             familieRelasjon = OpplysningDTO(
                 FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle),

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
@@ -91,7 +92,7 @@ class PersonService(
             } else {
                 try {
                     val folkeregisterIdent: String = it.data.hentIdenter.identer
-                        .filter { it.gruppe == "FOLKEREGISTERIDENT" }
+                        .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
                         .first { !it.historisk }.ident
                     FolkeregisterIdent(folkeregisterident = Folkeregisteridentifikator.of(folkeregisterIdent))
                 } catch (e: Exception) {

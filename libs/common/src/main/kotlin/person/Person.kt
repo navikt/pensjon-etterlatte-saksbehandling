@@ -8,6 +8,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 
+enum class PDLIdentGruppeTyper(val navn: String) {
+    FOLKEREGISTERIDENT("FOLKEREGISTERIDENT"), // Kan være DNR og FNR
+    AKTORID("AKTORID"),
+    NPID("NPID")
+}
+
 data class Person(
     val fornavn: String,
     val etternavn: String,

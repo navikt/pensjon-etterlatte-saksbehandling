@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -42,5 +43,19 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
         }
+    }
+
+    suspend fun kanBeregnes(behandlingId: UUID, bruker: Bruker): Boolean {
+        logger.info("Sjekker om behandling med behandlingId=$behandlingId kan beregnes")
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/beregn")
+
+        return downstreamResourceClient.get(resource, bruker)
+            .mapBoth(
+                success = { true },
+                failure = {
+                    logger.info("Behandling med id $behandlingId kan ikke beregnes")
+                    false
+                }
+            )
     }
 }

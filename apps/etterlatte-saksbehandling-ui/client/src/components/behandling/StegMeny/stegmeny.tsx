@@ -38,7 +38,7 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
       )}
       {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && sakType === ISaksType.OMSTILLINGSSTOENAD && (
         <>
-          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.OPPRETTET) })}>
+          <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
             <NavLink to="trygdetid">Trygdetid</NavLink>
           </li>
           <Separator aria-hidden={'true'} />

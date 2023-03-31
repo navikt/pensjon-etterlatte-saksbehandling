@@ -94,11 +94,12 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
 function finnRoutesFoerstegangbehandling(behandling: IBehandlingReducer): Array<behandlingRouteTypes> {
   const routes: Array<behandlingRouteTypes> = ['soeknadsoversikt', 'vilkaarsvurdering', 'brev']
   if (behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT) {
+    if (behandling.sakType == ISaksType.OMSTILLINGSSTOENAD) {
+      routes.push('trygdetid')
+    }
     routes.push('beregningsgrunnlag')
     routes.push('beregne')
   }
-  if (behandling.sakType == ISaksType.OMSTILLINGSSTOENAD) {
-    routes.push('trygdetid')
-  }
+
   return routes
 }

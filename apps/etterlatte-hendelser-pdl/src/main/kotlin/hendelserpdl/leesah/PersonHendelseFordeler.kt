@@ -185,7 +185,7 @@ class PersonHendelseFordeler(
         log.error(
             "kunne ikke haandtere $hendelseType for hendelsen med id=$hendelsesid. Dette skyldes sannsynligvis" +
                 "at personhendelsen ser annerledes ut enn forventet, eller at det var problem med henting av " +
-                "folkeregisteridentifikatoren fra PDL",
+                "personidentifikatoren fra PDL",
             e
         )
     }

@@ -42,7 +42,6 @@ jobs:
           team: etterlatte
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          image_suffix: demo
           dockerfile: docker/Dockerfile
           docker_context: apps/${{ github.workflow }}
           tag: ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}

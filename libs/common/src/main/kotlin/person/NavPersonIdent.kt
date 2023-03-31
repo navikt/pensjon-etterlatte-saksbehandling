@@ -1,7 +1,8 @@
 package no.nav.etterlatte.libs.common.person
 
-@JvmInline
-value class NavPersonIdent(val ident: String) {
+import com.fasterxml.jackson.annotation.JsonProperty
+
+data class NavPersonIdent(@JsonProperty("value") val ident: String) {
 
     init {
         if (!ident.matches(Regex("^\\d{11}$"))) {

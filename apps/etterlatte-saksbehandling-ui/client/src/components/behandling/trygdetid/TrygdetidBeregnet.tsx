@@ -54,21 +54,27 @@ export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid, setTrygdetid }) 
             <TextField
               label="Nasjonal trygdetid (år)"
               size="medium"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={nasjonalTrygdetid!!}
               onChange={(e) => setNasjonalTrygdetid(Number(e.target.value))}
             />
             <TextField
               label="Fremtidig trygdetid (år)"
               size="medium"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={fremtidigTrygdetid!!}
               onChange={(e) => setFremtidigTrygdetid(Number(e.target.value))}
             />
             <TextField
               label="Sum trygdetid (år)"
               size="medium"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={oppsummertTrygdetid!!}
               onChange={(e) => setOppsummertTrygdetid(Number(e.target.value))}
             />

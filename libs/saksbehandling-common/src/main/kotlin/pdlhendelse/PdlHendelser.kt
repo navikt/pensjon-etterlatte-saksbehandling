@@ -4,6 +4,12 @@ import java.time.LocalDate
 
 sealed interface PdlHendelse
 
+data class VergeMaalEllerFremtidsfullmakt(
+    val fnr: String,
+    val vergeIdent: String,
+    val endringstype: Endringstype
+) : PdlHendelse
+
 data class Doedshendelse(
     val avdoedFnr: String,
     val doedsdato: LocalDate?,

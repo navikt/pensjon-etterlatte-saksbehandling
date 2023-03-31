@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -72,6 +73,15 @@ class GrunnlagsendringshendelseService(
         return opprettHendelseAvTypeForPerson(
             forelderBarnRelasjonHendelse.fnr,
             GrunnlagsendringsType.FORELDER_BARN_RELASJON
+        )
+    }
+
+    fun opprettVergemaalEllerFremtidsfullmakt(
+        vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt
+    ): List<Grunnlagsendringshendelse> {
+        return opprettHendelseAvTypeForPerson(
+            vergeMaalEllerFremtidsfullmakt.fnr,
+            GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT
         )
     }
 
@@ -218,6 +228,16 @@ class GrunnlagsendringshendelseService(
                         barnGrunnlag = grunnlag?.barn(rolle)
                     )
                 }
+            }
+
+            GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> {
+                val pdlBarn = pdlData.hentBarn()
+                val grunnlagBarn = grunnlag?.barn(rolle)
+                SamsvarMellomPdlOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
+                    pdlBarn,
+                    grunnlagBarn,
+                    samsvar = pdlBarn erLikRekkefoelgeIgnorert grunnlagBarn
+                )
             }
         }
     }

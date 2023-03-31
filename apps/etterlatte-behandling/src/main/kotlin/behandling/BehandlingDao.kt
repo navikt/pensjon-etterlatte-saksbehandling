@@ -274,7 +274,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setString(16, revurderingsAarsak?.name)
             stmt.setString(17, opphoerAarsaker?.toJson())
             stmt.setString(18, fritekstAarsak)
-            stmt.setString(19, prosesstype?.toString())
+            stmt.setString(19, prosesstype.toString())
         }
         require(stmt.executeUpdate() == 1)
     }

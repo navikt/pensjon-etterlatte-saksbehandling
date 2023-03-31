@@ -37,7 +37,8 @@ data class DetaljertBehandling(
     val behandlingType: BehandlingType,
     val virkningstidspunkt: Virkningstidspunkt?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
-    val revurderingsaarsak: RevurderingAarsak? = null
+    val revurderingsaarsak: RevurderingAarsak? = null,
+    val prosesstype: Prosesstype
 )
 
 data class BehandlingMedGrunnlagsopplysninger<Person>(

@@ -134,7 +134,8 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
         revurderingsaarsak = when (this) {
             is Revurdering -> revurderingsaarsak
             else -> null
-        }
+        },
+        prosesstype = prosesstype
     )
 }
 

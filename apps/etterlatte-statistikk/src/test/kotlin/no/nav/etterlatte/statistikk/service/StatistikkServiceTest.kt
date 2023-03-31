@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -67,7 +68,8 @@ class StatistikkServiceTest {
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             kommerBarnetTilgode = null,
-            revurderingsaarsak = null
+            revurderingsaarsak = null,
+            prosesstype = Prosesstype.MANUELL
         )
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns Persongalleri(
             "12312312312"
@@ -152,7 +154,8 @@ class StatistikkServiceTest {
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             kommerBarnetTilgode = null,
-            revurderingsaarsak = null
+            revurderingsaarsak = null,
+            prosesstype = Prosesstype.MANUELL
         )
 
         val beregningKlient = mockk<BeregningKlient>()

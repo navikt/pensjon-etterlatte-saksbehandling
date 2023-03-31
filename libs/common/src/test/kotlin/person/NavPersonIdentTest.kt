@@ -1,6 +1,9 @@
 package no.nav.etterlatte.person
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -27,5 +30,11 @@ class NavPersonIdentTest {
         assertDoesNotThrow { NavPersonIdent("01289000000") }
         assertDoesNotThrow { NavPersonIdent("01619000000") }
         assertDoesNotThrow { NavPersonIdent("01729000000") }
+    }
+
+    @Test
+    fun `jsonproperty fungerer?`() {
+        val npid: NavPersonIdent = objectMapper.readValue("\"01729000000\"")
+        Assertions.assertEquals("01729000000", npid.ident)
     }
 }

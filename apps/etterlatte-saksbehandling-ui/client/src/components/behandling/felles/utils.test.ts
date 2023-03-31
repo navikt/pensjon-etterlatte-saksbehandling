@@ -6,6 +6,7 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  IProsesstype,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
@@ -131,6 +132,7 @@ const opprettBehandling = (
     status: IBehandlingStatus.OPPRETTET,
     hendelser: [],
     behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
+    prosesstype: IProsesstype.MANUELL,
   }
 }
 

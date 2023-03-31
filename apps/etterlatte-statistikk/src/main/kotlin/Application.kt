@@ -7,6 +7,7 @@ fun main() {
     with(ApplicationContext()) {
         jobs(this)
         rapidApplication(this).start()
+        // test
     }
 }
 

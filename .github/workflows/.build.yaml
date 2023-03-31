@@ -15,7 +15,7 @@ jobs:
       image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
       branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}
     outputs:
-      image: ${{ env.image }}
+      image: ${{ steps.docker-build-push.outputs.image }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -31,16 +31,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :apps:${{ github.workflow }}:build
+
       - name: Build and publish docker image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker build --tag ${{ env.image }} --tag ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }} -f docker/Dockerfile apps/${{ github.workflow }}
-          docker push ${{ env.image }}
-          docker push ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: etterlatte
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          image_suffix: demo
+          dockerfile: docker/Dockerfile
+          docker-context: apps/${{ github.workflow }}
+          tag: ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}
       - name: Print docker tag
-        run: echo 'Docker-tag er ${{ env.image }} ' >> $GITHUB_STEP_SUMMARY
+        run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY
   snyk:
     name: Snyk
     runs-on: ubuntu-latest

@@ -1,4 +1,4 @@
-package person
+package no.nav.etterlatte.person
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper

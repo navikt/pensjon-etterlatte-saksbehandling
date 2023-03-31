@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
-import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
@@ -93,7 +93,7 @@ class PersonService(
             } else {
                 try {
                     val folkeregisterIdent: String? = identResponse.data.hentIdenter.identer
-                        .filter { it.gruppe == PdlIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
+                        .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
                         .firstOrNull { !it.historisk }?.ident
                     if (folkeregisterIdent != null) {
                         PdlIdentifikator.FolkeregisterIdent(
@@ -103,7 +103,7 @@ class PersonService(
                         )
                     } else {
                         val npid: String = identResponse.data.hentIdenter.identer
-                            .filter {it.gruppe == PdlIdentGruppeTyper.NPID.navn }
+                            .filter { it.gruppe == PDLIdentGruppeTyper.NPID.navn }
                             .first { !it.historisk }.ident
                         PdlIdentifikator.Npid(NavPersonIdent(npid))
                     }

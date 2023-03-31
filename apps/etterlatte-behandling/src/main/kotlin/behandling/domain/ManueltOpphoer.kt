@@ -5,13 +5,14 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class ManueltOpphoer(
     override val id: UUID,
@@ -22,7 +23,8 @@ data class ManueltOpphoer(
     override val persongalleri: Persongalleri,
     override val virkningstidspunkt: Virkningstidspunkt?,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
-    val fritekstAarsak: String?
+    val fritekstAarsak: String?,
+    override val prosesstype: Prosesstype = Prosesstype.MANUELL
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER
 

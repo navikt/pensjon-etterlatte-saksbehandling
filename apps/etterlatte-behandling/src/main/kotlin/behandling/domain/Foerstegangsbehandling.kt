@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -27,7 +28,8 @@ data class Foerstegangsbehandling(
     override val vilkaarUtfall: VilkaarsvurderingUtfall?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
-    val gyldighetsproeving: GyldighetsResultat?
+    val gyldighetsproeving: GyldighetsResultat?,
+    override val prosesstype: Prosesstype = Prosesstype.MANUELL
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 

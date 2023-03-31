@@ -131,7 +131,7 @@ class PersonRouteTest {
                 restModule(log) { personRoute(personService) }
             }
 
-            val response = client.post(FOLKEREGISTERIDENT_ENDEPUNKT) {
+            val response = client.post(PDLIDENT_ENDEPUNKT) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(hentPdlIdentRequest.toJson())
@@ -252,7 +252,7 @@ class PersonRouteTest {
     private companion object {
         const val PERSON_ENDEPUNKT = "/person"
         const val PERSON_ENDEPUNKT_V2 = "/person/v2"
-        const val FOLKEREGISTERIDENT_ENDEPUNKT = "/folkeregisterident"
+        const val PDLIDENT_ENDEPUNKT = "/pdlident"
         const val GEOGRAFISKTILKNYTNING_ENDEPUNKT = "/geografisktilknyttning"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }

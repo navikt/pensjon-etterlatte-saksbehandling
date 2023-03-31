@@ -8,7 +8,7 @@ value class NavPersonIdent(val ident: String) {
             throw IllegalArgumentException("Fikk en verdi som ikke er en Npid")
         }
         val month = ident.substring(2 until 4).toInt()
-        if (month < 21 || month > 32) {
+        if (month !in 21..32 && month !in 61..72) {
             throw IllegalArgumentException("Fikk en verdi som ikke er en Npid")
         }
     }

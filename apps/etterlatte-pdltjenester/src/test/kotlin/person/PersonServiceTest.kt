@@ -39,11 +39,15 @@ internal class PersonServiceTest {
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
     private val personService = PersonService(pdlKlient, ppsKlient)
 
+    private val aktorIdMedNpid = "1234567890123"
+    private val aktorIdMedFolkeregisterIdent = "2305469522806"
+
     @BeforeEach
     fun beforeEach() {
         val personResponse: PdlPersonResponse = mockResponse("/pdl/person.json")
         val personBolkResponse: PdlPersonResponseBolk = mockResponse("/pdl/personBolk.json")
         val personIdentResponse: PdlIdentResponse = mockResponse("/pdl/folkeregisterident.json")
+        val personNpidResponse: PdlIdentResponse = mockResponse("/pdl/npid.json")
         val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
         val geografiskTilknytning = PdlGeografiskTilknytningResponse(
             data = PdlGeografiskTilknytningData(
@@ -58,7 +62,10 @@ internal class PersonServiceTest {
 
         coEvery { pdlKlient.hentPerson(any(), any()) } returns personResponse
         coEvery { pdlKlient.hentPersonBolk(any()) } returns personBolkResponse
-        coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns personIdentResponse
+        coEvery {
+            pdlKlient.hentPdlIdentifikator(PersonIdent(aktorIdMedFolkeregisterIdent))
+        } returns personIdentResponse
+        coEvery { pdlKlient.hentPdlIdentifikator(PersonIdent(aktorIdMedNpid)) } returns personNpidResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
         coEvery { ppsKlient.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
@@ -189,19 +196,34 @@ internal class PersonServiceTest {
 
     @Test
     fun `Skal hente folkeregisterident for aktoerid`() {
-        val personIdentResponse =
-            runBlocking {
-                personService.hentPdlIdentifikator(
-                    HentPdlIdentRequest(
-                        PersonIdent("2305469522806")
-                    )
+        val personIdentResponse = runBlocking {
+            personService.hentPdlIdentifikator(
+                HentPdlIdentRequest(
+                    PersonIdent("2305469522806")
                 )
-            }
+            )
+        }
         val expectedFolkeregisterIdent = "70078749472"
         if (personIdentResponse !is PdlIdentifikator.FolkeregisterIdent) {
             fail("Fikk ikke folkeregisteridentifikator")
         }
         assertEquals(expectedFolkeregisterIdent, personIdentResponse.folkeregisterident.value)
+    }
+
+    @Test
+    fun `Skal hente npid for aktoerid som ikke har folkeregisteridentifikator`() {
+        val personIdentResponse = runBlocking {
+            personService.hentPdlIdentifikator(
+                HentPdlIdentRequest(
+                    PersonIdent(aktorIdMedNpid)
+                )
+            )
+        }
+        val expectedNpid = "09706511617"
+        if (personIdentResponse !is PdlIdentifikator.Npid) {
+            fail("Fikk ikke Npid")
+        }
+        assertEquals(expectedNpid, personIdentResponse.npid.ident)
     }
 
     @Test

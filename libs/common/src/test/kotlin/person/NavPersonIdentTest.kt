@@ -17,11 +17,15 @@ class NavPersonIdentTest {
     }
 
     @Test
-    fun `NPID sjekker om den månedsdelen av identifikatoren er 20 + måned`() {
+    fun `NPID sjekker om den månedsdelen av identifikatoren er 20 + måned eller 60 + måned for test`() {
         assertThrows<IllegalArgumentException> { NavPersonIdent("12335678901") }
         assertThrows<IllegalArgumentException> { NavPersonIdent("12125678901") }
+        assertThrows<IllegalArgumentException> { NavPersonIdent("12605678901") }
+        assertThrows<IllegalArgumentException> { NavPersonIdent("12735678901") }
         assertDoesNotThrow { NavPersonIdent("01309000000") }
         assertDoesNotThrow { NavPersonIdent("01329000000") }
         assertDoesNotThrow { NavPersonIdent("01289000000") }
+        assertDoesNotThrow { NavPersonIdent("01619000000") }
+        assertDoesNotThrow { NavPersonIdent("01729000000") }
     }
 }

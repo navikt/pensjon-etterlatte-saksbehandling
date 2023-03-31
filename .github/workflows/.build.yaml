@@ -11,6 +11,9 @@ jobs:
   build-and-publish:
     name: Build & publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     env:
       image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
       branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}

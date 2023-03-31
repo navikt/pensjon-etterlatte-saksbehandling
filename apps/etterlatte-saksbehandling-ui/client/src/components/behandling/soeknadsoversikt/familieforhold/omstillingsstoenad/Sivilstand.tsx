@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
 import { DatoFormat } from '~utils/formattering'
 
-export const SivilstatusWrapper = styled.span`
+export const SivilstandWrapper = styled.span`
   min-width: 60%;
   max-width: 36rem;
 `
@@ -17,17 +17,17 @@ type Props = {
   avdoed: IPdlPerson
 }
 
-export const Sivilstatus: React.FC<Props> = ({ familieforhold, avdoed }) => {
+export const Sivilstand: React.FC<Props> = ({ familieforhold, avdoed }) => {
   const sivilstand = familieforhold.gjenlevende.opplysning.sivilstand
 
   return (
-    <SivilstatusWrapper>
+    <SivilstandWrapper>
       <FlexHeader>
         <IconWrapper>
           <Heart fontSize={IconSize.DEFAULT} />
         </IconWrapper>
         <Heading size={'small'} level={'3'}>
-          Sivilstatus (gjenlevende)
+          Sivilstand (gjenlevende)
         </Heading>
       </FlexHeader>
       <TableWrapper>
@@ -65,13 +65,13 @@ export const Sivilstatus: React.FC<Props> = ({ familieforhold, avdoed }) => {
             ) : (
               <Table.Row>
                 <Table.DataCell aria-colspan={4} colSpan={4} align={'center'}>
-                  Mangler data om sivilstatus
+                  Mangler data om sivilstand
                 </Table.DataCell>
               </Table.Row>
             )}
           </Table.Body>
         </Table>
       </TableWrapper>
-    </SivilstatusWrapper>
+    </SivilstandWrapper>
   )
 }

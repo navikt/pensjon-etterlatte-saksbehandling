@@ -8,6 +8,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBeregnet'
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 import styled from 'styled-components'
+import { BodyShort } from '@navikt/ds-react'
 
 export const Trygdetid = () => {
   const { behandlingId } = useParams()
@@ -41,12 +42,10 @@ export const Trygdetid = () => {
         ]}
         status={null}
       >
-        <TrygdetidInfo>
-          <p>
-            Faktisk trygdetid er den tiden fra avdøde fylte 16 år til personen døde. fremtidig trygdetid er tiden fra
-            dødsfallet til og med kalenderåret avdøde hadde blitt 66 år. Tilsammen kan man ha maks 40 år med trygdetid.
-          </p>
-        </TrygdetidInfo>
+        <BodyShort>
+          Faktisk trygdetid er den tiden fra avdøde fylte 16 år til personen døde. fremtidig trygdetid er tiden fra
+          dødsfallet til og med kalenderåret avdøde hadde blitt 66 år. Tilsammen kan man ha maks 40 år med trygdetid.
+        </BodyShort>
       </Soeknadsvurdering>
 
       {trygdetid && (
@@ -72,9 +71,4 @@ export const Trygdetid = () => {
 const TrygdetidWrapper = styled.div`
   padding: 0 4em;
   max-width: 52em;
-`
-
-const TrygdetidInfo = styled.div`
-  display: flex;
-  flex-direction: column;
 `

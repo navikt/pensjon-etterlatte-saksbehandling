@@ -1,1 +1,1 @@
-ALTER TABLE trygdetid_grunnlag ADD COLUMN trygdetid BIGINT;
+ALTER TABLE trygdetid_grunnlag ADD COLUMN trygdetid INTEGER;

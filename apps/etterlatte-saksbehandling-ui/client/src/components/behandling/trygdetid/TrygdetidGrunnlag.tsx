@@ -25,9 +25,7 @@ const initialState = (type: ITrygdetidGrunnlagType) => {
 
 export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, trygdetidGrunnlagType }) => {
   const { behandlingId } = useParams()
-  const eksisterendeGrunnlag = trygdetid.trygdetidGrunnlag.filter(
-    (grunnlag) => grunnlag.type === trygdetidGrunnlagType
-  )[0]
+  const eksisterendeGrunnlag = trygdetid.trygdetidGrunnlag.find((grunnlag) => grunnlag.type === trygdetidGrunnlagType)
   const [trygdetidgrunnlag, setTrygdetidgrunnlag] = useState<ITrygdetidGrunnlag>(
     eksisterendeGrunnlag ? eksisterendeGrunnlag : initialState(trygdetidGrunnlagType)
   )
@@ -155,8 +153,10 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
                     : 'Faktisk trygdetid'
                 }
                 size="medium"
-                type="number"
-                value={trygdetidgrunnlag.trygdetid == null ? undefined : trygdetidgrunnlag.trygdetid}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={trygdetidgrunnlag.trygdetid && trygdetidgrunnlag.trygdetid}
                 onChange={(e) =>
                   setTrygdetidgrunnlag({
                     ...trygdetidgrunnlag,
@@ -196,7 +196,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
 }
 
 const TrygdetidGrunnlagWrapper = styled.div`
-  padding-bottom: 2em;
+  padding: 2em 0 0 0;
 `
 
 const TrygdetidForm = styled.form`

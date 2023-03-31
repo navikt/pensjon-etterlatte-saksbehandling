@@ -89,7 +89,7 @@ export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid, setTrygdetid }) 
 }
 
 const TrygdetidSum = styled.div`
-  padding-bottom: 4em;
+  padding: 2em 0 4em 0;
 `
 
 const TrygdetidForm = styled.form`

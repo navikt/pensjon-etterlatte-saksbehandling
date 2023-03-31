@@ -77,7 +77,7 @@ class PersonService(
     }
 
     suspend fun hentPdlIdentifikator(request: HentPdlIdentRequest): PdlIdentifikator {
-        logger.info("Henter folkeregisterident for ident=${request.ident} fra PDL")
+        logger.info("Henter pdlidentifikator for ident=${request.ident} fra PDL")
 
         return pdlKlient.hentPdlIdentifikator(request.ident).let { identResponse ->
             if (identResponse.data?.hentIdenter == null) {
@@ -86,7 +86,7 @@ class PersonService(
                     throw PdlFantIkkePerson("Fant ikke personen ${request.ident}")
                 } else {
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente folkeregisterident " +
+                        "Kunne ikke hente pdlidentifkator " +
                             "for ${request.ident} fra PDL: $pdlFeil"
                     )
                 }

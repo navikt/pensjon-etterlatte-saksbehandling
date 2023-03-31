@@ -7,9 +7,9 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -70,6 +70,6 @@ fun mockPerson(
     vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) }
 )
 
-fun mockFolkeregisterident(fnr: String) = FolkeregisterIdent(Folkeregisteridentifikator.of(fnr))
+fun mockFolkeregisterident(fnr: String) = PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(fnr))
 
 fun mockGeografiskTilknytning() = GeografiskTilknytning(kommune = "0301", ukjent = false)

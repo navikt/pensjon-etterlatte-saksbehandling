@@ -3,6 +3,7 @@ package no.nav.etterlatte.hendelserpdl.leesah
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
 import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.person.pdl.leesah.Personhendelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,17 +42,30 @@ class PersonHendelseFordeler(
             return
         }
         try {
-            val personnummer =
-                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
-            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-            personhendelse.adressebeskyttelse.let {
-                postHendelser.haandterAdressebeskyttelse(
-                    fnr = personnummer.folkeregisterident.value,
-                    adressebeskyttelseGradering = gradering.let {
-                        AdressebeskyttelseGradering.valueOf(gradering.toString())
-                    },
-                    endringstype = endringstype
-                )
+            when (
+                val personnummer =
+                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
+            ) {
+                is PdlIdentifikator.Npid -> {
+                    log.info(
+                        "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
+                            "som identifikator"
+                    )
+                    return
+                }
+
+                is PdlIdentifikator.FolkeregisterIdent -> {
+                    val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+                    personhendelse.adressebeskyttelse.let {
+                        postHendelser.haandterAdressebeskyttelse(
+                            fnr = personnummer.folkeregisterident.value,
+                            adressebeskyttelseGradering = gradering.let {
+                                AdressebeskyttelseGradering.valueOf(gradering.toString())
+                            },
+                            endringstype = endringstype
+                        )
+                    }
+                }
             }
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
@@ -62,20 +76,32 @@ class PersonHendelseFordeler(
     private suspend fun haandterForelderBarnRelasjon(personhendelse: Personhendelse) {
         val hendelseType = "Forelder-barn-relasjon-hendelse"
         try {
-            val personnummer =
-                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            when (
+                val personnummer =
+                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
+            ) {
+                is PdlIdentifikator.Npid -> {
+                    log.info(
+                        "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
+                            "som identifikator"
+                    )
+                    return
+                }
 
-            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-            personhendelse.forelderBarnRelasjon.let {
-                postHendelser.forelderBarnRelasjon(
-                    fnr = personnummer.folkeregisterident.value,
-                    relatertPersonsIdent = it?.relatertPersonsIdent,
-                    relatertPersonsRolle = it?.relatertPersonsRolle,
-                    minRolleForPerson = it?.minRolleForPerson,
-                    relatertPersonUtenFolkeregisteridentifikator =
-                    it?.relatertPersonUtenFolkeregisteridentifikator?.toString(),
-                    endringstype = endringstype
-                )
+                is PdlIdentifikator.FolkeregisterIdent -> {
+                    val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+                    personhendelse.forelderBarnRelasjon.let {
+                        postHendelser.forelderBarnRelasjon(
+                            fnr = personnummer.folkeregisterident.value,
+                            relatertPersonsIdent = it?.relatertPersonsIdent,
+                            relatertPersonsRolle = it?.relatertPersonsRolle,
+                            minRolleForPerson = it?.minRolleForPerson,
+                            relatertPersonUtenFolkeregisteridentifikator =
+                            it?.relatertPersonUtenFolkeregisteridentifikator?.toString(),
+                            endringstype = endringstype
+                        )
+                    }
+                }
             }
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
@@ -86,20 +112,32 @@ class PersonHendelseFordeler(
     private suspend fun haandterDoedsendelse(personhendelse: Personhendelse) {
         val hendelseType = "Doedshendelse"
         try {
-            val personnummer =
-                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            when (
+                val personnummer =
+                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
+            ) {
+                is PdlIdentifikator.Npid -> {
+                    log.info(
+                        "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
+                            "som identifikator"
+                    )
+                    return
+                }
 
-            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-            postHendelser.personErDod(
-                fnr = personnummer.folkeregisterident.value,
-                doedsdato = try {
-                    personhendelse.doedsfall?.doedsdato?.format(DateTimeFormatter.ISO_DATE)
-                } catch (e: Exception) {
-                    log.warn("Kunne ikke String-formatere dato i en dødshendelse")
-                    null
-                },
-                endringstype = endringstype
-            )
+                is PdlIdentifikator.FolkeregisterIdent -> {
+                    val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+                    postHendelser.personErDod(
+                        fnr = personnummer.folkeregisterident.value,
+                        doedsdato = try {
+                            personhendelse.doedsfall?.doedsdato?.format(DateTimeFormatter.ISO_DATE)
+                        } catch (e: Exception) {
+                            log.warn("Kunne ikke String-formatere dato i en dødshendelse")
+                            null
+                        },
+                        endringstype = endringstype
+                    )
+                }
+            }
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
             throw e
@@ -109,22 +147,34 @@ class PersonHendelseFordeler(
     private suspend fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
         val hendelseType = "Utflytting fra Norge-hendelse"
         try {
-            val personnummer =
-                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            when (
+                val personnummer =
+                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
+            ) {
+                is PdlIdentifikator.Npid -> {
+                    log.info(
+                        "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
+                            "som identifikator"
+                    )
+                    return
+                }
 
-            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-            postHendelser.personUtflyttingFraNorge(
-                fnr = personnummer.folkeregisterident.value,
-                tilflyttingsLand = personhendelse.utflyttingFraNorge?.tilflyttingsland,
-                tilflyttingsstedIUtlandet = personhendelse.utflyttingFraNorge?.tilflyttingsstedIUtlandet,
-                utflyttingsdato = try {
-                    personhendelse.utflyttingFraNorge?.utflyttingsdato?.format(DateTimeFormatter.ISO_DATE)
-                } catch (e: Exception) {
-                    log.warn("Kunne ikke String-formatere dato i en utflyttingshendelse")
-                    null
-                },
-                endringstype = endringstype
-            )
+                is PdlIdentifikator.FolkeregisterIdent -> {
+                    val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+                    postHendelser.personUtflyttingFraNorge(
+                        fnr = personnummer.folkeregisterident.value,
+                        tilflyttingsLand = personhendelse.utflyttingFraNorge?.tilflyttingsland,
+                        tilflyttingsstedIUtlandet = personhendelse.utflyttingFraNorge?.tilflyttingsstedIUtlandet,
+                        utflyttingsdato = try {
+                            personhendelse.utflyttingFraNorge?.utflyttingsdato?.format(DateTimeFormatter.ISO_DATE)
+                        } catch (e: Exception) {
+                            log.warn("Kunne ikke String-formatere dato i en utflyttingshendelse")
+                            null
+                        },
+                        endringstype = endringstype
+                    )
+                }
+            }
         } catch (e: Exception) {
             loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
             throw e
@@ -135,7 +185,7 @@ class PersonHendelseFordeler(
         log.error(
             "kunne ikke haandtere $hendelseType for hendelsen med id=$hendelsesid. Dette skyldes sannsynligvis" +
                 "at personhendelsen ser annerledes ut enn forventet, eller at det var problem med henting av " +
-                "folkeregisteridentifikatoren fra PDL",
+                "personidentifikatoren fra PDL",
             e
         )
     }

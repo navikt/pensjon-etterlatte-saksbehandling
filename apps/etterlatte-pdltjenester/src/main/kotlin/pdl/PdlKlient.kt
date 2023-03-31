@@ -9,8 +9,8 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
@@ -74,17 +74,17 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
-    suspend fun hentFolkeregisterIdent(ident: PersonIdent): PdlFolkeregisterIdentResponse {
+    suspend fun hentPdlIdentifikator(ident: PersonIdent): PdlIdentResponse {
         val request = PdlFolkeregisterIdentRequest(
             query = getQuery("/pdl/hentFolkeregisterIdent.graphql"),
             variables = PdlFolkeregisterIdentVariables(
                 ident = ident.value,
-                grupper = listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn),
+                grupper = listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn, PDLIdentGruppeTyper.NPID.navn),
                 historikk = true
             )
         )
-        logger.info("Henter folkeregisterident for ident = $ident fra PDL")
-        return retry<PdlFolkeregisterIdentResponse> {
+        logger.info("Henter PdlIdentifikator for ident = $ident fra PDL")
+        return retry<PdlIdentResponse> {
             httpClient.post(apiUrl) {
                 header("Tema", TEMA)
                 accept(Json)

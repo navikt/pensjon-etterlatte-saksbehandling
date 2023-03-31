@@ -6,19 +6,20 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
+import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.mockResponse
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.pdl.PdlFolkeregisterIdentResponse
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytning
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytningData
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytningResponse
 import no.nav.etterlatte.pdl.PdlGtType
 import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.PdlIdentResponse
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlPersonResponse
 import no.nav.etterlatte.pdl.PdlPersonResponseBolk
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 
 internal class PersonServiceTest {
 
@@ -37,11 +39,15 @@ internal class PersonServiceTest {
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
     private val personService = PersonService(pdlKlient, ppsKlient)
 
+    private val aktorIdMedNpid = "1234567890123"
+    private val aktorIdMedFolkeregisterIdent = "2305469522806"
+
     @BeforeEach
     fun beforeEach() {
         val personResponse: PdlPersonResponse = mockResponse("/pdl/person.json")
         val personBolkResponse: PdlPersonResponseBolk = mockResponse("/pdl/personBolk.json")
-        val personIdentResponse: PdlFolkeregisterIdentResponse = mockResponse("/pdl/folkeregisterident.json")
+        val personIdentResponse: PdlIdentResponse = mockResponse("/pdl/folkeregisterident.json")
+        val personNpidResponse: PdlIdentResponse = mockResponse("/pdl/npid.json")
         val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
         val geografiskTilknytning = PdlGeografiskTilknytningResponse(
             data = PdlGeografiskTilknytningData(
@@ -56,7 +62,10 @@ internal class PersonServiceTest {
 
         coEvery { pdlKlient.hentPerson(any(), any()) } returns personResponse
         coEvery { pdlKlient.hentPersonBolk(any()) } returns personBolkResponse
-        coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns personIdentResponse
+        coEvery {
+            pdlKlient.hentPdlIdentifikator(PersonIdent(aktorIdMedFolkeregisterIdent))
+        } returns personIdentResponse
+        coEvery { pdlKlient.hentPdlIdentifikator(PersonIdent(aktorIdMedNpid)) } returns personNpidResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
         coEvery { ppsKlient.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
@@ -187,24 +196,42 @@ internal class PersonServiceTest {
 
     @Test
     fun `Skal hente folkeregisterident for aktoerid`() {
-        val personIdentResponse =
-            runBlocking {
-                personService.hentFolkeregisterIdent(
-                    HentFolkeregisterIdentRequest(
-                        PersonIdent("2305469522806")
-                    )
+        val personIdentResponse = runBlocking {
+            personService.hentPdlIdentifikator(
+                HentPdlIdentRequest(
+                    PersonIdent("2305469522806")
                 )
-            }
+            )
+        }
         val expectedFolkeregisterIdent = "70078749472"
+        if (personIdentResponse !is PdlIdentifikator.FolkeregisterIdent) {
+            fail("Fikk ikke folkeregisteridentifikator")
+        }
         assertEquals(expectedFolkeregisterIdent, personIdentResponse.folkeregisterident.value)
     }
 
     @Test
+    fun `Skal hente npid for aktoerid som ikke har folkeregisteridentifikator`() {
+        val personIdentResponse = runBlocking {
+            personService.hentPdlIdentifikator(
+                HentPdlIdentRequest(
+                    PersonIdent(aktorIdMedNpid)
+                )
+            )
+        }
+        val expectedNpid = "09706511617"
+        if (personIdentResponse !is PdlIdentifikator.Npid) {
+            fail("Fikk ikke Npid")
+        }
+        assertEquals(expectedNpid, personIdentResponse.npid.ident)
+    }
+
+    @Test
     fun `finner ikke folkeregisterident`() {
-        coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
+        coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
         runBlocking {
             assertThrows<PdlFantIkkePerson> {
-                personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest(PersonIdent("1234")))
+                personService.hentPdlIdentifikator(HentPdlIdentRequest(PersonIdent("1234")))
             }
         }
     }

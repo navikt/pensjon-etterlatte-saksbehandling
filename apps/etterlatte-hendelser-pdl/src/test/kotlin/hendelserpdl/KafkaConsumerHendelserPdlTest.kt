@@ -11,8 +11,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.hendelserpdl.leesah.ILivsHendelserRapid
 import no.nav.etterlatte.hendelserpdl.leesah.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
-import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon
@@ -33,19 +33,19 @@ internal class KafkaConsumerHendelserPdlTest {
             )
         }
 
-        coVerify(exactly = 0) { pdlMock.hentFolkeregisterIdentifikator(any()) }
+        coVerify(exactly = 0) { pdlMock.hentPdlIdentifikator(any()) }
     }
 
     @Test
     fun hendelserSomLyttesPaa() {
         val pdlMock = mockk<PdlService>() {
-            coEvery { hentFolkeregisterIdentifikator("123") } returns FolkeregisterIdent(
+            coEvery { hentPdlIdentifikator("123") } returns PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of("70078749472")
             )
-            coEvery { hentFolkeregisterIdentifikator("321") } returns FolkeregisterIdent(
+            coEvery { hentPdlIdentifikator("321") } returns PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of("12345678911")
             )
-            coEvery { hentFolkeregisterIdentifikator("123") } returns FolkeregisterIdent(
+            coEvery { hentPdlIdentifikator("123") } returns PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of("70078749472")
             )
         }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.person
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class NavPersonIdent(@JsonProperty("value") val ident: String) {
@@ -16,5 +17,16 @@ data class NavPersonIdent(@JsonProperty("value") val ident: String) {
 
     override fun toString(): String {
         return ident.replaceRange(6 until 11, "*****")
+    }
+
+    companion object {
+        @JvmStatic
+        @JsonCreator
+        fun of(npid: String?): NavPersonIdent =
+            try {
+                NavPersonIdent(npid!!)
+            } catch (e: Exception) {
+                throw IllegalArgumentException("$npid er ikke en gyldig NPID", e)
+            }
     }
 }

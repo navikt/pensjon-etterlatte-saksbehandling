@@ -23,7 +23,7 @@ sealed class Revurdering(
     override val vilkaarUtfall: VilkaarsvurderingUtfall?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     open val revurderingsaarsak: RevurderingAarsak,
-    val prosesstype: Prosesstype
+    override val prosesstype: Prosesstype
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
 

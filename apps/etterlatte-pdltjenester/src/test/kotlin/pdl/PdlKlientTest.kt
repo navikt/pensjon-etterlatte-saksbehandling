@@ -69,7 +69,7 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/folkeregisterident.json")
 
         runBlocking {
-            val identResponse = pdlKlient.hentFolkeregisterIdent(PersonIdent("2305469522806"))
+            val identResponse = pdlKlient.hentPdlIdentifikator(PersonIdent("2305469522806"))
             assertEquals("70078749472", identResponse.data?.hentIdenter?.identer?.first()?.ident)
             assertEquals(false, identResponse.data?.hentIdenter?.identer?.first()?.historisk)
             assertEquals("FOLKEREGISTERIDENT", identResponse.data?.hentIdenter?.identer?.first()?.gruppe)
@@ -81,7 +81,7 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/ident_ikke_funnet.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentFolkeregisterIdent(PersonIdent("1234"))
+            val personResponse = pdlKlient.hentPdlIdentifikator(PersonIdent("1234"))
             val errors = personResponse.errors
 
             assertEquals("Fant ikke person", errors?.first()?.message)

@@ -6,14 +6,14 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
+import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface Pdl {
-    suspend fun hentFolkeregisterIdentifikator(ident: String): PdlIdentifikator
+    suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator
 }
 
 class PdlService(
@@ -25,15 +25,15 @@ class PdlService(
         val logger: Logger = LoggerFactory.getLogger(PdlService::class.java)
     }
 
-    override suspend fun hentFolkeregisterIdentifikator(ident: String): PdlIdentifikator {
+    override suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator {
         logger.info("Henter folkeregisteridentifikator")
         try {
-            return pdl_app.post("$url/folkeregisterident") {
+            return pdl_app.post("$url/pdlident") {
                 contentType(ContentType.Application.Json)
-                setBody(HentFolkeregisterIdentRequest(PersonIdent(ident)))
+                setBody(HentPdlIdentRequest(PersonIdent(ident)))
             }.body()
         } catch (e: Exception) {
-            logger.info("Kunne ikke hente folkeregisteridentifikator", e)
+            logger.info("Kunne ikke hente pdlident", e)
             throw e
         }
     }

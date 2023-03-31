@@ -6,20 +6,20 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
+import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.mockResponse
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.pdl.PdlFolkeregisterIdentResponse
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytning
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytningData
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytningResponse
 import no.nav.etterlatte.pdl.PdlGtType
 import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.PdlIdentResponse
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlPersonResponse
 import no.nav.etterlatte.pdl.PdlPersonResponseBolk
@@ -43,7 +43,7 @@ internal class PersonServiceTest {
     fun beforeEach() {
         val personResponse: PdlPersonResponse = mockResponse("/pdl/person.json")
         val personBolkResponse: PdlPersonResponseBolk = mockResponse("/pdl/personBolk.json")
-        val personIdentResponse: PdlFolkeregisterIdentResponse = mockResponse("/pdl/folkeregisterident.json")
+        val personIdentResponse: PdlIdentResponse = mockResponse("/pdl/folkeregisterident.json")
         val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
         val geografiskTilknytning = PdlGeografiskTilknytningResponse(
             data = PdlGeografiskTilknytningData(
@@ -58,7 +58,7 @@ internal class PersonServiceTest {
 
         coEvery { pdlKlient.hentPerson(any(), any()) } returns personResponse
         coEvery { pdlKlient.hentPersonBolk(any()) } returns personBolkResponse
-        coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns personIdentResponse
+        coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns personIdentResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
         coEvery { ppsKlient.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
@@ -191,8 +191,8 @@ internal class PersonServiceTest {
     fun `Skal hente folkeregisterident for aktoerid`() {
         val personIdentResponse =
             runBlocking {
-                personService.hentFolkeregisterIdent(
-                    HentFolkeregisterIdentRequest(
+                personService.hentPdlIdentifikator(
+                    HentPdlIdentRequest(
                         PersonIdent("2305469522806")
                     )
                 )
@@ -206,10 +206,10 @@ internal class PersonServiceTest {
 
     @Test
     fun `finner ikke folkeregisterident`() {
-        coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
+        coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
         runBlocking {
             assertThrows<PdlFantIkkePerson> {
-                personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest(PersonIdent("1234")))
+                personService.hentPdlIdentifikator(HentPdlIdentRequest(PersonIdent("1234")))
             }
         }
     }

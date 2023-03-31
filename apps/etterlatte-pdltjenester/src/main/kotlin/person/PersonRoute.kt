@@ -9,8 +9,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
+import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 
 fun Route.personRoute(service: PersonService) {
@@ -42,15 +42,15 @@ fun Route.personRoute(service: PersonService) {
         }
     }
 
-    route("folkeregisterident") {
+    route("pdlident") {
         val logger = application.log
 
         post {
-            val hentFolkeregisterIdentRequest = call.receive<HentFolkeregisterIdentRequest>()
-            logger.info("Henter identer for ident=${hentFolkeregisterIdentRequest.ident}")
+            val hentPdlIdentRequest = call.receive<HentPdlIdentRequest>()
+            logger.info("Henter identer for ident=${hentPdlIdentRequest.ident}")
 
             try {
-                service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest).let { call.respond(it) }
+                service.hentPdlIdentifikator(hentPdlIdentRequest).let { call.respond(it) }
             } catch (e: PdlFantIkkePerson) {
                 call.respond(HttpStatusCode.NotFound)
             }

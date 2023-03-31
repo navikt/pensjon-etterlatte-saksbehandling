@@ -33,19 +33,19 @@ internal class KafkaConsumerHendelserPdlTest {
             )
         }
 
-        coVerify(exactly = 0) { pdlMock.hentFolkeregisterIdentifikator(any()) }
+        coVerify(exactly = 0) { pdlMock.hentPdlIdentifikator(any()) }
     }
 
     @Test
     fun hendelserSomLyttesPaa() {
         val pdlMock = mockk<PdlService>() {
-            coEvery { hentFolkeregisterIdentifikator("123") } returns PdlIdentifikator.FolkeregisterIdent(
+            coEvery { hentPdlIdentifikator("123") } returns PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of("70078749472")
             )
-            coEvery { hentFolkeregisterIdentifikator("321") } returns PdlIdentifikator.FolkeregisterIdent(
+            coEvery { hentPdlIdentifikator("321") } returns PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of("12345678911")
             )
-            coEvery { hentFolkeregisterIdentifikator("123") } returns PdlIdentifikator.FolkeregisterIdent(
+            coEvery { hentPdlIdentifikator("123") } returns PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of("70078749472")
             )
         }

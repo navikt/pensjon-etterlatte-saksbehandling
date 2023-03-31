@@ -8,7 +8,7 @@ data class HentPersonRequest(
     val rolle: PersonRolle
 )
 
-data class HentFolkeregisterIdentRequest(
+data class HentPdlIdentRequest(
     val ident: PersonIdent
 )
 

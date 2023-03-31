@@ -44,7 +44,7 @@ class PersonHendelseFordeler(
         try {
             when (
                 val personnummer =
-                    pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
             ) {
                 is PdlIdentifikator.Npid -> {
                     log.info(
@@ -78,7 +78,7 @@ class PersonHendelseFordeler(
         try {
             when (
                 val personnummer =
-                    pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
             ) {
                 is PdlIdentifikator.Npid -> {
                     log.info(
@@ -114,7 +114,7 @@ class PersonHendelseFordeler(
         try {
             when (
                 val personnummer =
-                    pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
             ) {
                 is PdlIdentifikator.Npid -> {
                     log.info(
@@ -149,7 +149,7 @@ class PersonHendelseFordeler(
         try {
             when (
                 val personnummer =
-                    pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
             ) {
                 is PdlIdentifikator.Npid -> {
                     log.info(

@@ -15,8 +15,8 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
+import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -114,11 +114,11 @@ class PersonRouteTest {
 
     @Test
     fun `skal returnere folkeregisterIdent`() {
-        val hentFolkeregisterIdentRequest = HentFolkeregisterIdentRequest(
+        val hentPdlIdentRequest = HentPdlIdentRequest(
             ident = PersonIdent("2305469522806")
         )
         coEvery {
-            personService.hentFolkeregisterIdent(hentFolkeregisterIdentRequest)
+            personService.hentPdlIdentifikator(hentPdlIdentRequest)
         } returns mockFolkeregisterident(
             "70078749472"
         )
@@ -134,11 +134,11 @@ class PersonRouteTest {
             val response = client.post(FOLKEREGISTERIDENT_ENDEPUNKT) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(hentFolkeregisterIdentRequest.toJson())
+                setBody(hentPdlIdentRequest.toJson())
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
-            coVerify { personService.hentFolkeregisterIdent(any()) }
+            coVerify { personService.hentPdlIdentifikator(any()) }
             confirmVerified(personService)
         }
     }
@@ -207,12 +207,12 @@ class PersonRouteTest {
 
     @Test
     fun `skal returne 500 naar kall mot folkeregisterident feiler`() {
-        val hentFolkeregisterIdentReq = HentFolkeregisterIdentRequest(
+        val hentFolkeregisterIdentReq = HentPdlIdentRequest(
             ident = PersonIdent("2305469522806")
         )
 
         coEvery {
-            personService.hentFolkeregisterIdent(hentFolkeregisterIdentReq)
+            personService.hentPdlIdentifikator(hentFolkeregisterIdentReq)
         } throws PdlForesporselFeilet(
             "Noe feilet"
         )
@@ -233,7 +233,7 @@ class PersonRouteTest {
 
             assertEquals(HttpStatusCode.InternalServerError, response.status)
             assertEquals("En intern feil har oppstått", response.bodyAsText())
-            coVerify { personService.hentFolkeregisterIdent(any()) }
+            coVerify { personService.hentPdlIdentifikator(any()) }
             confirmVerified(personService)
         }
     }

@@ -65,7 +65,7 @@ data class PdlPersonResponseBolk(
     val errors: List<PdlResponseError>? = null
 )
 
-data class PdlFolkeregisterIdentResponse(
+data class PdlIdentResponse(
     val data: PdlFolkegisterIdentData? = null,
     val errors: List<PdlResponseError>? = null
 )

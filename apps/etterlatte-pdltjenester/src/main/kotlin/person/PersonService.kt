@@ -3,8 +3,8 @@ package no.nav.etterlatte.person
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
+import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
@@ -76,10 +76,10 @@ class PersonService(
         }
     }
 
-    suspend fun hentFolkeregisterIdent(request: HentFolkeregisterIdentRequest): PdlIdentifikator {
+    suspend fun hentPdlIdentifikator(request: HentPdlIdentRequest): PdlIdentifikator {
         logger.info("Henter folkeregisterident for ident=${request.ident} fra PDL")
 
-        return pdlKlient.hentFolkeregisterIdent(request.ident).let { identResponse ->
+        return pdlKlient.hentPdlIdentifikator(request.ident).let { identResponse ->
             if (identResponse.data?.hentIdenter == null) {
                 val pdlFeil = identResponse.errors?.asFormatertFeil()
                 if (identResponse.errors?.personIkkeFunnet() == true) {

@@ -90,6 +90,7 @@ data class TrygdetidGrunnlagDto(
     val bosted: String,
     val periodeFra: LocalDate,
     val periodeTil: LocalDate,
+    val trygdetid: Int,
     val kilde: String
 )
 
@@ -119,6 +120,7 @@ private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(): TrygdetidGrunnlag =
         type = TrygdetidType.valueOf(type),
         bosted = bosted,
         periode = TrygdetidPeriode(periodeFra, periodeTil),
+        trygdetid = trygdetid,
         kilde = kilde
     )
 
@@ -129,6 +131,7 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
         bosted = bosted,
         periodeFra = periode.fra,
         periodeTil = periode.til,
+        trygdetid = trygdetid,
         kilde = kilde
     )
 }

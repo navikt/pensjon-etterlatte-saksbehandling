@@ -25,7 +25,12 @@ class TrygdetidService(
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
             // TODO hvis status er "forbi" trygdetid bør dette sette tilstand tilbake til trygdetid?
-            trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+            val eksisterendeTrygdetid = trygdetidRepository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
+            if (eksisterendeTrygdetid != null) {
+                trygdetidRepository.oppdaterTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+            } else {
+                trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+            }
         }
 
     suspend fun lagreBeregnetTrygdetid(

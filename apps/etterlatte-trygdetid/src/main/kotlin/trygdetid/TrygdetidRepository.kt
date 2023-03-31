@@ -30,6 +30,23 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 }
         }
 
+    fun hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlagId: UUID): TrygdetidGrunnlag? =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement = """
+                    SELECT id, trygdetid_id, type, bosted, periode_fra, periode_til, trygdetid, kilde 
+                    FROM trygdetid_grunnlag
+                    WHERE id = :trygdetidGrunnlagId
+                """.trimIndent(),
+                paramMap = mapOf("trygdetidGrunnlagId" to trygdetidGrunnlagId)
+            )
+                .let { query ->
+                    session.run(
+                        query.map { row -> row.toTrygdetidGrunnlag() }.asSingle
+                    )
+                }
+        }
+
     fun opprettTrygdetid(behandlingId: UUID): Trygdetid =
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
@@ -53,8 +70,16 @@ class TrygdetidRepository(private val dataSource: DataSource) {
 
                 queryOf(
                     statement = """
-                        INSERT INTO trygdetid_grunnlag(id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde) 
-                        VALUES(:id, :trygdetidId, :type, :bosted, :periodeFra, :periodeTil, :kilde)
+                        INSERT INTO trygdetid_grunnlag(
+                            id, 
+                            trygdetid_id, 
+                            type, bosted, 
+                            periode_fra, 
+                            periode_til,
+                            trygdetid,
+                            kilde
+                        ) 
+                        VALUES(:id, :trygdetidId, :type, :bosted, :periodeFra, :periodeTil, :trygdetid, :kilde)
                     """.trimIndent(),
                     paramMap = mapOf(
                         "id" to trygdetidGrunnlag.id,
@@ -63,6 +88,33 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         "bosted" to trygdetidGrunnlag.bosted,
                         "periodeFra" to trygdetidGrunnlag.periode.fra,
                         "periodeTil" to trygdetidGrunnlag.periode.til,
+                        "trygdetid" to trygdetidGrunnlag.trygdetid,
+                        "kilde" to trygdetidGrunnlag.kilde
+                    )
+                )
+                    .let { query -> tx.update(query) }
+            }
+        }.let { hentTrygdtidNotNull(behandlingId) }
+
+    fun oppdaterTrygdetidGrunnlag(behandlingId: UUID, trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid =
+        using(sessionOf(dataSource)) { session ->
+            session.transaction { tx ->
+                queryOf(
+                    statement = """
+                        UPDATE trygdetid_grunnlag
+                        SET bosted = :bosted,
+                         periode_fra = :periodeFra,
+                         periode_til = :periodeTil,
+                         trygdetid = :trygdetid,
+                         kilde = :kilde
+                        WHERE id = :trygdetidGrunnlagId
+                    """.trimIndent(),
+                    paramMap = mapOf(
+                        "trygdetidGrunnlagId" to trygdetidGrunnlag.id,
+                        "bosted" to trygdetidGrunnlag.bosted,
+                        "periodeFra" to trygdetidGrunnlag.periode.fra,
+                        "periodeTil" to trygdetidGrunnlag.periode.til,
+                        "trygdetid" to trygdetidGrunnlag.trygdetid,
                         "kilde" to trygdetidGrunnlag.kilde
                     )
                 )
@@ -95,7 +147,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, trygdetid_id, type, bosted, periode_fra, periode_til, kilde 
+                    SELECT id, trygdetid_id, type, bosted, periode_fra, periode_til, trygdetid, kilde 
                     FROM trygdetid_grunnlag
                     WHERE trygdetid_id = :trygdetidId
                 """.trimIndent(),
@@ -135,6 +187,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 fra = localDate("periode_fra"),
                 til = localDate("periode_til")
             ),
+            trygdetid = int("trygdetid"),
             kilde = string("kilde")
         )
 }

@@ -9,6 +9,8 @@ import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -27,6 +29,9 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IDetaljertBeh
   return (
     <>
       {isFailure(beregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
+
+      <Trygdetid />
+      <Border />
 
       {behandles ? (
         <BehandlingHandlingKnapper>

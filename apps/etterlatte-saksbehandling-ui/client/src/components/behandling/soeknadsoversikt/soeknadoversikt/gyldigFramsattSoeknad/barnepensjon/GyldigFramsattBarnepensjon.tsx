@@ -18,7 +18,7 @@ export const GyldigFramsattBarnepensjon = ({
   gyldigFremsattTilStatusIcon: 'success' | 'error' | 'warning'
 }) => {
   if (gyldigFramsatt == null) {
-    return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søkanden er gyldig framsatt</div>
+    return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søknaden er gyldig framsatt</div>
   }
 
   const innsenderHarForeldreansvar = gyldigFramsatt.vurderinger.find(

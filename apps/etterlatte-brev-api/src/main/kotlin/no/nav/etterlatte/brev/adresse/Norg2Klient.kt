@@ -7,7 +7,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -50,10 +49,6 @@ class Norg2Klient(
     }
 
     private suspend fun hentKontaktinformasjon(enhet: String): Norg2Kontaktinfo {
-        if (enhet == Fagsaksystem.EY.enhet) {
-            return Norg2Kontaktinfo()
-        }
-
         val response = klient.get("$apiUrl/enhet/$enhet/kontaktinformasjon")
 
         return if (response.status == HttpStatusCode.OK) {

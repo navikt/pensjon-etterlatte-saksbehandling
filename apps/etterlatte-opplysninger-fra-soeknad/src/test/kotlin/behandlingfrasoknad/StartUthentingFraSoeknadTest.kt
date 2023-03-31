@@ -43,7 +43,6 @@ internal class StartUthentingFraSoeknadTest {
 
         assertEquals(1, inspector.message(0).get("sakId").intValue())
         assertEquals("f525f2f7-e246-43d7-b61a-5f0757472916", inspector.message(0).get("behandlingId").asText())
-        assertEquals(true, inspector.message(0).get("gyldigInnsender").asBoolean())
         assertEquals(12, inspector.message(0).get("opplysning").size())
     }
 }

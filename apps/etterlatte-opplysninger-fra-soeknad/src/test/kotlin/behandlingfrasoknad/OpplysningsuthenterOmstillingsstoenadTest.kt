@@ -144,7 +144,6 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
             return """
             {
               "@event_name": "GYLDIG_SOEKNAD:VURDERT",
-              "gyldigInnsender": true,
               "behandlingId": "f525f2f7-e246-43d7-b61a-5f0757472916",
               "sakId": 1,
               "@skjema_info": ${soeknad.toJson()},

@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -61,10 +60,6 @@ internal class FordeltSoeknadRiver(
                     packet.apply {
                         set(GyldigSoeknadVurdert.sakIdKey, sakId)
                         set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
-                        set(
-                            GyldigSoeknadVurdert.gyldigInnsenderKey,
-                            gyldighetsVurdering.resultat == VurderingsResultat.OPPFYLT
-                        )
                     }.toJson()
                 )
 

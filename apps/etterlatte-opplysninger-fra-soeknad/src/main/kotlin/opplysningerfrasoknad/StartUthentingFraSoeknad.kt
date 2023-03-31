@@ -34,7 +34,6 @@ internal class StartUthentingFraSoeknad(
             validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.behandlingIdKey) }
-            validate { it.requireKey(GyldigSoeknadVurdert.gyldigInnsenderKey) }
             validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoTypeKey) }
         }.register(this)
     }
@@ -51,7 +50,6 @@ internal class StartUthentingFraSoeknad(
                 mapOf(
                     "sakId" to packet[GyldigSoeknadVurdert.sakIdKey],
                     "behandlingId" to packet[GyldigSoeknadVurdert.behandlingIdKey],
-                    "gyldigInnsender" to packet[GyldigSoeknadVurdert.gyldigInnsenderKey],
                     CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY],
                     "opplysning" to opplysninger
                 )

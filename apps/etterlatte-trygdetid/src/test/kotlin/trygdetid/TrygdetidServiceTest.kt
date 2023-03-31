@@ -109,10 +109,11 @@ internal class TrygdetidServiceTest {
     }
 
     @Test
-    fun `skal lagre trygdetidsgrunnlag`() {
+    fun `skal lagre nytt trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
         val trygdetid = trygdetid(behandlingId)
         val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
+        every { repository.hentEnkeltTrygdetidGrunnlag(any()) } returns null
         every { repository.opprettTrygdetidGrunnlag(any(), any()) } returns trygdetid(behandlingId)
 
         runBlocking {
@@ -125,7 +126,33 @@ internal class TrygdetidServiceTest {
 
         coVerify(exactly = 1) {
             behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
             repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+        }
+    }
+
+    @Test
+    fun `skal oppdatere trygdetidsgrunnlag`() {
+        val behandlingId = randomUUID()
+        val trygdetid = trygdetid(behandlingId)
+        val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(trygdetid = 5)
+
+        every { repository.hentEnkeltTrygdetidGrunnlag(any()) } returns trygdetidGrunnlag
+        every { repository.oppdaterTrygdetidGrunnlag(any(), any()) } returns trygdetid(behandlingId)
+
+        runBlocking {
+            service.lagreTrygdetidGrunnlag(
+                behandlingId,
+                saksbehandler,
+                endretTrygdetidGrunnlag
+            )
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
+            repository.hentEnkeltTrygdetidGrunnlag(endretTrygdetidGrunnlag.id)
+            repository.oppdaterTrygdetidGrunnlag(behandlingId, endretTrygdetidGrunnlag)
         }
     }
 

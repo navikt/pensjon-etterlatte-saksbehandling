@@ -27,6 +27,7 @@ fun trygdetidGrunnlag(trygdetidId: UUID) = TrygdetidGrunnlag(
         fra = LocalDate.of(2023, 1, 1),
         til = LocalDate.of(2023, 2, 1)
     ),
+    trygdetid = 10,
     kilde = "pdl"
 )
 

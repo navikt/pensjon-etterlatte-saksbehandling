@@ -80,6 +80,37 @@ internal class TrygdetidRepositoryTest {
     }
 
     @Test
+    fun `skal oppdatere et trygdetidsgrunnlag`() {
+        val behandlingId = randomUUID()
+        val trygdetid = repository.opprettTrygdetid(behandlingId)
+
+        val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
+        repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(trygdetid = 20)
+        val trygdetidMedOppdatertGrunnlag =
+            repository.oppdaterTrygdetidGrunnlag(behandlingId, endretTrygdetidGrunnlag)
+
+        trygdetidMedOppdatertGrunnlag shouldNotBe null
+        with(trygdetidMedOppdatertGrunnlag.trygdetidGrunnlag.first()) {
+            this shouldBe endretTrygdetidGrunnlag
+        }
+    }
+
+    @Test
+    fun `skal hente et trygdetidsgrunnlag`() {
+        val behandlingId = randomUUID()
+        val trygdetid = repository.opprettTrygdetid(behandlingId)
+
+        val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
+        repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+
+        val hentetTrygdetidGrunnlag = repository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
+
+        hentetTrygdetidGrunnlag shouldNotBe null
+    }
+
+    @Test
     fun `skal oppdatere beregnet trygdetid`() {
         val behandlingId = randomUUID()
         val beregnetTrygdetid = beregnetTrygdetid(nasjonal = 10, fremtidig = 2, total = 12)

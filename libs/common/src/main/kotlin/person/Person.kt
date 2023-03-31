@@ -87,7 +87,7 @@ enum class Sivilstatus {
 
 data class Sivilstand(
     val sivilstatus: Sivilstatus,
-    val relatertVedSiviltilstand: Foedselsnummer?,
+    val relatertVedSiviltilstand: Folkeregisteridentifikator?,
     val gyldigFraOgMed: LocalDate?,
     val bekreftelsesdato: LocalDate?,
     val kilde: String

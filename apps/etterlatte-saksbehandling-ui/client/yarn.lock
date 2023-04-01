@@ -408,10 +408,10 @@
   resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-2.8.3.tgz#fe6aa35cb70beb99f9519d1c678ea5d481d3547a"
   integrity sha512-ZdSc4WkhMHY0FpyCwfaBuHoGFxmcXRCXhyb4XKbQpSD2OaCoitsXARBvMvTz05/HWvNJxWVoDf73k4c02GaUfw==
 
-"@navikt/ds-css@^2.8.3":
-  version "2.8.3"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.8.3.tgz#0059eafb004b35e79d84107e24d0c3239e370c3c"
-  integrity sha512-B8xGzajBHH6MDp9x4To97ec8OKt7Mmx9O7jyoTIL0PJOZppa2rv3S8rtDQOqwrFMdXzb6VHzDimpY1TBZ68yAw==
+"@navikt/ds-css@^2.8.10":
+  version "2.8.10"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-2.8.10.tgz#71f6526bdfef544483b50e5041b1a93d18257653"
+  integrity sha512-+sOcOojVaj5N5k+oLYcoyd1S8zETb+Cst22YMV5k4UBFkyP7I8zt9A4+pLCCDu9JfZXQnkw3713xcZkTHSN6rQ==
 
 "@navikt/ds-icons@^2.8.3":
   version "2.8.3"

@@ -25,7 +25,7 @@
     "mocha": "^10.2.0",
     "ts-node": "^10.6.0",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.3"
   },
   "scripts": {
     "dev": "ts-node-dev ./src/index.ts",

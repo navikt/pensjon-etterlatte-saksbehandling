@@ -35,7 +35,7 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^14.4.3",
-    "@types/node": "^18.15.7",
+    "@types/node": "^18.15.11",
     "@types/react": "^18.0.28",
     "@types/react-datepicker": "^4.10.0",
     "@types/react-dom": "^18.0.11",

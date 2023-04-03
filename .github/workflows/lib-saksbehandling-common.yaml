@@ -1,17 +1,17 @@
-name: common
+name: saksbehandling-common
 
 on:
   push:
     branches:
       - main
     paths:
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 
 jobs:

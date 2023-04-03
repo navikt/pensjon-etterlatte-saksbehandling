@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":libs:common"))
+    implementation(project(":libs:saksbehandling-common"))
     runtimeOnly(group = "com.papertrailapp", name = "logback-syslog4j", version = "1.0.0")
 
     compileOnly(libs.logging.slf4japi)

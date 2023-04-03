@@ -18,7 +18,7 @@ dependencies {
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
 
-    implementation(project(":libs:common"))
+    implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-token-model"))
 

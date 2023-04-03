@@ -18,7 +18,7 @@ import rapidsandrivers.withFeilhaandtering
 
 internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
-    private val behandlingService: Behandling
+    private val behandlingService: BehandlingService
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(Reguleringsforespoersel::class.java)
 

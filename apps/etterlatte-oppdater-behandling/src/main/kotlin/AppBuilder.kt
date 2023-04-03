@@ -7,7 +7,10 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class AppBuilder(props: Miljoevariabler) {
 
-    fun createBehandlingService(): Behandling = BehandlingsService(behandling_app, "http://etterlatte-behandling")
+    fun createBehandlingService(): BehandlingService = BehandlingServiceImpl(
+        behandling_app,
+        "http://etterlatte-behandling"
+    )
 
     private val behandling_app: HttpClient by lazy {
         httpClientClientCredentials(

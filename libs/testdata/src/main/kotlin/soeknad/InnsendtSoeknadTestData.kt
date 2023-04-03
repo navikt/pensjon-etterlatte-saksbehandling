@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Innsender
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Opplysning
 import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.time.LocalDate
 
 object InnsendtSoeknadTestData {
@@ -37,7 +37,7 @@ object InnsendtSoeknadTestData {
                     spoersmaal = "Etternavn"
                 ),
                 foedselsnummer = Opplysning(
-                    svar = Folkeregisteridentifikator.of("03108718357"),
+                    svar = Foedselsnummer.of("03108718357"),
                     spoersmaal = "Fødselsnummer"
                 )
             ),
@@ -69,7 +69,7 @@ object InnsendtSoeknadTestData {
                 fornavn = Opplysning(svar = "Kirsten", spoersmaal = "Spoersmal"),
                 etternavn = Opplysning(svar = "Jakobsen", spoersmaal = "Etternavn"),
                 foedselsnummer = Opplysning(
-                    svar = Folkeregisteridentifikator.of("26058411891"),
+                    svar = Foedselsnummer.of("26058411891"),
                     spoersmaal = "Barnets fødselsnummer / d-nummer"
                 ),
                 statsborgerskap = Opplysning(
@@ -164,7 +164,7 @@ object InnsendtSoeknadTestData {
                 fornavn = Opplysning(svar = "Bernt", spoersmaal = null),
                 etternavn = Opplysning(svar = "Jakobsen", spoersmaal = null),
                 foedselsnummer = Opplysning(
-                    svar = Folkeregisteridentifikator.of("22128202440"),
+                    svar = Foedselsnummer.of("22128202440"),
                     spoersmaal = "Barnets fødselsnummer / d-nummer"
                 ),
                 datoForDoedsfallet = Opplysning(

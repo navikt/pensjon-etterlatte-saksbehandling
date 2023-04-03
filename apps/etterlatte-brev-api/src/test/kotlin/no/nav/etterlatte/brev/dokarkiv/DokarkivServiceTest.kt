@@ -22,7 +22,6 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.brev.model.Spraak
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.junit.jupiter.api.AfterEach

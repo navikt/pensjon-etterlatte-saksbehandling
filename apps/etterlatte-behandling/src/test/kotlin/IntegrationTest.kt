@@ -26,7 +26,7 @@ import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -186,7 +186,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.post("/api/behandling/$behandlingId/kommerbarnettilgode") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(VurderingMedBegrunnelseJson(JaNeiVetIkke.JA, "begrunnelse"))
+                setBody(VurderingMedBegrunnelseJson(JaNei.JA, "begrunnelse"))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }

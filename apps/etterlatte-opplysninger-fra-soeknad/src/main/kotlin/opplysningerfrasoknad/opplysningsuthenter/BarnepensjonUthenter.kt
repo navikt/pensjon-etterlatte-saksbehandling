@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -76,8 +77,8 @@ internal object BarnepensjonUthenter {
                         Grunnlagsopplysning.empty(
                             Opplysningstype.UTENLANDSOPPHOLD,
                             kilde,
-                            avdoedFnr,
-                            YearMonth.from(avdoedFnr.getBirthDate())
+                            avdoedFnr.toFolkeregisteridentifikator(),
+                            YearMonth.from(Folkeregisteridentifikator.of(avdoedFnr.value).getBirthDate())
                         )
                     )
                 }
@@ -153,7 +154,7 @@ internal object BarnepensjonUthenter {
                 type = PersonType.BARN,
                 fornavn = barnepensjon.soeker.fornavn.svar,
                 etternavn = barnepensjon.soeker.etternavn.svar,
-                foedselsnummer = barnepensjon.soeker.foedselsnummer.svar,
+                foedselsnummer = barnepensjon.soeker.foedselsnummer.svar.toFolkeregisteridentifikator(),
                 statsborgerskap = barnepensjon.soeker.statsborgerskap.svar,
                 utenlandsadresse = UtenlandsadresseBarn(
                     adresse?.svar?.verdi,
@@ -165,14 +166,14 @@ internal object BarnepensjonUthenter {
                         it.type,
                         it.fornavn.svar,
                         it.etternavn.svar,
-                        it.foedselsnummer.svar
+                        it.foedselsnummer.svar.toFolkeregisteridentifikator()
                     )
                 },
                 verge = Verge(
                     barnepensjon.soeker.verge?.svar?.verdi,
                     barnepensjon.soeker.verge?.opplysning?.fornavn?.svar,
                     barnepensjon.soeker.verge?.opplysning?.etternavn?.svar,
-                    barnepensjon.soeker.verge?.opplysning?.foedselsnummer?.svar
+                    barnepensjon.soeker.verge?.opplysning?.foedselsnummer?.svar?.toFolkeregisteridentifikator()
                 ),
                 omsorgPerson = barnepensjon.soeker.dagligOmsorg?.svar?.verdi
             )
@@ -191,7 +192,7 @@ internal object BarnepensjonUthenter {
                     PersonType.GJENLEVENDE_FORELDER,
                     forelder.fornavn.svar,
                     forelder.etternavn.svar,
-                    forelder.foedselsnummer.svar,
+                    forelder.foedselsnummer.svar.toFolkeregisteridentifikator(),
                     forelder.adresse.svar,
                     forelder.statsborgerskap.svar,
                     forelder.kontaktinfo.telefonnummer.svar.innhold
@@ -211,7 +212,7 @@ internal object BarnepensjonUthenter {
                 PersonType.INNSENDER,
                 barnepensjon.innsender.fornavn.svar,
                 barnepensjon.innsender.etternavn.svar,
-                barnepensjon.innsender.foedselsnummer.svar
+                barnepensjon.innsender.foedselsnummer.svar.toFolkeregisteridentifikator()
             )
         )
     }

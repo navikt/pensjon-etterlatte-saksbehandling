@@ -14,6 +14,8 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import java.util.*
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold as UtenlandsoppholdOpplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld
@@ -33,7 +35,7 @@ internal fun avdoedOpplysning(avdoed: Avdoed): AvdoedSoeknad {
         type = PersonType.AVDOED,
         fornavn = avdoed.fornavn.svar,
         etternavn = avdoed.etternavn.svar,
-        foedselsnummer = avdoed.foedselsnummer.svar,
+        foedselsnummer = avdoed.foedselsnummer.svar.toFolkeregisteridentifikator(),
         doedsdato = avdoed.datoForDoedsfallet.svar.innhold,
         statsborgerskap = avdoed.statsborgerskap.svar.innhold,
         utenlandsopphold = UtenlandsoppholdOpplysningstype(
@@ -82,4 +84,8 @@ internal fun <T : Any> lagOpplysning(
         opplysning = opplysning,
         periode = periode
     )
+}
+
+internal fun Foedselsnummer.toFolkeregisteridentifikator(): Folkeregisteridentifikator {
+    return Folkeregisteridentifikator.of(this.value)
 }

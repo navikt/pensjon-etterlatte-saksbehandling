@@ -24,7 +24,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
@@ -267,4 +267,4 @@ internal data class FastsettVirkningstidspunktResponse(
     }
 }
 
-internal data class VurderingMedBegrunnelseJson(val svar: JaNeiVetIkke, val begrunnelse: String)
+internal data class VurderingMedBegrunnelseJson(val svar: JaNei, val begrunnelse: String)

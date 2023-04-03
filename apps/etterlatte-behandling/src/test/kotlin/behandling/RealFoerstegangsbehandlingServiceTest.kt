@@ -15,7 +15,7 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -209,7 +209,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 mockk(),
                 naaTid.fixedNorskTid()
             )
-        val resultat = service.lagreGyldighetsproeving(id, "saksbehandler", JaNeiVetIkke.JA, "begrunnelse")
+        val resultat = service.lagreGyldighetsproeving(id, "saksbehandler", JaNei.JA, "begrunnelse")
 
         assertEquals(forventetResultat, resultat)
     }

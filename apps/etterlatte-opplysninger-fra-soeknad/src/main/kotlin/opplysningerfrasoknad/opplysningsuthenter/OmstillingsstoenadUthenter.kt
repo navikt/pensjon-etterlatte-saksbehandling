@@ -60,7 +60,7 @@ internal object OmstillingsstoenadUthenter {
             PersonType.GJENLEVENDE,
             soeker.fornavn.svar,
             soeker.etternavn.svar,
-            soeker.foedselsnummer.svar,
+            soeker.foedselsnummer.svar.toFolkeregisteridentifikator(),
             soeker.adresse?.svar,
             soeker.statsborgerskap.svar,
             soeker.kontaktinfo.telefonnummer.svar.innhold,
@@ -74,7 +74,7 @@ internal object OmstillingsstoenadUthenter {
             PersonType.INNSENDER,
             soknad.innsender.fornavn.svar,
             soknad.innsender.etternavn.svar,
-            soknad.innsender.foedselsnummer.svar
+            soknad.innsender.foedselsnummer.svar.toFolkeregisteridentifikator()
         )
         return lagOpplysning(Opplysningstype.INNSENDER_SOEKNAD_V1, kilde(soknad), opplysning, null)
     }

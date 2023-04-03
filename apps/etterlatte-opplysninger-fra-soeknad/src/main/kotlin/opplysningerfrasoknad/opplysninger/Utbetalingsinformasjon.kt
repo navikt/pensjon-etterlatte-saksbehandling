@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
+package no.nav.etterlatte.opplysningerfrasoknad.opplysninger
 
 import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke

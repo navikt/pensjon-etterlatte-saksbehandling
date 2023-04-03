@@ -7,16 +7,16 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerOmstillingSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Samtykke
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoekerOmstillingSoeknad
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoeknadstypeOpplysning
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utbetalingsinformasjon
 
 internal object OmstillingsstoenadUthenter {
     fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any?>> {

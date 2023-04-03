@@ -1,7 +1,7 @@
-package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
+package no.nav.etterlatte.opplysningerfrasoknad.opplysninger
 
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 
 data class SoekerOmstillingSoeknad(
     val type: PersonType,

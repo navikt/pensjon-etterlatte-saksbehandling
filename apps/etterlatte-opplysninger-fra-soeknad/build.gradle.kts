@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":libs:common"))
+    implementation(project(":libs:saksbehandling-common"))
     implementation(libs.etterlatte.common)
 
     testImplementation(libs.test.mockk)

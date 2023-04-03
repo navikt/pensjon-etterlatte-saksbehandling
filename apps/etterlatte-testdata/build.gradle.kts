@@ -6,7 +6,7 @@ plugins {
 dependencies {
     api(kotlin("reflect"))
 
-    implementation(project(":libs:common"))
+    implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:ktor2client-onbehalfof"))
 
     implementation(libs.ktor2.servercore)

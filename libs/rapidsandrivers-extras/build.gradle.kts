@@ -20,7 +20,7 @@ dependencies {
     api(libs.bundles.jackson)
     api(libs.navfelles.rapidandriversktor2)
 
-    implementation(project(":libs:common"))
+    implementation(project(":libs:saksbehandling-common"))
 
     compileOnly(libs.logging.slf4japi)
 

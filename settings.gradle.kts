@@ -27,7 +27,7 @@ include(
     "apps:etterlatte-trygdetid",
     "libs:ktor2client-auth-clientcredentials",
     "libs:etterlatte-token-model",
-    "libs:common",
+    "libs:saksbehandling-common",
     "libs:ktor2client-onbehalfof",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-database",

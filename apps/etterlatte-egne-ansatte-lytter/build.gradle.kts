@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":libs:common"))
+    implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
 

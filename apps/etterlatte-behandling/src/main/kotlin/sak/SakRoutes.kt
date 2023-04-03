@@ -79,6 +79,6 @@ internal fun Route.sakRoutes(
     }
 }
 
-data class Sak(val ident: String, val sakType: SakType, val id: Long)
+data class Sak(val ident: String, val sakType: SakType, val id: Long, val enhet: String? = null)
 
 data class Saker(val saker: List<Sak>)

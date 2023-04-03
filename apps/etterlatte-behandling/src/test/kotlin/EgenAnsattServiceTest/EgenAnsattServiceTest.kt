@@ -1,11 +1,17 @@
 package no.nav.etterlatte
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.egenansatt.EgenAnsattService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -46,10 +52,21 @@ class EgenAnsattServiceTest {
             password = postgreSQLContainer.password
         ).apply { migrate() }
 
+        val pdlKlient = mockk<PdlKlient>()
+        val norg2Klient = mockk<Norg2Klient>()
+        val featureToggleService = mockk<FeatureToggleService>()
+
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        sakService = spyk(RealSakService(sakRepo))
+        sakService = spyk(RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService))
         egenAnsattService = EgenAnsattService(sakService)
+
+        every { pdlKlient.hentGeografiskTilknytning(any()) } returns GeografiskTilknytning(kommune = "0301")
+        every {
+            norg2Klient.hentEnheterForOmraade("EYB", "0301")
+        } returns listOf(ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817"))
+
+        every { featureToggleService.isEnabled(any(), any()) } returns false
     }
 
     @BeforeEach

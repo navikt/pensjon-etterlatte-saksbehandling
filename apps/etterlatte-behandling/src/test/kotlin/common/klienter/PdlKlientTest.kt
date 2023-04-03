@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grunnlagsendring.klienter
+package no.nav.etterlatte.common.klienter
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
@@ -12,14 +12,14 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.mockPerson
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -34,8 +34,8 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle)
-        assertEquals("Ola", resultat.fornavn.verdi)
-        assertEquals("Nordmann", resultat.etternavn.verdi)
+        Assertions.assertEquals("Ola", resultat.fornavn.verdi)
+        Assertions.assertEquals("Nordmann", resultat.etternavn.verdi)
     }
 
     @Test
@@ -45,7 +45,7 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentDoedsdato()
-        assertEquals(mockPerson().doedsdato?.verdi, resultat)
+        Assertions.assertEquals(mockPerson().doedsdato?.verdi, resultat)
     }
 
     @Test
@@ -57,7 +57,7 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentAnsvarligeForeldre()
-        assertEquals(familierelasjon.ansvarligeForeldre, resultat)
+        Assertions.assertEquals(familierelasjon.ansvarligeForeldre, resultat)
     }
 
     @Test
@@ -69,7 +69,16 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentBarn()
-        assertEquals(familierelasjon.barn, resultat)
+        Assertions.assertEquals(familierelasjon.barn, resultat)
+    }
+
+    @Test
+    fun `skal hente geografisk tilknytning`() {
+        val klient = mockHttpClient(GeografiskTilknytning(kommune = "0301", ukjent = false))
+        val pdlService = PdlKlientImpl(klient, "url")
+        val fnr = TRIVIELL_MIDTPUNKT
+        val resultat = pdlService.hentGeografiskTilknytning(fnr.value).geografiskTilknytning()
+        Assertions.assertEquals("0301", resultat)
     }
 
     @Test
@@ -89,15 +98,16 @@ internal class PdlKlientTest {
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentUtland()
-        assertEquals(utland, resultat)
+        Assertions.assertEquals(utland, resultat)
     }
 
-    private fun mockHttpClient(personRespons: PersonDTO): HttpClient {
+    private fun mockHttpClient(respons: Any): HttpClient {
         val httpClient = HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
                     when (request.url.fullPath) {
-                        "/url/person/v2" -> respond(personRespons.toJson(), HttpStatusCode.OK, defaultHeaders)
+                        "/url/geografisktilknytning" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
+                        "/url/person/v2" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
                         else -> error("Unhandled ${request.url.fullPath}")
                     }
                 }

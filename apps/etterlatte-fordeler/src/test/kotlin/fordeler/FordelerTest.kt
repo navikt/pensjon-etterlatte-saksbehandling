@@ -1,6 +1,7 @@
 package no.nav.etterlatte.fordeler
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.ktor.client.plugins.ResponseException
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -45,6 +46,19 @@ internal class FordelerTest {
     fun `skal ikke fordele ugyldig soknad til behandling`() {
         every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
             FordelerResultat.UgyldigHendelse("Ikke gyldig for behandling")
+
+        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
+
+        assertEquals(0, inspector.size)
+    }
+
+    @Test
+    fun `skal ikke fordele soknad uten sakId til behandling`() {
+        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling
+
+        val responseException = mockk<ResponseException>()
+        every { responseException.message } returns "Oops"
+        every { fordelerService.hentSakId(any(), any()) } throws responseException
 
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 

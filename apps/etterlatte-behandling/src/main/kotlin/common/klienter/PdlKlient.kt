@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grunnlagsendring.klienter
+package no.nav.etterlatte.common.klienter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -9,6 +9,8 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Utland
@@ -18,6 +20,7 @@ import java.time.LocalDate
 
 interface PdlKlient {
     fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): PersonDTO
+    fun hentGeografiskTilknytning(foedselsnummer: String): GeografiskTilknytning
 }
 
 class PdlKlientImpl(
@@ -38,6 +41,18 @@ class PdlKlientImpl(
                 setBody(personRequest)
             }.body<PersonDTO>()
         }
+        return response
+    }
+
+    override fun hentGeografiskTilknytning(foedselsnummer: String): GeografiskTilknytning {
+        val request = HentGeografiskTilknytningRequest(Folkeregisteridentifikator.of(foedselsnummer))
+        val response = runBlocking {
+            pdl_app.post("$url/geografisktilknytning") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body<GeografiskTilknytning>()
+        }
+
         return response
     }
 }

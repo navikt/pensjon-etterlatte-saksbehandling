@@ -23,13 +23,13 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
+import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlient
-import no.nav.etterlatte.grunnlagsendring.klienter.PdlKlientImpl
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -131,7 +131,8 @@ abstract class CommonFactory : BeanFactory {
         return revurderingFactory
     }
 
-    override fun sakService(): SakService = RealSakService(sakDao())
+    override fun sakService(): SakService =
+        RealSakService(sakDao(), pdlKlient(), norg2HttpClient(), featureToggleService())
 
     override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
         SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()))

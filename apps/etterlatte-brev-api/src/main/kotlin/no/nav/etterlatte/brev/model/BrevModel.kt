@@ -1,8 +1,8 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import java.util.UUID
 
 typealias BrevID = Long
@@ -78,3 +78,5 @@ class UlagretBrev(
 ) {
     val status: Status = Status.OPPRETTET
 }
+
+enum class Spraak(@get:JsonValue val verdi: String) { NB("nb"), NN("nn"), EN("en") }

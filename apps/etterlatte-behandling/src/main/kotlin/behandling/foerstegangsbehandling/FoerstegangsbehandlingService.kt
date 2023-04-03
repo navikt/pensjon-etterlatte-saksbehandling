@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -15,7 +16,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.ManuellVurdering
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
@@ -37,7 +37,7 @@ interface FoerstegangsbehandlingService {
     fun lagreGyldighetsproeving(
         behandling: UUID,
         navIdent: String,
-        svar: JaNeiVetIkke,
+        svar: JaNei,
         begrunnelse: String
     ): GyldighetsResultat
 
@@ -95,12 +95,12 @@ class RealFoerstegangsbehandlingService(
     override fun lagreGyldighetsproeving(
         behandling: UUID,
         navIdent: String,
-        svar: JaNeiVetIkke,
+        svar: JaNei,
         begrunnelse: String
     ): GyldighetsResultat {
         return inTransaction {
             val resultat =
-                if (svar == JaNeiVetIkke.JA) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
+                if (svar == JaNei.JA) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
             val gyldighetsResultat = GyldighetsResultat(
                 resultat = resultat,
                 vurderinger = listOf(

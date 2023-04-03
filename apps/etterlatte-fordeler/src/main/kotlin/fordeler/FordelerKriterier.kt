@@ -7,11 +7,11 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.aktiv
 import no.nav.etterlatte.libs.common.person.alder
 import no.nav.etterlatte.libs.common.person.nyeste
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
+import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import java.time.LocalDate
 
 private const val NORGE = "NOR"

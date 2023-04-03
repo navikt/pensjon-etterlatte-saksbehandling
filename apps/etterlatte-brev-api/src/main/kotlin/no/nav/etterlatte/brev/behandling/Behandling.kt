@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -8,7 +9,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 import java.util.UUID

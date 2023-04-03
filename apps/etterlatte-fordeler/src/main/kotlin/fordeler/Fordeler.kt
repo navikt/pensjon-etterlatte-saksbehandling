@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -18,7 +19,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.sikkerLogg

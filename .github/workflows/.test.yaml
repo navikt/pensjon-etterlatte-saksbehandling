@@ -17,4 +17,6 @@ jobs:
           java-version: 17.x
           cache: gradle
       - name: Gradle test and build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :apps:${{ github.workflow }}:test --stacktrace

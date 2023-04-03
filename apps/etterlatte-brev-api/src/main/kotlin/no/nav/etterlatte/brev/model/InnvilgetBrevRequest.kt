@@ -4,7 +4,6 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 
 data class InnvilgetBrevRequest(
     val saksnummer: String,

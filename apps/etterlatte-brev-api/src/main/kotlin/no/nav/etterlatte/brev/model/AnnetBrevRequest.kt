@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.Mal
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 
 class AnnetBrevRequest(
     private val mal: Mal,

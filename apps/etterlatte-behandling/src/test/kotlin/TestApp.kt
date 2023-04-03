@@ -9,6 +9,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -140,5 +141,9 @@ class LocalAppBeanFactory(
 
     override fun norg2HttpClient(): Norg2Klient {
         return Norg2KlientTest()
+    }
+
+    override fun navAnsattKlient(): NavAnsattKlient {
+        return NavAnsattKlientTest()
     }
 }

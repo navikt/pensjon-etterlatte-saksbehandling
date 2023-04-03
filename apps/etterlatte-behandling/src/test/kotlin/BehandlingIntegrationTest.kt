@@ -14,7 +14,10 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
+import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -170,6 +173,16 @@ class Norg2KlientTest : Norg2Klient {
     }
 }
 
+class NavAnsattKlientTest : NavAnsattKlient {
+    override suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet> {
+        return listOf(SaksbehandlerEnhet("4817", "NAV Familie- og pensjonsytelser Steinkjer"))
+    }
+
+    override suspend fun hentSaksbehandlerTema(ident: String): List<SaksbehandlerTema> {
+        return listOf(SaksbehandlerTema(SakType.BARNEPENSJON.name), SaksbehandlerTema(SakType.OMSTILLINGSSTOENAD.name))
+    }
+}
+
 class TestBeanFactory(
     private val jdbcUrl: String,
     private val username: String,
@@ -308,5 +321,9 @@ class TestBeanFactory(
 
     override fun norg2HttpClient(): Norg2Klient {
         return Norg2KlientTest()
+    }
+
+    override fun navAnsattKlient(): NavAnsattKlient {
+        return NavAnsattKlientTest()
     }
 }

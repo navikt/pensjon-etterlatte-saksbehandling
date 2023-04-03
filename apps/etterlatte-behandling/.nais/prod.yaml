@@ -85,6 +85,10 @@ spec:
       value: ad7b87a6-9180-467c-affc-20a566b0fec0
     - name: NORG2_URL
       value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1
+    - name: NAVANSATT_URL
+      value: https://navansatt.prod-fss-pub.nais.io
+    - name: ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE
+      value: api://prod-fss.pensjondeployer.navansatt/.default
   accessPolicy:
     outbound:
       rules:
@@ -95,6 +99,7 @@ spec:
       external:
         - host: unleash.nais.io
         - host: norg2.prod-fss-pub.nais.io
+        - host: navansatt.prod-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

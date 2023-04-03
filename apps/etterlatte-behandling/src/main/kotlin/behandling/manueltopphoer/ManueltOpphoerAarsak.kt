@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.behandling
+package no.nav.etterlatte.behandling.manueltopphoer
 
 enum class ManueltOpphoerAarsak {
     UTFLYTTING_FRA_NORGE,

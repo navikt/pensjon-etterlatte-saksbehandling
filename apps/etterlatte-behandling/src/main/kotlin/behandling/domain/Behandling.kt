@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.BehandlingSammendrag
+import no.nav.etterlatte.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
@@ -11,7 +12,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.VILKAARSVURDERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt

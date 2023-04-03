@@ -8,8 +8,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.domain.Handling
 import no.nav.etterlatte.oppgave.domain.Oppgave

@@ -1,4 +1,6 @@
-package no.nav.etterlatte.libs.common.behandling
+package no.nav.etterlatte.behandling
+
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 
 enum class OppgaveStatus {
     NY,

@@ -6,6 +6,7 @@ import {
   GrunnlagsendringStatus,
   SamsvarMellomGrunnlagOgPdl,
   UtlandSamsvar,
+  VergemaalEllerFremtidsfullmaktForholdSamsvar,
 } from '../typer'
 import {
   formaterKanskjeStringDato,
@@ -16,27 +17,23 @@ import { Heading } from '@navikt/ds-react'
 import { teksterForGrunnlagshendelser, teksterForSaksrolle } from '~components/person/grunnlagshendelser/tekster'
 import { HendelseMetaItem, HendelseMetaWrapper, HendelseSammenligning, HendelseWrapper } from './styled'
 
-const VisDoedsdatoSamsvar = (props: { data: DoedsdatoSamsvar }) => {
-  return (
-    <HendelseSammenligning>
-      <dt>Dødsdato i grunnlag</dt>
-      <dd>{formaterKanskjeStringDatoMedFallback('Ingen', props.data.fraGrunnlag)}</dd>
-      <dt>Dødsdato i PDL</dt>
-      <dd>{formaterKanskjeStringDatoMedFallback('Ingen', props.data.fraPdl)}</dd>
-    </HendelseSammenligning>
-  )
-}
+const VisDoedsdatoSamsvar = (props: { data: DoedsdatoSamsvar }) => (
+  <HendelseSammenligning>
+    <dt>Dødsdato i grunnlag</dt>
+    <dd>{formaterKanskjeStringDatoMedFallback('Ingen', props.data.fraGrunnlag)}</dd>
+    <dt>Dødsdato i PDL</dt>
+    <dd>{formaterKanskjeStringDatoMedFallback('Ingen', props.data.fraPdl)}</dd>
+  </HendelseSammenligning>
+)
 
-const VisBarnSamsvar = (props: { data: BarnSamsvar }) => {
-  return (
-    <HendelseSammenligning>
-      <dt>Barn i grunnlag</dt>
-      <dd>{props.data.fraGrunnlag?.join(', ') ?? 'Ingen barn'}</dd>
-      <dt>Barn i PDL</dt>
-      <dd>{props.data.fraPdl?.join(', ') ?? 'Ingen barn'}</dd>
-    </HendelseSammenligning>
-  )
-}
+const VisBarnSamsvar = (props: { data: BarnSamsvar }) => (
+  <HendelseSammenligning>
+    <dt>Barn i grunnlag</dt>
+    <dd>{props.data.fraGrunnlag?.join(', ') ?? 'Ingen barn'}</dd>
+    <dt>Barn i PDL</dt>
+    <dd>{props.data.fraPdl?.join(', ') ?? 'Ingen barn'}</dd>
+  </HendelseSammenligning>
+)
 
 const LandListeMedDatoOgOverskrift = (props: { tittel: string; land: { land?: string; dato?: string }[] }) => {
   if (!props.land || props.land.length === 0) {
@@ -61,65 +58,72 @@ const LandListeMedDatoOgOverskrift = (props: { tittel: string; land: { land?: st
   )
 }
 
-const VisUtlandSamsvar = (props: { data: UtlandSamsvar }) => {
-  return (
-    <HendelseSammenligning>
-      <dt>Ut-/innflyttinger i grunnlag</dt>
-      <dd>
-        <LandListeMedDatoOgOverskrift
-          tittel={'Utflyttinger'}
-          land={
-            props.data.fraGrunnlag?.utflyttingFraNorge?.map(({ tilflyttingsland, dato }) => ({
-              land: tilflyttingsland,
-              dato,
-            })) ?? []
-          }
-        />
-        <LandListeMedDatoOgOverskrift
-          tittel={'Innflyttinger'}
-          land={
-            props.data.fraGrunnlag?.innflyttingTilNorge?.map(({ fraflyttingsland, dato }) => ({
-              land: fraflyttingsland,
-              dato,
-            })) ?? []
-          }
-        />
-      </dd>
-      <dt>Ut-/innflyttinger i PDL</dt>
-      <dd>
-        <LandListeMedDatoOgOverskrift
-          tittel={'Utflyttinger'}
-          land={
-            props.data.fraPdl?.utflyttingFraNorge?.map(({ tilflyttingsland, dato }) => ({
-              land: tilflyttingsland,
-              dato,
-            })) ?? []
-          }
-        />
-        <LandListeMedDatoOgOverskrift
-          tittel={'Innflyttinger'}
-          land={
-            props.data.fraPdl?.innflyttingTilNorge?.map(({ fraflyttingsland, dato }) => ({
-              land: fraflyttingsland,
-              dato,
-            })) ?? []
-          }
-        />
-      </dd>
-    </HendelseSammenligning>
-  )
-}
+const VisUtlandSamsvar = (props: { data: UtlandSamsvar }) => (
+  <HendelseSammenligning>
+    <dt>Ut-/innflyttinger i grunnlag</dt>
+    <dd>
+      <LandListeMedDatoOgOverskrift
+        tittel={'Utflyttinger'}
+        land={
+          props.data.fraGrunnlag?.utflyttingFraNorge?.map(({ tilflyttingsland, dato }) => ({
+            land: tilflyttingsland,
+            dato,
+          })) ?? []
+        }
+      />
+      <LandListeMedDatoOgOverskrift
+        tittel={'Innflyttinger'}
+        land={
+          props.data.fraGrunnlag?.innflyttingTilNorge?.map(({ fraflyttingsland, dato }) => ({
+            land: fraflyttingsland,
+            dato,
+          })) ?? []
+        }
+      />
+    </dd>
+    <dt>Ut-/innflyttinger i PDL</dt>
+    <dd>
+      <LandListeMedDatoOgOverskrift
+        tittel={'Utflyttinger'}
+        land={
+          props.data.fraPdl?.utflyttingFraNorge?.map(({ tilflyttingsland, dato }) => ({
+            land: tilflyttingsland,
+            dato,
+          })) ?? []
+        }
+      />
+      <LandListeMedDatoOgOverskrift
+        tittel={'Innflyttinger'}
+        land={
+          props.data.fraPdl?.innflyttingTilNorge?.map(({ fraflyttingsland, dato }) => ({
+            land: fraflyttingsland,
+            dato,
+          })) ?? []
+        }
+      />
+    </dd>
+  </HendelseSammenligning>
+)
 
-const VisAnsvarligeForeldreSamsvar = (props: { data: AnsvarligeForeldreSamsvar }) => {
-  return (
-    <HendelseSammenligning>
-      <dt>Ansvarlige foreldre i grunnlag</dt>
-      <dd>{props.data.fraGrunnlag?.join(', ') ?? 'Ingen ansvarlige foreldre'}</dd>
-      <dt>Ansvarlige foreldre i PDL</dt>
-      <dd>{props.data.fraPdl?.join(', ') ?? 'Ingen ansvarlige foreldre'}</dd>
-    </HendelseSammenligning>
-  )
-}
+const VisAnsvarligeForeldreSamsvar = (props: { data: AnsvarligeForeldreSamsvar }) => (
+  <HendelseSammenligning>
+    <dt>Ansvarlige foreldre i grunnlag</dt>
+    <dd>{props.data.fraGrunnlag?.join(', ') ?? 'Ingen ansvarlige foreldre'}</dd>
+    <dt>Ansvarlige foreldre i PDL</dt>
+    <dd>{props.data.fraPdl?.join(', ') ?? 'Ingen ansvarlige foreldre'}</dd>
+  </HendelseSammenligning>
+)
+
+const VisVergemaalEllerFremtidsfullmaktForholdSamsvar = (props: {
+  data: VergemaalEllerFremtidsfullmaktForholdSamsvar
+}) => (
+  <HendelseSammenligning>
+    <dt>Vergemål i grunnlag</dt>
+    <dd>{props.data.fraGrunnlag?.join(', ') ?? 'Ingen vergemål funnet'}</dd>
+    <dt>Vergemål i PDL</dt>
+    <dd>{props.data.fraPdl?.join(', ') ?? 'Ingen vergemål funnet'}</dd>
+  </HendelseSammenligning>
+)
 
 const HendelseVisning = (props: { data?: SamsvarMellomGrunnlagOgPdl }) => {
   switch (props.data?.type) {
@@ -131,6 +135,8 @@ const HendelseVisning = (props: { data?: SamsvarMellomGrunnlagOgPdl }) => {
       return <VisUtlandSamsvar data={props.data} />
     case 'ANSVARLIGE_FORELDRE':
       return <VisAnsvarligeForeldreSamsvar data={props.data} />
+    case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':
+      return <VisVergemaalEllerFremtidsfullmaktForholdSamsvar data={props.data} />
     default:
       return <p>Ukjent hendelse</p>
   }

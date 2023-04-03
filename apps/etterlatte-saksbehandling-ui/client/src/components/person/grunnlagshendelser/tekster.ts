@@ -14,4 +14,5 @@ export const teksterForGrunnlagshendelser: Record<GrunnlagsendringsType, string>
   BARN: 'Barn',
   UTLAND: 'Ut-/innflytting',
   DOEDSDATO: 'Dødsfall',
+  VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Vergemål',
 }

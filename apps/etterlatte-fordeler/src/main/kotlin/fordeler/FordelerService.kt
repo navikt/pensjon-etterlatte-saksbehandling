@@ -8,6 +8,7 @@ import no.nav.etterlatte.fordeler.FordelerResultat.UgyldigHendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
+import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -15,6 +16,8 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException
+import no.nav.etterlatte.sikkerLogg
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -39,6 +42,7 @@ class FordelerService(
     private val klokke: Clock = utcKlokke(),
     private val maxFordelingTilDoffen: Long
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
     fun sjekkGyldighetForBehandling(event: FordelerEvent): FordelerResultat {
         if (ugyldigHendelse(event)) {
             return UgyldigHendelse(
@@ -52,6 +56,13 @@ class FordelerService(
                     Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
                 }
             }
+        } catch (e: FamilieRelasjonManglerIdent) {
+            logger.warn(
+                "Fikk en familierelasjon som mangler ident fra PDL. Disse tilfellene støtter vi ikke per nå." +
+                    " Se sikkerlogg for detaljer"
+            )
+            sikkerLogg.info("Fikk en søknad med en familierelasjon som manglet ident", e)
+            IkkeGyldigForBehandling(listOf(FordelerKriterie.FAMILIERELASJON_MANGLER_IDENT))
         } catch (e: PersonFinnesIkkeException) {
             UgyldigHendelse("Person fra søknaden med fnr=${e.fnr} finnes ikke i PDL")
         }

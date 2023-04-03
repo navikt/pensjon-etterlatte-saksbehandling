@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
+import rapidsandrivers.migrering.MigreringRequest
 import java.util.*
 
 interface BehandlingService {
@@ -27,6 +28,7 @@ interface BehandlingService {
     fun hentAlleSaker(): Saker
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
     fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe
+    fun migrer(hendelse: MigreringRequest): UUID
 }
 
 class BehandlingServiceImpl(
@@ -93,6 +95,13 @@ class BehandlingServiceImpl(
                 contentType(ContentType.Application.Json)
             }.body()
         }
+    }
+
+    override fun migrer(hendelse: MigreringRequest): UUID = runBlocking {
+        behandling_app.post("$url/migrering") {
+            contentType(ContentType.Application.Json)
+            setBody(hendelse)
+        }.body()
     }
 
     override fun hentAlleSaker(): Saker =

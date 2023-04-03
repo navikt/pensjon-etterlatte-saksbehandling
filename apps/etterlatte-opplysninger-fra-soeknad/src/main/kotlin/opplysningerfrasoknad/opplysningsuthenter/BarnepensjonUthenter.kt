@@ -5,17 +5,11 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.GjenlevendeForelder
@@ -28,6 +22,12 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Forelder
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.GjenlevendeForelderSoeknad
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Samtykke
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoekerBarnSoeknad
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.UtenlandsadresseBarn
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Verge
 import java.time.YearMonth
 import java.util.*
 

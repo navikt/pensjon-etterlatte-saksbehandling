@@ -10,6 +10,7 @@ import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
@@ -35,6 +36,11 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
                     val exception = it.exceptions.last()
                     if (exception is ClientRequestException && exception.response.status == HttpStatusCode.NotFound) {
                         throw PersonFinnesIkkeException(hentPersonRequest.foedselsnummer)
+                    }
+                    if (exception is ClientRequestException &&
+                        exception.response.status == HttpStatusCode.ExpectationFailed
+                    ) {
+                        throw FamilieRelasjonManglerIdent(exception.response.body())
                     }
                     throw it.exceptions.last()
                 }

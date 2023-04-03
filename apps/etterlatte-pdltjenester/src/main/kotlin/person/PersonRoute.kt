@@ -9,6 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -37,6 +38,8 @@ fun Route.personRoute(service: PersonService) {
                     service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
                 } catch (e: PdlFantIkkePerson) {
                     call.respond(HttpStatusCode.NotFound)
+                } catch (e: FamilieRelasjonManglerIdent) {
+                    call.respond(HttpStatusCode.ExpectationFailed, e.message)
                 }
             }
         }

@@ -192,5 +192,5 @@ fun List<Adresse>.aktiv(): Adresse? = firstOrNull { it.aktiv }
 fun List<Adresse>.nyeste(inkluderInaktiv: Boolean = false): Adresse? =
     sortedByDescending { it.gyldigFraOgMed }.firstOrNull { if (inkluderInaktiv) true else it.gyldigTilOgMed == null }
 
-class FamilieRelasjonManglerIdent(override val message: String? = null, override val cause: Throwable? = null) :
+class FamilieRelasjonManglerIdent(override val message: String, override val cause: Throwable? = null) :
     Exception(message, cause)

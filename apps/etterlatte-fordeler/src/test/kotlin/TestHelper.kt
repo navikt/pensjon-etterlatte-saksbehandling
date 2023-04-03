@@ -3,9 +3,9 @@ package no.nav.etterlatte
 import no.nav.etterlatte.fordeler.FordelerServiceTest
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
@@ -33,7 +33,7 @@ fun mockPerson(
     foedselsaar: Int = 2010,
     foedselsdato: LocalDate? = LocalDate.parse("2010-04-19"),
     doedsdato: LocalDate? = null,
-    adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+    adressebeskyttelse: AdressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
     statsborgerskap: String = NORGE,
     foedeland: String = NORGE,
     sivilstatus: Sivilstatus = Sivilstatus.UGIFT,

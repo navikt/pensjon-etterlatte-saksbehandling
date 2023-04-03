@@ -3,7 +3,7 @@ package no.nav.etterlatte.pdl.mapper
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -36,8 +36,10 @@ object PersonMapper {
             foedselsaar = foedsel.foedselsaar,
             doedsdato = doedsfall?.doedsdato,
             foedeland = foedsel.foedeland,
-            adressebeskyttelse = adressebeskyttelse?.let { Adressebeskyttelse.valueOf(it.gradering.toString()) }
-                ?: Adressebeskyttelse.UGRADERT,
+            adressebeskyttelse = adressebeskyttelse?.let {
+                AdressebeskyttelseGradering.valueOf(it.gradering.toString())
+            }
+                ?: AdressebeskyttelseGradering.UGRADERT,
             bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) },
             oppholdsadresse = hentPerson.oppholdsadresse?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) },
             deltBostedsadresse = hentPerson.deltBostedsadresse?.let {
@@ -85,8 +87,8 @@ object PersonMapper {
             doedsdato = doedsfall?.doedsdato?.let { OpplysningDTO(it, doedsfall.metadata.opplysningsId) },
             foedeland = foedsel.foedeland?.let { OpplysningDTO(it, foedsel.metadata.opplysningsId) },
             adressebeskyttelse = adressebeskyttelse?.let {
-                OpplysningDTO(Adressebeskyttelse.valueOf(it.gradering.toString()), it.metadata.opplysningsId)
-            } ?: OpplysningDTO(Adressebeskyttelse.UGRADERT, null),
+                OpplysningDTO(AdressebeskyttelseGradering.valueOf(it.gradering.toString()), it.metadata.opplysningsId)
+            } ?: OpplysningDTO(AdressebeskyttelseGradering.UGRADERT, null),
             bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
                 ?.map { OpplysningDTO(it, null) }, /* Finn ut hva opplysningsid:n er for data fra pps */
             oppholdsadresse = hentPerson.oppholdsadresse?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) }

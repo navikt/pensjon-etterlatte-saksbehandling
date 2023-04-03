@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.innsendtsoeknad.OppholdUtlandType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
@@ -24,7 +25,7 @@ data class Person(
     val foedselsaar: Int,
     val foedeland: String?,
     val doedsdato: LocalDate?,
-    val adressebeskyttelse: Adressebeskyttelse?,
+    val adressebeskyttelse: AdressebeskyttelseGradering?,
     var bostedsadresse: List<Adresse>?,
     var deltBostedsadresse: List<Adresse>?,
     var kontaktadresse: List<Adresse>?,
@@ -37,13 +38,6 @@ data class Person(
     var avdoedesBarn: List<Person>?,
     var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?
 )
-
-enum class Adressebeskyttelse {
-    STRENGT_FORTROLIG_UTLAND,
-    STRENGT_FORTROLIG,
-    FORTROLIG,
-    UGRADERT
-}
 
 enum class AdresseType {
     VEGADRESSE,

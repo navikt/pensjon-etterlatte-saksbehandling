@@ -41,7 +41,7 @@ jobs:
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           dockerfile: docker/Dockerfile
           docker_context: apps/${{ github.workflow }}/
-          image_suffix: etterlatte-${{ github.workflow }}
+          image_suffix: -${{ github.workflow }}
           tag: ${{ env.GITHUB_REF_SLUG }}
       - name: Print docker tag
         run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY

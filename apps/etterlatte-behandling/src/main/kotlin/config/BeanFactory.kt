@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
+import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.regulering.RevurderingFactory
 import no.nav.etterlatte.common.klienter.PdlKlient
@@ -67,6 +68,7 @@ interface BeanFactory {
     fun manueltOpphoerService(): ManueltOpphoerService
     fun oppgaveService(): OppgaveService
     fun omregningService(): OmregningService
+    fun migreringService(): MigreringService
     fun sakDao(): SakDao
     fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse
     fun oppgaveDao(): OppgaveDao
@@ -213,6 +215,8 @@ abstract class CommonFactory : BeanFactory {
 
     override fun omregningService(): OmregningService =
         OmregningService(behandlingService = generellBehandlingService(), revurderingFactory = revurderingFactory())
+
+    override fun migreringService(): MigreringService = MigreringService()
 }
 
 class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory() {

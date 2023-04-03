@@ -7,10 +7,10 @@ import rapidsandrivers.getRapidEnv
 fun main() {
     val rapidEnv = getRapidEnv()
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        val ab = AppBuilder(Miljoevariabler(rapidEnv))
-        val behandlingservice = ab.createBehandlingService()
+        val behandlingservice = AppBuilder(Miljoevariabler(rapidEnv)).createBehandlingService()
         PdlHendelser(rapidsConnection, behandlingservice)
         OmregningsHendelser(rapidsConnection, behandlingservice)
         Reguleringsforespoersel(rapidsConnection, behandlingservice)
+        MigreringHendelser(rapidsConnection, behandlingservice)
     }.start()
 }

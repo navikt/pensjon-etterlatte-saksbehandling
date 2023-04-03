@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.common.behandling
 
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
@@ -39,10 +38,4 @@ data class DetaljertBehandling(
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: RevurderingAarsak? = null,
     val prosesstype: Prosesstype
-)
-
-data class BehandlingMedGrunnlagsopplysninger<Person>(
-    val id: UUID,
-    val soeknadMottattDato: LocalDateTime?,
-    val personopplysning: Grunnlagsopplysning<Person>?
 )

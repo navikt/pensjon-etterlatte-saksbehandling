@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.behandling
+package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDateTime

@@ -40,6 +40,8 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
     }
   }
 
+  const dager = eksisterendeGrunnlag ? eksisterendeGrunnlag.trygdetid : 0
+
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!behandlingId) throw new Error('Mangler behandlingsid')
@@ -49,6 +51,10 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
         trygdetidgrunnlag: trygdetidgrunnlag,
       },
       (respons) => {
+        const eksisterendeGrunnlag = respons.trygdetidGrunnlag.find(
+          (grunnlag) => grunnlag.type === trygdetidGrunnlagType
+        )
+        eksisterendeGrunnlag && setTrygdetidgrunnlag(eksisterendeGrunnlag)
         setTrygdetid(respons)
       }
     )
@@ -152,11 +158,12 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
                     ? 'Fremtidig trygdetid'
                     : 'Faktisk trygdetid'
                 }
+                disabled={true}
                 size="medium"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={trygdetidgrunnlag.trygdetid && trygdetidgrunnlag.trygdetid}
+                value={dager}
                 onChange={(e) =>
                   setTrygdetidgrunnlag({
                     ...trygdetidgrunnlag,
@@ -165,22 +172,20 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
                 }
               />
             </TrygdetidInput>
-            {trygdetidGrunnlagType !== ITrygdetidGrunnlagType.FREMTIDIG && (
-              <Kilde>
-                <TextField
-                  label="Kilde"
-                  size="medium"
-                  type="text"
-                  value={trygdetidgrunnlag.kilde}
-                  onChange={(e) =>
-                    setTrygdetidgrunnlag({
-                      ...trygdetidgrunnlag,
-                      kilde: e.target.value,
-                    })
-                  }
-                />
-              </Kilde>
-            )}
+            <Kilde>
+              <TextField
+                label="Kilde"
+                size="medium"
+                type="text"
+                value={trygdetidgrunnlag.kilde}
+                onChange={(e) =>
+                  setTrygdetidgrunnlag({
+                    ...trygdetidgrunnlag,
+                    kilde: e.target.value,
+                  })
+                }
+              />
+            </Kilde>
           </FormWrapper>
           <FormKnapper>
             <Button size="medium" loading={isPending(trygdetidgrunnlagStatus)} type="submit">

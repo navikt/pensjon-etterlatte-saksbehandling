@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import java.util.*
@@ -22,6 +23,7 @@ interface Behandling {
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
     fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
+    fun sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt)
     fun hentAlleSaker(): Saker
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
     fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe
@@ -63,6 +65,15 @@ class BehandlingsService(
             behandling_app.post("$url/grunnlagsendringshendelse/adressebeskyttelse") {
                 contentType(ContentType.Application.Json)
                 setBody(adressebeskyttelse)
+            }
+        }
+    }
+
+    override fun sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt) {
+        runBlocking {
+            behandling_app.post("$url/grunnlagsendringshendelse/vergemaalellerfremtidsfullmakt") {
+                contentType(ContentType.Application.Json)
+                setBody(vergeMaalEllerFremtidsfullmakt)
             }
         }
     }

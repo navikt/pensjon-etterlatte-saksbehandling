@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -60,6 +61,12 @@ internal class PdlHendelser(
                         val adressebeskyttelse: Adressebeskyttelse =
                             objectMapper.treeToValue(packet["hendelse_data"])
                         behandlinger.sendAdressebeskyttelseHendelse(adressebeskyttelse)
+                    }
+                    "VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1" -> {
+                        logger.info("Veregmaal eller fremtidsfullmakt mottatt")
+                        val vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt =
+                            objectMapper.treeToValue(packet["hendelse_data"])
+                        behandlinger.sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
                     }
                     else -> {
                         logger.info("Pdl-hendelsestypen mottatt håndteres ikke av applikasjonen")

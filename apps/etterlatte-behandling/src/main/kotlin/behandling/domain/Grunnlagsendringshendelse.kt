@@ -19,7 +19,8 @@ data class Grunnlagsendringshendelse(
 enum class GrunnlagsendringsType {
     DOEDSFALL,
     UTFLYTTING,
-    FORELDER_BARN_RELASJON
+    FORELDER_BARN_RELASJON,
+    VERGEMAAL_ELLER_FREMTIDSFULLMAKT
 }
 
 enum class GrunnlagsendringStatus {

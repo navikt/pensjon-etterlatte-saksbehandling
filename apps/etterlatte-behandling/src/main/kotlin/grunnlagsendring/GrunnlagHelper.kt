@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
+import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 
 fun Grunnlag.doedsdato(saksrolle: Saksrolle, fnr: String) =
     when (saksrolle) {
@@ -69,5 +70,15 @@ fun Grunnlag.utland(saksrolle: Saksrolle, fnr: String) =
         }
         else -> throw IllegalArgumentException(
             "Proevde aa finne doedsdato for $saksrolle, men det skal ikke kunne skje D:"
+        )
+    }
+
+fun Grunnlag.vergemaalellerfremtidsfullmakt(saksrolle: Saksrolle) =
+    when (saksrolle) {
+        Saksrolle.SOEKER -> {
+            soeker.hentVergemaalellerfremtidsfullmakt()?.verdi
+        }
+        else -> throw IllegalArgumentException(
+            "Prøvde å finne vergemål på en person som ikke er søker, men det er ikke relevant"
         )
     }

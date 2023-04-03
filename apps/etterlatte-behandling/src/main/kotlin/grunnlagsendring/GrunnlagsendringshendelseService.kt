@@ -12,6 +12,7 @@ import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
 import no.nav.etterlatte.common.klienter.hentBarn
 import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.common.klienter.hentUtland
+import no.nav.etterlatte.common.klienter.hentVergemaal
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -72,6 +74,15 @@ class GrunnlagsendringshendelseService(
         return opprettHendelseAvTypeForPerson(
             forelderBarnRelasjonHendelse.fnr,
             GrunnlagsendringsType.FORELDER_BARN_RELASJON
+        )
+    }
+
+    fun opprettVergemaalEllerFremtidsfullmakt(
+        vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt
+    ): List<Grunnlagsendringshendelse> {
+        return opprettHendelseAvTypeForPerson(
+            vergeMaalEllerFremtidsfullmakt.fnr,
+            GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT
         )
     }
 
@@ -218,6 +229,16 @@ class GrunnlagsendringshendelseService(
                         barnGrunnlag = grunnlag?.barn(rolle)
                     )
                 }
+            }
+
+            GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> {
+                val pdlVergemaal = pdlData.hentVergemaal()
+                val grunnlagVergemaal = grunnlag?.vergemaalellerfremtidsfullmakt(rolle)
+                SamsvarMellomPdlOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
+                    fraPdl = pdlVergemaal,
+                    fraGrunnlag = grunnlagVergemaal,
+                    samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal
+                )
             }
         }
     }

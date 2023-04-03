@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -43,10 +44,34 @@ interface ILivsHendelserRapid {
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
         endringstype: Endringstype
     )
+    fun haandterVergeoppnevnelse(
+        fnr: String,
+        vergeIdent: String,
+        endringstype: Endringstype
+    )
 }
 
 class LivsHendelserTilRapid(private val kafkaProduser: KafkaProdusent<String, JsonMessage>) : ILivsHendelserRapid {
     val logger = LoggerFactory.getLogger(this.javaClass)
+
+    override fun haandterVergeoppnevnelse(fnr: String, vergeIdent: String, endringstype: Endringstype) {
+        logger.info("Poster at en person med fnr=${fnr.maskerFnr()} har fått verge")
+        val vergeMaalEllerFremtidsfullmakt = VergeMaalEllerFremtidsfullmakt(
+            fnr = fnr,
+            vergeIdent = vergeIdent,
+            endringstype = endringstype
+        )
+        kafkaProduser.publiser(
+            UUID.randomUUID().toString(),
+            JsonMessage.newMessage(
+                "PDL:PERSONHENDELSE",
+                mapOf(
+                    "hendelse" to LeesahOpplysningstyper.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1.toString(),
+                    "hendelse_data" to vergeMaalEllerFremtidsfullmakt
+                )
+            )
+        )
+    }
 
     override fun personErDod(fnr: String, doedsdato: String?, endringstype: Endringstype) {
         logger.info("Poster at en person med fnr=${fnr.maskerFnr()} er doed")

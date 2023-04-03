@@ -4,11 +4,19 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class SamsvarMellomPdlOgGrunnlag {
     abstract val samsvar: Boolean
+
+    @JsonTypeName("VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1")
+    data class VergemaalEllerFremtidsfullmaktForhold(
+        val fraPdl: List<VergemaalEllerFremtidsfullmakt>?,
+        val fraGrunnlag: List<VergemaalEllerFremtidsfullmakt>?,
+        override val samsvar: Boolean
+    ) : SamsvarMellomPdlOgGrunnlag()
 
     @JsonTypeName("DOEDSDATO")
     data class Doedsdatoforhold(
@@ -37,8 +45,4 @@ sealed class SamsvarMellomPdlOgGrunnlag {
         val fraGrunnlag: List<Folkeregisteridentifikator>?,
         override val samsvar: Boolean
     ) : SamsvarMellomPdlOgGrunnlag()
-
-    // Verge
-
-    // institusjonsopphold?
 }

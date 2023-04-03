@@ -44,5 +44,5 @@ fun personTestData(
     utland = opplysningsmap.hentUtland()?.verdi,
     familieRelasjon = opplysningsmap.hentFamilierelasjon()?.verdi,
     avdoedesBarn = opplysningsmap.hentAvdoedesbarn()?.verdi?.avdoedesBarn,
-    vergemaalEllerFremtidsfullmakt = opplysningsmap.hentVergemaalellerfremtidsfullmakt()?.verdi?.let { listOf(it) }
+    vergemaalEllerFremtidsfullmakt = opplysningsmap.hentVergemaalellerfremtidsfullmakt()?.verdi
 )

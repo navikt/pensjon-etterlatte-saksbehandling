@@ -6,6 +6,7 @@ import {
   GrunnlagsendringStatus,
   SamsvarMellomGrunnlagOgPdl,
   UtlandSamsvar,
+  VergemaalEllerFremtidsfullmaktForholdSamsvar,
 } from '../typer'
 import {
   formaterKanskjeStringDato,
@@ -110,16 +111,25 @@ const VisUtlandSamsvar = (props: { data: UtlandSamsvar }) => {
   )
 }
 
-const VisAnsvarligeForeldreSamsvar = (props: { data: AnsvarligeForeldreSamsvar }) => {
-  return (
-    <HendelseSammenligning>
-      <dt>Ansvarlige foreldre i grunnlag</dt>
-      <dd>{props.data.fraGrunnlag?.join(', ') ?? 'Ingen ansvarlige foreldre'}</dd>
-      <dt>Ansvarlige foreldre i PDL</dt>
-      <dd>{props.data.fraPdl?.join(', ') ?? 'Ingen ansvarlige foreldre'}</dd>
-    </HendelseSammenligning>
-  )
-}
+const VisAnsvarligeForeldreSamsvar = (props: { data: AnsvarligeForeldreSamsvar }) => (
+  <HendelseSammenligning>
+    <dt>Ansvarlige foreldre i grunnlag</dt>
+    <dd>{props.data.fraGrunnlag?.join(', ') ?? 'Ingen ansvarlige foreldre'}</dd>
+    <dt>Ansvarlige foreldre i PDL</dt>
+    <dd>{props.data.fraPdl?.join(', ') ?? 'Ingen ansvarlige foreldre'}</dd>
+  </HendelseSammenligning>
+)
+
+const VisVergemaalEllerFremtidsfullmaktForholdSamsvar = (props: {
+  data: VergemaalEllerFremtidsfullmaktForholdSamsvar
+}) => (
+  <HendelseSammenligning>
+    <dt>Vergemål i grunnlag</dt>
+    <dd>{props.data.fraGrunnlag?.join(', ') ?? 'Ingen vergemål funnet'}</dd>
+    <dt>Vergemål i PDL</dt>
+    <dd>{props.data.fraPdl?.join(', ') ?? 'Ingen vergemål funnet'}</dd>
+  </HendelseSammenligning>
+)
 
 const HendelseVisning = (props: { data?: SamsvarMellomGrunnlagOgPdl }) => {
   switch (props.data?.type) {
@@ -131,6 +141,8 @@ const HendelseVisning = (props: { data?: SamsvarMellomGrunnlagOgPdl }) => {
       return <VisUtlandSamsvar data={props.data} />
     case 'ANSVARLIGE_FORELDRE':
       return <VisAnsvarligeForeldreSamsvar data={props.data} />
+    case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':
+      return <VisVergemaalEllerFremtidsfullmaktForholdSamsvar data={props.data} />
     default:
       return <p>Ukjent hendelse</p>
   }

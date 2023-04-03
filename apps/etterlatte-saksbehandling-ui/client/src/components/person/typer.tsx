@@ -90,7 +90,19 @@ export interface AnsvarligeForeldreSamsvar {
   fraGrunnlag?: string[]
 }
 
-export type SamsvarMellomGrunnlagOgPdl = DoedsdatoSamsvar | UtlandSamsvar | BarnSamsvar | AnsvarligeForeldreSamsvar
+export interface VergemaalEllerFremtidsfullmaktForholdSamsvar {
+  type: 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT'
+  samsvar: boolean
+  fraPdl?: string[]
+  fraGrunnlag?: string[]
+}
+
+export type SamsvarMellomGrunnlagOgPdl =
+  | DoedsdatoSamsvar
+  | UtlandSamsvar
+  | BarnSamsvar
+  | AnsvarligeForeldreSamsvar
+  | VergemaalEllerFremtidsfullmaktForholdSamsvar
 
 export type GrunnlagsendringStatus = (typeof GRUNNLAGSENDRING_STATUS)[number]
 

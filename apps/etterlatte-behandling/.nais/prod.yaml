@@ -37,6 +37,8 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  secureLogs:
+    enabled: true
   azure:
     application:
       enabled: true

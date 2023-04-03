@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfo
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlagTyper.InnsenderErForelderGrunnlag
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
@@ -160,7 +160,7 @@ private fun mockPerson(
     foedselsaar = 1985,
     foedeland = null,
     doedsdato = null,
-    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+    adressebeskyttelse = AdressebeskyttelseGradering.UGRADERT,
     bostedsadresse = null,
     deltBostedsadresse = null,
     kontaktadresse = null,

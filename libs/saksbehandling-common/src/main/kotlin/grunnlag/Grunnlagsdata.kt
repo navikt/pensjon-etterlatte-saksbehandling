@@ -28,8 +28,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.U
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTLAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -55,7 +55,7 @@ fun Grunnlagsdata<JsonNode>.hentFoedselsaar() = this.hentKonstantOpplysning<Int>
 fun Grunnlagsdata<JsonNode>.hentFoedeland() = this.hentKonstantOpplysning<String>(FOEDELAND)
 fun Grunnlagsdata<JsonNode>.hentDoedsdato() = this.hentKonstantOpplysning<LocalDate?>(DOEDSDATO)
 fun Grunnlagsdata<JsonNode>.hentAdressebeskyttelse() =
-    this.hentKonstantOpplysning<Adressebeskyttelse>(ADRESSEBESKYTTELSE)
+    this.hentKonstantOpplysning<AdressebeskyttelseGradering>(ADRESSEBESKYTTELSE)
 
 fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentPeriodisertOpplysning<Adresse>(BOSTEDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentDeltbostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(DELTBOSTEDSADRESSE)

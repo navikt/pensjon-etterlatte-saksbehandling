@@ -27,7 +27,21 @@ fun Route.personRoute(service: PersonService) {
             try {
                 service.hentPerson(hentPersonRequest).let { call.respond(it) }
             } catch (e: PdlFantIkkePerson) {
-                call.respond(HttpStatusCode.NotFound)
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    PdlFeil(
+                        aarsak = PdlFeilAarsak.FANT_IKKE_PERSON,
+                        detaljer = "Fnr ${hentPersonRequest.foedselsnummer} finnes ikke i PDL"
+                    )
+                )
+            } catch (e: FamilieRelasjonManglerIdent) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    PdlFeil(
+                        aarsak = PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON,
+                        detaljer = e.message
+                    )
+                )
             }
         }
 

@@ -180,7 +180,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) }
+        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
+        prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
     )
 
     private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
@@ -215,7 +216,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
-        fritekstAarsak = rs.getString("fritekst_aarsak")
+        fritekstAarsak = rs.getString("fritekst_aarsak"),
+        prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
     )
 
     private fun mapSak(rs: ResultSet) = Sak(
@@ -272,7 +274,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setString(16, revurderingsAarsak?.name)
             stmt.setString(17, opphoerAarsaker?.toJson())
             stmt.setString(18, fritekstAarsak)
-            stmt.setString(19, prosesstype?.toString())
+            stmt.setString(19, prosesstype.toString())
         }
         require(stmt.executeUpdate() == 1)
     }

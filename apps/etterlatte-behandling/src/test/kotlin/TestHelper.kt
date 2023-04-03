@@ -61,7 +61,7 @@ fun opprettBehandling(
     revurderingAarsak: RevurderingAarsak? = null,
     opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
     fritekstAarsak: String? = null,
-    prosesstype: Prosesstype? = null
+    prosesstype: Prosesstype = Prosesstype.MANUELL
 ) = OpprettBehandling(
     type = type,
     sakId = sakId,

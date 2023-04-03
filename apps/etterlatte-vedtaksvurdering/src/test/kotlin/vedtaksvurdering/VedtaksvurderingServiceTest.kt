@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -343,7 +344,8 @@ internal class VedtaksvurderingServiceTest {
             gyldighetsproeving = null,
             status = BehandlingStatus.VILKAARSVURDERT,
             virkningstidspunkt = null,
-            kommerBarnetTilgode = null
+            kommerBarnetTilgode = null,
+            prosesstype = Prosesstype.MANUELL
         )
 
         coEvery { behandlingKlientMock.fattVedtak(any(), any(), any()) } returns true

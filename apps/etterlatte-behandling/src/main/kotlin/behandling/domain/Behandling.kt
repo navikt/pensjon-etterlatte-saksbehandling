@@ -13,13 +13,14 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal sealed class TilstandException : IllegalStateException() {
     internal object UgyldigTilstand : TilstandException()
@@ -37,6 +38,7 @@ sealed class Behandling {
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val vilkaarUtfall: VilkaarsvurderingUtfall?
     abstract val virkningstidspunkt: Virkningstidspunkt?
+    open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
     val oppgaveStatus get() = OppgaveStatus.from(status)
@@ -132,7 +134,8 @@ internal fun Behandling.toDetaljertBehandling(): DetaljertBehandling {
         revurderingsaarsak = when (this) {
             is Revurdering -> revurderingsaarsak
             else -> null
-        }
+        },
+        prosesstype = prosesstype
     )
 }
 

@@ -14,8 +14,8 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
@@ -63,20 +63,6 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
                 call.respond(trygdetid.toDto())
             }
         }
-
-        post("/beregnet") {
-            withBehandlingId(behandlingKlient) {
-                logger.info("Oppdaterer beregnet trygdetid for behandling $behandlingsId")
-                val beregnetTrygdetid = call.receive<BeregnetTrygdetidDto>()
-                val trygdetid =
-                    trygdetidService.lagreBeregnetTrygdetid(
-                        behandlingsId,
-                        bruker,
-                        beregnetTrygdetid.toBeregnetTrygdetid()
-                    )
-                call.respond(trygdetid.toDto())
-            }
-        }
     }
 }
 
@@ -84,16 +70,15 @@ fun Trygdetid.toDto(): TrygdetidDto =
     TrygdetidDto(
         id = id,
         behandlingId = behandlingId,
-        beregnetTrygdetid = beregnetTrygdetid?.let {
-            BeregnetTrygdetidDto(
-                nasjonal = beregnetTrygdetid.nasjonal,
-                fremtidig = beregnetTrygdetid.fremtidig,
-                total = beregnetTrygdetid.total,
-                tidspunkt = beregnetTrygdetid.tidspunkt
-            )
-        },
+        beregnetTrygdetid = beregnetTrygdetid?.toDto(),
         trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() },
         opplysninger = this.opplysninger.toDto()
+    )
+
+private fun BeregnetTrygdetid.toDto(): BeregnetTrygdetidDto =
+    BeregnetTrygdetidDto(
+        total = verdi,
+        tidspunkt = tidspunkt
     )
 
 private fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
@@ -110,21 +95,12 @@ private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto = Opplysningsgru
     kilde = objectMapper.readValue(this.kilde.asText(), OpplysningkildeDto::class.java)
 )
 
-private fun BeregnetTrygdetidDto.toBeregnetTrygdetid(): BeregnetTrygdetid =
-    BeregnetTrygdetid(
-        nasjonal = nasjonal,
-        fremtidig = fremtidig,
-        total = total,
-        tidspunkt = tidspunkt ?: Tidspunkt.now()
-    )
-
 private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(): TrygdetidGrunnlag =
     TrygdetidGrunnlag(
         id = id ?: UUID.randomUUID(),
         type = TrygdetidType.valueOf(type),
         bosted = bosted,
         periode = TrygdetidPeriode(periodeFra, periodeTil),
-        trygdetid = trygdetid,
         kilde = kilde
     )
 
@@ -135,7 +111,9 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
         bosted = bosted,
         periodeFra = periode.fra,
         periodeTil = periode.til,
-        trygdetid = trygdetid,
+        beregnet = beregnetTrygdetid?.let {
+            BeregnetTrygdetidGrunnlagDto(it.verdi.days, it.verdi.months, it.verdi.years)
+        },
         kilde = kilde
     )
 }

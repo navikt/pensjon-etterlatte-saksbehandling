@@ -1,4 +1,4 @@
-import { Button, Heading, Label, Select, TextField } from '@navikt/ds-react'
+import { Button, Heading, Label, Select } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ITrygdetid, ITrygdetidGrunnlag, ITrygdetidGrunnlagType, lagreTrygdetidgrunnlag } from '~shared/api/trygdetid'
@@ -40,6 +40,10 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
     }
   }
 
+  const beregnetTrygdetid = eksisterendeGrunnlag
+    ? `${eksisterendeGrunnlag.beregnet?.aar} år ${eksisterendeGrunnlag.beregnet?.maaneder} måneder ${eksisterendeGrunnlag.beregnet?.dager} dager`
+    : '-'
+
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!behandlingId) throw new Error('Mangler behandlingsid')
@@ -49,6 +53,10 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
         trygdetidgrunnlag: trygdetidgrunnlag,
       },
       (respons) => {
+        const eksisterendeGrunnlag = respons.trygdetidGrunnlag.find(
+          (grunnlag) => grunnlag.type === trygdetidGrunnlagType
+        )
+        eksisterendeGrunnlag && setTrygdetidgrunnlag(eksisterendeGrunnlag)
         setTrygdetid(respons)
       }
     )
@@ -56,137 +64,145 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
 
   return (
     <TrygdetidGrunnlagWrapper>
-      <Heading spacing size="small" level="3">
+      {
         {
-          {
-            [ITrygdetidGrunnlagType.NASJONAL]: 'Faktisk trygdetid',
-            [ITrygdetidGrunnlagType.FREMTIDIG]: 'Fremtidig trygdetid',
-          }[trygdetidGrunnlagType]
-        }
-      </Heading>
+          [ITrygdetidGrunnlagType.NASJONAL]: (
+            <>
+              <Heading spacing size="small" level="3">
+                Faktisk trygdetid
+              </Heading>
+              <p>Legg til trygdetid fra avdøde var 16 år frem til hen døde.</p>
+            </>
+          ),
+          [ITrygdetidGrunnlagType.FREMTIDIG]: (
+            <>
+              <Heading spacing size="small" level="3">
+                Fremtidig trygdetid
+              </Heading>
+              <p>Legg til trygdetid fra dødsdato til og med kalenderåret avdøde hadde blitt 66 år.</p>
+            </>
+          ),
+        }[trygdetidGrunnlagType]
+      }
       <Innhold>
         <TrygdetidForm onSubmit={onSubmit}>
-          <FormWrapper>
-            <Land>
-              <Select
-                label="Land"
-                value={trygdetidgrunnlag.bosted}
-                key={`${trygdetidgrunnlag.bosted}-${trygdetidGrunnlagType}`}
-                onChange={(e) =>
-                  setTrygdetidgrunnlag({
-                    ...trygdetidgrunnlag,
-                    bosted: e.target.value,
-                  })
-                }
-                autoComplete="off"
-              >
-                <option value="">Velg land</option>
-                <option key={`NORGE-${trygdetidGrunnlagType}`} value="NORGE">
-                  Norge
-                </option>
-              </Select>
-            </Land>
+          <Rows>
+            <FormWrapper>
+              <Land>
+                <Select
+                  label="Land"
+                  value={trygdetidgrunnlag.bosted}
+                  key={`${trygdetidgrunnlag.bosted}-${trygdetidGrunnlagType}`}
+                  onChange={(e) =>
+                    setTrygdetidgrunnlag({
+                      ...trygdetidgrunnlag,
+                      bosted: e.target.value,
+                    })
+                  }
+                  autoComplete="off"
+                >
+                  <option value="">Velg land</option>
+                  <option key={`NORGE-${trygdetidGrunnlagType}`} value="NORGE">
+                    Norge
+                  </option>
+                </Select>
+              </Land>
 
-            <DatoSection>
-              <Label>Fra dato</Label>
-              <Datovelger>
-                <DatePicker
-                  ref={fraDatoPickerRef}
-                  dateFormat={'dd.MM.yyyy'}
-                  placeholderText={'dd.mm.åååå'}
-                  selected={trygdetidgrunnlag.periodeFra == null ? null : new Date(trygdetidgrunnlag.periodeFra)}
-                  locale="nb"
-                  autoComplete="off"
-                  onChange={(e) =>
-                    setTrygdetidgrunnlag({
-                      ...trygdetidgrunnlag,
-                      periodeFra: e == null ? '' : e.toISOString().split('T')[0],
-                    })
-                  }
-                />
-                <KalenderIkon
-                  tabIndex={0}
-                  onKeyPress={toggleDatepicker(fraDatoPickerRef)}
-                  onClick={toggleDatepicker(fraDatoPickerRef)}
-                  role="button"
-                  title="Åpne datovelger"
-                  aria-label="Åpne datovelger"
-                >
-                  <Calender color="white" />
-                </KalenderIkon>
-              </Datovelger>
-            </DatoSection>
-            <DatoSection>
-              <Label>Til dato</Label>
-              <Datovelger>
-                <DatePicker
-                  ref={tilDatoPickerRef}
-                  dateFormat={'dd.MM.yyyy'}
-                  placeholderText={'dd.mm.åååå'}
-                  selected={trygdetidgrunnlag.periodeTil == null ? null : new Date(trygdetidgrunnlag.periodeTil)}
-                  locale="nb"
-                  autoComplete="off"
-                  onChange={(e) =>
-                    setTrygdetidgrunnlag({
-                      ...trygdetidgrunnlag,
-                      periodeTil: e == null ? '' : e.toISOString().split('T')[0],
-                    })
-                  }
-                />
-                <KalenderIkon
-                  tabIndex={0}
-                  onKeyPress={toggleDatepicker(tilDatoPickerRef)}
-                  onClick={toggleDatepicker(tilDatoPickerRef)}
-                  role="button"
-                  title="Åpne datovelger"
-                  aria-label="Åpne datovelger"
-                >
-                  <Calender color="white" />
-                </KalenderIkon>
-              </Datovelger>
-            </DatoSection>
-            <TrygdetidInput>
-              <TextField
-                label={
-                  trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG
+              <DatoSection>
+                <Label>Fra dato</Label>
+                <Datovelger>
+                  <DatePicker
+                    ref={fraDatoPickerRef}
+                    dateFormat={'dd.MM.yyyy'}
+                    placeholderText={'dd.mm.åååå'}
+                    selected={trygdetidgrunnlag.periodeFra == null ? null : new Date(trygdetidgrunnlag.periodeFra)}
+                    locale="nb"
+                    autoComplete="off"
+                    onChange={(e) =>
+                      setTrygdetidgrunnlag({
+                        ...trygdetidgrunnlag,
+                        periodeFra: e == null ? '' : e.toISOString().split('T')[0],
+                      })
+                    }
+                  />
+                  <KalenderIkon
+                    tabIndex={0}
+                    onKeyPress={toggleDatepicker(fraDatoPickerRef)}
+                    onClick={toggleDatepicker(fraDatoPickerRef)}
+                    role="button"
+                    title="Åpne datovelger"
+                    aria-label="Åpne datovelger"
+                  >
+                    <Calender color="white" />
+                  </KalenderIkon>
+                </Datovelger>
+              </DatoSection>
+              <DatoSection>
+                <Label>Til dato</Label>
+                <Datovelger>
+                  <DatePicker
+                    ref={tilDatoPickerRef}
+                    dateFormat={'dd.MM.yyyy'}
+                    placeholderText={'dd.mm.åååå'}
+                    selected={trygdetidgrunnlag.periodeTil == null ? null : new Date(trygdetidgrunnlag.periodeTil)}
+                    locale="nb"
+                    autoComplete="off"
+                    onChange={(e) =>
+                      setTrygdetidgrunnlag({
+                        ...trygdetidgrunnlag,
+                        periodeTil: e == null ? '' : e.toISOString().split('T')[0],
+                      })
+                    }
+                  />
+                  <KalenderIkon
+                    tabIndex={0}
+                    onKeyPress={toggleDatepicker(tilDatoPickerRef)}
+                    onClick={toggleDatepicker(tilDatoPickerRef)}
+                    role="button"
+                    title="Åpne datovelger"
+                    aria-label="Åpne datovelger"
+                  >
+                    <Calender color="white" />
+                  </KalenderIkon>
+                </Datovelger>
+              </DatoSection>
+              {trygdetidGrunnlagType !== ITrygdetidGrunnlagType.FREMTIDIG && (
+                <Kilde>
+                  <Select
+                    label="Kilde til informasjon"
+                    value={trygdetidgrunnlag.kilde}
+                    key={`${trygdetidgrunnlag.kilde}-${trygdetidGrunnlagType}`}
+                    onChange={(e) =>
+                      setTrygdetidgrunnlag({
+                        ...trygdetidgrunnlag,
+                        kilde: e.target.value,
+                      })
+                    }
+                    autoComplete="off"
+                  >
+                    <option value="">Velg kilde</option>
+                    <option key={`FOLKEREGISTRERET}`} value="FOLKEREGISTRERET">
+                      Folkeregisteret
+                    </option>
+                  </Select>
+                </Kilde>
+              )}
+              <TrygdetidBeregnet>
+                <Label>
+                  {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG
                     ? 'Fremtidig trygdetid'
-                    : 'Faktisk trygdetid'
-                }
-                size="medium"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={trygdetidgrunnlag.trygdetid && trygdetidgrunnlag.trygdetid}
-                onChange={(e) =>
-                  setTrygdetidgrunnlag({
-                    ...trygdetidgrunnlag,
-                    trygdetid: Number(e.target.value),
-                  })
-                }
-              />
-            </TrygdetidInput>
-            {trygdetidGrunnlagType !== ITrygdetidGrunnlagType.FREMTIDIG && (
-              <Kilde>
-                <TextField
-                  label="Kilde"
-                  size="medium"
-                  type="text"
-                  value={trygdetidgrunnlag.kilde}
-                  onChange={(e) =>
-                    setTrygdetidgrunnlag({
-                      ...trygdetidgrunnlag,
-                      kilde: e.target.value,
-                    })
-                  }
-                />
-              </Kilde>
-            )}
-          </FormWrapper>
-          <FormKnapper>
-            <Button size="medium" loading={isPending(trygdetidgrunnlagStatus)} type="submit">
-              Lagre
-            </Button>
-          </FormKnapper>
+                    : 'Faktisk trygdetid'}
+                </Label>
+                <div>{beregnetTrygdetid}</div>
+              </TrygdetidBeregnet>
+            </FormWrapper>
+
+            <FormKnapper>
+              <Button size="small" loading={isPending(trygdetidgrunnlagStatus)} type="submit">
+                Lagre
+              </Button>
+            </FormKnapper>
+          </Rows>
         </TrygdetidForm>
       </Innhold>
 
@@ -203,6 +219,10 @@ const TrygdetidForm = styled.form`
   display: flex;
 `
 
+const Rows = styled.div`
+  flex-direction: column;
+`
+
 const Land = styled.div`
   width: 250px;
 `
@@ -211,8 +231,10 @@ const Kilde = styled.div`
   width: 250px;
 `
 
-const TrygdetidInput = styled.div`
-  width: 250px;
+const TrygdetidBeregnet = styled.div`
+  width: 220px;
+  display: grid;
+  gap: 0.5em;
 `
 
 const Datovelger = styled.div`
@@ -221,6 +243,7 @@ const Datovelger = styled.div`
 
   input {
     border-right: none;
+    border-width: 1px;
     border-radius: 4px 0 0 4px;
     width: 160px;
     height: 48px;

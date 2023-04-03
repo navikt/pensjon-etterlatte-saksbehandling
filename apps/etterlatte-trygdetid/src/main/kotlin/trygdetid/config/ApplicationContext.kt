@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -19,5 +20,11 @@ class ApplicationContext {
     )
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val grunnlagKlient = GrunnlagKlient(config, httpClient())
-    val trygdetidService = TrygdetidService(TrygdetidRepository(dataSource), behandlingKlient, grunnlagKlient)
+    val trygdetidService =
+        TrygdetidService(
+            TrygdetidRepository(dataSource),
+            behandlingKlient = behandlingKlient,
+            grunnlagKlient = grunnlagKlient,
+            beregnTrygdetidService = TrygdetidBeregningService
+        )
 }

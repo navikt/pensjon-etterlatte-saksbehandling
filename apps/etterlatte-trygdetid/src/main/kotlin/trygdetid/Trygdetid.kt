@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
+import java.time.Period
 import java.util.*
 
 data class Trygdetid(
@@ -16,10 +17,9 @@ data class Trygdetid(
 )
 
 data class BeregnetTrygdetid(
-    val nasjonal: Int,
-    val fremtidig: Int,
-    val total: Int,
-    val tidspunkt: Tidspunkt
+    val verdi: Int,
+    val tidspunkt: Tidspunkt,
+    val regelResultat: JsonNode
 )
 
 data class Opplysningsgrunnlag(
@@ -36,9 +36,11 @@ data class TrygdetidGrunnlag(
     val type: TrygdetidType,
     val bosted: String,
     val periode: TrygdetidPeriode,
-    val trygdetid: Int,
-    val kilde: String
+    val kilde: String,
+    val beregnetTrygdetid: BeregnetTrygdetidGrunnlag? = null
 )
+
+data class BeregnetTrygdetidGrunnlag(val verdi: Period, val tidspunkt: Tidspunkt, val regelResultat: JsonNode)
 
 data class TrygdetidPeriode(
     val fra: LocalDate,

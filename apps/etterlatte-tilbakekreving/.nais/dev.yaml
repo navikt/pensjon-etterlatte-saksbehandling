@@ -17,6 +17,8 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  secureLogs:
+    enabled: true
   strategy:
     type: Recreate
   gcp:

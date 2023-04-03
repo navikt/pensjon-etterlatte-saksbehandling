@@ -3,13 +3,16 @@ package no.nav.etterlatte.pdltjenester
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.accept
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.pdl.PdlFeil
+import no.nav.etterlatte.libs.common.pdl.PdlFeilAarsak
+import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
@@ -33,10 +36,25 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
                     val exception = it.exceptions.last()
-                    if (exception is ClientRequestException && exception.response.status == HttpStatusCode.NotFound) {
-                        throw PersonFinnesIkkeException(hentPersonRequest.foedselsnummer)
+                    val response = when (exception) {
+                        is ClientRequestException -> exception.response
+                        is ServerResponseException -> exception.response
+                        else -> throw exception
                     }
-                    throw it.exceptions.last()
+                    val feilFraPdl = try {
+                        response.body<PdlFeil>()
+                    } catch (e: Exception) {
+                        throw exception
+                    }
+                    when (feilFraPdl.aarsak) {
+                        PdlFeilAarsak.FANT_IKKE_PERSON ->
+                            throw PersonFinnesIkkeException(hentPersonRequest.foedselsnummer)
+
+                        PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON -> throw FamilieRelasjonManglerIdent(
+                            "${hentPersonRequest.foedselsnummer} har en person i persongalleriet som " +
+                                "mangler ident: ${feilFraPdl.detaljer}"
+                        )
+                    }
                 }
             }
         }

@@ -1,5 +1,10 @@
 package no.nav.etterlatte.fordeler
 
+import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
+import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -7,11 +12,6 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.aktiv
 import no.nav.etterlatte.libs.common.person.alder
 import no.nav.etterlatte.libs.common.person.nyeste
-import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
-import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
-import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
-import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import java.time.LocalDate
 
 private const val NORGE = "NOR"
@@ -50,7 +50,9 @@ enum class FordelerKriterie(val forklaring: String) {
 
     INNSENDER_ER_IKKE_FORELDER("Innsender er ikke markert som forelder til barnet"),
 
-    SOEKNAD_ER_IKKE_PAA_BOKMAAL("Søknaden er ikke sendt inn på bokmål")
+    SOEKNAD_ER_IKKE_PAA_BOKMAAL("Søknaden er ikke sendt inn på bokmål"),
+
+    FAMILIERELASJON_MANGLER_IDENT("En person tilknyttet søknaden mangler en ident i PDL")
 }
 
 class FordelerKriterier {

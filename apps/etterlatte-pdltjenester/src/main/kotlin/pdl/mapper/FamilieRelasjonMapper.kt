@@ -1,6 +1,7 @@
 package no.nav.etterlatte.pdl.mapper
 
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
@@ -19,8 +20,10 @@ object FamilieRelasjonMapper {
                         ?.groupBy { it.ansvarlig }
                         ?.mapValues { it.value.maxByOrNull { fa -> fa.metadata.sisteRegistrertDato() } }
                         ?.map {
-                            (Folkeregisteridentifikator.of(it.value?.ansvarlig))
+                            it.value?.ansvarlig?.let { Folkeregisteridentifikator.of(it) }
+                                ?: throw FamilieRelasjonManglerIdent("${it.value} mangler ident")
                         }
+
                 else -> null
             },
             foreldre = when (personRolle) {
@@ -30,8 +33,10 @@ object FamilieRelasjonMapper {
                         ?.groupBy { it.relatertPersonsIdent }
                         ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                         ?.map {
-                            (Folkeregisteridentifikator.of(it.value?.relatertPersonsIdent))
+                            it.value?.relatertPersonsIdent?.let { Folkeregisteridentifikator.of(it) }
+                                ?: throw FamilieRelasjonManglerIdent("${it.value} mangler ident")
                         }
+
                 else -> null
             },
             barn = when (personRolle) {
@@ -41,8 +46,10 @@ object FamilieRelasjonMapper {
                         ?.groupBy { it.relatertPersonsIdent }
                         ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                         ?.map {
-                            (Folkeregisteridentifikator.of(it.value?.relatertPersonsIdent))
+                            it.value?.relatertPersonsIdent?.let { Folkeregisteridentifikator.of(it) }
+                                ?: throw FamilieRelasjonManglerIdent("${it.value} mangler ident")
                         }
+
                 else -> null
             }
         )

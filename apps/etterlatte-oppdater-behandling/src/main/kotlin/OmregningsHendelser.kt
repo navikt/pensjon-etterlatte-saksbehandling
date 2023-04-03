@@ -19,7 +19,7 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.withFeilhaandtering
 
-internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: Behandling) :
+internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
     River.PacketListener {
 
     private val logger = LoggerFactory.getLogger(this::class.java)

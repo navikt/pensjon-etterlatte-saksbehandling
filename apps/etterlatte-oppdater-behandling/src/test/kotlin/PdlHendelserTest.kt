@@ -1,7 +1,7 @@
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.etterlatte.BehandlingsService
+import no.nav.etterlatte.BehandlingServiceImpl
 import no.nav.etterlatte.PdlHendelser
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -14,7 +14,7 @@ import java.time.LocalDate
 
 class PdlHendelserTest {
 
-    private val behandlingService = mockk<BehandlingsService>()
+    private val behandlingService = mockk<BehandlingServiceImpl>()
     private val inspector: TestRapid = TestRapid().apply { PdlHendelser(this, behandlingService) }
 
     @Test

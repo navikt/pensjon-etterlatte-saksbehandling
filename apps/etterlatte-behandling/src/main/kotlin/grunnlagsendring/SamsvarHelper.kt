@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
-import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utland
 import java.time.LocalDate

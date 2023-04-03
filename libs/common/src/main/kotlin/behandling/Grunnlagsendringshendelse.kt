@@ -1,13 +1,8 @@
 package no.nav.etterlatte.libs.common.behandling
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.annotation.JsonTypeName
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.Utland
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 data class PersonMedSakerOgRoller(
     val fnr: String,
@@ -49,41 +44,4 @@ enum class Saksrolle {
                 UKJENT
             }
     }
-}
-
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed class SamsvarMellomPdlOgGrunnlag {
-    abstract val samsvar: Boolean
-
-    @JsonTypeName("DOEDSDATO")
-    data class Doedsdatoforhold(
-        val fraGrunnlag: LocalDate?,
-        val fraPdl: LocalDate?,
-        override val samsvar: Boolean
-    ) : SamsvarMellomPdlOgGrunnlag()
-
-    @JsonTypeName("UTLAND")
-    data class Utlandsforhold(
-        val fraPdl: Utland?,
-        val fraGrunnlag: Utland?,
-        override val samsvar: Boolean
-    ) : SamsvarMellomPdlOgGrunnlag()
-
-    @JsonTypeName("ANSVARLIGE_FORELDRE")
-    data class AnsvarligeForeldre(
-        val fraPdl: List<Folkeregisteridentifikator>?,
-        val fraGrunnlag: List<Folkeregisteridentifikator>?,
-        override val samsvar: Boolean
-    ) : SamsvarMellomPdlOgGrunnlag()
-
-    @JsonTypeName("BARN")
-    data class Barn(
-        val fraPdl: List<Folkeregisteridentifikator>?,
-        val fraGrunnlag: List<Folkeregisteridentifikator>?,
-        override val samsvar: Boolean
-    ) : SamsvarMellomPdlOgGrunnlag()
-
-    // Verge
-
-    // institusjonsopphold?
 }

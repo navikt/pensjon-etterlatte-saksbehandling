@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import java.time.LocalDateTime
 import java.util.*
 

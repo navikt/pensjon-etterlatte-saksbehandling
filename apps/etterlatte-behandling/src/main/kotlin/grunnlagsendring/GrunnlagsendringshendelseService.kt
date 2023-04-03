@@ -234,19 +234,11 @@ class GrunnlagsendringshendelseService(
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> {
                 val pdlVergemaal = pdlData.hentVergemaal()
                 val grunnlagVergemaal = grunnlag?.vergemaalellerfremtidsfullmakt(rolle)
-                if (rolle.toPersonrolle() == PersonRolle.BARN) {
-                    SamsvarMellomPdlOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
-                        fraPdl = pdlVergemaal,
-                        fraGrunnlag = grunnlagVergemaal,
-                        samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal
-                    )
-                } else {
-                    SamsvarMellomPdlOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
-                        fraPdl = pdlVergemaal,
-                        fraGrunnlag = grunnlagVergemaal,
-                        samsvar = true
-                    )
-                }
+                SamsvarMellomPdlOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
+                    fraPdl = pdlVergemaal,
+                    fraGrunnlag = grunnlagVergemaal,
+                    samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal
+                )
             }
         }
     }

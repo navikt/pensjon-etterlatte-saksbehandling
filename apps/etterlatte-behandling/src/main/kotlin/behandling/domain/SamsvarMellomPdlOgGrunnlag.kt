@@ -11,7 +11,7 @@ import java.time.LocalDate
 sealed class SamsvarMellomPdlOgGrunnlag {
     abstract val samsvar: Boolean
 
-    @JsonTypeName("VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1")
+    @JsonTypeName("VERGEMAAL_ELLER_FREMTIDSFULLMAKT")
     data class VergemaalEllerFremtidsfullmaktForhold(
         val fraPdl: List<VergemaalEllerFremtidsfullmakt>?,
         val fraGrunnlag: List<VergemaalEllerFremtidsfullmakt>?,

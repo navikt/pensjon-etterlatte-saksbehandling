@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.UtbetalingsInformasjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utbetalingsinformasjon
 import java.util.*
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold as UtenlandsoppholdOpplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld

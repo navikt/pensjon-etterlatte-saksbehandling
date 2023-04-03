@@ -16,7 +16,6 @@ import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger

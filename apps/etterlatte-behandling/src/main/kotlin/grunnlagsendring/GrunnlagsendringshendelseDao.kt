@@ -1,12 +1,12 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
-import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
-import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.behandling.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt

@@ -21,14 +21,14 @@ import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.VurderingMedBegrunnelseJson
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
+import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning

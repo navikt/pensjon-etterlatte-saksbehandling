@@ -22,9 +22,3 @@ data class PersonIdent @JsonCreator constructor(
             this.value
         }
 }
-
-enum class PersonRolle {
-    BARN,
-    AVDOED,
-    GJENLEVENDE
-}

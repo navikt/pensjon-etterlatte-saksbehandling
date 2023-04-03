@@ -3,11 +3,11 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak

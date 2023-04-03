@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt

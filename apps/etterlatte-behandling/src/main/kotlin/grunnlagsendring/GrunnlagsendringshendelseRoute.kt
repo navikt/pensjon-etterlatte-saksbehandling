@@ -10,8 +10,8 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse

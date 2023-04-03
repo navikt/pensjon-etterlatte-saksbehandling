@@ -12,6 +12,9 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.foerstegangsbehandling
@@ -19,9 +22,6 @@ import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
-import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
-import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -44,7 +44,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class GrunnlagsendringshendelseServiceTest {
 

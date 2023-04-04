@@ -361,6 +361,6 @@ class RealGenerellBehandlingServiceTest {
     companion object {
         const val SAK_ID = 1L
         val BEHANDLINGS_ID: UUID = UUID.randomUUID()
-        val TOKEN = Bruker.of("a", "b", null, null)
+        val TOKEN = Bruker.of("a", "b", null, null, null)
     }
 }

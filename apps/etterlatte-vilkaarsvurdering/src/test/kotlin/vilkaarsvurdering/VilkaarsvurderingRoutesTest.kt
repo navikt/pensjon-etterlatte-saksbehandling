@@ -600,7 +600,7 @@ internal class VilkaarsvurderingRoutesTest {
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        val oboToken = Bruker.of("token", "s1", null, null)
+        val oboToken = Bruker.of("token", "s1", null, null, null)
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

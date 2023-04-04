@@ -53,7 +53,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val pdlService = mockk<PdlKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
     private val adressebeskyttelseDaoMock = mockk<SakDaoAdressebeskyttelse>()
-    private val sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(adressebeskyttelseDaoMock)
+    private val sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(adressebeskyttelseDaoMock, emptyMap())
 
     private val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
         grunnlagshendelsesDao,

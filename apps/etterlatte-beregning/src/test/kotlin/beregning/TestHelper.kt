@@ -36,4 +36,4 @@ fun Int.toBeregningstall(
     roundingMode: RoundingMode = RoundingMode.UNNECESSARY
 ) = Beregningstall(this).setScale(decimals, roundingMode)
 
-val bruker = Saksbehandler("token", "ident")
+val bruker = Saksbehandler("token", "ident", null)

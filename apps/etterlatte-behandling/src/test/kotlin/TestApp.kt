@@ -67,7 +67,9 @@ class LocalAppBeanFactory(
     override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> =
         mapOf(
             "AZUREAD_ATTESTANT_GROUPID" to azureAdAttestantClaim,
-            "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim
+            "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim,
+            "AZUREAD_STRENGT_FORTROLIG_GROUPID" to "5ef775f2-61f8-4283-bf3d-8d03f428aa14",
+            "AZUREAD_FORTROLIG_GROUPID" to "ea930b6b-9397-44d9-b9e6-f4cf527a632a"
         )
 
     override fun dataSource(): DataSource = DataSourceBuilder.createDataSource(jdbcUrl, username, password)

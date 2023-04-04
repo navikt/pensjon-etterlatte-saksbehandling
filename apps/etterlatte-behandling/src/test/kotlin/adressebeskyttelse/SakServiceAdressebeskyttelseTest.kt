@@ -1,5 +1,6 @@
 package no.nav.etterlatte.adressebeskyttelse
 
+import no.nav.etterlatte.SaksbehandlerMedRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -13,6 +14,7 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
 import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
+import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -44,7 +46,10 @@ class SakServiceAdressebeskyttelseTest {
             password = postgreSQLContainer.password
         ).apply { migrate() }
 
-        sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource))
+        sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(
+            SakDaoAdressebeskyttelse(dataSource),
+            emptyMap()
+        )
         sakRepo = SakDao { dataSource.connection }
         behandlingRepo = BehandlingDao { dataSource.connection }
     }
@@ -53,6 +58,7 @@ class SakServiceAdressebeskyttelseTest {
     fun `Skal kunne sette adressebeskyttelse på sak`() {
         val fnr = Folkeregisteridentifikator.of("08071272487").value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
+        val saksbehandlerMedRoller = SaksbehandlerMedRoller(Saksbehandler("", "ident", null))
 
         sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val opprettBehandling = opprettBehandling(
@@ -67,15 +73,17 @@ class SakServiceAdressebeskyttelseTest {
             )
         )
         behandlingRepo.opprettBehandling(opprettBehandling)
+        val harTilgangTilBehandling =
+            sakServiceAdressebeskyttelse.harTilgangTilBehandling(
+                opprettBehandling.id.toString(),
+                saksbehandlerMedRoller
+            )
 
-        val behandlingHarAdressebeskyttelse =
-            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(opprettBehandling.id.toString())
-
-        Assertions.assertEquals(true, behandlingHarAdressebeskyttelse)
+        Assertions.assertEquals(false, harTilgangTilBehandling)
 
         val smokeTestBehandling =
-            sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(UUID.randomUUID().toString())
+            sakServiceAdressebeskyttelse.harTilgangTilBehandling(UUID.randomUUID().toString(), saksbehandlerMedRoller)
 
-        Assertions.assertEquals(false, smokeTestBehandling)
+        Assertions.assertEquals(true, smokeTestBehandling)
     }
 }

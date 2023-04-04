@@ -79,6 +79,7 @@ fun Application.module(beanFactory: BeanFactory) {
         ) {
             attachContekst(dataSource(), beanFactory)
             sakRoutes(
+                sakServiceAdressebeskyttelse = sakServiceAdressebeskyttelse,
                 sakService = sakService,
                 generellBehandlingService = generellBehandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService
@@ -97,13 +98,13 @@ fun Application.module(beanFactory: BeanFactory) {
             oppgaveRoutes(service = beanFactory.oppgaveService())
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService))
-            tilgangRoutes(sakService, sakServiceAdressebeskyttelse)
+            tilgangRoutes(sakServiceAdressebeskyttelse)
             install(adressebeskyttelsePlugin) {
-                behandlingIdHarAdressebeskyttelse = { behandlingId ->
-                    sakServiceAdressebeskyttelse.behandlingHarAdressebeskyttelse(behandlingId)
+                harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
+                    sakServiceAdressebeskyttelse.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
                 }
-                sakIdHarAdressebeskyttelse = { sakId ->
-                    sakServiceAdressebeskyttelse.sjekkOmSakHarAdresseBeskyttelse(sakId)
+                harTilgangTilSak = { sakId, saksbehandlerMedRoller ->
+                    sakServiceAdressebeskyttelse.harTilgangTilSak(sakId, saksbehandlerMedRoller)
                 }
             }
         }

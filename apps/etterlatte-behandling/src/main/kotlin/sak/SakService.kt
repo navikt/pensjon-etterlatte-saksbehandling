@@ -10,13 +10,11 @@ import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
-import no.nav.etterlatte.Saksbehandler as SaksbehandlerBruker
+import no.nav.etterlatte.Saksbehandler
 
 enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
     OpprettMedEnhetId("pensjon-etterlatte.opprett-sak-med-enhet-id"),
@@ -25,7 +23,7 @@ enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
     override fun key() = key
 }
 
-interface SakService : PersonTilgangsSjekk {
+interface SakService {
     fun hentSaker(): List<Sak>
     fun finnSaker(person: String): List<Sak>
     fun finnEllerOpprettSak(person: String, type: SakType): Sak
@@ -33,8 +31,6 @@ interface SakService : PersonTilgangsSjekk {
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
     fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean)
-    fun sjekkOmFnrHarEnSakMedAdresseBeskyttelse(fnr: String): Boolean
-    fun sjekkOmSakHarAdresseBeskyttelse(sakId: Long): Boolean
 }
 
 class RealSakService(
@@ -71,27 +67,6 @@ class RealSakService(
         }
     }
 
-    override fun sjekkOmFnrHarEnSakMedAdresseBeskyttelse(fnr: String): Boolean {
-        val sakIder = this.finnSaker(fnr).map { it.id }
-        return inTransaction {
-            dao.enAvSakeneHarAdresseBeskyttelse(sakIder)
-        }
-    }
-
-    override fun sjekkOmSakHarAdresseBeskyttelse(sakId: Long): Boolean {
-        return inTransaction {
-            dao.enAvSakeneHarAdresseBeskyttelse(listOf(sakId))
-        }
-    }
-
-    override suspend fun harTilgangTilPerson(
-        foedselsnummer: Folkeregisteridentifikator,
-        bruker: Saksbehandler
-    ): Boolean {
-        return !this.sjekkOmFnrHarEnSakMedAdresseBeskyttelse(foedselsnummer.value)
-    }
-
-    // Kalles kun fra en route som ikke er åpent til saksbehandlere så enhetsjekk er ikke nødvendig
     override fun finnEllerOpprettSak(person: String, type: SakType) =
         finnSakerForPersonOgType(person, type) ?: dao.opprettSak(
             person,
@@ -131,12 +106,12 @@ class RealSakService(
         }
     }
 
-    private fun SaksbehandlerBruker.enheterIds() = this.enheter().map { it.id }
+    private fun Saksbehandler.enheterIds() = this.enheter().map { it.id }
 
     private fun List<Sak>.filterForEnheter() =
         if (featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false)) {
             when (val user = Kontekst.get().AppUser) {
-                is SaksbehandlerBruker -> {
+                is Saksbehandler -> {
                     val enheter = user.enheterIds()
 
                     this.filter { it.enhet?.let { enhet -> enheter.contains(enhet) } ?: true }

@@ -2,7 +2,6 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.Assertions
@@ -36,55 +35,10 @@ class SakDaoTest {
         ).apply { migrate() }
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource))
-    }
-
-    @Test
-    fun kanSjekkeOmHarStrengtFortroligAdressebeskyttelse() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
-
-        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
-        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
-            opprettSak.id,
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG
+        sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(
+            SakDaoAdressebeskyttelse(dataSource),
+            emptyMap()
         )
-        Assertions.assertTrue(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
-    }
-
-    @Test
-    fun kanSjekkeOmHarStrengtFortroligUtlandAdressebeskyttelse() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
-
-        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
-        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
-            opprettSak.id,
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
-        )
-        Assertions.assertTrue(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
-    }
-
-    @Test
-    fun kanSjekkeOmHarFortroligAdressebeskyttelse() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
-
-        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
-        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
-            opprettSak.id,
-            AdressebeskyttelseGradering.FORTROLIG
-        )
-        Assertions.assertTrue(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
-    }
-
-    @Test
-    fun kanSjekkeUgradertAdressebeskyttlese() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON)
-
-        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
-        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
-            opprettSak.id,
-            AdressebeskyttelseGradering.UGRADERT
-        )
-        Assertions.assertFalse(sakRepo.enAvSakeneHarAdresseBeskyttelse(listOf(opprettSak.id)))
     }
 
     @Test

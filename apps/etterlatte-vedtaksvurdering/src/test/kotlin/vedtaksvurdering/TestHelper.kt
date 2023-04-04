@@ -24,8 +24,8 @@ const val SAKSBEHANDLER_2 = "saksbehandler2"
 const val ENHET_1 = "1234"
 const val ENHET_2 = "4321"
 
-val saksbehandler = Saksbehandler("token", SAKSBEHANDLER_1)
-val attestant = Saksbehandler("token", SAKSBEHANDLER_2)
+val saksbehandler = Saksbehandler("token", SAKSBEHANDLER_1, null)
+val attestant = Saksbehandler("token", SAKSBEHANDLER_2, null)
 
 fun opprettVedtak(
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),

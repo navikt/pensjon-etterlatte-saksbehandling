@@ -93,7 +93,7 @@ internal class VedtaksbrevServiceTest {
                 vedtaksbrevService.oppdaterVedtaksbrev(
                     SAK_ID,
                     BEHANDLING_ID,
-                    Bruker.of("token", "saksbehandler", null, null)
+                    Bruker.of("token", "saksbehandler", null, null, null)
                 )
             }
 
@@ -132,7 +132,7 @@ internal class VedtaksbrevServiceTest {
                 val brev = vedtaksbrevService.oppdaterVedtaksbrev(
                     SAK_ID,
                     BEHANDLING_ID,
-                    Bruker.of("token", "saksbehandler", null, null)
+                    Bruker.of("token", "saksbehandler", null, null, null)
                 )
 
                 assertNotNull(brev)
@@ -170,7 +170,7 @@ internal class VedtaksbrevServiceTest {
                 vedtaksbrevService.oppdaterVedtaksbrev(
                     123,
                     BEHANDLING_ID,
-                    Bruker.of("token", "saksbehandler", null, null)
+                    Bruker.of("token", "saksbehandler", null, null, null)
                 )
             }
 

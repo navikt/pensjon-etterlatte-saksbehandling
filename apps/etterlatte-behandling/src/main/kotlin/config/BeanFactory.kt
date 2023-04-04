@@ -118,7 +118,7 @@ abstract class CommonFactory : BeanFactory {
     }
 
     private val oppgaveService: OppgaveService by lazy {
-        OppgaveServiceImpl(oppgaveDao())
+        OppgaveServiceImpl(oppgaveDao(), featureToggleService())
     }
 
     private val oppgaveDao: OppgaveDao by lazy {

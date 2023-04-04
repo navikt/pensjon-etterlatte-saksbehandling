@@ -1,16 +1,25 @@
 package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.oppgave.domain.Oppgave
+
+enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle {
+    EnhetFilterOppgaver("pensjon-etterlatte.filter-oppgaver-enhet");
+
+    override fun key() = key
+}
 
 interface OppgaveService {
 
     fun finnOppgaverForBruker(bruker: Saksbehandler): List<Oppgave>
 }
 
-class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
+class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao, private val featureToggleService: FeatureToggleService) :
+    OppgaveService {
 
     private fun finnAktuelleRoller(bruker: Saksbehandler): List<Rolle> =
         listOfNotNull(
@@ -43,14 +52,17 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
     }
 
     private fun List<Oppgave>.filterForEnheter(bruker: Saksbehandler) =
-        filterOppgaverForEnheter(this, bruker.enheter().map { it.id })
+        if (featureToggleService.isEnabled(OppgaveServiceFeatureToggle.EnhetFilterOppgaver, false)) {
+            filterOppgaverForEnheter(this, bruker.enheter().map { it.id })
+        } else {
+            this
+        }
 
-    fun filterOppgaverForEnheter(oppgaver: List<Oppgave>, enheter: List<String>): List<Oppgave> {
-        return oppgaver.filter { oppgave ->
+    fun filterOppgaverForEnheter(oppgaver: List<Oppgave>, enheter: List<String>) =
+        oppgaver.filter { oppgave ->
             when (oppgave) {
                 is Oppgave.BehandlingOppgave -> oppgave.enhet == null || enheter.contains(oppgave.enhet)
                 else -> true
             }
         }
-    }
 }

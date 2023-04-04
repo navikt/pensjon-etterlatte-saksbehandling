@@ -39,6 +39,18 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao) : OppgaveService {
                 oppgaveDao.finnOppgaverMedStatuser(aktuelleStatuserForRoller) +
                     oppgaveDao.finnOppgaverFraGrunnlagsendringshendelser()
             }.sortedByDescending { it.registrertDato }
+        }.filterForEnheter(bruker)
+    }
+
+    private fun List<Oppgave>.filterForEnheter(bruker: Saksbehandler) =
+        filterOppgaverForEnheter(this, bruker.enheter().map { it.id })
+
+    fun filterOppgaverForEnheter(oppgaver: List<Oppgave>, enheter: List<String>): List<Oppgave> {
+        return oppgaver.filter { oppgave ->
+            when (oppgave) {
+                is Oppgave.BehandlingOppgave -> oppgave.enhet == null || enheter.contains(oppgave.enhet)
+                else -> true
+            }
         }
     }
 }

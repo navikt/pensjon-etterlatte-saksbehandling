@@ -111,7 +111,8 @@ private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {
             Context(
                 AppUser = decideUser(
                     call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
-                    beanFactory.getSaksbehandlerGroupIdsByKey()
+                    beanFactory.getSaksbehandlerGroupIdsByKey(),
+                    beanFactory.enhetService()
                 ),
                 databasecontxt = DatabaseContext(ds)
             )

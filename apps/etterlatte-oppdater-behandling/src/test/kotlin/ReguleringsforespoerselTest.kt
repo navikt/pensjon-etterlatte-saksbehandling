@@ -74,15 +74,15 @@ internal class ReguleringsforespoerselTest {
     @Test
     fun `skal sende med sakId for alle saker i basen`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
-        val behandlingServiceServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { behandlingServiceServiceMock.hentAlleSaker() } returns Saker(
+        val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
+        every { behandlingServiceMock.hentAlleSaker() } returns Saker(
             listOf(
                 Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L),
                 Sak("saksbehandler2", SakType.BARNEPENSJON, 1002L),
                 Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L)
             )
         )
-        val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceServiceMock) }
+        val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceMock) }
         inspector.sendTestMessage(melding.toJson())
 
         val melding1 = inspector.inspektør.message(0)
@@ -97,19 +97,19 @@ internal class ReguleringsforespoerselTest {
     @Test
     fun `ider fra tilbakestilte behandlinger sendes med i meldinga videre`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
-        val behandlingServiceServiceMock = mockk<BehandlingService>(relaxed = true)
+        val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         val sakId = 1000L
-        every { behandlingServiceServiceMock.hentAlleSaker() } returns Saker(
+        every { behandlingServiceMock.hentAlleSaker() } returns Saker(
             listOf(
                 Sak("saksbehandler1", SakType.BARNEPENSJON, sakId)
             )
         )
         val behandlingId1 = UUID.randomUUID()
         val behandlingId2 = UUID.randomUUID()
-        every { behandlingServiceServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert() } returns SakIDListe(
+        every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert() } returns SakIDListe(
             listOf(BehandlingOgSak(behandlingId1, sakId), BehandlingOgSak(behandlingId2, sakId))
         )
-        val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceServiceMock) }
+        val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceMock) }
         inspector.sendTestMessage(melding.toJson())
 
         val melding1 = inspector.inspektør.message(0)
@@ -120,12 +120,12 @@ internal class ReguleringsforespoerselTest {
     @Test
     fun `kjoerer med feilhaandtering`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
-        val behandlingServiceServiceMock = mockk<BehandlingService>(relaxed = true)
+        val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         coEvery {
-            behandlingServiceServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
+            behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
         } throws RuntimeException("feil")
 
-        val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceServiceMock) }
+        val inspector = TestRapid().apply { Reguleringsforespoersel(this, behandlingServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
 

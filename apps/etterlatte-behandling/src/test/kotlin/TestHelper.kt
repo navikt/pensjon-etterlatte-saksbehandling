@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
@@ -262,7 +262,7 @@ fun personOpplysning(
     foedselsaar = 1985,
     foedeland = null,
     doedsdato = doedsdato,
-    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+    adressebeskyttelse = AdressebeskyttelseGradering.UGRADERT,
     bostedsadresse = null,
     deltBostedsadresse = null,
     kontaktadresse = null,

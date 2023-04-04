@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common.pdl
 
 import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
@@ -19,7 +19,7 @@ data class PersonDTO(
     val foedselsaar: OpplysningDTO<Int>,
     val foedeland: OpplysningDTO<String>?,
     val doedsdato: OpplysningDTO<LocalDate>?,
-    val adressebeskyttelse: OpplysningDTO<Adressebeskyttelse>?,
+    val adressebeskyttelse: OpplysningDTO<AdressebeskyttelseGradering>?,
     var bostedsadresse: List<OpplysningDTO<Adresse>>?,
     var deltBostedsadresse: List<OpplysningDTO<Adresse>>?,
     var kontaktadresse: List<OpplysningDTO<Adresse>>?,

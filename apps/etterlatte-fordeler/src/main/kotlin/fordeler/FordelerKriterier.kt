@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.aktiv
 import no.nav.etterlatte.libs.common.person.alder
@@ -120,7 +120,7 @@ class FordelerKriterier {
     }
 
     private fun harAdressebeskyttelse(person: Person): Boolean {
-        return person.adressebeskyttelse != Adressebeskyttelse.UGRADERT
+        return person.adressebeskyttelse != AdressebeskyttelseGradering.UGRADERT
     }
 
     private fun ikkeNorskStatsborger(person: Person): Boolean {

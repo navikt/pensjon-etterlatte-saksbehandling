@@ -1,6 +1,6 @@
 package no.nav.etterlatte.sak
 
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 
 interface SakServiceAdressebeskyttelse {
     fun behandlingHarAdressebeskyttelse(behandlingId: String): Boolean

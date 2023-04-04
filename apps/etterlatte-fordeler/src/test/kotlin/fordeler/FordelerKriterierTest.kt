@@ -4,15 +4,15 @@ import no.nav.etterlatte.FNR_1
 import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_5
 import no.nav.etterlatte.SVERIGE
+import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.mockNorskAdresse
@@ -155,7 +155,7 @@ internal class FordelerKriterierTest {
 
     @Test
     fun `barn som har adressebeskyttelse er ikke en gyldig kandidat`() {
-        val barn = mockPerson(adressebeskyttelse = Adressebeskyttelse.STRENGT_FORTROLIG)
+        val barn = mockPerson(adressebeskyttelse = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
@@ -436,7 +436,7 @@ internal class FordelerKriterierTest {
     @Test
     fun `avdod med adressebeskyttelse er ikke en gyldig kandidat`() {
         val barn = mockPerson()
-        val avdoed = mockPerson(adressebeskyttelse = Adressebeskyttelse.STRENGT_FORTROLIG)
+        val avdoed = mockPerson(adressebeskyttelse = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -511,7 +511,7 @@ internal class FordelerKriterierTest {
     fun `gjenlevende med adressebeskyttelse er ikke en gyldig kandidat`() {
         val barn = mockPerson()
         val avdoed = mockPerson()
-        val gjenlevende = mockPerson(adressebeskyttelse = Adressebeskyttelse.STRENGT_FORTROLIG)
+        val gjenlevende = mockPerson(adressebeskyttelse = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 

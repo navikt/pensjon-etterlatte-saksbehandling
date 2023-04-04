@@ -24,7 +24,7 @@ data class Person(
     val foedselsaar: Int,
     val foedeland: String?,
     val doedsdato: LocalDate?,
-    val adressebeskyttelse: Adressebeskyttelse?,
+    val adressebeskyttelse: AdressebeskyttelseGradering?,
     var bostedsadresse: List<Adresse>?,
     var deltBostedsadresse: List<Adresse>?,
     var kontaktadresse: List<Adresse>?,
@@ -37,13 +37,6 @@ data class Person(
     var avdoedesBarn: List<Person>?,
     var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?
 )
-
-enum class Adressebeskyttelse {
-    STRENGT_FORTROLIG_UTLAND,
-    STRENGT_FORTROLIG,
-    FORTROLIG,
-    UGRADERT
-}
 
 enum class AdresseType {
     VEGADRESSE,
@@ -194,3 +187,10 @@ fun List<Adresse>.nyeste(inkluderInaktiv: Boolean = false): Adresse? =
 
 class FamilieRelasjonManglerIdent(override val message: String, override val cause: Throwable? = null) :
     Exception(message, cause)
+
+enum class AdressebeskyttelseGradering {
+    STRENGT_FORTROLIG_UTLAND,
+    STRENGT_FORTROLIG,
+    FORTROLIG,
+    UGRADERT
+}

@@ -21,7 +21,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.S
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -68,7 +68,7 @@ internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
     FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, Adressebeskyttelse.UGRADERT.toJsonNode()),
+    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
     BOSTEDSADRESSE to Opplysning.Periodisert(
         ADRESSE_DEFAULT.map {
             PeriodisertOpplysning(
@@ -99,7 +99,7 @@ internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNod
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
     FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, Adressebeskyttelse.UGRADERT.toJsonNode()),
+    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
     BOSTEDSADRESSE to Opplysning.Periodisert(
         ADRESSE_DEFAULT.map {
             PeriodisertOpplysning(
@@ -134,7 +134,7 @@ internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
         HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()
     ),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, Adressebeskyttelse.UGRADERT.toJsonNode()),
+    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
     BOSTEDSADRESSE to Opplysning.Periodisert(
         ADRESSE_DEFAULT.map {
             PeriodisertOpplysning(
@@ -166,7 +166,7 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
     FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     DOEDSDATO to Opplysning.Konstant(randomUUID(), kilde, LocalDateTime.parse("2022-08-17T00:00:00").toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, Adressebeskyttelse.UGRADERT.toJsonNode()),
+    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
     BOSTEDSADRESSE to Opplysning.Periodisert(
         ADRESSE_DEFAULT.map {
             PeriodisertOpplysning(
@@ -208,7 +208,7 @@ internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
         GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()
     ),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, Adressebeskyttelse.UGRADERT.toJsonNode()),
+    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
     BOSTEDSADRESSE to Opplysning.Periodisert(
         ADRESSE_DEFAULT.map {
             PeriodisertOpplysning(

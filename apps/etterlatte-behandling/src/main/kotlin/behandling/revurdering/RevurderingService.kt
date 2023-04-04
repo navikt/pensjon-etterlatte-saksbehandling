@@ -9,14 +9,13 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import java.util.*
 
 interface RevurderingService {
     fun opprettRevurdering(forrigeBehandling: Behandling, revurderingAarsak: RevurderingAarsak): Revurdering
 }
 
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
-    OpprettManuellRegulering("pensjon-etterlatte.opprett-manuell-regulering");
+    OpprettManuellRevurdering("pensjon-etterlatte.opprett-manuell-revurdering");
 
     override fun key() = key
 }
@@ -24,14 +23,14 @@ enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureTog
 class RealRevurderingService(
     private val revurderingFactory: RevurderingFactory,
     private val behandlingHendelser: BehandlingHendelserKanal,
-    private val featureToggleService: FeatureToggleService,
+    private val featureToggleService: FeatureToggleService
 ) : RevurderingService {
 
     override fun opprettRevurdering(
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak
     ): Revurdering {
-        if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRegulering, false)) {
+        if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
             return inTransaction {
                 revurderingFactory.opprettManuellRevurdering(
                     forrigeBehandling.sak.id,

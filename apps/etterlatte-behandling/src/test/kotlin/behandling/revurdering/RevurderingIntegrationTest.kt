@@ -45,7 +45,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val featureToggleService = mockk<FeatureToggleService>()
         every {
             featureToggleService.isEnabled(
-                RevurderingServiceFeatureToggle.OpprettManuellRegulering,
+                RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
                 any()
             )
         } returns true
@@ -73,7 +73,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val featureToggleService = mockk<FeatureToggleService>()
         every {
             featureToggleService.isEnabled(
-                RevurderingServiceFeatureToggle.OpprettManuellRegulering,
+                RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
                 any()
             )
         } returns false

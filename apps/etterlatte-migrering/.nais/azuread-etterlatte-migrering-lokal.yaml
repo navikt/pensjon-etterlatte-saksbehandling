@@ -9,16 +9,6 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  preAuthorizedApplications:
-    - application: etterlatte-saksbehandling-ui-lokal
-      cluster: dev-gcp
-      namespace: etterlatte
-    - application: etterlatte-behandling
-      cluster: dev-gcp
-      namespace: etterlatte
-    - application: etterlatte-grunnlag
-      cluster: dev-gcp
-      namespace: etterlatte
   tenant: trygdeetaten.no
   secretName: azuread-etterlatte-migrering-lokal
   claims:

@@ -35,6 +35,7 @@ include(
     "libs:etterlatte-ktor",
     "libs:etterlatte-jobs",
     "libs:etterlatte-kafka",
+    "libs:etterlatte-pdl-model",
     "libs:testdata",
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",

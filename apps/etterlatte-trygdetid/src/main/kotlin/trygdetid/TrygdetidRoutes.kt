@@ -12,10 +12,12 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
-import java.time.LocalDate
 import java.util.*
 
 fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: BehandlingKlient) {
@@ -72,31 +74,10 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
     }
 }
 
-data class TrygdetidDto(
-    val id: UUID,
-    val beregnetTrygdetid: BeregnetTrygdetidDto?,
-    val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>
-)
-
-data class BeregnetTrygdetidDto(
-    val nasjonal: Int,
-    val fremtidig: Int,
-    val total: Int
-)
-
-data class TrygdetidGrunnlagDto(
-    val id: UUID?,
-    val type: String,
-    val bosted: String,
-    val periodeFra: LocalDate,
-    val periodeTil: LocalDate,
-    val trygdetid: Int,
-    val kilde: String
-)
-
 fun Trygdetid.toDto(): TrygdetidDto =
     TrygdetidDto(
         id = id,
+        behandlingId = behandlingId,
         beregnetTrygdetid = beregnetTrygdetid?.let {
             BeregnetTrygdetidDto(
                 nasjonal = beregnetTrygdetid.nasjonal,

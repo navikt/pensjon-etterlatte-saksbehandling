@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -56,16 +57,3 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
         }
     }
 }
-
-// TODO fellesklasser for dette
-data class TrygdetidDto(
-    val id: UUID,
-    val behandlingId: UUID,
-    val beregnetTrygdetid: BeregnetTrygdetidDto?
-)
-
-data class BeregnetTrygdetidDto(
-    val nasjonal: Int,
-    val fremtidig: Int,
-    val total: Int
-)

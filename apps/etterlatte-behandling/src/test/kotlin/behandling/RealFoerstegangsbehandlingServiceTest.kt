@@ -4,7 +4,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import kotlinx.coroutines.channels.SendChannel
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -107,7 +106,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         val hendelserMock = mockk<HendelseDao>()
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 

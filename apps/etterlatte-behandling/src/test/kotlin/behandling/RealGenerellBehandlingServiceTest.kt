@@ -7,7 +7,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
@@ -41,7 +40,7 @@ import org.junit.jupiter.api.assertThrows
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class RealGenerellBehandlingServiceTest {
     @BeforeEach
@@ -64,7 +63,7 @@ class RealGenerellBehandlingServiceTest {
 
     @Test
     fun `skal hente behandlinger`() {
-        val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlinger() } returns listOf(
                 revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING),
@@ -100,7 +99,7 @@ class RealGenerellBehandlingServiceTest {
     @Test
     fun `hent behandlingstype`() {
         val id = UUID.randomUUID()
-        val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { hentBehandlingType(id) } returns BehandlingType.REVURDERING
         }
@@ -123,7 +122,7 @@ class RealGenerellBehandlingServiceTest {
 
     @Test
     fun `skal hente behandlinger i sak`() {
-        val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(1) } returns listOf(
                 revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING),
@@ -172,7 +171,7 @@ class RealGenerellBehandlingServiceTest {
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
         }
-        val hendelseskanalMock = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>> {
+        val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
             coEvery { send(any()) } returns Unit
         }
         val manueltOpphoerMock = mockk<ManueltOpphoerService>()
@@ -208,7 +207,7 @@ class RealGenerellBehandlingServiceTest {
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
         }
-        val hendelseskanalMock = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>> {
+        val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
             coEvery { send(any()) } returns Unit
         }
         val manueltOpphoerMock = mockk<ManueltOpphoerService>()
@@ -234,7 +233,7 @@ class RealGenerellBehandlingServiceTest {
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingAvbrutt(any(), any()) } returns Unit
         }
-        val hendelseskanalMock = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>> {
+        val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
             coEvery { send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT)) } returns Unit
         }
         val manueltOpphoerMock = mockk<ManueltOpphoerService>()
@@ -396,7 +395,7 @@ class RealGenerellBehandlingServiceTest {
 
     private fun lagRealGenerellBehandlingService(
         behandlinger: BehandlingDao? = null,
-        hendelseKanal: SendChannel<Pair<UUID, BehandlingHendelseType>>? = null,
+        hendelseKanal: BehandlingHendelserKanal? = null,
         hendelseDao: HendelseDao? = null,
         manueltOpphoerService: ManueltOpphoerService? = null,
         grunnlagKlient: GrunnlagKlient? = null

@@ -7,7 +7,6 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
-import kotlinx.coroutines.channels.SendChannel
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -34,7 +33,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class RealManueltOpphoerServiceTest {
 
@@ -68,7 +67,7 @@ internal class RealManueltOpphoerServiceTest {
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingOpprettet(any()) } returns Unit
         }
-        val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val sut = RealManueltOpphoerService(
             behandlingerMock,
             hendleseskanal,
@@ -115,7 +114,7 @@ internal class RealManueltOpphoerServiceTest {
                 )
             }
         }
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>> {
+        val hendelsesKanal = mockk<BehandlingHendelserKanal> {
             coEvery { send(capture(hendelse_slot)) } returns Unit
         }
         val hendelserMock = mockk<HendelseDao> {
@@ -207,7 +206,7 @@ internal class RealManueltOpphoerServiceTest {
             }
         }
 
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>> {
+        val hendelsesKanal = mockk<BehandlingHendelserKanal> {
             coEvery { send(any()) } returns Unit
         }
         val hendelserMock = mockk<HendelseDao> {
@@ -240,7 +239,7 @@ internal class RealManueltOpphoerServiceTest {
                 manueltOpphoer(sakId = sak)
             )
         }
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelsesKanal = mockk<BehandlingHendelserKanal>()
         val hendelserMock = mockk<HendelseDao>()
         val sut = RealManueltOpphoerService(
             behandlingerMock,
@@ -279,7 +278,7 @@ internal class RealManueltOpphoerServiceTest {
             )
         }
 
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelsesKanal = mockk<BehandlingHendelserKanal>()
         val hendelserMock = mockk<HendelseDao>()
         val service = RealManueltOpphoerService(
             behandlingerMock,
@@ -293,7 +292,7 @@ internal class RealManueltOpphoerServiceTest {
 
     @Test
     fun `hentManueltOpphoerOgAlleIverksatteBehandlingerISak svarer med null hvis ingen manuelt opphør med id finnes`() {
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelsesKanal = mockk<BehandlingHendelserKanal>()
         val hendelserMock = mockk<HendelseDao>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { hentBehandling(any()) } returns null
@@ -312,7 +311,7 @@ internal class RealManueltOpphoerServiceTest {
         val manueltOpphoerId = UUID.randomUUID()
         val sakId = 1L
         val soeker = "12312312312"
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelsesKanal = mockk<BehandlingHendelserKanal>()
         val hendelserMock = mockk<HendelseDao>()
         val opphoer = manueltOpphoer(
             sakId = sakId,

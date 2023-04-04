@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.regulering
 
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
+import no.nav.etterlatte.behandling.BehandlingHendelserKanal
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
@@ -12,7 +12,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelse
-import java.util.UUID
+import java.util.*
 
 interface RevurderingService {
     fun hentRevurdering(behandling: UUID): Revurdering?
@@ -29,7 +29,7 @@ interface RevurderingService {
 class RealRevurderingService(
     private val behandlinger: BehandlingDao,
     private val revurderingFactory: RevurderingFactory,
-    private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>
+    private val behandlingHendelser: BehandlingHendelserKanal
 ) : RevurderingService {
 
     override fun hentRevurderingerISak(sakId: Long): List<Revurdering> {

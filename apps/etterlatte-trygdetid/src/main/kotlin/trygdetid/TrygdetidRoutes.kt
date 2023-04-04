@@ -11,10 +11,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -36,10 +38,11 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
             }
         }
 
-        post {
+        post("{$SAKID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter trygdetid for behandling $behandlingsId")
-                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId, bruker)
+                val sakId = call.parameters[SAKID_CALL_PARAMETER]!!.toLong()
+                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId, sakId, bruker)
                 call.respond(trygdetid.toDto())
             }
         }
@@ -89,11 +92,14 @@ fun Trygdetid.toDto(): TrygdetidDto =
         opplysninger = this.opplysninger.toDto()
     )
 
-private fun GrunnlagOpplysninger.toDto(): GrunnlagOpplysningerDto =
+private fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
     GrunnlagOpplysningerDto(
-        avdoedDoedsdato = this.avdoedDoedsdato,
-        avdoedFoedselsdato = this.avdoedFoedselsdato
+        avdoedFoedselsdato = this.finnDato(Opplysningstype.FOEDSELSDATO),
+        avdoedDoedsdato = this.finnDato(Opplysningstype.DOEDSDATO)
     )
+
+private fun List<Opplysningsgrunnlag>.finnDato(type: Opplysningstype): LocalDate? =
+    this.find { opplysning -> opplysning.type == type }?.opplysning?.toLocalDate()
 
 private fun BeregnetTrygdetidDto.toBeregnetTrygdetid(): BeregnetTrygdetid =
     BeregnetTrygdetid(

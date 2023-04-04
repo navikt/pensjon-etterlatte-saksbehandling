@@ -2,28 +2,36 @@ import React, { useEffect, useState } from 'react'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { hentTrygdetid, ITrygdetid, ITrygdetidGrunnlagType, opprettTrygdetid } from '~shared/api/trygdetid'
-import { useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBeregnet'
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
+import { useAppSelector } from '~store/Store'
+import { formaterStringDato } from '~utils/formattering'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 export const Trygdetid = () => {
-  const { behandlingId } = useParams()
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const [trygdetidStatus, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
 
   useEffect(() => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-    fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
+    if (!behandling) throw new Error('Mangler behandling')
+    fetchTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
       if (trygdetid == null) {
-        requestOpprettTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
-          setTrygdetid(trygdetid)
-        })
+        requestOpprettTrygdetid(
+          {
+            behandlingsId: behandling.id,
+            sakId: behandling.sak.toString(),
+          },
+          (trygdetid: ITrygdetid) => {
+            setTrygdetid(trygdetid)
+          }
+        )
       } else {
         setTrygdetid(trygdetid)
       }
@@ -50,10 +58,13 @@ export const Trygdetid = () => {
 
       {trygdetid && (
         <>
-          <Opplysninger>
-            <li>{`Fødselsdato: ${trygdetid.opplysninger.avdoedFoedselsdato}`}</li>
-            <li>{`Dødsdato: ${trygdetid.opplysninger.avdoedDoedsdato}`}</li>
-          </Opplysninger>
+          <InfoWrapper>
+            <Info
+              label="Fødselsdato"
+              tekst={formaterStringDato(trygdetid.opplysninger.avdoedFoedselsdato.toString())}
+            />
+            <Info label="Dødsdato" tekst={formaterStringDato(trygdetid.opplysninger.avdoedDoedsdato.toString())} />
+          </InfoWrapper>
           <TrygdetidGrunnlag
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
@@ -77,6 +88,9 @@ const TrygdetidWrapper = styled.div`
   max-width: 52em;
 `
 
-const Opplysninger = styled.ul`
-  padding: 2em 0 2em 1em;
+export const InfoWrapper = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 2em 0 2em 0;
 `

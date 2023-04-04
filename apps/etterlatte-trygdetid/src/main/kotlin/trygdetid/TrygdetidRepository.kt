@@ -1,10 +1,12 @@
 package no.nav.etterlatte.trygdetid
 
 import kotliquery.Row
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import java.time.LocalDate
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.toJsonNode
 import java.util.*
 import javax.sql.DataSource
 
@@ -13,23 +15,22 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     fun hentTrygdetid(behandlingId: UUID): Trygdetid? =
         using(sessionOf(dataSource)) { session ->
             queryOf(
-                // TODO Legg til datoer..
                 statement = """
                     SELECT id, behandling_id, trygdetid_nasjonal, trygdetid_fremtidig, trygdetid_total 
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                 """.trimIndent(),
                 paramMap = mapOf("behandlingId" to behandlingId)
-            )
-                .let { query ->
-                    session.run(
-                        query.map { row ->
-                            val trygdetidId = row.uuid("id")
-                            val trygdetidGrunnlag = hentTrygdetidGrunnlag(trygdetidId)
-                            row.toTrygdetid(trygdetidGrunnlag)
-                        }.asSingle
-                    )
-                }
+            ).let { query ->
+                session.run(
+                    query.map { row ->
+                        val trygdetidId = row.uuid("id")
+                        val trygdetidGrunnlag = hentTrygdetidGrunnlag(trygdetidId)
+                        val opplysninger = hentGrunnlagOpplysninger(trygdetidId)
+                        row.toTrygdetid(trygdetidGrunnlag, opplysninger)
+                    }.asSingle
+                )
+            }
         }
 
     fun hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlagId: UUID): TrygdetidGrunnlag? =
@@ -41,30 +42,51 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     WHERE id = :trygdetidGrunnlagId
                 """.trimIndent(),
                 paramMap = mapOf("trygdetidGrunnlagId" to trygdetidGrunnlagId)
-            )
-                .let { query ->
-                    session.run(
-                        query.map { row -> row.toTrygdetidGrunnlag() }.asSingle
-                    )
-                }
+            ).let { query ->
+                session.run(
+                    query.map { row -> row.toTrygdetidGrunnlag() }.asSingle
+                )
+            }
         }
 
-    fun opprettTrygdetid(behandlingId: UUID): Trygdetid =
+    fun opprettTrygdetid(behandlingId: UUID, opplysninger: Map<Opplysningstype, String?>): Trygdetid =
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
-                queryOf(
-                    // Legg til avdød fødsels- og dødsdato
-                    statement = """
-                        INSERT INTO trygdetid(id, behandling_id) VALUES(:id, :behandlingId)
-                    """.trimIndent(),
-                    paramMap = mapOf(
-                        "id" to UUID.randomUUID(),
-                        "behandlingId" to behandlingId
-                    )
-                )
-                    .let { query -> tx.update(query) }
+                val trygdetidId = UUID.randomUUID()
+                opprettTrygdetid(behandlingId, trygdetidId, tx)
+                lagreOpplysningsgrunnlag(trygdetidId, opplysninger, tx)
             }
         }.let { hentTrygdtidNotNull(behandlingId) }
+
+    private fun opprettTrygdetid(behandlingId: UUID, trygdetidId: UUID, tx: TransactionalSession) =
+        queryOf(
+            statement = """
+                        INSERT INTO trygdetid(id, behandling_id) VALUES(:id, :behandlingId)
+            """.trimIndent(),
+            paramMap = mapOf(
+                "id" to trygdetidId,
+                "behandlingId" to behandlingId
+            )
+        ).let { query -> tx.update(query) }
+
+    private fun lagreOpplysningsgrunnlag(
+        trygdetidId: UUID?,
+        opplysninger: Map<Opplysningstype, String?>,
+        tx: TransactionalSession
+    ) = opplysninger.forEach { (type, opplysning) ->
+        queryOf(
+            statement = """
+                INSERT INTO opplysningsgrunnlag(id, trygdetid_id, type, opplysning)
+                 VALUES(:id, :trygdetidId, :type, :opplysning::JSONB)
+            """.trimIndent(),
+            paramMap = mapOf(
+                "id" to UUID.randomUUID(),
+                "trygdetidId" to trygdetidId,
+                "type" to type.name,
+                "opplysning" to opplysning
+            )
+        ).let { query -> tx.update(query) }
+    }
 
     fun opprettTrygdetidGrunnlag(behandlingId: UUID, trygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid =
         using(sessionOf(dataSource)) { session ->
@@ -94,8 +116,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         "trygdetid" to trygdetidGrunnlag.trygdetid,
                         "kilde" to trygdetidGrunnlag.kilde
                     )
-                )
-                    .let { query -> tx.update(query) }
+                ).let { query -> tx.update(query) }
             }
         }.let { hentTrygdtidNotNull(behandlingId) }
 
@@ -120,8 +141,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         "trygdetid" to trygdetidGrunnlag.trygdetid,
                         "kilde" to trygdetidGrunnlag.kilde
                     )
-                )
-                    .let { query -> tx.update(query) }
+                ).let { query -> tx.update(query) }
             }
         }.let { hentTrygdtidNotNull(behandlingId) }
 
@@ -141,8 +161,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         "trygdetidFremtidig" to beregnetTrygdetid.fremtidig,
                         "trygdetidTotal" to beregnetTrygdetid.total
                     )
-                )
-                    .let { query -> tx.update(query) }
+                ).let { query -> tx.update(query) }
             }
         }.let { hentTrygdtidNotNull(behandlingId) }
 
@@ -155,19 +174,34 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     WHERE trygdetid_id = :trygdetidId
                 """.trimIndent(),
                 paramMap = mapOf("trygdetidId" to trygdetidId)
-            )
-                .let { query ->
-                    session.run(
-                        query.map { row -> row.toTrygdetidGrunnlag() }.asList
-                    )
-                }
+            ).let { query ->
+                session.run(
+                    query.map { row -> row.toTrygdetidGrunnlag() }.asList
+                )
+            }
+        }
+
+    private fun hentGrunnlagOpplysninger(trygdetidId: UUID): List<Opplysningsgrunnlag> =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement = """
+                SELECT id, trygdetid_id, type, opplysning
+                FROM opplysningsgrunnlag
+                WHERE trygdetid_id = :trygdetidId
+                """.trimIndent(),
+                paramMap = mapOf("trygdetidId" to trygdetidId)
+            ).let { query ->
+                session.run(
+                    query.map { row -> row.toOpplysningsgrunnlag() }.asList
+                )
+            }
         }
 
     private fun hentTrygdtidNotNull(behandlingsId: UUID) =
         hentTrygdetid(behandlingsId)
             ?: throw Exception("Fant ikke trygdetid for $behandlingsId")
 
-    private fun Row.toTrygdetid(trygdetidGrunnlag: List<TrygdetidGrunnlag>) =
+    private fun Row.toTrygdetid(trygdetidGrunnlag: List<TrygdetidGrunnlag>, opplysninger: List<Opplysningsgrunnlag>) =
         Trygdetid(
             id = uuid("id"),
             behandlingId = uuid("behandling_id"),
@@ -179,7 +213,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 )
             },
             trygdetidGrunnlag = trygdetidGrunnlag,
-            opplysninger = GrunnlagOpplysninger(LocalDate.now(), LocalDate.now()) // TODO erstatt hardkoding
+            opplysninger = opplysninger
         )
 
     private fun Row.toTrygdetidGrunnlag() =
@@ -194,4 +228,12 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             trygdetid = int("trygdetid"),
             kilde = string("kilde")
         )
+
+    private fun Row.toOpplysningsgrunnlag(): Opplysningsgrunnlag {
+        return Opplysningsgrunnlag(
+            id = uuid("id"),
+            type = Opplysningstype.valueOf(string("type")),
+            opplysning = string("opplysning").toJsonNode()
+        )
+    }
 }

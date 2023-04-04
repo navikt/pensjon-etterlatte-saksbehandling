@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
+import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -17,5 +18,6 @@ class ApplicationContext {
         password = properties.dbPassword
     )
     val behandlingKlient = BehandlingKlient(config, httpClient())
-    val trygdetidService = TrygdetidService(TrygdetidRepository(dataSource), behandlingKlient)
+    val grunnlagKlient = GrunnlagKlient(config, httpClient())
+    val trygdetidService = TrygdetidService(TrygdetidRepository(dataSource), behandlingKlient, grunnlagKlient)
 }

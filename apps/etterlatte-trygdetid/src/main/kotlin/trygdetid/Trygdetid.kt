@@ -1,5 +1,8 @@
 package no.nav.etterlatte.trygdetid
 
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import java.time.LocalDate
 import java.util.*
 
@@ -8,7 +11,7 @@ data class Trygdetid(
     val behandlingId: UUID,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag>,
     val beregnetTrygdetid: BeregnetTrygdetid?,
-    val opplysninger: GrunnlagOpplysninger
+    val opplysninger: List<Opplysningsgrunnlag>
 )
 
 data class BeregnetTrygdetid(
@@ -17,11 +20,13 @@ data class BeregnetTrygdetid(
     val total: Int
 )
 
-data class GrunnlagOpplysninger(
-    // TODO Mer utfyllende om opplysingene?
-    val avdoedDoedsdato: LocalDate,
-    val avdoedFoedselsdato: LocalDate
+data class Opplysningsgrunnlag(
+    val id: UUID,
+    val type: Opplysningstype,
+    val opplysning: JsonNode
 )
+
+fun JsonNode.toLocalDate(): LocalDate = objectMapper.readValue(this.asText(), LocalDate::class.java)
 
 data class TrygdetidGrunnlag(
     val id: UUID,

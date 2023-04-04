@@ -2,7 +2,6 @@ package trygdetid
 
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetid
-import no.nav.etterlatte.trygdetid.GrunnlagOpplysninger
 import no.nav.etterlatte.trygdetid.Trygdetid
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
@@ -18,7 +17,7 @@ fun trygdetid(behandlingId: UUID = randomUUID(), beregnetTrygdetid: BeregnetTryg
     behandlingId = behandlingId,
     trygdetidGrunnlag = emptyList(),
     beregnetTrygdetid = beregnetTrygdetid,
-    opplysninger = GrunnlagOpplysninger(LocalDate.now(), LocalDate.now())
+    opplysninger = emptyList()
 )
 
 fun trygdetidGrunnlag(trygdetidId: UUID) = TrygdetidGrunnlag(

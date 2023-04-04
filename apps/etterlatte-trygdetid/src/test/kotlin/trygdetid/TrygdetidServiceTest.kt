@@ -10,9 +10,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
+import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,7 +25,8 @@ internal class TrygdetidServiceTest {
 
     private val repository: TrygdetidRepository = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
-    private val service = TrygdetidService(repository, behandlingKlient)
+    private val grunnlagKlient: GrunnlagKlient = mockk()
+    private val service = TrygdetidService(repository, behandlingKlient, grunnlagKlient)
 
     @BeforeEach
     fun beforeEach() {
@@ -63,28 +66,33 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal opprette trygdetid`() {
         val behandlingId = randomUUID()
+        val sakId = 123L
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         every { repository.hentTrygdetid(any()) } returns null
-        every { repository.opprettTrygdetid(any()) } returns trygdetid(behandlingId)
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        every { repository.opprettTrygdetid(any(), any()) } returns trygdetid(behandlingId)
 
         runBlocking {
-            service.opprettTrygdetid(behandlingId, saksbehandler)
+            service.opprettTrygdetid(behandlingId, sakId, saksbehandler)
         }
 
         coVerify(exactly = 1) {
             behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
             repository.hentTrygdetid(behandlingId)
-            repository.opprettTrygdetid(behandlingId)
+            grunnlagKlient.hentGrunnlag(sakId, saksbehandler)
+            repository.opprettTrygdetid(behandlingId, any())
         }
     }
 
     @Test
     fun `skal feile ved opprettelse av trygdetid naar det allerede finnes for behandling`() {
         val behandlingId = randomUUID()
+        val sakId = 123L
         every { repository.hentTrygdetid(any()) } returns trygdetid(behandlingId)
 
         runBlocking {
             assertThrows<IllegalArgumentException> {
-                service.opprettTrygdetid(behandlingId, saksbehandler)
+                service.opprettTrygdetid(behandlingId, sakId, saksbehandler)
             }
         }
 
@@ -97,11 +105,12 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal feile ved opprettelse av trygdetid dersom behandling er i feil tilstand`() {
         val behandlingId = randomUUID()
+        val sakId = 123L
         coEvery { behandlingKlient.kanBeregnes(any(), any()) } returns false
 
         runBlocking {
             assertThrows<Exception> {
-                service.opprettTrygdetid(behandlingId, saksbehandler)
+                service.opprettTrygdetid(behandlingId, sakId, saksbehandler)
             }
         }
 

@@ -50,6 +50,10 @@ export const Trygdetid = () => {
 
       {trygdetid && (
         <>
+          <Opplysninger>
+            <li>{`Fødselsdato: ${trygdetid.opplysninger.avdoedFoedselsdato}`}</li>
+            <li>{`Dødsdato: ${trygdetid.opplysninger.avdoedDoedsdato}`}</li>
+          </Opplysninger>
           <TrygdetidGrunnlag
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
@@ -71,4 +75,8 @@ export const Trygdetid = () => {
 const TrygdetidWrapper = styled.div`
   padding: 0 4em;
   max-width: 52em;
+`
+
+const Opplysninger = styled.ul`
+  padding: 2em 0 2em 1em;
 `

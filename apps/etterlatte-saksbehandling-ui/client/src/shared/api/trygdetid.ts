@@ -23,6 +23,13 @@ export interface ITrygdetid {
   behandlingId: string
   beregnetTrygdetid?: IBeregnetTrygdetid
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
+
+  opplysninger: IGrunnlagOpplysninger
+}
+
+export interface IGrunnlagOpplysninger {
+  avdoedDoedsdato: Date
+  avdoedFoedselsdato: Date
 }
 
 export interface IBeregnetTrygdetid {

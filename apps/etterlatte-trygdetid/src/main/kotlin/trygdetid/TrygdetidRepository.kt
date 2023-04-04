@@ -4,6 +4,7 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
@@ -12,6 +13,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     fun hentTrygdetid(behandlingId: UUID): Trygdetid? =
         using(sessionOf(dataSource)) { session ->
             queryOf(
+                // TODO Legg til datoer..
                 statement = """
                     SELECT id, behandling_id, trygdetid_nasjonal, trygdetid_fremtidig, trygdetid_total 
                     FROM trygdetid 
@@ -51,6 +53,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 queryOf(
+                    // Legg til avdød fødsels- og dødsdato
                     statement = """
                         INSERT INTO trygdetid(id, behandling_id) VALUES(:id, :behandlingId)
                     """.trimIndent(),
@@ -175,7 +178,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     total = int("trygdetid_total")
                 )
             },
-            trygdetidGrunnlag = trygdetidGrunnlag
+            trygdetidGrunnlag = trygdetidGrunnlag,
+            opplysninger = GrunnlagOpplysninger(LocalDate.now(), LocalDate.now()) // TODO erstatt hardkoding
         )
 
     private fun Row.toTrygdetidGrunnlag() =

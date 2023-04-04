@@ -85,7 +85,14 @@ fun Trygdetid.toDto(): TrygdetidDto =
                 total = beregnetTrygdetid.total
             )
         },
-        trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() }
+        trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() },
+        opplysninger = this.opplysninger.toDto()
+    )
+
+private fun GrunnlagOpplysninger.toDto(): GrunnlagOpplysningerDto =
+    GrunnlagOpplysningerDto(
+        avdoedDoedsdato = this.avdoedDoedsdato,
+        avdoedFoedselsdato = this.avdoedFoedselsdato
     )
 
 private fun BeregnetTrygdetidDto.toBeregnetTrygdetid(): BeregnetTrygdetid =

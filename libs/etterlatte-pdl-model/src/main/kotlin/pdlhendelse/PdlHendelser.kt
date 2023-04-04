@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.pdlhendelse
 
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import java.time.LocalDate
 
 sealed interface PdlHendelse
@@ -41,11 +42,4 @@ data class Adressebeskyttelse(
 
 enum class Endringstype {
     OPPRETTET, KORRIGERT, ANNULLERT, OPPHOERT
-}
-
-enum class AdressebeskyttelseGradering {
-    STRENGT_FORTROLIG_UTLAND,
-    STRENGT_FORTROLIG,
-    FORTROLIG,
-    UGRADERT
 }

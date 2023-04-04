@@ -3,7 +3,7 @@ package no.nav.etterlatte.pdl.mapper
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle

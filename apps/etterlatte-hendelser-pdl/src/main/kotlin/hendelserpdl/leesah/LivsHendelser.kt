@@ -3,12 +3,12 @@ package no.nav.etterlatte.hendelserpdl.leesah
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

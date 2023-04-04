@@ -2,7 +2,7 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.Assertions

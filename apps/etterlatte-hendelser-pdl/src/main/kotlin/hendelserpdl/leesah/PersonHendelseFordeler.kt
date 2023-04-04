@@ -1,8 +1,8 @@
 package no.nav.etterlatte.hendelserpdl.leesah
 
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.verge.VergemaalEllerFremtidsfullmakt

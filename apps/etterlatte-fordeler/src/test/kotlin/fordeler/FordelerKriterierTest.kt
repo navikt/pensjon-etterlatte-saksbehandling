@@ -5,8 +5,8 @@ import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_5
 import no.nav.etterlatte.SVERIGE
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
-import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge

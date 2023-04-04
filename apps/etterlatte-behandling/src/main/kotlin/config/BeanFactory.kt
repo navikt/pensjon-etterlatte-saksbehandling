@@ -209,7 +209,11 @@ abstract class CommonFactory : BeanFactory {
     override fun omregningService(): OmregningService =
         OmregningService(behandlingService = generellBehandlingService(), revurderingService = revurderingService())
 
-    override fun migreringService(): MigreringService = MigreringService()
+    override fun migreringService(): MigreringService = MigreringService(
+        sakService(),
+        foerstegangsbehandlingFactory,
+        behandlingHendelser().nyHendelse
+    )
 }
 
 class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory() {

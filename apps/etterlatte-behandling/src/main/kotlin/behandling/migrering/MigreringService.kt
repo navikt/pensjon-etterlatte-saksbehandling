@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
+import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.sak.SakService
@@ -15,13 +16,15 @@ import java.util.*
 class MigreringService(
     private val sakService: SakService,
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
-    private val behandlingsHendelser: BehandlingHendelserKanal
+    private val behandlingsHendelser: BehandlingHendelserKanal,
+    private val migreringRepository: MigreringRepository
 ) {
     fun migrer(request: MigreringRequest): Behandling {
         val behandling = inTransaction {
             opprettSakOgBehandling(request)
         }
         runBlocking { sendHendelse(behandling.id) }
+        migreringRepository.lagreKoplingTilPesyssaka(pesysSakId = request.pesysId, sakId = behandling.sak.id)
         return behandling
     }
 

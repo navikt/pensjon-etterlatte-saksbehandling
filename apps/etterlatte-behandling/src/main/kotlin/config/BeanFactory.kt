@@ -24,6 +24,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
+import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
@@ -41,6 +42,7 @@ import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -212,7 +214,8 @@ abstract class CommonFactory : BeanFactory {
     override fun migreringService(): MigreringService = MigreringService(
         sakService(),
         foerstegangsbehandlingFactory,
-        behandlingHendelser().nyHendelse
+        behandlingHendelser().nyHendelse,
+        MigreringRepository(KotliqueryRepositoryWrapper(dataSource()))
     )
 }
 

@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.person.pdl.leesah.Personhendelse
+import no.nav.person.pdl.leesah.verge.VergemaalEllerFremtidsfullmakt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
@@ -21,12 +22,15 @@ class PersonHendelseFordeler(
             LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(
                 personhendelse
             )
+
             LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(
                 personhendelse
             )
+
             LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(
                 personhendelse
             )
+
             LeesahOpplysningstyper.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1.toString() -> haandterVergemaal(personhendelse)
 
             else -> log.info("Så en hendelse av type ${personhendelse.opplysningstype} som vi ikke håndterer")
@@ -35,7 +39,8 @@ class PersonHendelseFordeler(
 
     private suspend fun haandterVergemaal(personhendelse: Personhendelse) {
         val hendelseType = "Vergemål"
-        val vergemaalEllerFremtidsfullmakt = personhendelse.vergemaalEllerFremtidsfullmakt
+        val vergemaalEllerFremtidsfullmakt: VergemaalEllerFremtidsfullmakt? =
+            personhendelse.vergemaalEllerFremtidsfullmakt
         if (vergemaalEllerFremtidsfullmakt?.type in
             listOf(
                 "ensligMindreaarigAsylsoeker",
@@ -56,6 +61,7 @@ class PersonHendelseFordeler(
                         )
                         return
                     }
+
                     is PdlIdentifikator.FolkeregisterIdent -> {
                         val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
                         personhendelse.vergemaalEllerFremtidsfullmakt.vergeEllerFullmektig.let {
@@ -72,7 +78,7 @@ class PersonHendelseFordeler(
                 loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
             }
         } else {
-            log.info("Ignorerer vergemaalEllerFremtidsfullmakt av typen ${vergemaalEllerFremtidsfullmakt.type}")
+            log.info("Ignorerer vergemaalEllerFremtidsfullmakt av typen ${vergemaalEllerFremtidsfullmakt?.type}")
         }
     }
 

@@ -107,7 +107,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             )
         )
 
-        logger.info("Henter geografisk tilknyttning for fnr = $ident fra PDL")
+        logger.info("Henter geografisk tilknytning for fnr = $ident fra PDL")
 
         return retry<PdlGeografiskTilknytningResponse> {
             httpClient.post(apiUrl) {

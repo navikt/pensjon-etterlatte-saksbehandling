@@ -8,6 +8,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.sak.SakService
 import rapidsandrivers.migrering.MigreringRequest
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class MigreringService(
@@ -26,12 +27,12 @@ class MigreringService(
     private fun opprettSakOgBehandling(request: MigreringRequest): UUID =
         foerstegangsbehandlingFactory.opprettFoerstegangsbehandling(
             finnEllerOpprettSak(request).id,
-            request.mottattDato,
+            request.mottattDato.format(DateTimeFormatter.ISO_DATE),
             request.persongalleri
         ).lagretBehandling.id
 
     private fun finnEllerOpprettSak(request: MigreringRequest) =
-        sakService.finnEllerOpprettSak(request.fnr, SakType.BARNEPENSJON)
+        sakService.finnEllerOpprettSak(request.fnr.value, SakType.BARNEPENSJON)
 
     private suspend fun sendHendelse(behandlingId: UUID) =
         behandlingsHendelser.send(behandlingId to BehandlingHendelseType.OPPRETTET)

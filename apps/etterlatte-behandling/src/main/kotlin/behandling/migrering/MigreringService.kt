@@ -36,7 +36,7 @@ class MigreringService(
         ).lagretBehandling
 
     private fun finnEllerOpprettSak(request: MigreringRequest) =
-        sakService.finnEllerOpprettSak(request.fnr.value, SakType.BARNEPENSJON)
+        sakService.finnEllerOpprettSak(request.fnr.value, SakType.BARNEPENSJON, request.enhet.nr)
 
     private suspend fun sendHendelse(behandlingId: UUID) =
         behandlingsHendelser.send(behandlingId to BehandlingHendelseType.OPPRETTET)

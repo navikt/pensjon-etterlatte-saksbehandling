@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import rapidsandrivers.migrering.Enhet
 import rapidsandrivers.migrering.MigreringRequest
 import rapidsandrivers.migrering.PesysId
 import java.time.LocalDateTime
@@ -49,6 +50,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
             val fnr = Folkeregisteridentifikator.of("08071272487")
             val request = MigreringRequest(
                 pesysId = PesysId("1"),
+                enhet = Enhet("4808"),
                 fnr = fnr,
                 mottattDato = LocalDateTime.now(),
                 persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList())

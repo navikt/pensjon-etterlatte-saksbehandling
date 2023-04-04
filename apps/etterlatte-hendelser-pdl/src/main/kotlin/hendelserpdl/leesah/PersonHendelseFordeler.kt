@@ -72,7 +72,7 @@ class PersonHendelseFordeler(
                 loggFeilVedHaandtering(personhendelse.hendelseId, hendelseType, e)
             }
         } else {
-            log.info("Ignorerer vergemaalEllerFremtidsfullmakt av typen ${vergemaalEllerFremtidsfullmakt.type}")
+            log.info("Ignorerer vergemaalEllerFremtidsfullmakt av typen ${vergemaalEllerFremtidsfullmakt?.type}")
         }
     }
 

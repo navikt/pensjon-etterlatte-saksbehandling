@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.Context
@@ -33,7 +32,7 @@ class BehandlingsHendelser(
     private val datasource: DataSource
 ) {
     private val kanal: Channel<Pair<UUID, BehandlingHendelseType>> = Channel(Channel.UNLIMITED)
-    val nyHendelse: SendChannel<Pair<UUID, BehandlingHendelseType>> get() = kanal
+    val nyHendelse: BehandlingHendelserKanal get() = BehandlingHendelserKanal(kanal)
 
     private val logger: Logger = LoggerFactory.getLogger(BehandlingsHendelser::class.java)
 

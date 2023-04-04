@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.foerstegangsbehandling
 
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
+import no.nav.etterlatte.behandling.BehandlingHendelserKanal
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 interface FoerstegangsbehandlingService {
     fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling?
@@ -62,7 +62,7 @@ interface FoerstegangsbehandlingService {
 class RealFoerstegangsbehandlingService(
     private val behandlinger: BehandlingDao,
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
-    private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>,
+    private val behandlingHendelser: BehandlingHendelserKanal,
     private val klokke: Clock = utcKlokke()
 ) : FoerstegangsbehandlingService {
     private val logger = LoggerFactory.getLogger(RealFoerstegangsbehandlingService::class.java)

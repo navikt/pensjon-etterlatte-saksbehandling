@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.manueltopphoer
 
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
+import no.nav.etterlatte.behandling.BehandlingHendelserKanal
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
@@ -45,7 +45,7 @@ interface ManueltOpphoerService {
 
 class RealManueltOpphoerService(
     private val behandlinger: BehandlingDao,
-    private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>,
+    private val behandlingHendelser: BehandlingHendelserKanal,
     private val hendelser: HendelseDao
 ) : ManueltOpphoerService {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)

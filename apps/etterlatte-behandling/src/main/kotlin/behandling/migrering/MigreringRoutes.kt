@@ -15,7 +15,7 @@ fun Route.migreringRoutes(
     route("/migrering") {
         post {
             val request = call.receive<MigreringRequest>()
-            val behandlingId = migreringService.migrer()
+            val behandlingId = migreringService.migrer(request)
             call.respond(MigreringResponse(behandlingId))
         }
     }

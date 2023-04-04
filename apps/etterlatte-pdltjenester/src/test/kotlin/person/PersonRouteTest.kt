@@ -253,7 +253,7 @@ class PersonRouteTest {
         const val PERSON_ENDEPUNKT = "/person"
         const val PERSON_ENDEPUNKT_V2 = "/person/v2"
         const val PDLIDENT_ENDEPUNKT = "/pdlident"
-        const val GEOGRAFISKTILKNYTNING_ENDEPUNKT = "/geografisktilknyttning"
+        const val GEOGRAFISKTILKNYTNING_ENDEPUNKT = "/geografisktilknytning"
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

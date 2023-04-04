@@ -36,7 +36,7 @@ class PersonHendelseFordeler(
     private suspend fun haandterVergemaal(personhendelse: Personhendelse) {
         val hendelseType = "Vergemål"
         val vergemaalEllerFremtidsfullmakt = personhendelse.vergemaalEllerFremtidsfullmakt
-        if (vergemaalEllerFremtidsfullmakt.type in
+        if (vergemaalEllerFremtidsfullmakt?.type in
             listOf(
                 "ensligMindreaarigAsylsoeker",
                 "ensligMindreaarigFlyktning",

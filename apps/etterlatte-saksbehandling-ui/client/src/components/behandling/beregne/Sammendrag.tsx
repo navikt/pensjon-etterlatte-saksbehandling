@@ -47,7 +47,7 @@ export const Sammendrag = ({ beregning, soeker, soesken }: Props) => {
                   }[beregning.type]
                 }
               </Table.DataCell>
-              <Table.DataCell>40 år</Table.DataCell>
+              <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
                 {beregningsperiode.soeskenFlokk && soeker ? (

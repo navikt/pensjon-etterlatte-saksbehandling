@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-sporingslogg"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:etterlatte-pdl-model"))
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)

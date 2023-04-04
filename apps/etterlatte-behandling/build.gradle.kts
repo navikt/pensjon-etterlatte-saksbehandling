@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:etterlatte-jobs"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
+    implementation(project(":libs:etterlatte-pdl-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercore)

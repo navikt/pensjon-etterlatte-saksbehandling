@@ -12,6 +12,8 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.config.HoconApplicationConfig
+import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
@@ -325,5 +327,9 @@ class TestBeanFactory(
 
     override fun navAnsattKlient(): NavAnsattKlient {
         return NavAnsattKlientTest()
+    }
+
+    override fun enhetService(): EnhetService {
+        return EnhetServiceImpl(navAnsattKlient())
     }
 }

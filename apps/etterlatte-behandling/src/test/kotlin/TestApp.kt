@@ -8,6 +8,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
+import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -145,5 +147,9 @@ class LocalAppBeanFactory(
 
     override fun navAnsattKlient(): NavAnsattKlient {
         return NavAnsattKlientTest()
+    }
+
+    override fun enhetService(): EnhetService {
+        return EnhetServiceImpl(navAnsattKlient())
     }
 }

@@ -31,7 +31,7 @@ class OppgaveDao(private val connection: () -> Connection) {
         with(connection()) {
             val stmt = prepareStatement(
                 """
-                |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, status, behandling_opprettet,
+                |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, enhet, status, behandling_opprettet,
                 |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE ((adressebeskyttelse = ?) OR (adressebeskyttelse = ?)) 
@@ -56,7 +56,8 @@ class OppgaveDao(private val connection: () -> Connection) {
                     fnr = Folkeregisteridentifikator.of(getString("fnr")),
                     registrertDato = mottattDato,
                     behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
-                    antallSoesken = antallSoesken(getString("soesken"))
+                    antallSoesken = antallSoesken(getString("soesken")),
+                    enhet = getString("enhet").takeIf { !wasNull() }
                 )
             }
         }
@@ -68,7 +69,7 @@ class OppgaveDao(private val connection: () -> Connection) {
         with(connection()) {
             val stmt = prepareStatement(
                 """
-                |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, status, behandling_opprettet,
+                |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, enhet, status, behandling_opprettet,
                 |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
@@ -94,7 +95,8 @@ class OppgaveDao(private val connection: () -> Connection) {
                     fnr = Folkeregisteridentifikator.of(getString("fnr")),
                     registrertDato = mottattDato,
                     behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
-                    antallSoesken = antallSoesken(getString("soesken"))
+                    antallSoesken = antallSoesken(getString("soesken")),
+                    enhet = getString("enhet").takeIf { !wasNull() }
                 )
             }.also {
                 logger.info(

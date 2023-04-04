@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -124,6 +125,18 @@ internal class OppgaveDaoTest {
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(listOf(BehandlingStatus.OPPRETTET))
         assertEquals(1, oppgaver.size)
         assertEquals(manuel.id, (oppgaver[0] as Oppgave.BehandlingOppgave).behandlingId)
+    }
+
+    @Test
+    fun `enhet er tilgjengelig hvis det er tilgjengelig paa sak`() {
+        val fnr = TRIVIELL_MIDTPUNKT.value
+        val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.DEFAULT.enhetNr)
+        behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, fnr, sak.id))
+        val alleBehandlingsStatuser = BehandlingStatus.values().asList()
+        val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
+        assertEquals(1, oppgaver.size)
+        val oppgave = oppgaver.first() as Oppgave.BehandlingOppgave
+        assertEquals(Enheter.DEFAULT.enhetNr, oppgave.enhet)
     }
 
     @Test

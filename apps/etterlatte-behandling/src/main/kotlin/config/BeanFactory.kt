@@ -7,6 +7,8 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelser
+import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.RealGenerellBehandlingService
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
@@ -91,6 +93,7 @@ interface BeanFactory {
     fun featureToggleService(): FeatureToggleService
     fun norg2HttpClient(): Norg2Klient
     fun navAnsattKlient(): NavAnsattKlient
+    fun enhetService(): EnhetService
 }
 
 abstract class CommonFactory : BeanFactory {
@@ -115,7 +118,7 @@ abstract class CommonFactory : BeanFactory {
     }
 
     private val oppgaveService: OppgaveService by lazy {
-        OppgaveServiceImpl(oppgaveDao())
+        OppgaveServiceImpl(oppgaveDao(), featureToggleService())
     }
 
     private val oppgaveDao: OppgaveDao by lazy {
@@ -307,5 +310,9 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
             ),
             env.getValue("NAVANSATT_URL")
         )
+    }
+
+    override fun enhetService(): EnhetService {
+        return EnhetServiceImpl(navAnsattKlient())
     }
 }

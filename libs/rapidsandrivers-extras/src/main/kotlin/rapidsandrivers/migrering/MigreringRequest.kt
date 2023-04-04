@@ -2,12 +2,12 @@ package rapidsandrivers.migrering
 
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class MigreringRequest(
     val pesysId: PesysId,
     val fnr: Folkeregisteridentifikator,
-    val mottattDato: LocalDate,
+    val mottattDato: LocalDateTime,
     val persongalleri: Persongalleri
 )
 

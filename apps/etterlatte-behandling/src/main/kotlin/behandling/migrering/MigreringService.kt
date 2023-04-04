@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.omregning
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -16,20 +17,20 @@ class MigreringService(
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
     private val behandlingsHendelser: BehandlingHendelserKanal
 ) {
-    fun migrer(request: MigreringRequest): UUID {
-        val behandlingId = inTransaction {
+    fun migrer(request: MigreringRequest): Behandling {
+        val behandling = inTransaction {
             opprettSakOgBehandling(request)
         }
-        runBlocking { sendHendelse(behandlingId) }
-        return behandlingId
+        runBlocking { sendHendelse(behandling.id) }
+        return behandling
     }
 
-    private fun opprettSakOgBehandling(request: MigreringRequest): UUID =
+    private fun opprettSakOgBehandling(request: MigreringRequest): Behandling =
         foerstegangsbehandlingFactory.opprettFoerstegangsbehandling(
             finnEllerOpprettSak(request).id,
-            request.mottattDato.format(DateTimeFormatter.ISO_DATE),
+            request.mottattDato.format(DateTimeFormatter.ISO_DATE_TIME),
             request.persongalleri
-        ).lagretBehandling.id
+        ).lagretBehandling
 
     private fun finnEllerOpprettSak(request: MigreringRequest) =
         sakService.finnEllerOpprettSak(request.fnr.value, SakType.BARNEPENSJON)

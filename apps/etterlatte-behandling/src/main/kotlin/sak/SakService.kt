@@ -99,12 +99,21 @@ class RealSakService(
     }
 
     private fun finnEnhetForTemaOgOmraade(tema: String, omraade: String) =
-        norg2Klient.hentEnheterForOmraade(tema, omraade).firstOrNull() ?: throw IngenEnhetFunnetException(omraade, tema)
+        norg2Klient.hentEnheterForOmraade(tema, omraade).firstOrNull()
+            .also { logger.info("Enhet for $tema, $omraade was $it") } ?: throw IngenEnhetFunnetException(omraade, tema)
 
     private fun finnEnhetForPersonOgTema(person: String, tema: String): ArbeidsFordelingEnhet? {
+        logger.info("Checking feature toggle service")
         if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
+            logger.info("Feature toggle service enabled")
+
             val tilknytning = pdlKlient.hentGeografiskTilknytning(person)
+
+            logger.info("Tilknytning $tilknytning")
+
             val geografiskTilknytning = tilknytning.geografiskTilknytning()
+
+            logger.info("Geografisk Tilknytning $geografiskTilknytning")
 
             return when {
                 tilknytning.ukjent -> ArbeidsFordelingEnhet(Enheter.DEFAULT.navn, Enheter.DEFAULT.enhetNr)
@@ -118,6 +127,8 @@ class RealSakService(
                 else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
             }
         } else {
+            logger.info("Feature toggle service disabled")
+
             return null
         }
     }

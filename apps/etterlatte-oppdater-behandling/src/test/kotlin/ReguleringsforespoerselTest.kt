@@ -2,7 +2,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.Behandling
+import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.Reguleringsforespoersel
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -38,7 +38,7 @@ internal class ReguleringsforespoerselTest {
     @Test
     fun `kan ta imot reguleringsmelding og kalle på behandling`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
-        val vedtakServiceMock = mockk<Behandling>(relaxed = true)
+        val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
         val inspector = TestRapid().apply { Reguleringsforespoersel(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
@@ -51,7 +51,7 @@ internal class ReguleringsforespoerselTest {
     @Test
     fun `skal lage ny melding for hver sak den faar tilbake`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
-        val vedtakServiceMock = mockk<Behandling>(relaxed = true)
+        val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
         every { vedtakServiceMock.hentAlleSaker() } returns Saker(
             listOf(
                 Sak("saksbehandler1", SakType.BARNEPENSJON, 1L),
@@ -74,7 +74,7 @@ internal class ReguleringsforespoerselTest {
     @Test
     fun `skal sende med sakId for alle saker i basen`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
-        val behandlingServiceMock = mockk<Behandling>(relaxed = true)
+        val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         every { behandlingServiceMock.hentAlleSaker() } returns Saker(
             listOf(
                 Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L),
@@ -97,7 +97,7 @@ internal class ReguleringsforespoerselTest {
     @Test
     fun `ider fra tilbakestilte behandlinger sendes med i meldinga videre`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
-        val behandlingServiceMock = mockk<Behandling>(relaxed = true)
+        val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         val sakId = 1000L
         every { behandlingServiceMock.hentAlleSaker() } returns Saker(
             listOf(
@@ -120,7 +120,7 @@ internal class ReguleringsforespoerselTest {
     @Test
     fun `kjoerer med feilhaandtering`() {
         val melding = genererReguleringMelding(`1_mai_2023`)
-        val behandlingServiceMock = mockk<Behandling>(relaxed = true)
+        val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         coEvery {
             behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
         } throws RuntimeException("feil")

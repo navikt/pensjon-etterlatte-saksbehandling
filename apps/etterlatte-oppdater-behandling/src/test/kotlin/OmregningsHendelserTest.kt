@@ -1,7 +1,7 @@
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.etterlatte.BehandlingsService
+import no.nav.etterlatte.BehandlingServiceImpl
 import no.nav.etterlatte.OmregningsHendelser
 import no.nav.etterlatte.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
@@ -15,7 +15,7 @@ import java.util.UUID
 
 internal class OmregningsHendelserTest {
 
-    private val behandlingService = mockk<BehandlingsService>()
+    private val behandlingService = mockk<BehandlingServiceImpl>()
     private val inspector = TestRapid().apply { OmregningsHendelser(this, behandlingService) }
 
     @Test

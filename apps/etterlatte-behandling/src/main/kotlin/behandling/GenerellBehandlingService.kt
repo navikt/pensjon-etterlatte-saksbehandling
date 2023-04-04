@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -70,7 +69,7 @@ interface GenerellBehandlingService {
 
 class RealGenerellBehandlingService(
     val behandlinger: BehandlingDao,
-    private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>,
+    private val behandlingHendelser: BehandlingHendelserKanal,
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
     private val revurderingFactory: RevurderingFactory,
     private val hendelser: HendelseDao,

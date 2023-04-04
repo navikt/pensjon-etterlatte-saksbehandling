@@ -4,7 +4,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import kotlinx.coroutines.channels.SendChannel
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -24,7 +23,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.sql.Connection
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class RealRevurderingServiceTest {
 
@@ -59,7 +58,7 @@ class RealRevurderingServiceTest {
         val hendelserMock = mockk<HendelseDao> {
             every { behandlingOpprettet(any()) } returns Unit
         }
-        val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val sut = RealRevurderingService(
             behandlingerMock,
             RevurderingFactory(behandlingerMock, hendelserMock),
@@ -85,7 +84,7 @@ class RealRevurderingServiceTest {
             )
         }
         val hendelserMock = mockk<HendelseDao>()
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelsesKanal = mockk<BehandlingHendelserKanal>()
         val sut = RealRevurderingService(
             behandlingerMock,
             RevurderingFactory(behandlingerMock, hendelserMock),
@@ -116,7 +115,7 @@ class RealRevurderingServiceTest {
             every { behandlingOpprettet(any()) } returns Unit
         }
 
-        val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>> {
+        val hendelsesKanal = mockk<BehandlingHendelserKanal> {
             coEvery { send(capture(hendelse)) } returns Unit
         }
         val sut = RealRevurderingService(

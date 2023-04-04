@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import java.util.*
 
-interface Behandling {
+interface BehandlingService {
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
@@ -29,10 +29,10 @@ interface Behandling {
     fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe
 }
 
-class BehandlingsService(
+class BehandlingServiceImpl(
     private val behandling_app: HttpClient,
     private val url: String
-) : Behandling {
+) : BehandlingService {
     override fun sendDoedshendelse(doedshendelse: Doedshendelse) {
         runBlocking {
             behandling_app.post("$url/grunnlagsendringshendelse/doedshendelse") {

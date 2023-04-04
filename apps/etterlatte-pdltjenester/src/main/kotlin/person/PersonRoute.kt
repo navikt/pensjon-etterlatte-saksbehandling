@@ -88,12 +88,12 @@ fun Route.personRoute(service: PersonService) {
         }
     }
 
-    route("geografisktilknyttning") {
+    route("geografisktilknytning") {
         val logger = application.log
 
         post {
             val hentGeografiskTilknytningRequest = call.receive<HentGeografiskTilknytningRequest>()
-            logger.info("Henter geografisk tilknyttning med fnr=${hentGeografiskTilknytningRequest.foedselsnummer}")
+            logger.info("Henter geografisk tilknytning med fnr=${hentGeografiskTilknytningRequest.foedselsnummer}")
 
             try {
                 service.hentGeografiskTilknytning(hentGeografiskTilknytningRequest).let { call.respond(it) }

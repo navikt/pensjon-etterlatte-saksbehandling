@@ -1,4 +1,4 @@
-package pdl
+package no.nav.etterlatte.libs.common.pdl
 
 data class PdlFeil(val aarsak: PdlFeilAarsak, val detaljer: String?)
 

@@ -31,7 +31,7 @@ spec:
       tenant: trygdeetaten.no
       claims:
         groups:
-          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # Tror dette er 0000-GA-PENSJON_ATTESTERING
+          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # 0000-GA-PENSJON_ATTESTERING
           - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
         extra:
           - NAVident
@@ -47,17 +47,17 @@ spec:
             value: "100"
   env:
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: f4cf400f-8ef9-406f-baf1-8218f8f7edac
+      value: dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VILKAARSVURDERING_URL
       value: http://etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
-      value: ce96a301-13db-4409-b277-5b27f464d08b
+      value: dev-gcp.etterlatte.etterlatte-grunnlag
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
-      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
+      value: dev-gcp.etterlatte.etterlatte-behandling
     - name: ETTERLATTE_TRYGDETID_URL
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID

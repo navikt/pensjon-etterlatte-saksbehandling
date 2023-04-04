@@ -12,8 +12,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.etterlatte.BeanFactory
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.config.BeanFactory
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module

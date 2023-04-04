@@ -3,7 +3,7 @@ import { Saksliste } from './saksliste'
 import styled from 'styled-components'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe, IBehandlingsammendrag } from './typer'
 import { INasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
-import { Heading, Tag } from '@navikt/ds-react'
+import { Button, Heading, Tag } from '@navikt/ds-react'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { ToKolonner } from '../toKolonner/ToKolonner'
 import { Grunnlagshendelser } from './grunnlagshendelser/Grunnlagsendringshendelser'
@@ -106,6 +106,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       {kanOppretteManueltOpphoer && (
                         <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
                       )}
+                      <Button>Opprett revurdering</Button>
                     </EkstraHandlinger>
                   ) : null}
                   <div className="behandlinger">

@@ -17,8 +17,11 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
+import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.config.BeanFactory
+import no.nav.etterlatte.config.EnvBasedBeanFactory
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
@@ -85,9 +88,11 @@ fun Application.module(beanFactory: BeanFactory) {
                 foerstegangsbehandlingService = foerstegangsbehandlingService(),
                 manueltOpphoerService = manueltOpphoerService()
             )
-            omregningRoutes(
-                omregningService = omregningService()
+            revurderingRoutes(
+                revurderingService = revurderingService(),
+                generellBehandlingService = generellBehandlingService
             )
+            omregningRoutes(omregningService = omregningService())
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())
             oppgaveRoutes(service = beanFactory.oppgaveService())
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)

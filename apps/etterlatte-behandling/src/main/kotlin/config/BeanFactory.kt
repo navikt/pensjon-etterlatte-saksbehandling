@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -26,9 +26,12 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.OmregningService
-import no.nav.etterlatte.behandling.regulering.RevurderingFactory
+import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
+import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
+import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -64,6 +67,7 @@ interface BeanFactory {
     fun sakService(): SakService
     fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse
     fun foerstegangsbehandlingService(): FoerstegangsbehandlingService
+    fun revurderingService(): RevurderingService
     fun generellBehandlingService(): GenerellBehandlingService
     fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService
     fun manueltOpphoerService(): ManueltOpphoerService
@@ -125,6 +129,8 @@ abstract class CommonFactory : BeanFactory {
         OppgaveDao { databaseContext().activeTx() }
     }
 
+    private val featureToggleService by lazy { featureToggleService() }
+
     override fun behandlingHendelser(): BehandlingsHendelser {
         return behandlingsHendelser
     }
@@ -138,7 +144,7 @@ abstract class CommonFactory : BeanFactory {
     }
 
     override fun sakService(): SakService =
-        RealSakService(sakDao(), pdlKlient(), norg2HttpClient(), featureToggleService())
+        RealSakService(sakDao(), pdlKlient(), norg2HttpClient(), featureToggleService)
 
     override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
         SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()))
@@ -153,6 +159,12 @@ abstract class CommonFactory : BeanFactory {
             foerstegangsbehandlingFactory(),
             behandlingHendelser().nyHendelse
         )
+
+    override fun revurderingService(): RevurderingService = RealRevurderingService(
+        revurderingFactory(),
+        behandlingHendelser().nyHendelse,
+        featureToggleService
+    )
 
     override fun manueltOpphoerService(): ManueltOpphoerService =
         RealManueltOpphoerService(
@@ -268,7 +280,7 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-                Duration.of(1, ChronoUnit.MINUTES).toMillis()
+            Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

@@ -11,7 +11,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
@@ -38,11 +37,10 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
             }
         }
 
-        post("{$SAKID_CALL_PARAMETER}") {
+        post {
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter trygdetid for behandling $behandlingsId")
-                val sakId = call.parameters[SAKID_CALL_PARAMETER]!!.toLong()
-                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId, sakId, bruker)
+                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId, bruker)
                 call.respond(trygdetid.toDto())
             }
         }

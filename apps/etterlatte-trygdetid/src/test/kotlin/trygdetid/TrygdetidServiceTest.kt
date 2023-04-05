@@ -10,6 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
@@ -67,18 +68,24 @@ internal class TrygdetidServiceTest {
     fun `skal opprette trygdetid`() {
         val behandlingId = randomUUID()
         val sakId = 123L
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { sak } returns sakId
+        }
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         every { repository.hentTrygdetid(any()) } returns null
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { repository.opprettTrygdetid(any(), any()) } returns trygdetid(behandlingId)
 
         runBlocking {
-            service.opprettTrygdetid(behandlingId, sakId, saksbehandler)
+            service.opprettTrygdetid(behandlingId, saksbehandler)
         }
 
         coVerify(exactly = 1) {
             behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
             repository.hentTrygdetid(behandlingId)
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+            behandling.sak
             grunnlagKlient.hentGrunnlag(sakId, saksbehandler)
             repository.opprettTrygdetid(behandlingId, any())
         }
@@ -87,12 +94,11 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal feile ved opprettelse av trygdetid naar det allerede finnes for behandling`() {
         val behandlingId = randomUUID()
-        val sakId = 123L
         every { repository.hentTrygdetid(any()) } returns trygdetid(behandlingId)
 
         runBlocking {
             assertThrows<IllegalArgumentException> {
-                service.opprettTrygdetid(behandlingId, sakId, saksbehandler)
+                service.opprettTrygdetid(behandlingId, saksbehandler)
             }
         }
 
@@ -105,12 +111,11 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal feile ved opprettelse av trygdetid dersom behandling er i feil tilstand`() {
         val behandlingId = randomUUID()
-        val sakId = 123L
         coEvery { behandlingKlient.kanBeregnes(any(), any()) } returns false
 
         runBlocking {
             assertThrows<Exception> {
-                service.opprettTrygdetid(behandlingId, sakId, saksbehandler)
+                service.opprettTrygdetid(behandlingId, saksbehandler)
             }
         }
 

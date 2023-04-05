@@ -3,10 +3,8 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 export const hentTrygdetid = async (behandlingsId: string): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.get<ITrygdetid>(`/trygdetid/${behandlingsId}`)
 
-export const opprettTrygdetid = async (args: {
-  behandlingsId: string
-  sakId: string
-}): Promise<ApiResponse<ITrygdetid>> => apiClient.post(`/trygdetid/${args.behandlingsId}/${args.sakId}`, {})
+export const opprettTrygdetid = async (behandlingsId: string): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid/${behandlingsId}`, {})
 
 export const lagreTrygdetidgrunnlag = async (args: {
   behandlingsId: string

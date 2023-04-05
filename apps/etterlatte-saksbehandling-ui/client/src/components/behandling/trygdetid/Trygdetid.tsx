@@ -8,30 +8,23 @@ import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBer
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
-import { useAppSelector } from '~store/Store'
 import { formaterStringDato } from '~utils/formattering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { useParams } from 'react-router-dom'
 
 export const Trygdetid = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
-
+  const { behandlingsId } = useParams()
   const [trygdetidStatus, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
 
   useEffect(() => {
-    if (!behandling) throw new Error('Mangler behandling')
-    fetchTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
+    if (!behandlingsId) throw new Error('Mangler behandlingsid')
+    fetchTrygdetid(behandlingsId, (trygdetid: ITrygdetid) => {
       if (trygdetid == null) {
-        requestOpprettTrygdetid(
-          {
-            behandlingsId: behandling.id,
-            sakId: behandling.sak.toString(),
-          },
-          (trygdetid: ITrygdetid) => {
-            setTrygdetid(trygdetid)
-          }
-        )
+        requestOpprettTrygdetid(behandlingsId, (trygdetid: ITrygdetid) => {
+          setTrygdetid(trygdetid)
+        })
       } else {
         setTrygdetid(trygdetid)
       }

@@ -16,13 +16,13 @@ class TrygdetidService(
 ) {
     fun hentTrygdetid(behandlingsId: UUID): Trygdetid? = trygdetidRepository.hentTrygdetid(behandlingsId)
 
-    suspend fun opprettTrygdetid(behandlingId: UUID, sakId: Long, bruker: Bruker): Trygdetid =
+    suspend fun opprettTrygdetid(behandlingId: UUID, bruker: Bruker): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
             trygdetidRepository.hentTrygdetid(behandlingId)?.let {
                 throw IllegalArgumentException("Trygdetid finnes allerede for behandling $behandlingId")
             }
-
-            val avdoed = grunnlagKlient.hentGrunnlag(sakId, bruker).hentAvdoed()
+            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+            val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, bruker).hentAvdoed()
             val opplysninger = mapOf(
                 Opplysningstype.FOEDSELSDATO to avdoed.hentFoedselsdato()?.verdi?.toJson(),
                 Opplysningstype.DOEDSDATO to avdoed.hentDoedsdato()?.verdi?.toJson()

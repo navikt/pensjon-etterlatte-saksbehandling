@@ -10,6 +10,8 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -17,7 +19,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RevurderingIntegrationTest : BehandlingIntegrationTest() {
@@ -52,7 +53,11 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val (_, behandling) = inTransaction { beanFactory.opprettSakMedFoerstegangsbehandling(sakId, fnr) }
         inTransaction {
-            beanFactory.behandlingDao().lagreStatus(behandling.id, BehandlingStatus.IVERKSATT, LocalDateTime.now())
+            beanFactory.behandlingDao().lagreStatus(
+                behandling.id,
+                BehandlingStatus.IVERKSATT,
+                Tidspunkt.now().toLocalDatetimeUTC()
+            )
         }
 
         val revurdering =
@@ -80,7 +85,11 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val (_, behandling) = inTransaction { beanFactory.opprettSakMedFoerstegangsbehandling(sakId, fnr) }
         inTransaction {
-            beanFactory.behandlingDao().lagreStatus(behandling.id, BehandlingStatus.IVERKSATT, LocalDateTime.now())
+            beanFactory.behandlingDao().lagreStatus(
+                behandling.id,
+                BehandlingStatus.IVERKSATT,
+                Tidspunkt.now().toLocalDatetimeUTC()
+            )
         }
 
         assertThrows<NotImplementedError> {

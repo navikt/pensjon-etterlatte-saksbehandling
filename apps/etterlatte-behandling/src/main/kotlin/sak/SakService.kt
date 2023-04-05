@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
@@ -14,9 +15,11 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
+import no.nav.etterlatte.Saksbehandler as SaksbehandlerBruker
 
 enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
-    OpprettMedEnhetId("pensjon-etterlatte.opprett-sak-med-enhet-id");
+    OpprettMedEnhetId("pensjon-etterlatte.opprett-sak-med-enhet-id"),
+    FiltrerMedEnhetId("pensjon-etterlatte.filtrer-saker-med-enhet-id");
 
     override fun key() = key
 }
@@ -42,14 +45,18 @@ class RealSakService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun hentSaker(): List<Sak> {
-        return dao.hentSaker()
+        return dao.hentSaker().filterForEnheter()
     }
 
     private fun finnSakerForPerson(person: String) = dao.finnSaker(person)
 
+    private fun finnSakerForPersonOgType(person: String, type: SakType) = finnSakerForPerson(person).find {
+        it.sakType == type
+    }
+
     override fun finnSaker(person: String): List<Sak> {
         return inTransaction {
-            finnSakerForPerson(person)
+            finnSakerForPerson(person).filterForEnheter()
         }
     }
 
@@ -83,19 +90,20 @@ class RealSakService(
         return !this.sjekkOmFnrHarEnSakMedAdresseBeskyttelse(foedselsnummer.value)
     }
 
+    // Kalles kun fra en route som ikke er åpent til saksbehandlere så enhetsjekk er ikke nødvendig
     override fun finnEllerOpprettSak(person: String, type: SakType) =
-        finnSak(person, type) ?: dao.opprettSak(
+        finnSakerForPersonOgType(person, type) ?: dao.opprettSak(
             person,
             type,
             finnEnhetForPersonOgTema(person, type.tema)?.enhetNr
         )
 
     override fun finnSak(person: String, type: SakType): Sak? {
-        return finnSakerForPerson(person).find { it.sakType == type }
+        return finnSakerForPersonOgType(person, type).sjekkEnhet()
     }
 
     override fun finnSak(id: Long): Sak? {
-        return dao.hentSak(id)
+        return dao.hentSak(id).sjekkEnhet()
     }
 
     private fun finnEnhetForTemaOgOmraade(tema: String, omraade: String) =
@@ -120,5 +128,26 @@ class RealSakService(
         } else {
             return null
         }
+    }
+
+    private fun SaksbehandlerBruker.enheterIds() = this.enheter().map { it.id }
+
+    private fun List<Sak>.filterForEnheter() =
+        if (featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false)) {
+            when (val user = Kontekst.get().AppUser) {
+                is SaksbehandlerBruker -> {
+                    val enheter = user.enheterIds()
+
+                    this.filter { it.enhet?.let { enhet -> enheter.contains(enhet) } ?: true }
+                }
+
+                else -> this
+            }
+        } else {
+            this
+        }
+
+    private fun Sak?.sjekkEnhet() = this?.let { sak ->
+        listOf(sak).filterForEnheter().firstOrNull()
     }
 }

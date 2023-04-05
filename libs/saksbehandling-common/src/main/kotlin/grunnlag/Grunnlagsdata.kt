@@ -41,7 +41,6 @@ import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.toJson
-import org.slf4j.LoggerFactory.getLogger
 import java.time.LocalDate
 
 typealias Grunnlagsdata<T> = Map<Opplysningstype, Opplysning<T>>
@@ -57,7 +56,7 @@ fun Grunnlagsdata<JsonNode>.hentDoedsdato() = this.hentKonstantOpplysning<LocalD
 fun Grunnlagsdata<JsonNode>.hentAdressebeskyttelse() =
     this.hentKonstantOpplysning<AdressebeskyttelseGradering>(ADRESSEBESKYTTELSE)
 
-fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentPeriodisertOpplysning<Adresse>(BOSTEDSADRESSE)
+fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(BOSTEDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentDeltbostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(DELTBOSTEDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentKontaktadresse() = this.hentKonstantOpplysning<List<Adresse>>(KONTAKTADRESSE)
 fun Grunnlagsdata<JsonNode>.hentOppholdsadresse() = this.hentKonstantOpplysning<List<Adresse>>(OPPHOLDSADRESSE)
@@ -72,7 +71,7 @@ fun Grunnlagsdata<JsonNode>.hentVergemaalellerfremtidsfullmakt() =
 
 fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<PersonRolle>(PERSONROLLE)
 fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() =
-    this.hentPeriodisertOpplysning<UtenlandsoppholdOpplysninger>(UTENLANDSOPPHOLD)
+    this.hentKonstantOpplysning<UtenlandsoppholdOpplysninger>(UTENLANDSOPPHOLD)
 
 fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() =
     this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
@@ -91,38 +90,5 @@ inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(
             grunnlagsdata.kilde,
             objectMapper.readValue(grunnlagsdata.verdi.toJson(), object : TypeReference<T>() {})
         )
-
-        else -> {
-            getLogger(this::class.java).error("Feil skjedde under henting av opplysning: Opplysningen er periodisert")
-            throw RuntimeException("Feil skjedde under henting av opplysning: Opplysningen er periodisert")
-        }
-    }
-}
-
-inline fun <reified T> Grunnlagsdata<JsonNode>.hentPeriodisertOpplysning(
-    opplysningstype: Opplysningstype
-): Opplysning.Periodisert<T>? {
-    val grunnlagsdata = this[opplysningstype] ?: return null
-
-    return when (grunnlagsdata) {
-        is Opplysning.Periodisert -> {
-            Opplysning.Periodisert(
-                perioder = grunnlagsdata.perioder.map {
-                    PeriodisertOpplysning(
-                        id = it.id,
-                        kilde = it.kilde,
-                        verdi = objectMapper.readValue(it.verdi.toJson(), T::class.java),
-                        fom = it.fom,
-                        tom = it.tom
-                    )
-                }
-            )
-        }
-
-        else -> {
-            val err = "Feil skjedde under henting av opplysning $opplysningstype: Opplysningen er Konstant"
-            getLogger(this::class.java).error(err)
-            throw RuntimeException(err)
-        }
     }
 }

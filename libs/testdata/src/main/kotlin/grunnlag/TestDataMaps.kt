@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.testdata.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.ADRESSEBESKYTTELSE
@@ -31,7 +30,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID.randomUUID
 
 val kilde = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, "opplysningsId1")
@@ -69,16 +67,10 @@ internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
     FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Periodisert(
-        ADRESSE_DEFAULT.map {
-            PeriodisertOpplysning(
-                randomUUID(),
-                kilde = kilde,
-                verdi = it.toJsonNode(),
-                fom = it.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
-                tom = it.gyldigFraOgMed?.let { YearMonth.of(it.year, it.month) }
-            )
-        }
+    BOSTEDSADRESSE to Opplysning.Konstant(
+        randomUUID(),
+        kilde = kilde,
+        verdi = ADRESSE_DEFAULT.toJsonNode()
     ),
     STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.BARN.toJsonNode()),
@@ -100,16 +92,10 @@ internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNod
     FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Periodisert(
-        ADRESSE_DEFAULT.map {
-            PeriodisertOpplysning(
-                randomUUID(),
-                kilde = kilde,
-                verdi = it.toJsonNode(),
-                fom = it.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
-                tom = it.gyldigFraOgMed?.let { YearMonth.of(it.year, it.month) }
-            )
-        }
+    BOSTEDSADRESSE to Opplysning.Konstant(
+        randomUUID(),
+        kilde = kilde,
+        verdi = ADRESSE_DEFAULT.toJsonNode()
     ),
     STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.BARN.toJsonNode()),
@@ -135,16 +121,10 @@ internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
     ),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Periodisert(
-        ADRESSE_DEFAULT.map {
-            PeriodisertOpplysning(
-                randomUUID(),
-                kilde = kilde,
-                verdi = it.toJsonNode(),
-                fom = it.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
-                tom = it.gyldigFraOgMed?.let { YearMonth.of(it.year, it.month) }
-            )
-        }
+    BOSTEDSADRESSE to Opplysning.Konstant(
+        randomUUID(),
+        kilde = kilde,
+        verdi = ADRESSE_DEFAULT.toJsonNode()
     ),
     STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.BARN.toJsonNode()),
@@ -167,16 +147,10 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     DOEDSDATO to Opplysning.Konstant(randomUUID(), kilde, LocalDateTime.parse("2022-08-17T00:00:00").toJsonNode()),
     ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Periodisert(
-        ADRESSE_DEFAULT.map {
-            PeriodisertOpplysning(
-                randomUUID(),
-                kilde = kilde,
-                verdi = it.toJsonNode(),
-                fom = it.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
-                tom = it.gyldigFraOgMed?.let { YearMonth.of(it.year, it.month) }
-            )
-        }
+    BOSTEDSADRESSE to Opplysning.Konstant(
+        randomUUID(),
+        kilde = kilde,
+        verdi = ADRESSE_DEFAULT.toJsonNode()
     ),
     SIVILSTATUS to Opplysning.Konstant(randomUUID(), kilde, Sivilstatus.GIFT.toJsonNode()),
     STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
@@ -209,16 +183,10 @@ internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
     ),
     FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
     ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Periodisert(
-        ADRESSE_DEFAULT.map {
-            PeriodisertOpplysning(
-                randomUUID(),
-                kilde = kilde,
-                verdi = it.toJsonNode(),
-                fom = it.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
-                tom = it.gyldigFraOgMed?.let { YearMonth.of(it.year, it.month) }
-            )
-        }
+    BOSTEDSADRESSE to Opplysning.Konstant(
+        randomUUID(),
+        kilde = kilde,
+        verdi = ADRESSE_DEFAULT.toJsonNode()
     ),
     SIVILSTATUS to Opplysning.Konstant(randomUUID(), kilde, Sivilstatus.GIFT.toJsonNode()),
     STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),

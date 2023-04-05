@@ -34,7 +34,7 @@ fun personTestData(
     foedeland = opplysningsmap.hentFoedeland()?.verdi,
     doedsdato = opplysningsmap.hentDoedsdato()?.verdi,
     adressebeskyttelse = opplysningsmap.hentAdressebeskyttelse()?.verdi,
-    bostedsadresse = opplysningsmap.hentBostedsadresse()?.perioder?.map { it.verdi },
+    bostedsadresse = opplysningsmap.hentBostedsadresse()?.verdi,
     deltBostedsadresse = opplysningsmap.hentDeltbostedsadresse()?.verdi,
     kontaktadresse = opplysningsmap.hentKontaktadresse()?.verdi,
     oppholdsadresse = opplysningsmap.hentOppholdsadresse()?.verdi,

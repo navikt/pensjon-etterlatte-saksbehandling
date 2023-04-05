@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
@@ -19,7 +18,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.N
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
@@ -34,8 +32,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
-import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
@@ -229,7 +226,6 @@ internal class GrunnlagServiceTest {
             gyldigFraOgMed = LocalDateTime.of(2022, Month.JANUARY, 1, 0, 0),
             gyldigTilOgMed = LocalDateTime.of(2022, Month.JUNE, 1, 0, 0)
         )
-        val uuid2 = UUID.randomUUID()
         val bostedsadresse2 = ADRESSE_DEFAULT.first().copy(
             adresseLinje1 = "AktivAdresse 55",
             gyldigFraOgMed = LocalDateTime.of(2022, Month.JULY, 1, 0, 0),
@@ -242,58 +238,26 @@ internal class GrunnlagServiceTest {
                     kilde = kilde,
                     opplysningType = BOSTEDSADRESSE,
                     meta = objectMapper.createObjectNode(),
-                    opplysning = bostedsadresse1.toJsonNode(),
+                    opplysning = listOf(bostedsadresse1, bostedsadresse2).toJsonNode(),
                     attestering = null,
-                    fnr = testData.soeker.foedselsnummer,
-                    periode = Periode(
-                        fom = bostedsadresse1.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
-                        tom = bostedsadresse1.gyldigTilOgMed?.let { YearMonth.of(it.year, it.month) }
-                    )
+                    fnr = testData.soeker.foedselsnummer
                 ),
                 sakId = 1,
                 hendelseNummer = 1
-            ),
-            OpplysningDao.GrunnlagHendelse(
-                opplysning = Grunnlagsopplysning(
-                    id = uuid2,
-                    kilde = kilde,
-                    opplysningType = BOSTEDSADRESSE,
-                    meta = objectMapper.createObjectNode(),
-                    opplysning = bostedsadresse2.toJsonNode(),
-                    attestering = null,
-                    fnr = testData.soeker.foedselsnummer,
-                    periode = Periode(
-                        fom = bostedsadresse2.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
-                        tom = bostedsadresse2.gyldigTilOgMed?.let { YearMonth.of(it.year, it.month) }
-                    )
-                ),
-                sakId = 1,
-                hendelseNummer = 2
             )
         )
 
         every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
         val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
-        val expected = Opplysning.Periodisert(
-            listOf(
-                PeriodisertOpplysning(
-                    uuid1,
-                    kilde = kilde,
-                    verdi = bostedsadresse1,
-                    fom = YearMonth.of(2022, Month.JANUARY),
-                    tom = YearMonth.of(2022, Month.JUNE)
-                ),
-                PeriodisertOpplysning(
-                    uuid2,
-                    kilde = kilde,
-                    verdi = bostedsadresse2,
-                    fom = YearMonth.of(2022, Month.JULY),
-                    tom = YearMonth.of(2022, Month.DECEMBER)
-                )
+        val expected = Opplysning.Konstant(
+            uuid1,
+            kilde = kilde,
+            verdi = listOf(
+                bostedsadresse1,
+                bostedsadresse2
             )
         )
-
         Assertions.assertEquals(expected, actual.soeker.hentBostedsadresse())
     }
 

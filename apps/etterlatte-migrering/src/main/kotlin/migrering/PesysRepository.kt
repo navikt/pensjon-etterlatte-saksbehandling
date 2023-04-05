@@ -2,10 +2,10 @@ package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
+import no.nav.etterlatte.libs.database.KotliqueryRepository
 import java.util.*
 
-internal class PesysRepository(private val repository: KotliqueryRepositoryWrapper) {
+internal class PesysRepository(private val repository: KotliqueryRepository) {
 
     fun hentSaker(): List<Pesyssak> = repository.hentListeMedKotliquery(
         "SELECT sak from pesyssak WHERE migrert is false"

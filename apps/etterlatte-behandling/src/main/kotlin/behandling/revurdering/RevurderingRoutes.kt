@@ -27,6 +27,7 @@ internal fun Route.revurderingRoutes(
             val body = try {
                 call.receive<OpprettRevurderingRequest>()
             } catch (e: Exception) {
+                logger.error("Feil skjedde under lesing av payloaden. Mangler gitt revurderingsårsak.")
                 call.respond(HttpStatusCode.BadRequest, "Støtter ikke denne revurderingstypen")
                 return@post
             }

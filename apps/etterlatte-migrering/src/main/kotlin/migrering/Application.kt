@@ -1,8 +1,5 @@
 package no.nav.etterlatte.migrering
 
-import migrering.ApplicationContext
-import migrering.Migrering
-import migrering.PesysRepository
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger

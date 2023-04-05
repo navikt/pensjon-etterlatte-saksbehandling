@@ -1,4 +1,4 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.libs.database.jdbcUrl
 

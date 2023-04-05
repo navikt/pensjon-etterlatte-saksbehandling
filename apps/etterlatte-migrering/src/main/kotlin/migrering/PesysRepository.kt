@@ -1,4 +1,4 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -18,11 +18,3 @@ internal class PesysRepository {
         )
     )
 }
-
-data class Pesyssak(
-    val id: PesysId,
-    val enhet: Enhet,
-    val folkeregisteridentifikator: Folkeregisteridentifikator,
-    val mottattdato: LocalDateTime,
-    val persongalleri: Persongalleri
-)

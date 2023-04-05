@@ -68,7 +68,7 @@ class KotliqueryRepository(private val datasource: DataSource) {
 
     fun <T> hentListeMedKotliquery(
         query: String,
-        params: (s: Session) -> Map<String, Any?>,
+        params: (s: Session) -> Map<String, Any?> = { mapOf() },
         converter: (r: Row) -> T
     ): List<T> = using(sessionOf(datasource)) { session ->
         queryOf(statement = query, paramMap = params.invoke(session))

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.migrering
 
+import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
@@ -19,7 +20,7 @@ class Server(private val context: ApplicationContext) {
         dataSource.migrate()
         val rapidEnv = getRapidEnv()
         RapidApplication.create(rapidEnv).also { rapidsConnection ->
-            Migrering(rapidsConnection, PesysRepository())
+            Migrering(rapidsConnection, PesysRepository(KotliqueryRepositoryWrapper(dataSource)))
         }.start()
     }
 }

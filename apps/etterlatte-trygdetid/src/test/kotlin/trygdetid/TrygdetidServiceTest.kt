@@ -87,7 +87,7 @@ internal class TrygdetidServiceTest {
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             behandling.sak
             grunnlagKlient.hentGrunnlag(sakId, saksbehandler)
-            repository.opprettTrygdetid(behandlingId, any())
+            repository.opprettTrygdetid(behandling, any())
         }
     }
 

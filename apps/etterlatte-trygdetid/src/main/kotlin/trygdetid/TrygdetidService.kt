@@ -3,7 +3,6 @@ package no.nav.etterlatte.trygdetid
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
@@ -24,10 +23,10 @@ class TrygdetidService(
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
             val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, bruker).hentAvdoed()
             val opplysninger = mapOf(
-                Opplysningstype.FOEDSELSDATO to avdoed.hentFoedselsdato()?.verdi?.toJson(),
-                Opplysningstype.DOEDSDATO to avdoed.hentDoedsdato()?.verdi?.toJson()
+                Opplysningstype.FOEDSELSDATO to avdoed.hentFoedselsdato(),
+                Opplysningstype.DOEDSDATO to avdoed.hentDoedsdato()
             )
-            trygdetidRepository.opprettTrygdetid(behandlingId, opplysninger)
+            trygdetidRepository.opprettTrygdetid(behandling, opplysninger)
         }
 
     suspend fun lagreTrygdetidGrunnlag(

@@ -13,16 +13,16 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { useParams } from 'react-router-dom'
 
 export const Trygdetid = () => {
-  const { behandlingsId } = useParams()
+  const { behandlingId } = useParams()
   const [trygdetidStatus, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
 
   useEffect(() => {
-    if (!behandlingsId) throw new Error('Mangler behandlingsid')
-    fetchTrygdetid(behandlingsId, (trygdetid: ITrygdetid) => {
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
+    fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
       if (trygdetid == null) {
-        requestOpprettTrygdetid(behandlingsId, (trygdetid: ITrygdetid) => {
+        requestOpprettTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
           setTrygdetid(trygdetid)
         })
       } else {

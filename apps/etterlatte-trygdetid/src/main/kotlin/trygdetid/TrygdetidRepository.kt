@@ -5,8 +5,12 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
@@ -16,7 +20,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, behandling_id, trygdetid_nasjonal, trygdetid_fremtidig, trygdetid_total 
+                    SELECT id, behandling_id, sak_id, trygdetid_nasjonal, trygdetid_fremtidig, trygdetid_total 
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                 """.trimIndent(),
@@ -49,41 +53,46 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             }
         }
 
-    fun opprettTrygdetid(behandlingId: UUID, opplysninger: Map<Opplysningstype, String?>): Trygdetid =
+    fun opprettTrygdetid(
+        behandling: DetaljertBehandling,
+        opplysninger: Map<Opplysningstype, Opplysning.Konstant<out LocalDate?>?>
+    ): Trygdetid =
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 val trygdetidId = UUID.randomUUID()
-                opprettTrygdetid(behandlingId, trygdetidId, tx)
+                opprettTrygdetid(behandling, trygdetidId, tx)
                 lagreOpplysningsgrunnlag(trygdetidId, opplysninger, tx)
             }
-        }.let { hentTrygdtidNotNull(behandlingId) }
+        }.let { hentTrygdtidNotNull(behandling.id) }
 
-    private fun opprettTrygdetid(behandlingId: UUID, trygdetidId: UUID, tx: TransactionalSession) =
+    private fun opprettTrygdetid(behandling: DetaljertBehandling, trygdetidId: UUID, tx: TransactionalSession) =
         queryOf(
             statement = """
-                        INSERT INTO trygdetid(id, behandling_id) VALUES(:id, :behandlingId)
+                        INSERT INTO trygdetid(id, behandling_id, sak_id) VALUES(:id, :behandlingId, :sakId)
             """.trimIndent(),
             paramMap = mapOf(
                 "id" to trygdetidId,
-                "behandlingId" to behandlingId
+                "behandlingId" to behandling.id,
+                "sakId" to behandling.sak
             )
         ).let { query -> tx.update(query) }
 
     private fun lagreOpplysningsgrunnlag(
         trygdetidId: UUID?,
-        opplysninger: Map<Opplysningstype, String?>,
+        opplysninger: Map<Opplysningstype, Opplysning.Konstant<out LocalDate?>?>,
         tx: TransactionalSession
     ) = opplysninger.forEach { (type, opplysning) ->
         queryOf(
             statement = """
-                INSERT INTO opplysningsgrunnlag(id, trygdetid_id, type, opplysning)
-                 VALUES(:id, :trygdetidId, :type, :opplysning::JSONB)
+                INSERT INTO opplysningsgrunnlag(id, trygdetid_id, type, opplysning, kilde)
+                 VALUES(:id, :trygdetidId, :type, :opplysning::JSONB, :kilde::JSONB)
             """.trimIndent(),
             paramMap = mapOf(
                 "id" to UUID.randomUUID(),
                 "trygdetidId" to trygdetidId,
                 "type" to type.name,
-                "opplysning" to opplysning
+                "opplysning" to opplysning?.verdi?.toJson(),
+                "kilde" to opplysning?.kilde?.toJson()
             )
         ).let { query -> tx.update(query) }
     }
@@ -185,7 +194,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                SELECT id, trygdetid_id, type, opplysning
+                SELECT id, trygdetid_id, type, opplysning, kilde
                 FROM opplysningsgrunnlag
                 WHERE trygdetid_id = :trygdetidId
                 """.trimIndent(),
@@ -233,7 +242,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         return Opplysningsgrunnlag(
             id = uuid("id"),
             type = Opplysningstype.valueOf(string("type")),
-            opplysning = string("opplysning").toJsonNode()
+            opplysning = string("opplysning").toJsonNode(),
+            kilde = string("kilde").toJsonNode()
         )
     }
 }

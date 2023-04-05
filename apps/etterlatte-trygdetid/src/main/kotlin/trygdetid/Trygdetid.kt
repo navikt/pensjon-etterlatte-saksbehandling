@@ -23,7 +23,8 @@ data class BeregnetTrygdetid(
 data class Opplysningsgrunnlag(
     val id: UUID,
     val type: Opplysningstype,
-    val opplysning: JsonNode
+    val opplysning: JsonNode,
+    val kilde: JsonNode
 )
 
 fun JsonNode.toLocalDate(): LocalDate = objectMapper.readValue(this.asText(), LocalDate::class.java)

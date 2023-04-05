@@ -2,8 +2,13 @@ package no.nav.etterlatte.trygdetid
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.AfterAll
@@ -48,29 +53,49 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal opprette trygdetid med opplysninger`() {
         val behandlingId = randomUUID()
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns 123L
+        }
 
         val foedselsdato = LocalDate.of(2000, 1, 1)
         val doedsdato = LocalDate.of(2020, 1, 1)
+        val pdl = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, "opplysningsId1")
         val opplysninger = mapOf(
-            Opplysningstype.FOEDSELSDATO to foedselsdato.toJson(),
-            Opplysningstype.DOEDSDATO to doedsdato.toJson()
+            Opplysningstype.FOEDSELSDATO to mockk<Opplysning.Konstant<LocalDate>>().apply {
+                every { verdi } returns foedselsdato
+                every { kilde } returns pdl
+            },
+            Opplysningstype.DOEDSDATO to mockk<Opplysning.Konstant<LocalDate?>>().apply {
+                every { verdi } returns doedsdato
+                every { kilde } returns pdl
+            }
         )
-        val trygdetid = repository.opprettTrygdetid(behandlingId, opplysninger)
+        val trygdetid = repository.opprettTrygdetid(behandling, opplysninger)
 
         trygdetid shouldNotBe null
         trygdetid.behandlingId shouldBe behandlingId
 
-        trygdetid.opplysninger[0].type shouldBe Opplysningstype.FOEDSELSDATO
-        trygdetid.opplysninger[0].opplysning.toLocalDate() shouldBe foedselsdato
-
-        trygdetid.opplysninger[1].type shouldBe Opplysningstype.DOEDSDATO
-        trygdetid.opplysninger[1].opplysning.toLocalDate() shouldBe doedsdato
+        with(trygdetid.opplysninger[0]) {
+            type shouldBe Opplysningstype.FOEDSELSDATO
+            opplysning.toLocalDate() shouldBe foedselsdato
+            kilde shouldNotBe null
+        }
+        with(trygdetid.opplysninger[1]) {
+            type shouldBe Opplysningstype.DOEDSDATO
+            opplysning.toLocalDate() shouldBe doedsdato
+            kilde shouldNotBe null
+        }
     }
 
     @Test
     fun `skal opprette og hente trygdetid`() {
         val behandlingId = randomUUID()
-        repository.opprettTrygdetid(behandlingId, mapOf())
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns 123L
+        }
+        repository.opprettTrygdetid(behandling, mapOf())
 
         val trygdetid = repository.hentTrygdetid(behandlingId)
 
@@ -82,7 +107,11 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal opprette et trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
-        val trygdetid = repository.opprettTrygdetid(behandlingId, mapOf())
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns 123L
+        }
+        val trygdetid = repository.opprettTrygdetid(behandling, mapOf())
         val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
 
         val trygdetidMedTrygdetidGrunnlag =
@@ -97,7 +126,11 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal oppdatere et trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
-        val trygdetid = repository.opprettTrygdetid(behandlingId, mapOf())
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns 123L
+        }
+        val trygdetid = repository.opprettTrygdetid(behandling, mapOf())
 
         val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
         repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
@@ -115,7 +148,11 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal hente et trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
-        val trygdetid = repository.opprettTrygdetid(behandlingId, mapOf())
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns 123L
+        }
+        val trygdetid = repository.opprettTrygdetid(behandling, mapOf())
 
         val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
         repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
@@ -129,7 +166,11 @@ internal class TrygdetidRepositoryTest {
     fun `skal oppdatere beregnet trygdetid`() {
         val behandlingId = randomUUID()
         val beregnetTrygdetid = beregnetTrygdetid(nasjonal = 10, fremtidig = 2, total = 12)
-        repository.opprettTrygdetid(behandlingId, mapOf())
+        val behandling = mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns 123L
+        }
+        repository.opprettTrygdetid(behandling, mapOf())
 
         val trygdetidMedBeregnetTrygdetid = repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
 

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.regulering
+package no.nav.etterlatte.behandling.revurdering
 
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -11,7 +11,7 @@ class RevurderingFactory(private val behandlinger: BehandlingDao, private val he
     fun hentRevurdering(id: UUID): RevurderingAggregat =
         RevurderingAggregat(id, behandlinger, hendelser)
 
-    fun opprettRevurdering(
+    fun opprettManuellRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak

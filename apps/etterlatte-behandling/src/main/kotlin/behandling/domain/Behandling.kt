@@ -152,7 +152,7 @@ fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
     behandlingType = this.type,
     aarsak = when (this) {
         is Foerstegangsbehandling -> "SOEKNAD"
-        is Revurdering -> this.revurderingsaarsak.name
+        is Revurdering -> this.revurderingsaarsak?.name ?: "REVURDERING"
         is ManueltOpphoer -> "MANUELT OPPHOER"
     },
     virkningstidspunkt = this.virkningstidspunkt,

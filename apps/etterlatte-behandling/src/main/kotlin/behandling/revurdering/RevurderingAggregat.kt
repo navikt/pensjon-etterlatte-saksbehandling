@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.regulering
+package no.nav.etterlatte.behandling.revurdering
 
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Behandling

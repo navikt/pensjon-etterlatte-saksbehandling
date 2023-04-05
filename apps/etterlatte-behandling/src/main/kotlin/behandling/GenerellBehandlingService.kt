@@ -13,7 +13,7 @@ import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.regulering.RevurderingFactory
+import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -38,7 +38,6 @@ interface GenerellBehandlingService {
     fun hentBehandlingstype(behandlingId: UUID): BehandlingType?
     fun hentBehandlingerISak(sakId: Long): List<Behandling>
     fun hentSenestIverksatteBehandling(sakId: Long): Behandling?
-    fun slettBehandlingerISak(sak: Long)
     fun avbrytBehandling(behandlingId: UUID, saksbehandler: String)
     fun registrerVedtakHendelse(
         behandlingId: UUID,
@@ -106,13 +105,6 @@ class RealGenerellBehandlingService(
         return alleBehandlinger
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
-    }
-
-    override fun slettBehandlingerISak(sak: Long) {
-        inTransaction {
-            println("Sletter alle behandlinger i sak: $sak")
-            behandlinger.slettBehandlingerISak(sak)
-        }
     }
 
     override fun avbrytBehandling(behandlingId: UUID, saksbehandler: String) {

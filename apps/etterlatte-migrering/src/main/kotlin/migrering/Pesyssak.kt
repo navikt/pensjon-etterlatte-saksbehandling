@@ -5,9 +5,11 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import java.time.LocalDateTime
+import java.util.*
 
 data class Pesyssak(
-    val id: PesysId,
+    val id: UUID,
+    val pesysId: PesysId,
     val enhet: Enhet,
     val folkeregisteridentifikator: Folkeregisteridentifikator,
     val mottattdato: LocalDateTime,

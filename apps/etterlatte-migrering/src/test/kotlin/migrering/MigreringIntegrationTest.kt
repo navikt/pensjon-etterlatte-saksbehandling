@@ -25,6 +25,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MigreringIntegrationTest {
@@ -53,6 +54,7 @@ class MigreringIntegrationTest {
             val repository = PesysRepository(KotliqueryRepository(datasource))
             val syntetiskFnr = "19078504903"
             val sakInn = Pesyssak(
+                UUID.randomUUID(),
                 PesysId("4"),
                 Enhet("4808"),
                 Folkeregisteridentifikator.of(syntetiskFnr),

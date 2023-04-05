@@ -19,6 +19,6 @@ internal class PesysRepository(private val repository: KotliqueryRepository) {
         repository.opprett(
             "INSERT INTO pesyssak(id,sak,migrert) VALUES(:id,:sak::jsonb,:migrert::boolean)",
             mapOf("id" to UUID.randomUUID(), "sak" to pesyssak.toJson(), "migrert" to false),
-            "Lagra pesyssak ${pesyssak.id} i migreringsbasen"
+            "Lagra pesyssak ${pesyssak.pesysId} i migreringsbasen"
         )
 }

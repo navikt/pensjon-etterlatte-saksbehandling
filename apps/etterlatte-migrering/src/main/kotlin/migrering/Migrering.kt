@@ -43,12 +43,12 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
         packet.request = request
         context.publish(packet.toJson())
         logger.info(
-            "Migrering starta for pesys-sak ${it.id} og melding om behandling ble sendt."
+            "Migrering starta for pesys-sak ${it.pesysId} og melding om behandling ble sendt."
         )
     }
 
     private fun tilMigreringsrequest(sak: Pesyssak) = MigreringRequest(
-        pesysId = sak.id,
+        pesysId = sak.pesysId,
         enhet = sak.enhet,
         fnr = sak.folkeregisteridentifikator,
         mottattDato = sak.mottattdato,

@@ -21,4 +21,10 @@ internal class PesysRepository(private val repository: KotliqueryRepository) {
             mapOf("id" to UUID.randomUUID(), "sak" to pesyssak.toJson(), "migrert" to false),
             "Lagra pesyssak ${pesyssak.pesysId} i migreringsbasen"
         )
+
+    fun settSakMigrert(id: UUID) = repository.oppdater(
+        "UPDATE pesyssak SET migrert=:migrert WHERE id=:id",
+        mapOf("id" to id, "migrert" to true),
+        "Markerte $id som migrert"
+    )
 }

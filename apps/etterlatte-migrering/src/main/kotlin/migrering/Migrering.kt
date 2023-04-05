@@ -35,16 +35,17 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val pesysRe
 
     private fun migrerSak(
         packet: JsonMessage,
-        it: Pesyssak,
+        sak: Pesyssak,
         context: MessageContext
     ) {
         packet.eventName = Migreringshendelser.MIGRER_SAK
-        val request = tilMigreringsrequest(it).toJson()
+        val request = tilMigreringsrequest(sak).toJson()
         packet.request = request
         context.publish(packet.toJson())
         logger.info(
-            "Migrering starta for pesys-sak ${it.pesysId} og melding om behandling ble sendt."
+            "Migrering starta for pesys-sak ${sak.pesysId} og melding om behandling ble sendt."
         )
+        pesysRepository.settSakMigrert(sak.id)
     }
 
     private fun tilMigreringsrequest(sak: Pesyssak) = MigreringRequest(

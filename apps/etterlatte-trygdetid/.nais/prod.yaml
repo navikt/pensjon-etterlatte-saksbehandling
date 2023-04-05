@@ -22,7 +22,19 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14
+        tier: db-custom-1-3840
+        collation: nb_NO.UTF8
+        cascadingDelete: false
         name: etterlatte-trygdetid
+        diskAutoresize: true
+        diskSize: 30
+        diskType: SSD
+        highAvailability: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
+        maintenance:
+          day: 7
+          hour: 2
         databases:
           - name: trygdetid
             envVarPrefix: DB
@@ -32,14 +44,13 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: trygdeetaten.no
+      tenant: nav.no
       claims:
         groups:
-          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # 0000-GA-PENSJON_ATTESTERING
-          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
+          - id: 11053fd7-e674-4552-9a88-f9fcedfa70b3 # 0000-GA-PENSJON_ATTESTERING
+          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # 0000-GA-PENSJON_SAKSBEHANDLER
         extra:
           - NAVident
-
   replicas:
     cpuThresholdPercentage: 90
     max: 4
@@ -48,15 +59,14 @@ spec:
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-behandling
+      value: prod-gcp.etterlatte.etterlatte-behandling
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag/api
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-grunnlag
+      value: prod-gcp.etterlatte.etterlatte-grunnlag
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-beregning
     outbound:

@@ -7,11 +7,11 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import no.nav.etterlatte.brev.model.BrevRequest
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
-import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
@@ -26,7 +26,7 @@ class PdfGeneratorKlient(private val client: HttpClient, private val apiUrl: Str
         measureTimedValue {
             client.post("$apiUrl/${brevRequest.brevMalUrl()}") {
                 header("Content-Type", "application/json")
-                header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
+                header(X_CORRELATION_ID, getXCorrelationId())
                 setBody(brevRequest.toJsonNode())
             }.body<ByteArray>()
         }.let { (result, duration) ->

@@ -18,12 +18,13 @@ import io.ktor.http.content.TextContent
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import java.util.*
 
 /*
@@ -48,7 +49,7 @@ class SafClient(
         httpClient.get("$baseUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV") {
             header("Authorization", "Bearer ${getToken(accessToken)}")
             header("Content-Type", "application/json")
-            header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
+            header(X_CORRELATION_ID, getXCorrelationId())
         }.body()
     } catch (ex: Exception) {
         throw JournalpostException("Feil ved kall til hentdokument", ex)

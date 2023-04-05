@@ -2,13 +2,13 @@ package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
+import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.migrering.MigreringRequest
-import rapidsandrivers.migrering.Migreringshendelser
-import rapidsandrivers.migrering.PesysId
 
 class MigreringTest {
 

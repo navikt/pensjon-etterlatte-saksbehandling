@@ -1,4 +1,4 @@
-package rapidsandrivers.migrering
+package no.nav.etterlatte.rapidsandrivers.migrering
 
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator

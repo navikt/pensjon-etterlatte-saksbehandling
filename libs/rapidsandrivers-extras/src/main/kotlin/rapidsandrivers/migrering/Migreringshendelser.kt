@@ -1,4 +1,4 @@
-package rapidsandrivers.migrering
+package no.nav.etterlatte.rapidsandrivers.migrering
 
 object Migreringshendelser {
 

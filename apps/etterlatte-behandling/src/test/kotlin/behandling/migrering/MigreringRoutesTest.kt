@@ -18,14 +18,14 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.module
+import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
+import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import rapidsandrivers.migrering.Enhet
-import rapidsandrivers.migrering.MigreringRequest
-import rapidsandrivers.migrering.PesysId
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*

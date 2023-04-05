@@ -1,4 +1,4 @@
-package rapidsandrivers.migrering
+package no.nav.etterlatte.rapidsandrivers.migrering
 
 import no.nav.helse.rapids_rivers.JsonMessage
 

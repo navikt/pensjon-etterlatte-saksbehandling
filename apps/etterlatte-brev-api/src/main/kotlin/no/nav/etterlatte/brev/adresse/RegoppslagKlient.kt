@@ -8,6 +8,7 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -33,7 +34,7 @@ class RegoppslagKlient(
             logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
             val response = client.get("$url/regoppslag/$ident") {
-                header("x_correlation_id", getXCorrelationId())
+                header(X_CORRELATION_ID, getXCorrelationId())
                 header("Nav_Call_Id", getXCorrelationId())
             }
 

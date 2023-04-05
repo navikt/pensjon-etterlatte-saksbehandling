@@ -11,13 +11,10 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 class FoerstegangsbehandlingAggregat(
@@ -61,19 +58,6 @@ class FoerstegangsbehandlingAggregat(
                 logger.info("behandling ${it.id} i sak ${it.sak} er gyldighetsprøvd")
             }
             .also { behandlinger.lagreStatus(it) }
-    }
-
-    fun lagreVirkningstidspunkt(yearMonth: YearMonth, ident: String, begrunnelse: String): Virkningstidspunkt {
-        lagretBehandling =
-            lagretBehandling.oppdaterVirkningstidspunkt(
-                yearMonth,
-                Grunnlagsopplysning.Saksbehandler.create(ident),
-                begrunnelse
-            )
-                .also { behandlinger.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!) }
-                .also { behandlinger.lagreStatus(it) }
-
-        return lagretBehandling.virkningstidspunkt!!
     }
 
     fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {

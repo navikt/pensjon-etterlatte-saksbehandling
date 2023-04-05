@@ -99,7 +99,7 @@ function mapAarsak(aarsak: AarsaksTyper) {
     case AarsaksTyper.SOEKNAD:
       return 'Søknad'
     case AarsaksTyper.REGULERING:
-      return 'Automatisk regulering'
+      return 'Regulering'
   }
 }
 

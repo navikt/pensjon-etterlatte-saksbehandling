@@ -587,7 +587,7 @@ internal class BehandlingDaoIntegrationTest {
 
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("navIdent")
         val nyDato = YearMonth.of(2021, 2)
-        behandling!!.oppdaterVirkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse").let {
+        behandling!!.oppdaterVirkningstidspunkt(Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse")).let {
             behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.virkningstidspunkt!!)
         }
 
@@ -656,7 +656,7 @@ internal class BehandlingDaoIntegrationTest {
 
         foerstegangsbehandling!!
             .oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .let {

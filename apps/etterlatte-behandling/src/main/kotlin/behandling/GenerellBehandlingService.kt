@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
@@ -33,9 +34,7 @@ import java.util.UUID
 
 interface GenerellBehandlingService {
 
-    fun hentBehandlinger(): List<Behandling>
     fun hentBehandling(behandlingId: UUID): Behandling?
-    fun hentBehandlingstype(behandlingId: UUID): BehandlingType?
     fun hentBehandlingerISak(sakId: Long): List<Behandling>
     fun hentSenestIverksatteBehandling(sakId: Long): Behandling?
     fun avbrytBehandling(behandlingId: UUID, saksbehandler: String)
@@ -44,6 +43,13 @@ interface GenerellBehandlingService {
         vedtakHendelse: VedtakHendelse,
         hendelseType: HendelseType
     )
+
+    fun oppdaterVirkningstidspunkt(
+        behandlingId: UUID,
+        dato: YearMonth,
+        ident: String,
+        begrunnelse: String
+    ): Virkningstidspunkt
 
     fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse>
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
@@ -79,18 +85,10 @@ class RealGenerellBehandlingService(
 ) : GenerellBehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun hentBehandlinger(): List<Behandling> {
-        return inTransaction { behandlinger.alleBehandlinger() }
-    }
-
     override fun hentBehandling(behandlingId: UUID): Behandling? {
         return inTransaction {
             behandlinger.hentBehandling(behandlingId)
         }
-    }
-
-    override fun hentBehandlingstype(behandlingId: UUID): BehandlingType? {
-        return inTransaction { behandlinger.hentBehandlingType(behandlingId) }
     }
 
     override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
@@ -291,6 +289,36 @@ class RealGenerellBehandlingService(
                 }
             }
         }
+    }
+
+    override fun oppdaterVirkningstidspunkt(
+        behandlingId: UUID,
+        dato: YearMonth,
+        ident: String,
+        begrunnelse: String
+    ): Virkningstidspunkt {
+        val behandling = hentBehandling(behandlingId) ?: run {
+            logger.error("Prøvde å oppdatere virkningstidspunkt på en behandling som ikke eksisterer: $behandlingId")
+            throw RuntimeException("Fant ikke behandling")
+        }
+
+        val virkningstidspunkt = Virkningstidspunkt.create(dato, ident, begrunnelse)
+        try {
+            behandling.oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .also {
+                    inTransaction {
+                        behandlinger.lagreNyttVirkningstidspunkt(behandlingId, virkningstidspunkt)
+                        behandlinger.lagreStatus(it)
+                    }
+                }
+        } catch (e: NotImplementedError) {
+            logger.error(
+                "Kan ikke oppdatere virkningstidspunkt for behandling: $behandlingId med typen ${behandling.type}"
+            )
+            throw e
+        }
+
+        return virkningstidspunkt
     }
 
     override fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {

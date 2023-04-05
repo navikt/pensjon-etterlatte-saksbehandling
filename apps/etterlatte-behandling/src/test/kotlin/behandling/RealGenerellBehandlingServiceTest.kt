@@ -62,65 +62,6 @@ class RealGenerellBehandlingServiceTest {
     }
 
     @Test
-    fun `skal hente behandlinger`() {
-        val hendleseskanal = mockk<BehandlingHendelserKanal>()
-        val behandlingerMock = mockk<BehandlingDao> {
-            every { alleBehandlinger() } returns listOf(
-                revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING),
-                foerstegangsbehandling(sakId = 2),
-                revurdering(sakId = 3, revurderingAarsak = RevurderingAarsak.REGULERING),
-                foerstegangsbehandling(sakId = 4)
-            )
-        }
-        val hendelserMock = mockk<HendelseDao>()
-        val manueltOpphoerMock = mockk<ManueltOpphoerService>()
-        val sut = RealGenerellBehandlingService(
-            behandlingerMock,
-            hendleseskanal,
-            FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
-            RevurderingFactory(behandlingerMock, hendelserMock),
-            hendelserMock,
-            manueltOpphoerMock,
-            mockk(),
-            mockk(),
-            mockk()
-        )
-
-        val behandlinger = sut.hentBehandlinger()
-
-        assertAll(
-            "skal hente behandlinger",
-            { assertEquals(4, behandlinger.size) },
-            { assertEquals(2, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
-            { assertEquals(2, behandlinger.filterIsInstance<Revurdering>().size) }
-        )
-    }
-
-    @Test
-    fun `hent behandlingstype`() {
-        val id = UUID.randomUUID()
-        val hendleseskanal = mockk<BehandlingHendelserKanal>()
-        val behandlingerMock = mockk<BehandlingDao> {
-            every { hentBehandlingType(id) } returns BehandlingType.REVURDERING
-        }
-        val hendelserMock = mockk<HendelseDao>()
-        val manueltOpphoerMock = mockk<ManueltOpphoerService>()
-        val sut = RealGenerellBehandlingService(
-            behandlingerMock,
-            hendleseskanal,
-            FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
-            RevurderingFactory(behandlingerMock, hendelserMock),
-            hendelserMock,
-            manueltOpphoerMock,
-            mockk(),
-            mockk(),
-            mockk()
-        )
-        val behandlingtype = sut.hentBehandlingstype(id)
-        assertEquals(BehandlingType.REVURDERING, behandlingtype)
-    }
-
-    @Test
     fun `skal hente behandlinger i sak`() {
         val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val behandlingerMock = mockk<BehandlingDao> {

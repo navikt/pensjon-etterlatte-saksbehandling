@@ -9,7 +9,6 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -23,7 +22,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
 import java.time.Clock
-import java.time.YearMonth
 import java.util.*
 
 interface FoerstegangsbehandlingService {
@@ -42,13 +40,6 @@ interface FoerstegangsbehandlingService {
     ): GyldighetsResultat
 
     fun lagreGyldighetsproeving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
-    fun lagreVirkningstidspunkt(
-        behandlingId: UUID,
-        dato: YearMonth,
-        ident: String,
-        begrunnelse: String
-    ): Virkningstidspunkt
-
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
     fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true, utfall: VilkaarsvurderingUtfall?)
@@ -126,18 +117,6 @@ class RealFoerstegangsbehandlingService(
             val foerstegangsbehandlingAggregat = foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
             foerstegangsbehandlingAggregat.lagreGyldighetproeving(gyldighetsproeving)
             foerstegangsbehandlingAggregat
-        }
-    }
-
-    override fun lagreVirkningstidspunkt(
-        behandlingId: UUID,
-        dato: YearMonth,
-        ident: String,
-        begrunnelse: String
-    ): Virkningstidspunkt {
-        return inTransaction {
-            foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId)
-                .lagreVirkningstidspunkt(dato, ident, begrunnelse)
         }
     }
 

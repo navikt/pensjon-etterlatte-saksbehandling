@@ -28,7 +28,9 @@ const OpprettRevurderingModal = (props: Props) => {
 
     opprettRevurdering(
       { sakId: props.sakId, aarsak: valgtAarsak },
-      () => {},
+      () => {
+        location.reload()
+      },
       () => {
         setError('En feil skjedde ved opprettelse av revurderingen')
       }

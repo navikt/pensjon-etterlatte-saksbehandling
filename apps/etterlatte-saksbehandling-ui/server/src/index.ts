@@ -40,7 +40,13 @@ if (isDev) {
   )
 
   app.use(
-    ['/api/behandling', '/api/behandlinger/:sakid/manueltopphoer', '/api/oppgaver', '/api/personer'],
+    [
+      '/api/behandling',
+      '/api/behandlinger/:sakid/manueltopphoer',
+      '/api/oppgaver',
+      '/api/personer',
+      '/api/:sakid/revurdering',
+    ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url)
   )

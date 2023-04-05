@@ -35,6 +35,17 @@ const VedtaksDato = (props: { behandlingsId: string }) => {
   return <>{attestertDato ? formaterStringDato(attestertDato) : ''}</>
 }
 
+const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag): string => {
+  switch (behandlingSammendrag.behandlingType) {
+    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
+      return `/behandling/${behandlingSammendrag.id}/soeknadsoversikt`
+    case IBehandlingsType.REVURDERING:
+      return `/behandling/${behandlingSammendrag.id}/revurderingsoversikt`
+    case IBehandlingsType.MANUELT_OPPHOER:
+      return `/behandling/${behandlingSammendrag.id}/opphoeroversikt`
+  }
+}
+
 export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
   return (
     <div>
@@ -69,7 +80,7 @@ export const Saksliste = ({ behandlinger }: { behandlinger: IBehandlingsammendra
                 {erFerdigBehandlet(behandling.status) ? resultatTekst(behandling) : ''}
               </Table.DataCell>
               <Table.DataCell key={i}>
-                <Link href={`/behandling/${behandling.id}/soeknadsoversikt`}>Vis behandling</Link>
+                <Link href={lenkeTilBehandling(behandling)}>Vis behandling</Link>
               </Table.DataCell>
             </Table.Row>
           ))}

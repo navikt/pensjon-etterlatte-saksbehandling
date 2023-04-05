@@ -13,6 +13,7 @@ import { hentBehandlingerForPerson, hentGrunnlagsendringshendelserForPerson } fr
 import { Container } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import { harIngenUavbrutteManuelleOpphoer, kunIverksatteBehandlinger } from '~components/behandling/felles/utils'
+import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -106,6 +107,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       {kanOppretteManueltOpphoer && (
                         <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
                       )}
+                      {iverksatteBehandlinger.length > 0 && <OpprettRevurderingModal sakId={sakId} />}
                     </EkstraHandlinger>
                   ) : null}
                   <div className="behandlinger">
@@ -136,6 +138,7 @@ const HendelseBorder = styled.div`
 const EkstraHandlinger = styled.div`
   display: flex;
   flex-direction: row-reverse;
+  gap: 0.5em;
 `
 
 export const IconButton = styled.div`

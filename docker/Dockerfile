@@ -1,6 +1,6 @@
 FROM navikt/java:common AS java-common
 
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:17-alpine
 
 RUN umask o+r
 

@@ -6,7 +6,6 @@ RUN umask o+r
 
 RUN addgroup -S apprunner && adduser -S apprunner -G apprunner
 
-RUN apk add --no-cache bash
 COPY --chown=apprunner:root --from=java-common /init-scripts /init-scripts
 COPY --chown=apprunner:root --from=java-common /run-java.sh /run-java.sh
 COPY --from=java-common /entrypoint.sh /entrypoint.sh
@@ -29,6 +28,7 @@ COPY build/libs/*.jar ./
 
 EXPOSE 8080
 
+RUN apk add --no-cache bash
 RUN chown -R apprunner /app
 USER apprunner
 

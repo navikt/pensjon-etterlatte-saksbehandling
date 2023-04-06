@@ -11,7 +11,6 @@ COPY --chown=apprunner:root --from=java-common /init-scripts /init-scripts
 COPY --chown=apprunner:root --from=java-common /run-java.sh /run-java.sh
 COPY --from=java-common /entrypoint.sh /entrypoint.sh
 COPY --from=java-common /dumb-init /dumb-init
-RUN apk del bash
 
 RUN apk add tzdata
 RUN cp /usr/share/zoneinfo/Europe/Oslo /etc/localtime

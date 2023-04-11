@@ -68,12 +68,17 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
+    - name: ETTERLATTE_TRYGDETID_URL
+      value: http://etterlatte-trygdetid
+    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-trygdetid
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-grunnlag
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-behandling
+        - application: etterlatte-trygdetid
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

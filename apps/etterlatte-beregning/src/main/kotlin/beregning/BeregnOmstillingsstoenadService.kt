@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning
 import beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlient
+import no.nav.etterlatte.beregning.klienter.TrygdetidKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.beregning.regler.Beregningstall
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.Avdoed
@@ -17,6 +18,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -32,15 +34,17 @@ import java.util.UUID.randomUUID
 class BeregnOmstillingsstoenadService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val trygdetidKlient: TrygdetidKlient,
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository
 ) {
     private val logger = LoggerFactory.getLogger(BeregnOmstillingsstoenadService::class.java)
 
     suspend fun beregn(behandling: DetaljertBehandling, bruker: Bruker): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
+        val trygdetid = trygdetidKlient.hentTrygdetid(behandling.id, bruker)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
-        val beregningsgrunnlag = opprettBeregningsgrunnlagOmstillingsstoenad(FASTSATT_TRYGDETID_I_PILOT)
+        val beregningsgrunnlag = opprettBeregningsgrunnlagOmstillingsstoenad(trygdetid)
 
         logger.info("Beregner omstillingsstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
@@ -145,15 +149,21 @@ class BeregnOmstillingsstoenadService(
         )
     }
 
-    private fun opprettBeregningsgrunnlagOmstillingsstoenad(trygdetid: Int) = OmstillingstoenadGrunnlag(
-        avdoed = FaktumNode(
-            verdi = Avdoed(Beregningstall(trygdetid)),
-            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
-            beskrivelse = "Trygdetid avdøed ektefelle"
-        )
-    )
+    private fun opprettBeregningsgrunnlagOmstillingsstoenad(trygdetid: TrygdetidDto): OmstillingstoenadGrunnlag {
+        val totalTrygdetid = requireNotNull(trygdetid.beregnetTrygdetid?.total) {
+            "Total trygdetid ikke satt for behandling ${trygdetid.behandlingId}"
+        }
 
-    private companion object {
-        private const val FASTSATT_TRYGDETID_I_PILOT = 40
+        return OmstillingstoenadGrunnlag(
+            avdoed = FaktumNode(
+                verdi = Avdoed(Beregningstall(totalTrygdetid)),
+                kilde = Grunnlagsopplysning.RegelKilde(
+                    "Trygdetid fastsatt av saksbehandler",
+                    Tidspunkt.now(), // TODO få inn tidspunkt i trygdetid EY-2010
+                    "1"
+                ),
+                beskrivelse = "Trygdetid avdød ektefelle"
+            )
+        )
     }
 }

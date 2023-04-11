@@ -8,6 +8,7 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.beregning.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.beregning.klienter.TrygdetidKlient
 import no.nav.etterlatte.beregning.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -21,17 +22,21 @@ class ApplicationContext {
         username = properties.dbUsername,
         password = properties.dbPassword
     )
+
     val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
+    val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    val behandlingKlient = BehandlingKlientImpl(config, httpClient())
+
     val beregnBarnepensjonService = BeregnBarnepensjonService(
         vilkaarsvurderingKlient = vilkaarsvurderingKlient,
         grunnlagKlient = grunnlagKlient
     )
     val beregnOmstillingsstoenadService = BeregnOmstillingsstoenadService(
         vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-        grunnlagKlient = grunnlagKlient
+        grunnlagKlient = grunnlagKlient,
+        trygdetidKlient = trygdetidKlient
     )
-    val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     val beregningService = BeregningService(
         beregningRepository = BeregningRepository(dataSource),
         behandlingKlient = behandlingKlient,

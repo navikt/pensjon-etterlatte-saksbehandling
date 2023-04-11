@@ -25,4 +25,5 @@ export interface Beregningsperiode {
   soeskenFlokk: string[]
   grunnbelopMnd: number
   grunnbelop: number
+  trygdetid: number
 }

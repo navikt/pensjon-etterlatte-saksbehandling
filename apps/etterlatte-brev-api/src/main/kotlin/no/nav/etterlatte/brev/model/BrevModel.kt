@@ -2,8 +2,9 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import java.util.UUID
+import java.util.*
 
 typealias BrevID = Long
 
@@ -18,23 +19,44 @@ enum class Status {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Adresse(
-    val navn: String? = null,
-    val adresse: String? = null,
+    val adresseType: String,
+    val adresselinje1: String? = null,
+    val adresselinje2: String? = null,
+    val adresselinje3: String? = null,
     val postnummer: String? = null,
     val poststed: String? = null,
-    val land: String? = null
+    val landkode: String,
+    val land: String
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
+    val navn: String,
     val foedselsnummer: Folkeregisteridentifikator? = null,
     val orgnummer: String? = null,
-    val adresse: Adresse? = null
+    val adresse: Adresse
 ) {
     init {
-        if (foedselsnummer == null && orgnummer == null && adresse == null) {
+        if (foedselsnummer == null && orgnummer == null) {
             throw IllegalArgumentException("Enten fødselsnummer, orgnummer eller adresse må være spesifisert")
         }
+    }
+
+    companion object {
+        fun fra(fnr: Folkeregisteridentifikator, regoppslag: RegoppslagResponseDTO) = Mottaker(
+            navn = regoppslag.navn,
+            foedselsnummer = fnr,
+            adresse = Adresse(
+                adresseType = regoppslag.adresse.type.name,
+                adresselinje1 = regoppslag.adresse.adresselinje1,
+                adresselinje2 = regoppslag.adresse.adresselinje2,
+                adresselinje3 = regoppslag.adresse.adresselinje3,
+                postnummer = regoppslag.adresse.postnummer,
+                poststed = regoppslag.adresse.poststed,
+                landkode = regoppslag.adresse.landkode,
+                land = regoppslag.adresse.land
+            )
+        )
     }
 }
 

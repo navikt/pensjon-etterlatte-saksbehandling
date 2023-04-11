@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import java.lang.reflect.Array.setBoolean
 import java.sql.ResultSet
 import java.util.UUID
 import javax.sql.DataSource
@@ -77,12 +78,15 @@ class BrevRepository private constructor(private val ds: DataSource) {
                 .apply {
                     setString(1, brev.mottaker.foedselsnummer?.value)
                     setString(2, brev.mottaker.orgnummer)
-                    setString(3, brev.mottaker.adresse?.navn)
-                    setString(4, brev.mottaker.adresse?.adresse)
-                    setString(5, brev.mottaker.adresse?.postnummer)
-                    setString(6, brev.mottaker.adresse?.poststed)
-                    setString(7, brev.mottaker.adresse?.land)
-                    setLong(8, brevId)
+                    setString(3, brev.mottaker.navn)
+                    setString(4, brev.mottaker.adresse.adresselinje1)
+                    setString(5, brev.mottaker.adresse.adresselinje2)
+                    setString(6, brev.mottaker.adresse.adresselinje3)
+                    setString(7, brev.mottaker.adresse.postnummer)
+                    setString(8, brev.mottaker.adresse.poststed)
+                    setString(9, brev.mottaker.adresse.landkode)
+                    setString(10, brev.mottaker.adresse.land)
+                    setLong(11, brevId)
                 }
                 .executeUpdate()
         }
@@ -100,11 +104,15 @@ class BrevRepository private constructor(private val ds: DataSource) {
                     setBoolean(4, ulagretBrev.erVedtaksbrev)
                     setString(5, ulagretBrev.mottaker.foedselsnummer?.value)
                     setString(6, ulagretBrev.mottaker.orgnummer)
-                    setString(7, ulagretBrev.mottaker.adresse?.navn)
-                    setString(8, ulagretBrev.mottaker.adresse?.adresse)
-                    setString(9, ulagretBrev.mottaker.adresse?.postnummer)
-                    setString(10, ulagretBrev.mottaker.adresse?.poststed)
-                    setString(11, ulagretBrev.mottaker.adresse?.land)
+                    setString(7, ulagretBrev.mottaker.navn)
+                    setString(8, ulagretBrev.mottaker.adresse.adresseType)
+                    setString(9, ulagretBrev.mottaker.adresse.adresselinje1)
+                    setString(10, ulagretBrev.mottaker.adresse.adresselinje2)
+                    setString(11, ulagretBrev.mottaker.adresse.adresselinje3)
+                    setString(12, ulagretBrev.mottaker.adresse.postnummer)
+                    setString(13, ulagretBrev.mottaker.adresse.poststed)
+                    setString(14, ulagretBrev.mottaker.adresse.landkode)
+                    setString(15, ulagretBrev.mottaker.adresse.land)
                 }
                 .executeQuery()
                 .singleOrNull { getLong(1) }!!
@@ -172,16 +180,19 @@ class BrevRepository private constructor(private val ds: DataSource) {
         tittel = getString("tittel"),
         status = Status.valueOf(getString("status_id")),
         mottaker = Mottaker(
+            navn = getString("navn"),
             foedselsnummer = getString("foedselsnummer")?.let { Folkeregisteridentifikator.of(it) },
             orgnummer = getString("orgnummer"),
-            adresse = getString("navn")?.let {
-                Adresse(
-                    navn = it,
-                    adresse = getString("adresse"),
-                    postnummer = getString("postnummer"),
-                    poststed = getString("poststed")
-                )
-            }
+            adresse = Adresse(
+                adresseType = getString("adressetype"),
+                adresselinje1 = getString("adresselinje1"),
+                adresselinje2 = getString("adresselinje2"),
+                adresselinje3 = getString("adresselinje3"),
+                postnummer = getString("postnummer"),
+                poststed = getString("poststed"),
+                landkode = getString("landkode"),
+                land = getString("land")
+            )
         ),
         erVedtaksbrev = getBoolean("vedtaksbrev")
     )
@@ -223,8 +234,11 @@ class BrevRepository private constructor(private val ds: DataSource) {
             WITH nytt_brev AS (
                 INSERT INTO brev (behandling_id, soeker_fnr, tittel, vedtaksbrev) VALUES (?, ?, ?, ?) RETURNING id
             ) 
-            INSERT INTO mottaker (brev_id, foedselsnummer, orgnummer, navn, adresse, postnummer, poststed, land)
-                VALUES ((SELECT id FROM nytt_brev), ?, ?, ?, ?, ?, ?, ?) RETURNING brev_id
+            INSERT INTO mottaker (
+                brev_id, foedselsnummer, orgnummer, navn, 
+                adressetype, adresselinje1, adresselinje2, adresselinje3, 
+                postnummer, poststed, landkode, land
+            ) VALUES ((SELECT id FROM nytt_brev), ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?) RETURNING brev_id
         """
 
         const val OPPRETT_INNHOLD_QUERY = """
@@ -240,7 +254,9 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
         const val OPPDATER_MOTTAKER_QUERY = """
             UPDATE mottaker 
-            SET foedselsnummer = ?, orgnummer = ?, navn = ?, adresse = ?, postnummer = ?, poststed = ?, land = ?
+            SET foedselsnummer = ?, orgnummer = ?, navn = ?, 
+                adresselinje1 = ?, adresselinje2 = ?, adresselinje3 = ?,
+                postnummer = ?, poststed = ?, landkode = ?, land = ?
             WHERE brev_id = ?
         """
 

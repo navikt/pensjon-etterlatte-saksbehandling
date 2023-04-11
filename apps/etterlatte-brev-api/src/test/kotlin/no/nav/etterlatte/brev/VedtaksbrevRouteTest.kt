@@ -19,6 +19,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
@@ -175,7 +176,12 @@ internal class VedtaksbrevRouteTest {
         "soeker_fnr",
         "tittel",
         Status.OPPRETTET,
-        Mottaker(STOR_SNERK),
+        Mottaker(
+            "Stor Snerk",
+            STOR_SNERK,
+            null,
+            Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
+        ),
         true
     )
 

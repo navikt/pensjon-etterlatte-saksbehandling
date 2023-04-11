@@ -6,21 +6,16 @@ import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
-import no.nav.etterlatte.brev.model.Adresse
-import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
-import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.BrevRequestMapper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 class VedtaksbrevService(
     private val db: BrevRepository,
@@ -30,6 +25,12 @@ class VedtaksbrevService(
     private val dokarkivService: DokarkivServiceImpl
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
+
+    fun hentVedtaksbrev(behandlingId: UUID): Brev? {
+        logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")
+
+        return db.hentBrevForBehandling(behandlingId).find { it.erVedtaksbrev }
+    }
 
     suspend fun oppdaterVedtaksbrev(
         sakId: Long,
@@ -93,11 +94,7 @@ class VedtaksbrevService(
 
         val vedtakType = behandling.vedtak.type
 
-        val brevRequest = when (vedtakType) {
-            VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
-            VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(behandling, avsender, mottaker, attestant)
-            else -> throw Exception("Vedtakstype er ikke støttet: $vedtakType")
-        }
+        val brevRequest = BrevRequestMapper.fra(vedtakType, behandling, avsender, mottaker, attestant)
 
         val pdf = pdfGenerator.genererPdf(brevRequest)
 
@@ -108,21 +105,9 @@ class VedtaksbrevService(
             soekerFnr = behandling.persongalleri.soeker.fnr,
             tittel = "Vedtak om ${vedtakType.name.lowercase()}",
             behandling.spraak,
-            Mottaker(
-                foedselsnummer = Folkeregisteridentifikator.of(behandling.persongalleri.innsender.fnr),
-                adresse = Adresse(
-                    navn = behandling.persongalleri.innsender.navn,
-                    adresse = mottaker.adresse,
-                    postnummer = mottaker.postnummer,
-                    poststed = mottaker.poststed,
-                    land = mottaker.land
-                )
-            ),
+            mottaker,
             erVedtaksbrev = true,
             pdf
         )
     }
-
-    fun hentVedtaksbrev(behandlingId: UUID): Brev? =
-        db.hentBrevForBehandling(behandlingId).find { it.erVedtaksbrev }
 }

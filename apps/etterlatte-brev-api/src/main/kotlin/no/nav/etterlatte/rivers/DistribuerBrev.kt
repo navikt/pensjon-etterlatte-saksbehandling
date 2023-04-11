@@ -58,7 +58,7 @@ internal class DistribuerBrev(
         throw ex
     }
 
-    private fun JsonMessage.mottakerAdresse(): Adresse? = try {
+    private fun JsonMessage.mottakerAdresse(): Adresse = try {
         objectMapper.readValue(this["mottakerAdresse"].toJson())
     } catch (ex: Exception) {
         logger.error("Klarte ikke parse mottaker sin adresse:", ex)

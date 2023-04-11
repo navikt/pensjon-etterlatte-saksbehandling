@@ -17,7 +17,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 internal class DistribuerBrevTest {
     private val distribusjonService = mockk<DistribusjonServiceImpl>(relaxed = true)
@@ -26,7 +26,14 @@ internal class DistribuerBrevTest {
 
     private val brevId = 100L
     private val journalpostId = "11111"
-    private val adresse = Adresse("Fornavn Etternavn", "testveien 13", "0123", "Oslo", "Norge")
+    private val adresse = Adresse(
+        adresseType = "Fornavn Etternavn",
+        adresselinje1 = "testveien 13",
+        postnummer = "0123",
+        poststed = "Oslo",
+        land = "Norge",
+        landkode = "NOR"
+    )
 
     @BeforeEach
     fun before() = clearMocks(distribusjonService)

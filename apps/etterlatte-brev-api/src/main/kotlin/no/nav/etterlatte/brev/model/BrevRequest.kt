@@ -1,46 +1,36 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import java.time.LocalDate
 
 abstract class BrevRequest {
     abstract val spraak: Spraak
     abstract val avsender: Avsender
-    abstract val mottaker: MottakerRequest
+    abstract val mottaker: BrevMottaker
     abstract val attestant: Attestant?
     val utsendingsDato = LocalDate.now()
     abstract fun templateName(): String
 }
 
-// TODO: Sikre non-nullable
-data class MottakerRequest(
-    val navn: String? = null,
-    val adresse: String? = null,
+data class BrevMottaker(
+    val navn: String,
+    val adresse: String,
     val postnummer: String? = null,
     val poststed: String? = null,
     val land: String? = null
 ) {
     companion object {
-        fun fraAdresse(adresse: Adresse) = MottakerRequest(
-            navn = adresse.navn,
-            adresse = adresse.adresse,
-            postnummer = adresse.postnummer,
-            poststed = adresse.poststed,
-            land = adresse.land
-        )
-
-        fun fraRegoppslag(regoppslag: RegoppslagResponseDTO) = MottakerRequest(
-            navn = regoppslag.navn,
-            adresse = regoppslag.adresse.let {
+        fun fra(mottaker: Mottaker) = BrevMottaker(
+            navn = mottaker.navn,
+            adresse = mottaker.adresse.let {
                 listOfNotNull(
                     it.adresselinje1,
                     it.adresselinje2,
                     it.adresselinje3
                 ).joinToString(", ")
             },
-            postnummer = regoppslag.adresse.postnummer,
-            poststed = regoppslag.adresse.poststed?.capitalize(),
-            land = regoppslag.adresse.land
+            postnummer = mottaker.adresse.postnummer,
+            poststed = mottaker.adresse.poststed?.capitalize(),
+            land = mottaker.adresse.land
         )
     }
 }

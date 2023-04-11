@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class JournalfoerVedtaksbrevTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
@@ -54,14 +54,15 @@ internal class JournalfoerVedtaksbrevTest {
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
-        val adresse = Adresse("Fornavn", "Etternavn", "Testgaten 13", "1234", "OSLO")
+        val adresse =
+            Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
         val brev = Brev(
             1,
             BEHANDLING_ID,
             "fnr",
             "tittel",
             Status.FERDIGSTILT,
-            Mottaker(STOR_SNERK, null, adresse),
+            Mottaker("Fornavn Etternavn", STOR_SNERK, adresse = adresse),
             true
         )
         val response = JournalpostResponse("1234", null, null, true, emptyList())
@@ -94,14 +95,16 @@ internal class JournalfoerVedtaksbrevTest {
 
     @Test
     fun `Brev er allerede journalfoert`() {
-        val adresse = Adresse("Fornavn", "Etternavn", "Testgaten 13", "1234", "OSLO")
+        val adresse =
+            Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
+
         val brev = Brev(
             1,
             BEHANDLING_ID,
             "fnr",
             "tittel",
             Status.JOURNALFOERT,
-            Mottaker(STOR_SNERK, null, adresse),
+            Mottaker("Fornavn Etternavn", STOR_SNERK, adresse = adresse),
             true
         )
 

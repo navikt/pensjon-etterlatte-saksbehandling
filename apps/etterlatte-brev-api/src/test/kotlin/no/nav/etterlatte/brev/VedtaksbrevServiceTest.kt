@@ -25,6 +25,7 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.model.Mottaker
@@ -76,11 +77,11 @@ internal class VedtaksbrevServiceTest {
         @Test
         fun `Opprett vedtaksbrev hvis ikke finnes`() {
             every { db.hentBrevForBehandling(any()) } returns listOf(
-                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPRETTET, Mottaker(STOR_SNERK), false),
-                Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), false),
-                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), false),
-                Brev(4, BEHANDLING_ID, "fnr", "tittel", Status.JOURNALFOERT, Mottaker(STOR_SNERK), false),
-                Brev(5, BEHANDLING_ID, "fnr", "tittel", Status.DISTRIBUERT, Mottaker(STOR_SNERK), false)
+                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPRETTET, opprettMottaker(), false),
+                Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, opprettMottaker(), false),
+                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, opprettMottaker(), false),
+                Brev(4, BEHANDLING_ID, "fnr", "tittel", Status.JOURNALFOERT, opprettMottaker(), false),
+                Brev(5, BEHANDLING_ID, "fnr", "tittel", Status.DISTRIBUERT, opprettMottaker(), false)
             )
 
             val behandling = opprettBehandling()
@@ -114,11 +115,11 @@ internal class VedtaksbrevServiceTest {
         @Test
         fun `Oppdatering av vedtaksbrev som finnes`() {
             every { db.hentBrevForBehandling(any()) } returns listOf(
-                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPRETTET, Mottaker(STOR_SNERK), false),
-                Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), true),
-                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), false),
-                Brev(4, BEHANDLING_ID, "fnr", "tittel", Status.JOURNALFOERT, Mottaker(STOR_SNERK), false),
-                Brev(5, BEHANDLING_ID, "fnr", "tittel", Status.DISTRIBUERT, Mottaker(STOR_SNERK), false)
+                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPRETTET, opprettMottaker(), false),
+                Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, opprettMottaker(), true),
+                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, opprettMottaker(), false),
+                Brev(4, BEHANDLING_ID, "fnr", "tittel", Status.JOURNALFOERT, opprettMottaker(), false),
+                Brev(5, BEHANDLING_ID, "fnr", "tittel", Status.DISTRIBUERT, opprettMottaker(), false)
             )
 
             val behandling = opprettBehandling()
@@ -161,7 +162,7 @@ internal class VedtaksbrevServiceTest {
                     "fnr",
                     "tittel",
                     Status.FERDIGSTILT,
-                    Mottaker(STOR_SNERK),
+                    opprettMottaker(),
                     true
                 )
             )
@@ -189,9 +190,9 @@ internal class VedtaksbrevServiceTest {
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"])
         fun `Ferdigstille vedtaksbrev med gyldig status`(status: Status) {
             every { db.hentBrevForBehandling(any()) } returns listOf(
-                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), false),
-                Brev(2, BEHANDLING_ID, "fnr", "tittel", status, Mottaker(STOR_SNERK), true),
-                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), false)
+                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, opprettMottaker(), false),
+                Brev(2, BEHANDLING_ID, "fnr", "tittel", status, opprettMottaker(), true),
+                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, opprettMottaker(), false)
             )
             every { db.oppdaterStatus(any(), any()) } returns true
 
@@ -215,9 +216,9 @@ internal class VedtaksbrevServiceTest {
         @Test
         fun `Vedtaksbrev er allerede ferdigstilt`() {
             every { db.hentBrevForBehandling(any()) } returns listOf(
-                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), false),
-                Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), true),
-                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.JOURNALFOERT, Mottaker(STOR_SNERK), false)
+                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, opprettMottaker(), false),
+                Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, opprettMottaker(), true),
+                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.JOURNALFOERT, opprettMottaker(), false)
             )
 
             runBlocking {
@@ -243,9 +244,9 @@ internal class VedtaksbrevServiceTest {
         )
         fun `Ferdigstille vedtaksbrev`(status: Status) {
             every { db.hentBrevForBehandling(any()) } returns listOf(
-                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, Mottaker(STOR_SNERK), false),
-                Brev(2, BEHANDLING_ID, "fnr", "tittel", status, Mottaker(STOR_SNERK), true),
-                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), false)
+                Brev(1, BEHANDLING_ID, "fnr", "tittel", Status.OPPDATERT, opprettMottaker(), false),
+                Brev(2, BEHANDLING_ID, "fnr", "tittel", status, opprettMottaker(), true),
+                Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, opprettMottaker(), false)
             )
 
             runBlocking {
@@ -269,7 +270,7 @@ internal class VedtaksbrevServiceTest {
 
         @Test
         fun `Vedtaksbrev journalfoeres som forventet`() {
-            val forventetBrev = Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, Mottaker(STOR_SNERK), true)
+            val forventetBrev = Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, opprettMottaker(), true)
 
             val forventetResponse = JournalpostResponse("1", "OK", "melding", true)
             every { dokarkivService.journalfoer(any(), any()) } returns forventetResponse
@@ -301,7 +302,7 @@ internal class VedtaksbrevServiceTest {
             names = ["FERDIGSTILT"]
         )
         fun `Journalfoering av brev med ugyldig status`(status: Status) {
-            val brev = Brev(Random.nextLong(), BEHANDLING_ID, "fnr", "tittel", status, Mottaker(STOR_SNERK), true)
+            val brev = Brev(Random.nextLong(), BEHANDLING_ID, "fnr", "tittel", status, opprettMottaker(), true)
 
             runBlocking {
                 assertThrows<IllegalArgumentException> {
@@ -345,12 +346,18 @@ internal class VedtaksbrevServiceTest {
         )
     )
 
-    private fun opprettMottaker() = no.nav.etterlatte.brev.model.MottakerRequest(
-        "navn",
-        "adresse",
-        "1234",
-        "poststed",
-        "land"
+    private fun opprettMottaker() = Mottaker(
+        "Stor Snerk",
+        foedselsnummer = STOR_SNERK,
+        orgnummer = null,
+        adresse = Adresse(
+            adresseType = "NORSKPOSTADRESSE",
+            adresselinje1 = "Testgaten 13",
+            postnummer = "1234",
+            poststed = "OSLO",
+            land = "Norge",
+            landkode = "NOR"
+        )
     )
 
     private companion object {

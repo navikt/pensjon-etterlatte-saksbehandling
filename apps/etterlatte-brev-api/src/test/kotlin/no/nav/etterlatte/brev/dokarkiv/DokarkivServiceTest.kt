@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.journalpost.Sakstype
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.Mottaker
@@ -91,7 +92,12 @@ internal class DokarkivServiceTest {
         soekerFnr = "soeker fnr",
         tittel = "vedtak om innvilgelse",
         status = Status.FERDIGSTILT,
-        mottaker = Mottaker(STOR_SNERK),
+        mottaker = Mottaker(
+            "Stor Snerk",
+            STOR_SNERK,
+            null,
+            Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
+        ),
         erVedtaksbrev = true
     )
 

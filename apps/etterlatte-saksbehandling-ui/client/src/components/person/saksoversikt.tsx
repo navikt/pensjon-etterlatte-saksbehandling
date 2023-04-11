@@ -87,7 +87,10 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const iverksatteBehandlinger = kunIverksatteBehandlinger(behandlingliste)
   const kanOppretteManueltOpphoer =
     iverksatteBehandlinger.length > 0 && harIngenUavbrutteManuelleOpphoer(behandlingliste)
+  /** TODO ai: I mangel på feature toggling i front */
+  const toggledOn = false
   const kanOppretteRevurdering =
+    toggledOn &&
     iverksatteBehandlinger.length > 0 &&
     behandlingliste
       .filter((behandling) => behandling.behandlingType === IBehandlingsType.REVURDERING)

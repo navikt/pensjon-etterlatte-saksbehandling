@@ -170,7 +170,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
       <BrevContentFooter>
         <BehandlingHandlingKnapper>
-          {hentBehandlesFraStatus(status) && <SendTilAttesteringModal />}
+          {hentBehandlesFraStatus(status) && <SendTilAttesteringModal brevLaster={loading} />}
         </BehandlingHandlingKnapper>
       </BrevContentFooter>
     </Content>

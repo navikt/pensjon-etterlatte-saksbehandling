@@ -7,7 +7,7 @@ import { ButtonWrapper } from '~shared/modal/modal'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-export const SendTilAttesteringModal: React.FC = () => {
+export const SendTilAttesteringModal = (props: { brevLaster: Boolean }) => {
   const navigate = useNavigate()
 
   const [isOpen, setIsOpen] = useState(false)
@@ -30,8 +30,8 @@ export const SendTilAttesteringModal: React.FC = () => {
 
   return (
     <>
-      <Button variant="primary" size="medium" className="button" onClick={() => setIsOpen(true)}>
-        {handlinger.ATTESTERING.navn}
+      <Button variant="primary" size="medium" className="button" onClick={() => !props.brevLaster && setIsOpen(true)}>
+        {props.brevLaster ? 'Genererer brev' : handlinger.ATTESTERING.navn}
       </Button>
       <Modal
         open={isOpen}

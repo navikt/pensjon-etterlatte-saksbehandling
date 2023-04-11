@@ -79,7 +79,7 @@ fun Application.module(beanFactory: BeanFactory) {
         ) {
             attachContekst(dataSource(), beanFactory)
             sakRoutes(
-                sakServiceAdressebeskyttelse = sakServiceAdressebeskyttelse,
+                tilgangService = sakServiceAdressebeskyttelse,
                 sakService = sakService,
                 generellBehandlingService = generellBehandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService

@@ -7,27 +7,29 @@ import javax.sql.DataSource
 
 class SakDaoAdressebeskyttelse(private val datasource: DataSource) {
 
-    fun finnSakerMedGradering(fnr: String): List<SakMedGradering> {
+    fun finnSakerMedGraderingOgSkjerming(fnr: String): List<SakMedGraderingOgSkjermet> {
         datasource.connection.use {
-            val statement = it.prepareStatement("SELECT id, adressebeskyttelse from sak where fnr = ?")
+            val statement = it.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where fnr = ?")
             statement.setString(1, fnr)
             return statement.executeQuery().toList {
-                SakMedGradering(
+                SakMedGraderingOgSkjermet(
                     id = getLong(1),
-                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) }
+                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
+                    erSkjermet = getBoolean(3)
                 )
             }
         }
     }
 
-    fun hentSakMedGradering(id: Long): SakMedGradering? {
+    fun hentSakMedGraderingOgSkjerming(id: Long): SakMedGraderingOgSkjermet? {
         datasource.connection.use {
-            val statement = it.prepareStatement("SELECT id, adressebeskyttelse from sak where id = ?")
+            val statement = it.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where id = ?")
             statement.setLong(1, id)
             return statement.executeQuery().singleOrNull {
-                SakMedGradering(
+                SakMedGraderingOgSkjermet(
                     id = getLong(1),
-                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) }
+                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
+                    erSkjermet = getBoolean(3)
                 )
             }
         }
@@ -42,15 +44,19 @@ class SakDaoAdressebeskyttelse(private val datasource: DataSource) {
         }
     }
 
-    fun sjekkOmBehandlingHarAdressebeskyttelse(behandlingId: String): AdressebeskyttelseGradering? {
+    fun hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
         datasource.connection.use {
             val statement = it.prepareStatement(
-                "SELECT adressebeskyttelse FROM behandling b INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid"
+                "SELECT s.id, adressebeskyttelse, erSkjermet FROM behandling b" +
+                    " INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid"
             )
             statement.setString(1, behandlingId)
             return statement.executeQuery().singleOrNull {
-                val adressebeskyttelse = getString(1)
-                adressebeskyttelse?.let { AdressebeskyttelseGradering.valueOf(it) }
+                SakMedGraderingOgSkjermet(
+                    id = getLong(1),
+                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
+                    erSkjermet = getBoolean(3)
+                )
             }
         }
     }

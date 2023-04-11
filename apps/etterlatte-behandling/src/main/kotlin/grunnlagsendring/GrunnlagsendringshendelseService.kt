@@ -28,7 +28,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
+import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -38,7 +38,7 @@ class GrunnlagsendringshendelseService(
     private val generellBehandlingService: GenerellBehandlingService,
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val sakServiceAdressebeskyttelse: SakServiceAdressebeskyttelse
+    private val tilgangService: TilgangService
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -90,7 +90,7 @@ class GrunnlagsendringshendelseService(
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
         sakIder.forEach { sakId ->
-            sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(
+            tilgangService.oppdaterAdressebeskyttelse(
                 sakId,
                 gradering
             )

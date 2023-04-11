@@ -85,6 +85,8 @@ spec:
       value: ad7b87a6-9180-467c-affc-20a566b0fec0
     - name: AZUREAD_FORTROLIG_GROUPID
       value: 9ec6487d-f37a-4aad-a027-cd221c1ac32b
+    - name: AZUREAD_EGEN_ANSATT_GROUPID
+      value: e750ceb5-b70b-4d94-b4fa-9d22467b786b
     - name: NORG2_URL
       value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1
     - name: NAVANSATT_URL

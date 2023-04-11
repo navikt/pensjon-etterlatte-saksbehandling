@@ -100,4 +100,16 @@ data class SaksbehandlerMedRoller(val saksbehandler: Saksbehandler) {
         }
         return false
     }
+
+    fun harRolleEgenansatt(saksbehandlerGroupIdsByKey: Map<String, String>): Boolean {
+        val claims = saksbehandler.getClaims()
+
+        if (claims != null) {
+            return claims.containsClaim(
+                "groups",
+                saksbehandlerGroupIdsByKey["AZUREAD_EGEN_ANSATT_GROUPID"]
+            )
+        }
+        return false
+    }
 }

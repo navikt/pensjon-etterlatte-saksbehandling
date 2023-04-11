@@ -20,7 +20,7 @@ class SakDaoTest {
 
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao
-    private lateinit var sakServiceAdressebeskyttelse: SakServiceAdressebeskyttelse
+    private lateinit var tilgangService: TilgangService
 
     @BeforeAll
     fun beforeAll() {
@@ -35,7 +35,7 @@ class SakDaoTest {
         ).apply { migrate() }
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(
+        tilgangService = TilgangServiceImpl(
             SakDaoAdressebeskyttelse(dataSource),
             emptyMap()
         )

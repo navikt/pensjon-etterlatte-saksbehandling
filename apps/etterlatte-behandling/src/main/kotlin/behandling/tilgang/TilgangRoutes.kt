@@ -14,12 +14,12 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.bruker
-import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
+import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.SystemBruker
 
-internal fun Route.tilgangRoutes(sakServiceAdressebeskyttelse: SakServiceAdressebeskyttelse) {
+internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
     route("/$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()
@@ -27,7 +27,7 @@ internal fun Route.tilgangRoutes(sakServiceAdressebeskyttelse: SakServiceAdresse
             val harTilgang = harTilgangBrukertypeSjekk(
                 bruker = bruker,
                 harTilgang = {
-                    sakServiceAdressebeskyttelse.harTilgangTilPerson(
+                    tilgangService.harTilgangTilPerson(
                         fnr,
                         SaksbehandlerMedRoller(bruker as Saksbehandler)
                     )
@@ -40,7 +40,7 @@ internal fun Route.tilgangRoutes(sakServiceAdressebeskyttelse: SakServiceAdresse
             val harTilgang = harTilgangBrukertypeSjekk(
                 bruker = bruker,
                 harTilgang = {
-                    sakServiceAdressebeskyttelse.harTilgangTilBehandling(
+                    tilgangService.harTilgangTilBehandling(
                         behandlingsId.toString(),
                         SaksbehandlerMedRoller(bruker as Saksbehandler)
                     )
@@ -54,7 +54,7 @@ internal fun Route.tilgangRoutes(sakServiceAdressebeskyttelse: SakServiceAdresse
             val harTilgang = harTilgangBrukertypeSjekk(
                 bruker = bruker,
                 harTilgang = {
-                    sakServiceAdressebeskyttelse.harTilgangTilSak(
+                    tilgangService.harTilgangTilSak(
                         sakId,
                         SaksbehandlerMedRoller(bruker as Saksbehandler)
                     )

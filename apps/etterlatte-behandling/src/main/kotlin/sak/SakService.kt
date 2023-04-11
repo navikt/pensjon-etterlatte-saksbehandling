@@ -13,6 +13,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import no.nav.etterlatte.Saksbehandler as SaksbehandlerBruker

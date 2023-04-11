@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.kunSystembruker
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 
@@ -78,7 +79,3 @@ internal fun Route.sakRoutes(
         }
     }
 }
-
-data class Sak(val ident: String, val sakType: SakType, val id: Long, val enhet: String? = null)
-
-data class Saker(val saker: List<Sak>)

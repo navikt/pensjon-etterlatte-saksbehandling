@@ -36,8 +36,8 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               <OversiktKommerBarnetTilgode
                 kommerBarnetTilgode={behandling.kommerBarnetTilgode}
                 redigerbar={behandles}
-                søker={behandling.søker}
-                forelder={behandling.familieforhold?.gjenlevende}
+                soeker={behandling.søker}
+                gjenlevendeForelder={behandling.familieforhold?.gjenlevende}
                 behandlingId={behandling.id}
               />
             )}

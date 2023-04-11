@@ -9,23 +9,27 @@ import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/
 import { useState } from 'react'
 import { Grunnlagsopplysning } from '~shared/types/Grunnlagsopplysning'
 import { KildePdl } from '~shared/types/kilde'
+import { IAdresse } from '~shared/types/IAdresse'
 
 interface AdresseProps {
   label: string
-  adresse: string
+  adresse: IAdresse
   kilde?: string
 }
 
-const AdresseKort = (props: AdresseProps) => (
-  <InfoWrapper>
-    <Info label={props.label} tekst={props.adresse} undertekst={props.kilde} />
-  </InfoWrapper>
-)
+const AdresseKort = (props: AdresseProps) => {
+  const adresse = `${props.adresse.adresseLinje1}, ${props.adresse.postnr} ${props.adresse.poststed || ''}`
+  return (
+    <InfoWrapper>
+      <Info label={props.label} tekst={adresse} undertekst={props.kilde} />
+    </InfoWrapper>
+  )
+}
 
 interface Props {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
-  søker: IPdlPerson | undefined
-  forelder: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
+  soeker: IPdlPerson | undefined
+  gjenlevendeForelder: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
   redigerbar: boolean
   behandlingId: string
 }
@@ -33,13 +37,13 @@ interface Props {
 export const OversiktKommerBarnetTilgode = ({
   kommerBarnetTilgode,
   redigerbar,
-  søker,
-  forelder,
+  soeker,
+  gjenlevendeForelder,
   behandlingId,
 }: Props) => {
   const [vurder, setVurder] = useState(kommerBarnetTilgode !== null)
-  const bostedsadresse = søker?.bostedsadresse?.find((adresse) => adresse.aktiv === true)
-  const foreldersadresse = forelder?.opplysning?.bostedsadresse?.find((adresse) => adresse.aktiv === true)
+  const bostedsadresse = soeker?.bostedsadresse?.find((adresse) => adresse.aktiv)
+  const foreldersadresse = gjenlevendeForelder?.opplysning?.bostedsadresse?.find((adresse) => adresse.aktiv)
 
   return (
     <Soeknadsvurdering
@@ -59,13 +63,13 @@ export const OversiktKommerBarnetTilgode = ({
 
         <InfobokserWrapper>
           {bostedsadresse && (
-            <AdresseKort label="Barnets adresse" adresse={bostedsadresse.adresseLinje1} kilde={bostedsadresse?.kilde} />
+            <AdresseKort label="Barnets adresse" adresse={bostedsadresse} kilde={bostedsadresse?.kilde} />
           )}
           {foreldersadresse && (
             <AdresseKort
-              label="Forelders adresse"
-              adresse={foreldersadresse.adresseLinje1}
-              kilde={formaterKildePdl(forelder?.kilde)}
+              label="Gjenlevende forelders adresse"
+              adresse={foreldersadresse}
+              kilde={formaterKildePdl(gjenlevendeForelder?.kilde)}
             />
           )}
         </InfobokserWrapper>

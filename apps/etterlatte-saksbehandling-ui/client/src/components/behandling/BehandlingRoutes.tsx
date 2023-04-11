@@ -10,9 +10,11 @@ import { Vedtaksbrev } from './vedtaksbrev/Vedtaksbrev'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
+  | 'revurderingsoversikt'
   | 'opphoeroversikt'
   | 'vilkaarsvurdering'
   | 'trygdetid'
@@ -24,6 +26,7 @@ const behandlingRoutes = (
   behandling: IBehandlingReducer
 ): Array<{ path: behandlingRouteTypes; element: JSX.Element }> => [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt behandling={behandling} /> },
+  { path: 'revurderingsoversikt', element: <Revurderingsoversikt behandling={behandling} /> },
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
@@ -79,12 +82,15 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
 
   const soeknadRoutes = finnRoutesFoerstegangbehandling(behandling)
   const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
+  const revurderingRoutes = hentRevurderingRoutes()
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.MANUELT_OPPHOER:
       return behandlingRoutes(behandling).filter((route) => manueltOpphoerRoutes.includes(route.path))
-    default:
+    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandlingRoutes(behandling).filter((route) => soeknadRoutes.includes(route.path))
+    case IBehandlingsType.REVURDERING:
+      return behandlingRoutes(behandling).filter((route) => revurderingRoutes.includes(route.path))
   }
 }
 
@@ -95,4 +101,8 @@ function finnRoutesFoerstegangbehandling(behandling: IBehandlingReducer): Array<
     routes.push('beregne')
   }
   return routes
+}
+
+function hentRevurderingRoutes(): Array<behandlingRouteTypes> {
+  return ['revurderingsoversikt', 'vilkaarsvurdering', 'beregningsgrunnlag', 'beregne', 'brev']
 }

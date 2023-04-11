@@ -62,11 +62,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
             val iverksattBehandling = foerstegangsbehandling
                 .oppdaterKommerBarnetTilgode(kommerBarnetTilGodeVurdering())
                 .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
-                .oppdaterVirkningstidspunkt(
-                    virkningstidspunkt.dato,
-                    virkningstidspunkt.kilde,
-                    virkningstidspunkt.begrunnelse
-                )
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
                 .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
                 .tilBeregnet()
                 .tilFattetVedtak()

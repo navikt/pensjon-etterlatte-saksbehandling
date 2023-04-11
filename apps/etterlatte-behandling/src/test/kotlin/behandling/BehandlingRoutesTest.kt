@@ -205,7 +205,7 @@ internal class BehandlingRoutesTest {
             bodyBegrunnelse
         )
         every {
-            foerstegangsbehandlingService.lagreVirkningstidspunkt(
+            generellBehandlingService.oppdaterVirkningstidspunkt(
                 behandlingId,
                 parsetVirkningstidspunkt,
                 NAVident,

@@ -12,7 +12,13 @@ import { formaterEnumTilLesbarString } from '~utils/formattering'
 import { hentBehandlingerForPerson, hentGrunnlagsendringshendelserForPerson } from '~shared/api/behandling'
 import { Container } from '~shared/styled'
 import Spinner from '~shared/Spinner'
-import { harIngenUavbrutteManuelleOpphoer, kunIverksatteBehandlinger } from '~components/behandling/felles/utils'
+import {
+  erFerdigBehandlet,
+  harIngenUavbrutteManuelleOpphoer,
+  kunIverksatteBehandlinger,
+} from '~components/behandling/felles/utils'
+import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -81,6 +87,14 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const iverksatteBehandlinger = kunIverksatteBehandlinger(behandlingliste)
   const kanOppretteManueltOpphoer =
     iverksatteBehandlinger.length > 0 && harIngenUavbrutteManuelleOpphoer(behandlingliste)
+  /** TODO ai: I mangel på feature toggling i front */
+  const toggledOn = false
+  const kanOppretteRevurdering =
+    toggledOn &&
+    iverksatteBehandlinger.length > 0 &&
+    behandlingliste
+      .filter((behandling) => behandling.behandlingType === IBehandlingsType.REVURDERING)
+      .filter((behandling) => !erFerdigBehandlet(behandling.status)).length === 0
 
   return (
     <>
@@ -106,6 +120,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       {kanOppretteManueltOpphoer && (
                         <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
                       )}
+                      {kanOppretteRevurdering && <OpprettRevurderingModal sakId={sakId} />}
                     </EkstraHandlinger>
                   ) : null}
                   <div className="behandlinger">
@@ -136,6 +151,7 @@ const HendelseBorder = styled.div`
 const EkstraHandlinger = styled.div`
   display: flex;
   flex-direction: row-reverse;
+  gap: 0.5em;
 `
 
 export const IconButton = styled.div`

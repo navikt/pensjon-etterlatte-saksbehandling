@@ -136,7 +136,7 @@ internal fun Route.behandlingRoutes(
             }
 
             try {
-                val virkningstidspunkt = foerstegangsbehandlingService.lagreVirkningstidspunkt(
+                val virkningstidspunkt = generellBehandlingService.oppdaterVirkningstidspunkt(
                     behandlingsId,
                     body.dato,
                     navIdent,

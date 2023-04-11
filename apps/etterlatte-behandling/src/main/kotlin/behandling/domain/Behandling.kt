@@ -46,6 +46,13 @@ sealed class Behandling {
     private val kanRedigeres: Boolean
         get() = this.status.kanEndres()
 
+    open fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt): Behandling {
+        throw NotImplementedError(
+            "Kan ikke oppdatere virkningstidspunkt på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt."
+        )
+    }
+
     protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {
         if (kanRedigeres) {
             return block()

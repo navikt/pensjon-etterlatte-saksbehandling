@@ -79,3 +79,12 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
     begrunnelse: args.begrunnelse,
   })
 }
+
+export const opprettRevurdering = async (args: {
+  sakId: number
+  aarsak: string
+}): Promise<ApiResponse<IDetaljertBehandling>> => {
+  return apiClient.post(`/${args.sakId}/revurdering`, {
+    aarsak: args.aarsak,
+  })
+}

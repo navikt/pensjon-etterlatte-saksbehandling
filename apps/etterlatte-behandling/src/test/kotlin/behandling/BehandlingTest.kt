@@ -60,7 +60,7 @@ internal class BehandlingTest {
     @Test
     fun `kan oppdatere behandling når den er OPPRETTET`() {
         behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .let {
                 assertEquals(kommerBarnetTilgode, it.kommerBarnetTilgode)
@@ -72,7 +72,7 @@ internal class BehandlingTest {
     @Test
     fun `kan ikke oppdatere behandlingen når den er til attestering`() {
         val behandlingTilAttestering = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .tilBeregnet()
@@ -86,7 +86,7 @@ internal class BehandlingTest {
     @Test
     fun `kan ikke oppdatere behandling når den er iverksatt`() {
         val iverksattBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .tilBeregnet()
@@ -122,7 +122,7 @@ internal class BehandlingTest {
     @Test
     fun `kan ikke ga fra VILKAARSVURDERT til FATTET VEDTAK`() {
         val fyltUtBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
 
         assertThrows<TilstandException.UgyldigTilstand> { fyltUtBehandling.tilVilkaarsvurdert(null).tilFattetVedtak() }
@@ -137,7 +137,7 @@ internal class BehandlingTest {
     @Test
     fun `behandling kan endres igjen etter den har blitt returnet av attestant`() {
         val returnertBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .tilBeregnet()
@@ -147,7 +147,7 @@ internal class BehandlingTest {
         val nyttVirkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 2), saksbehandler, "begrunnelse")
 
         returnertBehandling
-            .oppdaterVirkningstidspunkt(nyttVirkningstidspunkt.dato, nyttVirkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(nyttVirkningstidspunkt)
             .let {
                 assertEquals(nyttVirkningstidspunkt, it.virkningstidspunkt)
             }
@@ -156,13 +156,13 @@ internal class BehandlingTest {
     @Test
     fun `man maa gjennom hele loeypen paa nytt dersom man gjoer operasjoner i tidligere steg`() {
         val vilkaarsvurdertBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
         val nyttVirkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 2), saksbehandler, "begrunnelse")
 
         vilkaarsvurdertBehandling
-            .oppdaterVirkningstidspunkt(nyttVirkningstidspunkt.dato, nyttVirkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(nyttVirkningstidspunkt)
             .let {
                 assertEquals(it.status, BehandlingStatus.OPPRETTET)
             }
@@ -171,7 +171,7 @@ internal class BehandlingTest {
     @Test
     fun `kan gaa fra RETURNERT til alle redigerbare states`() {
         val initialBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .tilBeregnet()
@@ -186,7 +186,7 @@ internal class BehandlingTest {
     @Test
     fun `kan ikke gaa fra RETURNERT til ATTESTERT`() {
         val behandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .tilBeregnet()
@@ -201,7 +201,7 @@ internal class BehandlingTest {
     @Test
     fun `kan ikke gaa fra RETURNERT til IVERKSATT`() {
         val behandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
-            .oppdaterVirkningstidspunkt(virkningstidspunkt.dato, virkningstidspunkt.kilde, "begrunnelse")
+            .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
             .tilBeregnet()

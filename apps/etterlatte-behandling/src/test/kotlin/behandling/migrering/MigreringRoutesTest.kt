@@ -50,7 +50,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
             val fnr = Folkeregisteridentifikator.of("08071272487")
             val request = MigreringRequest(
                 pesysId = PesysId("1"),
-                enhet = Enhet("4808"),
+                enhet = Enhet("4817"),
                 fnr = fnr,
                 mottattDato = LocalDateTime.now(),
                 persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList())

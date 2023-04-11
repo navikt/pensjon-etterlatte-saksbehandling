@@ -10,12 +10,13 @@ import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.LoggerFactory
+import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 
 enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
     OpprettMedEnhetId("pensjon-etterlatte.opprett-sak-med-enhet-id"),
@@ -27,7 +28,7 @@ enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
 interface SakService {
     fun hentSaker(): List<Sak>
     fun finnSaker(person: String): List<Sak>
-    fun finnEllerOpprettSak(fnr: String, type: SakType): Sak
+    fun finnEllerOpprettSak(fnr: String, type: SakType, enhet: String? = null): Sak
     fun finnSak(person: String, type: SakType): Sak?
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
@@ -70,12 +71,12 @@ class RealSakService(
         }
     }
 
-    override fun finnEllerOpprettSak(fnr: String, type: SakType): Sak {
+    override fun finnEllerOpprettSak(fnr: String, type: SakType, enhet: String?): Sak {
         return finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
             fnr,
             type,
             if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
-                finnEnhetForPersonOgTema(fnr, type.tema).enhetNr
+                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema).enhetNr
             } else {
                 null
             }

@@ -7,7 +7,13 @@ data class TrygdetidDto(
     val id: UUID,
     val behandlingId: UUID,
     val beregnetTrygdetid: BeregnetTrygdetidDto?,
-    val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>
+    val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>,
+    val opplysninger: GrunnlagOpplysningerDto
+)
+
+data class GrunnlagOpplysningerDto(
+    val avdoedDoedsdato: LocalDate?,
+    val avdoedFoedselsdato: LocalDate?
 )
 
 data class BeregnetTrygdetidDto(

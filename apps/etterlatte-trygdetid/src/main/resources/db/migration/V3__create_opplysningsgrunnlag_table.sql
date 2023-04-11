@@ -8,3 +8,4 @@ CREATE TABLE opplysningsgrunnlag
 );
 
 ALTER TABLE trygdetid ADD COLUMN sak_id BIGINT;
+ALTER TABLE trygdetid ADD UNIQUE (behandling_id)

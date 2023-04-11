@@ -23,7 +23,7 @@ object BrevRequestMapper {
             BrevMottaker.fra(mottaker),
             attestant
         )
-
-        else -> throw Exception("Vedtakstype er ikke støttet: $vedtakType")
+        VedtakType.ENDRING -> TODO("Vedtakstype er ikke støttet: $vedtakType")
+        VedtakType.OPPHOER -> TODO("Vedtakstype er ikke støttet: $vedtakType")
     }
 }

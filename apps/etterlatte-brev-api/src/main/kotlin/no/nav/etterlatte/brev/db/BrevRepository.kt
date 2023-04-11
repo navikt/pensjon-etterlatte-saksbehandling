@@ -19,7 +19,6 @@ import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import java.lang.reflect.Array.setBoolean
 import java.sql.ResultSet
 import java.util.UUID
 import javax.sql.DataSource

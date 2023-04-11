@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
@@ -8,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
+import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -28,7 +30,7 @@ interface RevurderingService {
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
         kilde: Vedtaksloesning
-    ): Revurdering
+    ): Revurdering?
 
     fun opprettAutomatiskRevurdering(
         sakId: Long,
@@ -36,7 +38,7 @@ interface RevurderingService {
         revurderingAarsak: RevurderingAarsak,
         fraDato: LocalDate,
         kilde: Vedtaksloesning
-    ): Revurdering
+    ): Revurdering?
 }
 
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
@@ -53,18 +55,17 @@ class RealRevurderingService(
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RealRevurderingService::class.java)
 
-    fun hentBehandling(id: UUID): Revurdering = requireNotNull(
-        behandlingDao.hentBehandling(id) as Revurdering
-    )
+    fun hentBehandling(id: UUID): Revurdering? =
+        (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
 
     override fun opprettManuellRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
         kilde: Vedtaksloesning
-    ): Revurdering {
-        if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
-            return inTransaction {
+    ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
+        return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
+            inTransaction {
                 opprettRevurdering(
                     sakId,
                     forrigeBehandling,
@@ -74,9 +75,9 @@ class RealRevurderingService(
                     kilde
                 )
             }
+        } else {
+            null
         }
-
-        throw NotImplementedError("Feature togglet av")
     }
 
     override fun opprettAutomatiskRevurdering(
@@ -85,8 +86,8 @@ class RealRevurderingService(
         revurderingAarsak: RevurderingAarsak,
         fraDato: LocalDate,
         kilde: Vedtaksloesning
-    ): Revurdering {
-        return inTransaction {
+    ) = forrigeBehandling.sjekkEnhet()?.let {
+        inTransaction {
             opprettRevurdering(
                 sakId,
                 forrigeBehandling,
@@ -121,9 +122,18 @@ class RealRevurderingService(
         logger.info("Opprettet revurdering ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
         hentBehandling(opprettBehandling.id)
-    }.also {
-        runBlocking {
-            behandlingHendelser.send(it.id to BehandlingHendelseType.OPPRETTET)
+    }.also { revurdering ->
+        revurdering?.let {
+            runBlocking {
+                behandlingHendelser.send(revurdering.id to BehandlingHendelseType.OPPRETTET)
+            }
         }
+    }
+
+    private fun <T : Behandling> T?.sjekkEnhet() = this?.let { behandling ->
+        listOf(behandling).filterBehandlingerForEnheter(
+            featureToggleService,
+            Kontekst.get().AppUser
+        ).firstOrNull()
     }
 }

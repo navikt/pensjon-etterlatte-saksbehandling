@@ -16,11 +16,11 @@ class OmregningService(
         sakId: Long,
         fraDato: LocalDate,
         prosessType: Prosesstype
-    ): Pair<UUID, UUID> {
+    ): Pair<UUID?, UUID> {
         val forrigeBehandling = behandlingService.hentSenestIverksatteBehandling(sakId)
             ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
 
-        val behandlingId = when (prosessType) {
+        val behandling = when (prosessType) {
             Prosesstype.AUTOMATISK -> revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
@@ -35,8 +35,8 @@ class OmregningService(
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.DOFFEN
             )
-        }.id
+        }
 
-        return Pair(behandlingId, forrigeBehandling.id)
+        return Pair(behandling?.id, forrigeBehandling.id)
     }
 }

@@ -242,56 +242,6 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     @Test
-    fun `skal returnere behandlingtype Foerstegangsbehandling`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-        val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1).also {
-            behandlingRepo.opprettBehandling(it)
-        }
-        val type = behandlingRepo.hentBehandlingType(opprettBehandling.id)
-        assertEquals(BehandlingType.FØRSTEGANGSBEHANDLING, type)
-    }
-
-    @Test
-    fun `skal returnere behandlingtype Revurdering`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.REVURDERING,
-            sakId = sak1,
-            revurderingAarsak = RevurderingAarsak.REGULERING
-        ).also {
-            behandlingRepo.opprettBehandling(it)
-        }
-        val type = behandlingRepo.hentBehandlingType(opprettBehandling.id)
-        assertEquals(BehandlingType.REVURDERING, type)
-    }
-
-    @Test
-    fun `skal returnere behandlingtype ManueltOpphoer`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.MANUELT_OPPHOER,
-            sakId = sak1,
-            persongalleri = persongalleri(),
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 8),
-                Grunnlagsopplysning.Saksbehandler.create(
-                    saksbehandlerToken
-                ),
-                "begrunnelse"
-            ),
-            opphoerAarsaker = listOf(
-                ManueltOpphoerAarsak.SOESKEN_DOED,
-                ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
-            ),
-            fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem"
-        ).also {
-            behandlingRepo.opprettBehandling(it)
-        }
-        val type = behandlingRepo.hentBehandlingType(opprettBehandling.id)
-        assertEquals(BehandlingType.MANUELT_OPPHOER, type)
-    }
-
-    @Test
     fun `skal hente behandling av type Foerstegangsbehandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 

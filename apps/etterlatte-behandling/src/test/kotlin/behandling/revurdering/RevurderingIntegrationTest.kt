@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -16,10 +17,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RevurderingIntegrationTest : BehandlingIntegrationTest() {
@@ -37,7 +39,6 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    val sakId: Long = 1
     val fnr: String = "123"
 
     @Test
@@ -52,11 +53,20 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns true
 
-        val (_, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling(sakId, fnr)
+        every {
+            featureToggleService.isEnabled(
+                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
+                false
+            )
+        } returns false
+
+        val (sak, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling(fnr)
+
+        assertNotNull(behandling)
 
         inTransaction {
             beanFactory.behandlingDao().lagreStatus(
-                behandling.id,
+                behandling!!.id,
                 BehandlingStatus.IVERKSATT,
                 Tidspunkt.now().toLocalDatetimeUTC()
             )
@@ -69,19 +79,19 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 beanFactory.behandlingDao(),
                 beanFactory.hendelseDao()
             ).opprettManuellRevurdering(
-                sakId = behandling.sak.id,
-                forrigeBehandling = behandling,
+                sakId = sak.id,
+                forrigeBehandling = behandling!!,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.DOFFEN
             )
 
         inTransaction {
-            Assertions.assertEquals(revurdering, beanFactory.behandlingDao().hentBehandling(revurdering.id))
+            Assertions.assertEquals(revurdering, beanFactory.behandlingDao().hentBehandling(revurdering!!.id))
         }
     }
 
     @Test
-    fun `hvis featuretoggle er av saa kastes NotImplementedError ved opprettelse`() {
+    fun `hvis featuretoggle er av saa opprettes ikke revurdering`() {
         val hendelser = beanFactory.behandlingHendelser().nyHendelse
         val featureToggleService = mockk<FeatureToggleService>()
 
@@ -92,27 +102,37 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns false
 
-        val (_, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling(sakId, fnr)
+        every {
+            featureToggleService.isEnabled(
+                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
+                false
+            )
+        } returns false
+
+        val (sak, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling(fnr)
+
+        assertNotNull(behandling)
+
         inTransaction {
             beanFactory.behandlingDao().lagreStatus(
-                behandling.id,
+                behandling!!.id,
                 BehandlingStatus.IVERKSATT,
                 Tidspunkt.now().toLocalDatetimeUTC()
             )
         }
 
-        assertThrows<NotImplementedError> {
+        assertNull(
             RealRevurderingService(
                 hendelser,
                 featureToggleService,
                 beanFactory.behandlingDao(),
                 beanFactory.hendelseDao()
             ).opprettManuellRevurdering(
-                sakId = behandling.sak.id,
-                forrigeBehandling = behandling,
+                sakId = sak.id,
+                forrigeBehandling = behandling!!,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
                 kilde = Vedtaksloesning.DOFFEN
             )
-        }
+        )
     }
 }

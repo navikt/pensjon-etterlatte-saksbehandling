@@ -2,12 +2,14 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.filterForEnheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -121,22 +123,21 @@ class RealSakService(
 
     private fun Saksbehandler.enheterIds() = this.enheter().map { it.id }
 
-    private fun List<Sak>.filterForEnheter() =
-        if (featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false)) {
-            when (val user = Kontekst.get().AppUser) {
-                is Saksbehandler -> {
-                    val enheter = user.enheterIds()
-
-                    this.filter { it.enhet?.let { enhet -> enheter.contains(enhet) } ?: true }
-                }
-
-                else -> this
-            }
-        } else {
-            this
-        }
+    private fun List<Sak>.filterForEnheter() = this.filterSakerForEnheter(
+        featureToggleService,
+        Kontekst.get().AppUser
+    )
 
     private fun Sak?.sjekkEnhet() = this?.let { sak ->
         listOf(sak).filterForEnheter().firstOrNull()
     }
+}
+
+fun List<Sak>.filterSakerForEnheter(
+    featureToggleService: FeatureToggleService,
+    user: User
+) = this.filterForEnheter(featureToggleService, SakServiceFeatureToggle.FiltrerMedEnhetId, user) { item, enheter ->
+    item.enhet?.let { enhet ->
+        enheter.contains(enhet)
+    } ?: true
 }

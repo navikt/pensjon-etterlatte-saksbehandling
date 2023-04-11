@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.manueltopphoer
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
@@ -10,9 +11,11 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
+import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -21,10 +24,10 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 interface ManueltOpphoerService {
-    fun hentManueltOpphoer(behandling: UUID): ManueltOpphoer?
+    fun hentManueltOpphoer(behandlingId: UUID): ManueltOpphoer?
     fun opprettManueltOpphoer(
         opphoerRequest: ManueltOpphoerRequest
     ): ManueltOpphoer?
@@ -39,41 +42,42 @@ interface ManueltOpphoerService {
         begrunnelse: String?
     )
 
-    fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer?
+    fun hentManueltOpphoerInTransaction(behandlingId: UUID): ManueltOpphoer?
 
-    fun hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandling: UUID): Pair<ManueltOpphoer, List<Behandling>>?
+    fun hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingId: UUID): Pair<ManueltOpphoer, List<Behandling>>?
 }
 
 class RealManueltOpphoerService(
-    private val behandlinger: BehandlingDao,
+    private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKanal,
-    private val hendelser: HendelseDao
+    private val hendelseDao: HendelseDao,
+    private val featureToggleService: FeatureToggleService
 ) : ManueltOpphoerService {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun hentManueltOpphoer(behandling: UUID): ManueltOpphoer? =
-        behandlinger.hentBehandling(behandling) as ManueltOpphoer?
+    override fun hentManueltOpphoer(behandlingId: UUID): ManueltOpphoer? =
+        (behandlingDao.hentBehandling(behandlingId) as? ManueltOpphoer?).sjekkEnhet()
 
-    override fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer? =
-        inTransaction { behandlinger.hentBehandling(behandling) as ManueltOpphoer? }
+    override fun hentManueltOpphoerInTransaction(behandlingId: UUID): ManueltOpphoer? =
+        inTransaction { hentManueltOpphoer(behandlingId) }
 
     override fun hentManueltOpphoerOgAlleIverksatteBehandlingerISak(
-        behandling: UUID
+        behandlingId: UUID
     ): Pair<ManueltOpphoer, List<Behandling>>? =
         inTransaction {
-            val opphoer = behandlinger.hentBehandling(behandling) as ManueltOpphoer?
-                ?: return@inTransaction null
-            val andreBehandlinger = behandlinger.alleBehandlingerISak(opphoer.sak.id)
-                .filter { it.id != behandling && it.status == BehandlingStatus.IVERKSATT }
-            opphoer to andreBehandlinger
+            hentManueltOpphoer(behandlingId)?.let { opphoer ->
+                val andreBehandlinger = behandlingDao.alleBehandlingerISak(opphoer.sak.id)
+                    .filter { it.id != behandlingId && it.status == BehandlingStatus.IVERKSATT }
+                opphoer to andreBehandlinger
+            }
         }
 
     override fun opprettManueltOpphoer(
         opphoerRequest: ManueltOpphoerRequest
     ): ManueltOpphoer? {
         return inTransaction {
-            val alleBehandlingerISak = behandlinger.alleBehandlingerISak(opphoerRequest.sak)
-            val forrigeBehandling = alleBehandlingerISak.`siste ikke-avbrutte behandling`()
+            val alleBehandlingerISak = behandlingDao.alleBehandlingerISak(opphoerRequest.sak).filterForEnheter()
+            val forrigeBehandling = alleBehandlingerISak.sisteIkkeAvbrutteBehandling()
             val virkningstidspunkt = alleBehandlingerISak.tidligsteIverksatteVirkningstidspunkt()
 
             if (virkningstidspunkt == null) {
@@ -106,11 +110,11 @@ class RealManueltOpphoerService(
                     null
                 }
             }?.let {
-                behandlinger.opprettBehandling(it)
-                hendelser.behandlingOpprettet(it.toBehandlingOpprettet())
+                behandlingDao.opprettBehandling(it)
+                hendelseDao.behandlingOpprettet(it.toBehandlingOpprettet())
                 it.id
             }?.let { id ->
-                behandlinger.hentBehandling(id) as ManueltOpphoer
+                (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
             }
         }?.also { lagretManueltOpphoer ->
             runBlocking {
@@ -138,12 +142,12 @@ class RealManueltOpphoerService(
                 kommentar = kommentar,
                 begrunnelse = begrunnelse,
                 lagretBehandling = manueltOpphoer,
-                hendelser = hendelser
+                hendelser = hendelseDao
             )
         }
     }
 
-    private fun List<Behandling>.`siste ikke-avbrutte behandling`(): Behandling? =
+    private fun List<Behandling>.sisteIkkeAvbrutteBehandling(): Behandling? =
         this.sortedByDescending { it.behandlingOpprettet }
             .firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
 
@@ -151,4 +155,12 @@ class RealManueltOpphoerService(
         this.filter { it.status == BehandlingStatus.IVERKSATT }
             .mapNotNull { it.virkningstidspunkt }
             .minByOrNull { it.dato }
+
+    private fun <T : Behandling> List<T>.filterForEnheter() = this.filterBehandlingerForEnheter(
+        featureToggleService,
+        Kontekst.get().AppUser
+    )
+    private fun ManueltOpphoer?.sjekkEnhet() = this?.let { behandling ->
+        listOf(behandling).filterForEnheter().firstOrNull()
+    }
 }

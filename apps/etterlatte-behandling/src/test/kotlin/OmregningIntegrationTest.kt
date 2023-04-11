@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -49,15 +50,19 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
     @Nested
     inner class KanOmregne {
-        private val sakId = 1L
+        private var sakId: Long = 0L
 
         @BeforeEach
         fun beforeEach() {
-            val (_, foerstegangsbehandling) = beanFactory.opprettSakMedFoerstegangsbehandling(sakId, "234")
+            val (sak, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling("234")
+
+            sakId = sak.id
+
+            assumeTrue(behandling != null)
 
             val virkningstidspunkt = virkningstidspunktVurdering()
 
-            val iverksattBehandling = foerstegangsbehandling
+            val iverksattBehandling = behandling!!
                 .oppdaterKommerBarnetTilgode(kommerBarnetTilGodeVurdering())
                 .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
                 .oppdaterVirkningstidspunkt(virkningstidspunkt)
@@ -94,7 +99,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(
                         Omregningshendelse(
-                            1,
+                            sakId,
                             LocalDate.now(),
                             null,
                             prosesstype

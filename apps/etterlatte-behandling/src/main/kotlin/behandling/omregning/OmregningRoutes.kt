@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.omregning
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -20,7 +21,10 @@ fun Route.omregningRoutes(
                 fraDato = request.fradato,
                 prosessType = request.prosesstype
             )
-            call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandlingId))
+            when (behandlingId) {
+                null -> call.respond(HttpStatusCode.NotFound)
+                else -> call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandlingId))
+            }
         }
     }
 }

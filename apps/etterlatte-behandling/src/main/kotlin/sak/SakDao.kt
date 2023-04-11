@@ -83,6 +83,6 @@ class SakDao(private val connection: () -> Connection) {
         sakType = enumValueOf(getString("sakType")),
         ident = getString("fnr"),
         id = getLong("id"),
-        enhet = getString("enhet").takeIf { !wasNull() }
+        enhet = getString("enhet").takeUnless { wasNull() }
     )
 }

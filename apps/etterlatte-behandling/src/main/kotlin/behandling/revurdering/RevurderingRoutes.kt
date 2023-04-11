@@ -40,7 +40,11 @@ internal fun Route.revurderingRoutes(
                     revurderingAarsak = body.aarsak,
                     kilde = Vedtaksloesning.DOFFEN
                 )
-                call.respond(revurdering.toDetaljertBehandling())
+
+                when (revurdering) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(revurdering.toDetaljertBehandling())
+                }
             } ?: call.respond(HttpStatusCode.BadRequest, "Kan ikke revurdere en sak uten iverksatt behandling")
         }
     }

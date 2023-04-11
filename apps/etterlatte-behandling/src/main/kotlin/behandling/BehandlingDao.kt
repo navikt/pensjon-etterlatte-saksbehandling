@@ -37,13 +37,17 @@ import java.util.*
 
 class BehandlingDao(private val connection: () -> Connection) {
 
+    private val alleBehandlingerMedSak = """
+        SELECT b.*, s.sakType, s.enhet, s.fnr 
+        FROM behandling b
+        INNER JOIN sak s ON b.sak_id = s.id
+    """.trimIndent()
+
     fun hentBehandling(id: UUID): Behandling? {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType, s.fnr 
-                    FROM behandling b
-                    INNER JOIN sak s ON b.sak_id = s.id
+                    $alleBehandlingerMedSak
                     WHERE b.id = ?
                     """
             )
@@ -54,24 +58,11 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
-    fun hentBehandlingType(id: UUID): BehandlingType? {
-        val stmt =
-            connection().prepareStatement(
-                "SELECT behandlingstype from behandling WHERE id = ?"
-            )
-        stmt.setObject(1, id)
-        return stmt.executeQuery().singleOrNull {
-            getString("behandlingstype").let { BehandlingType.valueOf(it) }
-        }
-    }
-
     fun alleBehandlingerAvType(type: BehandlingType): List<Behandling> {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType, s.fnr 
-                    FROM behandling b
-                    INNER JOIN sak s ON b.sak_id = s.id 
+                    $alleBehandlingerMedSak
                     WHERE b.behandlingstype = ?
                 """.trimIndent()
             )
@@ -82,9 +73,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     fun alleBehandlingerISakAvType(sakId: Long, type: BehandlingType): List<Behandling> {
         return connection().prepareStatement(
             """
-                SELECT b.*, s.sakType, s.fnr 
-                FROM behandling b
-                INNER JOIN sak s ON b.sak_id = s.id 
+                $alleBehandlingerMedSak
                 WHERE b.sak_id = ? AND b.behandlingstype = ?
             """.trimIndent()
         ).let {
@@ -96,13 +85,7 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     fun alleBehandlinger(): List<Behandling> {
         val stmt =
-            connection().prepareStatement(
-                """
-                    SELECT b.*, s.sakType, s.fnr 
-                    FROM behandling b
-                    INNER JOIN sak s ON b.sak_id = s.id 
-                """.trimIndent()
-            )
+            connection().prepareStatement(alleBehandlingerMedSak)
         return stmt.executeQuery().behandlingsListe()
     }
 
@@ -110,9 +93,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType, s.fnr 
-                    FROM behandling b
-                    INNER JOIN sak s ON b.sak_id = s.id
+                    $alleBehandlingerMedSak
                     WHERE sak_id = ?
                 """.trimIndent()
             )
@@ -125,9 +106,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             val stmt =
                 prepareStatement(
                     """
-                        SELECT b.*, s.sakType, s.fnr  
-                        FROM behandling b
-                        INNER JOIN sak s ON b.sak_id = s.id
+                        $alleBehandlingerMedSak
                         WHERE b.sak_id = ? AND b.status = ANY(?)
                     """.trimIndent()
                 )
@@ -144,9 +123,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                    SELECT b.*, s.sakType, s.fnr 
-                    FROM behandling b
-                    INNER JOIN sak s ON b.sak_id = s.id
+                    $alleBehandlingerMedSak
                     WHERE sak_id = ? AND b.soeker = ?
                 """.trimIndent()
             )
@@ -223,7 +200,8 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun mapSak(rs: ResultSet) = Sak(
         id = rs.getLong("sak_id"),
         sakType = enumValueOf(rs.getString("saktype")),
-        ident = rs.getString("fnr")
+        ident = rs.getString("fnr"),
+        enhet = rs.getString("enhet").takeUnless { rs.wasNull() }
     )
 
     fun alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr: String): List<Long> {

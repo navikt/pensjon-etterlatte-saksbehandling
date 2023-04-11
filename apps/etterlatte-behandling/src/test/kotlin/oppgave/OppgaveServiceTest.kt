@@ -3,8 +3,10 @@ package no.nav.etterlatte.oppgave
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -63,15 +65,17 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `filter oppgaveliste for enheter`() {
-        val enhetsListe = listOf(Enheter.DEFAULT_PORSGRUNN.enhetNr, Enheter.EGNE_ANSATTE.enhetNr)
-
         val featureToggleService = mockk<FeatureToggleService>()
-
         every { featureToggleService.isEnabled(any(), false) } returns true
 
-        val service = OppgaveServiceImpl(mockk(), featureToggleService)
+        val user = mockk<Saksbehandler>()
 
-        val filtered = service.filterOppgaverForEnheter(oppgaveListe, enhetsListe)
+        every { user.enheter() } returns listOf(
+            SaksbehandlerEnhet(Enheter.DEFAULT_PORSGRUNN.enhetNr, Enheter.DEFAULT_PORSGRUNN.navn),
+            SaksbehandlerEnhet(Enheter.EGNE_ANSATTE.enhetNr, Enheter.EGNE_ANSATTE.navn)
+        )
+
+        val filtered = oppgaveListe.filterOppgaverForEnheter(featureToggleService, user)
 
         filtered.size shouldBe 3
         filtered.filter { it.sakId == 3L }.size shouldBe 0

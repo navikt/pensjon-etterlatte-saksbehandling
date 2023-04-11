@@ -88,13 +88,15 @@ fun foerstegangsbehandling(
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
-    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN
+    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN,
+    enhet: String? = null
 ) = Foerstegangsbehandling(
     id = id,
     sak = Sak(
         ident = persongalleri.soeker,
         sakType = SakType.BARNEPENSJON,
-        id = sakId
+        id = sakId,
+        enhet = enhet
     ),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
@@ -118,13 +120,15 @@ fun revurdering(
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
     virkningstidspunkt: Virkningstidspunkt? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
-    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN
+    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN,
+    enhet: String? = null
 ) = Revurdering.opprett(
     id = id,
     sak = Sak(
         ident = persongalleri.soeker,
         sakType = SakType.BARNEPENSJON,
-        id = sakId
+        id = sakId,
+        enhet = enhet
     ),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
@@ -146,13 +150,15 @@ fun manueltOpphoer(
         ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
     ),
     fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
-    virkningstidspunkt: Virkningstidspunkt? = null
+    virkningstidspunkt: Virkningstidspunkt? = null,
+    enhet: String? = null
 ) = ManueltOpphoer(
     id = behandlingId,
     sak = Sak(
         ident = persongalleri.soeker,
         sakType = SakType.BARNEPENSJON,
-        id = sakId
+        id = sakId,
+        enhet = enhet
     ),
     behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),

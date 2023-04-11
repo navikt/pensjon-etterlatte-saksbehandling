@@ -3,6 +3,8 @@ package no.nav.etterlatte.behandling
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysninger
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
@@ -12,6 +14,9 @@ import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.filterForEnheter
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -27,7 +32,13 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
+
+enum class BehandlingServiceFeatureToggle(private val key: String) : FeatureToggle {
+    FiltrerMedEnhetId("pensjon-etterlatte.filtrer-behandlinger-med-enhet-id");
+
+    override fun key() = key
+}
 
 interface GenerellBehandlingService {
 
@@ -75,13 +86,18 @@ class RealGenerellBehandlingService(
     private val hendelseDao: HendelseDao,
     private val vedtakKlient: VedtakKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val sporingslogg: Sporingslogg
+    private val sporingslogg: Sporingslogg,
+    private val featureToggleService: FeatureToggleService
 ) : GenerellBehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private fun hentBehandlingForId(id: UUID): Behandling? {
-        return behandlingDao.hentBehandling(id)
-    }
+    private fun hentBehandlingForId(id: UUID) =
+        behandlingDao.hentBehandling(id)?.let { behandling ->
+            listOf(behandling).filterForEnheter().firstOrNull()
+        }
+
+    private fun hentBehandlingerForSakId(sakId: Long) =
+        behandlingDao.alleBehandlingerISak(sakId).filterForEnheter()
 
     override fun hentBehandling(behandlingId: UUID): Behandling? {
         return inTransaction {
@@ -91,12 +107,12 @@ class RealGenerellBehandlingService(
 
     override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
         return inTransaction {
-            behandlingDao.alleBehandlingerISak(sakId)
+            hentBehandlingerForSakId(sakId)
         }
     }
 
     override fun hentSenestIverksatteBehandling(sakId: Long): Behandling? {
-        return hentBehandlingerISak(sakId)
+        return inTransaction { hentBehandlingerForSakId(sakId) }
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
     }
@@ -302,7 +318,26 @@ class RealGenerellBehandlingService(
 
     override fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling> {
         return inTransaction {
-            behandlingDao.alleBehandlingerForSoekerMedFnr(fnr)
+            behandlingDao.alleBehandlingerForSoekerMedFnr(fnr).filterForEnheter()
         }
     }
+
+    private fun List<Behandling>.filterForEnheter() =
+        this.filterBehandlingerForEnheter(
+            featureToggleService = featureToggleService,
+            user = Kontekst.get().AppUser
+        )
+}
+
+fun <T : Behandling> List<T>.filterBehandlingerForEnheter(
+    featureToggleService: FeatureToggleService,
+    user: User
+) = this.filterForEnheter(
+    featureToggleService,
+    BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
+    user
+) { item, enheter ->
+    item.sak.enhet?.let { enhet ->
+        enheter.contains(enhet)
+    } ?: true
 }

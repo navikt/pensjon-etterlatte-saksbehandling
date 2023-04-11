@@ -121,8 +121,7 @@ class BehandlingStatusServiceImpl constructor(
     private fun lagreNyBehandlingStatus(behandling: Behandling) =
         behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
 
-    private fun hentBehandling(behandlingId: UUID): Behandling = inTransaction {
-        behandlingDao.hentBehandling(behandlingId)
+    private fun hentBehandling(behandlingId: UUID): Behandling =
+        behandlingService.hentBehandling(behandlingId)
             ?: throw NotFoundException("Fant ikke behandling med id=$behandlingId")
-    }
 }

@@ -10,7 +10,6 @@ import io.ktor.server.application.log
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.Saksrolle.Companion.log
@@ -41,7 +40,6 @@ internal class TrygdetidRoutesTest {
 
     @AfterAll
     fun afterAll() {
-        confirmVerified()
         server.shutdown()
     }
 

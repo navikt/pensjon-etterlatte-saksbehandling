@@ -12,12 +12,15 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
+import java.time.LocalDate
 import java.util.*
 
 fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: BehandlingKlient) {
@@ -85,8 +88,18 @@ fun Trygdetid.toDto(): TrygdetidDto =
                 total = beregnetTrygdetid.total
             )
         },
-        trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() }
+        trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() },
+        opplysninger = this.opplysninger.toDto()
     )
+
+private fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
+    GrunnlagOpplysningerDto(
+        avdoedFoedselsdato = this.finnDato(Opplysningstype.FOEDSELSDATO),
+        avdoedDoedsdato = this.finnDato(Opplysningstype.DOEDSDATO)
+    )
+
+private fun List<Opplysningsgrunnlag>.finnDato(type: Opplysningstype): LocalDate? =
+    this.find { opplysning -> opplysning.type == type }?.opplysning?.toLocalDate()
 
 private fun BeregnetTrygdetidDto.toBeregnetTrygdetid(): BeregnetTrygdetid =
     BeregnetTrygdetid(

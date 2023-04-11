@@ -16,7 +16,8 @@ fun trygdetid(behandlingId: UUID = randomUUID(), beregnetTrygdetid: BeregnetTryg
     id = randomUUID(),
     behandlingId = behandlingId,
     trygdetidGrunnlag = emptyList(),
-    beregnetTrygdetid = beregnetTrygdetid
+    beregnetTrygdetid = beregnetTrygdetid,
+    opplysninger = emptyList()
 )
 
 fun trygdetidGrunnlag(trygdetidId: UUID) = TrygdetidGrunnlag(

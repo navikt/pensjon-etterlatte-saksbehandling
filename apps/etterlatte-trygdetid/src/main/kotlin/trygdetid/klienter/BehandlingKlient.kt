@@ -5,7 +5,10 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -57,5 +60,34 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                     false
                 }
             )
+    }
+
+    suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling {
+        logger.info("Henter behandling med behandlingId=$behandlingId")
+
+        return retry<DetaljertBehandling> {
+            downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/behandlinger/$behandlingId"
+                    ),
+                    bruker = bruker
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                )
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw BehandlingKlientException(
+                        "Klarte ikke hente behandling med behandlingId=$behandlingId",
+                        it.exceptions.last()
+                    )
+                }
+            }
+        }
     }
 }

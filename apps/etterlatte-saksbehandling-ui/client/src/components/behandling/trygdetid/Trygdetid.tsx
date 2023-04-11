@@ -2,17 +2,18 @@ import React, { useEffect, useState } from 'react'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { hentTrygdetid, ITrygdetid, ITrygdetidGrunnlagType, opprettTrygdetid } from '~shared/api/trygdetid'
-import { useParams } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBeregnet'
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
+import { formaterStringDato } from '~utils/formattering'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { useParams } from 'react-router-dom'
 
 export const Trygdetid = () => {
   const { behandlingId } = useParams()
-
   const [trygdetidStatus, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
@@ -50,6 +51,13 @@ export const Trygdetid = () => {
 
       {trygdetid && (
         <>
+          <InfoWrapper>
+            <Info
+              label="Fødselsdato"
+              tekst={formaterStringDato(trygdetid.opplysninger.avdoedFoedselsdato.toString())}
+            />
+            <Info label="Dødsdato" tekst={formaterStringDato(trygdetid.opplysninger.avdoedDoedsdato.toString())} />
+          </InfoWrapper>
           <TrygdetidGrunnlag
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}
@@ -71,4 +79,11 @@ export const Trygdetid = () => {
 const TrygdetidWrapper = styled.div`
   padding: 0 4em;
   max-width: 52em;
+`
+
+export const InfoWrapper = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 2em 0 2em 0;
 `

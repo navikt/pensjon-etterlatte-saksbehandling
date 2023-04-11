@@ -166,7 +166,7 @@ class BeregnBarnepensjonService(
         avdoedForelder = FaktumNode(
             verdi = AvdoedForelder(Beregningstall(FASTSATT_TRYGDETID_I_PILOT)),
             kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
-            beskrivelse = "Trygdetid avdøed forelder"
+            beskrivelse = "Trygdetid avdød forelder"
         )
     )
 

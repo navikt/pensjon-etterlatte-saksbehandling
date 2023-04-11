@@ -162,7 +162,7 @@ class BeregnOmstillingsstoenadService(
                     Tidspunkt.now(), // TODO få inn tidspunkt i trygdetid EY-2010
                     "1"
                 ),
-                beskrivelse = "Trygdetid avdøed ektefelle"
+                beskrivelse = "Trygdetid avdød ektefelle"
             )
         )
     }

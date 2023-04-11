@@ -45,6 +45,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.token.Bruker
+import no.nav.etterlatte.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
@@ -103,8 +104,7 @@ abstract class BehandlingIntegrationTest {
         issueToken(
             mapOf(
                 "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01"
-
+                Claims.NAVident.toString() to "Saksbehandler01"
             )
         )
     }
@@ -113,20 +113,11 @@ abstract class BehandlingIntegrationTest {
         issueToken(
             mapOf(
                 "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01",
+                Claims.NAVident.toString() to "Saksbehandler01",
                 "groups" to listOf(
                     azureAdAttestantClaim,
                     azureAdSaksbehandlerClaim
                 )
-            )
-        )
-    }
-
-    protected val tokenServiceUser: String by lazy {
-        issueToken(
-            mapOf(
-                "NAVident" to "Saksbehandler01",
-                "roles" to listOf("kan-sette-kilde") // TODO hva brukes dette til?
             )
         )
     }
@@ -193,10 +184,12 @@ class TestBeanFactory(
     private val azureAdSaksbehandlerClaim: String,
     private val azureAdAttestantClaim: String
 ) : CommonFactory() {
-    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String?> =
+    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> =
         mapOf(
             "AZUREAD_ATTESTANT_GROUPID" to azureAdAttestantClaim,
-            "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim
+            "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim,
+            "AZUREAD_STRENGT_FORTROLIG_GROUPID" to "5ef775f2-61f8-4283-bf3d-8d03f428aa14",
+            "AZUREAD_FORTROLIG_GROUPID" to "ea930b6b-9397-44d9-b9e6-f4cf527a632a"
         )
 
     val rapidSingleton: TestProdusent<String, String> by lazy() { TestProdusent() }

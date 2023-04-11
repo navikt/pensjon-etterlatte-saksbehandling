@@ -43,7 +43,8 @@ inline val ApplicationCall.bruker: Bruker
             accessToken = hentAccessToken(this),
             oid = oidSub?.first,
             sub = oidSub?.second,
-            saksbehandler = saksbehandler
+            saksbehandler = saksbehandler,
+            claims = claims
         )
     }
 

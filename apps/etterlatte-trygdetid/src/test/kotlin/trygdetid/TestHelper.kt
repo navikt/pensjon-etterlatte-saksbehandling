@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.util.*
 import java.util.UUID.randomUUID
 
-val saksbehandler = Saksbehandler("token", "ident")
+val saksbehandler = Saksbehandler("token", "ident", null)
 
 fun trygdetid(behandlingId: UUID = randomUUID(), beregnetTrygdetid: BeregnetTrygdetid? = null) = Trygdetid(
     id = randomUUID(),

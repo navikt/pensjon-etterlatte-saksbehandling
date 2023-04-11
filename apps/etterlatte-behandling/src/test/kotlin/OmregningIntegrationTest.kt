@@ -92,7 +92,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 application { module(beanFactory) }
 
                 val (omregning) = client.post("/omregning") {
-                    addAuthToken(tokenServiceUser)
+                    addAuthToken(systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(
                         Omregningshendelse(
@@ -135,7 +135,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
             application { module(beanFactory) }
 
             client.post("/omregning") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(Omregningshendelse(1, LocalDate.now(), null, Prosesstype.AUTOMATISK))
             }.also {

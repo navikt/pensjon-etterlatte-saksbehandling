@@ -29,6 +29,7 @@ dependencies {
 
     testImplementation(libs.test.testcontainer.jupiter)
     testImplementation(libs.test.testcontainer.postgresql)
+    testImplementation(libs.navfelles.tokenvalidationktor2)
 
     testImplementation(libs.test.mockk)
     testImplementation(libs.test.kotest.assertionscore)

@@ -29,6 +29,8 @@ dependencies {
     implementation(libs.jackson.modulekotlin)
     implementation(libs.database.kotliquery)
 
+    testImplementation(libs.navfelles.tokenvalidationktor2)
+
     testImplementation(libs.test.mockk)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.kotest.assertionscore)

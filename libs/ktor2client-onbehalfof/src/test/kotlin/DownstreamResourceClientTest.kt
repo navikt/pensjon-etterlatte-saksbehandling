@@ -30,7 +30,10 @@ internal class DownstreamResourceClientTest {
         every { runBlocking { azureAdClient.getAccessTokenForResource(any()) } } returns Ok(mockk())
 
         runBlocking {
-            client.get(resource, Bruker.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null))
+            client.get(
+                resource,
+                Bruker.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null)
+            )
         }
         verify { runBlocking { azureAdClient.getAccessTokenForResource(any()) } }
         verify(exactly = 0) {
@@ -45,7 +48,7 @@ internal class DownstreamResourceClientTest {
         runBlocking {
             client.get(
                 resource,
-                Bruker.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1")
+                Bruker.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null)
             )
         }
         verify { runBlocking { azureAdClient.getOnBehalfOfAccessTokenForResource(any(), "a") } }

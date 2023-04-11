@@ -13,11 +13,14 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.SystemBruker
 
 class PluginConfiguration {
-    var behandlingIdHarAdressebeskyttelse: (behandlingId: String) -> Boolean = { false }
-    var sakIdHarAdressebeskyttelse: (sakId: String) -> Boolean = { false }
+    var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    -> Boolean = { _, _ -> false }
+    var harTilgangTilSak: (sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    -> Boolean = { _, _ -> false }
 }
 
 private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
@@ -43,29 +46,58 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRou
 ) {
     on(AdressebeskyttelseHook) { call ->
         val bruker = call.bruker
+
         if (bruker is SystemBruker) {
             return@on
         }
         if (call.request.uri.contains(TILGANG_ROUTE_PATH)) {
             return@on
         }
-        val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER]
 
-        if (!behandlingId.isNullOrEmpty()) {
-            if (pluginConfig.behandlingIdHarAdressebeskyttelse(behandlingId)) {
-                call.respond(HttpStatusCode.NotFound)
+        if (bruker is Saksbehandler) {
+            val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER]
+            if (!behandlingId.isNullOrEmpty()) {
+                if (!pluginConfig.harTilgangBehandling(behandlingId, SaksbehandlerMedRoller(bruker))) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
+                return@on
             }
-            return@on
-        }
 
-        val sakId = call.parameters[SAKID_CALL_PARAMETER]
-        if (!sakId.isNullOrEmpty()) {
-            if (pluginConfig.sakIdHarAdressebeskyttelse(sakId)) {
-                call.respond(HttpStatusCode.NotFound)
+            val sakId = call.parameters[SAKID_CALL_PARAMETER]
+            if (!sakId.isNullOrEmpty()) {
+                if (!pluginConfig.harTilgangTilSak(sakId.toLong(), SaksbehandlerMedRoller(bruker))) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
+                return@on
             }
-            return@on
         }
 
         return@on
+    }
+}
+
+data class SaksbehandlerMedRoller(val saksbehandler: Saksbehandler) {
+    fun harRolleStrengtFortrolig(saksbehandlerGroupIdsByKey: Map<String, String>): Boolean {
+        val claims = saksbehandler.getClaims()
+
+        if (claims != null) {
+            return claims.containsClaim(
+                "groups",
+                saksbehandlerGroupIdsByKey["AZUREAD_STRENGT_FORTROLIG_GROUPID"]
+            )
+        }
+        return false
+    }
+
+    fun harRolleFortrolig(saksbehandlerGroupIdsByKey: Map<String, String>): Boolean {
+        val claims = saksbehandler.getClaims()
+
+        if (claims != null) {
+            return claims.containsClaim(
+                "groups",
+                saksbehandlerGroupIdsByKey["AZUREAD_FORTROLIG_GROUPID"]
+            )
+        }
+        return false
     }
 }

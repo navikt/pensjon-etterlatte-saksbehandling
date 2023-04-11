@@ -38,6 +38,9 @@ internal class BehandlingsstatusRoutesTest {
         server.start()
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
+        every { beanFactory.sakServiceAdressebeskyttelse() } returns mockk {
+            every { harTilgangTilBehandling(any(), any()) } returns true
+        }
     }
 
     @AfterAll

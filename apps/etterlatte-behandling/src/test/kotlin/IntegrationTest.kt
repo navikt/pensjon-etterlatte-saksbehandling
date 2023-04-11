@@ -87,7 +87,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
 
             assertTrue(beanFactory.featureToggleService().isEnabled(FellesFeatureToggle.NoOperationToggle, false))
 
-            client.get("/saker/$fnr") {
+            client.get("/saker/1") {
                 addAuthToken(tokenSaksbehandler)
             }.apply {
                 assertEquals(HttpStatusCode.NotFound, status)
@@ -110,7 +110,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
 
             val behandlingId = client.post("/behandlinger/foerstegangsbehandling") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     BehandlingsBehov(
@@ -288,7 +288,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/doedshendelse") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))
             }.also {
@@ -296,7 +296,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/doedshendelse") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))
             }.also {
@@ -304,7 +304,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/utflyttingshendelse") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     UtflyttingsHendelse(
@@ -320,7 +320,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     ForelderBarnRelasjonHendelse(
@@ -337,7 +337,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
 
             val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger/foerstegangsbehandling") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     BehandlingsBehov(
@@ -358,20 +358,6 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(tokenServiceUser)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    Adressebeskyttelse(
-                        fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                        endringstype = Endringstype.OPPRETTET
-                    )
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
             client.post("/api/behandlinger/${sak.id}/manueltopphoer") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -388,6 +374,20 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
                 it.body<ManueltOpphoerResponse>()
+            }
+
+            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                addAuthToken(systemBruker)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Adressebeskyttelse(
+                        fnr = fnr,
+                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                        endringstype = Endringstype.OPPRETTET
+                    )
+                )
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.get("/behandlinger/$behandlingId") {

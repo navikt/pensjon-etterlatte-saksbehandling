@@ -101,7 +101,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
@@ -189,7 +189,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
 
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
@@ -275,7 +275,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             Assertions.assertTrue(harTilgang)
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
@@ -321,7 +321,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }.body()
 
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(tokenServiceUser)
+                addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(

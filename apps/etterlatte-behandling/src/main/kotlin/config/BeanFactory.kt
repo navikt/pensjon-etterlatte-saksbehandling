@@ -93,7 +93,7 @@ interface BeanFactory {
     fun vedtakKlient(): VedtakKlient
     fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
-    fun getSaksbehandlerGroupIdsByKey(): Map<String, String?>
+    fun getSaksbehandlerGroupIdsByKey(): Map<String, String>
     fun featureToggleService(): FeatureToggleService
     fun norg2HttpClient(): Norg2Klient
     fun navAnsattKlient(): NavAnsattKlient
@@ -147,7 +147,7 @@ abstract class CommonFactory : BeanFactory {
         RealSakService(sakDao(), pdlKlient(), norg2HttpClient(), featureToggleService)
 
     override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
-        SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()))
+        SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()), getSaksbehandlerGroupIdsByKey())
 
     override fun behandlingsStatusService(): BehandlingStatusService {
         return BehandlingStatusServiceImpl(behandlingDao(), generellBehandlingService())
@@ -233,14 +233,17 @@ abstract class CommonFactory : BeanFactory {
 class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String?> {
-        val attestantClaim = env["AZUREAD_ATTESTANT_GROUPID"]
-        val saksbehandlerClaim = env["AZUREAD_SAKSBEHANDLER_GROUPID"]
-        val fortroligClaim = env["AZUREAD_STRENGT_FORTROLIG_GROUPID"]
+    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> {
+        val attestantClaim = env["AZUREAD_ATTESTANT_GROUPID"]!!
+        val saksbehandlerClaim = env["AZUREAD_SAKSBEHANDLER_GROUPID"]!!
+        val strengFortroligClaim = env["AZUREAD_STRENGT_FORTROLIG_GROUPID"]!!
+        val fortroligClaim = env["AZUREAD_FORTROLIG_GROUPID"]!!
+
         return mapOf(
             "AZUREAD_ATTESTANT_GROUPID" to attestantClaim,
             "AZUREAD_SAKSBEHANDLER_GROUPID" to saksbehandlerClaim,
-            "AZUREAD_STRENGT_FORTROLIG_GROUPID" to fortroligClaim
+            "AZUREAD_STRENGT_FORTROLIG_GROUPID" to strengFortroligClaim,
+            "AZUREAD_FORTROLIG_GROUPID" to fortroligClaim
         )
     }
 
@@ -280,7 +283,7 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-            Duration.of(1, ChronoUnit.MINUTES).toMillis()
+                Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

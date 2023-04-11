@@ -25,6 +25,9 @@ dependencies {
     api(libs.cache.caffeine)
     api(project(":libs:etterlatte-token-model"))
 
+    implementation(libs.navfelles.tokenclientcore)
+
+    testImplementation(libs.navfelles.tokenvalidationktor2)
     testImplementation(libs.kotlinx.coroutinestest)
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.0")
     testImplementation(libs.test.jupiter.engine)

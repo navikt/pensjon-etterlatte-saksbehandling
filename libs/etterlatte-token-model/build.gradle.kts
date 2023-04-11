@@ -9,6 +9,8 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.navfelles.tokenvalidationktor2)
+
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.test.jupiter.params)
     testRuntimeOnly(libs.test.jupiter.engine)

@@ -71,6 +71,8 @@ spec:
       value: http://etterlatte-vedtaksvurdering
     - name: AZUREAD_ATTESTANT_GROUPID
       value: 63f46f74-84a8-4d1c-87a8-78532ab3ae60
+    - name: AZUREAD_FORTROLIG_GROUPID
+      value: ea930b6b-9397-44d9-b9e6-f4cf527a632a
     - name: AZUREAD_SAKSBEHANDLER_GROUPID
       value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
     - name: AZUREAD_STRENGT_FORTROLIG_GROUPID

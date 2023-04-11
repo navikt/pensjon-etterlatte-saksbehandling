@@ -26,6 +26,8 @@ dependencies {
     implementation(libs.navfelles.tokenvalidationktor2)
     implementation(libs.database.kotliquery)
 
+    testImplementation(libs.navfelles.tokenvalidationktor2)
+
     testImplementation(libs.test.mockk)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)

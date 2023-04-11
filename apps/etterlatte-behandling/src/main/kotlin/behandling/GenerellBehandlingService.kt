@@ -313,7 +313,8 @@ class RealGenerellBehandlingService(
                 }
         } catch (e: NotImplementedError) {
             logger.error(
-                "Kan ikke oppdatere virkningstidspunkt for behandling: $behandlingId med typen ${behandling.type}"
+                "Kan ikke oppdatere virkningstidspunkt for behandling: $behandlingId med typen ${behandling.type}",
+                e
             )
             throw e
         }

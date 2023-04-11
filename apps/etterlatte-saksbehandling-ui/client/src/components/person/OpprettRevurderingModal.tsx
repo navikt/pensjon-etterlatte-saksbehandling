@@ -32,7 +32,7 @@ const OpprettRevurderingModal = (props: Props) => {
         location.reload()
       },
       () => {
-        setError('En feil skjedde ved opprettelse av revurderingen')
+        setError('En feil skjedde ved opprettelse av revurderingen. Prøv igjen senere.')
       }
     )
   }

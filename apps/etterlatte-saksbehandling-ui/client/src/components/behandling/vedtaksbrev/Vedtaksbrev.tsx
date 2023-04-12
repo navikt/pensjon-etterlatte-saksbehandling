@@ -134,16 +134,24 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
                   <div className="info">
                     <Info>Navn</Info>
-                    <Tekst>{vedtaksbrev.mottaker?.adresse?.navn}</Tekst>
+                    <Tekst>{vedtaksbrev.mottaker?.navn}</Tekst>
                   </div>
 
                   <div className="info">
                     <Info>Adresse</Info>
                     <Tekst>
-                      {vedtaksbrev.mottaker?.adresse?.adresse},&nbsp;
-                      {vedtaksbrev.mottaker?.adresse?.postnummer} {vedtaksbrev.mottaker?.adresse?.poststed}
+                      {[
+                        vedtaksbrev.mottaker.adresse?.adresselinje1,
+                        vedtaksbrev.mottaker.adresse?.adresselinje2,
+                        vedtaksbrev.mottaker.adresse?.adresselinje3,
+                      ].join('\n')}
                     </Tekst>
-                    <Tekst>{vedtaksbrev.mottaker?.adresse?.land}</Tekst>
+                    <Tekst>
+                      {vedtaksbrev.mottaker.adresse?.postnummer} {vedtaksbrev.mottaker.adresse?.poststed}
+                    </Tekst>
+                    <Tekst>
+                      {vedtaksbrev.mottaker.adresse?.land} ({vedtaksbrev.mottaker.adresse?.landkode})
+                    </Tekst>
                   </div>
                 </InfoContainer>
               </>

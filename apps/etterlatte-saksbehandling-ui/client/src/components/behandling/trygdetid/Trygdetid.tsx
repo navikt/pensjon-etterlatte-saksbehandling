@@ -54,9 +54,20 @@ export const Trygdetid = () => {
           <InfoWrapper>
             <Info
               label="Fødselsdato"
-              tekst={formaterStringDato(trygdetid.opplysninger.avdoedFoedselsdato.toString())}
+              tekst={
+                trygdetid.opplysninger.avdoedFoedselsdato
+                  ? formaterStringDato(trygdetid.opplysninger.avdoedFoedselsdato.toString())
+                  : 'n/a'
+              }
             />
-            <Info label="Dødsdato" tekst={formaterStringDato(trygdetid.opplysninger.avdoedDoedsdato.toString())} />
+            <Info
+              label="Dødsdato"
+              tekst={
+                trygdetid.opplysninger.avdoedDoedsdato
+                  ? formaterStringDato(trygdetid.opplysninger.avdoedDoedsdato.toString())
+                  : 'n/a'
+              }
+            />
           </InfoWrapper>
           <TrygdetidGrunnlag
             trygdetid={trygdetid}

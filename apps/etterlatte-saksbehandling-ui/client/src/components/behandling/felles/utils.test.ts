@@ -13,6 +13,7 @@ import { ISaksType } from '~components/behandling/fargetags/saksType'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeType } from '~shared/types/kilde'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
   it('barnepensjon gyldig utfylt', () => {
@@ -133,6 +134,7 @@ const opprettBehandling = (
     hendelser: [],
     behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
     prosesstype: IProsesstype.MANUELL,
+    revurderingsaarsak: Revurderingsaarsak.REGULERING,
   }
 }
 

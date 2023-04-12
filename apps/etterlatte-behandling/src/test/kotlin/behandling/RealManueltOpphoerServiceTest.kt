@@ -96,12 +96,12 @@ internal class RealManueltOpphoerServiceTest {
             every { alleBehandlingerISak(capture(alleBehandlingerISak_sak)) } returns listOf(
                 foerstegangsbehandling(
                     sakId = sak,
+                    status = BehandlingStatus.IVERKSATT,
                     virkningstidspunkt = Virkningstidspunkt(
                         dato = YearMonth.of(2022, 8),
                         kilde = Grunnlagsopplysning.Saksbehandler.create(ident = ""),
                         begrunnelse = ""
-                    ),
-                    status = BehandlingStatus.IVERKSATT
+                    )
                 )
             )
             every { opprettBehandling(capture(opprettBehandling_slot)) } just runs
@@ -176,23 +176,23 @@ internal class RealManueltOpphoerServiceTest {
                     sakId = sakId,
                     status = BehandlingStatus.IVERKSATT,
                     persongalleri = Persongalleri(soeker = brukerFnr),
+                    revurderingAarsak = RevurderingAarsak.REGULERING,
                     virkningstidspunkt = Virkningstidspunkt(
                         YearMonth.of(2022, 10),
                         Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken),
                         "begrunnelse"
-                    ),
-                    revurderingAarsak = RevurderingAarsak.REGULERING
+                    )
                 ),
                 revurdering(
                     sakId = sakId,
                     status = BehandlingStatus.VILKAARSVURDERT,
                     persongalleri = Persongalleri(soeker = brukerFnr),
+                    revurderingAarsak = RevurderingAarsak.REGULERING,
                     virkningstidspunkt = Virkningstidspunkt(
                         YearMonth.of(2022, 5),
                         Grunnlagsopplysning.Saksbehandler.create(saksbehandlerToken),
                         "begrunnelse"
-                    ),
-                    revurderingAarsak = RevurderingAarsak.REGULERING
+                    )
                 )
             )
             every { opprettBehandling(capture(opprettetManueltOpphoerSlot)) } just runs

@@ -15,12 +15,12 @@ fun Route.omregningRoutes(
     route("/omregning") {
         post {
             val request = call.receive<Omregningshendelse>()
-            val (behandlingId, forrigebehandlingId) = omregningService.opprettOmregning(
+            val (behandlingId, forrigeBehandlingId) = omregningService.opprettOmregning(
                 sakId = request.sakId,
-                fradato = request.fradato,
-                prosesstype = request.prosesstype
+                fraDato = request.fradato,
+                prosessType = request.prosesstype
             )
-            call.respond(OpprettOmregningResponse(behandlingId, forrigebehandlingId))
+            call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandlingId))
         }
     }
 }

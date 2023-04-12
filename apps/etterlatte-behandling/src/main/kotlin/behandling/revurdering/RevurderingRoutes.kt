@@ -33,7 +33,11 @@ internal fun Route.revurderingRoutes(
             }
 
             generellBehandlingService.hentSenestIverksatteBehandling(sakId)?.let { forrigeIverksatteBehandling ->
-                val revurdering = revurderingService.opprettRevurdering(forrigeIverksatteBehandling, body.aarsak)
+                val revurdering = revurderingService.opprettManuellRevurdering(
+                    sakId = forrigeIverksatteBehandling.sak.id,
+                    forrigeBehandling = forrigeIverksatteBehandling,
+                    revurderingAarsak = body.aarsak
+                )
                 call.respond(revurdering.toDetaljertBehandling())
             } ?: call.respond(HttpStatusCode.BadRequest, "Kan ikke revurdere en sak uten iverksatt behandling")
         }

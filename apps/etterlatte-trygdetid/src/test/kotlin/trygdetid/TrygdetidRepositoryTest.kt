@@ -165,7 +165,7 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal oppdatere beregnet trygdetid`() {
         val behandlingId = randomUUID()
-        val beregnetTrygdetid = beregnetTrygdetid(nasjonal = 10, fremtidig = 2, total = 12)
+        val beregnetTrygdetid = beregnetTrygdetid(nasjonal = 10, fremtidig = 2, total = 12, tidspunkt = Tidspunkt.now())
         val behandling = mockk<DetaljertBehandling>().apply {
             every { id } returns behandlingId
             every { sak } returns 123L

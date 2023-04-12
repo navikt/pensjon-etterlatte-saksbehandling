@@ -8,8 +8,10 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.database.tidspunkt
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
@@ -20,7 +22,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, behandling_id, sak_id, trygdetid_nasjonal, trygdetid_fremtidig, trygdetid_total 
+                    SELECT id, behandling_id, sak_id, trygdetid_nasjonal, trygdetid_fremtidig,
+                     trygdetid_total, tidspunkt
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                 """.trimIndent(),
@@ -161,14 +164,15 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     statement = """
                         UPDATE trygdetid 
                         SET trygdetid_nasjonal = :trygdetidNasjonal, trygdetid_fremtidig = :trygdetidFremtidig, 
-                            trygdetid_total = :trygdetidTotal 
+                            trygdetid_total = :trygdetidTotal, tidspunkt = :tidspunkt 
                         WHERE behandling_id = :behandlingId
                     """.trimIndent(),
                     paramMap = mapOf(
                         "behandlingId" to behandlingId,
                         "trygdetidNasjonal" to beregnetTrygdetid.nasjonal,
                         "trygdetidFremtidig" to beregnetTrygdetid.fremtidig,
-                        "trygdetidTotal" to beregnetTrygdetid.total
+                        "trygdetidTotal" to beregnetTrygdetid.total,
+                        "tidspunkt" to beregnetTrygdetid.tidspunkt.toTimestamp()
                     )
                 ).let { query -> tx.update(query) }
             }
@@ -218,7 +222,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 BeregnetTrygdetid(
                     nasjonal = it,
                     fremtidig = int("trygdetid_fremtidig"),
-                    total = int("trygdetid_total")
+                    total = int("trygdetid_total"),
+                    tidspunkt = tidspunkt("tidspunkt")
                 )
             },
             trygdetidGrunnlag = trygdetidGrunnlag,

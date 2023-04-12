@@ -1,5 +1,6 @@
 package trygdetid
 
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.Trygdetid
@@ -32,8 +33,10 @@ fun trygdetidGrunnlag(trygdetidId: UUID) = TrygdetidGrunnlag(
     kilde = "pdl"
 )
 
-fun beregnetTrygdetid(nasjonal: Int = 0, fremtidig: Int = 0, total: Int = 0) = BeregnetTrygdetid(
-    nasjonal = nasjonal,
-    fremtidig = fremtidig,
-    total = total
-)
+fun beregnetTrygdetid(nasjonal: Int = 0, fremtidig: Int = 0, total: Int = 0, tidspunkt: Tidspunkt = Tidspunkt.now()) =
+    BeregnetTrygdetid(
+        nasjonal = nasjonal,
+        fremtidig = fremtidig,
+        total = total,
+        tidspunkt = tidspunkt
+    )

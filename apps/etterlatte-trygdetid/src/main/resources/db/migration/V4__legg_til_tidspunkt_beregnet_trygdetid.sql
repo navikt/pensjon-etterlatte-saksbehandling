@@ -1,0 +1,1 @@
+ALTER TABLE trygdetid ADD COLUMN tidspunkt timestamp;

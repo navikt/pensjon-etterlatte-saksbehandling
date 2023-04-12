@@ -159,7 +159,8 @@ class BeregnOmstillingsstoenadService(
                 verdi = Avdoed(Beregningstall(totalTrygdetid)),
                 kilde = Grunnlagsopplysning.RegelKilde(
                     "Trygdetid fastsatt av saksbehandler",
-                    Tidspunkt.now(), // TODO få inn tidspunkt i trygdetid EY-2010
+                    trygdetid.beregnetTrygdetid?.tidspunkt
+                        ?: throw Exception("Trygdetid mangler tidspunkt på beregnet trygdetid"),
                     "1"
                 ),
                 beskrivelse = "Trygdetid avdød ektefelle"

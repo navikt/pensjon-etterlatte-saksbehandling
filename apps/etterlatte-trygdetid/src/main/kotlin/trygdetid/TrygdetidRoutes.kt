@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
@@ -85,7 +86,8 @@ fun Trygdetid.toDto(): TrygdetidDto =
             BeregnetTrygdetidDto(
                 nasjonal = beregnetTrygdetid.nasjonal,
                 fremtidig = beregnetTrygdetid.fremtidig,
-                total = beregnetTrygdetid.total
+                total = beregnetTrygdetid.total,
+                tidspunkt = beregnetTrygdetid.tidspunkt
             )
         },
         trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() },
@@ -105,7 +107,8 @@ private fun BeregnetTrygdetidDto.toBeregnetTrygdetid(): BeregnetTrygdetid =
     BeregnetTrygdetid(
         nasjonal = nasjonal,
         fremtidig = fremtidig,
-        total = total
+        total = total,
+        tidspunkt = tidspunkt ?: Tidspunkt.now()
     )
 
 private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(): TrygdetidGrunnlag =

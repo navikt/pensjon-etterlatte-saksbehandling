@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.trygdetid
 
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.*
 
@@ -19,7 +20,8 @@ data class GrunnlagOpplysningerDto(
 data class BeregnetTrygdetidDto(
     val nasjonal: Int,
     val fremtidig: Int,
-    val total: Int
+    val total: Int,
+    val tidspunkt: Tidspunkt?
 )
 
 data class TrygdetidGrunnlagDto(

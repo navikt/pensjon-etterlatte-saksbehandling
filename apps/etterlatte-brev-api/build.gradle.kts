@@ -12,6 +12,7 @@ dependencies {
     implementation(libs.database.hikaricp)
     implementation(libs.database.flywaydb)
     implementation(libs.database.postgresql)
+    implementation(libs.database.kotliquery)
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.clientcore)

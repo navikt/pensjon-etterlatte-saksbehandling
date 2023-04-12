@@ -9,8 +9,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Adresse
-import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -58,10 +56,7 @@ internal class DistribusjonServiceTest {
         assertEquals(tidspunkt, faktiskRequest.distribusjonstidspunkt)
         assertEquals("etterlatte-brev-api", faktiskRequest.dokumentProdApp)
 
-        verify(exactly = 1) {
-            mockDb.setBestillingsId(brevId, bestillingsID)
-            mockDb.oppdaterStatus(brevId, Status.DISTRIBUERT, distribusjonResponse.toJson())
-        }
+        verify(exactly = 1) { mockDb.settBrevDistribuert(brevId, distribusjonResponse) }
     }
 
     private fun opprettAdresse() = Adresse(

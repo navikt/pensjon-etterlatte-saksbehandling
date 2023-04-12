@@ -98,7 +98,7 @@ class ApplicationBuilder {
     )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
-    private val db = BrevRepository.using(datasource)
+    private val db = BrevRepository(datasource)
 
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 

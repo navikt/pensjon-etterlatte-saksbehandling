@@ -11,7 +11,6 @@ import no.nav.etterlatte.brev.model.BrevRequestMapper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
@@ -65,7 +64,7 @@ class VedtaksbrevService(
             ?: throw IllegalArgumentException("Vedtaksbrev ikke funnet. Avbryter ferdigstilling/attestering.")
 
         return when (vedtaksbrev.status) {
-            in listOf(Status.OPPRETTET, Status.OPPDATERT) -> db.oppdaterStatus(vedtaksbrev.id, Status.FERDIGSTILT)
+            in listOf(Status.OPPRETTET, Status.OPPDATERT) -> db.settBrevFerdigstilt(vedtaksbrev.id)
             Status.FERDIGSTILT -> true // Ignorer hvis brev allerede er ferdigstilt
             else -> throw IllegalArgumentException(
                 "Kan ikke ferdigstille vedtaksbrev (id=${vedtaksbrev.id}) med status ${vedtaksbrev.status}"
@@ -80,9 +79,8 @@ class VedtaksbrevService(
 
         val response = dokarkivService.journalfoer(vedtaksbrev, vedtak)
 
-        db.setJournalpostId(vedtaksbrev.id, response.journalpostId)
-        db.oppdaterStatus(vedtaksbrev.id, Status.JOURNALFOERT, response.toJson())
-            .also { logger.info("Brev med id=${vedtaksbrev.id} markert som ferdigstilt") }
+        db.settBrevJournalfoert(vedtaksbrev.id, response)
+            .also { logger.info("Brev med id=${vedtaksbrev.id} markert som journalført") }
 
         return vedtaksbrev to response
     }

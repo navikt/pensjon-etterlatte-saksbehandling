@@ -3,8 +3,6 @@ package no.nav.etterlatte.brev.distribusjon
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Adresse
-import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.brev.distribusjon.Adresse as DistAdresse
 
 interface DistribusjonService {
@@ -46,10 +44,7 @@ class DistribusjonServiceImpl(
         )
 
         klient.distribuerJournalpost(request)
-            .also {
-                db.setBestillingsId(brevId, it.bestillingsId)
-                db.oppdaterStatus(brevId, Status.DISTRIBUERT, it.toJson())
-            }
-            .let { it.bestillingsId }
+            .also { db.settBrevDistribuert(brevId, it) }
+            .bestillingsId
     }
 }

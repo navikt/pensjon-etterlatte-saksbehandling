@@ -1,11 +1,14 @@
 package no.nav.etterlatte.db
 
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
+import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
-import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -14,13 +17,12 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,8 +32,6 @@ internal class BrevRepositoryIntegrationTest {
 
     private lateinit var db: BrevRepository
     private lateinit var dataSource: DataSource
-
-    private val connection get() = dataSource.connection
 
     @BeforeAll
     fun beforeAll() {
@@ -46,7 +46,7 @@ internal class BrevRepositoryIntegrationTest {
         )
         dataSource.migrate()
 
-        db = BrevRepository.using(dataSource)
+        db = BrevRepository(dataSource)
     }
 
     @AfterAll
@@ -56,8 +56,8 @@ internal class BrevRepositoryIntegrationTest {
 
     @AfterEach
     fun resetTablesAfterEachTest() {
-        connection.use {
-            it.prepareStatement("TRUNCATE brev RESTART IDENTITY CASCADE;").execute()
+        using(sessionOf(dataSource)) {
+            it.run(queryOf("TRUNCATE brev RESTART IDENTITY CASCADE;").asExecute)
         }
     }
 
@@ -67,7 +67,7 @@ internal class BrevRepositoryIntegrationTest {
 
         assertTrue(db.hentBrevForBehandling(behandlingId).isEmpty())
 
-        val nyttBrev = opprettBrev(behandlingId)
+        val nyttBrev = db.opprettBrev(ulagretBrev(behandlingId))
 
         val brevTilBehandling = db.hentBrevForBehandling(behandlingId).single()
         assertEquals(nyttBrev.status, brevTilBehandling.status)
@@ -82,12 +82,17 @@ internal class BrevRepositoryIntegrationTest {
     fun `Lagring av flere brev paa flere behandlinger`() {
         val behandlingId = UUID.randomUUID()
 
-        opprettBrev(behandlingId)
-        opprettBrev(behandlingId)
-        opprettBrev(behandlingId)
+        val brev1 = db.opprettBrev(ulagretBrev(behandlingId))
+        assertEquals(1, brev1.id)
 
-        LongRange(2, 10).forEach {
-            opprettBrev(UUID.randomUUID())
+        val brev2 = db.opprettBrev(ulagretBrev(behandlingId))
+        assertEquals(2, brev2.id)
+
+        val brev3 = db.opprettBrev(ulagretBrev(behandlingId))
+        assertEquals(3, brev3.id)
+
+        repeat(10) {
+            db.opprettBrev(ulagretBrev(UUID.randomUUID()))
         }
 
         assertEquals(3, db.hentBrevForBehandling(behandlingId).size)
@@ -95,7 +100,7 @@ internal class BrevRepositoryIntegrationTest {
 
     @Test
     fun `Hent pdf for brev`() {
-        val nyttBrev = opprettBrev(UUID.randomUUID())
+        val nyttBrev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
 
         val innhold = db.hentBrevInnhold(nyttBrev.id)
 
@@ -106,9 +111,9 @@ internal class BrevRepositoryIntegrationTest {
     fun `Slett brev`() {
         val behandlingId = UUID.randomUUID()
 
-        opprettBrev(behandlingId)
-        opprettBrev(behandlingId)
-        opprettBrev(behandlingId)
+        db.opprettBrev(ulagretBrev(behandlingId))
+        db.opprettBrev(ulagretBrev(behandlingId))
+        db.opprettBrev(ulagretBrev(behandlingId))
 
         val brev = db.hentBrevForBehandling(behandlingId)
 
@@ -123,58 +128,52 @@ internal class BrevRepositoryIntegrationTest {
     fun `Oppdater journalpost ID`() {
         val journalpostId = UUID.randomUUID().toString()
 
-        val brev = opprettBrev(UUID.randomUUID())
+        val brev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
 
-        assertTrue(db.setJournalpostId(brev.id, journalpostId))
+        assertTrue(db.settBrevJournalfoert(brev.id, JournalpostResponse(journalpostId, journalpostferdigstilt = true)))
     }
 
     @Test
     fun `Oppdater bestilling ID`() {
-        val journalpostId = UUID.randomUUID().toString()
+        val bestillingsId = UUID.randomUUID().toString()
 
-        val brev = opprettBrev(UUID.randomUUID())
+        val brev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
 
-        assertTrue(db.setBestillingsId(brev.id, journalpostId))
+        assertTrue(db.settBrevDistribuert(brev.id, DistribuerJournalpostResponse(bestillingsId)))
     }
 
     @Test
     fun `Oppdater status`() {
-        val opprettetBrev = opprettBrev(UUID.randomUUID())
+        val opprettetBrev = db.opprettBrev(ulagretBrev(UUID.randomUUID()))
 
-        db.oppdaterStatus(opprettetBrev.id, Status.OPPDATERT)
-        db.oppdaterStatus(opprettetBrev.id, Status.FERDIGSTILT)
-        db.oppdaterStatus(opprettetBrev.id, Status.JOURNALFOERT)
-        db.oppdaterStatus(opprettetBrev.id, Status.DISTRIBUERT)
+        db.oppdaterBrev(opprettetBrev.id, ulagretBrev(opprettetBrev.behandlingId))
+        db.settBrevFerdigstilt(opprettetBrev.id)
+        db.settBrevJournalfoert(opprettetBrev.id, JournalpostResponse("id", journalpostferdigstilt = true))
+        db.settBrevDistribuert(opprettetBrev.id, DistribuerJournalpostResponse("id"))
 
-        val count = connection.use {
-            it.prepareStatement("SELECT COUNT(*) FROM hendelse WHERE brev_id = ${opprettetBrev.id}")
-                .executeQuery()
-                .let { rs ->
-                    if (rs.next()) {
-                        rs.getInt("count")
-                    } else {
-                        fail()
-                    }
-                }
-        }
+        val count =
+            sessionOf(dataSource).use {
+                it.run(
+                    queryOf(
+                        "SELECT COUNT(*) FROM hendelse WHERE brev_id = ?",
+                        opprettetBrev.id
+                    ).map { row -> row.int("count") }.asSingle
+                )
+            }
 
         // Skal være 5 hendelser. 1 for opprettet, og 4 for resten som ble kjørt manuelt
         assertEquals(5, count)
     }
 
-    private fun opprettBrev(behandlingId: UUID): Brev {
-        return db.opprettBrev(
-            UlagretBrev(
-                behandlingId = behandlingId,
-                soekerFnr = "00000012345",
-                tittel = UUID.randomUUID().toString(),
-                spraak = Spraak.NB,
-                mottaker = opprettMottaker(),
-                pdf = PDF_BYTES,
-                erVedtaksbrev = false
-            )
-        )
-    }
+    private fun ulagretBrev(behandlingId: UUID) = UlagretBrev(
+        behandlingId = behandlingId,
+        soekerFnr = "00000012345",
+        tittel = UUID.randomUUID().toString(),
+        spraak = Spraak.NB,
+        mottaker = opprettMottaker(),
+        pdf = PDF_BYTES,
+        erVedtaksbrev = false
+    )
 
     private fun opprettMottaker() = Mottaker(
         navn = "Test Testesen",

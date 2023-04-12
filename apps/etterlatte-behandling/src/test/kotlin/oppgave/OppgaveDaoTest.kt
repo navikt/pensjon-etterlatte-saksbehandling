@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
+import no.nav.etterlatte.sak.SakTilgangDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -48,7 +48,7 @@ internal class OppgaveDaoTest {
     private lateinit var grunnlagsendringshendelsesRepo: GrunnlagsendringshendelseDao
     private lateinit var behandlingDao: BehandlingDao
     private lateinit var sakDao: SakDao
-    private lateinit var sakDaoAdressebeskyttelse: SakDaoAdressebeskyttelse
+    private lateinit var sakTilgangDao: SakTilgangDao
 
     @BeforeAll
     fun beforeAll() {
@@ -67,7 +67,7 @@ internal class OppgaveDaoTest {
         sakDao = SakDao { connection }
         grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao { connection }
         behandlingDao = BehandlingDao { connection }
-        sakDaoAdressebeskyttelse = SakDaoAdressebeskyttelse(dataSource)
+        sakTilgangDao = SakTilgangDao(dataSource)
     }
 
     @AfterEach
@@ -145,7 +145,7 @@ internal class OppgaveDaoTest {
 
         val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON)
         behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, fnr, sak.id))
-        sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakTilgangDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val sakk = sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
         behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, TRIVIELL_MIDTPUNKT.value, sakk.id))
@@ -159,14 +159,14 @@ internal class OppgaveDaoTest {
         )
         assertEquals(1, strengtFortroligOppgaver.size)
 
-        sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
+        sakTilgangDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT)
         assertEquals(2, oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser).size)
         assertEquals(
             0,
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(alleBehandlingsStatuser).size
         )
 
-        sakDaoAdressebeskyttelse.oppdaterAdresseBeskyttelse(
+        sakTilgangDao.oppdaterAdresseBeskyttelse(
             sak.id,
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
         )

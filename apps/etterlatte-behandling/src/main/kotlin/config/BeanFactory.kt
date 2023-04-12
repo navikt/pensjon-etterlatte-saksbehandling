@@ -51,10 +51,10 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.OppgaveServiceImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
-import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
+import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.TilgangService
+import no.nav.etterlatte.sak.tilgangServiceImpl
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -65,7 +65,7 @@ interface BeanFactory {
     val config: Config
     fun dataSource(): DataSource
     fun sakService(): SakService
-    fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse
+    fun tilgangService(): TilgangService
     fun foerstegangsbehandlingService(): FoerstegangsbehandlingService
     fun revurderingService(): RevurderingService
     fun generellBehandlingService(): GenerellBehandlingService
@@ -74,7 +74,7 @@ interface BeanFactory {
     fun oppgaveService(): OppgaveService
     fun omregningService(): OmregningService
     fun sakDao(): SakDao
-    fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse
+    fun sakDaoAdressebeskyttelse(datasource: DataSource): SakTilgangDao
     fun oppgaveDao(): OppgaveDao
     fun behandlingDao(): BehandlingDao
     fun hendelseDao(): HendelseDao
@@ -146,8 +146,8 @@ abstract class CommonFactory : BeanFactory {
     override fun sakService(): SakService =
         RealSakService(sakDao(), pdlKlient(), norg2HttpClient(), featureToggleService)
 
-    override fun sakServiceAdressebeskyttelse(): SakServiceAdressebeskyttelse =
-        SakServiceAdressebeskyttelseImpl(SakDaoAdressebeskyttelse(dataSource()), getSaksbehandlerGroupIdsByKey())
+    override fun tilgangService(): TilgangService =
+        tilgangServiceImpl(SakTilgangDao(dataSource()), getSaksbehandlerGroupIdsByKey())
 
     override fun behandlingsStatusService(): BehandlingStatusService {
         return BehandlingStatusServiceImpl(behandlingDao(), generellBehandlingService())
@@ -190,8 +190,8 @@ abstract class CommonFactory : BeanFactory {
     override fun oppgaveDao(): OppgaveDao = oppgaveDao
     override fun oppgaveService(): OppgaveService = oppgaveService
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
-    override fun sakDaoAdressebeskyttelse(datasource: DataSource): SakDaoAdressebeskyttelse =
-        SakDaoAdressebeskyttelse(datasource)
+    override fun sakDaoAdressebeskyttelse(datasource: DataSource): SakTilgangDao =
+        SakTilgangDao(datasource)
 
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
     override fun hendelseDao(): HendelseDao = HendelseDao { databaseContext().activeTx() }
@@ -212,7 +212,7 @@ abstract class CommonFactory : BeanFactory {
             generellBehandlingService(),
             pdlKlient(),
             grunnlagKlientClientCredentials(),
-            sakServiceAdressebeskyttelse()
+            tilgangService()
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(
@@ -238,12 +238,14 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
         val saksbehandlerClaim = env["AZUREAD_SAKSBEHANDLER_GROUPID"]!!
         val strengFortroligClaim = env["AZUREAD_STRENGT_FORTROLIG_GROUPID"]!!
         val fortroligClaim = env["AZUREAD_FORTROLIG_GROUPID"]!!
+        val egenAnsattClaim = env["AZUREAD_EGEN_ANSATT_GROUPID"]!!
 
         return mapOf(
             "AZUREAD_ATTESTANT_GROUPID" to attestantClaim,
             "AZUREAD_SAKSBEHANDLER_GROUPID" to saksbehandlerClaim,
             "AZUREAD_STRENGT_FORTROLIG_GROUPID" to strengFortroligClaim,
-            "AZUREAD_FORTROLIG_GROUPID" to fortroligClaim
+            "AZUREAD_FORTROLIG_GROUPID" to fortroligClaim,
+            "AZUREAD_EGEN_ANSATT_GROUPID" to egenAnsattClaim
         )
     }
 

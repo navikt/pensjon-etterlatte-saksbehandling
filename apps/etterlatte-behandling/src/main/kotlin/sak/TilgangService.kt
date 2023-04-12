@@ -5,19 +5,23 @@ import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 
-interface SakServiceAdressebeskyttelse : PersonTilgangsSjekk {
+interface TilgangService : PersonTilgangsSjekk {
     fun harTilgangTilBehandling(behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
     fun oppdaterAdressebeskyttelse(id: Long, adressebeskyttelseGradering: AdressebeskyttelseGradering): Int
     fun harTilgangTilSak(sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
     fun harTilgangTilPerson(fnr: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean
 }
 
-data class SakMedGradering(val id: Long, val adressebeskyttelseGradering: AdressebeskyttelseGradering?)
+data class SakMedGraderingOgSkjermet(
+    val id: Long,
+    val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
+    val erSkjermet: Boolean?
+)
 
-class SakServiceAdressebeskyttelseImpl(
-    private val dao: SakDaoAdressebeskyttelse,
+class tilgangServiceImpl(
+    private val dao: SakTilgangDao,
     private val saksbehandlereGroupIdsByKey: Map<String, String>
-) : SakServiceAdressebeskyttelse {
+) : TilgangService {
 
     override suspend fun harTilgangTilPerson(
         foedselsnummer: Folkeregisteridentifikator,
@@ -27,43 +31,50 @@ class SakServiceAdressebeskyttelseImpl(
     }
 
     override fun harTilgangTilPerson(fnr: String, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
-        val finnSakerMedGradering = dao.finnSakerMedGradering(fnr)
+        val finnSakerMedGradering = dao.finnSakerMedGraderingOgSkjerming(fnr)
         if (finnSakerMedGradering.isEmpty()) {
             return true
         }
-        val harRolleStrengtFortrolig = saksbehandlerMedRoller.harRolleStrengtFortrolig(saksbehandlereGroupIdsByKey)
-        val harRolleFortrolig = saksbehandlerMedRoller.harRolleFortrolig(saksbehandlereGroupIdsByKey)
-
         return finnSakerMedGradering.map {
-            when (it.adressebeskyttelseGradering) {
-                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> harRolleStrengtFortrolig
-                AdressebeskyttelseGradering.STRENGT_FORTROLIG -> harRolleStrengtFortrolig
-                AdressebeskyttelseGradering.FORTROLIG -> harRolleFortrolig
-                AdressebeskyttelseGradering.UGRADERT -> true
-                else -> true
-            }
+            harTilgangSjekker(it, saksbehandlerMedRoller)
         }.all { it }
     }
 
     override fun harTilgangTilSak(sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
-        val harRolleStrengtFortrolig = saksbehandlerMedRoller.harRolleStrengtFortrolig(saksbehandlereGroupIdsByKey)
-        val harRolleFortrolig = saksbehandlerMedRoller.harRolleFortrolig(saksbehandlereGroupIdsByKey)
-
-        val sakMedGradering = dao.hentSakMedGradering(sakId) ?: return true
-        return when (sakMedGradering.adressebeskyttelseGradering) {
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> harRolleStrengtFortrolig
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> harRolleStrengtFortrolig
-            AdressebeskyttelseGradering.FORTROLIG -> harRolleFortrolig
-            AdressebeskyttelseGradering.UGRADERT -> true
-            else -> true
-        }
+        val sak = dao.hentSakMedGraderingOgSkjerming(sakId) ?: return true
+        return harTilgangSjekker(sak, saksbehandlerMedRoller)
     }
 
     override fun harTilgangTilBehandling(
         behandlingId: String,
         saksbehandlerMedRoller: SaksbehandlerMedRoller
     ): Boolean {
-        return when (dao.sjekkOmBehandlingHarAdressebeskyttelse(behandlingId)) {
+        val sakMedGraderingOgSkjermet =
+            dao.hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId) ?: return true
+        return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
+    }
+
+    fun harTilgangSjekker(sak: SakMedGraderingOgSkjermet, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
+        return kanBehandleEgenAnsatt(sak, saksbehandlerMedRoller) &&
+            kanBehandleAdressebeskyttelse(sak, saksbehandlerMedRoller)
+    }
+
+    private fun kanBehandleEgenAnsatt(
+        sak: SakMedGraderingOgSkjermet,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller
+    ): Boolean {
+        return when (sak.erSkjermet) {
+            true -> saksbehandlerMedRoller.harRolleEgenansatt(saksbehandlereGroupIdsByKey)
+            false -> true
+            null -> true
+        }
+    }
+
+    private fun kanBehandleAdressebeskyttelse(
+        sak: SakMedGraderingOgSkjermet,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller
+    ): Boolean {
+        return when (sak.adressebeskyttelseGradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> saksbehandlerMedRoller.harRolleStrengtFortrolig(
                 saksbehandlereGroupIdsByKey
             )

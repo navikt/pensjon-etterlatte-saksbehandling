@@ -34,8 +34,8 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
-import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
+import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.tilgangServiceImpl
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -52,15 +52,15 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>()
     private val pdlService = mockk<PdlKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
-    private val adressebeskyttelseDaoMock = mockk<SakDaoAdressebeskyttelse>()
-    private val sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(adressebeskyttelseDaoMock, emptyMap())
+    private val adressebeskyttelseDaoMock = mockk<SakTilgangDao>()
+    private val tilgangServiceImpl = tilgangServiceImpl(adressebeskyttelseDaoMock, emptyMap())
 
     private val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
         grunnlagshendelsesDao,
         generellBehandlingService,
         pdlService,
         grunnlagClient,
-        sakServiceAdressebeskyttelse
+        tilgangServiceImpl
     )
 
     @BeforeEach

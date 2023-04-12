@@ -12,9 +12,9 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
-import no.nav.etterlatte.sak.SakServiceAdressebeskyttelse
-import no.nav.etterlatte.sak.SakServiceAdressebeskyttelseImpl
+import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.TilgangService
+import no.nav.etterlatte.sak.tilgangServiceImpl
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions
@@ -27,16 +27,17 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SakServiceAdressebeskyttelseTest {
+class TilgangServiceTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
     private lateinit var dataSource: DataSource
-    private lateinit var sakServiceAdressebeskyttelse: SakServiceAdressebeskyttelse
+    private lateinit var tilgangService: TilgangService
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val fortroligDev = "ea930b6b-9397-44d9-b9e6-f4cf527a632a"
+    private val egenAnsattDev = "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d"
 
     @BeforeAll
     fun beforeAll() {
@@ -50,11 +51,12 @@ class SakServiceAdressebeskyttelseTest {
             password = postgreSQLContainer.password
         ).apply { migrate() }
 
-        sakServiceAdressebeskyttelse = SakServiceAdressebeskyttelseImpl(
-            SakDaoAdressebeskyttelse(dataSource),
+        tilgangService = tilgangServiceImpl(
+            SakTilgangDao(dataSource),
             mapOf(
                 "AZUREAD_STRENGT_FORTROLIG_GROUPID" to strengtfortroligDev,
-                "AZUREAD_FORTROLIG_GROUPID" to fortroligDev
+                "AZUREAD_FORTROLIG_GROUPID" to fortroligDev,
+                "AZUREAD_EGEN_ANSATT_GROUPID" to egenAnsattDev
             )
         )
         sakRepo = SakDao { dataSource.connection }
@@ -67,7 +69,7 @@ class SakServiceAdressebeskyttelseTest {
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
         val saksbehandlerMedRoller = SaksbehandlerMedRoller(Saksbehandler("", "ident", null))
 
-        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        tilgangService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             sakId = sakId,
@@ -81,7 +83,7 @@ class SakServiceAdressebeskyttelseTest {
         )
         behandlingRepo.opprettBehandling(opprettBehandling)
         val harTilgangTilBehandling =
-            sakServiceAdressebeskyttelse.harTilgangTilBehandling(
+            tilgangService.harTilgangTilBehandling(
                 opprettBehandling.id.toString(),
                 saksbehandlerMedRoller
             )
@@ -89,7 +91,7 @@ class SakServiceAdressebeskyttelseTest {
         Assertions.assertEquals(false, harTilgangTilBehandling)
 
         val smokeTestBehandling =
-            sakServiceAdressebeskyttelse.harTilgangTilBehandling(UUID.randomUUID().toString(), saksbehandlerMedRoller)
+            tilgangService.harTilgangTilBehandling(UUID.randomUUID().toString(), saksbehandlerMedRoller)
 
         Assertions.assertEquals(true, smokeTestBehandling)
     }
@@ -103,7 +105,7 @@ class SakServiceAdressebeskyttelseTest {
             Saksbehandler("", "ident", JwtTokenClaims(jwtclaims))
         )
 
-        sakServiceAdressebeskyttelse.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        tilgangService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val opprettBehandling = opprettBehandling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             sakId = sakId,
@@ -117,7 +119,7 @@ class SakServiceAdressebeskyttelseTest {
         )
         behandlingRepo.opprettBehandling(opprettBehandling)
         val harTilgangTilBehandlingSomStrengtFortrolig =
-            sakServiceAdressebeskyttelse.harTilgangTilBehandling(
+            tilgangService.harTilgangTilBehandling(
                 opprettBehandling.id.toString(),
                 saksbehandlerMedStrengtfortrolig
             )
@@ -129,11 +131,63 @@ class SakServiceAdressebeskyttelseTest {
             Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsFortrolig))
         )
         val harTilgangTilBehandlingSomfortrolig =
-            sakServiceAdressebeskyttelse.harTilgangTilBehandling(
+            tilgangService.harTilgangTilBehandling(
                 opprettBehandling.id.toString(),
                 saksbehandlerMedFortrolig
             )
 
         Assertions.assertEquals(false, harTilgangTilBehandlingSomfortrolig)
+    }
+
+    @Test
+    fun `Skal kunne se på skjermet sak hvis riktig rolle`() {
+        val fnr = Folkeregisteridentifikator.of("08071272487").value
+        val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON).id
+        val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
+        val saksbehandlerMedStrengtfortrolig = SaksbehandlerMedRoller(
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaims))
+        )
+
+        val opprettBehandling = opprettBehandling(
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            sakId = sakId,
+            persongalleri = Persongalleri(
+                soeker = "11111",
+                innsender = "11111",
+                soesken = listOf("11111", "04040", "05050"),
+                avdoed = listOf("06060", "11111"),
+                gjenlevende = listOf("11111")
+            )
+        )
+        behandlingRepo.opprettBehandling(opprettBehandling)
+        val hartilgangtilvanligsak =
+            tilgangService.harTilgangTilBehandling(
+                opprettBehandling.id.toString(),
+                saksbehandlerMedStrengtfortrolig
+            )
+
+        Assertions.assertEquals(true, hartilgangtilvanligsak)
+
+        sakRepo.markerSakerMedSkjerming(listOf(sakId), true)
+
+        val hartilgangSomStrengtFortroligMotEgenAnsattSak =
+            tilgangService.harTilgangTilBehandling(
+                opprettBehandling.id.toString(),
+                saksbehandlerMedStrengtfortrolig
+            )
+
+        Assertions.assertEquals(false, hartilgangSomStrengtFortroligMotEgenAnsattSak)
+
+        val jwtclaimsEgenAnsatt = JWTClaimsSet.Builder().claim("groups", egenAnsattDev).build()
+        val saksbehandlerMedEgenansatt = SaksbehandlerMedRoller(
+            Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsEgenAnsatt))
+        )
+        val harTilgangTilBehandlingMedEgenAnsattRolle =
+            tilgangService.harTilgangTilBehandling(
+                opprettBehandling.id.toString(),
+                saksbehandlerMedEgenansatt
+            )
+
+        Assertions.assertEquals(true, harTilgangTilBehandlingMedEgenAnsattRolle)
     }
 }

@@ -50,7 +50,7 @@ spec:
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-behandling
     - name: ETTERLATTE_GRUNNLAG_URL
-      value: http://etterlatte-grunnlag/api
+      value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-grunnlag
   accessPolicy:

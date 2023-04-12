@@ -126,19 +126,12 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev
     setFilURL(pdfUrl)
   }
 
-  const oppdaterMottaker = (value: string, id: string, section?: string) => {
+  const oppdaterMottaker = (value: string, id: string) => {
     setFnrMottaker(id === 'FNR' ? value : '')
     setOrgMottaker(id === 'ORGNR' ? value : '')
 
-    if (id === 'ADRESSE') {
-      if (section === 'fornavn') setAdresse({ ...adresse, fornavn: value })
-      if (section === 'etternavn') setAdresse({ ...adresse, etternavn: value })
-      if (section === 'adresse') setAdresse({ ...adresse, adresse: value })
-      if (section === 'postnummer') setAdresse({ ...adresse, postnummer: value })
-      if (section === 'poststed') setAdresse({ ...adresse, poststed: value })
-    } else {
-      setAdresse({})
-    }
+    // TODO: Fikse dette når det blir aktuelt å bruke koden
+    setAdresse({})
   }
 
   useEffect(() => {

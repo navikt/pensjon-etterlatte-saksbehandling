@@ -77,7 +77,7 @@ export const MottakerComponent = ({
         id="manuell-panel"
         tabIndex={0}
       >
-        <Grid>
+        {/*        <Grid>
           <Cell xs={12}>
             <TextField
               label={'Fornavn'}
@@ -92,7 +92,7 @@ export const MottakerComponent = ({
               onChange={(e) => oppdaterMottaker(e.target.value, 'ADRESSE', 'etternavn')}
             />
           </Cell>
-        </Grid>
+        </Grid>*/}
 
         <br />
 
@@ -100,7 +100,7 @@ export const MottakerComponent = ({
           <Cell xs={12}>
             <TextField
               label={'Adresse'}
-              value={adresse?.adresse || ''}
+              value={adresse?.adresselinje1 || ''}
               onChange={(e) => oppdaterMottaker(e.target.value, 'ADRESSE', 'adresse')}
             />
           </Cell>

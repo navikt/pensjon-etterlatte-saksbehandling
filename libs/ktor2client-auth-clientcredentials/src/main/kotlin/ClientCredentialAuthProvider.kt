@@ -13,6 +13,7 @@ import no.nav.security.token.support.client.core.OAuth2GrantType
 import no.nav.security.token.support.client.core.oauth2.ClientCredentialsTokenClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import java.net.URI
+import java.time.Duration
 
 fun Auth.clientCredential(block: ClientCredentialAuthConfig.() -> Unit) {
     with(ClientCredentialAuthConfig().apply(block)) {
@@ -62,6 +63,9 @@ internal fun setupOAuth2AccessTokenService(httpClient: DefaultOAuth2HttpClient):
         ClientCredentialsTokenClient(httpClient),
         null
     ).also {
-        it.clientCredentialsGrantCache = OAuth2CacheFactory.accessTokenResponseCache(10, 3500)
+        it.clientCredentialsGrantCache = OAuth2CacheFactory.accessTokenResponseCache(
+            30,
+            Duration.ofMinutes(50L).toSeconds()
+        )
     }
 }

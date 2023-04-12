@@ -64,7 +64,7 @@ internal fun setupOAuth2AccessTokenService(httpClient: DefaultOAuth2HttpClient):
         null
     ).also {
         it.clientCredentialsGrantCache = OAuth2CacheFactory.accessTokenResponseCache(
-            30,
+            10,
             Duration.ofMinutes(50L).toSeconds()
         )
     }

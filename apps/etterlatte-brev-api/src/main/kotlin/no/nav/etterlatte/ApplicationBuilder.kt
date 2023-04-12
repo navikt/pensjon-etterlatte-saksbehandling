@@ -105,7 +105,8 @@ class ApplicationBuilder {
     private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE"), env.requireEnvValue("DOKARKIV_URL"))
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
 
-    private val distribusjonKlient = DistribusjonKlient(httpClient("DOKDIST_SCOPE"), env.requireEnvValue("DOKDIST_URL"))
+    private val distribusjonKlient =
+        DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
     private val brevService = BrevService(db, pdfGenerator, adresseService)
@@ -151,8 +152,8 @@ class ApplicationBuilder {
 
     fun start() = setReady().also { rapidsConnection.start() }
 
-    private fun httpClient(scope: String? = null) = HttpClient(OkHttp) {
-        expectSuccess = true
+    private fun httpClient(scope: String? = null, forventStatusSuccess: Boolean = true) = HttpClient(OkHttp) {
+        expectSuccess = forventStatusSuccess
         install(ContentNegotiation) {
             jackson()
         }

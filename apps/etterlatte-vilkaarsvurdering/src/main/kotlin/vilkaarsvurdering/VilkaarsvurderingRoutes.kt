@@ -21,10 +21,11 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
+import vilkaarsvurdering.VilkaarsvurderingAPI
 import java.util.*
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, behandlingKlient: BehandlingKlient) {
-    route("/api/vilkaarsvurdering") {
+    route(VilkaarsvurderingAPI.basisrute) {
         val logger = application.log
 
         get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -41,7 +42,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/opprett") {
+        post(VilkaarsvurderingAPI.opprett(BEHANDLINGSID_CALL_PARAMETER)) {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 try {
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
@@ -61,7 +62,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/kopier") {
+        post(VilkaarsvurderingAPI.kopier(BEHANDLINGSID_CALL_PARAMETER)) {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val forrigeBehandling = call.receive<OpprettVilkaarsvurderingFraBehandling>().forrigeBehandling
 

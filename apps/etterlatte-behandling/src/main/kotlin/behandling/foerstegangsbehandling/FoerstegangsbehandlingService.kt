@@ -5,7 +5,12 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.OpprettBehandling
+import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -22,6 +27,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
 import java.time.Clock
+import java.time.LocalDateTime
 import java.util.*
 
 interface FoerstegangsbehandlingService {
@@ -51,16 +57,20 @@ interface FoerstegangsbehandlingService {
 }
 
 class RealFoerstegangsbehandlingService(
-    private val behandlinger: BehandlingDao,
-    private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
+    private val behandlingDao: BehandlingDao,
+    private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKanal,
     private val klokke: Clock = utcKlokke()
 ) : FoerstegangsbehandlingService {
     private val logger = LoggerFactory.getLogger(RealFoerstegangsbehandlingService::class.java)
 
+    fun hentBehandling(id: UUID): Foerstegangsbehandling = requireNotNull(
+        behandlingDao.hentBehandling(id) as Foerstegangsbehandling
+    )
+
     override fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling {
         return inTransaction {
-            foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling).serialiserbarUtgave()
+            hentBehandling(behandling)
         }
     }
 
@@ -69,18 +79,27 @@ class RealFoerstegangsbehandlingService(
         persongalleri: Persongalleri,
         mottattDato: String
     ): Foerstegangsbehandling {
-        logger.info("Starter en behandling")
+        logger.info("Starter behandling i sak $sak")
         return inTransaction {
-            foerstegangsbehandlingFactory.opprettFoerstegangsbehandling(
-                sak,
-                mottattDato,
-                persongalleri
-            )
+            OpprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = LocalDateTime.parse(mottattDato),
+                persongalleri = persongalleri
+            ).let { opprettBehandling ->
+                behandlingDao.opprettBehandling(opprettBehandling)
+                hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
+
+                logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+
+                hentBehandling(opprettBehandling.id)
+            }
         }.also {
             runBlocking {
-                behandlingHendelser.send(it.lagretBehandling.id to BehandlingHendelseType.OPPRETTET)
+                behandlingHendelser.send(it.id to BehandlingHendelseType.OPPRETTET)
             }
-        }.serialiserbarUtgave()
+        }
     }
 
     override fun lagreGyldighetsproeving(
@@ -106,29 +125,41 @@ class RealFoerstegangsbehandlingService(
                 ),
                 vurdertDato = Tidspunkt(klokke.instant()).toLocalDatetimeNorskTid()
             )
-            val foerstegangsbehandlingAggregat = foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
-            foerstegangsbehandlingAggregat.lagreGyldighetproeving(gyldighetsResultat)
+
+            hentBehandling(behandling).lagreGyldighetsproeving(gyldighetsResultat)
+
             gyldighetsResultat
         }
     }
 
     override fun lagreGyldighetsproeving(behandling: UUID, gyldighetsproeving: GyldighetsResultat) {
         inTransaction {
-            val foerstegangsbehandlingAggregat = foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
-            foerstegangsbehandlingAggregat.lagreGyldighetproeving(gyldighetsproeving)
-            foerstegangsbehandlingAggregat
+            hentBehandling(behandling).lagreGyldighetsproeving(gyldighetsproeving)
         }
+    }
+
+    private fun Foerstegangsbehandling.lagreGyldighetsproeving(gyldighetsproeving: GyldighetsResultat) {
+        this.oppdaterGyldighetsproeving(gyldighetsproeving)
+            .also {
+                behandlingDao.lagreGyldighetsproving(it)
+                logger.info("behandling ${it.id} i sak ${it.sak} er gyldighetsprøvd")
+            }
     }
 
     override fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
         return inTransaction {
-            foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId)
-                .lagreKommerBarnetTilgode(kommerBarnetTilgode)
+            hentBehandling(behandlingId).lagreKommerBarnetTilgode(kommerBarnetTilgode)
         }
     }
 
+    private fun Foerstegangsbehandling.lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
+        this.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
+            .also { behandlingDao.lagreKommerBarnetTilgode(it.id, kommerBarnetTilgode) }
+            .also { behandlingDao.lagreStatus(it) }
+    }
+
     override fun settOpprettet(behandlingId: UUID, dryRun: Boolean) {
-        hentFoerstegangsbehandling(behandlingId).tilOpprettet().lagreEndring(dryRun)
+        hentBehandling(behandlingId).tilOpprettet().lagreEndring(dryRun)
     }
 
     override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean, utfall: VilkaarsvurderingUtfall?) {
@@ -136,8 +167,8 @@ class RealFoerstegangsbehandlingService(
 
         if (!dryRun) {
             inTransaction {
-                behandlinger.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
-                behandlinger.lagreVilkaarstatus(behandling.id, behandling.vilkaarUtfall)
+                behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+                behandlingDao.lagreVilkaarstatus(behandling.id, behandling.vilkaarUtfall)
             }
         }
     }
@@ -171,7 +202,7 @@ class RealFoerstegangsbehandlingService(
     private fun lagreNyBehandlingStatus(behandling: Foerstegangsbehandling) {
         inTransaction {
             behandling.let {
-                behandlinger.lagreStatus(it.id, it.status, it.sistEndret)
+                behandlingDao.lagreStatus(it.id, it.status, it.sistEndret)
             }
         }
     }

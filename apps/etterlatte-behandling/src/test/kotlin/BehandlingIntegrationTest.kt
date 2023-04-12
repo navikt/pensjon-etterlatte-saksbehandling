@@ -218,10 +218,12 @@ class TestBeanFactory(
     }
 
     fun opprettSakMedFoerstegangsbehandling(sakId: Long, fnr: String): Pair<Sak, Foerstegangsbehandling> {
-        val sak = sakDao().opprettSak(fnr, SakType.BARNEPENSJON)
-        val foerstegangsbehandling = foerstegangsbehandlingFactory()
-            .opprettFoerstegangsbehandling(sakId, LocalDateTime.now().toString(), persongalleri())
-            .lagretBehandling
+        val sak = inTransaction {
+            sakDao().opprettSak(fnr, SakType.BARNEPENSJON)
+        }
+
+        val foerstegangsbehandling = foerstegangsbehandlingService()
+            .startFoerstegangsbehandling(sakId, persongalleri(), LocalDateTime.now().toString())
 
         return Pair(sak, foerstegangsbehandling)
     }

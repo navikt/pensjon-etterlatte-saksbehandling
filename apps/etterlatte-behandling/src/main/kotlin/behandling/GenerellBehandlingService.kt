@@ -6,17 +6,14 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysninger
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
+import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -73,47 +70,46 @@ interface GenerellBehandlingService {
 }
 
 class RealGenerellBehandlingService(
-    val behandlinger: BehandlingDao,
+    private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKanal,
-    private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
-    private val revurderingFactory: RevurderingFactory,
-    private val hendelser: HendelseDao,
-    private val manueltOpphoerService: ManueltOpphoerService,
+    private val hendelseDao: HendelseDao,
     private val vedtakKlient: VedtakKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val sporingslogg: Sporingslogg
 ) : GenerellBehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    private fun hentBehandlingForId(id: UUID): Behandling? {
+        return behandlingDao.hentBehandling(id)
+    }
+
     override fun hentBehandling(behandlingId: UUID): Behandling? {
         return inTransaction {
-            behandlinger.hentBehandling(behandlingId)
+            hentBehandlingForId(behandlingId)
         }
     }
 
     override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
         return inTransaction {
-            behandlinger.alleBehandlingerISak(sakId)
+            behandlingDao.alleBehandlingerISak(sakId)
         }
     }
 
     override fun hentSenestIverksatteBehandling(sakId: Long): Behandling? {
-        val alleBehandlinger = inTransaction { behandlinger.alleBehandlingerISak(sakId) }
-
-        return alleBehandlinger
+        return hentBehandlingerISak(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
     }
 
     override fun avbrytBehandling(behandlingId: UUID, saksbehandler: String) {
         inTransaction {
-            val behandling = behandlinger.hentBehandling(behandlingId)
+            val behandling = hentBehandlingForId(behandlingId)
                 ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
             if (!behandling.status.kanAvbrytes()) {
                 throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
             }
-            behandlinger.avbrytBehandling(behandlingId).also {
-                hendelser.behandlingAvbrutt(behandling, saksbehandler)
+            behandlingDao.avbrytBehandling(behandlingId).also {
+                hendelseDao.behandlingAvbrutt(behandling, saksbehandler)
                 runBlocking {
                     behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
                 }
@@ -252,42 +248,17 @@ class RealGenerellBehandlingService(
         vedtakHendelse: VedtakHendelse,
         hendelseType: HendelseType
     ) {
-        behandlinger.hentBehandlingType(behandlingId)?.let {
-            when (it) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandlingId).registrerVedtakHendelse(
-                        vedtakHendelse.vedtakId,
-                        hendelseType,
-                        vedtakHendelse.inntruffet,
-                        vedtakHendelse.saksbehandler,
-                        vedtakHendelse.kommentar,
-                        vedtakHendelse.valgtBegrunnelse
-                    )
-                }
-
-                BehandlingType.REVURDERING -> {
-                    revurderingFactory.hentRevurdering(behandlingId).registrerVedtakHendelse(
-                        vedtakHendelse.vedtakId,
-                        hendelseType,
-                        vedtakHendelse.inntruffet,
-                        vedtakHendelse.saksbehandler,
-                        vedtakHendelse.kommentar,
-                        vedtakHendelse.valgtBegrunnelse
-                    )
-                }
-
-                BehandlingType.MANUELT_OPPHOER -> {
-                    manueltOpphoerService.registrerVedtakHendelse(
-                        behandlingId,
-                        vedtakHendelse.vedtakId,
-                        hendelseType,
-                        vedtakHendelse.inntruffet,
-                        vedtakHendelse.saksbehandler,
-                        vedtakHendelse.kommentar,
-                        vedtakHendelse.valgtBegrunnelse
-                    )
-                }
-            }
+        hentBehandlingForId(behandlingId)?.let {
+            registrerVedtakHendelseFelles(
+                vedtakHendelse.vedtakId,
+                hendelseType,
+                vedtakHendelse.inntruffet,
+                vedtakHendelse.saksbehandler,
+                vedtakHendelse.kommentar,
+                vedtakHendelse.valgtBegrunnelse,
+                it,
+                hendelseDao
+            )
         }
     }
 
@@ -307,8 +278,8 @@ class RealGenerellBehandlingService(
             behandling.oppdaterVirkningstidspunkt(virkningstidspunkt)
                 .also {
                     inTransaction {
-                        behandlinger.lagreNyttVirkningstidspunkt(behandlingId, virkningstidspunkt)
-                        behandlinger.lagreStatus(it)
+                        behandlingDao.lagreNyttVirkningstidspunkt(behandlingId, virkningstidspunkt)
+                        behandlingDao.lagreStatus(it)
                     }
                 }
         } catch (e: NotImplementedError) {
@@ -324,13 +295,13 @@ class RealGenerellBehandlingService(
 
     override fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {
         return inTransaction {
-            hendelser.finnHendelserIBehandling(behandlingId)
+            hendelseDao.finnHendelserIBehandling(behandlingId)
         }
     }
 
     override fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling> {
         return inTransaction {
-            behandlinger.alleBehandlingerForSoekerMedFnr(fnr)
+            behandlingDao.alleBehandlingerForSoekerMedFnr(fnr)
         }
     }
 }

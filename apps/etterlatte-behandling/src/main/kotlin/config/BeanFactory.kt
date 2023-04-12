@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.RealGenerellBehandlingService
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -81,7 +80,6 @@ interface BeanFactory {
     fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao
     fun rapid(): KafkaProdusent<String, String>
     fun behandlingHendelser(): BehandlingsHendelser
-    fun foerstegangsbehandlingFactory(): FoerstegangsbehandlingFactory
     fun revurderingFactory(): RevurderingFactory
     fun pdlHttpClient(): HttpClient
     fun pdlKlient(): PdlKlient
@@ -110,12 +108,6 @@ abstract class CommonFactory : BeanFactory {
             dataSource()
         )
     }
-    private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory by lazy {
-        FoerstegangsbehandlingFactory(
-            behandlingDao(),
-            hendelseDao()
-        )
-    }
 
     private val revurderingFactory: RevurderingFactory by lazy {
         RevurderingFactory(behandlingDao(), hendelseDao())
@@ -135,10 +127,6 @@ abstract class CommonFactory : BeanFactory {
         return behandlingsHendelser
     }
 
-    override fun foerstegangsbehandlingFactory(): FoerstegangsbehandlingFactory {
-        return foerstegangsbehandlingFactory
-    }
-
     override fun revurderingFactory(): RevurderingFactory {
         return revurderingFactory
     }
@@ -156,7 +144,7 @@ abstract class CommonFactory : BeanFactory {
     override fun foerstegangsbehandlingService(): FoerstegangsbehandlingService =
         RealFoerstegangsbehandlingService(
             behandlingDao(),
-            foerstegangsbehandlingFactory(),
+            hendelseDao(),
             behandlingHendelser().nyHendelse
         )
 
@@ -177,10 +165,7 @@ abstract class CommonFactory : BeanFactory {
         return RealGenerellBehandlingService(
             behandlingDao(),
             behandlingHendelser().nyHendelse,
-            foerstegangsbehandlingFactory(),
-            revurderingFactory(),
             hendelseDao(),
-            manueltOpphoerService(),
             vedtakKlient(),
             grunnlagKlient(),
             sporingslogg()

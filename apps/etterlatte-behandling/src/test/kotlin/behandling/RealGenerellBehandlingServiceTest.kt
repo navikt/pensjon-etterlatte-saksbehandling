@@ -13,11 +13,8 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -64,21 +61,17 @@ class RealGenerellBehandlingServiceTest {
     @Test
     fun `skal hente behandlinger i sak`() {
         val hendleseskanal = mockk<BehandlingHendelserKanal>()
-        val behandlingerMock = mockk<BehandlingDao> {
+        val behandlingDaoMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(1) } returns listOf(
                 revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING),
                 foerstegangsbehandling(sakId = 1)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
-        val manueltOpphoerMock = mockk<ManueltOpphoerService>()
         val sut = RealGenerellBehandlingService(
-            behandlingerMock,
+            behandlingDaoMock,
             hendleseskanal,
-            FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
-            RevurderingFactory(behandlingerMock, hendelserMock),
             hendelserMock,
-            manueltOpphoerMock,
             mockk(),
             mockk(),
             mockk()
@@ -115,10 +108,9 @@ class RealGenerellBehandlingServiceTest {
         val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
             coEvery { send(any()) } returns Unit
         }
-        val manueltOpphoerMock = mockk<ManueltOpphoerService>()
 
         val behandlingService =
-            lagRealGenerellBehandlingService(behandlingDaoMock, hendelseskanalMock, hendelserMock, manueltOpphoerMock)
+            lagRealGenerellBehandlingService(behandlingDaoMock, hendelseskanalMock, hendelserMock)
 
         assertThrows<IllegalStateException> {
             behandlingService.avbrytBehandling(avbruttBehandling.id, "")
@@ -151,10 +143,9 @@ class RealGenerellBehandlingServiceTest {
         val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
             coEvery { send(any()) } returns Unit
         }
-        val manueltOpphoerMock = mockk<ManueltOpphoerService>()
 
         val behandlingService =
-            lagRealGenerellBehandlingService(behandlingDaoMock, hendelseskanalMock, hendelserMock, manueltOpphoerMock)
+            lagRealGenerellBehandlingService(behandlingDaoMock, hendelseskanalMock, hendelserMock)
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
         verify {
@@ -177,10 +168,9 @@ class RealGenerellBehandlingServiceTest {
         val hendelseskanalMock = mockk<BehandlingHendelserKanal> {
             coEvery { send(Pair(nyFoerstegangsbehandling.id, BehandlingHendelseType.AVBRUTT)) } returns Unit
         }
-        val manueltOpphoerMock = mockk<ManueltOpphoerService>()
 
         val behandlingService =
-            lagRealGenerellBehandlingService(behandlingDaoMock, hendelseskanalMock, hendelserMock, manueltOpphoerMock)
+            lagRealGenerellBehandlingService(behandlingDaoMock, hendelseskanalMock, hendelserMock)
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, "")
         coVerify {
@@ -215,7 +205,7 @@ class RealGenerellBehandlingServiceTest {
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
 
         val service = lagRealGenerellBehandlingService(
-            behandlinger = mockk {
+            behandlingDao = mockk {
                 every { hentBehandlingType(BEHANDLINGS_ID) } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { hentBehandling(BEHANDLINGS_ID) } returns behandling
             },
@@ -302,7 +292,7 @@ class RealGenerellBehandlingServiceTest {
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { alleBehandlingerISak(any()) } returns listOf(behandling1, behandling2)
         }
-        val service = lagRealGenerellBehandlingService(behandlinger = behandlingDaoMock)
+        val service = lagRealGenerellBehandlingService(behandlingDao = behandlingDaoMock)
 
         assertEquals(behandling1, service.hentSenestIverksatteBehandling(1))
     }
@@ -320,7 +310,7 @@ class RealGenerellBehandlingServiceTest {
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
 
         return lagRealGenerellBehandlingService(
-            behandlinger = mockk {
+            behandlingDao = mockk {
                 every { hentBehandlingType(BEHANDLINGS_ID) } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every {
                     hentBehandling(BEHANDLINGS_ID)
@@ -335,24 +325,14 @@ class RealGenerellBehandlingServiceTest {
     }
 
     private fun lagRealGenerellBehandlingService(
-        behandlinger: BehandlingDao? = null,
+        behandlingDao: BehandlingDao? = null,
         hendelseKanal: BehandlingHendelserKanal? = null,
         hendelseDao: HendelseDao? = null,
-        manueltOpphoerService: ManueltOpphoerService? = null,
         grunnlagKlient: GrunnlagKlient? = null
     ): RealGenerellBehandlingService = RealGenerellBehandlingService(
-        behandlinger = behandlinger ?: mockk(),
+        behandlingDao = behandlingDao ?: mockk(),
         behandlingHendelser = hendelseKanal ?: mockk(),
-        foerstegangsbehandlingFactory = FoerstegangsbehandlingFactory(
-            behandlinger = behandlinger ?: mockk(),
-            hendelser = hendelseDao ?: mockk()
-        ),
-        revurderingFactory = RevurderingFactory(
-            behandlinger = behandlinger ?: mockk(),
-            hendelser = hendelseDao ?: mockk()
-        ),
-        hendelser = hendelseDao ?: mockk(),
-        manueltOpphoerService = manueltOpphoerService ?: mockk(),
+        hendelseDao = hendelseDao ?: mockk(),
         mockk(),
         grunnlagKlient ?: mockk(),
         mockk()

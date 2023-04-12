@@ -6,10 +6,12 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import java.util.*
 
 interface VilkaarsvurderingService {
     fun kopierForrigeVilkaarsvurdering(behandlingId: UUID, behandlingViOmregnerFra: UUID)
+    fun opprettVilkaarsvurdering(behandlingId: UUID)
 }
 
 class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClient, private val url: String) :
@@ -22,5 +24,8 @@ class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClie
             }
         }
     }
+
+    override fun opprettVilkaarsvurdering(behandlingId: UUID) = runBlocking {
+//        vilkaarsvurderingKlient.post()
+    }
 }
-data class OpprettVilkaarsvurderingFraBehandling(val forrigeBehandling: UUID)

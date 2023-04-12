@@ -216,5 +216,3 @@ data class VurdertVilkaarsvurderingResultatDto(
     val resultat: VilkaarsvurderingUtfall,
     val kommentar: String?
 )
-
-data class OpprettVilkaarsvurderingFraBehandling(val forrigeBehandling: UUID)

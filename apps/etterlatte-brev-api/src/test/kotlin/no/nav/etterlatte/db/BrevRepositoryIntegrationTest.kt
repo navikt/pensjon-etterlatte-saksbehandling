@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.AfterAll
@@ -176,15 +177,20 @@ internal class BrevRepositoryIntegrationTest {
     }
 
     private fun opprettMottaker() = Mottaker(
+        navn = "Test Testesen",
+        foedselsnummer = STOR_SNERK,
         adresse = Adresse(
-            navn = "Test Testesen",
-            adresse = "Fyrstikkaleen 1",
+            adresseType = "NORSKPOSTADRESSE",
+            adresselinje1 = "Fyrstikkaleen 1",
             postnummer = "1234",
-            poststed = "Oslo"
+            poststed = "Oslo",
+            land = "Norge",
+            landkode = "NOR"
         )
     )
 
     companion object {
         private val PDF_BYTES = "Hello world!".toByteArray()
+        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
     }
 }

@@ -8,13 +8,14 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 internal class DistribusjonServiceTest {
     private val mockKlient = mockk<DistribusjonKlient>()
@@ -43,7 +44,7 @@ internal class DistribusjonServiceTest {
         val type = DistribusjonsType.VEDTAK
         val tidspunkt = DistribusjonsTidspunktType.KJERNETID
 
-        val bestillingsID = service.distribuerJournalpost(brevId, journalpostId, type, tidspunkt, null)
+        val bestillingsID = service.distribuerJournalpost(brevId, journalpostId, type, tidspunkt, opprettAdresse())
 
         assertEquals(distribusjonResponse.bestillingsId, bestillingsID)
 
@@ -62,4 +63,13 @@ internal class DistribusjonServiceTest {
             mockDb.oppdaterStatus(brevId, Status.DISTRIBUERT, distribusjonResponse.toJson())
         }
     }
+
+    private fun opprettAdresse() = Adresse(
+        adresseType = "NORSKPOSTADRESSE",
+        adresselinje1 = "Fyrstikkaleen 1",
+        postnummer = "1234",
+        poststed = "Oslo",
+        land = "Norge",
+        landkode = "NOR"
+    )
 }

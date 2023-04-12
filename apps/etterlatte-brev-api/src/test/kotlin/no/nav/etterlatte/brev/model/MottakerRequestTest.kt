@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -26,13 +27,16 @@ internal class MottakerRequestTest {
                 )
             )
 
-            val mottaker = MottakerRequest.fraRegoppslag(regoppslagResponseDTO)
+            val mottaker = Mottaker.fra(STOR_SNERK, regoppslagResponseDTO)
 
-            mottaker.adresse shouldBe "Testveien 13A"
             mottaker.navn shouldBe regoppslagResponseDTO.navn
-            mottaker.land shouldBe regoppslagResponseDTO.adresse.land
-            mottaker.postnummer shouldBe regoppslagResponseDTO.adresse.postnummer
-            mottaker.poststed shouldBe regoppslagResponseDTO.adresse.poststed
+            mottaker.adresse.adresselinje1 shouldBe "Testveien 13A"
+            mottaker.adresse.adresselinje2 shouldBe null
+            mottaker.adresse.adresselinje3 shouldBe null
+            mottaker.adresse.postnummer shouldBe regoppslagResponseDTO.adresse.postnummer
+            mottaker.adresse.poststed shouldBe regoppslagResponseDTO.adresse.poststed
+            mottaker.adresse.land shouldBe regoppslagResponseDTO.adresse.land
+            mottaker.adresse.landkode shouldBe regoppslagResponseDTO.adresse.landkode
         }
 
         @Test
@@ -52,13 +56,20 @@ internal class MottakerRequestTest {
                 )
             )
 
-            val mottaker = MottakerRequest.fraRegoppslag(regoppslagResponseDTO)
+            val mottaker = Mottaker.fra(STOR_SNERK, regoppslagResponseDTO)
 
-            mottaker.adresse shouldBe "c/o STOR SNERK, Testveien 13A"
             mottaker.navn shouldBe regoppslagResponseDTO.navn
-            mottaker.land shouldBe regoppslagResponseDTO.adresse.land
-            mottaker.postnummer shouldBe regoppslagResponseDTO.adresse.postnummer
-            mottaker.poststed shouldBe regoppslagResponseDTO.adresse.poststed
+            mottaker.adresse.adresselinje1 shouldBe "c/o STOR SNERK"
+            mottaker.adresse.adresselinje2 shouldBe "Testveien 13A"
+            mottaker.adresse.adresselinje3 shouldBe null
+            mottaker.adresse.postnummer shouldBe regoppslagResponseDTO.adresse.postnummer
+            mottaker.adresse.poststed shouldBe regoppslagResponseDTO.adresse.poststed
+            mottaker.adresse.land shouldBe regoppslagResponseDTO.adresse.land
+            mottaker.adresse.landkode shouldBe regoppslagResponseDTO.adresse.landkode
         }
+    }
+
+    companion object {
+        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
     }
 }

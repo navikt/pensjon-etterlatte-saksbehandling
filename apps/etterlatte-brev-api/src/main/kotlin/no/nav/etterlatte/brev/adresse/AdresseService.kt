@@ -5,18 +5,23 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.Avsender
-import no.nav.etterlatte.brev.model.MottakerRequest
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.navansatt.NavansattKlient
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 
 class AdresseService(
     private val norg2Klient: Norg2Klient,
     private val navansattKlient: NavansattKlient,
     private val regoppslagKlient: RegoppslagKlient
 ) {
-    suspend fun hentMottakerAdresse(ident: String): MottakerRequest =
-        regoppslagKlient.hentMottakerAdresse(ident).let {
-            MottakerRequest.fraRegoppslag(it)
-        }
+    suspend fun hentMottakerAdresse(ident: String): Mottaker {
+        val regoppslagResponse = regoppslagKlient.hentMottakerAdresse(ident)
+
+        return Mottaker.fra(
+            Folkeregisteridentifikator.of(ident),
+            regoppslagResponse
+        )
+    }
 
     suspend fun hentAvsenderEnhet(navEnhetNr: String, saksbehandlerNavn: String): Avsender {
         val enhet = norg2Klient.hentEnhet(navEnhetNr)

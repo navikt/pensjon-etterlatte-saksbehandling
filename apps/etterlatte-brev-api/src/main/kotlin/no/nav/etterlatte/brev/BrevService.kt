@@ -7,14 +7,14 @@ import no.nav.etterlatte.brev.model.Attestant
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevMottaker
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
 import org.slf4j.LoggerFactory
-import java.util.UUID
-import no.nav.etterlatte.brev.model.MottakerRequest as BrevMottaker
+import java.util.*
 
 class BrevService(
     private val db: BrevRepository,
@@ -43,13 +43,12 @@ class BrevService(
         val brevMottaker = when {
             mottaker.foedselsnummer != null -> adresseService.hentMottakerAdresse(mottaker.foedselsnummer!!.value)
             mottaker.orgnummer != null -> adresseService.hentMottakerAdresse(mottaker.orgnummer!!)
-            mottaker.adresse != null -> BrevMottaker.fraAdresse(adresse = mottaker.adresse!!)
             else -> throw Exception("Ingen brevmottaker spesifisert")
         }
 
         val avsender = adresseService.hentAvsenderEnhet(enhet, "")
 
-        val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker, Attestant("", ""))
+        val request = AnnetBrevRequest(mal, Spraak.NB, avsender, BrevMottaker.fra(brevMottaker), Attestant("", ""))
 
         return BrevInnhold(mal.tittel, Spraak.NB, pdfGenerator.genererPdf(request))
     }

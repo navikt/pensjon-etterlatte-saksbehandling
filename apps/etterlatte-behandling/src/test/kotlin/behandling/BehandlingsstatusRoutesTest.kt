@@ -51,7 +51,7 @@ internal class BehandlingsstatusRoutesTest {
     @Test
     fun `skal returnere 200 OK hvis behandlingstatus kan settes til vilkaarsvurdert`() {
         every { beanFactory.behandlingsStatusService() } returns mockk {
-            every { settVilkaarsvurdert(any(), any(), any()) } just runs
+            every { settVilkaarsvurdert(any(), any()) } just runs
         }
 
         testApplication {
@@ -80,7 +80,6 @@ internal class BehandlingsstatusRoutesTest {
         every { beanFactory.behandlingsStatusService() } returns mockk {
             every {
                 settVilkaarsvurdert(
-                    any(),
                     any(),
                     any()
                 )

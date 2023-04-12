@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -36,7 +35,6 @@ sealed class Behandling {
     abstract val type: BehandlingType
     abstract val persongalleri: Persongalleri
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
-    abstract val vilkaarUtfall: VilkaarsvurderingUtfall?
     abstract val virkningstidspunkt: Virkningstidspunkt?
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
@@ -84,7 +82,7 @@ sealed class Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
     }
 
-    open fun tilVilkaarsvurdert(utfall: VilkaarsvurderingUtfall?): Behandling {
+    open fun tilVilkaarsvurdert(): Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(VILKAARSVURDERT)
     }
 
@@ -162,6 +160,5 @@ fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
         is Revurdering -> this.revurderingsaarsak?.name ?: "REVURDERING"
         is ManueltOpphoer -> "MANUELT OPPHOER"
     },
-    virkningstidspunkt = this.virkningstidspunkt,
-    vilkaarsvurderingUtfall = this.vilkaarUtfall
+    virkningstidspunkt = this.virkningstidspunkt
 )

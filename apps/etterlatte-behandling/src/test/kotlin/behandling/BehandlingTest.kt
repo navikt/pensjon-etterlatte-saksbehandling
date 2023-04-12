@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -43,8 +42,7 @@ internal class BehandlingTest {
         kommerBarnetTilgode = null,
         virkningstidspunkt = null,
         soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-        gyldighetsproeving = null,
-        vilkaarUtfall = null
+        gyldighetsproeving = null
     )
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
@@ -74,7 +72,7 @@ internal class BehandlingTest {
         val behandlingTilAttestering = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilVilkaarsvurdert()
             .tilBeregnet()
             .tilFattetVedtak()
 
@@ -88,7 +86,7 @@ internal class BehandlingTest {
         val iverksattBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilVilkaarsvurdert()
             .tilBeregnet()
             .tilFattetVedtak()
             .tilAttestert()
@@ -104,7 +102,7 @@ internal class BehandlingTest {
 
     @Test
     fun `behandling må være fylt ut for å settes til VILKAARSVURDERING`() {
-        assertThrows<TilstandException.IkkeFyltUt> { behandling.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT) }
+        assertThrows<TilstandException.IkkeFyltUt> { behandling.tilVilkaarsvurdert() }
     }
 
     @Test
@@ -113,24 +111,17 @@ internal class BehandlingTest {
     }
 
     @Test
-    fun `kan ikke ga fra BEREGNET til FATTET VEDTAK uten oppfylt vilkaarsutfall`() {
-        assertThrows<Exception> {
-            behandling.tilVilkaarsvurdert(null).tilBeregnet().tilFattetVedtak()
-        }
-    }
-
-    @Test
     fun `kan ikke ga fra VILKAARSVURDERT til FATTET VEDTAK`() {
         val fyltUtBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
 
-        assertThrows<TilstandException.UgyldigTilstand> { fyltUtBehandling.tilVilkaarsvurdert(null).tilFattetVedtak() }
+        assertThrows<TilstandException.UgyldigTilstand> { fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak() }
         assertThrows<TilstandException.UgyldigTilstand> {
-            fyltUtBehandling.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilFattetVedtak()
+            fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak()
         }
         assertThrows<TilstandException.UgyldigTilstand> {
-            fyltUtBehandling.tilVilkaarsvurdert(VilkaarsvurderingUtfall.IKKE_OPPFYLT).tilFattetVedtak()
+            fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak()
         }
     }
 
@@ -139,7 +130,7 @@ internal class BehandlingTest {
         val returnertBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilVilkaarsvurdert()
             .tilBeregnet()
             .tilFattetVedtak()
             .tilReturnert()
@@ -158,7 +149,7 @@ internal class BehandlingTest {
         val vilkaarsvurdertBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilVilkaarsvurdert()
         val nyttVirkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 2), saksbehandler, "begrunnelse")
 
         vilkaarsvurdertBehandling
@@ -173,13 +164,13 @@ internal class BehandlingTest {
         val initialBehandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilVilkaarsvurdert()
             .tilBeregnet()
             .tilFattetVedtak()
 
         initialBehandling.tilReturnert().tilFattetVedtak()
         initialBehandling.tilReturnert().tilBeregnet()
-        initialBehandling.tilReturnert().tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+        initialBehandling.tilReturnert().tilVilkaarsvurdert()
         initialBehandling.tilReturnert().tilOpprettet()
     }
 
@@ -188,7 +179,7 @@ internal class BehandlingTest {
         val behandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilVilkaarsvurdert()
             .tilBeregnet()
             .tilFattetVedtak()
             .tilReturnert()
@@ -203,7 +194,7 @@ internal class BehandlingTest {
         val behandling = behandling.oppdaterKommerBarnetTilgode(kommerBarnetTilgode)
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            .tilVilkaarsvurdert()
             .tilBeregnet()
             .tilFattetVedtak()
             .tilReturnert()

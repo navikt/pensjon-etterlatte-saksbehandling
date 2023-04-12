@@ -292,7 +292,7 @@ internal class VilkaarsvurderingServiceTest {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyBehandlingId = UUID.randomUUID()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
 
         runBlocking {
             service.opprettVilkaarsvurdering(uuid, bruker)

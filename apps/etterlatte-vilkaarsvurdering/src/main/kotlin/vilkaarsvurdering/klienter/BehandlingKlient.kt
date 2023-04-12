@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -23,16 +22,10 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling
     suspend fun kanSetteBehandlingStatusVilkaarsvurdert(behandlingId: UUID, bruker: Bruker): Boolean
     suspend fun settBehandlingStatusOpprettet(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean
-    suspend fun settBehandlingStatusVilkaarsvurdert(
-        behandlingId: UUID,
-        bruker: Bruker,
-        utfall: VilkaarsvurderingUtfall
-    ): Boolean
+    suspend fun settBehandlingStatusVilkaarsvurdert(behandlingId: UUID, bruker: Bruker): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
-
-internal data class TilVilkaarsvurderingJson(val utfall: VilkaarsvurderingUtfall)
 
 class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingKlient {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
@@ -93,14 +86,13 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun settBehandlingStatusVilkaarsvurdert(
         behandlingId: UUID,
-        bruker: Bruker,
-        utfall: VilkaarsvurderingUtfall
+        bruker: Bruker
     ): Boolean {
         logger.info("Committer vilkaarsvurdering på behandling med id $behandlingId")
         val response = downstreamResourceClient.post(
             resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/vilkaarsvurder"),
             bruker = bruker,
-            postBody = TilVilkaarsvurderingJson(utfall)
+            postBody = "{}"
         )
 
         return response.mapBoth(

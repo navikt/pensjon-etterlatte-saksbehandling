@@ -7,13 +7,12 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.util.*
 
 interface BehandlingStatusService {
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
-    fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true, utfall: VilkaarsvurderingUtfall?)
+    fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
     fun sjekkOmKanFatteVedtak(behandlingId: UUID)
     fun settFattetVedtak(behandlingId: UUID, vedtakHendelse: VedtakHendelse)
@@ -35,18 +34,16 @@ class BehandlingStatusServiceImpl constructor(
         if (!dryRun) {
             inTransaction {
                 behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
-                behandlingDao.lagreVilkaarstatus(behandling.id, behandling.vilkaarUtfall)
             }
         }
     }
 
-    override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean, utfall: VilkaarsvurderingUtfall?) {
-        val behandling = hentBehandling(behandlingId).tilVilkaarsvurdert(utfall)
+    override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean) {
+        val behandling = hentBehandling(behandlingId).tilVilkaarsvurdert()
 
         if (!dryRun) {
             inTransaction {
                 behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
-                behandlingDao.lagreVilkaarstatus(behandling.id, behandling.vilkaarUtfall)
             }
         }
     }

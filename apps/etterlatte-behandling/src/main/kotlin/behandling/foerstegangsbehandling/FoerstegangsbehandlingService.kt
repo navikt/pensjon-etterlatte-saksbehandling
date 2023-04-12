@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDateTime
@@ -48,7 +47,7 @@ interface FoerstegangsbehandlingService {
     fun lagreGyldighetsproeving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode)
     fun settOpprettet(behandlingId: UUID, dryRun: Boolean = true)
-    fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true, utfall: VilkaarsvurderingUtfall?)
+    fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean = true)
     fun settBeregnet(behandlingId: UUID, dryRun: Boolean = true)
     fun settFattetVedtak(behandlingId: UUID, dryRun: Boolean = true)
     fun settAttestert(behandlingId: UUID, dryRun: Boolean = true)
@@ -162,13 +161,12 @@ class RealFoerstegangsbehandlingService(
         hentBehandling(behandlingId).tilOpprettet().lagreEndring(dryRun)
     }
 
-    override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean, utfall: VilkaarsvurderingUtfall?) {
-        val behandling = hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert(utfall)
+    override fun settVilkaarsvurdert(behandlingId: UUID, dryRun: Boolean) {
+        val behandling = hentFoerstegangsbehandling(behandlingId).tilVilkaarsvurdert()
 
         if (!dryRun) {
             inTransaction {
                 behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
-                behandlingDao.lagreVilkaarstatus(behandling.id, behandling.vilkaarUtfall)
             }
         }
     }

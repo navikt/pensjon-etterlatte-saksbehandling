@@ -27,7 +27,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
@@ -180,7 +179,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-        vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
         prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
     )
 
@@ -202,7 +200,6 @@ class BehandlingDao(private val connection: () -> Connection) {
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
             kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-            vilkaarUtfall = rs.getString("vilkaar_utfall")?.let { VilkaarsvurderingUtfall.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
         )
@@ -246,8 +243,8 @@ class BehandlingDao(private val connection: () -> Connection) {
                 """
                     INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                     soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt,
-                    kommer_barnet_tilgode, vilkaar_utfall, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    kommer_barnet_tilgode, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(behandling) {
@@ -270,11 +267,10 @@ class BehandlingDao(private val connection: () -> Connection) {
                 virkningstidspunkt?.toJson()
             )
             stmt.setString(14, kommerBarnetTilgode?.toJson())
-            stmt.setString(15, vilkaarUtfall?.name)
-            stmt.setString(16, revurderingsAarsak?.name)
-            stmt.setString(17, opphoerAarsaker?.toJson())
-            stmt.setString(18, fritekstAarsak)
-            stmt.setString(19, prosesstype.toString())
+            stmt.setString(15, revurderingsAarsak?.name)
+            stmt.setString(16, opphoerAarsaker?.toJson())
+            stmt.setString(17, fritekstAarsak)
+            stmt.setString(18, prosesstype.toString())
         }
         require(stmt.executeUpdate() == 1)
     }
@@ -341,13 +337,6 @@ class BehandlingDao(private val connection: () -> Connection) {
     fun lagreKommerBarnetTilgode(behandlingId: UUID, kommerBarnetTilgode: KommerBarnetTilgode) {
         val statement = connection().prepareStatement("UPDATE behandling SET kommer_barnet_tilgode = ? where id = ?")
         statement.setString(1, kommerBarnetTilgode.toJson())
-        statement.setObject(2, behandlingId)
-        statement.executeUpdate()
-    }
-
-    fun lagreVilkaarstatus(behandlingId: UUID, vilkaarUtfall: VilkaarsvurderingUtfall?) {
-        val statement = connection().prepareStatement("UPDATE behandling SET vilkaar_utfall = ? where id = ?")
-        statement.setString(1, vilkaarUtfall?.toString())
         statement.setObject(2, behandlingId)
         statement.executeUpdate()
     }

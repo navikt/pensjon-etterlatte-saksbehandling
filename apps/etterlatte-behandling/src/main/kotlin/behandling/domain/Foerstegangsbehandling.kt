@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.util.*
 
@@ -23,7 +22,6 @@ data class Foerstegangsbehandling(
     override val status: BehandlingStatus,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
-    override val vilkaarUtfall: VilkaarsvurderingUtfall?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?,
@@ -52,16 +50,16 @@ data class Foerstegangsbehandling(
     }
 
     override fun tilOpprettet(): Foerstegangsbehandling {
-        return hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }.copy(vilkaarUtfall = null)
+        return hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
     }
 
-    override fun tilVilkaarsvurdert(utfall: VilkaarsvurderingUtfall?): Foerstegangsbehandling {
+    override fun tilVilkaarsvurdert(): Foerstegangsbehandling {
         if (!erFyltUt()) {
             logger.info("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert")
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }.copy(vilkaarUtfall = utfall)
+        return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
     }
 
     override fun tilBeregnet(): Foerstegangsbehandling = hvisTilstandEr(

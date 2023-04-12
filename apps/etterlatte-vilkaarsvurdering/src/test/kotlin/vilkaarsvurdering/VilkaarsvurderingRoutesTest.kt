@@ -81,7 +81,7 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery {
-            behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any(), VilkaarsvurderingUtfall.OPPFYLT)
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any())
         } returns true
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns true
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
@@ -512,7 +512,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             assertEquals(HttpStatusCode.PreconditionFailed, response.status)
-            coVerify(exactly = 0) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any(), any()) }
+            coVerify(exactly = 0) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) }
         }
     }
 

@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.util.*
 
@@ -52,9 +51,6 @@ data class ManueltOpphoer(
         }
 
     override val kommerBarnetTilgode: KommerBarnetTilgode?
-        get() = null
-
-    override val vilkaarUtfall: VilkaarsvurderingUtfall?
         get() = null
 
     override fun tilBeregnet(): ManueltOpphoer = hvisTilstandEr(

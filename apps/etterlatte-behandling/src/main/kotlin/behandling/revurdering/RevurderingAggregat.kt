@@ -41,7 +41,6 @@ class RevurderingAggregat(
                 persongalleri = forrigeBehandling.persongalleri,
                 revurderingsAarsak = revurderingAarsak,
                 kommerBarnetTilgode = forrigeBehandling.kommerBarnetTilgode,
-                vilkaarUtfall = forrigeBehandling.vilkaarUtfall,
                 virkningstidspunkt = null,
                 prosesstype = Prosesstype.MANUELL
             )
@@ -69,7 +68,6 @@ class RevurderingAggregat(
                 persongalleri = forrigeBehandling.persongalleri,
                 revurderingsAarsak = revurderingAarsak,
                 kommerBarnetTilgode = forrigeBehandling.kommerBarnetTilgode,
-                vilkaarUtfall = forrigeBehandling.vilkaarUtfall,
                 virkningstidspunkt = fraDato.tilVirkningstidspunkt("Opprettet automatisk"),
                 prosesstype = Prosesstype.AUTOMATISK
             )

@@ -3,7 +3,6 @@ package no.nav.etterlatte.vilkaarsvurdering
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -131,8 +130,12 @@ class VilkaarsvurderingService(
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, grunnlag, virkningstidspunkt)
-
+                    val vilkaar = finnVilkaarForNyVilkaarsvurdering(
+                        grunnlag,
+                        virkningstidspunkt,
+                        behandling.behandlingType,
+                        behandling.sakType
+                    )
                     vilkaarsvurderingRepository.opprettVilkaarsvurdering(
                         Vilkaarsvurdering(
                             behandlingId = behandlingId,
@@ -156,28 +159,29 @@ class VilkaarsvurderingService(
         }
 
     private fun finnVilkaarForNyVilkaarsvurdering(
-        behandling: DetaljertBehandling,
         grunnlag: Grunnlag,
-        virkningstidspunkt: Virkningstidspunkt
-    ): List<Vilkaar> = when (behandling.sakType) {
+        virkningstidspunkt: Virkningstidspunkt,
+        behandlingType: BehandlingType,
+        sakType: SakType
+    ): List<Vilkaar> = when (sakType) {
         SakType.BARNEPENSJON ->
-            when (behandling.behandlingType) {
+            when (behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 BehandlingType.REVURDERING -> BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
 
                 BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
-                    "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
+                    "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"
                 )
             }
 
         SakType.OMSTILLINGSSTOENAD ->
-            when (behandling.behandlingType) {
+            when (behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
                     OmstillingstoenadVilkaar.inngangsvilkaar()
 
                 BehandlingType.REVURDERING,
                 BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
-                    "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
+                    "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"
                 )
             }
     }
@@ -199,9 +203,9 @@ class VilkaarsvurderingService(
     private suspend fun hentDataForVilkaarsvurdering(
         behandlingId: UUID,
         bruker: Bruker
-    ): Pair<DetaljertBehandling, Grunnlag> {
+    ): Pair<VilkaarsvurderingBehandlingDTO, Grunnlag> {
         return coroutineScope {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
+            val behandling = VilkaarsvurderingBehandlingDTO.fra(behandlingKlient.hentBehandling(behandlingId, bruker))
             val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, bruker) }
 
             Pair(behandling, grunnlag.await())

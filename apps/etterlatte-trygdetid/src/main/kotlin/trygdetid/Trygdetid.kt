@@ -3,6 +3,7 @@ package no.nav.etterlatte.trygdetid
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.*
 
@@ -17,7 +18,8 @@ data class Trygdetid(
 data class BeregnetTrygdetid(
     val nasjonal: Int,
     val fremtidig: Int,
-    val total: Int
+    val total: Int,
+    val tidspunkt: Tidspunkt
 )
 
 data class Opplysningsgrunnlag(

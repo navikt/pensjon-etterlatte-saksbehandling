@@ -18,8 +18,8 @@ data class SakMedGraderingOgSkjermet(
     val erSkjermet: Boolean?
 )
 
-class TilgangServiceImpl(
-    private val dao: SakDaoAdressebeskyttelse,
+class tilgangServiceImpl(
+    private val dao: SakTilgangDao,
     private val saksbehandlereGroupIdsByKey: Map<String, String>
 ) : TilgangService {
 

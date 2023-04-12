@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
 
-class SakDaoAdressebeskyttelse(private val datasource: DataSource) {
+class SakTilgangDao(private val datasource: DataSource) {
 
     fun finnSakerMedGraderingOgSkjerming(fnr: String): List<SakMedGraderingOgSkjermet> {
         datasource.connection.use {

@@ -12,9 +12,9 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakDaoAdressebeskyttelse
+import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.sak.TilgangServiceImpl
+import no.nav.etterlatte.sak.tilgangServiceImpl
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.Assertions
@@ -51,8 +51,8 @@ class TilgangServiceTest {
             password = postgreSQLContainer.password
         ).apply { migrate() }
 
-        tilgangService = TilgangServiceImpl(
-            SakDaoAdressebeskyttelse(dataSource),
+        tilgangService = tilgangServiceImpl(
+            SakTilgangDao(dataSource),
             mapOf(
                 "AZUREAD_STRENGT_FORTROLIG_GROUPID" to strengtfortroligDev,
                 "AZUREAD_FORTROLIG_GROUPID" to fortroligDev,

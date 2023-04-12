@@ -35,8 +35,8 @@ class SakDaoTest {
         ).apply { migrate() }
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        tilgangService = TilgangServiceImpl(
-            SakDaoAdressebeskyttelse(dataSource),
+        tilgangService = tilgangServiceImpl(
+            SakTilgangDao(dataSource),
             emptyMap()
         )
     }

@@ -25,6 +25,8 @@ class BrevService(
 
     fun hentAlleBrev(behandlingId: UUID): List<Brev> = db.hentBrevForBehandling(behandlingId)
 
+    fun hentBrev(id: BrevID): Brev = db.hentBrev(id)
+
     fun hentBrevInnhold(id: BrevID): BrevInnhold = db.hentBrevInnhold(id)
 
     fun slettBrev(id: BrevID): Boolean {

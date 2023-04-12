@@ -10,19 +10,15 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
-import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevEventTypes
-import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
@@ -54,15 +50,13 @@ internal class JournalfoerVedtaksbrevTest {
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
-        val adresse =
-            Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
         val brev = Brev(
             1,
             BEHANDLING_ID,
             "fnr",
             "tittel",
             Status.FERDIGSTILT,
-            Mottaker("Fornavn Etternavn", STOR_SNERK, adresse = adresse),
+            mottaker = mockk(),
             true
         )
         val response = JournalpostResponse("1234", null, null, true, emptyList())
@@ -90,21 +84,17 @@ internal class JournalfoerVedtaksbrevTest {
         assertEquals(brev.id, actualMessage.get("brevId").asLong())
         assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
-        assertEquals(adresse.toJson(), actualMessage.get("mottakerAdresse").toJson())
     }
 
     @Test
     fun `Brev er allerede journalfoert`() {
-        val adresse =
-            Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
-
         val brev = Brev(
             1,
             BEHANDLING_ID,
             "fnr",
             "tittel",
             Status.JOURNALFOERT,
-            Mottaker("Fornavn Etternavn", STOR_SNERK, adresse = adresse),
+            mottaker = mockk(),
             true
         )
 
@@ -178,7 +168,6 @@ internal class JournalfoerVedtaksbrevTest {
     }
 
     private companion object {
-        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
         private val BEHANDLING_ID = UUID.randomUUID()
     }
 }

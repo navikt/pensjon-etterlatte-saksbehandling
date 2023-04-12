@@ -2,13 +2,16 @@ package no.nav.etterlatte
 
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.BrevEventTypes
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rivers.DistribuerBrev
@@ -20,9 +23,10 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class DistribuerBrevTest {
+    private val brevService = mockk<BrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>(relaxed = true)
 
-    private val inspector = TestRapid().apply { DistribuerBrev(this, distribusjonService) }
+    private val inspector = TestRapid().apply { DistribuerBrev(this, brevService, distribusjonService) }
 
     private val brevId = 100L
     private val journalpostId = "11111"
@@ -43,6 +47,11 @@ internal class DistribuerBrevTest {
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
+        every { brevService.hentBrev(any()) } returns mockk {
+            every { id } returns brevId
+            every { mottaker } returns Mottaker("navn", foedselsnummer = mockk(), adresse = adresse)
+        }
+
         val melding = JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to BrevEventTypes.JOURNALFOERT.toString(),

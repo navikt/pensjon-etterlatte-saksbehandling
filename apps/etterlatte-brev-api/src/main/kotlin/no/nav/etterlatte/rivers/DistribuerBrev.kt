@@ -1,19 +1,16 @@
 package no.nav.etterlatte.rivers
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,6 +19,7 @@ import org.slf4j.LoggerFactory
 
 internal class DistribuerBrev(
     private val rapidsConnection: RapidsConnection,
+    private val vedtaksbrevService: BrevService,
     private val distribusjonService: DistribusjonService
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)
@@ -29,7 +27,7 @@ internal class DistribuerBrev(
     init {
         River(rapidsConnection).apply {
             eventName(BrevEventTypes.JOURNALFOERT.toString())
-            validate { it.requireKey("brevId", "journalpostId", "distribusjonType", "mottakerAdresse") }
+            validate { it.requireKey("brevId", "journalpostId", "distribusjonType") }
             validate { it.rejectKey("bestillingsId") }
             correlationId()
         }.register(this)
@@ -39,12 +37,14 @@ internal class DistribuerBrev(
         withLogContext(packet[CORRELATION_ID_KEY].asText()) {
             logger.info("Starter distribuering av brev.")
 
+            val brev = vedtaksbrevService.hentBrev(packet["brevId"].asLong())
+
             val bestillingsId = distribusjonService.distribuerJournalpost(
-                brevId = packet["brevId"].asLong(),
+                brevId = brev.id,
                 journalpostId = packet["journalpostId"].asText(),
                 type = packet.distribusjonType(),
                 tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-                adresse = packet.mottakerAdresse()
+                adresse = brev.mottaker.adresse
             )
 
             rapidsConnection.svarSuksess(packet, bestillingsId)
@@ -55,13 +55,6 @@ internal class DistribuerBrev(
         DistribusjonsType.valueOf(this["distribusjonType"].asText())
     } catch (ex: Exception) {
         logger.error("Klarte ikke hente ut distribusjonstype:", ex)
-        throw ex
-    }
-
-    private fun JsonMessage.mottakerAdresse(): Adresse = try {
-        objectMapper.readValue(this["mottakerAdresse"].toJson())
-    } catch (ex: Exception) {
-        logger.error("Klarte ikke parse mottaker sin adresse:", ex)
         throw ex
     }
 

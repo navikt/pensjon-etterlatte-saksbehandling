@@ -3,8 +3,8 @@ package no.nav.etterlatte.rivers
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevEventTypes
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -69,7 +69,7 @@ internal class JournalfoerVedtaksbrev(
 
                 rapidsConnection.svarSuksess(
                     packet,
-                    brev,
+                    brev.id,
                     response.journalpostId
                 )
             }
@@ -81,16 +81,15 @@ internal class JournalfoerVedtaksbrev(
 
     private fun RapidsConnection.svarSuksess(
         packet: JsonMessage,
-        brev: Brev,
+        brevId: BrevID,
         journalpostId: String
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
         packet[EVENT_NAME_KEY] = BrevEventTypes.JOURNALFOERT.toString()
-        packet["brevId"] = brev.id
+        packet["brevId"] = brevId
         packet["journalpostId"] = journalpostId
         packet["distribusjonType"] = DistribusjonsType.VEDTAK.toString()
-        packet["mottakerAdresse"] = brev.mottaker.adresse!!
 
         publish(packet.toJson())
     }

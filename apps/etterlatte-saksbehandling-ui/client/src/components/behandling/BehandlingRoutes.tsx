@@ -104,5 +104,5 @@ function finnRoutesFoerstegangbehandling(behandling: IBehandlingReducer): Array<
 }
 
 function hentRevurderingRoutes(): Array<behandlingRouteTypes> {
-  return ['revurderingsoversikt', 'vilkaarsvurdering', 'beregningsgrunnlag', 'beregne', 'brev']
+  return ['revurderingsoversikt', 'vilkaarsvurdering', 'beregningsgrunnlag', 'beregne']
 }

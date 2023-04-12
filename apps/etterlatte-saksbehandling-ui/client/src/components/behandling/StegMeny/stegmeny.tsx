@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import classNames from 'classnames'
 import { Next } from '@navikt/ds-icons'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { kanGaaTilStatus } from '~components/behandling/felles/utils'
+import { behandlingSkalSendeBrev, kanGaaTilStatus } from '~components/behandling/felles/utils'
 
 export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingType, status } = props.behandling
@@ -46,7 +46,7 @@ export const StegMeny = (props: { behandling: IDetaljertBehandling }) => {
       <li className={classNames({ disabled: stegErDisabled(IBehandlingStatus.BEREGNET) })}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
-      {behandlingType !== IBehandlingsType.MANUELT_OPPHOER && (
+      {behandlingSkalSendeBrev(props.behandling) && (
         <>
           <Separator aria-hidden={'true'} />
           <li

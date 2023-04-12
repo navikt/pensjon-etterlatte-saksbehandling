@@ -72,7 +72,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `hvis featuretoggle er av saa kastes NotImplementedError`() {
+    fun `hvis featuretoggle er av saa kastes NotImplementedError ved opprettelse`() {
         val revurderingFactory = RevurderingFactory(beanFactory.behandlingDao(), beanFactory.hendelseDao())
         val hendelser = beanFactory.behandlingHendelser().nyHendelse
         val featureToggleService = mockk<FeatureToggleService>()

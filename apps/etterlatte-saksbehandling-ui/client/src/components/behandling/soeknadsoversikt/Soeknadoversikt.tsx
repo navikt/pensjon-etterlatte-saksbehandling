@@ -17,6 +17,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const behandles = hentBehandlesFraStatus(behandling.status)
+  const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
 
   return (
     <Content>
@@ -57,9 +58,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       <Familieforhold behandling={behandling} />
       {behandles ? (
         <BehandlingHandlingKnapper>
-          {behandlingErUtfylt(behandling) && (
-            <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT} />
-          )}
+          {behandlingErUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

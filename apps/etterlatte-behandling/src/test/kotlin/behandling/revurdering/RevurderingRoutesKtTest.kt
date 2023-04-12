@@ -49,7 +49,7 @@ internal class RevurderingRoutesKtTest {
     }
 
     @Test
-    fun `happy case`() {
+    fun `kan opprette en revurdering`() {
         testApplication {
             environment {
                 config = hoconApplicationConfig
@@ -96,7 +96,7 @@ internal class RevurderingRoutesKtTest {
     }
 
     @Test
-    fun `returnerer bad request hvis payloaden er ugyldig`() {
+    fun `returnerer bad request hvis payloaden er ugyldig for opprettelse av en revurdering`() {
         testApplication {
             environment { config = hoconApplicationConfig }
             application { module(beanFactory) }

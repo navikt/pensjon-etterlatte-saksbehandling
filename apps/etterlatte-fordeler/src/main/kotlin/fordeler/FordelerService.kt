@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.IkkeGyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.UgyldigHendelse
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
@@ -21,10 +22,6 @@ import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
-
-enum class Vedtaksloesning {
-    DOFFEN, PESYS
-}
 
 data class Fordeling(val soeknadId: Long, val fordeltTil: Vedtaksloesning, val kriterier: List<FordelerKriterie>)
 

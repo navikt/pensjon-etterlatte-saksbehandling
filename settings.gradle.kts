@@ -39,6 +39,7 @@ include(
     "libs:testdata",
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",
+    "libs:etterlatte-vilkaarsvurdering-model",
     "jobs:test-fordeler",
     "jobs:start-regulering"
 )

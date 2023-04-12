@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
+    implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercore)

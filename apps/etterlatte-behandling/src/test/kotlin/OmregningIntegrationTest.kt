@@ -54,9 +54,8 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
         @BeforeEach
         fun beforeEach() {
-            val (_, foerstegangsbehandling) = inTransaction {
-                beanFactory.opprettSakMedFoerstegangsbehandling(sakId, "234")
-            }
+            val (_, foerstegangsbehandling) = beanFactory.opprettSakMedFoerstegangsbehandling(sakId, "234")
+
             val virkningstidspunkt = virkningstidspunktVurdering()
 
             val iverksattBehandling = foerstegangsbehandling

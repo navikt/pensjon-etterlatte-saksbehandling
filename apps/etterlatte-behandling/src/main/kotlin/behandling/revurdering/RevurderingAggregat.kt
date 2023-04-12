@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingAggregat
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
@@ -25,7 +24,7 @@ class RevurderingAggregat(
     private val hendelser: HendelseDao
 ) {
     companion object {
-        private val logger = LoggerFactory.getLogger(FoerstegangsbehandlingAggregat::class.java)
+        private val logger = LoggerFactory.getLogger(RevurderingAggregat::class.java)
 
         fun opprettManuellRevurdering(
             sak: Long,

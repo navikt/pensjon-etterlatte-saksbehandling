@@ -51,7 +51,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns true
 
-        val (_, behandling) = inTransaction { beanFactory.opprettSakMedFoerstegangsbehandling(sakId, fnr) }
+        val (_, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling(sakId, fnr)
+
         inTransaction {
             beanFactory.behandlingDao().lagreStatus(
                 behandling.id,
@@ -83,7 +84,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns false
 
-        val (_, behandling) = inTransaction { beanFactory.opprettSakMedFoerstegangsbehandling(sakId, fnr) }
+        val (_, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling(sakId, fnr)
         inTransaction {
             beanFactory.behandlingDao().lagreStatus(
                 behandling.id,

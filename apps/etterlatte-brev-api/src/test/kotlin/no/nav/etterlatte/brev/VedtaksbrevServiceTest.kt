@@ -194,7 +194,7 @@ internal class VedtaksbrevServiceTest {
                 Brev(2, BEHANDLING_ID, "fnr", "tittel", status, opprettMottaker(), true),
                 Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, opprettMottaker(), false)
             )
-            every { db.oppdaterStatus(any(), any()) } returns true
+            every { db.settBrevFerdigstilt(any()) } returns true
 
             runBlocking {
                 val ferdigstiltOK = vedtaksbrevService.ferdigstillVedtaksbrev(BEHANDLING_ID)
@@ -204,7 +204,7 @@ internal class VedtaksbrevServiceTest {
 
             verify(exactly = 1) {
                 db.hentBrevForBehandling(BEHANDLING_ID)
-                db.oppdaterStatus(2, Status.FERDIGSTILT)
+                db.settBrevFerdigstilt(2)
             }
 
             verify {
@@ -220,6 +220,7 @@ internal class VedtaksbrevServiceTest {
                 Brev(2, BEHANDLING_ID, "fnr", "tittel", Status.FERDIGSTILT, opprettMottaker(), true),
                 Brev(3, BEHANDLING_ID, "fnr", "tittel", Status.JOURNALFOERT, opprettMottaker(), false)
             )
+            every { db.settBrevFerdigstilt(any()) } returns true
 
             runBlocking {
                 val ferdigstiltOK = vedtaksbrevService.ferdigstillVedtaksbrev(BEHANDLING_ID)
@@ -228,7 +229,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
-            verify(exactly = 0) { db.oppdaterStatus(any(), any()) }
+            verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
 
             verify {
                 listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
@@ -256,7 +257,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
-            verify(exactly = 0) { db.oppdaterStatus(any(), any()) }
+            verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
 
             verify {
                 listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)
@@ -286,8 +287,7 @@ internal class VedtaksbrevServiceTest {
 
             verify(exactly = 1) {
                 dokarkivService.journalfoer(forventetBrev, vedtak)
-                db.setJournalpostId(forventetBrev.id, response.journalpostId)
-                db.oppdaterStatus(forventetBrev.id, Status.JOURNALFOERT, any())
+                db.settBrevJournalfoert(forventetBrev.id, response)
             }
 
             verify {
@@ -310,7 +310,7 @@ internal class VedtaksbrevServiceTest {
                 }
             }
 
-            verify(exactly = 0) { db.oppdaterStatus(any(), any()) }
+            verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
 
             verify {
                 listOf(pdfGenerator, sakOgBehandlingService, adresseService, dokarkivService)

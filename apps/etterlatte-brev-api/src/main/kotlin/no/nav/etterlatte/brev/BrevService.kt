@@ -78,7 +78,7 @@ class BrevService(
             return true
         }
 
-        return db.oppdaterStatus(id, Status.FERDIGSTILT)
+        return db.settBrevFerdigstilt(id)
             .also {
                 if (it) {
                     logger.info("Brev (id=$id) status er satt til ${Status.FERDIGSTILT}")

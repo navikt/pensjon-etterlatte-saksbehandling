@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.adresse
 
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -48,6 +49,9 @@ internal class AdresseServiceTest {
         val (faktiskAvsender, faktiskAttestant) = runBlocking {
             adresseService.hentAvsenderOgAttestant(vedtak)
         }
+
+        faktiskAvsender.saksbehandler shouldBe "fornavn etternavn"
+        faktiskAttestant?.navn shouldBe "fornavn etternavn"
 
         coVerify(exactly = 1) {
             norg2Mock.hentEnhet(saksbehandler.enhet)

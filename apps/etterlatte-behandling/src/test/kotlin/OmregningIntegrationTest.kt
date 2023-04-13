@@ -18,7 +18,6 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -62,7 +61,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 .oppdaterKommerBarnetTilgode(kommerBarnetTilGodeVurdering())
                 .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
                 .oppdaterVirkningstidspunkt(virkningstidspunkt)
-                .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+                .tilVilkaarsvurdert()
                 .tilBeregnet()
                 .tilFattetVedtak()
                 .tilAttestert()

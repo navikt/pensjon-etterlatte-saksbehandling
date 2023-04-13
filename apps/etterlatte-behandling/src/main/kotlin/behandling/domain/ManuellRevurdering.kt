@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.util.*
 
@@ -22,7 +21,6 @@ data class ManuellRevurdering(
     override val status: BehandlingStatus,
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
-    override val vilkaarUtfall: VilkaarsvurderingUtfall?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val revurderingsaarsak: RevurderingAarsak
 ) : Revurdering(
@@ -33,7 +31,6 @@ data class ManuellRevurdering(
     status,
     persongalleri,
     kommerBarnetTilgode,
-    vilkaarUtfall,
     virkningstidspunkt,
     revurderingsaarsak,
     Prosesstype.MANUELL
@@ -51,15 +48,15 @@ data class ManuellRevurdering(
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(virkningstidspunkt = virkningstidspunkt) }
 
     override fun tilOpprettet() =
-        hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }.copy(vilkaarUtfall = null)
+        hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
 
-    override fun tilVilkaarsvurdert(utfall: VilkaarsvurderingUtfall?): Revurdering {
+    override fun tilVilkaarsvurdert(): Revurdering {
         if (!erFyltUt()) {
             logger.info("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert")
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }.copy(vilkaarUtfall = utfall)
+        return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
     }
 
     override fun tilBeregnet() = hvisTilstandEr(

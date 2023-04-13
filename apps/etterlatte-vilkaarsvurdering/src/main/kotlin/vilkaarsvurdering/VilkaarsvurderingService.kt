@@ -43,8 +43,7 @@ class VilkaarsvurderingService(
             virkningstidspunkt = virkningstidspunkt,
             resultat = resultat
         )
-        val utfall = vilkaarsvurdering.resultat?.utfall ?: throw IllegalStateException("Utfall kan ikke vaere null")
-        behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker, utfall)
+        behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
         vilkaarsvurdering
     }
 

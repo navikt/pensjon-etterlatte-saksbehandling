@@ -11,7 +11,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 
 internal fun Route.behandlingsstatusRoutes(
     behandlingsstatusService: BehandlingStatusService
@@ -32,14 +31,12 @@ internal fun Route.behandlingsstatusRoutes(
 
         get("/vilkaarsvurder") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settVilkaarsvurdert(behandlingsId, true, null)
+                behandlingsstatusService.settVilkaarsvurdert(behandlingsId, true)
             }
         }
         post("/vilkaarsvurder") {
-            val body = call.receive<TilVilkaarsvurderingJson>()
-
             haandterStatusEndring(call) {
-                behandlingsstatusService.settVilkaarsvurdert(behandlingsId, false, body.utfall)
+                behandlingsstatusService.settVilkaarsvurdert(behandlingsId, false)
             }
         }
 
@@ -116,5 +113,3 @@ private suspend fun haandterStatusEndring(call: ApplicationCall, proevStatusEndr
             onFailure = { call.respond(HttpStatusCode.Conflict, it.message ?: "Statussjekk feilet") }
         )
 }
-
-internal data class TilVilkaarsvurderingJson(val utfall: VilkaarsvurderingUtfall)

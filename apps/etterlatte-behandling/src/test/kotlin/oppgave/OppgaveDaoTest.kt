@@ -192,7 +192,6 @@ internal class OppgaveDaoTest {
             ),
             soeknadMottattDato = null,
             kommerBarnetTilgode = null,
-            vilkaarUtfall = null,
             virkningstidspunkt = null,
             opphoerAarsaker = listOf(),
             fritekstAarsak = null,

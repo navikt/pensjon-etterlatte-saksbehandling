@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.virkningstidspunktVurdering
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
@@ -37,12 +36,11 @@ internal class RevurderingTest {
             status = BehandlingStatus.OPPRETTET,
             persongalleri = Persongalleri(""),
             kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
-            vilkaarUtfall = null,
             virkningstidspunkt = virkningstidspunktVurdering(),
             revurderingsaarsak = RevurderingAarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL
-        ).tilVilkaarsvurdert(VilkaarsvurderingUtfall.IKKE_OPPFYLT).tilBeregnet()
-            .tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilBeregnet().tilFattetVedtak().tilAttestert()
+        ).tilVilkaarsvurdert().tilBeregnet()
+            .tilVilkaarsvurdert().tilBeregnet().tilFattetVedtak().tilAttestert()
             .tilIverksatt()
     }
 
@@ -52,7 +50,7 @@ internal class RevurderingTest {
 
         @Test
         fun `kan endre status gjennom gyldig statusendringsflyt`() {
-            val actual = revurdering.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilBeregnet().tilFattetVedtak()
+            val actual = revurdering.tilVilkaarsvurdert().tilBeregnet().tilFattetVedtak()
                 .tilAttestert().tilIverksatt()
 
             Assertions.assertEquals(BehandlingStatus.IVERKSATT, actual.status)
@@ -66,12 +64,12 @@ internal class RevurderingTest {
             assertThrows<TilstandException.UgyldigTilstand> { revurdering.tilReturnert() }
 
             assertDoesNotThrow { revurdering.tilOpprettet() }
-            assertDoesNotThrow { revurdering.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT) }
+            assertDoesNotThrow { revurdering.tilVilkaarsvurdert() }
         }
 
         @Test
         fun `vilkaarsvurdert kan ikke gaa til andre statuser enn beregnet og opprettet`() {
-            val vilkaarsvurdert = revurdering.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            val vilkaarsvurdert = revurdering.tilVilkaarsvurdert()
 
             assertThrows<TilstandException.UgyldigTilstand> { vilkaarsvurdert.tilFattetVedtak() }
             assertThrows<TilstandException.UgyldigTilstand> { vilkaarsvurdert.tilIverksatt() }
@@ -83,13 +81,13 @@ internal class RevurderingTest {
 
         @Test
         fun `beregnet`() {
-            val beregnet = revurdering.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilBeregnet()
+            val beregnet = revurdering.tilVilkaarsvurdert().tilBeregnet()
 
             assertThrows<TilstandException.UgyldigTilstand> { beregnet.tilReturnert() }
             assertThrows<TilstandException.UgyldigTilstand> { beregnet.tilIverksatt() }
 
             assertDoesNotThrow { beregnet.tilOpprettet() }
-            assertDoesNotThrow { beregnet.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT) }
+            assertDoesNotThrow { beregnet.tilVilkaarsvurdert() }
             assertDoesNotThrow { beregnet.tilBeregnet() }
             assertDoesNotThrow { beregnet.tilBeregnet() }
             assertDoesNotThrow { beregnet.tilFattetVedtak() }
@@ -107,19 +105,19 @@ internal class RevurderingTest {
 
         @Test
         fun `vilkaarsvurdert`() {
-            val vilkaarsvurdert = revurdering.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT)
+            val vilkaarsvurdert = revurdering.tilVilkaarsvurdert()
             assertKanGaaTilAlleStatuser(vilkaarsvurdert)
         }
 
         @Test
         fun `beregnet`() {
-            val beregnet = revurdering.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilBeregnet()
+            val beregnet = revurdering.tilVilkaarsvurdert().tilBeregnet()
             assertKanGaaTilAlleStatuser(beregnet)
         }
 
         @Test
         fun `fattet`() {
-            val fattet = revurdering.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).tilBeregnet().tilFattetVedtak()
+            val fattet = revurdering.tilVilkaarsvurdert().tilBeregnet().tilFattetVedtak()
             assertKanGaaTilAlleStatuser(fattet)
         }
 
@@ -127,7 +125,7 @@ internal class RevurderingTest {
             Assertions.assertEquals(BehandlingStatus.OPPRETTET, revurdering.tilOpprettet().status)
             Assertions.assertEquals(
                 BehandlingStatus.VILKAARSVURDERT,
-                revurdering.tilVilkaarsvurdert(VilkaarsvurderingUtfall.OPPFYLT).status
+                revurdering.tilVilkaarsvurdert().status
             )
             Assertions.assertEquals(BehandlingStatus.BEREGNET, revurdering.tilBeregnet().status)
             Assertions.assertEquals(BehandlingStatus.FATTET_VEDTAK, revurdering.tilFattetVedtak().status)
@@ -146,7 +144,6 @@ private fun opprettetRevurdering(prosesstype: Prosesstype) = Revurdering.opprett
     status = BehandlingStatus.OPPRETTET,
     persongalleri = Persongalleri(""),
     kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
-    vilkaarUtfall = null,
     virkningstidspunkt = virkningstidspunktVurdering(),
     revurderingsaarsak = RevurderingAarsak.REGULERING,
     prosesstype = prosesstype

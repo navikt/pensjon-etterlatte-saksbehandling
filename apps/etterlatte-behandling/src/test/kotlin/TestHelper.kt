@@ -56,7 +56,6 @@ fun opprettBehandling(
     persongalleri: Persongalleri = persongalleri(),
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
-    vilkaarUtfall: VilkaarsvurderingUtfall? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
     revurderingAarsak: RevurderingAarsak? = null,
     opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
@@ -69,7 +68,6 @@ fun opprettBehandling(
     persongalleri = persongalleri,
     soeknadMottattDato = soeknadMottattDato,
     kommerBarnetTilgode = kommerBarnetTilgode,
-    vilkaarUtfall = vilkaarUtfall,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsAarsak = revurderingAarsak,
     opphoerAarsaker = opphoerAarsaker,
@@ -103,8 +101,7 @@ fun foerstegangsbehandling(
     persongalleri = persongalleri,
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
-    kommerBarnetTilgode = kommerBarnetTilgode,
-    vilkaarUtfall = vilkaarStatus
+    kommerBarnetTilgode = kommerBarnetTilgode
 )
 
 fun revurdering(
@@ -132,7 +129,6 @@ fun revurdering(
     persongalleri = persongalleri,
     revurderingsaarsak = revurderingAarsak,
     kommerBarnetTilgode = kommerBarnetTilgode,
-    vilkaarUtfall = vilkaarStatus,
     virkningstidspunkt = virkningstidspunkt,
     prosesstype = prosesstype
 )

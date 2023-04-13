@@ -17,7 +17,6 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
-import no.nav.etterlatte.behandling.TilVilkaarsvurderingJson
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.VurderingMedBegrunnelseJson
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -46,7 +45,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -205,7 +203,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.post("/behandlinger/$behandlingId/vilkaarsvurder") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(TilVilkaarsvurderingJson(VilkaarsvurderingUtfall.OPPFYLT))
+                setBody("{}")
             }.also {
                 beanFactory.dataSource().connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!

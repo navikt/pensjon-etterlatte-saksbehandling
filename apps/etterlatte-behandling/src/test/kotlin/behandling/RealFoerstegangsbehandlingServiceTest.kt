@@ -97,8 +97,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
-            kommerBarnetTilgode = null,
-            vilkaarUtfall = null
+            kommerBarnetTilgode = null
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
@@ -138,8 +137,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
-            kommerBarnetTilgode = null,
-            vilkaarUtfall = null
+            kommerBarnetTilgode = null
         )
 
         val persongalleri = Persongalleri(
@@ -196,7 +194,6 @@ internal class RealFoerstegangsbehandlingServiceTest {
             status = BehandlingStatus.OPPRETTET,
             persongalleri = persongalleri(),
             kommerBarnetTilgode = null,
-            vilkaarUtfall = null,
             virkningstidspunkt = null,
             soeknadMottattDato = now,
             gyldighetsproeving = null,

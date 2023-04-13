@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDateTime
 import java.util.*
 
@@ -20,7 +19,6 @@ data class OpprettBehandling(
     val persongalleri: Persongalleri,
     val soeknadMottattDato: LocalDateTime? = null,
     val kommerBarnetTilgode: KommerBarnetTilgode? = null,
-    val vilkaarUtfall: VilkaarsvurderingUtfall? = null,
     val virkningstidspunkt: Virkningstidspunkt? = null,
     val revurderingsAarsak: RevurderingAarsak? = null,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,

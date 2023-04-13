@@ -92,7 +92,11 @@ internal class BrevRepositoryIntegrationTest {
         assertEquals(3, brev3.id)
 
         repeat(10) {
-            db.opprettBrev(ulagretBrev(UUID.randomUUID()))
+            val nyttBrev = ulagretBrev(UUID.randomUUID())
+            val lagretBrev = db.opprettBrev(nyttBrev)
+            val hentetBrev = db.hentBrev(lagretBrev.id)
+
+            assertEquals(lagretBrev, hentetBrev)
         }
 
         assertEquals(3, db.hentBrevForBehandling(behandlingId).size)

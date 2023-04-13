@@ -60,7 +60,7 @@ data class Mottaker(
     }
 }
 
-class Brev(
+data class Brev(
     val id: BrevID,
     val behandlingId: UUID,
     val soekerFnr: String,

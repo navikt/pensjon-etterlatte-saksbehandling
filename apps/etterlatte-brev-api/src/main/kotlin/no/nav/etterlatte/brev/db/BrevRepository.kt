@@ -259,7 +259,6 @@ class BrevRepository(private val ds: DataSource) {
         const val OPPRETT_BREV_QUERY = """
             INSERT INTO brev (behandling_id, soeker_fnr, tittel, vedtaksbrev) 
             VALUES (:behandling_id, :soeker_fnr, :tittel, :vedtaksbrev) 
-            RETURNING id
         """
 
         const val OPPRETT_MOTTAKER_QUERY = """

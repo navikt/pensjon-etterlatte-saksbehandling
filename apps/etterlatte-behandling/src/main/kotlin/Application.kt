@@ -14,6 +14,7 @@ import io.ktor.server.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
+import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
@@ -74,10 +75,13 @@ fun Application.module(beanFactory: BeanFactory) {
 
         val tilgangService = tilgangService()
         val sakService = sakService()
+        val enhetService = enhetService()
+        val saksbehandlerGroupIds = getSaksbehandlerGroupIdsByKey()
+
         restModule(
             sikkerLogg
         ) {
-            attachContekst(dataSource(), beanFactory)
+            attachContekst(dataSource(), enhetService, saksbehandlerGroupIds)
             sakRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
@@ -111,14 +115,18 @@ fun Application.module(beanFactory: BeanFactory) {
     }
 }
 
-private fun Route.attachContekst(ds: DataSource, beanFactory: BeanFactory) {
+private fun Route.attachContekst(
+    ds: DataSource,
+    enhetService: EnhetService,
+    saksbehandlerGroupIds: Map<String, String>
+) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
             Context(
                 AppUser = decideUser(
                     call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
-                    beanFactory.getSaksbehandlerGroupIdsByKey(),
-                    beanFactory.enhetService()
+                    saksbehandlerGroupIds,
+                    enhetService
                 ),
                 databasecontxt = DatabaseContext(ds)
             )

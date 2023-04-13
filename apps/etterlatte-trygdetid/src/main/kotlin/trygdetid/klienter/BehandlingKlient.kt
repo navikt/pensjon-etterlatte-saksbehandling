@@ -62,6 +62,26 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
             )
     }
 
+    suspend fun settBehandlingStatusVilkaarsvurdert(
+        behandlingId: UUID,
+        bruker: Bruker
+    ): Boolean {
+        logger.info("Committer vilkaarsvurdering på behandling med id $behandlingId")
+        val response = downstreamResourceClient.post(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/vilkaarsvurder"),
+            bruker = bruker,
+            postBody = "{}"
+        )
+
+        return response.mapBoth(
+            success = { true },
+            failure = {
+                logger.info("Kunne ikke committe vilkaarsvurdering på behandling med id $behandlingId", it.throwable)
+                false
+            }
+        )
+    }
+
     suspend fun hentBehandling(behandlingId: UUID, bruker: Bruker): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
 

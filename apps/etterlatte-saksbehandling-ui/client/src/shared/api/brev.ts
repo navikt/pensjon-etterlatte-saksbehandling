@@ -50,17 +50,21 @@ export const hentForhaandsvisning = async (
 ): Promise<ApiResponse<ArrayBuffer>> => apiClient.post(`/brev/forhaandsvisning`, { mottaker, mal, enhet })
 
 export interface Mottaker {
+  navn?: string
   foedselsnummer?: string
   orgnummer?: string
   adresse?: Adresse
 }
 
 export interface Adresse {
-  fornavn?: string
-  etternavn?: string
-  adresse?: string
+  adresseType?: string
+  adresselinje1?: string
+  adresselinje2?: string
+  adresselinje3?: string
   postnummer?: string
   poststed?: string
+  landkode?: string
+  land?: string
 }
 
 export interface Mal {

@@ -36,7 +36,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
 
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [klarForLagring, setKlarforLagring] = useState<boolean>(false)
-  const [adresse, setAdresse] = useState<Adresse | undefined>(undefined)
+  const [adresse, setAdresse] = useState<Adresse>({})
   const [fnrMottaker, setFnrMottaker] = useState<string | undefined>(undefined)
   const [orgMottaker, setOrgMottaker] = useState<string | undefined>(undefined)
   const [mottakere, setMottakere] = useState<DefaultMottaker[]>([])
@@ -124,7 +124,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
         else throw Error(res.error)
       })
       .finally(() => {
-        setAdresse(undefined)
+        setAdresse({})
         setFnrMottaker(undefined)
         setOrgMottaker(undefined)
         setLaster(false)
@@ -136,20 +136,13 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
       })
   }
 
-  const oppdaterMottaker = (value: string, id: string, section?: string) => {
+  const oppdaterMottaker = (value: string, id: string) => {
     setKlarforLagring(false)
     setFnrMottaker(id === 'FNR' ? value : '')
     setOrgMottaker(id === 'ORGNR' ? value : '')
 
-    if (id === 'ADRESSE') {
-      if (section === 'fornavn') setAdresse({ ...adresse, fornavn: value })
-      if (section === 'etternavn') setAdresse({ ...adresse, etternavn: value })
-      if (section === 'adresse') setAdresse({ ...adresse, adresse: value })
-      if (section === 'postnummer') setAdresse({ ...adresse, postnummer: value })
-      if (section === 'poststed') setAdresse({ ...adresse, poststed: value })
-    } else {
-      setAdresse({})
-    }
+    // TODO: Fikse dette når det blir aktuelt å bruke koden
+    setAdresse({})
   }
 
   return (

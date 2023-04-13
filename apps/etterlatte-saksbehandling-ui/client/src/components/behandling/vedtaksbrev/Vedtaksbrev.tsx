@@ -38,6 +38,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
 
+  const adresse = vedtaksbrev?.mottaker?.adresse
+
   useEffect(() => {
     if (!vedtaksbrev?.id) return
 
@@ -134,16 +136,18 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
                   <div className="info">
                     <Info>Navn</Info>
-                    <Tekst>{vedtaksbrev.mottaker?.adresse?.navn}</Tekst>
+                    <Tekst>{vedtaksbrev.mottaker?.navn}</Tekst>
                   </div>
 
                   <div className="info">
                     <Info>Adresse</Info>
+                    <Tekst>{[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].join('\n')}</Tekst>
                     <Tekst>
-                      {vedtaksbrev.mottaker?.adresse?.adresse},&nbsp;
-                      {vedtaksbrev.mottaker?.adresse?.postnummer} {vedtaksbrev.mottaker?.adresse?.poststed}
+                      {adresse?.postnummer} {adresse?.poststed}
                     </Tekst>
-                    <Tekst>{vedtaksbrev.mottaker?.adresse?.land}</Tekst>
+                    <Tekst>
+                      {adresse?.land} ({adresse?.landkode})
+                    </Tekst>
                   </div>
                 </InfoContainer>
               </>

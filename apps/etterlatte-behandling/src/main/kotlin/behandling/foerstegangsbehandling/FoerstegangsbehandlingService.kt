@@ -14,16 +14,20 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.ManuellVurdering
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
+import no.nav.etterlatte.sak.SakDao
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDateTime
@@ -32,7 +36,7 @@ import java.util.*
 interface FoerstegangsbehandlingService {
     fun hentFoerstegangsbehandling(behandling: UUID): Foerstegangsbehandling?
     fun startFoerstegangsbehandling(
-        sak: Long,
+        sakId: Long,
         persongalleri: Persongalleri,
         mottattDato: String
     ): Foerstegangsbehandling
@@ -56,6 +60,7 @@ interface FoerstegangsbehandlingService {
 }
 
 class RealFoerstegangsbehandlingService(
+    private val sakDao: SakDao,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKanal,
@@ -74,18 +79,24 @@ class RealFoerstegangsbehandlingService(
     }
 
     override fun startFoerstegangsbehandling(
-        sak: Long,
+        sakId: Long,
         persongalleri: Persongalleri,
         mottattDato: String
     ): Foerstegangsbehandling {
-        logger.info("Starter behandling i sak $sak")
+        logger.info("Starter behandling i sak $sakId")
+
         return inTransaction {
+            val sak = requireNotNull(sakDao.hentSak(sakId)) {
+                "Fant ingen sak med id=$sakId!"
+            }
+
             OpprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sak,
+                sakId = sakId,
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = LocalDateTime.parse(mottattDato),
-                persongalleri = persongalleri
+                persongalleri = persongalleri,
+                merknad = opprettMerknad(sak, persongalleri)
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)
                 hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
@@ -202,6 +213,20 @@ class RealFoerstegangsbehandlingService(
             behandling.let {
                 behandlingDao.lagreStatus(it.id, it.status, it.sistEndret)
             }
+        }
+    }
+
+    private fun opprettMerknad(sak: Sak, persongalleri: Persongalleri): String? {
+        return if (persongalleri.soesken.isEmpty()) {
+            null
+        } else if (sak.sakType == SakType.BARNEPENSJON) {
+            "${persongalleri.soesken.size} søsken"
+        } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+            val barnUnder20 = persongalleri.soesken.count { Folkeregisteridentifikator.of(it).getAge() < 20 }
+
+            "$barnUnder20 barn u/20år"
+        } else {
+            null
         }
     }
 }

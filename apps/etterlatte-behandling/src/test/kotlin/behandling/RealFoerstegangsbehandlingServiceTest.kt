@@ -1,11 +1,15 @@
 package no.nav.etterlatte.behandling
 
 import io.mockk.Runs
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -32,6 +36,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.sak.SakDao
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,6 +47,20 @@ import java.time.YearMonth
 import java.util.*
 
 internal class RealFoerstegangsbehandlingServiceTest {
+
+    private val sakDaoMock = mockk<SakDao>()
+    private val behandlingDaoMock = mockk<BehandlingDao>()
+    private val hendelseDaoMock = mockk<HendelseDao>()
+    private val hendelserKanalMock = mockk<BehandlingHendelserKanal>()
+
+    private val naaTid = Tidspunkt.now()
+    private val sut = RealFoerstegangsbehandlingService(
+        sakDaoMock,
+        behandlingDaoMock,
+        hendelseDaoMock,
+        hendelserKanalMock,
+        naaTid.fixedNorskTid()
+    )
 
     @BeforeEach
     fun before() {
@@ -60,15 +80,14 @@ internal class RealFoerstegangsbehandlingServiceTest {
         )
     }
 
+    @AfterEach
+    fun after() {
+        confirmVerified(sakDaoMock, behandlingDaoMock, hendelseDaoMock, hendelserKanalMock)
+        clearAllMocks()
+    }
+
     @Test
     fun hentFoerstegangsbehandling() {
-        val behandlingDaoMock = mockk<BehandlingDao>()
-        val hendelseDaoMock = mockk<HendelseDao>()
-        val sut = RealFoerstegangsbehandlingService(
-            behandlingDaoMock,
-            hendelseDaoMock,
-            mockk()
-        )
         val id = UUID.randomUUID()
 
         every {
@@ -101,15 +120,14 @@ internal class RealFoerstegangsbehandlingServiceTest {
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
+
+        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
 
     @Test
     fun startBehandling() {
-        val behandlingDaoMock = mockk<BehandlingDao>()
-        val hendelseDaoMock = mockk<HendelseDao>()
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-        val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
@@ -148,19 +166,12 @@ internal class RealFoerstegangsbehandlingServiceTest {
             listOf("Gjenlevende")
         )
 
-        val sut = RealFoerstegangsbehandlingService(
-            behandlingDaoMock,
-            hendelseDaoMock,
-            hendleseskanal
-        )
-
+        every { sakDaoMock.hentSak(any()) } returns opprettetBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
-        every {
-            behandlingDaoMock.hentBehandling(capture(behandlingHentes))
-        } returns opprettetBehandling
+        every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } returns Unit
-        coEvery { hendleseskanal.send(capture(hendelse)) } returns Unit
+        coEvery { hendelserKanalMock.send(capture(hendelse)) } returns Unit
 
         val resultat = sut.startFoerstegangsbehandling(
             1,
@@ -168,6 +179,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             datoNaa.toString()
         )
 
+        assertEquals(opprettetBehandling, resultat)
         assertEquals(opprettetBehandling.persongalleri.avdoed, resultat.persongalleri.avdoed)
         assertEquals(opprettetBehandling.sak, resultat.sak)
         assertEquals(opprettetBehandling.id, resultat.id)
@@ -176,14 +188,19 @@ internal class RealFoerstegangsbehandlingServiceTest {
         assertEquals(1, behandlingOpprettes.captured.sakId)
         assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
         assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second)
+
+        verify(exactly = 1) {
+            sakDaoMock.hentSak(any())
+            behandlingDaoMock.hentBehandling(any())
+            behandlingDaoMock.opprettBehandling(any())
+            hendelseDaoMock.behandlingOpprettet(any())
+        }
+        coVerify(exactly = 1) { hendelserKanalMock.send(any()) }
     }
 
     @Test
     fun `lagring av gyldighetsproeving skal lagre og returnere gyldighetsresultat for innsender er gjenlevende`() {
         val id = UUID.randomUUID()
-
-        val behandlingDaoMock = mockk<BehandlingDao>()
-
         val now = LocalDateTime.now()
 
         val behandling = Foerstegangsbehandling(
@@ -201,11 +218,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
         )
         every { behandlingDaoMock.hentBehandling(any()) } returns behandling
 
-        every { behandlingDaoMock.lagreStatus(any()) } just Runs
-
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } just Runs
 
-        val naaTid = Tidspunkt.now()
         val forventetResultat = GyldighetsResultat(
             resultat = VurderingsResultat.OPPFYLT,
             vurderinger = listOf(
@@ -221,15 +235,13 @@ internal class RealFoerstegangsbehandlingServiceTest {
             vurdertDato = naaTid.toLocalDatetimeNorskTid()
         )
 
-        val service =
-            RealFoerstegangsbehandlingService(
-                behandlingDaoMock,
-                mockk(),
-                mockk(),
-                naaTid.fixedNorskTid()
-            )
-        val resultat = service.lagreGyldighetsproeving(id, "saksbehandler", JaNei.JA, "begrunnelse")
+        val resultat = sut.lagreGyldighetsproeving(id, "saksbehandler", JaNei.JA, "begrunnelse")
 
         assertEquals(forventetResultat, resultat)
+
+        verify(exactly = 1) {
+            behandlingDaoMock.hentBehandling(id)
+            behandlingDaoMock.lagreGyldighetsproving(any())
+        }
     }
 }

@@ -27,7 +27,8 @@ internal class OppgaveServiceTest {
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
             antallSoesken = 1,
-            enhet = null
+            enhet = null,
+            merknad = null
         ),
         Oppgave.BehandlingOppgave(
             sakId = 2,
@@ -38,7 +39,8 @@ internal class OppgaveServiceTest {
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
             antallSoesken = 1,
-            enhet = Enheter.DEFAULT.enhetNr
+            enhet = Enheter.DEFAULT.enhetNr,
+            merknad = null
         ),
         Oppgave.BehandlingOppgave(
             sakId = 3,
@@ -49,7 +51,8 @@ internal class OppgaveServiceTest {
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
             antallSoesken = 1,
-            enhet = Enheter.STRENGT_FORTROLIG.enhetNr
+            enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+            merknad = null
         ),
         Oppgave.Grunnlagsendringsoppgave(
             sakId = 4,

@@ -11,7 +11,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - "https://etterlatte-brev-api.dev.intern.nav.no"
+    - "https://etterlatte-brev-api.intern.dev.nav.no"
   liveness:
     initialDelay: 5
     path: /health/isalive

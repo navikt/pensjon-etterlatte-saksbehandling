@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.BehandlingSammendrag
 import no.nav.etterlatte.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
@@ -36,6 +37,7 @@ sealed class Behandling {
     abstract val persongalleri: Persongalleri
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val virkningstidspunkt: Virkningstidspunkt?
+    abstract val kildesystem: Vedtaksloesning
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)

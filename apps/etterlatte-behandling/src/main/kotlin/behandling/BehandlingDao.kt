@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -179,7 +180,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
-        prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
+        prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
+        kildesystem = rs.getString("kildesystem").let { Vedtaksloesning.valueOf(it) }
     )
 
     private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
@@ -201,7 +203,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
             kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-            prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) }
+            prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
+            kildesystem = rs.getString("kildesystem").let { Vedtaksloesning.valueOf(it) }
         )
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
@@ -243,8 +246,8 @@ class BehandlingDao(private val connection: () -> Connection) {
                 """
                     INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                     soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt,
-                    kommer_barnet_tilgode, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, merknad)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    kommer_barnet_tilgode, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kildesystem, merknad)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(behandling) {
@@ -271,7 +274,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setString(16, opphoerAarsaker?.toJson())
             stmt.setString(17, fritekstAarsak)
             stmt.setString(18, prosesstype.toString())
-            stmt.setString(19, merknad)
+            stmt.setString(19, kildesystem.toString())
+            stmt.setString(20, merknad)
         }
         require(stmt.executeUpdate() == 1)
     }

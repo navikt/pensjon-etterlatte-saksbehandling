@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -217,7 +218,8 @@ internal class OppgaveDaoTest {
             virkningstidspunkt = null,
             opphoerAarsaker = listOf(),
             fritekstAarsak = null,
-            prosesstype = prosesstype
+            prosesstype = prosesstype,
+            kildesystem = Vedtaksloesning.DOFFEN
         )
     }
 }

@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -96,6 +97,7 @@ class RealFoerstegangsbehandlingService(
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = LocalDateTime.parse(mottattDato),
                 persongalleri = persongalleri,
+                kildesystem = Vedtaksloesning.DOFFEN,
                 merknad = opprettMerknad(sak, persongalleri)
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)

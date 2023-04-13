@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -26,6 +27,7 @@ data class ManueltOpphoer(
     override val prosesstype: Prosesstype = Prosesstype.MANUELL
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER
+    override val kildesystem = Vedtaksloesning.DOFFEN
 
     constructor(
         sak: Sak,

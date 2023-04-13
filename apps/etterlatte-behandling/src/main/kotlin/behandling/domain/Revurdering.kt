@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -21,7 +22,8 @@ sealed class Revurdering(
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     open val revurderingsaarsak: RevurderingAarsak?,
-    override val prosesstype: Prosesstype
+    override val prosesstype: Prosesstype,
+    override val kildesystem: Vedtaksloesning
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
 
@@ -38,7 +40,8 @@ sealed class Revurdering(
             kommerBarnetTilgode: KommerBarnetTilgode?,
             virkningstidspunkt: Virkningstidspunkt?,
             revurderingsaarsak: RevurderingAarsak,
-            prosesstype: Prosesstype
+            prosesstype: Prosesstype,
+            kildesystem: Vedtaksloesning
         ) = when (prosesstype) {
             Prosesstype.MANUELL -> ManuellRevurdering(
                 id,
@@ -49,7 +52,8 @@ sealed class Revurdering(
                 persongalleri,
                 kommerBarnetTilgode,
                 virkningstidspunkt,
-                revurderingsaarsak
+                revurderingsaarsak,
+                kildesystem
             )
 
             Prosesstype.AUTOMATISK -> AutomatiskRevurdering(
@@ -61,7 +65,8 @@ sealed class Revurdering(
                 persongalleri,
                 kommerBarnetTilgode,
                 virkningstidspunkt,
-                revurderingsaarsak
+                revurderingsaarsak,
+                kildesystem
             )
         }
     }

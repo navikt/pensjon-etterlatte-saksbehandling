@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -59,7 +60,8 @@ fun opprettBehandling(
     revurderingAarsak: RevurderingAarsak? = null,
     opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
     fritekstAarsak: String? = null,
-    prosesstype: Prosesstype = Prosesstype.MANUELL
+    prosesstype: Prosesstype = Prosesstype.MANUELL,
+    kildesystem: Vedtaksloesning = Vedtaksloesning.DOFFEN
 ) = OpprettBehandling(
     type = type,
     sakId = sakId,
@@ -71,7 +73,8 @@ fun opprettBehandling(
     revurderingsAarsak = revurderingAarsak,
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak,
-    prosesstype = prosesstype
+    prosesstype = prosesstype,
+    kildesystem = kildesystem
 )
 
 fun foerstegangsbehandling(
@@ -84,7 +87,8 @@ fun foerstegangsbehandling(
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
-    kommerBarnetTilgode: KommerBarnetTilgode? = null
+    kommerBarnetTilgode: KommerBarnetTilgode? = null,
+    kildesystem: Vedtaksloesning = Vedtaksloesning.DOFFEN
 ) = Foerstegangsbehandling(
     id = id,
     sak = Sak(
@@ -99,7 +103,8 @@ fun foerstegangsbehandling(
     persongalleri = persongalleri,
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
-    kommerBarnetTilgode = kommerBarnetTilgode
+    kommerBarnetTilgode = kommerBarnetTilgode,
+    kildesystem = kildesystem
 )
 
 fun revurdering(
@@ -112,7 +117,8 @@ fun revurdering(
     revurderingAarsak: RevurderingAarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
     virkningstidspunkt: Virkningstidspunkt? = null,
-    prosesstype: Prosesstype = Prosesstype.MANUELL
+    prosesstype: Prosesstype = Prosesstype.MANUELL,
+    kildesystem: Vedtaksloesning = Vedtaksloesning.DOFFEN
 ) = Revurdering.opprett(
     id = id,
     sak = Sak(
@@ -127,7 +133,8 @@ fun revurdering(
     revurderingsaarsak = revurderingAarsak,
     kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
-    prosesstype = prosesstype
+    prosesstype = prosesstype,
+    kildesystem = kildesystem
 )
 
 fun manueltOpphoer(

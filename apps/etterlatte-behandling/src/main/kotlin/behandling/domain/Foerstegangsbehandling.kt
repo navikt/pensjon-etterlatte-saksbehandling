@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -25,7 +26,8 @@ data class Foerstegangsbehandling(
     override val virkningstidspunkt: Virkningstidspunkt?,
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?,
-    override val prosesstype: Prosesstype = Prosesstype.MANUELL
+    override val prosesstype: Prosesstype = Prosesstype.MANUELL,
+    override val kildesystem: Vedtaksloesning
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 

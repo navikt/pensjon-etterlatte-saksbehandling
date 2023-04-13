@@ -13,6 +13,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
@@ -61,6 +62,12 @@ class Server(private val beanFactory: BeanFactory) {
         val behandlingHendelser = behandlingHendelser()
         grunnlagsendringshendelseJob()
         behandlingHendelser.start()
+
+        // Sjekker om navansattklient funker som den skal
+        with(navAnsattKlient()) {
+            val list = runBlocking { hentSaksbehandlerEnhet("Z994292") }
+            println(list)
+        }
 
         setReady().also { engine.start(true) }
         behandlingHendelser.nyHendelse.close()

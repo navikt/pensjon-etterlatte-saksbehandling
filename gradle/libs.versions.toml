@@ -78,7 +78,7 @@ messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.
 
 mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.2.0" }
 
-navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2022122313141671797650.f806f770805a" }
+navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2023041310341681374880.67ced5ad4dda" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version = "1.4201aa" }
 navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon", version = "1.4201aa" }
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version = "2589.e85bf84" }

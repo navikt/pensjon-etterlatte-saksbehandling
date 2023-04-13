@@ -11,6 +11,7 @@ import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
+import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -82,7 +83,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
 
   const soeknadRoutes = finnRoutesFoerstegangbehandling(behandling)
   const manueltOpphoerRoutes: Array<behandlingRouteTypes> = ['opphoeroversikt', 'beregne']
-  const revurderingRoutes = hentRevurderingRoutes()
+  const revurderingRoutes = hentRevurderingRoutes(behandling)
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.MANUELT_OPPHOER:
@@ -103,6 +104,17 @@ function finnRoutesFoerstegangbehandling(behandling: IBehandlingReducer): Array<
   return routes
 }
 
-function hentRevurderingRoutes(): Array<behandlingRouteTypes> {
-  return ['revurderingsoversikt', 'vilkaarsvurdering', 'beregningsgrunnlag', 'beregne']
+function hentRevurderingRoutes(behandling: IBehandlingReducer): Array<behandlingRouteTypes> {
+  const defaultRoutes: Array<behandlingRouteTypes> = [
+    'revurderingsoversikt',
+    'vilkaarsvurdering',
+    'beregningsgrunnlag',
+    'beregne',
+  ]
+
+  if (behandlingSkalSendeBrev(behandling)) {
+    return [...defaultRoutes, 'brev']
+  }
+
+  return defaultRoutes
 }

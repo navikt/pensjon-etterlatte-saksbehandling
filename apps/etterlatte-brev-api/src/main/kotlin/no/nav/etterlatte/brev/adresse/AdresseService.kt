@@ -33,14 +33,14 @@ class AdresseService(
 
     suspend fun hentAvsenderOgAttestant(vedtak: ForenkletVedtak): Pair<Avsender, Attestant?> = coroutineScope {
         val avsender = vedtak.saksbehandler.let {
-            val saksbehandlerNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).navn }
+            val saksbehandlerNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).fornavnEtternavn }
             val saksbehandlerEnhet = async { hentEnhet(it.enhet) }
 
             mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await())
         }
 
         val attestant = vedtak.attestant?.let {
-            val attestantNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).navn }
+            val attestantNavn = async { navansattKlient.hentSaksbehandlerInfo(it.ident).fornavnEtternavn }
             val attestantEnhet = async { hentEnhet(it.enhet).navn ?: "NAV" }
 
             Attestant(attestantNavn.await(), attestantEnhet.await())

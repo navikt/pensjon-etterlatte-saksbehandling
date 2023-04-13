@@ -179,7 +179,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
         val resultat = sut.startFoerstegangsbehandling(
             1,
             persongalleri,
-            datoNaa.toString()
+            datoNaa.toString(),
+            Vedtaksloesning.DOFFEN
         )
 
         assertEquals(opprettetBehandling, resultat)

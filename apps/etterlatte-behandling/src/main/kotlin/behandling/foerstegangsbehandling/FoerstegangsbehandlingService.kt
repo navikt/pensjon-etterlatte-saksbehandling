@@ -39,7 +39,8 @@ interface FoerstegangsbehandlingService {
     fun startFoerstegangsbehandling(
         sakId: Long,
         persongalleri: Persongalleri,
-        mottattDato: String
+        mottattDato: String,
+        kildesystem: Vedtaksloesning
     ): Foerstegangsbehandling
 
     fun lagreGyldighetsproeving(
@@ -82,7 +83,8 @@ class RealFoerstegangsbehandlingService(
     override fun startFoerstegangsbehandling(
         sakId: Long,
         persongalleri: Persongalleri,
-        mottattDato: String
+        mottattDato: String,
+        kildesystem: Vedtaksloesning
     ): Foerstegangsbehandling {
         logger.info("Starter behandling i sak $sakId")
 

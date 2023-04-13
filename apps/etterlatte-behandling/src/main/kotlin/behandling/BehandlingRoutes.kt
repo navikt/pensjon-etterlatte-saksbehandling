@@ -24,6 +24,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -37,7 +38,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
@@ -178,7 +179,8 @@ internal fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.startFoerstegangsbehandling(
                     behandlingsBehov.sak,
                     behandlingsBehov.persongalleri,
-                    behandlingsBehov.mottattDato
+                    behandlingsBehov.mottattDato,
+                    Vedtaksloesning.DOFFEN
                 ).also { call.respondText(it.id.toString()) }
             }
         }

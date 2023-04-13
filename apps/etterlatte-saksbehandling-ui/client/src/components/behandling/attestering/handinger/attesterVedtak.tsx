@@ -4,15 +4,17 @@ import { attesterVedtak } from '~shared/api/behandling'
 import { BeslutningWrapper, ButtonWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { attesterVedtaksbrev } from '~shared/api/brev'
-import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
+import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 
 export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
   const [modalisOpen, setModalisOpen] = useState(false)
+  const skalSendeBrev = behandlingSkalSendeBrev(behandling)
 
   const ferdigstillVedtaksbrev = async () => {
-    if (behandling.behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
+    if (!skalSendeBrev) {
       return true
     }
 
@@ -38,7 +40,7 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
     <BeslutningWrapper>
       <ButtonWrapper>
         <Button variant="primary" size="medium" className="button" onClick={() => setModalisOpen(true)}>
-          Iverksett vedtak og send brev
+          {`Iverksett vedtak ${skalSendeBrev ? 'og send brev' : ''}`}
         </Button>
       </ButtonWrapper>
       <GeneriskModal

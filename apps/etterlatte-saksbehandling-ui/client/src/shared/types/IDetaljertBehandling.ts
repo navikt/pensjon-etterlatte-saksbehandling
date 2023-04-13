@@ -4,6 +4,7 @@ import { KildeSaksbehandler } from '~shared/types/kilde'
 import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 export interface IDetaljertBehandling {
   id: string
@@ -23,6 +24,7 @@ export interface IDetaljertBehandling {
   behandlingType: IBehandlingsType
   søker?: IPdlPerson
   prosesstype: IProsesstype
+  revurderingsaarsak: Revurderingsaarsak | null
 }
 
 export enum IBehandlingsType {

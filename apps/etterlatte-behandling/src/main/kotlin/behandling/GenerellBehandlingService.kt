@@ -222,7 +222,8 @@ class RealGenerellBehandlingService(
                 hendelser = hendelserIBehandling,
                 familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
                 behandlingType = detaljertBehandling.behandlingType,
-                søker = soeker.await()?.opplysning
+                søker = soeker.await()?.opplysning,
+                revurderingsaarsak = detaljertBehandling.revurderingsaarsak
             ).also {
                 gjenlevende.await()?.fnr?.let { loggRequest(bruker, it) }
                 soeker.await()?.fnr?.let { loggRequest(bruker, it) }

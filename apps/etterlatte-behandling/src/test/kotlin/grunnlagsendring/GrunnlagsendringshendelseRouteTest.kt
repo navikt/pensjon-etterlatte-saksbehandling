@@ -120,6 +120,20 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
             }.also {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
+
+            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                addAuthToken(systemBruker)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    Adressebeskyttelse(
+                        fnr = fnr,
+                        adressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
+                        endringstype = Endringstype.OPPRETTET
+                    )
+                )
+            }.also {
+                Assertions.assertEquals(HttpStatusCode.OK, it.status)
+            }
         }
     }
 }

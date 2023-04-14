@@ -188,6 +188,7 @@ internal class OppgaveDaoTest {
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
             persongalleri = Persongalleri("soeker", "innsender", listOf("soesken"), listOf("avdoed")),
+            kilde = Vedtaksloesning.DOFFEN,
             merknad = "1 søsken"
         )
 

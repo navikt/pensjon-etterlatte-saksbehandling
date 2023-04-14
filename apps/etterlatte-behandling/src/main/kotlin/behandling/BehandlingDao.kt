@@ -247,7 +247,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                     INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                     soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt,
                     kommer_barnet_tilgode, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, merknad)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(behandling) {

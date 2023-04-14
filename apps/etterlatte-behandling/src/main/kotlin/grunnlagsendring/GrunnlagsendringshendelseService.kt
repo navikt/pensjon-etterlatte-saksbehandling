@@ -125,7 +125,9 @@ class GrunnlagsendringshendelseService(
             AdressebeskyttelseGradering.FORTROLIG -> {
                 sakService.finnEnhetForPersonOgTema(fnr, sakType.tema).enhetNr
             }
-            AdressebeskyttelseGradering.UGRADERT -> Enheter.DEFAULT_PORSGRUNN.enhetNr
+            AdressebeskyttelseGradering.UGRADERT -> {
+                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema).enhetNr
+            }
         }
     }
 

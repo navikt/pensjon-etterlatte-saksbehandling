@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -19,20 +20,22 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 interface RevurderingService {
     fun opprettManuellRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,
-        revurderingAarsak: RevurderingAarsak
+        revurderingAarsak: RevurderingAarsak,
+        kilde: Vedtaksloesning
     ): Revurdering
 
     fun opprettAutomatiskRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        fraDato: LocalDate
+        fraDato: LocalDate,
+        kilde: Vedtaksloesning
     ): Revurdering
 }
 
@@ -57,7 +60,8 @@ class RealRevurderingService(
     override fun opprettManuellRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,
-        revurderingAarsak: RevurderingAarsak
+        revurderingAarsak: RevurderingAarsak,
+        kilde: Vedtaksloesning
     ): Revurdering {
         if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
             return inTransaction {
@@ -66,7 +70,8 @@ class RealRevurderingService(
                     forrigeBehandling,
                     revurderingAarsak,
                     null,
-                    Prosesstype.MANUELL
+                    Prosesstype.MANUELL,
+                    kilde
                 )
             }
         }
@@ -78,7 +83,8 @@ class RealRevurderingService(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        fraDato: LocalDate
+        fraDato: LocalDate,
+        kilde: Vedtaksloesning
     ): Revurdering {
         return inTransaction {
             opprettRevurdering(
@@ -86,7 +92,8 @@ class RealRevurderingService(
                 forrigeBehandling,
                 revurderingAarsak,
                 fraDato,
-                Prosesstype.AUTOMATISK
+                Prosesstype.AUTOMATISK,
+                kilde
             )
         }
     }
@@ -96,7 +103,8 @@ class RealRevurderingService(
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
         fraDato: LocalDate?,
-        prosessType: Prosesstype
+        prosessType: Prosesstype,
+        kilde: Vedtaksloesning
     ) = OpprettBehandling(
         type = BehandlingType.REVURDERING,
         sakId = sakId,
@@ -105,7 +113,8 @@ class RealRevurderingService(
         revurderingsAarsak = revurderingAarsak,
         kommerBarnetTilgode = forrigeBehandling.kommerBarnetTilgode,
         virkningstidspunkt = fraDato?.tilVirkningstidspunkt("Opprettet automatisk"),
-        prosesstype = prosessType
+        prosesstype = prosessType,
+        kilde = kilde
     ).let { opprettBehandling ->
         behandlingDao.opprettBehandling(opprettBehandling)
         hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())

@@ -12,6 +12,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.sakId
 
@@ -36,7 +37,8 @@ internal fun Route.revurderingRoutes(
                 val revurdering = revurderingService.opprettManuellRevurdering(
                     sakId = forrigeIverksatteBehandling.sak.id,
                     forrigeBehandling = forrigeIverksatteBehandling,
-                    revurderingAarsak = body.aarsak
+                    revurderingAarsak = body.aarsak,
+                    kilde = Vedtaksloesning.DOFFEN
                 )
                 call.respond(revurdering.toDetaljertBehandling())
             } ?: call.respond(HttpStatusCode.BadRequest, "Kan ikke revurdere en sak uten iverksatt behandling")

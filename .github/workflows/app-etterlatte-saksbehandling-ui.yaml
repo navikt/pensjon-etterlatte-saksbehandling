@@ -1,9 +1,7 @@
 name: etterlatte-saksbehandling-ui
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
   APP_NAME: ${{ github.workflow }}
-  branch-image: ghcr.io/${{ github.repository }}/${{ github.workflow }}
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
@@ -53,6 +51,11 @@ jobs:
     if: github.event_name != 'pull_request'
     name: Build, test and publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -72,13 +75,16 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
       - name: Build and publish Docker image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker build --tag ${{ env.IMAGE }} --tag ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }} apps/${{ env.APP_NAME }}
-          docker push ${{ env.IMAGE }}
-          docker push ${{ env.branch-image }}:${{ env.GITHUB_REF_SLUG }}
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: etterlatte
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          dockerfile: docker/Dockerfile
+          docker_context: apps/${{ github.workflow }}/
+          image_suffix: ${{ github.workflow }}
+          tag: ${{ env.GITHUB_REF_SLUG }}
 
   deploy-to-dev-gcp:
     if: github.event_name != 'pull_request'

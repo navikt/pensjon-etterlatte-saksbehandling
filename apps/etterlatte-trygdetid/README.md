@@ -26,9 +26,9 @@ DB_JDBC_URL=jdbc:postgresql://localhost:5432/trygdetid?user=FORNAVN.ETTERNAVN@na
 DB_PASSWORD=postgres;
 DB_USERNAME=postgres;
 ETTERLATTE_BEHANDLING_CLIENT_ID=59967ac8-009c-492e-a618-e5a0f6b3e4e4;
-ETTERLATTE_BEHANDLING_URL=https://etterlatte-behandling.dev.intern.nav.no;
+ETTERLATTE_BEHANDLING_URL=https://etterlatte-behandling.intern.dev.nav.no;
 ETTERLATTE_GRUNNLAG_CLIENT_ID=ce96a301-13db-4409-b277-5b27f464d08b;
-ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.dev.intern.nav.no/api;
+ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.intern.dev.nav.no/api;
 HTTP_PORT=8088
 ```
 Legg også til `.env.dev-gcp` som `Env-file` under `Run configurations` i Intellij.

@@ -15,7 +15,7 @@ spec:
     min: 2
     cpuThresholdPercentage: 90
   ingresses:
-    - https://etterlatte-saksbehandling.dev.intern.nav.no
+    - https://etterlatte-saksbehandling.intern.dev.nav.no
   azure:
     application:
       enabled: true

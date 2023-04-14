@@ -9,7 +9,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - https://etterlatte-testdata.dev.intern.nav.no
+    - https://etterlatte-testdata.intern.dev.nav.no
   liveness:
     initialDelay: 20
     path: /isalive

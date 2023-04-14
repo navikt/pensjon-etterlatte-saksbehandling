@@ -46,12 +46,12 @@ Copy-paste dette inn i "environment variables".
 ```
 BRREG_URL=https://data.brreg.no
 ETTERLATTE_GRUNNLAG_CLIENT_ID=ce96a301-13db-4409-b277-5b27f464d08b;
-ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.dev.intern.nav.no;
+ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.intern.dev.nav.no;
 ETTERLATTE_PDFGEN_URL=http://host.docker.internal:8081/api/v1/genpdf/brev;
 ETTERLATTE_PROXY_OUTBOUND_SCOPE="";
 ETTERLATTE_PROXY_URL=host.docker.internal:9091;
 ETTERLATTE_VEDTAK_CLIENT_ID=069b1b2c-0a06-4cc9-8418-f100b8ff71be;
-ETTERLATTE_VEDTAK_URL=https://etterlatte-vedtaksvurdering.dev.intern.nav.no
+ETTERLATTE_VEDTAK_URL=https://etterlatte-vedtaksvurdering.intern.dev.nav.no
 HTTP_PORT=8084;
 KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:9092;
 KAFKA_CONSUMER_GROUP_ID=0;

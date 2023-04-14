@@ -26,32 +26,32 @@ function hentApiConfigFraEnv() {
 const LOKAL_API_CONFIG = () => {
   return {
     vilkaarsvurdering: {
-      url: process.env.VILKAARSVURDERING_API_URL || 'https://etterlatte-vilkaarsvurdering.dev.intern.nav.no',
+      url: process.env.VILKAARSVURDERING_API_URL || 'https://etterlatte-vilkaarsvurdering.intern.dev.nav.no',
       scope:
         process.env.VILKAARSVURDERING_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default',
     },
     behandling: {
-      url: process.env.BEHANDLING_API_URL || 'https://etterlatte-behandling.dev.intern.nav.no',
+      url: process.env.BEHANDLING_API_URL || 'https://etterlatte-behandling.intern.dev.nav.no',
       scope: process.env.BEHANDLING_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-behandling/.default',
     },
     grunnlag: {
-      url: process.env.GRUNNLAG_API_URL || 'https://etterlatte-grunnlag.dev.intern.nav.no',
+      url: process.env.GRUNNLAG_API_URL || 'https://etterlatte-grunnlag.intern.dev.nav.no',
       scope: process.env.GRUNNLAG_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-grunnlag/.default',
     },
     brev: {
-      url: process.env.BREV_API_URL || 'https://etterlatte-brev-api.dev.intern.nav.no',
+      url: process.env.BREV_API_URL || 'https://etterlatte-brev-api.intern.dev.nav.no',
       scope: process.env.BREV_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-brev-api/.default',
     },
     beregning: {
-      url: process.env.BEREGNING_API_URL || 'https://etterlatte-beregning.dev.intern.nav.no',
+      url: process.env.BEREGNING_API_URL || 'https://etterlatte-beregning.intern.dev.nav.no',
       scope: process.env.BEREGNING_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-beregning/.default',
     },
     vedtak: {
-      url: process.env.VEDTAK_API_URL || 'https://etterlatte-vedtaksvurdering.dev.intern.nav.no',
+      url: process.env.VEDTAK_API_URL || 'https://etterlatte-vedtaksvurdering.intern.dev.nav.no',
       scope: process.env.VEDTAK_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default',
     },
     trygdetid: {
-      url: process.env.TRYGDETID_API_URL || 'https://etterlatte-trygdetid.dev.intern.nav.no',
+      url: process.env.TRYGDETID_API_URL || 'https://etterlatte-trygdetid.intern.dev.nav.no',
       scope: process.env.TRYGDETID_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-trygdetid/.default',
     },
   }

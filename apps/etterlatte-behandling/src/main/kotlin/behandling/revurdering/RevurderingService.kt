@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
@@ -27,7 +29,8 @@ interface RevurderingService {
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        kilde: Vedtaksloesning
+        bruker: Bruker,
+        kilde: Vedtaksloesning,
     ): Revurdering
 
     fun opprettAutomatiskRevurdering(
@@ -49,7 +52,8 @@ class RealRevurderingService(
     private val behandlingHendelser: BehandlingHendelserKanal,
     private val featureToggleService: FeatureToggleService,
     private val behandlingDao: BehandlingDao,
-    private val hendelseDao: HendelseDao
+    private val hendelseDao: HendelseDao,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RealRevurderingService::class.java)
 
@@ -61,11 +65,12 @@ class RealRevurderingService(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
+        bruker: Bruker,
         kilde: Vedtaksloesning
     ): Revurdering {
         if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
             return inTransaction {
-                opprettRevurdering(
+                val revurdering = opprettRevurdering(
                     sakId,
                     forrigeBehandling,
                     revurderingAarsak,
@@ -73,6 +78,16 @@ class RealRevurderingService(
                     Prosesstype.MANUELL,
                     kilde
                 )
+
+                runBlocking {
+                    vilkaarsvurderingKlient.kopierVilkaarsvurderingFraForrigeBehandling(
+                        revurdering.id,
+                        forrigeBehandling.id,
+                        bruker
+                    )
+                }
+
+                revurdering
             }
         }
 

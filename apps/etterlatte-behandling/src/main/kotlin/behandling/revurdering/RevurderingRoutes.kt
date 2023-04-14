@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.libs.ktor.bruker
 
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService,
@@ -38,7 +39,8 @@ internal fun Route.revurderingRoutes(
                     sakId = forrigeIverksatteBehandling.sak.id,
                     forrigeBehandling = forrigeIverksatteBehandling,
                     revurderingAarsak = body.aarsak,
-                    kilde = Vedtaksloesning.DOFFEN
+                    kilde = Vedtaksloesning.DOFFEN,
+                    bruker = bruker
                 )
                 call.respond(revurdering.toDetaljertBehandling())
             } ?: call.respond(HttpStatusCode.BadRequest, "Kan ikke revurdere en sak uten iverksatt behandling")

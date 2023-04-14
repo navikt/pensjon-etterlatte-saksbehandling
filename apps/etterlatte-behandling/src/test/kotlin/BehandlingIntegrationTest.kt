@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.config.CommonFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
@@ -152,6 +153,14 @@ class VedtakKlientTest : VedtakKlient {
     }
 }
 
+class VilkaarsvurderingKlientTest : VilkaarsvurderingKlient {
+    override suspend fun kopierVilkaarsvurderingFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        bruker: Bruker
+    ) {}
+}
+
 class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
         sakId: Long,
@@ -235,6 +244,10 @@ class TestBeanFactory(
 
     override fun vedtakKlient(): VedtakKlient {
         return VedtakKlientTest()
+    }
+
+    override fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient {
+        return VilkaarsvurderingKlientTest()
     }
 
     override fun grunnlagKlient(): GrunnlagKlient {

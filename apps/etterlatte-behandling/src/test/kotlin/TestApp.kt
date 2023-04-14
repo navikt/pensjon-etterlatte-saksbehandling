@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.config.CommonFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
@@ -114,6 +115,10 @@ class LocalAppBeanFactory(
 
     override fun vedtakKlient(): VedtakKlient {
         return VedtakKlientTest()
+    }
+
+    override fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient {
+        TODO("Not yet implemented")
     }
 
     override fun grunnlagKlient(): GrunnlagKlient {

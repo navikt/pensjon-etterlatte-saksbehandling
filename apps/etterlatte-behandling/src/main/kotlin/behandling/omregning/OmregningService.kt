@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.token.Bruker
 import java.time.LocalDate
 import java.util.*
 
@@ -15,7 +16,8 @@ class OmregningService(
     fun opprettOmregning(
         sakId: Long,
         fraDato: LocalDate,
-        prosessType: Prosesstype
+        prosessType: Prosesstype,
+        bruker: Bruker
     ): Pair<UUID, UUID> {
         val forrigeBehandling = behandlingService.hentSenestIverksatteBehandling(sakId)
             ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
@@ -33,7 +35,8 @@ class OmregningService(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
                 revurderingAarsak = RevurderingAarsak.REGULERING,
-                kilde = Vedtaksloesning.DOFFEN
+                kilde = Vedtaksloesning.DOFFEN,
+                bruker = bruker
             )
         }.id
 

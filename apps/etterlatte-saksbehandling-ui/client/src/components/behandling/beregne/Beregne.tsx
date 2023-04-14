@@ -1,6 +1,6 @@
 import { Content, ContentHeader } from '~shared/styled'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
-import { hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingSkalSendeBrev, hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch } from '~store/Store'
@@ -44,7 +44,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const opprettEllerOppdaterVedtak = () => {
     oppdaterVedtakRequest(behandling.id, () => {
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
-      if (behandling.behandlingType === IBehandlingsType.MANUELT_OPPHOER) {
+      if (!behandlingSkalSendeBrev(behandling)) {
         setVisAttesteringsmodal(true)
       } else {
         next()

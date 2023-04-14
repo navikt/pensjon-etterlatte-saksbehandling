@@ -22,6 +22,8 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
@@ -91,6 +93,7 @@ interface BeanFactory {
     fun grunnlagKlient(): GrunnlagKlient
     fun grunnlagKlientClientCredentials(): no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
     fun vedtakKlient(): VedtakKlient
+    fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient
     fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
     fun getSaksbehandlerGroupIdsByKey(): Map<String, String>
@@ -147,7 +150,8 @@ abstract class CommonFactory : BeanFactory {
         behandlingHendelser().nyHendelse,
         featureToggleService,
         behandlingDao(),
-        hendelseDao()
+        hendelseDao(),
+        vilkaarsvurderingKlient()
     )
 
     override fun manueltOpphoerService(): ManueltOpphoerService =
@@ -267,6 +271,10 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
         return VedtakKlientImpl(config, httpClient())
     }
 
+    override fun vilkaarsvurderingKlient(): VilkaarsvurderingKlient {
+        return VilkaarsvurderingKlientImpl(config, httpClient())
+    }
+
     override fun grunnlagKlient(): GrunnlagKlient {
         return GrunnlagKlientImpl(config, httpClient())
     }
@@ -274,7 +282,7 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
     override fun grunnlagsendringshendelseJob(): Timer {
         logger.info(
             "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
-                Duration.of(1, ChronoUnit.MINUTES).toMillis()
+            Duration.of(1, ChronoUnit.MINUTES).toMillis()
             }" +
                 ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "

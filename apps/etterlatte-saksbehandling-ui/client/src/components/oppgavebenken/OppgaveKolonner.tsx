@@ -63,11 +63,11 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     },
   },
   {
-    Header: 'Søsken',
-    accessor: 'antallSoesken',
+    Header: 'Merknad',
+    accessor: 'merknad',
     disableSortBy: true,
-    Cell: ({ value: antallSoesken }) => {
-      return <span>{Number.isInteger(antallSoesken) ? `${antallSoesken} søsken` : '-'}</span>
+    Cell: ({ value: merknad }) => {
+      return <span>{merknad || ''}</span>
     },
   },
   {

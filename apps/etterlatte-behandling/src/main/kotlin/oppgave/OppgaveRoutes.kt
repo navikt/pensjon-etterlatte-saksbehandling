@@ -50,7 +50,7 @@ data class OppgaveDTO(
     val beskrivelse: String,
     val saksbehandler: String,
     val handling: Handling,
-    val antallSoesken: Int?
+    val merknad: String? = null
 ) {
     companion object {
         fun fraOppgave(oppgave: Oppgave): OppgaveDTO {
@@ -67,8 +67,7 @@ data class OppgaveDTO(
                     fnr = oppgave.fnr.value,
                     beskrivelse = oppgave.beskrivelse,
                     saksbehandler = "",
-                    handling = oppgave.handling,
-                    antallSoesken = null
+                    handling = oppgave.handling
                 )
                 is Oppgave.BehandlingOppgave -> OppgaveDTO(
                     behandlingId = oppgave.behandlingId,
@@ -83,7 +82,7 @@ data class OppgaveDTO(
                     beskrivelse = "",
                     saksbehandler = "",
                     handling = oppgave.handling,
-                    antallSoesken = oppgave.antallSoesken
+                    merknad = oppgave.merknad
                 )
             }
         }

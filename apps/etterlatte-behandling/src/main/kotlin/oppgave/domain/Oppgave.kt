@@ -33,7 +33,6 @@ sealed class Oppgave {
         val behandlingId: UUID,
         val behandlingsType: BehandlingType,
         val behandlingStatus: BehandlingStatus,
-        val antallSoesken: Int,
         val enhet: String?,
         val merknad: String?
     ) : Oppgave() {

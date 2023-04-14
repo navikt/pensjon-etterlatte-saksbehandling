@@ -10,7 +10,7 @@ export interface IOppgave {
   oppgaveStatus: StatusFilter
   saksbehandler: string
   handling: Handlinger
-  antallSoesken: number | null
+  merknad: string
 }
 
 export enum Handlinger {

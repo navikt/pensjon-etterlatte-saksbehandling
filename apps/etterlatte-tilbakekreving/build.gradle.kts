@@ -1,4 +1,3 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("etterlatte.rapids-and-rivers-ktor2")
     alias(libs.plugins.analyze)

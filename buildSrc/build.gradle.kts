@@ -1,7 +1,6 @@
 import ca.cutterslade.gradle.analyze.AnalyzeDependenciesTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     `kotlin-dsl`
     alias(libs.plugins.cutterslade.analyze) apply true

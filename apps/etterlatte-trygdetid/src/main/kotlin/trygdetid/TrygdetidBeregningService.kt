@@ -6,6 +6,10 @@ import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
+import no.nav.etterlatte.trygdetid.regler.TotalTrygdetidGrunnlag
+import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
+import no.nav.etterlatte.trygdetid.regler.beregnAntallAarTrygdetid
+import no.nav.etterlatte.trygdetid.regler.beregnTrygdetidMellomToDatoer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 

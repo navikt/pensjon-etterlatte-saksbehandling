@@ -1,4 +1,4 @@
-package no.nav.etterlatte.trygdetid
+package no.nav.etterlatte.trygdetid.regler
 
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel

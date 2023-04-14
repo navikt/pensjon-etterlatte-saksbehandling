@@ -12,7 +12,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.behandling.omregning.MigreringResponse
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.module
@@ -25,6 +25,7 @@ import rapidsandrivers.migrering.Enhet
 import rapidsandrivers.migrering.MigreringRequest
 import rapidsandrivers.migrering.PesysId
 import java.time.LocalDateTime
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MigreringRoutesTest : BehandlingIntegrationTest() {
@@ -56,7 +57,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 persongalleri = Persongalleri(fnr.value, "innsender", emptyList(), emptyList(), emptyList())
             )
 
-            val response: MigreringResponse = client.post("/migrering") {
+            val response: UUID = client.post("/migrering") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
                 setBody(request)
@@ -64,7 +65,13 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.Created, status)
             }.body()
 
-            client.get("/saker/${response.sakId}") {
+            val sakId = client.get("/behandlinger/$response") {
+                addAuthToken(tokenSaksbehandler)
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.OK, status)
+            }.body<DetaljertBehandling>().sak
+
+            client.get("/saker/$sakId") {
                 addAuthToken(tokenSaksbehandler)
             }.apply {
                 Assertions.assertEquals(HttpStatusCode.OK, status)

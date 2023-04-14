@@ -36,7 +36,7 @@ class TrygdetidService(
         trygdetidGrunnlag: TrygdetidGrunnlag
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
-            // TODO hvis status er "forbi" trygdetid bør dette sette tilstand tilbake til trygdetid?
+            // TODO transaksjonshåndtering bør skje her i service
             val beregnetTrygdetidGrunnlag = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
             val trygdetidGrunnlagMedBeregning = trygdetidGrunnlag.copy(beregnetTrygdetid = beregnetTrygdetidGrunnlag)
             val eksisterendeTrygdetid = trygdetidRepository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
@@ -46,13 +46,12 @@ class TrygdetidService(
                 trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning)
             }
 
-            val trygdetidMedBeregning = trygdetidRepository.oppdaterBeregnetTrygdetid(
+            trygdetidRepository.oppdaterBeregnetTrygdetid(
                 behandlingId = behandlingId,
                 beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetid(trygdetid.trygdetidGrunnlag)
-            )
-
-            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
-            trygdetidMedBeregning
+            ).also {
+                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
+            }
         }
 
     suspend fun lagreBeregnetTrygdetid(
@@ -61,10 +60,10 @@ class TrygdetidService(
         beregnetTrygdetid: BeregnetTrygdetid
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
-            // TODO hvis status er "forbi" trygdetid bør dette sette tilstand tilbake til trygdetid?
-            val trygdetid = trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
-            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
-            trygdetid
+            // TODO transaksjonshåndtering bør skje her i service
+            trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid).also {
+                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
+            }
         }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {

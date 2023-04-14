@@ -100,7 +100,7 @@ fun Application.module(beanFactory: BeanFactory) {
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())
             oppgaveRoutes(service = beanFactory.oppgaveService())
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
-            egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService))
+            egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))
             tilgangRoutes(tilgangService)
             install(adressebeskyttelsePlugin) {
                 harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->

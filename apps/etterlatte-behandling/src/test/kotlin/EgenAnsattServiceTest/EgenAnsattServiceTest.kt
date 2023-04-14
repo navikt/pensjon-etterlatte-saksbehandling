@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.sql.Connection
@@ -31,6 +33,7 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EgenAnsattServiceTest {
+    val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
@@ -59,7 +62,7 @@ class EgenAnsattServiceTest {
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
         sakService = spyk(RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService))
-        egenAnsattService = EgenAnsattService(sakService)
+        egenAnsattService = EgenAnsattService(sakService, sikkerLogg)
 
         every { pdlKlient.hentGeografiskTilknytning(any()) } returns GeografiskTilknytning(kommune = "0301")
         every {

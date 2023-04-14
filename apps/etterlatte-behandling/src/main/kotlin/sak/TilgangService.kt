@@ -18,7 +18,7 @@ data class SakMedGraderingOgSkjermet(
     val erSkjermet: Boolean?
 )
 
-class tilgangServiceImpl(
+class TilgangServiceImpl(
     private val dao: SakTilgangDao,
     private val saksbehandlereGroupIdsByKey: Map<String, String>
 ) : TilgangService {
@@ -54,7 +54,10 @@ class tilgangServiceImpl(
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 
-    fun harTilgangSjekker(sak: SakMedGraderingOgSkjermet, saksbehandlerMedRoller: SaksbehandlerMedRoller): Boolean {
+    private fun harTilgangSjekker(
+        sak: SakMedGraderingOgSkjermet,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller
+    ): Boolean {
         return kanBehandleEgenAnsatt(sak, saksbehandlerMedRoller) &&
             kanBehandleAdressebeskyttelse(sak, saksbehandlerMedRoller)
     }

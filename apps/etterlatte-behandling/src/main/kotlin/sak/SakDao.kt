@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -31,6 +32,24 @@ class SakDao(private val connection: () -> Connection) {
         return requireNotNull(
             statement.executeQuery().singleOrNull { this.toSak() }
         )
+    }
+
+    fun oppdaterEnhet(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+        with(connection()) {
+            val statement = prepareStatement(
+                """
+                UPDATE sak 
+                set enhet = ? 
+                where id = ?
+                """.trimIndent()
+            )
+            saker.forEach {
+                statement.setString(1, it.enhet)
+                statement.setLong(2, it.id)
+                statement.addBatch()
+            }
+            statement.executeBatch()
+        }
     }
 
     // TODO: høre med Lars Erik om det kan returneres en liste av saker her, mtp at hver person kun kan ha

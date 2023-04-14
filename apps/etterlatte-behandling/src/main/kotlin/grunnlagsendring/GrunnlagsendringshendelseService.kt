@@ -26,8 +26,10 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -38,7 +40,8 @@ class GrunnlagsendringshendelseService(
     private val generellBehandlingService: GenerellBehandlingService,
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
+    private val sakService: SakService
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -89,6 +92,9 @@ class GrunnlagsendringshendelseService(
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
+
+        oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr)
+
         sakIder.forEach { sakId ->
             tilgangService.oppdaterAdressebeskyttelse(
                 sakId,
@@ -101,6 +107,25 @@ class GrunnlagsendringshendelseService(
             logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
         }
     }
+
+    private fun oppdaterEnheterForsaker(fnr: String) {
+        val saker = sakService.finnSaker(fnr)
+        val sakerMedNyEnhet = saker.map {
+            val finnEnhetForPersonOgTema =
+                sakService.finnEnhetForPersonOgTema(fnr = fnr, tema = it.sakType.tema)
+                    ?: throw FantIkkeEnhetException(
+                        "Fant ikke enhet for ${fnr.maskerFnr()} " +
+                            "med tema ${it.sakType.tema} sakid: ${it.id}"
+                    )
+            SakMedEnhet(it.id, finnEnhetForPersonOgTema.enhetNr)
+        }
+
+        sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
+    }
+
+    data class SakMedEnhet(val id: Long, val enhet: String)
+
+    class FantIkkeEnhetException(message: String) : Exception(message)
 
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
@@ -9,12 +10,12 @@ import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.LoggerFactory
-import no.nav.etterlatte.Saksbehandler
 
 enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
     OpprettMedEnhetId("pensjon-etterlatte.opprett-sak-med-enhet-id"),
@@ -26,11 +27,13 @@ enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
 interface SakService {
     fun hentSaker(): List<Sak>
     fun finnSaker(person: String): List<Sak>
-    fun finnEllerOpprettSak(person: String, type: SakType): Sak
+    fun finnEllerOpprettSak(fnr: String, type: SakType): Sak
     fun finnSak(person: String, type: SakType): Sak?
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
     fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean)
+    fun finnEnhetForPersonOgTema(fnr: String, tema: String): ArbeidsFordelingEnhet?
+    fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>)
 }
 
 class RealSakService(
@@ -67,12 +70,18 @@ class RealSakService(
         }
     }
 
-    override fun finnEllerOpprettSak(person: String, type: SakType) =
-        finnSakerForPersonOgType(person, type) ?: dao.opprettSak(
-            person,
+    override fun finnEllerOpprettSak(fnr: String, type: SakType) =
+        finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
+            fnr,
             type,
-            finnEnhetForPersonOgTema(person, type.tema)?.enhetNr
+            finnEnhetForPersonOgTema(fnr, type.tema)?.enhetNr
         )
+
+    override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+        inTransaction {
+            dao.oppdaterEnhet(saker)
+        }
+    }
 
     override fun finnSak(person: String, type: SakType): Sak? {
         return finnSakerForPersonOgType(person, type).sjekkEnhet()
@@ -82,18 +91,15 @@ class RealSakService(
         return dao.hentSak(id).sjekkEnhet()
     }
 
-    private fun finnEnhetForTemaOgOmraade(tema: String, omraade: String) =
-        norg2Klient.hentEnheterForOmraade(tema, omraade).firstOrNull() ?: throw IngenEnhetFunnetException(omraade, tema)
-
-    private fun finnEnhetForPersonOgTema(person: String, tema: String): ArbeidsFordelingEnhet? {
+    override fun finnEnhetForPersonOgTema(fnr: String, tema: String): ArbeidsFordelingEnhet? {
         if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
-            val tilknytning = pdlKlient.hentGeografiskTilknytning(person)
+            val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr)
             val geografiskTilknytning = tilknytning.geografiskTilknytning()
 
             return when {
                 tilknytning.ukjent -> ArbeidsFordelingEnhet(Enheter.DEFAULT.navn, Enheter.DEFAULT.enhetNr)
                 geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
-                    Folkeregisteridentifikator.of(person),
+                    Folkeregisteridentifikator.of(fnr),
                     tema
                 ).also {
                     logger.warn(it.message)
@@ -105,6 +111,9 @@ class RealSakService(
             return null
         }
     }
+
+    private fun finnEnhetForTemaOgOmraade(tema: String, omraade: String) =
+        norg2Klient.hentEnheterForOmraade(tema, omraade).firstOrNull() ?: throw IngenEnhetFunnetException(omraade, tema)
 
     private fun Saksbehandler.enheterIds() = this.enheter().map { it.id }
 

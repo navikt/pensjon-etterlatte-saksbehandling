@@ -64,7 +64,7 @@ abstract class BehandlingIntegrationTest {
     protected lateinit var beanFactory: TestBeanFactory
     protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
-    protected fun startServer() {
+    protected fun startServer(norg2Klient: Norg2Klient? = null) {
         server.start()
 
         val httpServer = server.config.httpServer
@@ -78,7 +78,8 @@ abstract class BehandlingIntegrationTest {
             username = postgreSQLContainer.username,
             password = postgreSQLContainer.password,
             azureAdAttestantClaim = azureAdAttestantClaim,
-            azureAdSaksbehandlerClaim = azureAdSaksbehandlerClaim
+            azureAdSaksbehandlerClaim = azureAdSaksbehandlerClaim,
+            norg2Klient = norg2Klient
         ).apply { dataSource().migrate() }
 
         beanFactory.behandlingHendelser().start()
@@ -183,7 +184,8 @@ class TestBeanFactory(
     private val username: String,
     private val password: String,
     private val azureAdSaksbehandlerClaim: String,
-    private val azureAdAttestantClaim: String
+    private val azureAdAttestantClaim: String,
+    private val norg2Klient: Norg2Klient?
 ) : CommonFactory() {
     override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> =
         mapOf(
@@ -319,7 +321,7 @@ class TestBeanFactory(
     }
 
     override fun norg2HttpClient(): Norg2Klient {
-        return Norg2KlientTest()
+        return norg2Klient ?: Norg2KlientTest()
     }
 
     override fun navAnsattKlient(): NavAnsattKlient {

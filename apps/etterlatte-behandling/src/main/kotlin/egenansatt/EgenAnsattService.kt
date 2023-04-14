@@ -14,7 +14,8 @@ class EgenAnsattService(private val sakService: SakService, val sikkerLogg: Logg
         if (saker.isEmpty()) {
             logger.error(
                 "Fant ingen saker for skjermethendelse fnr: ${skjermetHendelse.fnr.maskerFnr()} " +
-                    "se sikkerlogg og/eller skjekk korrelasjonsid"
+                    "se sikkerlogg og/eller skjekk korrelasjonsid. Selvom dette var forventet," +
+                    " ellers hadde ikke vi fått denne hendelsen"
             )
             sikkerLogg.info("Fant ingen ingen saker for fnr: ${skjermetHendelse.fnr}")
         }

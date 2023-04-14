@@ -60,7 +60,8 @@ class Server(private val beanFactory: BeanFactory) {
         dataSource().migrate()
 
         val behandlingHendelser = behandlingHendelser()
-        grunnlagsendringshendelseJob()
+        val grunnlagsendringshendelseJob = grunnlagsendringshendelseJob()
+        Runtime.getRuntime().addShutdownHook(Thread { grunnlagsendringshendelseJob.cancel() })
         behandlingHendelser.start()
 
         setReady().also { engine.start(true) }

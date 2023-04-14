@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import org.slf4j.LoggerFactory
 import java.sql.Connection
+import java.sql.ResultSet
 import java.util.*
 
 enum class Rolle {
@@ -32,7 +33,7 @@ class OppgaveDao(private val connection: () -> Connection) {
             val stmt = prepareStatement(
                 """
                 |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, enhet, status, behandling_opprettet,
-                |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
+                |behandlingstype, soesken, b.prosesstype, adressebeskyttelse, merknad
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE ((adressebeskyttelse = ?) OR (adressebeskyttelse = ?)) 
                 |AND status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
@@ -42,24 +43,7 @@ class OppgaveDao(private val connection: () -> Connection) {
             stmt.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
             stmt.setArray(3, createArrayOf("text", statuser.toTypedArray()))
             stmt.setString(4, Prosesstype.AUTOMATISK.toString())
-            return stmt.executeQuery().toList {
-                val mottattDato = getTidspunktOrNull("soeknad_mottatt_dato")
-                    ?: getTidspunktOrNull("behandling_opprettet")
-                    ?: throw IllegalStateException(
-                        "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
-                    )
-                Oppgave.BehandlingOppgave(
-                    behandlingId = getObject("id") as UUID,
-                    behandlingStatus = BehandlingStatus.valueOf(getString("status")),
-                    sakId = getLong("sak_id"),
-                    sakType = enumValueOf(getString("sakType")),
-                    fnr = Folkeregisteridentifikator.of(getString("fnr")),
-                    registrertDato = mottattDato,
-                    behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
-                    antallSoesken = antallSoesken(getString("soesken")),
-                    enhet = getString("enhet").takeIf { !wasNull() }
-                )
-            }
+            return stmt.executeQuery().toList(tilOppgave)
         }
     }
 
@@ -70,7 +54,7 @@ class OppgaveDao(private val connection: () -> Connection) {
             val stmt = prepareStatement(
                 """
                 |SELECT b.id, b.sak_id, soeknad_mottatt_dato, fnr, sakType, enhet, status, behandling_opprettet,
-                |behandlingstype, soesken, b.prosesstype, adressebeskyttelse
+                |behandlingstype, soesken, b.prosesstype, adressebeskyttelse, merknad
                 |FROM behandling b INNER JOIN sak s ON b.sak_id = s.id 
                 |WHERE status = ANY(?) AND (b.prosesstype is NULL OR b.prosesstype != ?)
                 |AND adressebeskyttelse is null OR 
@@ -81,24 +65,7 @@ class OppgaveDao(private val connection: () -> Connection) {
             stmt.setString(2, Prosesstype.AUTOMATISK.toString())
             stmt.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG.toString())
             stmt.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.toString())
-            return stmt.executeQuery().toList {
-                val mottattDato = getTidspunktOrNull("soeknad_mottatt_dato")
-                    ?: getTidspunktOrNull("behandling_opprettet")
-                    ?: throw IllegalStateException(
-                        "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
-                    )
-                Oppgave.BehandlingOppgave(
-                    behandlingId = getObject("id") as UUID,
-                    behandlingStatus = BehandlingStatus.valueOf(getString("status")),
-                    sakId = getLong("sak_id"),
-                    sakType = enumValueOf(getString("sakType")),
-                    fnr = Folkeregisteridentifikator.of(getString("fnr")),
-                    registrertDato = mottattDato,
-                    behandlingsType = BehandlingType.valueOf(getString("behandlingstype")),
-                    antallSoesken = antallSoesken(getString("soesken")),
-                    enhet = getString("enhet").takeIf { !wasNull() }
-                )
-            }.also {
+            return stmt.executeQuery().toList(tilOppgave).also {
                 logger.info(
                     "Hentet behandlingsoppgaveliste for bruker med statuser $statuser. Fant ${it.size} oppgaver"
                 )
@@ -136,5 +103,26 @@ class OppgaveDao(private val connection: () -> Connection) {
     private fun antallSoesken(soesken: String): Int {
         val soeskenList: List<String> = objectMapper.readValue(soesken)
         return soeskenList.size
+    }
+
+    private val tilOppgave: (ResultSet) -> Oppgave = { rs ->
+        val mottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")
+            ?: rs.getTidspunktOrNull("behandling_opprettet")
+            ?: throw IllegalStateException(
+                "Vi har en behandling som hverken har soeknad mottatt dato eller behandling opprettet dato "
+            )
+
+        Oppgave.BehandlingOppgave(
+            behandlingId = rs.getObject("id") as UUID,
+            behandlingStatus = BehandlingStatus.valueOf(rs.getString("status")),
+            sakId = rs.getLong("sak_id"),
+            sakType = enumValueOf(rs.getString("sakType")),
+            fnr = Folkeregisteridentifikator.of(rs.getString("fnr")),
+            registrertDato = mottattDato,
+            behandlingsType = BehandlingType.valueOf(rs.getString("behandlingstype")),
+            antallSoesken = antallSoesken(rs.getString("soesken")),
+            enhet = rs.getString("enhet").takeUnless { rs.wasNull() },
+            merknad = rs.getString("merknad")
+        )
     }
 }

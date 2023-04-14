@@ -133,6 +133,7 @@ abstract class CommonFactory : BeanFactory {
 
     override fun foerstegangsbehandlingService(): FoerstegangsbehandlingService =
         RealFoerstegangsbehandlingService(
+            sakDao(),
             behandlingDao(),
             hendelseDao(),
             behandlingHendelser().nyHendelse

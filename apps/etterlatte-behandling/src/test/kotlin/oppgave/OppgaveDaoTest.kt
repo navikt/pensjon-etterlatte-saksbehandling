@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import no.nav.etterlatte.sak.SakDao
@@ -175,6 +176,27 @@ internal class OppgaveDaoTest {
             1,
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(alleBehandlingsStatuser).size
         )
+    }
+
+    @Test
+    fun `Behandling merknad er tilgjengelig i oppgave`() {
+        val sak = sakDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON)
+
+        val opprettBehandling = OpprettBehandling(
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            sakId = sak.id,
+            status = BehandlingStatus.OPPRETTET,
+            persongalleri = Persongalleri("soeker", "innsender", listOf("soesken"), listOf("avdoed")),
+            merknad = "1 søsken"
+        )
+
+        behandlingDao.opprettBehandling(opprettBehandling)
+
+        val oppgave =
+            oppgaveDao.finnOppgaverMedStatuser(BehandlingStatus.underBehandling()).single() as Oppgave.BehandlingOppgave
+
+        assertEquals(opprettBehandling.id, oppgave.behandlingId)
+        assertEquals(opprettBehandling.merknad, oppgave.merknad)
     }
 
     private fun lagRegulering(prosesstype: Prosesstype, fnr: String, sakId: Long): OpprettBehandling {

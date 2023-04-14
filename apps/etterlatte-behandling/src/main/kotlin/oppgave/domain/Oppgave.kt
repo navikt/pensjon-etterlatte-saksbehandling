@@ -34,7 +34,8 @@ sealed class Oppgave {
         val behandlingsType: BehandlingType,
         val behandlingStatus: BehandlingStatus,
         val antallSoesken: Int,
-        val enhet: String?
+        val enhet: String?,
+        val merknad: String?
     ) : Oppgave() {
         override val oppgaveStatus: OppgaveStatus
             get() = OppgaveStatus.from(behandlingStatus)

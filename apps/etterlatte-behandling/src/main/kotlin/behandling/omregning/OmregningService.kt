@@ -2,10 +2,11 @@ package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class OmregningService(
     private val behandlingService: GenerellBehandlingService,
@@ -24,13 +25,15 @@ class OmregningService(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
                 fraDato = fraDato,
-                revurderingAarsak = RevurderingAarsak.REGULERING
+                revurderingAarsak = RevurderingAarsak.REGULERING,
+                kilde = Vedtaksloesning.DOFFEN
             )
 
             Prosesstype.MANUELL -> revurderingService.opprettManuellRevurdering(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
-                revurderingAarsak = RevurderingAarsak.REGULERING
+                revurderingAarsak = RevurderingAarsak.REGULERING,
+                kilde = Vedtaksloesning.DOFFEN
             )
         }.id
 

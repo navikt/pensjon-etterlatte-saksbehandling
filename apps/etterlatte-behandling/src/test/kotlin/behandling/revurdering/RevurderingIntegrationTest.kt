@@ -8,6 +8,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -70,7 +71,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             ).opprettManuellRevurdering(
                 sakId = behandling.sak.id,
                 forrigeBehandling = behandling,
-                revurderingAarsak = RevurderingAarsak.REGULERING
+                revurderingAarsak = RevurderingAarsak.REGULERING,
+                kilde = Vedtaksloesning.DOFFEN
             )
 
         inTransaction {
@@ -108,7 +110,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             ).opprettManuellRevurdering(
                 sakId = behandling.sak.id,
                 forrigeBehandling = behandling,
-                revurderingAarsak = RevurderingAarsak.REGULERING
+                revurderingAarsak = RevurderingAarsak.REGULERING,
+                kilde = Vedtaksloesning.DOFFEN
             )
         }
     }

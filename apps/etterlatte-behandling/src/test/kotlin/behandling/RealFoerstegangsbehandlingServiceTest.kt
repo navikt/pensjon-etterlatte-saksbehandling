@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -116,7 +117,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
-            kommerBarnetTilgode = null
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.DOFFEN
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
@@ -155,7 +157,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "begrunnelse"
             ),
-            kommerBarnetTilgode = null
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.DOFFEN
         )
 
         val persongalleri = Persongalleri(
@@ -176,7 +179,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
         val resultat = sut.startFoerstegangsbehandling(
             1,
             persongalleri,
-            datoNaa.toString()
+            datoNaa.toString(),
+            Vedtaksloesning.DOFFEN
         )
 
         assertEquals(opprettetBehandling, resultat)
@@ -214,7 +218,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
             virkningstidspunkt = null,
             soeknadMottattDato = now,
             gyldighetsproeving = null,
-            prosesstype = Prosesstype.MANUELL
+            prosesstype = Prosesstype.MANUELL,
+            kilde = Vedtaksloesning.DOFFEN
         )
         every { behandlingDaoMock.hentBehandling(any()) } returns behandling
 

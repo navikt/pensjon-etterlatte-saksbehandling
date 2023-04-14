@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -38,7 +39,8 @@ internal class RevurderingTest {
             kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
             virkningstidspunkt = virkningstidspunktVurdering(),
             revurderingsaarsak = RevurderingAarsak.REGULERING,
-            prosesstype = Prosesstype.MANUELL
+            prosesstype = Prosesstype.MANUELL,
+            kilde = Vedtaksloesning.DOFFEN
         ).tilVilkaarsvurdert().tilBeregnet()
             .tilVilkaarsvurdert().tilBeregnet().tilFattetVedtak().tilAttestert()
             .tilIverksatt()
@@ -146,5 +148,6 @@ private fun opprettetRevurdering(prosesstype: Prosesstype) = Revurdering.opprett
     kommerBarnetTilgode = kommerBarnetTilGodeVurdering(),
     virkningstidspunkt = virkningstidspunktVurdering(),
     revurderingsaarsak = RevurderingAarsak.REGULERING,
-    prosesstype = prosesstype
+    prosesstype = prosesstype,
+    kilde = Vedtaksloesning.DOFFEN
 )

@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -38,7 +39,8 @@ interface FoerstegangsbehandlingService {
     fun startFoerstegangsbehandling(
         sakId: Long,
         persongalleri: Persongalleri,
-        mottattDato: String
+        mottattDato: String,
+        kilde: Vedtaksloesning
     ): Foerstegangsbehandling
 
     fun lagreGyldighetsproeving(
@@ -81,7 +83,8 @@ class RealFoerstegangsbehandlingService(
     override fun startFoerstegangsbehandling(
         sakId: Long,
         persongalleri: Persongalleri,
-        mottattDato: String
+        mottattDato: String,
+        kilde: Vedtaksloesning
     ): Foerstegangsbehandling {
         logger.info("Starter behandling i sak $sakId")
 
@@ -96,6 +99,7 @@ class RealFoerstegangsbehandlingService(
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = LocalDateTime.parse(mottattDato),
                 persongalleri = persongalleri,
+                kilde = Vedtaksloesning.DOFFEN,
                 merknad = opprettMerknad(sak, persongalleri)
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -22,7 +23,8 @@ data class ManuellRevurdering(
     override val persongalleri: Persongalleri,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
-    override val revurderingsaarsak: RevurderingAarsak
+    override val revurderingsaarsak: RevurderingAarsak,
+    override val kilde: Vedtaksloesning
 ) : Revurdering(
     id,
     sak,
@@ -33,7 +35,8 @@ data class ManuellRevurdering(
     kommerBarnetTilgode,
     virkningstidspunkt,
     revurderingsaarsak,
-    Prosesstype.MANUELL
+    Prosesstype.MANUELL,
+    kilde
 ) {
 
     private fun erFyltUt(): Boolean =

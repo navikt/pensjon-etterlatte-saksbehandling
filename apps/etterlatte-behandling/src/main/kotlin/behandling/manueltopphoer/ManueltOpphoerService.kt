@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -91,7 +92,8 @@ class RealManueltOpphoerService(
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak,
-                    virkningstidspunkt = virkningstidspunkt
+                    virkningstidspunkt = virkningstidspunkt,
+                    kilde = Vedtaksloesning.DOFFEN
                 )
 
                 is ManueltOpphoer -> {

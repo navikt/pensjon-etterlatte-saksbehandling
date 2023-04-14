@@ -27,6 +27,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -223,7 +224,7 @@ class TestBeanFactory(
         }
 
         val foerstegangsbehandling = foerstegangsbehandlingService()
-            .startFoerstegangsbehandling(sakId, persongalleri(), LocalDateTime.now().toString())
+            .startFoerstegangsbehandling(sakId, persongalleri(), LocalDateTime.now().toString(), Vedtaksloesning.DOFFEN)
 
         return Pair(sak, foerstegangsbehandling)
     }

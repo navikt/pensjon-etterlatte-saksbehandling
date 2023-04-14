@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -24,6 +25,7 @@ data class OpprettBehandling(
     val opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
     val fritekstAarsak: String? = null,
     val prosesstype: Prosesstype = Prosesstype.MANUELL,
+    val kilde: Vedtaksloesning,
     val merknad: String? = null
 ) {
     val id: UUID = UUID.randomUUID()

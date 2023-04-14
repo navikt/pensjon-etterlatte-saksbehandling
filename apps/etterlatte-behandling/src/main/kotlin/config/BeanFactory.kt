@@ -213,7 +213,7 @@ abstract class CommonFactory : BeanFactory {
 
     override fun migreringService(): MigreringService = MigreringService(
         sakService(),
-        foerstegangsbehandlingFactory,
+        foerstegangsbehandlingService(),
         behandlingHendelser().nyHendelse,
         MigreringRepository(KotliqueryRepositoryWrapper(dataSource()))
     )

@@ -18,6 +18,7 @@ import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -93,7 +94,7 @@ class GrunnlagsendringshendelseService(
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
 
-        oppdaterEnheterForsaker(gradering = gradering, sakIder = sakIder)
+        oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering)
 
         sakIder.forEach { sakId ->
             tilgangService.oppdaterAdressebeskyttelse(
@@ -108,20 +109,23 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    private fun oppdaterEnheterForsaker(gradering: AdressebeskyttelseGradering, sakIder: Set<Long>) {
-        val sakerMedNyEnhet = sakIder.map {
-            SakMedEnhet(it, finnEnhetFraGradering(gradering).enhetNr)
+    private fun oppdaterEnheterForsaker(fnr: String, gradering: AdressebeskyttelseGradering) {
+        val finnSaker = sakService.finnSaker(fnr)
+        val sakerMedNyEnhet = finnSaker.map {
+            SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
         }
 
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
     }
 
-    private fun finnEnhetFraGradering(gradering: AdressebeskyttelseGradering): Enheter {
+    private fun finnEnhetFraGradering(fnr: String, gradering: AdressebeskyttelseGradering, sakType: SakType): String {
         return when (gradering) {
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND
-            AdressebeskyttelseGradering.FORTROLIG -> Enheter.FORTROLIG
-            AdressebeskyttelseGradering.UGRADERT -> Enheter.DEFAULT_PORSGRUNN
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
+            AdressebeskyttelseGradering.FORTROLIG -> {
+                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema).enhetNr
+            }
+            AdressebeskyttelseGradering.UGRADERT -> Enheter.DEFAULT_PORSGRUNN.enhetNr
         }
     }
 

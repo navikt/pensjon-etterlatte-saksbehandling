@@ -32,7 +32,7 @@ interface SakService {
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
     fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean)
-    fun finnEnhetForPersonOgTema(fnr: String, tema: String): ArbeidsFordelingEnhet?
+    fun finnEnhetForPersonOgTema(fnr: String, tema: String): ArbeidsFordelingEnhet
     fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>)
 }
 
@@ -70,12 +70,17 @@ class RealSakService(
         }
     }
 
-    override fun finnEllerOpprettSak(fnr: String, type: SakType) =
-        finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
+    override fun finnEllerOpprettSak(fnr: String, type: SakType): Sak {
+        return finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
             fnr,
             type,
-            finnEnhetForPersonOgTema(fnr, type.tema)?.enhetNr
+            if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
+                finnEnhetForPersonOgTema(fnr, type.tema).enhetNr
+            } else {
+                null
+            }
         )
+    }
 
     override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
         inTransaction {
@@ -91,27 +96,23 @@ class RealSakService(
         return dao.hentSak(id).sjekkEnhet()
     }
 
-    override fun finnEnhetForPersonOgTema(fnr: String, tema: String): ArbeidsFordelingEnhet? {
-        if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
-            val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr)
-            val geografiskTilknytning = tilknytning.geografiskTilknytning()
+    override fun finnEnhetForPersonOgTema(fnr: String, tema: String): ArbeidsFordelingEnhet {
+        val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr)
+        val geografiskTilknytning = tilknytning.geografiskTilknytning()
 
-            return when {
-                tilknytning.ukjent -> ArbeidsFordelingEnhet(
-                    Enheter.DEFAULT_PORSGRUNN.navn,
-                    Enheter.DEFAULT_PORSGRUNN.enhetNr
-                )
-                geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
-                    Folkeregisteridentifikator.of(fnr),
-                    tema
-                ).also {
-                    logger.warn(it.message)
-                }
-
-                else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
+        return when {
+            tilknytning.ukjent -> ArbeidsFordelingEnhet(
+                Enheter.DEFAULT_PORSGRUNN.navn,
+                Enheter.DEFAULT_PORSGRUNN.enhetNr
+            )
+            geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
+                Folkeregisteridentifikator.of(fnr),
+                tema
+            ).also {
+                logger.warn(it.message)
             }
-        } else {
-            return null
+
+            else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
         }
     }
 

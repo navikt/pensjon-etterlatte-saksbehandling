@@ -13,10 +13,13 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.foerstegangsbehandling
@@ -26,6 +29,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -34,6 +38,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.sak.SakService
@@ -463,16 +468,65 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `Skal kunne sette adressebeskyttelse og sette enhet`() {
+    fun `Skal kunne sette adressebeskyttelse strengt fortrolig og sette enhet`() {
         val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
+        val saker = sakIder.map {
+            Sak(
+                id = it,
+                ident = TRIVIELL_MIDTPUNKT.value,
+                sakType = SakType.BARNEPENSJON,
+                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+            )
+        }
         val fnr = "16017919184"
         val adressebeskyttelse =
             Adressebeskyttelse(fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG, Endringstype.OPPRETTET)
 
         coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
         every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
+        every { sakService.finnSaker(fnr) } returns saker
+        every {
+            sakService.finnEnhetForPersonOgTema(any(), any())
+        } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
+        runBlocking {
+            grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
+        }
 
+        coVerify(exactly = 1) { grunnlagClient.hentAlleSakIder(adressebeskyttelse.fnr) }
+
+        sakIder.forEach {
+            verify(exactly = 1) {
+                adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(
+                    it,
+                    adressebeskyttelse.adressebeskyttelseGradering
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Skal kunne sette fortrolig og sette enhet`() {
+        val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
+        val saker = sakIder.map {
+            Sak(
+                id = it,
+                ident = TRIVIELL_MIDTPUNKT.value,
+                sakType = SakType.BARNEPENSJON,
+                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+            )
+        }
+        val fnr = "16017919184"
+        val adressebeskyttelse =
+            Adressebeskyttelse(fnr, AdressebeskyttelseGradering.FORTROLIG, Endringstype.OPPRETTET)
+
+        coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
+        every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
+        every { sakService.finnSaker(fnr) } returns saker
+        every {
+            sakService.finnEnhetForPersonOgTema(any(), any())
+        } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
+        every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }

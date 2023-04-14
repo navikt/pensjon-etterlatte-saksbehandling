@@ -42,7 +42,6 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -85,8 +84,7 @@ fun foerstegangsbehandling(
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
-    kommerBarnetTilgode: KommerBarnetTilgode? = null,
-    vilkaarStatus: VilkaarsvurderingUtfall? = null
+    kommerBarnetTilgode: KommerBarnetTilgode? = null
 ) = Foerstegangsbehandling(
     id = id,
     sak = Sak(
@@ -113,7 +111,6 @@ fun revurdering(
     persongalleri: Persongalleri = persongalleri(),
     revurderingAarsak: RevurderingAarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
-    vilkaarStatus: VilkaarsvurderingUtfall? = VilkaarsvurderingUtfall.OPPFYLT,
     virkningstidspunkt: Virkningstidspunkt? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL
 ) = Revurdering.opprett(

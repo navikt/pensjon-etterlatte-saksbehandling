@@ -26,7 +26,6 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
@@ -80,7 +79,6 @@ interface BeanFactory {
     fun grunnlagsendringshendelseDao(): GrunnlagsendringshendelseDao
     fun rapid(): KafkaProdusent<String, String>
     fun behandlingHendelser(): BehandlingsHendelser
-    fun revurderingFactory(): RevurderingFactory
     fun pdlHttpClient(): HttpClient
     fun pdlKlient(): PdlKlient
     fun leaderElection(): LeaderElection
@@ -109,10 +107,6 @@ abstract class CommonFactory : BeanFactory {
         )
     }
 
-    private val revurderingFactory: RevurderingFactory by lazy {
-        RevurderingFactory(behandlingDao(), hendelseDao())
-    }
-
     private val oppgaveService: OppgaveService by lazy {
         OppgaveServiceImpl(oppgaveDao(), featureToggleService())
     }
@@ -125,10 +119,6 @@ abstract class CommonFactory : BeanFactory {
 
     override fun behandlingHendelser(): BehandlingsHendelser {
         return behandlingsHendelser
-    }
-
-    override fun revurderingFactory(): RevurderingFactory {
-        return revurderingFactory
     }
 
     override fun sakService(): SakService =
@@ -149,9 +139,10 @@ abstract class CommonFactory : BeanFactory {
         )
 
     override fun revurderingService(): RevurderingService = RealRevurderingService(
-        revurderingFactory(),
         behandlingHendelser().nyHendelse,
-        featureToggleService
+        featureToggleService,
+        behandlingDao(),
+        hendelseDao()
     )
 
     override fun manueltOpphoerService(): ManueltOpphoerService =
@@ -212,7 +203,7 @@ abstract class CommonFactory : BeanFactory {
     override fun sporingslogg(): Sporingslogg = Sporingslogg()
 
     override fun omregningService(): OmregningService =
-        OmregningService(behandlingService = generellBehandlingService(), revurderingFactory = revurderingFactory())
+        OmregningService(behandlingService = generellBehandlingService(), revurderingService = revurderingService())
 }
 
 class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory() {

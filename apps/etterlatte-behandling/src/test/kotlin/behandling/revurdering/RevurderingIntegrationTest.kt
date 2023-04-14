@@ -41,9 +41,9 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `kan opprette ny revurdering og lagre i db`() {
-        val revurderingFactory = RevurderingFactory(beanFactory.behandlingDao(), beanFactory.hendelseDao())
         val hendelser = beanFactory.behandlingHendelser().nyHendelse
         val featureToggleService = mockk<FeatureToggleService>()
+
         every {
             featureToggleService.isEnabled(
                 RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
@@ -62,9 +62,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
 
         val revurdering =
-            RealRevurderingService(revurderingFactory, hendelser, featureToggleService).opprettRevurdering(
-                behandling,
-                RevurderingAarsak.REGULERING
+            RealRevurderingService(
+                hendelser,
+                featureToggleService,
+                beanFactory.behandlingDao(),
+                beanFactory.hendelseDao()
+            ).opprettManuellRevurdering(
+                sakId = behandling.sak.id,
+                forrigeBehandling = behandling,
+                revurderingAarsak = RevurderingAarsak.REGULERING
             )
 
         inTransaction {
@@ -74,9 +80,9 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `hvis featuretoggle er av saa kastes NotImplementedError ved opprettelse`() {
-        val revurderingFactory = RevurderingFactory(beanFactory.behandlingDao(), beanFactory.hendelseDao())
         val hendelser = beanFactory.behandlingHendelser().nyHendelse
         val featureToggleService = mockk<FeatureToggleService>()
+
         every {
             featureToggleService.isEnabled(
                 RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
@@ -94,9 +100,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
 
         assertThrows<NotImplementedError> {
-            RealRevurderingService(revurderingFactory, hendelser, featureToggleService).opprettRevurdering(
-                behandling,
-                RevurderingAarsak.REGULERING
+            RealRevurderingService(
+                hendelser,
+                featureToggleService,
+                beanFactory.behandlingDao(),
+                beanFactory.hendelseDao()
+            ).opprettManuellRevurdering(
+                sakId = behandling.sak.id,
+                forrigeBehandling = behandling,
+                revurderingAarsak = RevurderingAarsak.REGULERING
             )
         }
     }

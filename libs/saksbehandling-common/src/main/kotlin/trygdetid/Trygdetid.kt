@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.trygdetid
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.*
@@ -13,8 +14,18 @@ data class TrygdetidDto(
 )
 
 data class GrunnlagOpplysningerDto(
-    val avdoedDoedsdato: LocalDate?,
-    val avdoedFoedselsdato: LocalDate?
+    val avdoedDoedsdato: OpplysningsgrunnlagDto?,
+    val avdoedFoedselsdato: OpplysningsgrunnlagDto?
+)
+
+data class OpplysningsgrunnlagDto(
+    val opplysning: JsonNode,
+    val kilde: OpplysningkildeDto
+)
+
+data class OpplysningkildeDto(
+    val type: String,
+    val tidspunktForInnhenting: String
 )
 
 data class BeregnetTrygdetidDto(

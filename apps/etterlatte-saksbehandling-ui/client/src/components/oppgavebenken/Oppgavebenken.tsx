@@ -90,7 +90,7 @@ const mapOppgaveResponse = (data: OppgaveDTO): IOppgave => ({
   oppgaveStatus: data.oppgaveStatus.toUpperCase() as StatusFilter,
   saksbehandler: data.saksbehandler,
   handling: data.handling.toUpperCase() as Handlinger,
-  antallSoesken: data.antallSoesken,
+  merknad: data.merknad,
 })
 
 export default Oppgavebenken

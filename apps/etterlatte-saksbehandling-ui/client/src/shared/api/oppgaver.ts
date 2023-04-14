@@ -12,7 +12,7 @@ export interface OppgaveDTO {
   oppgaveStatus: string
   saksbehandler: string
   handling: string
-  antallSoesken: number | null
+  merknad: string
 }
 export interface OppgaveResponse {
   oppgaver: ReadonlyArray<OppgaveDTO>

@@ -1,9 +1,7 @@
 package no.nav.etterlatte.oppgave
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
-import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -100,11 +98,6 @@ class OppgaveDao(private val connection: () -> Connection) {
         }
     }
 
-    private fun antallSoesken(soesken: String): Int {
-        val soeskenList: List<String> = objectMapper.readValue(soesken)
-        return soeskenList.size
-    }
-
     private val tilOppgave: (ResultSet) -> Oppgave = { rs ->
         val mottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")
             ?: rs.getTidspunktOrNull("behandling_opprettet")
@@ -120,7 +113,6 @@ class OppgaveDao(private val connection: () -> Connection) {
             fnr = Folkeregisteridentifikator.of(rs.getString("fnr")),
             registrertDato = mottattDato,
             behandlingsType = BehandlingType.valueOf(rs.getString("behandlingstype")),
-            antallSoesken = antallSoesken(rs.getString("soesken")),
             enhet = rs.getString("enhet").takeUnless { rs.wasNull() },
             merknad = rs.getString("merknad")
         )

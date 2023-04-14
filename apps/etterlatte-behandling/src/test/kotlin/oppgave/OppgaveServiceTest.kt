@@ -26,7 +26,6 @@ internal class OppgaveServiceTest {
             behandlingId = UUID.randomUUID(),
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
-            antallSoesken = 1,
             enhet = null,
             merknad = null
         ),
@@ -38,7 +37,6 @@ internal class OppgaveServiceTest {
             behandlingId = UUID.randomUUID(),
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
-            antallSoesken = 1,
             enhet = Enheter.DEFAULT.enhetNr,
             merknad = null
         ),
@@ -50,7 +48,6 @@ internal class OppgaveServiceTest {
             behandlingId = UUID.randomUUID(),
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
-            antallSoesken = 1,
             enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
             merknad = null
         ),

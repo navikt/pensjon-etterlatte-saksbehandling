@@ -28,14 +28,17 @@ fun trygdetid(
     opplysninger = emptyList()
 )
 
-fun trygdetidGrunnlag(beregnetTrygdetidGrunnlag: BeregnetTrygdetidGrunnlag? = null) = TrygdetidGrunnlag(
+fun trygdetidGrunnlag(
+    beregnetTrygdetidGrunnlag: BeregnetTrygdetidGrunnlag? = null,
+    periode: TrygdetidPeriode = TrygdetidPeriode(
+        fra = LocalDate.of(2023, 1, 1),
+        til = LocalDate.of(2023, 2, 1)
+    )
+) = TrygdetidGrunnlag(
     id = randomUUID(),
     type = TrygdetidType.NASJONAL,
     bosted = "Norge",
-    periode = TrygdetidPeriode(
-        fra = LocalDate.of(2023, 1, 1),
-        til = LocalDate.of(2023, 2, 1)
-    ),
+    periode = periode,
     beregnetTrygdetid = beregnetTrygdetidGrunnlag,
     kilde = "pdl"
 )
@@ -47,8 +50,8 @@ fun beregnetTrygdetid(total: Int = 0, tidspunkt: Tidspunkt = Tidspunkt.now()) =
         regelResultat = "".toJsonNode()
     )
 
-fun beregnetTrygdetidGrunnlag() = BeregnetTrygdetidGrunnlag(
-    verdi = Period.parse("P2Y2D"),
+fun beregnetTrygdetidGrunnlag(verdi: Period = Period.parse("P2Y2D")) = BeregnetTrygdetidGrunnlag(
+    verdi = verdi,
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode()
 )

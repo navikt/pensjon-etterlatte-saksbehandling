@@ -8,12 +8,14 @@ type Props = {
   setTrygdetid: (trygdetid: ITrygdetid) => void
 }
 export const TrygdetidBeregnet: React.FC<Props> = ({ trygdetid }) => {
+  const beregnetTrygdetid = trygdetid.beregnetTrygdetid ? `${trygdetid.beregnetTrygdetid?.total} år` : '-'
+
   return (
     <TrygdetidSum>
       <Heading spacing size="small" level="3">
         Sum faktisk og fremtidig trygdetid
       </Heading>
-      <p>{trygdetid.beregnetTrygdetid?.total} år</p>
+      <p>{beregnetTrygdetid}</p>
     </TrygdetidSum>
   )
 }

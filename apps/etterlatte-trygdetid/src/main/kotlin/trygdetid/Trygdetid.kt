@@ -45,10 +45,13 @@ data class BeregnetTrygdetidGrunnlag(val verdi: Period, val tidspunkt: Tidspunkt
 data class TrygdetidPeriode(
     val fra: LocalDate,
     val til: LocalDate
-)
+) {
+    init {
+        require(fra.isBefore(til) || fra.isEqual(til)) { "Ugyldig periode, fra må være før eller lik til" }
+    }
+}
 
 enum class TrygdetidType {
     NASJONAL,
-    FREMTIDIG,
-    UTLAND
+    FREMTIDIG
 }

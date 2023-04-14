@@ -20,7 +20,7 @@ object TrygdetidBeregningService {
             FaktumNode(
                 verdi = trygdetidGrunnlag.mapNotNull { it.beregnetTrygdetid?.verdi },
                 kilde = "System",
-                beskrivelse = "Delberegninger all trygdetid"
+                beskrivelse = "Beregninger alle trygdetidgrunnlag"
             )
         )
 
@@ -30,7 +30,7 @@ object TrygdetidBeregningService {
                 val periodisertResultat = resultat.periodiserteResultater.first().resultat
                 val totaltAntallAarTrygdetid = periodisertResultat.verdi
 
-                logger.info("Beregning fullførte med resultat: $totaltAntallAarTrygdetid")
+                logger.info("Beregning fullførte med resultat: $totaltAntallAarTrygdetid år")
                 BeregnetTrygdetid(
                     verdi = totaltAntallAarTrygdetid,
                     tidspunkt = Tidspunkt(periodisertResultat.opprettet),
@@ -41,19 +41,19 @@ object TrygdetidBeregningService {
         }
     }
 
-    fun beregnTrygdetidGrunnlag(trygdetidGrunnlag: TrygdetidGrunnlag): TrygdetidGrunnlag {
+    fun beregnTrygdetidGrunnlag(trygdetidGrunnlag: TrygdetidGrunnlag): BeregnetTrygdetidGrunnlag {
         logger.info("Beregner trygdetid for trygdetidsgrunnlag ${trygdetidGrunnlag.id}")
 
         val grunnlag = TrygdetidPeriodeGrunnlag(
             periodeFra = FaktumNode(
                 verdi = trygdetidGrunnlag.periode.fra,
                 kilde = trygdetidGrunnlag.kilde,
-                beskrivelse = "Startdato for perioden"
+                beskrivelse = "Startdato for trygdetidsperiode"
             ),
             periodeTil = FaktumNode(
                 verdi = trygdetidGrunnlag.periode.til,
                 kilde = trygdetidGrunnlag.kilde,
-                beskrivelse = "Sluttdato for perioden"
+                beskrivelse = "Sluttdato for trygdetidsperiode"
             )
         )
 
@@ -65,12 +65,10 @@ object TrygdetidBeregningService {
 
                 logger.info("Beregning fullførte med resultat: $periodeTrygdetid")
 
-                trygdetidGrunnlag.copy(
-                    beregnetTrygdetid = BeregnetTrygdetidGrunnlag(
-                        verdi = periodeTrygdetid,
-                        tidspunkt = Tidspunkt(periodisertResultat.opprettet),
-                        regelResultat = periodisertResultat.toJsonNode()
-                    )
+                BeregnetTrygdetidGrunnlag(
+                    verdi = periodeTrygdetid,
+                    tidspunkt = Tidspunkt(periodisertResultat.opprettet),
+                    regelResultat = periodisertResultat.toJsonNode()
                 )
             }
             is RegelkjoeringResultat.UgyldigPeriode -> throw Exception("En feil oppstod under regelkjøring")

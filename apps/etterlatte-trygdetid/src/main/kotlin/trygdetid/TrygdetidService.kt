@@ -37,7 +37,8 @@ class TrygdetidService(
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
             // TODO hvis status er "forbi" trygdetid bør dette sette tilstand tilbake til trygdetid?
-            val trygdetidGrunnlagMedBeregning = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
+            val beregnetTrygdetidGrunnlag = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
+            val trygdetidGrunnlagMedBeregning = trygdetidGrunnlag.copy(beregnetTrygdetid = beregnetTrygdetidGrunnlag)
             val eksisterendeTrygdetid = trygdetidRepository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
             val trygdetid = if (eksisterendeTrygdetid != null) {
                 trygdetidRepository.oppdaterTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning)

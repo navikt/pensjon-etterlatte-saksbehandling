@@ -10,13 +10,12 @@ import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.LoggerFactory
-import no.nav.etterlatte.Saksbehandler
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 
 enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
     OpprettMedEnhetId("pensjon-etterlatte.opprett-sak-med-enhet-id"),

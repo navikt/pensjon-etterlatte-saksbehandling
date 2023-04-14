@@ -79,7 +79,7 @@ class RealSakService(
 
     override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
         inTransaction {
-            dao.oppdaterEnhet(saker)
+            dao.oppdaterEnheterPaaSaker(saker)
         }
     }
 
@@ -97,7 +97,10 @@ class RealSakService(
             val geografiskTilknytning = tilknytning.geografiskTilknytning()
 
             return when {
-                tilknytning.ukjent -> ArbeidsFordelingEnhet(Enheter.DEFAULT.navn, Enheter.DEFAULT.enhetNr)
+                tilknytning.ukjent -> ArbeidsFordelingEnhet(
+                    Enheter.DEFAULT_PORSGRUNN.navn,
+                    Enheter.DEFAULT_PORSGRUNN.enhetNr
+                )
                 geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
                     Folkeregisteridentifikator.of(fnr),
                     tema

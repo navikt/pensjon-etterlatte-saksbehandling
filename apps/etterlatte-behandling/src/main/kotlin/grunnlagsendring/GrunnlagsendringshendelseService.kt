@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
 import no.nav.etterlatte.common.klienter.hentBarn
@@ -26,7 +27,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.sak.SakService
@@ -93,7 +93,7 @@ class GrunnlagsendringshendelseService(
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
 
-        oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr)
+        oppdaterEnheterForsaker(gradering = gradering, sakIder = sakIder)
 
         sakIder.forEach { sakId ->
             tilgangService.oppdaterAdressebeskyttelse(
@@ -108,24 +108,24 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    private fun oppdaterEnheterForsaker(fnr: String) {
-        val saker = sakService.finnSaker(fnr)
-        val sakerMedNyEnhet = saker.map {
-            val finnEnhetForPersonOgTema =
-                sakService.finnEnhetForPersonOgTema(fnr = fnr, tema = it.sakType.tema)
-                    ?: throw FantIkkeEnhetException(
-                        "Fant ikke enhet for ${fnr.maskerFnr()} " +
-                            "med tema ${it.sakType.tema} sakid: ${it.id}"
-                    )
-            SakMedEnhet(it.id, finnEnhetForPersonOgTema.enhetNr)
+    private fun oppdaterEnheterForsaker(gradering: AdressebeskyttelseGradering, sakIder: Set<Long>) {
+        val sakerMedNyEnhet = sakIder.map {
+            SakMedEnhet(it, finnEnhetPaaGradering(gradering).enhetNr)
         }
 
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
     }
 
-    data class SakMedEnhet(val id: Long, val enhet: String)
+    private fun finnEnhetPaaGradering(gradering: AdressebeskyttelseGradering): Enheter {
+        return when (gradering) {
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND
+            AdressebeskyttelseGradering.FORTROLIG -> TODO()
+            AdressebeskyttelseGradering.UGRADERT -> Enheter.DEFAULT_PORSGRUNN
+        }
+    }
 
-    class FantIkkeEnhetException(message: String) : Exception(message)
+    data class SakMedEnhet(val id: Long, val enhet: String)
 
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,

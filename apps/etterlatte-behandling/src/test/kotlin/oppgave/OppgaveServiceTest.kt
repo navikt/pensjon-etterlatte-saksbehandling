@@ -37,7 +37,7 @@ internal class OppgaveServiceTest {
             behandlingId = UUID.randomUUID(),
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
-            enhet = Enheter.DEFAULT.enhetNr,
+            enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr,
             merknad = null
         ),
         Oppgave.BehandlingOppgave(
@@ -63,7 +63,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `filter oppgaveliste for enheter`() {
-        val enhetsListe = listOf(Enheter.DEFAULT.enhetNr, Enheter.EGNE_ANSATTE.enhetNr)
+        val enhetsListe = listOf(Enheter.DEFAULT_PORSGRUNN.enhetNr, Enheter.EGNE_ANSATTE.enhetNr)
 
         val featureToggleService = mockk<FeatureToggleService>()
 

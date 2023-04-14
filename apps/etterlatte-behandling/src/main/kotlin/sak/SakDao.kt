@@ -34,7 +34,7 @@ class SakDao(private val connection: () -> Connection) {
         )
     }
 
-    fun oppdaterEnhet(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+    fun oppdaterEnheterPaaSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
         with(connection()) {
             val statement = prepareStatement(
                 """
@@ -52,8 +52,6 @@ class SakDao(private val connection: () -> Connection) {
         }
     }
 
-    // TODO: høre med Lars Erik om det kan returneres en liste av saker her, mtp at hver person kun kan ha
-    // én tilhørende sak. Hvs så, skriv om til singleOrNull
     fun finnSaker(fnr: String): List<Sak> {
         val statement = connection().prepareStatement("SELECT id, sakType, fnr, enhet from sak where fnr = ?")
         statement.setString(1, fnr)

@@ -63,7 +63,7 @@ class SakDaoTest {
         val funnetSaker = sakRepo.finnSaker(fnr)
         Assertions.assertEquals(1, funnetSaker.size)
         Assertions.assertEquals(sak.id, funnetSaker[0].id)
-        sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.DEFAULT_PORSGRUNN.enhetNr).also {
+        sakRepo.opprettSak(fnr, SakType.OMSTILLINGSSTOENAD, Enheter.DEFAULT_PORSGRUNN.enhetNr).also {
             Assertions.assertNotNull(it)
         }
         val funnetSakermed2saker = sakRepo.finnSaker(fnr)

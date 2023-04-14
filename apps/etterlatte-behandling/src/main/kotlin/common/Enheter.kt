@@ -3,6 +3,7 @@ package no.nav.etterlatte.common
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 
 enum class Enheter(val enhetNr: String, val navn: String) {
+    FORTROLIG("2103", "NAV Vikafossen"),
     STRENGT_FORTROLIG("2103", "NAV Vikafossen"),
     STRENGT_FORTROLIG_UTLAND("2103", "NAV Vikafossen"),
     EGNE_ANSATTE("4883", "NAV Familie- og pensjonsytelser Egne ansatte"),

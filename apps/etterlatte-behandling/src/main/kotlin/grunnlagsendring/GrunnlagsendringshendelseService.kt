@@ -110,17 +110,17 @@ class GrunnlagsendringshendelseService(
 
     private fun oppdaterEnheterForsaker(gradering: AdressebeskyttelseGradering, sakIder: Set<Long>) {
         val sakerMedNyEnhet = sakIder.map {
-            SakMedEnhet(it, finnEnhetPaaGradering(gradering).enhetNr)
+            SakMedEnhet(it, finnEnhetFraGradering(gradering).enhetNr)
         }
 
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
     }
 
-    private fun finnEnhetPaaGradering(gradering: AdressebeskyttelseGradering): Enheter {
+    private fun finnEnhetFraGradering(gradering: AdressebeskyttelseGradering): Enheter {
         return when (gradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND
-            AdressebeskyttelseGradering.FORTROLIG -> TODO()
+            AdressebeskyttelseGradering.FORTROLIG -> Enheter.FORTROLIG
             AdressebeskyttelseGradering.UGRADERT -> Enheter.DEFAULT_PORSGRUNN
         }
     }

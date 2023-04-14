@@ -25,7 +25,7 @@ data class OpprettBehandling(
     val opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
     val fritekstAarsak: String? = null,
     val prosesstype: Prosesstype = Prosesstype.MANUELL,
-    val kildesystem: Vedtaksloesning,
+    val kilde: Vedtaksloesning,
     val merknad: String? = null
 ) {
     val id: UUID = UUID.randomUUID()

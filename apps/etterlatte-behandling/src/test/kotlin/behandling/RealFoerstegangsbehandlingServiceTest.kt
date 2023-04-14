@@ -118,7 +118,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             kommerBarnetTilgode = null,
-            kildesystem = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.DOFFEN
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
@@ -158,7 +158,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "begrunnelse"
             ),
             kommerBarnetTilgode = null,
-            kildesystem = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.DOFFEN
         )
 
         val persongalleri = Persongalleri(
@@ -219,7 +219,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             soeknadMottattDato = now,
             gyldighetsproeving = null,
             prosesstype = Prosesstype.MANUELL,
-            kildesystem = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.DOFFEN
         )
         every { behandlingDaoMock.hentBehandling(any()) } returns behandling
 

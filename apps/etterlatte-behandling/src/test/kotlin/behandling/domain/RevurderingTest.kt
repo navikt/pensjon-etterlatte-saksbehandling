@@ -40,7 +40,7 @@ internal class RevurderingTest {
             virkningstidspunkt = virkningstidspunktVurdering(),
             revurderingsaarsak = RevurderingAarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL,
-            kildesystem = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.DOFFEN
         ).tilVilkaarsvurdert().tilBeregnet()
             .tilVilkaarsvurdert().tilBeregnet().tilFattetVedtak().tilAttestert()
             .tilIverksatt()
@@ -149,5 +149,5 @@ private fun opprettetRevurdering(prosesstype: Prosesstype) = Revurdering.opprett
     virkningstidspunkt = virkningstidspunktVurdering(),
     revurderingsaarsak = RevurderingAarsak.REGULERING,
     prosesstype = prosesstype,
-    kildesystem = Vedtaksloesning.DOFFEN
+    kilde = Vedtaksloesning.DOFFEN
 )

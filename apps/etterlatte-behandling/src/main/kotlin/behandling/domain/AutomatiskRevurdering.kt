@@ -23,7 +23,7 @@ data class AutomatiskRevurdering(
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val revurderingsaarsak: RevurderingAarsak,
-    override val kildesystem: Vedtaksloesning
+    override val kilde: Vedtaksloesning
 ) : Revurdering(
     id,
     sak,
@@ -35,7 +35,7 @@ data class AutomatiskRevurdering(
     virkningstidspunkt,
     revurderingsaarsak,
     Prosesstype.AUTOMATISK,
-    kildesystem = kildesystem
+    kilde = kilde
 ) {
     override fun kopier() = this.copy()
 

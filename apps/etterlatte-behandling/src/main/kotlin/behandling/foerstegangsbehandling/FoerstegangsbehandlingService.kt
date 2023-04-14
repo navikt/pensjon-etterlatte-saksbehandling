@@ -40,7 +40,7 @@ interface FoerstegangsbehandlingService {
         sakId: Long,
         persongalleri: Persongalleri,
         mottattDato: String,
-        kildesystem: Vedtaksloesning
+        kilde: Vedtaksloesning
     ): Foerstegangsbehandling
 
     fun lagreGyldighetsproeving(
@@ -84,7 +84,7 @@ class RealFoerstegangsbehandlingService(
         sakId: Long,
         persongalleri: Persongalleri,
         mottattDato: String,
-        kildesystem: Vedtaksloesning
+        kilde: Vedtaksloesning
     ): Foerstegangsbehandling {
         logger.info("Starter behandling i sak $sakId")
 
@@ -99,7 +99,7 @@ class RealFoerstegangsbehandlingService(
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = LocalDateTime.parse(mottattDato),
                 persongalleri = persongalleri,
-                kildesystem = Vedtaksloesning.DOFFEN,
+                kilde = Vedtaksloesning.DOFFEN,
                 merknad = opprettMerknad(sak, persongalleri)
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)

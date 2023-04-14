@@ -24,7 +24,7 @@ data class ManuellRevurdering(
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val revurderingsaarsak: RevurderingAarsak,
-    override val kildesystem: Vedtaksloesning
+    override val kilde: Vedtaksloesning
 ) : Revurdering(
     id,
     sak,
@@ -36,7 +36,7 @@ data class ManuellRevurdering(
     virkningstidspunkt,
     revurderingsaarsak,
     Prosesstype.MANUELL,
-    kildesystem
+    kilde
 ) {
 
     private fun erFyltUt(): Boolean =

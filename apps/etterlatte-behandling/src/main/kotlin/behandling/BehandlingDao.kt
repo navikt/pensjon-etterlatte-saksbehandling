@@ -181,7 +181,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
         kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
         prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
-        kildesystem = rs.getString("kildesystem").let { Vedtaksloesning.valueOf(it) }
+        kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
     )
 
     private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
@@ -204,7 +204,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             kommerBarnetTilgode = rs.getString("kommer_barnet_tilgode")?.let { objectMapper.readValue(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
-            kildesystem = rs.getString("kildesystem").let { Vedtaksloesning.valueOf(it) }
+            kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) }
         )
 
     private fun asManueltOpphoer(rs: ResultSet) = ManueltOpphoer(
@@ -246,8 +246,8 @@ class BehandlingDao(private val connection: () -> Connection) {
                 """
                     INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                     soeknad_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, virkningstidspunkt,
-                    kommer_barnet_tilgode, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kildesystem, merknad)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    kommer_barnet_tilgode, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, merknad)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
         with(behandling) {
@@ -274,7 +274,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setString(16, opphoerAarsaker?.toJson())
             stmt.setString(17, fritekstAarsak)
             stmt.setString(18, prosesstype.toString())
-            stmt.setString(19, kildesystem.toString())
+            stmt.setString(19, kilde.toString())
             stmt.setString(20, merknad)
         }
         require(stmt.executeUpdate() == 1)

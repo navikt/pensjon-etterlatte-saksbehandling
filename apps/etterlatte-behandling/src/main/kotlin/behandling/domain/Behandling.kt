@@ -37,7 +37,7 @@ sealed class Behandling {
     abstract val persongalleri: Persongalleri
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val virkningstidspunkt: Virkningstidspunkt?
-    abstract val kildesystem: Vedtaksloesning
+    abstract val kilde: Vedtaksloesning
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)

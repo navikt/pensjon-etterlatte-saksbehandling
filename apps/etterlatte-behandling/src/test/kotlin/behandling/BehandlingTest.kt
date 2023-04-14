@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -45,7 +44,7 @@ internal class BehandlingTest {
         virkningstidspunkt = null,
         soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
         gyldighetsproeving = null,
-        kildesystem = Vedtaksloesning.DOFFEN
+        kilde = Vedtaksloesning.DOFFEN
     )
 
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")

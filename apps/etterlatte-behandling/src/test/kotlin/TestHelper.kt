@@ -61,7 +61,7 @@ fun opprettBehandling(
     opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
     fritekstAarsak: String? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
-    kildesystem: Vedtaksloesning = Vedtaksloesning.DOFFEN
+    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN
 ) = OpprettBehandling(
     type = type,
     sakId = sakId,
@@ -74,7 +74,7 @@ fun opprettBehandling(
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak,
     prosesstype = prosesstype,
-    kildesystem = kildesystem
+    kilde = kilde
 )
 
 fun foerstegangsbehandling(
@@ -88,7 +88,7 @@ fun foerstegangsbehandling(
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
-    kildesystem: Vedtaksloesning = Vedtaksloesning.DOFFEN
+    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN
 ) = Foerstegangsbehandling(
     id = id,
     sak = Sak(
@@ -104,7 +104,7 @@ fun foerstegangsbehandling(
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
     kommerBarnetTilgode = kommerBarnetTilgode,
-    kildesystem = kildesystem
+    kilde = kilde
 )
 
 fun revurdering(
@@ -118,7 +118,7 @@ fun revurdering(
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(),
     virkningstidspunkt: Virkningstidspunkt? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
-    kildesystem: Vedtaksloesning = Vedtaksloesning.DOFFEN
+    kilde: Vedtaksloesning = Vedtaksloesning.DOFFEN
 ) = Revurdering.opprett(
     id = id,
     sak = Sak(
@@ -134,7 +134,7 @@ fun revurdering(
     kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
     prosesstype = prosesstype,
-    kildesystem = kildesystem
+    kilde = kilde
 )
 
 fun manueltOpphoer(

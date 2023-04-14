@@ -27,7 +27,7 @@ data class ManueltOpphoer(
     override val prosesstype: Prosesstype = Prosesstype.MANUELL
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER
-    override val kildesystem = Vedtaksloesning.DOFFEN
+    override val kilde = Vedtaksloesning.DOFFEN
 
     constructor(
         sak: Sak,

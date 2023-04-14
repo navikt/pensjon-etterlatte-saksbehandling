@@ -23,7 +23,7 @@ sealed class Revurdering(
     override val virkningstidspunkt: Virkningstidspunkt?,
     open val revurderingsaarsak: RevurderingAarsak?,
     override val prosesstype: Prosesstype,
-    override val kildesystem: Vedtaksloesning
+    override val kilde: Vedtaksloesning
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
 
@@ -41,7 +41,7 @@ sealed class Revurdering(
             virkningstidspunkt: Virkningstidspunkt?,
             revurderingsaarsak: RevurderingAarsak,
             prosesstype: Prosesstype,
-            kildesystem: Vedtaksloesning
+            kilde: Vedtaksloesning
         ) = when (prosesstype) {
             Prosesstype.MANUELL -> ManuellRevurdering(
                 id,
@@ -53,7 +53,7 @@ sealed class Revurdering(
                 kommerBarnetTilgode,
                 virkningstidspunkt,
                 revurderingsaarsak,
-                kildesystem
+                kilde
             )
 
             Prosesstype.AUTOMATISK -> AutomatiskRevurdering(
@@ -66,7 +66,7 @@ sealed class Revurdering(
                 kommerBarnetTilgode,
                 virkningstidspunkt,
                 revurderingsaarsak,
-                kildesystem
+                kilde
             )
         }
     }

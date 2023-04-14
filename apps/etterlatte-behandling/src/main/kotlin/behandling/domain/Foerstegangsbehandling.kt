@@ -27,7 +27,7 @@ data class Foerstegangsbehandling(
     val soeknadMottattDato: LocalDateTime,
     val gyldighetsproeving: GyldighetsResultat?,
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
-    override val kildesystem: Vedtaksloesning
+    override val kilde: Vedtaksloesning
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 

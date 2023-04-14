@@ -1,3 +1,3 @@
-ALTER TABLE behandling ADD COLUMN kildesystem TEXT;
-UPDATE behandling SET kildesystem = 'DOFFEN';
-ALTER TABLE behandling ALTER COLUMN kildesystem SET NOT NULL;
+ALTER TABLE behandling ADD COLUMN kilde TEXT;
+UPDATE behandling SET kilde = 'DOFFEN';
+ALTER TABLE behandling ALTER COLUMN kilde SET NOT NULL;

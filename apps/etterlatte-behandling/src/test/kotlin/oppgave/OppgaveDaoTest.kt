@@ -219,7 +219,7 @@ internal class OppgaveDaoTest {
             opphoerAarsaker = listOf(),
             fritekstAarsak = null,
             prosesstype = prosesstype,
-            kildesystem = Vedtaksloesning.DOFFEN
+            kilde = Vedtaksloesning.DOFFEN
         )
     }
 }

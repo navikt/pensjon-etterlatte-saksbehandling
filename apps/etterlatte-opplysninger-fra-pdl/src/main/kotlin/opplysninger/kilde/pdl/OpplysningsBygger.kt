@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.YearMonth
 
 class Opplysningsbolk(private val fnr: Folkeregisteridentifikator, private val innhentetTidspunkt: Tidspunkt) {
     private val opplysninger = mutableListOf<Grunnlagsopplysning<out Any>>()
@@ -39,7 +38,14 @@ class Opplysningsbolk(private val fnr: Folkeregisteridentifikator, private val i
         opplysningstype: Opplysningstype,
         grunnlagsopplysning: List<OpplysningDTO<out Any>>?
     ) {
-        grunnlagsopplysning?.forEach { leggTilOpplysning(opplysningstype, it) }
+        if (grunnlagsopplysning.isNullOrEmpty()) {
+            return
+        }
+        val opplysningSamlet = OpplysningDTO(
+            grunnlagsopplysning.map { it.verdi },
+            opplysningsid = grunnlagsopplysning.firstOrNull()?.opplysningsid
+        )
+        leggTilOpplysning(opplysningstype, opplysningSamlet)
     }
 
     fun leggTilOpplysning(
@@ -94,18 +100,7 @@ fun lagEnkelopplysningerFraPDL(
         leggTilOpplysning(FOEDSELSAAR, personDTO.foedselsaar)
         leggTilOpplysning(PERSONROLLE, OpplysningDTO(personRolle, null))
         personDTO.avdoedesBarn?.let { leggTilOpplysning(AVDOEDESBARN, OpplysningDTO(it, null)) }
-        personDTO.bostedsadresse?.map {
-            leggTilOpplysning(
-                BOSTEDSADRESSE,
-                it,
-                it.verdi.gyldigFraOgMed?.let { fom ->
-                    Periode(
-                        fom = YearMonth.from(fom),
-                        tom = it.verdi.gyldigTilOgMed?.let { tom -> YearMonth.from(tom) }
-                    )
-                }
-            )
-        }
+        leggTilOpplysninger(BOSTEDSADRESSE, personDTO.bostedsadresse)
     }
 
     val gammalGrunnlagsopplysning = lagPdlOpplysning(opplysningsbehov, person, tidspunktForInnhenting)

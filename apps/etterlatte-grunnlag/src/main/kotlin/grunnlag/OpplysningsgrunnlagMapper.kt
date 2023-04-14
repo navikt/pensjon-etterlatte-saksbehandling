@@ -21,12 +21,8 @@ class OpplysningsgrunnlagMapper(
             assert(alleOpplysningerErAvSammeType(hendelser.map { it.opplysning }))
         }
 
-        val opplysning: Opplysning<JsonNode> = if (hendelser.any { it.opplysning.periode != null }) {
-            Opplysning.Periodisert.create(hendelser.map { it.opplysning })
-        } else {
-            hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
-                .let { Opplysning.Konstant.create(it.opplysning) }
-        }
+        val opplysning: Opplysning<JsonNode> = hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
+            .let { Opplysning.Konstant.create(it.opplysning) }
 
         val opplysningstype: Opplysningstype
             get() = hendelser.first().opplysning.opplysningType
@@ -48,9 +44,9 @@ class OpplysningsgrunnlagMapper(
         val opplysninger = grupper.map { GruppertHendelser(it) }
 
         val (personopplysninger, saksopplysninger) = opplysninger.partition { it.fnr !== null }
-        val (søker, familie) = personopplysninger.partition { it.fnr!!.value == persongalleri.soeker }
+        val (soeker, familie) = personopplysninger.partition { it.fnr!!.value == persongalleri.soeker }
 
-        val søkerMap = søker.associateBy({ it.opplysningstype }, { it.opplysning })
+        val soekerMap = soeker.associateBy({ it.opplysningstype }, { it.opplysning })
         val familieMap = familie
             .groupBy { it.fnr }.values
             .map { familiemedlem ->
@@ -59,7 +55,7 @@ class OpplysningsgrunnlagMapper(
         val sakMap = saksopplysninger.associateBy({ it.opplysningstype }, { it.opplysning })
 
         return Grunnlag(
-            soeker = søkerMap,
+            soeker = soekerMap,
             familie = familieMap,
             sak = sakMap,
             metadata = Metadata(sakId, senestVersjon)

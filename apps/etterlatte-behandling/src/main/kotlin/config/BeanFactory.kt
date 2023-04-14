@@ -52,7 +52,7 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.sak.tilgangServiceImpl
+import no.nav.etterlatte.sak.TilgangServiceImpl
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -125,7 +125,7 @@ abstract class CommonFactory : BeanFactory {
         RealSakService(sakDao(), pdlKlient(), norg2HttpClient(), featureToggleService)
 
     override fun tilgangService(): TilgangService =
-        tilgangServiceImpl(SakTilgangDao(dataSource()), getSaksbehandlerGroupIdsByKey())
+        TilgangServiceImpl(SakTilgangDao(dataSource()), getSaksbehandlerGroupIdsByKey())
 
     override fun behandlingsStatusService(): BehandlingStatusService {
         return BehandlingStatusServiceImpl(behandlingDao(), generellBehandlingService())
@@ -189,7 +189,8 @@ abstract class CommonFactory : BeanFactory {
             generellBehandlingService(),
             pdlKlient(),
             grunnlagKlientClientCredentials(),
-            tilgangService()
+            tilgangService(),
+            sakService()
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(

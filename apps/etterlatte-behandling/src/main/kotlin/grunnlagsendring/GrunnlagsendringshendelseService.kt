@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
 import no.nav.etterlatte.common.klienter.hentBarn
@@ -17,6 +18,7 @@ import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -28,6 +30,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -38,7 +41,8 @@ class GrunnlagsendringshendelseService(
     private val generellBehandlingService: GenerellBehandlingService,
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
+    private val sakService: SakService
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -89,6 +93,9 @@ class GrunnlagsendringshendelseService(
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
+
+        oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering)
+
         sakIder.forEach { sakId ->
             tilgangService.oppdaterAdressebeskyttelse(
                 sakId,
@@ -101,6 +108,28 @@ class GrunnlagsendringshendelseService(
             logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
         }
     }
+
+    private fun oppdaterEnheterForsaker(fnr: String, gradering: AdressebeskyttelseGradering) {
+        val finnSaker = sakService.finnSaker(fnr)
+        val sakerMedNyEnhet = finnSaker.map {
+            SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
+        }
+
+        sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
+    }
+
+    private fun finnEnhetFraGradering(fnr: String, gradering: AdressebeskyttelseGradering, sakType: SakType): String {
+        return when (gradering) {
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
+            AdressebeskyttelseGradering.FORTROLIG -> {
+                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema).enhetNr
+            }
+            AdressebeskyttelseGradering.UGRADERT -> Enheter.DEFAULT_PORSGRUNN.enhetNr
+        }
+    }
+
+    data class SakMedEnhet(val id: Long, val enhet: String)
 
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,

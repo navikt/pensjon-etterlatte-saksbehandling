@@ -122,7 +122,7 @@ internal class SakServiceTest {
         saksbehandlerKontekst()
 
         coEvery { enhetService.enheterForIdent(any()) } returns listOf(
-            SaksbehandlerEnhet(id = Enheter.DEFAULT.enhetNr, navn = Enheter.DEFAULT.navn)
+            SaksbehandlerEnhet(id = Enheter.DEFAULT_PORSGRUNN.enhetNr, navn = Enheter.DEFAULT_PORSGRUNN.navn)
         )
 
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns listOf(
@@ -130,7 +130,7 @@ internal class SakServiceTest {
                 id = 1,
                 ident = TRIVIELL_MIDTPUNKT.value,
                 sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.DEFAULT.enhetNr
+                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
             )
         )
 
@@ -151,7 +151,7 @@ internal class SakServiceTest {
         saksbehandlerKontekst()
 
         coEvery { enhetService.enheterForIdent(any()) } returns listOf(
-            SaksbehandlerEnhet(id = Enheter.DEFAULT.enhetNr, navn = Enheter.DEFAULT.navn)
+            SaksbehandlerEnhet(id = Enheter.DEFAULT_PORSGRUNN.enhetNr, navn = Enheter.DEFAULT_PORSGRUNN.navn)
         )
 
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns listOf(
@@ -180,7 +180,7 @@ internal class SakServiceTest {
         systemBrukerKontekst()
 
         coEvery { enhetService.enheterForIdent(any()) } returns listOf(
-            SaksbehandlerEnhet(id = Enheter.DEFAULT.enhetNr, navn = Enheter.DEFAULT.navn)
+            SaksbehandlerEnhet(id = Enheter.DEFAULT_PORSGRUNN.enhetNr, navn = Enheter.DEFAULT_PORSGRUNN.navn)
         )
 
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns listOf(
@@ -231,7 +231,7 @@ internal class SakServiceTest {
         }
     }
 
-    @Test()
+    @Test
     fun `finnEllerOpprettSak feiler hvis NORG2 ikke finner geografisk tilknytning`() {
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false) } returns true
@@ -255,23 +255,23 @@ internal class SakServiceTest {
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
     }
 
-    @Test()
+    @Test
     fun `finnEllerOpprettSak lagre enhet hvis enhet er funnet`() {
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
         every {
-            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.DEFAULT.enhetNr)
+            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.DEFAULT_PORSGRUNN.enhetNr)
         } returns Sak(
             id = 1,
             ident = TRIVIELL_MIDTPUNKT.value,
             sakType = SakType.BARNEPENSJON,
-            enhet = Enheter.DEFAULT.enhetNr
+            enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
         )
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false) } returns true
         every {
             pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns listOf(
-            ArbeidsFordelingEnhet(Enheter.DEFAULT.navn, Enheter.DEFAULT.enhetNr)
+            ArbeidsFordelingEnhet(Enheter.DEFAULT_PORSGRUNN.navn, Enheter.DEFAULT_PORSGRUNN.enhetNr)
         )
 
         val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
@@ -282,7 +282,7 @@ internal class SakServiceTest {
             ident = TRIVIELL_MIDTPUNKT.value,
             sakType = SakType.BARNEPENSJON,
             id = 1,
-            enhet = Enheter.DEFAULT.enhetNr
+            enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
         )
 
         verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }
@@ -290,11 +290,11 @@ internal class SakServiceTest {
         verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value) }
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
         verify(exactly = 1) {
-            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.DEFAULT.enhetNr)
+            sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.DEFAULT_PORSGRUNN.enhetNr)
         }
     }
 
-    @Test()
+    @Test
     fun `finnEllerOpprettSak lagre uten enhet - feature disabled`() {
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
         every {

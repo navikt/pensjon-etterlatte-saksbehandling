@@ -132,13 +132,13 @@ internal class OppgaveDaoTest {
     @Test
     fun `enhet er tilgjengelig hvis det er tilgjengelig paa sak`() {
         val fnr = TRIVIELL_MIDTPUNKT.value
-        val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.DEFAULT.enhetNr)
+        val sak = sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.DEFAULT_PORSGRUNN.enhetNr)
         behandlingDao.opprettBehandling(lagRegulering(Prosesstype.MANUELL, fnr, sak.id))
         val alleBehandlingsStatuser = BehandlingStatus.values().asList()
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
         assertEquals(1, oppgaver.size)
         val oppgave = oppgaver.first() as Oppgave.BehandlingOppgave
-        assertEquals(Enheter.DEFAULT.enhetNr, oppgave.enhet)
+        assertEquals(Enheter.DEFAULT_PORSGRUNN.enhetNr, oppgave.enhet)
     }
 
     @Test

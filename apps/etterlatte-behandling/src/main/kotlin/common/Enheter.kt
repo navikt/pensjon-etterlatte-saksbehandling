@@ -6,7 +6,7 @@ enum class Enheter(val enhetNr: String, val navn: String) {
     STRENGT_FORTROLIG("2103", "NAV Vikafossen"),
     STRENGT_FORTROLIG_UTLAND("2103", "NAV Vikafossen"),
     EGNE_ANSATTE("4883", "NAV Familie- og pensjonsytelser Egne ansatte"),
-    DEFAULT("4808", "NAV Familie- og pensjonsytelser Porsgrunn")
+    DEFAULT_PORSGRUNN("4808", "NAV Familie- og pensjonsytelser Porsgrunn")
 }
 
 open class EnhetException(override val message: String) : Exception(message)

@@ -209,7 +209,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
 
         val behandling = Foerstegangsbehandling(
             id = id,
-            sak = Sak("", SakType.BARNEPENSJON, 1, Enheter.DEFAULT.enhetNr),
+            sak = Sak("", SakType.BARNEPENSJON, 1, Enheter.DEFAULT_PORSGRUNN.enhetNr),
             behandlingOpprettet = now,
             sistEndret = now,
             status = BehandlingStatus.OPPRETTET,

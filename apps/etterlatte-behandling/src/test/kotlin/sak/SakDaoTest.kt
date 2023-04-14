@@ -1,6 +1,7 @@
 package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -35,7 +36,7 @@ class SakDaoTest {
         ).apply { migrate() }
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        tilgangService = tilgangServiceImpl(
+        tilgangService = TilgangServiceImpl(
             SakTilgangDao(dataSource),
             emptyMap()
         )
@@ -50,8 +51,33 @@ class SakDaoTest {
 
     @Test
     fun `kan opprett sak med enhet`() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.DEFAULT.enhetNr)
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.DEFAULT_PORSGRUNN.enhetNr)
 
-        Assertions.assertEquals(Enheter.DEFAULT.enhetNr, opprettSak.enhet)
+        Assertions.assertEquals(Enheter.DEFAULT_PORSGRUNN.enhetNr, opprettSak.enhet)
+    }
+
+    @Test
+    fun `Skal kunne oppdatere enhet`() {
+        val fnr = "fnr"
+        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.DEFAULT_PORSGRUNN.enhetNr)
+        val funnetSaker = sakRepo.finnSaker(fnr)
+        Assertions.assertEquals(1, funnetSaker.size)
+        Assertions.assertEquals(sak.id, funnetSaker[0].id)
+        sakRepo.opprettSak(fnr, SakType.OMSTILLINGSSTOENAD, Enheter.DEFAULT_PORSGRUNN.enhetNr).also {
+            Assertions.assertNotNull(it)
+        }
+        val funnetSakermed2saker = sakRepo.finnSaker(fnr)
+        Assertions.assertEquals(2, funnetSakermed2saker.size)
+
+        val sakerMedNyEnhet = funnetSakermed2saker.map {
+            GrunnlagsendringshendelseService.SakMedEnhet(it.id, Enheter.EGNE_ANSATTE.enhetNr)
+        }
+
+        sakRepo.oppdaterEnheterPaaSaker(sakerMedNyEnhet)
+
+        val sakerMedEgenAnsattEnhet = sakRepo.finnSaker(fnr)
+        sakerMedEgenAnsattEnhet.forEach {
+            Assertions.assertEquals(Enheter.EGNE_ANSATTE.enhetNr, it.enhet)
+        }
     }
 }

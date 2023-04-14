@@ -75,13 +75,12 @@ fun Application.module(beanFactory: BeanFactory) {
 
         val tilgangService = tilgangService()
         val sakService = sakService()
-        val enhetService = enhetService()
         val saksbehandlerGroupIds = getSaksbehandlerGroupIdsByKey()
 
         restModule(
             sikkerLogg
         ) {
-            attachContekst(dataSource(), enhetService, saksbehandlerGroupIds)
+            attachContekst(dataSource(), enhetService(), saksbehandlerGroupIds)
             sakRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,

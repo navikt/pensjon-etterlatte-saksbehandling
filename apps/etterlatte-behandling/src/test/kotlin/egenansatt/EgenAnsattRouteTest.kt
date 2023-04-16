@@ -57,7 +57,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 }
             }
             application {
-                module(beanFactory)
+                module(applicationContext)
             }
             coEvery {
                 norg2Klient.hentEnheterForOmraade(any(), any())

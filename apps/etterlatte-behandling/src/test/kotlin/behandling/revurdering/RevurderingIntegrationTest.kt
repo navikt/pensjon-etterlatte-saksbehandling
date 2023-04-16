@@ -28,12 +28,12 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() {
         startServer()
-        Kontekst.set(Context(mockk(), DatabaseContext(beanFactory.dataSource())))
+        Kontekst.set(Context(mockk(), DatabaseContext(applicationContext.dataSource)))
     }
 
     @AfterEach
     fun afterEach() {
-        beanFactory.resetDatabase()
+        resetDatabase()
     }
 
     @AfterAll
@@ -43,7 +43,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `kan opprette ny revurdering og lagre i db`() {
-        val hendelser = beanFactory.behandlingHendelser().nyHendelse
+        val hendelser = applicationContext.behandlingsHendelser.nyHendelse
         val featureToggleService = mockk<FeatureToggleService>()
 
         every {
@@ -60,12 +60,12 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns false
 
-        val (sak, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling(fnr)
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
 
         assertNotNull(behandling)
 
         inTransaction {
-            beanFactory.behandlingDao().lagreStatus(
+            applicationContext.behandlingDao.lagreStatus(
                 behandling!!.id,
                 BehandlingStatus.IVERKSATT,
                 Tidspunkt.now().toLocalDatetimeUTC()
@@ -76,8 +76,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             RealRevurderingService(
                 hendelser,
                 featureToggleService,
-                beanFactory.behandlingDao(),
-                beanFactory.hendelseDao()
+                applicationContext.behandlingDao,
+                applicationContext.hendelseDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
@@ -86,13 +86,13 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
 
         inTransaction {
-            Assertions.assertEquals(revurdering, beanFactory.behandlingDao().hentBehandling(revurdering!!.id))
+            Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
         }
     }
 
     @Test
     fun `hvis featuretoggle er av saa opprettes ikke revurdering`() {
-        val hendelser = beanFactory.behandlingHendelser().nyHendelse
+        val hendelser = applicationContext.behandlingsHendelser.nyHendelse
         val featureToggleService = mockk<FeatureToggleService>()
 
         every {
@@ -109,12 +109,12 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns false
 
-        val (sak, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling(fnr)
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
 
         assertNotNull(behandling)
 
         inTransaction {
-            beanFactory.behandlingDao().lagreStatus(
+            applicationContext.behandlingDao.lagreStatus(
                 behandling!!.id,
                 BehandlingStatus.IVERKSATT,
                 Tidspunkt.now().toLocalDatetimeUTC()
@@ -125,8 +125,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             RealRevurderingService(
                 hendelser,
                 featureToggleService,
-                beanFactory.behandlingDao(),
-                beanFactory.hendelseDao()
+                applicationContext.behandlingDao,
+                applicationContext.hendelseDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,

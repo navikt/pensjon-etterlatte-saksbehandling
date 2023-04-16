@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 import kotlin.concurrent.fixedRateTimer
@@ -36,6 +37,12 @@ class GrunnlagsendringshendelseJob(
             period = periode.toMillis()
         ) {
             try {
+                logger.info(
+                    "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection.isLeader()} " +
+                        ", initialDelay: ${Duration.of(1, ChronoUnit.MINUTES).toMillis()}" +
+                        ", periode: ${periode.toMinutes()}" +
+                        ", minutterGamleHendelser: $minutterGamleHendelser "
+                )
                 runBlocking {
                     SjekkKlareGrunnlagsendringshendelser(
                         grunnlagsendringshendelseService = grunnlagsendringshendelseService,

@@ -47,7 +47,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     jackson { registerModule(JavaTimeModule()) }
                 }
             }
-            application { module(beanFactory) }
+            application { module(applicationContext) }
             val fnr = Folkeregisteridentifikator.of("08071272487")
             val request = MigreringRequest(
                 pesysId = PesysId("1"),

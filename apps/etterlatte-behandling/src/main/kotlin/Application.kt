@@ -14,7 +14,6 @@ import io.ktor.server.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
-import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
@@ -22,9 +21,6 @@ import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.DatabaseContext
-import no.nav.etterlatte.config.AzureGroup
-import no.nav.etterlatte.config.BeanFactory
-import no.nav.etterlatte.config.EnvBasedBeanFactory
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
@@ -40,10 +36,10 @@ import javax.sql.DataSource
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 fun main() {
-    Server(EnvBasedBeanFactory(System.getenv())).run()
+    Server(ApplicationContext()).run()
 }
 
-class Server(private val beanFactory: BeanFactory) {
+class Server(private val context: ApplicationContext) {
 
     init {
         sikkerLogg.info("SikkerLogg: etterlatte-behandling oppstart")
@@ -52,42 +48,35 @@ class Server(private val beanFactory: BeanFactory) {
     private val engine = embeddedServer(
         factory = CIO,
         environment = applicationEngineEnvironment {
-            config = HoconApplicationConfig(beanFactory.config)
-            module { module(beanFactory) }
+            config = HoconApplicationConfig(context.config)
+            module { module(context) }
             connector { port = 8080 }
         }
     )
 
-    fun run() = with(beanFactory) {
-        dataSource().migrate()
+    fun run() = with(context) {
+        dataSource.migrate()
 
-        val behandlingHendelser = behandlingHendelser()
-        val grunnlagsendringshendelseJob = grunnlagsendringshendelseJob()
+        grunnlagsendringshendelseJob.schedule()
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 grunnlagsendringshendelseJob.cancel()
                 behandlingHendelser.nyHendelse.close()
             }
         )
-        behandlingHendelser.start()
+        behandlingsHendelser.start()
 
         setReady().also { engine.start(true) }
+        behandlingsHendelser.nyHendelse.close()
     }
 }
 
-fun Application.module(beanFactory: BeanFactory) {
-    with(beanFactory) {
-        val generellBehandlingService = generellBehandlingService()
-        val grunnlagsendringshendelseService = grunnlagsendringshendelseService()
-
-        val tilgangService = tilgangService()
-        val sakService = sakService()
-        val saksbehandlerGroupIds = getSaksbehandlerGroupIdsByKey()
-
+fun Application.module(context: ApplicationContext) {
+    with(context) {
         restModule(
             sikkerLogg
         ) {
-            attachContekst(dataSource(), enhetService(), saksbehandlerGroupIds)
+            attachContekst(dataSource, context)
             sakRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
@@ -96,22 +85,21 @@ fun Application.module(beanFactory: BeanFactory) {
             )
             behandlingRoutes(
                 generellBehandlingService = generellBehandlingService,
-                foerstegangsbehandlingService = foerstegangsbehandlingService(),
-                manueltOpphoerService = manueltOpphoerService()
+                foerstegangsbehandlingService = foerstegangsbehandlingService,
+                manueltOpphoerService = manueltOpphoerService
             )
             revurderingRoutes(
-                revurderingService = revurderingService(),
+                revurderingService = revurderingService,
                 generellBehandlingService = generellBehandlingService
             )
-            omregningRoutes(omregningService = omregningService())
-            migreringRoutes(
-                migreringService = migreringService()
-            )
-            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService())
-            oppgaveRoutes(service = beanFactory.oppgaveService())
+            omregningRoutes(omregningService = omregningService)
+            migreringRoutes(migreringService = migreringService)
+            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
+            oppgaveRoutes(service = oppgaveService)
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))
             tilgangRoutes(tilgangService)
+
             install(adressebeskyttelsePlugin) {
                 harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
@@ -126,16 +114,15 @@ fun Application.module(beanFactory: BeanFactory) {
 
 private fun Route.attachContekst(
     ds: DataSource,
-    enhetService: EnhetService,
-    saksbehandlerGroupIds: Map<AzureGroup, String>
+    context: ApplicationContext
 ) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
             Context(
                 AppUser = decideUser(
                     call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
-                    saksbehandlerGroupIds,
-                    enhetService
+                    context.saksbehandlerGroupIdsByKey,
+                    context.enhetService
                 ),
                 databasecontxt = DatabaseContext(ds)
             )

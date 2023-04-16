@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class GrunnlagKlientImplTest {
+internal class GrunnlagKlientOboTest {
 
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 

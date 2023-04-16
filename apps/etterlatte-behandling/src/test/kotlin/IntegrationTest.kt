@@ -24,6 +24,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
+import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -81,9 +82,9 @@ class IntegrationTest : BehandlingIntegrationTest() {
                     jackson { registerModule(JavaTimeModule()) }
                 }
             }
-            application { module(beanFactory) }
+            application { module(applicationContext) }
 
-            assertTrue(beanFactory.featureToggleService().isEnabled(FellesFeatureToggle.NoOperationToggle, false))
+            assertTrue(applicationContext.featureToggleService.isEnabled(FellesFeatureToggle.NoOperationToggle, false))
 
             client.get("/saker/1") {
                 addAuthToken(tokenSaksbehandler)
@@ -192,7 +193,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
                 addAuthToken(tokenSaksbehandler)
             }.also {
-                beanFactory.dataSource().connection.use {
+                applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.OPPRETTET, actual.status)
                 }
@@ -205,7 +206,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody("{}")
             }.also {
-                beanFactory.dataSource().connection.use {
+                applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
                 }
@@ -216,7 +217,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             client.post("/behandlinger/$behandlingId/beregn") {
                 addAuthToken(tokenSaksbehandler)
             }.also {
-                beanFactory.dataSource().connection.use {
+                applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.BEREGNET, actual.status)
                 }
@@ -229,7 +230,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
             }.also {
-                beanFactory.dataSource().connection.use {
+                applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
                 }
@@ -252,7 +253,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(VedtakHendelse(123L, "saksb", Tidspunkt.now(), null, null))
             }.also {
-                beanFactory.dataSource().connection.use {
+                applicationContext.dataSource.connection.use {
                     val actual = BehandlingDao { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.ATTESTERT, actual.status)
                 }
@@ -395,11 +396,11 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
         }
 
-        beanFactory.behandlingHendelser().nyHendelse.close()
+        applicationContext.behandlingsHendelser.nyHendelse.close()
 
         kotlin.runCatching { sleep(2000) }
         assertNotNull(behandlingOpprettet)
-        val rapid = beanFactory.rapidSingleton
+        val rapid = applicationContext.rapid as TestProdusent
         assertEquals(4, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
@@ -417,7 +418,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue()
         )
-        beanFactory.dataSource().connection.use {
+        applicationContext.dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
         }
     }

@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory
 import java.net.InetAddress
 
 open class LeaderElection(
-    private val electorPath: String,
     private val httpClient: HttpClient = HttpClient(),
+    private val electorPath: String,
     private val me: String? = InetAddress.getLocalHost().hostName
 ) {
     private val objectMapper = jacksonObjectMapper()

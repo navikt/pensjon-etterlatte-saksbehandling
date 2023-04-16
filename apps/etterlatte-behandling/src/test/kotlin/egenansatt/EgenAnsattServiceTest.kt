@@ -1,13 +1,15 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.egenansatt
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.klienter.PdlKlient
-import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator

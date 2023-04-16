@@ -58,7 +58,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                 }
             }
             application {
-                module(beanFactory)
+                module(applicationContext)
             }
 
             val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {

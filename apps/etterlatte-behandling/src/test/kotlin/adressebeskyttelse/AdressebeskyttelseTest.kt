@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class AdressebeskyttelseTest : BehandlingIntegrationTest() {
@@ -59,7 +59,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }
             }
             application {
-                module(beanFactory)
+                module(applicationContext)
             }
 
             val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
@@ -146,7 +146,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }
             }
             application {
-                module(beanFactory)
+                module(applicationContext)
             }
 
             val sak: Sak = httpClient.post("personer/saker/${SakType.BARNEPENSJON}") {
@@ -232,7 +232,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }
             }
             application {
-                module(beanFactory)
+                module(applicationContext)
             }
 
             val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
@@ -309,7 +309,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }
             }
             application {
-                module(beanFactory)
+                module(applicationContext)
             }
 
             val sak: Sak = httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {

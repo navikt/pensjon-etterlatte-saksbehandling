@@ -24,7 +24,7 @@ interface GrunnlagKlient {
 
 class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
 
-class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlient {
+class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient {
     private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)

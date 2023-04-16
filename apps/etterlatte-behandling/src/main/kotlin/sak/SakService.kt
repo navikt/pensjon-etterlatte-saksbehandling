@@ -27,7 +27,7 @@ enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
 interface SakService {
     fun hentSaker(): List<Sak>
     fun finnSaker(person: String): List<Sak>
-    fun finnEllerOpprettSak(fnr: String, type: SakType): Sak
+    fun finnEllerOpprettSak(fnr: String, type: SakType, enhet: String? = null): Sak
     fun finnSak(person: String, type: SakType): Sak?
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
@@ -70,12 +70,12 @@ class RealSakService(
         }
     }
 
-    override fun finnEllerOpprettSak(fnr: String, type: SakType): Sak {
+    override fun finnEllerOpprettSak(fnr: String, type: SakType, enhet: String?): Sak {
         return finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
             fnr,
             type,
             if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
-                finnEnhetForPersonOgTema(fnr, type.tema).enhetNr
+                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema).enhetNr
             } else {
                 null
             }

@@ -24,6 +24,8 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
+import no.nav.etterlatte.behandling.migrering.MigreringRepository
+import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -40,6 +42,7 @@ import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -71,6 +74,7 @@ interface BeanFactory {
     fun manueltOpphoerService(): ManueltOpphoerService
     fun oppgaveService(): OppgaveService
     fun omregningService(): OmregningService
+    fun migreringService(): MigreringService
     fun sakDao(): SakDao
     fun sakDaoAdressebeskyttelse(datasource: DataSource): SakTilgangDao
     fun oppgaveDao(): OppgaveDao
@@ -206,6 +210,13 @@ abstract class CommonFactory : BeanFactory {
 
     override fun omregningService(): OmregningService =
         OmregningService(behandlingService = generellBehandlingService(), revurderingService = revurderingService())
+
+    override fun migreringService(): MigreringService = MigreringService(
+        sakService(),
+        foerstegangsbehandlingService(),
+        behandlingHendelser().nyHendelse,
+        MigreringRepository(KotliqueryRepositoryWrapper(dataSource()))
+    )
 }
 
 class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory() {

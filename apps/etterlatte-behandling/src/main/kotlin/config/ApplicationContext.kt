@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
+import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
@@ -34,6 +35,7 @@ import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
@@ -97,37 +99,38 @@ class ApplicationContext(
     val vedtakKlientObo: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient())
 ) {
-    val saksbehandlerGroupIdsByKey by lazy { AzureGroup.values().associateWith{env.requireEnvValue(it.envKey)} }
-    val sporingslogg by lazy { Sporingslogg() }
-    val dataSource by lazy { DataSourceBuilder.createDataSource(env) }
+    val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
+    val sporingslogg = Sporingslogg()
+    val dataSource = DataSourceBuilder.createDataSource(env)
 
     // Dao
-    val hendelseDao by lazy { HendelseDao { databaseContext().activeTx() } }
-    val oppgaveDao by lazy { OppgaveDao { databaseContext().activeTx() } }
-    val behandlingDao by lazy { BehandlingDao { databaseContext().activeTx() } }
-    val sakDao by lazy { SakDao { databaseContext().activeTx() } }
-    val grunnlagsendringshendelseDao by lazy { GrunnlagsendringshendelseDao { databaseContext().activeTx() } }
+    val hendelseDao = HendelseDao { databaseContext().activeTx() }
+    val oppgaveDao = OppgaveDao { databaseContext().activeTx() }
+    val behandlingDao = BehandlingDao { databaseContext().activeTx() }
+    val sakDao = SakDao { databaseContext().activeTx() }
+    val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
 
     // Klient
-    val pdlKlient by lazy { PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester") }
-    val grunnlagKlient by lazy { GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag") }
-    val leaderElectionKlient by lazy { LeaderElection(leaderElectionHttpClient, env.getValue("ELECTOR_PATH")) }
+    val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")
+    val grunnlagKlient = GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag")
+    val leaderElectionKlient = LeaderElection(leaderElectionHttpClient, env.getValue("ELECTOR_PATH"))
+
+    val behandlingsHendelser = BehandlingsHendelser(rapid, behandlingDao, dataSource)
 
     // Service
-    val oppgaveService by lazy { OppgaveServiceImpl(oppgaveDao, featureToggleService) }
-    val sakService by lazy { RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService) }
-    val generellBehandlingService by lazy {
-        RealGenerellBehandlingService(
-            behandlingDao = behandlingDao,
-            behandlingHendelser = behandlingsHendelser.nyHendelse,
-            hendelseDao = hendelseDao,
-            vedtakKlient = vedtakKlientObo,
-            grunnlagKlient = grunnlagKlientObo,
-            sporingslogg = sporingslogg,
-            featureToggleService = featureToggleService
-        )
-    }
-    val foerstegangsbehandlingService by lazy {
+    val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)
+    val sakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
+    val generellBehandlingService = RealGenerellBehandlingService(
+        behandlingDao = behandlingDao,
+        behandlingHendelser = behandlingsHendelser.nyHendelse,
+        hendelseDao = hendelseDao,
+        vedtakKlient = vedtakKlientObo,
+        grunnlagKlient = grunnlagKlientObo,
+        sporingslogg = sporingslogg,
+        featureToggleService = featureToggleService
+    )
+
+    val foerstegangsbehandlingService =
         RealFoerstegangsbehandlingService(
             sakDao = sakDao,
             behandlingDao = behandlingDao,
@@ -135,34 +138,34 @@ class ApplicationContext(
             behandlingHendelser = behandlingsHendelser.nyHendelse,
             featureToggleService = featureToggleService
         )
-    }
-    val revurderingService by lazy {
+
+    val revurderingService =
         RealRevurderingService(
             behandlingHendelser = behandlingsHendelser.nyHendelse,
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao
         )
-    }
-    val manueltOpphoerService by lazy {
+
+    val manueltOpphoerService =
         RealManueltOpphoerService(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser.nyHendelse,
             hendelseDao = hendelseDao,
             featureToggleService = featureToggleService
         )
-    }
-    val omregningService by lazy {
+
+    val omregningService =
         OmregningService(
             behandlingService = generellBehandlingService,
             revurderingService = revurderingService
         )
-    }
-    val behandlingsStatusService by lazy { BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService) }
-    val tilgangService by lazy { TilgangServiceImpl(SakTilgangDao(dataSource), saksbehandlerGroupIdsByKey) }
-    val enhetService by lazy { EnhetServiceImpl(navAnsattKlient) }
-    val sakDaoAdressebeskyttelse by lazy { SakTilgangDao(dataSource) }
-    val grunnlagsendringshendelseService by lazy {
+
+    val behandlingsStatusService = BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService)
+    val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource), saksbehandlerGroupIdsByKey)
+    val enhetService = EnhetServiceImpl(navAnsattKlient)
+    val sakDaoAdressebeskyttelse = SakTilgangDao(dataSource)
+    val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             grunnlagsendringshendelseDao,
             generellBehandlingService,
@@ -171,18 +174,15 @@ class ApplicationContext(
             tilgangService,
             sakService,
         )
-    }
-    val migreringService by lazy {
-        MigreringService(
-            sakService,
-            foerstegangsbehandlingService,
-            behandlingsHendelser.nyHendelse,
-            MigreringRepository(KotliqueryRepositoryWrapper(dataSource))
-        )
-    }
+
+    val migreringService = MigreringService(
+        sakService,
+        foerstegangsbehandlingService,
+        behandlingsHendelser.nyHendelse,
+        MigreringRepository(KotliqueryRepositoryWrapper(dataSource))
+    )
 
     // Job
-    val behandlingsHendelser by lazy { BehandlingsHendelser(rapid, behandlingDao, dataSource) }
     val grunnlagsendringshendelseJob = GrunnlagsendringshendelseJob(
         datasource = dataSource,
         grunnlagsendringshendelseService = grunnlagsendringshendelseService,

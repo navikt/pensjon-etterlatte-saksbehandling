@@ -12,12 +12,12 @@ class EgenAnsattService(private val sakService: SakService, val sikkerLogg: Logg
     fun haandterSkjerming(skjermetHendelse: EgenAnsattSkjermet) {
         val saker = sakService.finnSaker(skjermetHendelse.fnr)
         if (saker.isEmpty()) {
-            logger.error(
+            logger.debug(
                 "Fant ingen saker for skjermethendelse fnr: ${skjermetHendelse.fnr.maskerFnr()} " +
                     "se sikkerlogg og/eller skjekk korrelasjonsid. Selvom dette var forventet," +
                     " ellers hadde ikke vi fått denne hendelsen"
             )
-            sikkerLogg.info("Fant ingen ingen saker for fnr: ${skjermetHendelse.fnr}")
+            sikkerLogg.debug("Fant ingen ingen saker for fnr: ${skjermetHendelse.fnr}")
         }
         val sakerMedNyEnhet = saker.map {
             GrunnlagsendringshendelseService.SakMedEnhet(

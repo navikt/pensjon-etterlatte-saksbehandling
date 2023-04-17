@@ -8,9 +8,8 @@ import { TrygdetidBeregnet } from '~components/behandling/trygdetid/TrygdetidBer
 import { Soeknadsvurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsVurdering'
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { useParams } from 'react-router-dom'
+import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 
 export const Trygdetid = () => {
   const { behandlingId } = useParams()
@@ -51,24 +50,7 @@ export const Trygdetid = () => {
 
       {trygdetid && (
         <>
-          <InfoWrapper>
-            <Info
-              label="Fødselsdato"
-              tekst={
-                trygdetid.opplysninger.avdoedFoedselsdato
-                  ? formaterStringDato(trygdetid.opplysninger.avdoedFoedselsdato.toString())
-                  : 'n/a'
-              }
-            />
-            <Info
-              label="Dødsdato"
-              tekst={
-                trygdetid.opplysninger.avdoedDoedsdato
-                  ? formaterStringDato(trygdetid.opplysninger.avdoedDoedsdato.toString())
-                  : 'n/a'
-              }
-            />
-          </InfoWrapper>
+          <Grunnlagopplysninger opplysninger={trygdetid.opplysninger} />
           <TrygdetidGrunnlag
             trygdetid={trygdetid}
             setTrygdetid={setTrygdetid}

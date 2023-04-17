@@ -13,15 +13,17 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
-import java.time.LocalDate
 import java.util.*
 
 fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: BehandlingKlient) {
@@ -96,12 +98,17 @@ fun Trygdetid.toDto(): TrygdetidDto =
 
 private fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
     GrunnlagOpplysningerDto(
-        avdoedFoedselsdato = this.finnDato(Opplysningstype.FOEDSELSDATO),
-        avdoedDoedsdato = this.finnDato(Opplysningstype.DOEDSDATO)
+        avdoedFoedselsdato = this.finnOpplysning(Opplysningstype.FOEDSELSDATO),
+        avdoedDoedsdato = this.finnOpplysning(Opplysningstype.DOEDSDATO)
     )
 
-private fun List<Opplysningsgrunnlag>.finnDato(type: Opplysningstype): LocalDate? =
-    this.find { opplysning -> opplysning.type == type }?.opplysning?.toLocalDate()
+private fun List<Opplysningsgrunnlag>.finnOpplysning(type: Opplysningstype): OpplysningsgrunnlagDto? =
+    this.find { opplysning -> opplysning.type == type }?.toDto()
+
+private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto = OpplysningsgrunnlagDto(
+    opplysning = this.opplysning,
+    kilde = objectMapper.readValue(this.kilde.asText(), OpplysningkildeDto::class.java)
+)
 
 private fun BeregnetTrygdetidDto.toBeregnetTrygdetid(): BeregnetTrygdetid =
     BeregnetTrygdetid(

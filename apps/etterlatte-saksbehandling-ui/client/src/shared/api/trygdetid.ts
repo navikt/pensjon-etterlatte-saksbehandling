@@ -28,8 +28,16 @@ export interface ITrygdetid {
 }
 
 export interface IGrunnlagOpplysninger {
-  avdoedDoedsdato: Date
-  avdoedFoedselsdato: Date
+  avdoedDoedsdato: IOpplysningsgrunnlag
+  avdoedFoedselsdato: IOpplysningsgrunnlag
+}
+
+export type IOpplysningsgrunnlag = {
+  opplysning: string
+  kilde: {
+    type: string
+    tidspunktForInnhenting: string
+  }
 }
 
 export interface IBeregnetTrygdetid {

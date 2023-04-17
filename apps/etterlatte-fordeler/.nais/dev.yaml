@@ -63,6 +63,5 @@ spec:
         - application: etterlatte-behandling
         - application: skjermede-personer-pip
           namespace: nom
-          cluster: dev-gcp
       external:
         - host: skjermede-personer-pip.intern.dev.nav.no

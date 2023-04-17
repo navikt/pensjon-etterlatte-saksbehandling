@@ -4,8 +4,6 @@ import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 
 object VilkaarsvurderingAPI {
     const val basisrute = "api/vilkaarsvurdering"
-//    const kopierRute =
-
     fun kopier(behandlingsId: String) =
         Route("/$behandlingsId/kopier", OpprettVilkaarsvurderingFraBehandling::class.java)
 

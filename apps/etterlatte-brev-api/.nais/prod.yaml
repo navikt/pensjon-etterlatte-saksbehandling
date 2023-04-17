@@ -114,6 +114,8 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-behandling
       external:
+        - host: etterlatte-proxy.prod-fss-pub.nais.io
+        - host: norg2.prod-fss-pub.nais.io
         - host: saf.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: dokdistfordeling.prod-fss-pub.nais.io

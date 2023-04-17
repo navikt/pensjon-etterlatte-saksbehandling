@@ -46,7 +46,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
             }
         }
 
-        post(VilkaarsvurderingAPI.opprett(BEHANDLINGSID_CALL_PARAMETER).url) {
+        post(VilkaarsvurderingAPI.opprett("{$BEHANDLINGSID_CALL_PARAMETER}").url) {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 try {
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
@@ -66,7 +66,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
             }
         }
 
-        val kopier = VilkaarsvurderingAPI.kopier(BEHANDLINGSID_CALL_PARAMETER)
+        val kopier = VilkaarsvurderingAPI.kopier("{$BEHANDLINGSID_CALL_PARAMETER}")
 
         post(kopier.url) {
             withBehandlingId(behandlingKlient) { behandlingId ->

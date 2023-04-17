@@ -19,6 +19,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import trygdetid.beregnetTrygdetid
+import trygdetid.beregnetTrygdetidGrunnlag
 import trygdetid.trygdetidGrunnlag
 import java.time.LocalDate
 import java.util.*
@@ -107,12 +108,13 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal opprette et trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
+        val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
+
         val behandling = mockk<DetaljertBehandling>().apply {
             every { id } returns behandlingId
             every { sak } returns 123L
         }
-        val trygdetid = repository.opprettTrygdetid(behandling, mapOf())
-        val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
+        repository.opprettTrygdetid(behandling, mapOf())
 
         val trygdetidMedTrygdetidGrunnlag =
             repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
@@ -130,12 +132,12 @@ internal class TrygdetidRepositoryTest {
             every { id } returns behandlingId
             every { sak } returns 123L
         }
-        val trygdetid = repository.opprettTrygdetid(behandling, mapOf())
+        val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
 
-        val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
+        repository.opprettTrygdetid(behandling, mapOf())
         repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
 
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(trygdetid = 20)
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(kilde = "test")
         val trygdetidMedOppdatertGrunnlag =
             repository.oppdaterTrygdetidGrunnlag(behandlingId, endretTrygdetidGrunnlag)
 
@@ -148,13 +150,14 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal hente et trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
+        val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
+
         val behandling = mockk<DetaljertBehandling>().apply {
             every { id } returns behandlingId
             every { sak } returns 123L
         }
-        val trygdetid = repository.opprettTrygdetid(behandling, mapOf())
 
-        val trygdetidGrunnlag = trygdetidGrunnlag(trygdetid.id)
+        repository.opprettTrygdetid(behandling, mapOf())
         repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
 
         val hentetTrygdetidGrunnlag = repository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
@@ -165,7 +168,7 @@ internal class TrygdetidRepositoryTest {
     @Test
     fun `skal oppdatere beregnet trygdetid`() {
         val behandlingId = randomUUID()
-        val beregnetTrygdetid = beregnetTrygdetid(nasjonal = 10, fremtidig = 2, total = 12, tidspunkt = Tidspunkt.now())
+        val beregnetTrygdetid = beregnetTrygdetid(total = 12, tidspunkt = Tidspunkt.now())
         val behandling = mockk<DetaljertBehandling>().apply {
             every { id } returns behandlingId
             every { sak } returns 123L

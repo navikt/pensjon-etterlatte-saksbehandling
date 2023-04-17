@@ -23,7 +23,6 @@ export interface ITrygdetid {
   behandlingId: string
   beregnetTrygdetid?: IBeregnetTrygdetid
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
-
   opplysninger: IGrunnlagOpplysninger
 }
 
@@ -41,8 +40,6 @@ export type IOpplysningsgrunnlag = {
 }
 
 export interface IBeregnetTrygdetid {
-  nasjonal: number
-  fremtidig: number
   total: number
 }
 
@@ -52,8 +49,14 @@ export interface ITrygdetidGrunnlag {
   bosted: string
   periodeFra?: string
   periodeTil?: string
-  trygdetid?: number
+  beregnet?: IBeregnetTrygdetidGrunnlag
   kilde: string
+}
+
+export interface IBeregnetTrygdetidGrunnlag {
+  dager: number
+  maaneder: number
+  aar: number
 }
 
 export enum ITrygdetidGrunnlagType {

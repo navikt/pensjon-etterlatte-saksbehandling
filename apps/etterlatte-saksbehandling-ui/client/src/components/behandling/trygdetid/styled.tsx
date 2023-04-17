@@ -11,7 +11,7 @@ export const FormWrapper = styled.div`
 `
 
 export const FormKnapper = styled.div`
-  margin-top: 2rem;
+  margin-top: 1rem;
   margin-right: 1em;
   gap: 1rem;
 `

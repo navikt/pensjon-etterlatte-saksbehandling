@@ -29,10 +29,8 @@ data class OpplysningkildeDto(
 )
 
 data class BeregnetTrygdetidDto(
-    val nasjonal: Int,
-    val fremtidig: Int,
     val total: Int,
-    val tidspunkt: Tidspunkt?
+    val tidspunkt: Tidspunkt
 )
 
 data class TrygdetidGrunnlagDto(
@@ -41,6 +39,12 @@ data class TrygdetidGrunnlagDto(
     val bosted: String,
     val periodeFra: LocalDate,
     val periodeTil: LocalDate,
-    val trygdetid: Int,
-    val kilde: String
+    val kilde: String,
+    val beregnet: BeregnetTrygdetidGrunnlagDto?
+)
+
+data class BeregnetTrygdetidGrunnlagDto(
+    val dager: Int,
+    val maaneder: Int,
+    val aar: Int
 )

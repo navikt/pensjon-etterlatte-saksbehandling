@@ -11,7 +11,8 @@ import java.util.*
 class TrygdetidService(
     private val trygdetidRepository: TrygdetidRepository,
     private val behandlingKlient: BehandlingKlient,
-    private val grunnlagKlient: GrunnlagKlient
+    private val grunnlagKlient: GrunnlagKlient,
+    private val beregnTrygdetidService: TrygdetidBeregningService
 ) {
     fun hentTrygdetid(behandlingsId: UUID): Trygdetid? = trygdetidRepository.hentTrygdetid(behandlingsId)
 
@@ -35,27 +36,22 @@ class TrygdetidService(
         trygdetidGrunnlag: TrygdetidGrunnlag
     ): Trygdetid =
         tilstandssjekk(behandlingId, bruker) {
-            // TODO hvis status er "forbi" trygdetid bør dette sette tilstand tilbake til trygdetid?
+            // TODO transaksjonshåndtering bør skje her i service
+            val beregnetTrygdetidGrunnlag = beregnTrygdetidService.beregnTrygdetidGrunnlag(trygdetidGrunnlag)
+            val trygdetidGrunnlagMedBeregning = trygdetidGrunnlag.copy(beregnetTrygdetid = beregnetTrygdetidGrunnlag)
             val eksisterendeTrygdetid = trygdetidRepository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
             val trygdetid = if (eksisterendeTrygdetid != null) {
-                trygdetidRepository.oppdaterTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+                trygdetidRepository.oppdaterTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning)
             } else {
-                trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
+                trygdetidRepository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlagMedBeregning)
             }
-            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
-            trygdetid
-        }
 
-    suspend fun lagreBeregnetTrygdetid(
-        behandlingId: UUID,
-        bruker: Bruker,
-        beregnetTrygdetid: BeregnetTrygdetid
-    ): Trygdetid =
-        tilstandssjekk(behandlingId, bruker) {
-            // TODO hvis status er "forbi" trygdetid bør dette sette tilstand tilbake til trygdetid?
-            val trygdetid = trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
-            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
-            trygdetid
+            trygdetidRepository.oppdaterBeregnetTrygdetid(
+                behandlingId = behandlingId,
+                beregnetTrygdetid = beregnTrygdetidService.beregnTrygdetid(trygdetid.trygdetidGrunnlag)
+            ).also {
+                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
+            }
         }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {

@@ -77,6 +77,7 @@ class BrevRepository(private val ds: DataSource) {
                             "foedselsnummer" to brev.mottaker.foedselsnummer?.value,
                             "orgnummer" to brev.mottaker.orgnummer,
                             "navn" to brev.mottaker.navn,
+                            "adressetype" to brev.mottaker.adresse.adresseType,
                             "adresselinje1" to brev.mottaker.adresse.adresselinje1,
                             "adresselinje2" to brev.mottaker.adresse.adresselinje2,
                             "adresselinje3" to brev.mottaker.adresse.adresselinje3,

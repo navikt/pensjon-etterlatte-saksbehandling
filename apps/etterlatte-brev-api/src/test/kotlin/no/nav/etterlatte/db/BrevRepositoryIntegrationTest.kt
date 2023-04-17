@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -167,6 +168,20 @@ internal class BrevRepositoryIntegrationTest {
 
         // Skal være 5 hendelser. 1 for opprettet, og 4 for resten som ble kjørt manuelt
         assertEquals(5, count)
+    }
+
+    @Test
+    fun `Oppdater brev`() {
+        val behandlingId = UUID.randomUUID()
+
+        val originaltBrev = ulagretBrev(behandlingId)
+        val opprettetBrev = db.opprettBrev(originaltBrev)
+
+        db.oppdaterBrev(opprettetBrev.id, originaltBrev)
+
+        val faktiskBrev = db.hentBrev(opprettetBrev.id)
+
+        assertEquals(Status.OPPDATERT, faktiskBrev.status)
     }
 
     private fun ulagretBrev(behandlingId: UUID) = UlagretBrev(

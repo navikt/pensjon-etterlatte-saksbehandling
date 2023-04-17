@@ -15,7 +15,9 @@ data class TrygdetidDto(
 
 data class GrunnlagOpplysningerDto(
     val avdoedDoedsdato: OpplysningsgrunnlagDto?,
-    val avdoedFoedselsdato: OpplysningsgrunnlagDto?
+    val avdoedFoedselsdato: OpplysningsgrunnlagDto?,
+    val avdoedFylteSeksten: OpplysningsgrunnlagDto?,
+    val avdoedFyllerSeksti: OpplysningsgrunnlagDto?
 )
 
 data class OpplysningsgrunnlagDto(
@@ -25,7 +27,7 @@ data class OpplysningsgrunnlagDto(
 
 data class OpplysningkildeDto(
     val type: String,
-    val tidspunktForInnhenting: String
+    val tidspunkt: String
 )
 
 data class BeregnetTrygdetidDto(

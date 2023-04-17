@@ -1,20 +1,18 @@
 package no.nav.etterlatte.trygdetid
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.tidspunkt
-import java.time.LocalDate
 import java.time.Period
 import java.util.*
 import javax.sql.DataSource
@@ -60,10 +58,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             }
         }
 
-    fun opprettTrygdetid(
-        behandling: DetaljertBehandling,
-        opplysninger: Map<Opplysningstype, Opplysning.Konstant<out LocalDate?>?>
-    ): Trygdetid =
+    fun opprettTrygdetid(behandling: DetaljertBehandling, opplysninger: List<Opplysningsgrunnlag>): Trygdetid =
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 val trygdetidId = UUID.randomUUID()
@@ -86,20 +81,20 @@ class TrygdetidRepository(private val dataSource: DataSource) {
 
     private fun lagreOpplysningsgrunnlag(
         trygdetidId: UUID?,
-        opplysninger: Map<Opplysningstype, Opplysning.Konstant<out LocalDate?>?>,
+        opplysninger: List<Opplysningsgrunnlag>,
         tx: TransactionalSession
-    ) = opplysninger.forEach { (type, opplysning) ->
+    ) = opplysninger.forEach { opplysningsgrunnlag ->
         queryOf(
             statement = """
                 INSERT INTO opplysningsgrunnlag(id, trygdetid_id, type, opplysning, kilde)
                  VALUES(:id, :trygdetidId, :type, :opplysning::JSONB, :kilde::JSONB)
             """.trimIndent(),
             paramMap = mapOf(
-                "id" to UUID.randomUUID(),
+                "id" to opplysningsgrunnlag.id,
                 "trygdetidId" to trygdetidId,
-                "type" to type.name,
-                "opplysning" to opplysning?.verdi?.toJson(),
-                "kilde" to opplysning?.kilde?.toJson()
+                "type" to opplysningsgrunnlag.type.name,
+                "opplysning" to opplysningsgrunnlag.opplysning.toJson(),
+                "kilde" to opplysningsgrunnlag.kilde.toJson()
             )
         ).let { query -> tx.update(query) }
     }
@@ -267,9 +262,9 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     private fun Row.toOpplysningsgrunnlag(): Opplysningsgrunnlag {
         return Opplysningsgrunnlag(
             id = uuid("id"),
-            type = Opplysningstype.valueOf(string("type")),
+            type = string("type").let { TrygdetidOpplysningType.valueOf(it) },
             opplysning = string("opplysning").toJsonNode(),
-            kilde = string("kilde").toJsonNode()
+            kilde = string("kilde").let { objectMapper.readValue(it) }
         )
     }
 }

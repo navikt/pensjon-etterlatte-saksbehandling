@@ -12,12 +12,6 @@ export const lagreTrygdetidgrunnlag = async (args: {
 }): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag`, { ...args.trygdetidgrunnlag })
 
-export const lagreOppsummertTrygdetid = async (args: {
-  behandlingsId: string
-  beregnetTrygdetid: IBeregnetTrygdetid
-}): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.post(`/trygdetid/${args.behandlingsId}/beregnet`, { ...args.beregnetTrygdetid })
-
 export interface ITrygdetid {
   id: string
   behandlingId: string
@@ -29,13 +23,15 @@ export interface ITrygdetid {
 export interface IGrunnlagOpplysninger {
   avdoedDoedsdato: IOpplysningsgrunnlag
   avdoedFoedselsdato: IOpplysningsgrunnlag
+  avdoedFylteSeksten: IOpplysningsgrunnlag
+  avdoedFyllerSeksti: IOpplysningsgrunnlag
 }
 
 export type IOpplysningsgrunnlag = {
   opplysning: string
   kilde: {
     type: string
-    tidspunktForInnhenting: string
+    tidspunkt: string
   }
 }
 

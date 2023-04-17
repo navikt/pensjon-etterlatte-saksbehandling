@@ -1,9 +1,9 @@
 package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import java.time.LocalDate
 import java.time.Period
 import java.util.*
@@ -24,12 +24,31 @@ data class BeregnetTrygdetid(
 
 data class Opplysningsgrunnlag(
     val id: UUID,
-    val type: Opplysningstype,
+    val type: TrygdetidOpplysningType,
     val opplysning: JsonNode,
-    val kilde: JsonNode
-)
+    val kilde: Grunnlagsopplysning.Kilde
+) {
+    companion object {
+        fun ny(
+            type: TrygdetidOpplysningType,
+            kilde: Grunnlagsopplysning.Kilde?,
+            verdi: LocalDate?
+        ): Opplysningsgrunnlag =
+            Opplysningsgrunnlag(
+                id = UUID.randomUUID(),
+                type = type,
+                opplysning = verdi?.toJsonNode() ?: throw Exception("Mangler opplysning"),
+                kilde = kilde ?: throw Exception("Mangler kilde")
+            )
+    }
+}
 
-fun JsonNode.toLocalDate(): LocalDate = objectMapper.readValue(this.asText(), LocalDate::class.java)
+enum class TrygdetidOpplysningType {
+    FOEDSELSDATO,
+    DOEDSDATO,
+    FYLT_16,
+    FYLLER_66
+}
 
 data class TrygdetidGrunnlag(
     val id: UUID,

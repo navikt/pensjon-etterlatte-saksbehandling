@@ -15,7 +15,7 @@ on:
     branches:
       - main
     paths:
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
@@ -23,7 +23,7 @@ on:
     branches:
       - main
     paths:
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 

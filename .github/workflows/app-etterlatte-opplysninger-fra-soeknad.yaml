@@ -16,14 +16,14 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-soeknad/**
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-soeknad/**
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 
 jobs:

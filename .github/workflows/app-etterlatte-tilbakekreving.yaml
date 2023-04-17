@@ -16,7 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-tilbakekreving/**
-      - libs/etterlatte-common/**
+      - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - gradle/libs.versions.toml
@@ -25,7 +25,7 @@ on:
       - main
     paths:
       - apps/etterlatte-tilbakekreving/**
-      - libs/etterlatte-common/**
+      - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - gradle/libs.versions.toml

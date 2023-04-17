@@ -16,11 +16,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.bruker
 import no.nav.etterlatte.libs.ktor.receive
+import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import vilkaarsvurdering.VilkaarsvurderingAPI
 import java.util.*
@@ -213,10 +213,5 @@ data class VurdertVilkaarDto(
     val vilkaarId: UUID,
     val hovedvilkaar: VilkaarTypeOgUtfall,
     val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
-    val kommentar: String?
-)
-
-data class VurdertVilkaarsvurderingResultatDto(
-    val resultat: VilkaarsvurderingUtfall,
     val kommentar: String?
 )

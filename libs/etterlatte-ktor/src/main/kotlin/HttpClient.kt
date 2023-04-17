@@ -12,6 +12,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.plugins.CannotTransformContentToTypeException
+import io.ktor.server.request.receiveNullable
+import io.ktor.util.reflect.typeInfo
 import no.nav.etterlatte.libs.common.Invocation
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -60,3 +64,6 @@ suspend fun <T> HttpClient.post(invocation: Invocation<T>) = this.post(invocatio
     contentType(ContentType.Application.Json)
     invocation.body
 }
+
+suspend inline fun <reified T : Any> ApplicationCall.receive(clazz: Class<T>): T = receiveNullable(typeInfo<T>())
+    ?: throw CannotTransformContentToTypeException(typeInfo<T>().kotlinType!!)

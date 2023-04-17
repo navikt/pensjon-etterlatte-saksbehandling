@@ -1,9 +1,12 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
+import io.ktor.server.plugins.CannotTransformContentToTypeException
 import io.ktor.server.request.receive
+import io.ktor.server.request.receiveNullable
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
@@ -11,6 +14,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import io.ktor.util.reflect.typeInfo
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -42,7 +46,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
             }
         }
 
-        post(VilkaarsvurderingAPI.opprett(BEHANDLINGSID_CALL_PARAMETER)) {
+        post(VilkaarsvurderingAPI.opprett(BEHANDLINGSID_CALL_PARAMETER).url) {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 try {
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
@@ -62,9 +66,11 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
             }
         }
 
-        post(VilkaarsvurderingAPI.kopier(BEHANDLINGSID_CALL_PARAMETER)) {
+        val kopier = VilkaarsvurderingAPI.kopier(BEHANDLINGSID_CALL_PARAMETER)
+
+        post(kopier.url) {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                val forrigeBehandling = call.receive<OpprettVilkaarsvurderingFraBehandling>().forrigeBehandling
+                val forrigeBehandling = call.receive(kopier.clazz).forrigeBehandling
 
                 try {
                     logger.info("Kopierer vilkårsvurdering for $behandlingId fra $forrigeBehandling")
@@ -217,3 +223,6 @@ data class VurdertVilkaarsvurderingResultatDto(
     val resultat: VilkaarsvurderingUtfall,
     val kommentar: String?
 )
+
+suspend inline fun <reified T : Any> ApplicationCall.receive(clazz: Class<T>): T = receiveNullable(typeInfo<T>())
+    ?: throw CannotTransformContentToTypeException(typeInfo<T>().kotlinType!!)

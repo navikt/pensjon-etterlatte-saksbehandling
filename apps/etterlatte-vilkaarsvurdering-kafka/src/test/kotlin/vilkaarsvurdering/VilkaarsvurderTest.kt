@@ -13,7 +13,7 @@ import java.util.*
 
 internal class VilkaarsvurderTest {
     private val vilkaarsvurderingServiceMock = mockk<VilkaarsvurderingService> {
-        coEvery { kopierForrigeVilkaarsvurdering(any(), any()) } returns Unit
+        coEvery { kopierForrigeVilkaarsvurdering(any(), any()) } returns mockk()
     }
     private val testRapid = TestRapid().apply { Vilkaarsvurder(this, vilkaarsvurderingServiceMock) }
 

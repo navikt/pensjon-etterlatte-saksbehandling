@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Period
 import java.util.UUID.randomUUID
 
 internal class TrygdetidServiceTest {
@@ -149,12 +150,17 @@ internal class TrygdetidServiceTest {
             )
         }
 
-        runBlocking {
+        val trygdetid = runBlocking {
             service.lagreTrygdetidGrunnlag(
                 behandlingId,
                 saksbehandler,
                 trygdetidGrunnlag
             )
+        }
+        with(trygdetid.trygdetidGrunnlag.first()) {
+            beregnetTrygdetid?.verdi shouldBe java.time.Period.of(0, 1, 1)
+            beregnetTrygdetid?.regelResultat shouldNotBe null
+            beregnetTrygdetid?.tidspunkt shouldNotBe null
         }
 
         coVerify(exactly = 1) {
@@ -190,12 +196,18 @@ internal class TrygdetidServiceTest {
             )
         }
 
-        runBlocking {
+        val trygdetid = runBlocking {
             service.lagreTrygdetidGrunnlag(
                 behandlingId,
                 saksbehandler,
                 endretTrygdetidGrunnlag
             )
+        }
+
+        with(trygdetid.trygdetidGrunnlag.first()) {
+            beregnetTrygdetid?.verdi shouldBe Period.of(0, 1, 1)
+            beregnetTrygdetid?.regelResultat shouldNotBe null
+            beregnetTrygdetid?.tidspunkt shouldNotBe null
         }
 
         coVerify(exactly = 1) {
@@ -224,47 +236,5 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify { behandlingKlient.kanBeregnes(behandlingId, saksbehandler) }
-    }
-
-    @Test
-    fun `skal lagre beregnet trygdetid`() {
-        val behandlingId = randomUUID()
-        val beregnetTrygdetid = beregnetTrygdetid(10)
-        every { repository.oppdaterBeregnetTrygdetid(any(), any()) } returns trygdetid(behandlingId, beregnetTrygdetid)
-        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
-
-        runBlocking {
-            service.lagreBeregnetTrygdetid(
-                behandlingId,
-                saksbehandler,
-                beregnetTrygdetid
-            )
-        }
-        coVerify(exactly = 1) {
-            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
-            repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
-            behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, saksbehandler)
-        }
-    }
-
-    @Test
-    fun `skal feile ved lagring av beregnet trygdetid hvis behandling er i feil tilstand`() {
-        val behandlingId = randomUUID()
-        val beregnetTrygdetid = beregnetTrygdetid(10)
-        coEvery { behandlingKlient.kanBeregnes(any(), any()) } returns false
-
-        runBlocking {
-            assertThrows<Exception> {
-                service.lagreBeregnetTrygdetid(
-                    behandlingId,
-                    saksbehandler,
-                    beregnetTrygdetid
-                )
-            }
-        }
-
-        coVerify(exactly = 1) {
-            behandlingKlient.kanBeregnes(behandlingId, saksbehandler)
-        }
     }
 }

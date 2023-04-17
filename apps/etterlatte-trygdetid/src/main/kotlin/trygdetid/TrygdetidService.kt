@@ -54,18 +54,6 @@ class TrygdetidService(
             }
         }
 
-    suspend fun lagreBeregnetTrygdetid(
-        behandlingId: UUID,
-        bruker: Bruker,
-        beregnetTrygdetid: BeregnetTrygdetid
-    ): Trygdetid =
-        tilstandssjekk(behandlingId, bruker) {
-            // TODO transaksjonshåndtering bør skje her i service
-            trygdetidRepository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid).also {
-                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker)
-            }
-        }
-
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Trygdetid): Trygdetid {
         val kanFastsetteTrygdetid = behandlingKlient.kanBeregnes(behandlingId, bruker)
         return if (kanFastsetteTrygdetid) {

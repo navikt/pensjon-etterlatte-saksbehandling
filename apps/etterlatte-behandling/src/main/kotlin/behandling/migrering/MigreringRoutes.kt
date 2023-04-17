@@ -15,8 +15,12 @@ fun Route.migreringRoutes(
     route("/migrering") {
         post {
             val request = call.receive<MigreringRequest>()
-            val behandlingId = migreringService.migrer(request)
-            call.respond(HttpStatusCode.Companion.Created, behandlingId.id)
+            val behandling = migreringService.migrer(request)
+
+            when (behandling) {
+                null -> call.respond(HttpStatusCode.NotFound)
+                else -> call.respond(HttpStatusCode.Companion.Created, behandling.id)
+            }
         }
     }
 }

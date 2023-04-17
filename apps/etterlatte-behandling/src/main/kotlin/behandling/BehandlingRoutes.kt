@@ -59,13 +59,18 @@ internal fun Route.behandlingRoutes(
                 "Kunne ikke hente ut navident for vurdering av ytelsen søkand gyldig framsatt"
             )
             val body = call.receive<VurderingMedBegrunnelseJson>()
-            val lagretGyldighetsResultat = foerstegangsbehandlingService.lagreGyldighetsproeving(
-                behandlingsId,
-                navIdent,
-                body.svar,
-                body.begrunnelse
-            )
-            call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
+
+            when (
+                val lagretGyldighetsResultat = foerstegangsbehandlingService.lagreGyldighetsproeving(
+                    behandlingsId,
+                    navIdent,
+                    body.svar,
+                    body.begrunnelse
+                )
+            ) {
+                null -> call.respond(HttpStatusCode.NotFound)
+                else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
+            }
         }
 
         post("/kommerbarnettilgode") {
@@ -176,12 +181,17 @@ internal fun Route.behandlingRoutes(
             post {
                 val behandlingsBehov = call.receive<BehandlingsBehov>()
 
-                foerstegangsbehandlingService.startFoerstegangsbehandling(
-                    behandlingsBehov.sak,
-                    behandlingsBehov.persongalleri,
-                    behandlingsBehov.mottattDato,
-                    Vedtaksloesning.DOFFEN
-                ).also { call.respondText(it.id.toString()) }
+                when (
+                    val behandling = foerstegangsbehandlingService.startFoerstegangsbehandling(
+                        behandlingsBehov.sak,
+                        behandlingsBehov.persongalleri,
+                        behandlingsBehov.mottattDato,
+                        Vedtaksloesning.DOFFEN
+                    )
+                ) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respondText(behandling.id.toString())
+                }
             }
         }
     }

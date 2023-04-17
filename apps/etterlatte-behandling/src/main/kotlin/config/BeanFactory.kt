@@ -140,7 +140,8 @@ abstract class CommonFactory : BeanFactory {
             sakDao(),
             behandlingDao(),
             hendelseDao(),
-            behandlingHendelser().nyHendelse
+            behandlingHendelser().nyHendelse,
+            featureToggleService
         )
 
     override fun revurderingService(): RevurderingService = RealRevurderingService(
@@ -154,7 +155,8 @@ abstract class CommonFactory : BeanFactory {
         RealManueltOpphoerService(
             behandlingDao(),
             behandlingHendelser().nyHendelse,
-            hendelseDao()
+            hendelseDao(),
+            featureToggleService
         )
 
     override fun generellBehandlingService(): GenerellBehandlingService {
@@ -164,7 +166,8 @@ abstract class CommonFactory : BeanFactory {
             hendelseDao(),
             vedtakKlient(),
             grunnlagKlient(),
-            sporingslogg()
+            sporingslogg(),
+            featureToggleService()
         )
     }
 

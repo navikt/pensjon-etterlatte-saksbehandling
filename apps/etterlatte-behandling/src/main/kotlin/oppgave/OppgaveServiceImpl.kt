@@ -1,6 +1,8 @@
 package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.Saksbehandler
+import no.nav.etterlatte.User
+import no.nav.etterlatte.filterForEnheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -52,17 +54,19 @@ class OppgaveServiceImpl(private val oppgaveDao: OppgaveDao, private val feature
     }
 
     private fun List<Oppgave>.filterForEnheter(bruker: Saksbehandler) =
-        if (featureToggleService.isEnabled(OppgaveServiceFeatureToggle.EnhetFilterOppgaver, false)) {
-            filterOppgaverForEnheter(this, bruker.enheter().map { it.id })
-        } else {
-            this
-        }
+        this.filterOppgaverForEnheter(featureToggleService, bruker)
+}
 
-    fun filterOppgaverForEnheter(oppgaver: List<Oppgave>, enheter: List<String>) =
-        oppgaver.filter { oppgave ->
-            when (oppgave) {
-                is Oppgave.BehandlingOppgave -> oppgave.enhet == null || enheter.contains(oppgave.enhet)
-                else -> true
-            }
-        }
+fun <T : Oppgave> List<T>.filterOppgaverForEnheter(
+    featureToggleService: FeatureToggleService,
+    user: User
+) = this.filterForEnheter(
+    featureToggleService,
+    OppgaveServiceFeatureToggle.EnhetFilterOppgaver,
+    user
+) { item, enheter ->
+    when (item) {
+        is Oppgave.BehandlingOppgave -> item.enhet == null || enheter.contains(item.enhet)
+        else -> true
+    }
 }

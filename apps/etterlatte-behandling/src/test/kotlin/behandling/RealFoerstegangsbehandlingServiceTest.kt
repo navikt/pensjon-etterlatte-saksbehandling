@@ -13,11 +13,14 @@ import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
+import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -38,8 +41,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
@@ -49,10 +54,12 @@ import java.util.*
 
 internal class RealFoerstegangsbehandlingServiceTest {
 
+    private val user = mockk<Saksbehandler>()
     private val sakDaoMock = mockk<SakDao>()
     private val behandlingDaoMock = mockk<BehandlingDao>()
     private val hendelseDaoMock = mockk<HendelseDao>()
     private val hendelserKanalMock = mockk<BehandlingHendelserKanal>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val naaTid = Tidspunkt.now()
     private val sut = RealFoerstegangsbehandlingService(
@@ -60,6 +67,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
         behandlingDaoMock,
         hendelseDaoMock,
         hendelserKanalMock,
+        featureToggleService,
         naaTid.fixedNorskTid()
     )
 
@@ -67,7 +75,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun before() {
         Kontekst.set(
             Context(
-                mockk(),
+                user,
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
@@ -90,6 +98,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
     @Test
     fun hentFoerstegangsbehandling() {
         val id = UUID.randomUUID()
+
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         every {
             behandlingDaoMock.hentBehandling(id)
@@ -121,7 +131,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             kilde = Vedtaksloesning.DOFFEN
         )
 
-        assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
+        assertEquals("Soeker", sut.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
@@ -132,6 +142,9 @@ internal class RealFoerstegangsbehandlingServiceTest {
         val behandlingHentes = slot<UUID>()
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
+
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val opprettetBehandling = Foerstegangsbehandling(
             id = UUID.randomUUID(),
@@ -181,7 +194,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             persongalleri,
             datoNaa.toString(),
             Vedtaksloesning.DOFFEN
-        )
+        )!!
 
         assertEquals(opprettetBehandling, resultat)
         assertEquals(opprettetBehandling.persongalleri.avdoed, resultat.persongalleri.avdoed)
@@ -225,6 +238,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
 
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } just Runs
 
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
         val forventetResultat = GyldighetsResultat(
             resultat = VurderingsResultat.OPPFYLT,
             vurderinger = listOf(
@@ -248,5 +263,139 @@ internal class RealFoerstegangsbehandlingServiceTest {
             behandlingDaoMock.hentBehandling(id)
             behandlingDaoMock.lagreGyldighetsproving(any())
         }
+    }
+
+    @Test
+    fun hentFoerstegangsbehandlingMedEnhetMensFeatureErSkruddAv() {
+        val id = UUID.randomUUID()
+
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        every {
+            behandlingDaoMock.hentBehandling(id)
+        } returns Foerstegangsbehandling(
+            id = id,
+            sak = Sak(
+                ident = "Ola Olsen",
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+            ),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            persongalleri = Persongalleri(
+                soeker = "Ola Olsen",
+                "Soeker",
+                listOf("Gjenlevende"),
+                listOf("Avdoed"),
+                emptyList()
+            ),
+            gyldighetsproeving = null,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "begrunnelse"
+            ),
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.DOFFEN
+        )
+
+        assertEquals("Soeker", sut.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+
+        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
+    }
+
+    @Test
+    fun hentFoerstegangsbehandlingMedEnhetOgSaksbehandlerHarEnhet() {
+        every {
+            user.enheter()
+        } returns listOf(SaksbehandlerEnhet(Enheter.DEFAULT_PORSGRUNN.enhetNr, Enheter.DEFAULT_PORSGRUNN.navn))
+
+        val id = UUID.randomUUID()
+
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+
+        every {
+            behandlingDaoMock.hentBehandling(id)
+        } returns Foerstegangsbehandling(
+            id = id,
+            sak = Sak(
+                ident = "Ola Olsen",
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+            ),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            persongalleri = Persongalleri(
+                soeker = "Ola Olsen",
+                "Soeker",
+                listOf("Gjenlevende"),
+                listOf("Avdoed"),
+                emptyList()
+            ),
+            gyldighetsproeving = null,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "begrunnelse"
+            ),
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.DOFFEN
+        )
+
+        assertEquals("Soeker", sut.hentFoerstegangsbehandling(id)!!.persongalleri.innsender)
+
+        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
+    }
+
+    @Test
+    fun hentFoerstegangsbehandlingMedEnhetOgSaksbehandlerHarIkkeEnhet() {
+        every {
+            user.enheter()
+        } returns listOf(SaksbehandlerEnhet(Enheter.EGNE_ANSATTE.enhetNr, Enheter.EGNE_ANSATTE.navn))
+
+        val id = UUID.randomUUID()
+
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+
+        every {
+            behandlingDaoMock.hentBehandling(id)
+        } returns Foerstegangsbehandling(
+            id = id,
+            sak = Sak(
+                ident = "Ola Olsen",
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+            ),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            persongalleri = Persongalleri(
+                soeker = "Ola Olsen",
+                "Soeker",
+                listOf("Gjenlevende"),
+                listOf("Avdoed"),
+                emptyList()
+            ),
+            gyldighetsproeving = null,
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "begrunnelse"
+            ),
+            kommerBarnetTilgode = null,
+            kilde = Vedtaksloesning.DOFFEN
+        )
+
+        assertNull(sut.hentFoerstegangsbehandling(id))
+
+        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
 }

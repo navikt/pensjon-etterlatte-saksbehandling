@@ -16,19 +16,18 @@ import java.util.*
 
 class MigreringService(
     private val sakService: SakService,
-    private val foerstegangsbehandlingService: FoerstegangsbehandlingService,
+    private val foerstegangsBehandlingService: FoerstegangsbehandlingService,
     private val behandlingsHendelser: BehandlingHendelserKanal,
     private val migreringRepository: MigreringRepository
 ) {
-    fun migrer(request: MigreringRequest): Behandling {
-        val behandling = opprettSakOgBehandling(request)
-        runBlocking { sendHendelse(behandling.id) }
-        migreringRepository.lagreKoplingTilPesyssaka(pesysSakId = request.pesysId, sakId = behandling.sak.id)
-        return behandling
+    fun migrer(request: MigreringRequest) = opprettSakOgBehandling(request)?.let {
+        runBlocking { sendHendelse(it.id) }
+        migreringRepository.lagreKoplingTilPesyssaka(pesysSakId = request.pesysId, sakId = it.sak.id)
+        it
     }
 
-    private fun opprettSakOgBehandling(request: MigreringRequest): Behandling =
-        foerstegangsbehandlingService.startFoerstegangsbehandling(
+    private fun opprettSakOgBehandling(request: MigreringRequest): Behandling? =
+        foerstegangsBehandlingService.startFoerstegangsbehandling(
             finnEllerOpprettSak(request).id,
             request.persongalleri,
             request.mottattDato.format(DateTimeFormatter.ISO_DATE_TIME),

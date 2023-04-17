@@ -220,15 +220,20 @@ class TestBeanFactory(
         }
     }
 
-    fun opprettSakMedFoerstegangsbehandling(sakId: Long, fnr: String): Pair<Sak, Foerstegangsbehandling> {
+    fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> {
         val sak = inTransaction {
             sakDao().opprettSak(fnr, SakType.BARNEPENSJON)
         }
 
-        val foerstegangsbehandling = foerstegangsbehandlingService()
-            .startFoerstegangsbehandling(sakId, persongalleri(), LocalDateTime.now().toString(), Vedtaksloesning.DOFFEN)
+        val behandling = foerstegangsbehandlingService()
+            .startFoerstegangsbehandling(
+                sak.id,
+                persongalleri(),
+                LocalDateTime.now().toString(),
+                Vedtaksloesning.DOFFEN
+            )
 
-        return Pair(sak, foerstegangsbehandling)
+        return Pair(sak, behandling)
     }
 
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton

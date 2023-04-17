@@ -10,6 +10,8 @@ import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelinePhase
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.bruker
@@ -113,3 +115,23 @@ data class SaksbehandlerMedRoller(val saksbehandler: Saksbehandler) {
         return false
     }
 }
+
+fun <T> List<T>.filterForEnheter(
+    featureToggleService: FeatureToggleService,
+    toggle: FeatureToggle,
+    user: User,
+    filter: (item: T, enheter: List<String>) -> Boolean
+) =
+    if (featureToggleService.isEnabled(toggle, false)) {
+        when (user) {
+            is no.nav.etterlatte.Saksbehandler -> {
+                val enheter = user.enheter().map { it.id }
+
+                this.filter { filter(it, enheter) }
+            }
+
+            else -> this
+        }
+    } else {
+        this
+    }

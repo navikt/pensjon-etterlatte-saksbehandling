@@ -7,9 +7,12 @@ import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
+import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
+import no.nav.etterlatte.libs.common.Invocation
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.security.ktor.clientCredential
@@ -52,3 +55,8 @@ fun httpClientClientCredentials(
         header(HttpHeaders.XCorrelationId, getCorrelationId())
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+
+suspend fun <T> HttpClient.post(invocation: Invocation<T>) = this.post(invocation.url) {
+    contentType(ContentType.Application.Json)
+    invocation.body
+}

@@ -140,7 +140,7 @@ internal class FordelerServiceTest {
     }
 
     @Test
-    fun `Skal fordele sak til doffen hvis barn er skjermet`() {
+    fun `Skal fordele sak til PESYS hvis barn er skjermet`() {
         val barnFnr = Folkeregisteridentifikator.of(FNR_1)
         val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
         val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)

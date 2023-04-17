@@ -50,7 +50,7 @@ class Server(private val context: ApplicationContext) {
         environment = applicationEngineEnvironment {
             config = HoconApplicationConfig(context.config)
             module { module(context) }
-            connector { port = 8080 }
+            connector { port = context.httpPort }
         }
     )
 
@@ -58,16 +58,15 @@ class Server(private val context: ApplicationContext) {
         dataSource.migrate()
 
         grunnlagsendringshendelseJob.schedule()
+        behandlingsHendelser.start()
+        setReady().also { engine.start(true) }
+
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 grunnlagsendringshendelseJob.cancel()
                 behandlingHendelser.nyHendelse.close()
             }
         )
-        behandlingsHendelser.start()
-
-        setReady().also { engine.start(true) }
-        behandlingsHendelser.nyHendelse.close()
     }
 }
 

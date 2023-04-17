@@ -77,7 +77,36 @@ saksnummer.
 
 ### Kjøre lokalt
 
-Appen er ikke satt opp for kunne kjøres lokalt p.t.
+TODO: Hvordan kjøre appen lokalt.
+
+DEV=true;
+NAIS_APP_NAME=etterlatte-behandling;
+NAIS_CLUSTER_NAME=dev-gcp;
+PDL_AZURE_SCOPE=api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default;
+GRUNNLAG_AZURE_SCOPE=api://dev-gcp.etterlatte.etterlatte-grunnlag/.default;
+ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE=api://dev-fss.teampensjon.navansatt/.default;
+NAVANSATT_URL=http://localhost:9091;
+NORG2_URL=http://localhost;
+ELECTOR_PATH=localhost:9091;
+ETTERLATTE_VEDTAK_CLIENT_ID=069b1b2c-0a06-4cc9-8418-f100b8ff71be;
+ETTERLATTE_VEDTAK_URL=https://etterlatte-vedtak.intern.dev.nav.no;
+ETTERLATTE_GRUNNLAG_CLIENT_ID=ce96a301-13db-4409-b277-5b27f464d08b;
+ETTERLATTE_GRUNNLAG_URL=https://etterlatte-grunnlag.intern.dev.nav.no/api;
+AZUREAD_ATTESTANT_GROUPID=63f46f74-84a8-4d1c-87a8-78532ab3ae60;
+AZUREAD_SAKSBEHANDLER_GROUPID=8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf;
+AZUREAD_STRENGT_FORTROLIG_GROUPID=5ef775f2-61f8-4283-bf3d-8d03f428aa14;
+AZUREAD_FORTROLIG_GROUPID=ea930b6b-9397-44d9-b9e6-f4cf527a632a;
+AZUREAD_EGEN_ANSATT_GROUPID=dbe4ad45-320b-4e9a-aaa1-73cca4ee124d;
+AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID=753805ea-65a7-4855-bdc3-e6130348df9f;
+AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID=ea7411eb-8b48-41a0-bc56-7b521fbf0c25;
+DB_HOST=localhost;
+DB_PORT=5432;
+DB_DATABASE=postgres;
+DB_PASSWORD=postgres;
+DB_USERNAME=postgres;
+HENDELSE_JOB_FREKVENS=1;
+HENDELSE_MINUTTER_GAMLE_HENDELSER=1;
+HTTP_PORT=8090;
 
 ## Bygg og deploy
 

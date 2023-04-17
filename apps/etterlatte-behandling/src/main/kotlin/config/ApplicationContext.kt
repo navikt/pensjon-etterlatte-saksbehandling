@@ -19,7 +19,6 @@ import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
-import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.migrering.MigreringRepository
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
@@ -34,8 +33,8 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
-import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
@@ -85,8 +84,12 @@ private fun featureToggleProperties(config: Config) = mapOf(
 class ApplicationContext(
     val env: Map<String, String> = System.getenv(),
     val config: Config = ConfigFactory.load(),
-    val rapid: KafkaProdusent<String, String> = GcpKafkaConfig.fromEnv(env)
-        .standardProducer(env.getValue("KAFKA_RAPID_TOPIC")),
+    val rapid: KafkaProdusent<String, String> =
+        if (env.getValue("DEV") == "true") {
+            TestProdusent()
+        } else {
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
+        },
     val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config)),
     val pdlHttpClient: HttpClient = pdlHttpClient(config),
     val grunnlagHttpClient: HttpClient = grunnlagHttpClient(config),
@@ -99,6 +102,7 @@ class ApplicationContext(
     val vedtakKlientObo: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient())
 ) {
+    val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
     val sporingslogg = Sporingslogg()
     val dataSource = DataSourceBuilder.createDataSource(env)
@@ -164,22 +168,21 @@ class ApplicationContext(
     val behandlingsStatusService = BehandlingStatusServiceImpl(behandlingDao, generellBehandlingService)
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource), saksbehandlerGroupIdsByKey)
     val enhetService = EnhetServiceImpl(navAnsattKlient)
-    val sakDaoAdressebeskyttelse = SakTilgangDao(dataSource)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
-            grunnlagsendringshendelseDao,
-            generellBehandlingService,
-            pdlKlient,
-            grunnlagKlient,
-            tilgangService,
-            sakService,
+            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+            generellBehandlingService = generellBehandlingService,
+            pdlKlient = pdlKlient,
+            grunnlagKlient = grunnlagKlient,
+            tilgangService = tilgangService,
+            sakService = sakService
         )
 
     val migreringService = MigreringService(
-        sakService,
-        foerstegangsbehandlingService,
-        behandlingsHendelser.nyHendelse,
-        MigreringRepository(KotliqueryRepositoryWrapper(dataSource))
+        sakService = sakService,
+        foerstegangsBehandlingService = foerstegangsbehandlingService,
+        behandlingsHendelser = behandlingsHendelser.nyHendelse,
+        migreringRepository = MigreringRepository(KotliqueryRepositoryWrapper(dataSource))
     )
 
     // Job

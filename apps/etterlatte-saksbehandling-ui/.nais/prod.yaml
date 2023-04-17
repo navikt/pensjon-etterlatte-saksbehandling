@@ -23,7 +23,8 @@ spec:
       allowAllUsers: false
       claims:
         groups:
-          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # Required for authorization
+          - id: 11053fd7-e674-4552-9a88-f9fcedfa70b3 # 0000-GA-PENSJON_ATTESTERING
+          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # 0000-GA-PENSJON_SAKSBEHANDLER
         extra:
           - NAVident
     sidecar:

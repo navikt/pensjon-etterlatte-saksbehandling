@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-pdltjenester/**
       - libs/etterlatte-sporingslogg/**
+      - libs/saksbehandling-common/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/ktor2client-auth-clientcredentials/**
@@ -28,6 +29,7 @@ on:
     paths:
       - apps/etterlatte-pdltjenester/**
       - libs/etterlatte-sporingslogg/**
+      - libs/saksbehandling-common/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
       - libs/ktor2client-auth-clientcredentials/**

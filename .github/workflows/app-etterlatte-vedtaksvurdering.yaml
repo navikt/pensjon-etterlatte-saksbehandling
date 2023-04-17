@@ -16,7 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-vedtaksvurdering/**
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - libs/testdata/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
@@ -29,7 +29,7 @@ on:
       - main
     paths:
       - apps/etterlatte-vedtaksvurdering/**
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - libs/testdata/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**

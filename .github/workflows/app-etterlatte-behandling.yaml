@@ -16,7 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-behandling/**
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**
@@ -32,7 +32,7 @@ on:
       - main
     paths:
       - apps/etterlatte-behandling/**
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-helsesjekk/**
       - libs/etterlatte-ktor/**

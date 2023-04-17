@@ -16,7 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-statistikk/**
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-database/**
       - gradle/libs.versions.toml
@@ -25,7 +25,7 @@ on:
       - main
     paths:
       - apps/etterlatte-statistikk/**
-      - libs/common/**
+      - libs/saksbehandling-common/**
       - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-database/**
       - gradle/libs.versions.toml

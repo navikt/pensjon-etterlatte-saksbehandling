@@ -23,7 +23,13 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         return 'Attestering'
       case IBehandlingStatus.IVERKSATT:
         return 'Iverksatt'
-      default:
+      case IBehandlingStatus.AVBRUTT:
+        return 'Avbrutt'
+      case IBehandlingStatus.OPPRETTET:
+      case IBehandlingStatus.VILKAARSVURDERT:
+      case IBehandlingStatus.BEREGNET:
+      case IBehandlingStatus.ATTESTERT:
+      case IBehandlingStatus.RETURNERT:
         return 'Under behandling'
     }
   }

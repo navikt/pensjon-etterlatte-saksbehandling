@@ -22,6 +22,7 @@ fun main() {
                 pdlTjenesterKlient = ab.pdlTjenesterKlient(),
                 fordelerRepository = FordelerRepository(ab.createDataSource()),
                 behandlingKlient = ab.behandlingKlient(),
+                skjermingKlient = ab.skjermingKlient(),
                 maxFordelingTilDoffen = ab.longFeature("FEATURE_MAX_FORDELING_TIL_DOFFEN")
             )
         )

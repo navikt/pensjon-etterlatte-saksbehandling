@@ -49,7 +49,7 @@ internal fun Route.behandlingRoutes(
 ) {
     val logger = application.log
     route("/api/behandling/") {
-        route("sak/$SAKID_CALL_PARAMETER/sisteIverksatte") {
+        route("sak/{$SAKID_CALL_PARAMETER}/sisteIverksatte") {
             get {
                 val sakId = call.parameters["sakId"] ?: return@get call.respond(
                     HttpStatusCode.BadRequest,
@@ -85,7 +85,7 @@ internal fun Route.behandlingRoutes(
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
-                } 
+                }
             }
 
             post("/kommerbarnettilgode") {

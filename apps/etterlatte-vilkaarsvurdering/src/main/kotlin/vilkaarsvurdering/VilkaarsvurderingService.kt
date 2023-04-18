@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
@@ -100,11 +101,11 @@ class VilkaarsvurderingService(
                 behandling.virkningstidspunkt ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
             vilkaarsvurderingRepository.kopierVilkaarsvurdering(
-                vilkaarsvurdering = Vilkaarsvurdering(
+                nyVilkaarsvurdering = Vilkaarsvurdering(
                     behandlingId = behandlingId,
                     grunnlagVersjon = grunnlag.metadata.versjon,
                     virkningstidspunkt = virkningstidspunkt.dato,
-                    vilkaar = tidligereVilkaarsvurdering.vilkaar,
+                    vilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
                     resultat = tidligereVilkaarsvurdering.resultat
                 ),
                 kopiertFraId = tidligereVilkaarsvurdering.id

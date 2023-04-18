@@ -126,7 +126,7 @@ fun <T> List<T>.filterForEnheter(
     if (featureToggleService.isEnabled(toggle, false)) {
         when (user) {
             is no.nav.etterlatte.Saksbehandler -> {
-                val enheter = user.enheter().map { it.id }
+                val enheter = user.enheter()
 
                 this.filter { filter(it, enheter) }
             }

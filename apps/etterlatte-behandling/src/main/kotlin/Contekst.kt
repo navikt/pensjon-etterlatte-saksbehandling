@@ -83,7 +83,7 @@ class Saksbehandler(
         )
     }
 
-    fun harRolleNasjonalTilgang(): Boolean {
+    private fun harRolleNasjonalTilgang(): Boolean {
         val jwtTokenClaims = identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims
         return jwtTokenClaims.containsClaim(
             "groups",
@@ -94,11 +94,11 @@ class Saksbehandler(
         )
     }
 
-    fun enheter() = runBlocking {
-        if (harRolleNasjonalTilgang()) {
-            Enheter.nasjonalTilgangEnheter()
-        } else {
-            enhetService.enheterForIdent(name())
+    fun enheter() = if (harRolleNasjonalTilgang()) {
+        Enheter.nasjonalTilgangEnheter()
+    } else {
+        runBlocking {
+            enhetService.enheterForIdent(name()).map { it.id }
         }
     }
 }

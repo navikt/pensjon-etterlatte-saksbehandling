@@ -6,7 +6,6 @@ import io.mockk.mockk
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -39,7 +38,7 @@ internal class OppgaveServiceTest {
             behandlingId = UUID.randomUUID(),
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
-            enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr,
+            enhet = Enheter.PORSGRUNN.enhetNr,
             merknad = null
         ),
         Oppgave.BehandlingOppgave(
@@ -71,8 +70,8 @@ internal class OppgaveServiceTest {
         val user = mockk<Saksbehandler>()
 
         every { user.enheter() } returns listOf(
-            SaksbehandlerEnhet(Enheter.DEFAULT_PORSGRUNN.enhetNr, Enheter.DEFAULT_PORSGRUNN.navn),
-            SaksbehandlerEnhet(Enheter.EGNE_ANSATTE.enhetNr, Enheter.EGNE_ANSATTE.navn)
+            Enheter.PORSGRUNN.enhetNr,
+            Enheter.EGNE_ANSATTE.enhetNr
         )
 
         val filtered = oppgaveListe.filterOppgaverForEnheter(featureToggleService, user)

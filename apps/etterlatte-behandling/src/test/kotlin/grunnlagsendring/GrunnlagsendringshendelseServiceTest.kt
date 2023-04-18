@@ -475,7 +475,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 id = it,
                 ident = TRIVIELL_MIDTPUNKT.value,
                 sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+                enhet = Enheter.PORSGRUNN.enhetNr
             )
         }
         val fnr = "16017919184"
@@ -513,7 +513,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 id = it,
                 ident = TRIVIELL_MIDTPUNKT.value,
                 sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+                enhet = Enheter.PORSGRUNN.enhetNr
             )
         }
         val fnr = "16017919184"

@@ -16,7 +16,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
@@ -222,7 +221,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
 
         val behandling = Foerstegangsbehandling(
             id = id,
-            sak = Sak("", SakType.BARNEPENSJON, 1, Enheter.DEFAULT_PORSGRUNN.enhetNr),
+            sak = Sak("", SakType.BARNEPENSJON, 1, Enheter.PORSGRUNN.enhetNr),
             behandlingOpprettet = now,
             sistEndret = now,
             status = BehandlingStatus.OPPRETTET,
@@ -279,7 +278,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 ident = "Ola Olsen",
                 sakType = SakType.BARNEPENSJON,
                 id = 1,
-                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+                enhet = Enheter.PORSGRUNN.enhetNr
             ),
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -311,7 +310,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun hentFoerstegangsbehandlingMedEnhetOgSaksbehandlerHarEnhet() {
         every {
             user.enheter()
-        } returns listOf(SaksbehandlerEnhet(Enheter.DEFAULT_PORSGRUNN.enhetNr, Enheter.DEFAULT_PORSGRUNN.navn))
+        } returns listOf(Enheter.PORSGRUNN.enhetNr)
 
         val id = UUID.randomUUID()
 
@@ -325,7 +324,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 ident = "Ola Olsen",
                 sakType = SakType.BARNEPENSJON,
                 id = 1,
-                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+                enhet = Enheter.PORSGRUNN.enhetNr
             ),
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -357,7 +356,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
     fun hentFoerstegangsbehandlingMedEnhetOgSaksbehandlerHarIkkeEnhet() {
         every {
             user.enheter()
-        } returns listOf(SaksbehandlerEnhet(Enheter.EGNE_ANSATTE.enhetNr, Enheter.EGNE_ANSATTE.navn))
+        } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
         val id = UUID.randomUUID()
 
@@ -371,7 +370,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 ident = "Ola Olsen",
                 sakType = SakType.BARNEPENSJON,
                 id = 1,
-                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+                enhet = Enheter.PORSGRUNN.enhetNr
             ),
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),

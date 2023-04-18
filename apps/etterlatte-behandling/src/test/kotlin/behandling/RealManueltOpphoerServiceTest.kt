@@ -12,7 +12,6 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
@@ -394,12 +393,12 @@ internal class RealManueltOpphoerServiceTest {
 
         every {
             user.enheter()
-        } returns listOf(SaksbehandlerEnhet(Enheter.DEFAULT_PORSGRUNN.enhetNr, Enheter.DEFAULT_PORSGRUNN.navn))
+        } returns listOf(Enheter.PORSGRUNN.enhetNr)
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(id) } returns manueltOpphoer(
                 sakId = sakId,
-                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+                enhet = Enheter.PORSGRUNN.enhetNr
             )
         }
         val hendelseDaoMock = mockk<HendelseDao> {
@@ -427,12 +426,12 @@ internal class RealManueltOpphoerServiceTest {
 
         every {
             user.enheter()
-        } returns listOf(SaksbehandlerEnhet(Enheter.EGNE_ANSATTE.enhetNr, Enheter.EGNE_ANSATTE.navn))
+        } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
         val behandlingDaoMock = mockk<BehandlingDao> {
             every { hentBehandling(id) } returns manueltOpphoer(
                 sakId = sakId,
-                enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+                enhet = Enheter.PORSGRUNN.enhetNr
             )
         }
         val hendelseDaoMock = mockk<HendelseDao> {

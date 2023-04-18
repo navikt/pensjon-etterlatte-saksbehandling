@@ -19,14 +19,12 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.bruker
-import no.nav.etterlatte.libs.ktor.receive
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
-import vilkaarsvurdering.VilkaarsvurderingAPI
 import java.util.*
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, behandlingKlient: BehandlingKlient) {
-    route(VilkaarsvurderingAPI.basisrute) {
+    route("/api/vilkaarsvurdering") {
         val logger = application.log
 
         get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -43,7 +41,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
             }
         }
 
-        post(VilkaarsvurderingAPI.opprett("{$BEHANDLINGSID_CALL_PARAMETER}").url) {
+        post("/{$BEHANDLINGSID_CALL_PARAMETER}/opprett") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 try {
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
@@ -63,11 +61,9 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService, 
             }
         }
 
-        val kopier = VilkaarsvurderingAPI.kopier("{$BEHANDLINGSID_CALL_PARAMETER}")
-
-        post(kopier.url) {
+        post("/{$BEHANDLINGSID_CALL_PARAMETER}/kopier") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                val forrigeBehandling = call.receive(kopier.clazz).forrigeBehandling
+                val forrigeBehandling = call.receive<OpprettVilkaarsvurderingFraBehandling>().forrigeBehandling
 
                 try {
                     logger.info("Kopierer vilkårsvurdering for $behandlingId fra $forrigeBehandling")

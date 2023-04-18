@@ -8,13 +8,18 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
+import org.slf4j.LoggerFactory
 
 class SkjermingKlient(
     private val httpClient: HttpClient,
     private val url: String
 ) : Pingable {
+    val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun personErSkjermet(fnr: String): Boolean {
         return httpClient.post("$url/skjermet") {
@@ -33,11 +38,14 @@ class SkjermingKlient(
                 header(X_CORRELATION_ID, getXCorrelationId())
                 header("Nav_Call_Id", getXCorrelationId())
                 contentType(ContentType.Application.Json)
-                setBody(SkjermetDataRequestDTO(personident = "dummy"))
+                setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
             }.body()
         } catch (e: Exception) {
-            return PingResult.down(serviceName, endpoint, e.message, beskrivelse)
+            return PingResult.down(serviceName, endpoint, e.message, beskrivelse).also {
+                logger.warn("Skjermingstjeneste svarer IKKE ok. ${it.toStringServiceDown()}")
+            }
         }
+        logger.info("Skjermingstjeneste svarer OK")
         return PingResult.up(serviceName, endpoint, beskrivelse)
     }
 
@@ -58,6 +66,13 @@ interface Pingable {
     val beskrivelse: String
     val endpoint: String
     suspend fun ping(): PingResult
+    fun asyncPing() {
+        runBlocking {
+            launch(Dispatchers.IO) {
+                ping()
+            }
+        }
+    }
 }
 
 class PingResult private constructor(

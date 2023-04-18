@@ -2,7 +2,7 @@ import io.ktor.client.HttpClient
 import io.ktor.server.testing.ApplicationTestBuilder
 import no.nav.etterlatte.libs.common.toJson
 
-private suspend fun ApplicationTestBuilder.verifyKlientOgRouteHarLikSignatur(
+private suspend fun ApplicationTestBuilder.verifyKlientOgRouteHarLikSignaturForPost(
     klient: HttpClient,
     request: Any
 ) {

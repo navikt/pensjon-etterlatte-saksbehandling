@@ -23,6 +23,7 @@ fun main() {
                 fordelerRepository = FordelerRepository(ab.createDataSource()),
                 behandlingKlient = ab.behandlingKlient(),
                 skjermingKlient = ab.skjermingKlient(),
+                skalBrukeSkjermingsklient = ab.skalBrukeSkjermingsklient(),
                 maxFordelingTilDoffen = ab.longFeature("FEATURE_MAX_FORDELING_TIL_DOFFEN")
             )
         )

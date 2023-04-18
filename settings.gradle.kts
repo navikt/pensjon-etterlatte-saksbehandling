@@ -36,6 +36,7 @@ include(
     "libs:etterlatte-ktor",
     "libs:etterlatte-jobs",
     "libs:etterlatte-kafka",
+    "libs:etterlatte-kontraktstesting",
     "libs:etterlatte-pdl-model",
     "libs:etterlatte-institusjonsopphold-model",
     "libs:testdata",

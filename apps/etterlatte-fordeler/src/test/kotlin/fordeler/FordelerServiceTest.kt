@@ -36,6 +36,7 @@ internal class FordelerServiceTest {
         fordelerRepo,
         maxFordelingTilDoffen = Long.MAX_VALUE,
         skjermingKlient = skjermingKlient,
+        skalBrukeSkjermingsklient = true,
         behandlingKlient = behandlingKlient
     )
 
@@ -212,6 +213,7 @@ internal class FordelerServiceTest {
             fordelerRepo,
             maxFordelingTilDoffen = 10,
             skjermingKlient = skjermingKlient,
+            skalBrukeSkjermingsklient = true,
             behandlingKlient = behandlingKlient
         )
 
@@ -259,6 +261,7 @@ internal class FordelerServiceTest {
             fordelerRepo,
             maxFordelingTilDoffen = 10,
             skjermingKlient = skjermingKlient,
+            skalBrukeSkjermingsklient = true,
             behandlingKlient = behandlingKlient
         )
         every { fordelerRepo.finnFordeling(any()) } returns null
@@ -303,6 +306,7 @@ internal class FordelerServiceTest {
             fordelerRepo,
             maxFordelingTilDoffen = 10,
             skjermingKlient = skjermingKlient,
+            skalBrukeSkjermingsklient = true,
             behandlingKlient = behandlingKlient
         )
         every { fordelerRepo.finnFordeling(any()) } returns null

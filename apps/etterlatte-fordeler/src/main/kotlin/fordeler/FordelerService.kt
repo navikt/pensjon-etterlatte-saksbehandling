@@ -38,6 +38,7 @@ class FordelerService(
     private val fordelerRepository: FordelerRepository,
     private val behandlingKlient: BehandlingKlient,
     private val skjermingKlient: SkjermingKlient,
+    private val skalBrukeSkjermingsklient: Boolean,
     private val klokke: Clock = utcKlokke(),
     private val maxFordelingTilDoffen: Long
 ) {
@@ -93,7 +94,11 @@ class FordelerService(
         val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
         val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
 
-        val barnetErSkjermet = skjermingKlient.personErSkjermet(barn.foedselsnummer.value)
+        val barnetErSkjermet = if (skalBrukeSkjermingsklient) {
+            skjermingKlient.personErSkjermet(barn.foedselsnummer.value)
+        } else {
+            false
+        }
 
         fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad, barnetErSkjermet).let {
             if (it.kandidat &&

@@ -27,6 +27,6 @@ class SkjermingKlient(
     }
 }
 
-internal class SkjermetDataRequestDTO(
-    val personident: String? = null
+data class SkjermetDataRequestDTO(
+    val personident: String
 )

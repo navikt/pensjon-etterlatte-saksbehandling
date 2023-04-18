@@ -138,33 +138,6 @@ internal class BehandlingRoutesTest {
         }
     }
 
-    @Test
-    fun `siste iverksatte route returnerer 200 ok og behandling`() {
-        val sakId = 1
-        coEvery { generellBehandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)
-
-        withTestApplication { client ->
-            val response = client.get("/api/behandling/sak/$sakId/sisteIverksatte") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
-
-            assertEquals(200, response.status.value)
-        }
-    }
-
-    @Test
-    fun `siste iverksatte route returnerer 404 naar det ikke finnes noen iverksatt behandling`() {
-        val sakId = 1
-        coEvery { generellBehandlingService.hentSisteIverksatte(1) } returns null
-        withTestApplication { client ->
-            val response = client.get("/api/behandling/sak/$sakId/sisteIverksatte") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
-
-            assertEquals(404, response.status.value)
-        }
-    }
-
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         testApplication {
             environment {

@@ -11,6 +11,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingListe
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
+import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -35,11 +36,24 @@ internal fun Route.sakRoutes(
             }
         }
 
-        get("/{$SAKID_CALL_PARAMETER}") {
-            val sak = inTransaction {
-                sakService.finnSak(sakId)
+        route("/{$SAKID_CALL_PARAMETER}") {
+            get {
+                val sak = inTransaction {
+                    sakService.finnSak(sakId)
+                }
+                call.respond(sak ?: HttpStatusCode.NotFound)
             }
-            call.respond(sak ?: HttpStatusCode.NotFound)
+
+            get("/behandlinger/sisteIverksatte") {
+                val sakId = call.parameters["sakId"] ?: return@get call.respond(
+                    HttpStatusCode.BadRequest,
+                    "Mangler sakId"
+                )
+                when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId.toLong())) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(sisteIverksatteBehandling.toDetaljertBehandling())
+                }
+            }
         }
     }
 

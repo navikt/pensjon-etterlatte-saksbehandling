@@ -19,13 +19,11 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
-import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -48,130 +46,115 @@ internal fun Route.behandlingRoutes(
     manueltOpphoerService: ManueltOpphoerService
 ) {
     val logger = application.log
-    route("/api/behandling/") {
-        route("sak/{$SAKID_CALL_PARAMETER}/sisteIverksatte") {
-            get {
-                val sakId = call.parameters["sakId"] ?: return@get call.respond(
-                    HttpStatusCode.BadRequest,
-                    "Mangler sakId"
+    route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {
+        get {
+            val detaljertBehandlingDTO =
+                generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, bruker)
+            call.respond(detaljertBehandlingDTO)
+        }
+
+        post("/gyldigfremsatt") {
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for vurdering av ytelsen søkand gyldig framsatt"
+            )
+            val body = call.receive<VurderingMedBegrunnelseJson>()
+            when (
+                val lagretGyldighetsResultat = foerstegangsbehandlingService.lagreGyldighetsproeving(
+                    behandlingsId,
+                    navIdent,
+                    body.svar,
+                    body.begrunnelse
                 )
-                when (val sisteIverksatteBehandling = generellBehandlingService.hentSisteIverksatte(sakId.toLong())) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(sisteIverksatteBehandling.toDetaljertBehandling())
+            ) {
+                null -> call.respond(HttpStatusCode.NotFound)
+                else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
+            }
+        }
+
+        post("/kommerbarnettilgode") {
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for vurdering av ytelsen kommer barnet tilgode"
+            )
+            val body = call.receive<VurderingMedBegrunnelseJson>()
+            val kommerBarnetTilgode = KommerBarnetTilgode(
+                body.svar,
+                body.begrunnelse,
+                Grunnlagsopplysning.Saksbehandler.create(navIdent)
+            )
+
+            try {
+                foerstegangsbehandlingService.lagreKommerBarnetTilgode(behandlingsId, kommerBarnetTilgode)
+                call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
+            } catch (e: TilstandException.UgyldigTilstand) {
+                call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
+            }
+        }
+
+        route("/manueltopphoer") {
+            get {
+                logger.info("Henter manuelt opphør oppsummering for manuelt opphør med id=$behandlingsId")
+                when (
+                    val opphoerOgBehandlinger =
+                        manueltOpphoerService.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingsId)
+                ) {
+                    null -> call.respond(
+                        HttpStatusCode.NotFound,
+                        "Fant ikke manuelt opphør med id=$behandlingsId"
+                    )
+
+                    else -> {
+                        val (opphoer, andre) = opphoerOgBehandlinger
+                        call.respond(
+                            opphoer.toManueltOpphoerOppsummmering(andre.map { it.toBehandlingSammendrag() })
+                        )
+                    }
                 }
             }
         }
 
-        route("{$BEHANDLINGSID_CALL_PARAMETER}") {
-            get {
-                val detaljertBehandlingDTO =
-                    generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, bruker)
-                call.respond(detaljertBehandlingDTO)
+        post("/avbryt") {
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for den som vil avbryte"
+            )
+            generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
+            call.respond(HttpStatusCode.OK)
+        }
+
+        post("/virkningstidspunkt") {
+            logger.debug("Prøver å fastsette virkningstidspunkt")
+            val navIdent = navIdentFraToken() ?: return@post call.respond(
+                HttpStatusCode.Unauthorized,
+                "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
+            )
+            val body = call.receive<VirkningstidspunktRequest>()
+
+            val erGyldigVirkningstidspunkt = generellBehandlingService.erGyldigVirkningstidspunkt(
+                behandlingsId,
+                bruker,
+                body
+            )
+            if (!erGyldigVirkningstidspunkt) {
+                return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
             }
 
-            post("/gyldigfremsatt") {
-                val navIdent = navIdentFraToken() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "Kunne ikke hente ut navident for vurdering av ytelsen søkand gyldig framsatt"
-                )
-                val body = call.receive<VurderingMedBegrunnelseJson>()
-                when (
-                    val lagretGyldighetsResultat = foerstegangsbehandlingService.lagreGyldighetsproeving(
-                        behandlingsId,
-                        navIdent,
-                        body.svar,
-                        body.begrunnelse
-                    )
-                ) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
-                }
-            }
-
-            post("/kommerbarnettilgode") {
-                val navIdent = navIdentFraToken() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "Kunne ikke hente ut navident for vurdering av ytelsen kommer barnet tilgode"
-                )
-                val body = call.receive<VurderingMedBegrunnelseJson>()
-                val kommerBarnetTilgode = KommerBarnetTilgode(
-                    body.svar,
-                    body.begrunnelse,
-                    Grunnlagsopplysning.Saksbehandler.create(navIdent)
-                )
-
-                try {
-                    foerstegangsbehandlingService.lagreKommerBarnetTilgode(behandlingsId, kommerBarnetTilgode)
-                    call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
-                }
-            }
-
-            route("/manueltopphoer") {
-                get {
-                    logger.info("Henter manuelt opphør oppsummering for manuelt opphør med id=$behandlingsId")
-                    when (
-                        val opphoerOgBehandlinger =
-                            manueltOpphoerService.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingsId)
-                    ) {
-                        null -> call.respond(
-                            HttpStatusCode.NotFound,
-                            "Fant ikke manuelt opphør med id=$behandlingsId"
-                        )
-
-                        else -> {
-                            val (opphoer, andre) = opphoerOgBehandlinger
-                            call.respond(
-                                opphoer.toManueltOpphoerOppsummmering(andre.map { it.toBehandlingSammendrag() })
-                            )
-                        }
-                    }
-                }
-            }
-
-            post("/avbryt") {
-                val navIdent = navIdentFraToken() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "Kunne ikke hente ut navident for den som vil avbryte"
-                )
-                generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
-                call.respond(HttpStatusCode.OK)
-            }
-
-            post("/virkningstidspunkt") {
-                logger.debug("Prøver å fastsette virkningstidspunkt")
-                val navIdent = navIdentFraToken() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "Kunne ikke hente ut navident for fastsetting av virkningstidspunkt"
-                )
-                val body = call.receive<VirkningstidspunktRequest>()
-
-                val erGyldigVirkningstidspunkt = generellBehandlingService.erGyldigVirkningstidspunkt(
+            try {
+                val virkningstidspunkt = generellBehandlingService.oppdaterVirkningstidspunkt(
                     behandlingsId,
-                    bruker,
-                    body
+                    body.dato,
+                    navIdent,
+                    body.begrunnelse!!
                 )
-                if (!erGyldigVirkningstidspunkt) {
-                    return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
-                }
 
-                try {
-                    val virkningstidspunkt = generellBehandlingService.oppdaterVirkningstidspunkt(
-                        behandlingsId,
-                        body.dato,
-                        navIdent,
-                        body.begrunnelse!!
-                    )
-
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
-                    )
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
-                }
+                call.respondText(
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.OK,
+                    text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
+                )
+            } catch (e: TilstandException.UgyldigTilstand) {
+                call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
             }
         }
     }

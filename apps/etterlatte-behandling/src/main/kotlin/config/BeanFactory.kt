@@ -231,13 +231,17 @@ class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory(
         val strengFortroligClaim = env["AZUREAD_STRENGT_FORTROLIG_GROUPID"]!!
         val fortroligClaim = env["AZUREAD_FORTROLIG_GROUPID"]!!
         val egenAnsattClaim = env["AZUREAD_EGEN_ANSATT_GROUPID"]!!
+        val nasjonalTilgangUtenLoggClaim = env["AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID"]!!
+        val nasjonalTilgangMedLoggClaim = env["AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID"]!!
 
         return mapOf(
             "AZUREAD_ATTESTANT_GROUPID" to attestantClaim,
             "AZUREAD_SAKSBEHANDLER_GROUPID" to saksbehandlerClaim,
             "AZUREAD_STRENGT_FORTROLIG_GROUPID" to strengFortroligClaim,
             "AZUREAD_FORTROLIG_GROUPID" to fortroligClaim,
-            "AZUREAD_EGEN_ANSATT_GROUPID" to egenAnsattClaim
+            "AZUREAD_EGEN_ANSATT_GROUPID" to egenAnsattClaim,
+            "AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID" to nasjonalTilgangUtenLoggClaim,
+            "AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID" to nasjonalTilgangMedLoggClaim
         )
     }
 

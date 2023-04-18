@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
 import no.nav.etterlatte.libs.database.tidspunkt
 import java.time.LocalDate
@@ -64,9 +63,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
         return hentNonNull(vilkaarsvurdering.behandlingId)
     }
 
-    fun kopierVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering, kopiertFraId: UUID): Vilkaarsvurdering {
-        val nyVilkaarsvurdering = vilkaarsvurdering.copy(vilkaar = vilkaarsvurdering.vilkaar.kopier())
-
+    fun kopierVilkaarsvurdering(nyVilkaarsvurdering: Vilkaarsvurdering, kopiertFraId: UUID): Vilkaarsvurdering {
         using(sessionOf(ds)) { session ->
             session.transaction { tx ->
                 opprettVilkaarsvurdering(nyVilkaarsvurdering, tx)
@@ -76,11 +73,11 @@ class VilkaarsvurderingRepository(private val ds: DataSource) {
                     nyVilkaarsvurdering.resultat ?: throw IllegalStateException("Fant ikke vilkårsvurderingsresultat"),
                     tx
                 )
-                opprettVilkaarsvurderingKilde(vilkaarsvurdering.id, kopiertFraId, tx)
+                opprettVilkaarsvurderingKilde(nyVilkaarsvurdering.id, kopiertFraId, tx)
             }
         }
 
-        return hentNonNull(vilkaarsvurdering.behandlingId)
+        return hentNonNull(nyVilkaarsvurdering.behandlingId)
     }
 
     private fun opprettVilkaarsvurdering(

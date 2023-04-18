@@ -1,6 +1,8 @@
 package behandling
 
+import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -76,26 +78,7 @@ internal class BehandlingRoutesTest {
             generellBehandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
         } returns true
 
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    behandlingRoutes(
-                        generellBehandlingService,
-                        foerstegangsbehandlingService,
-                        manueltOpphoerService
-                    )
-                }
-            }
-
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                }
-            }
-
+        withTestApplication { client ->
             val response = client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
@@ -115,26 +98,7 @@ internal class BehandlingRoutesTest {
 
     @Test
     fun `Avbryt behandling`() {
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    behandlingRoutes(
-                        generellBehandlingService,
-                        foerstegangsbehandlingService,
-                        manueltOpphoerService
-                    )
-                }
-            }
-
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                }
-            }
-
+        withTestApplication { client ->
             val response = client.post("/api/behandling/$behandlingId/avbryt") {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
@@ -155,6 +119,26 @@ internal class BehandlingRoutesTest {
             generellBehandlingService.erGyldigVirkningstidspunkt(any(), any(), any())
         } returns false
 
+        withTestApplication { client ->
+            val response = client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                contentType(ContentType.Application.Json)
+                setBody(
+                    """
+                    {
+                    "dato":"$bodyVirkningstidspunkt",
+                    "begrunnelse":"$bodyBegrunnelse"
+                    }
+                    """.trimIndent()
+                )
+            }
+
+            assertEquals(400, response.status.value)
+            assertEquals("Ugyldig virkningstidspunkt", response.bodyAsText())
+        }
+    }
+
+    private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         testApplication {
             environment {
                 config = hoconApplicationConfig
@@ -175,21 +159,7 @@ internal class BehandlingRoutesTest {
                 }
             }
 
-            val response = client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(
-                    """
-                    {
-                    "dato":"$bodyVirkningstidspunkt",
-                    "begrunnelse":"$bodyBegrunnelse"
-                    }
-                    """.trimIndent()
-                )
-            }
-
-            assertEquals(400, response.status.value)
-            assertEquals("Ugyldig virkningstidspunkt", response.bodyAsText())
+            block(client)
         }
     }
 

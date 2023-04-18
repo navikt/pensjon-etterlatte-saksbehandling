@@ -46,7 +46,7 @@ internal fun Route.behandlingRoutes(
     manueltOpphoerService: ManueltOpphoerService
 ) {
     val logger = application.log
-    route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+    route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {
         get {
             val detaljertBehandlingDTO =
                 generellBehandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, bruker)
@@ -59,7 +59,6 @@ internal fun Route.behandlingRoutes(
                 "Kunne ikke hente ut navident for vurdering av ytelsen søkand gyldig framsatt"
             )
             val body = call.receive<VurderingMedBegrunnelseJson>()
-
             when (
                 val lagretGyldighetsResultat = foerstegangsbehandlingService.lagreGyldighetsproeving(
                     behandlingsId,

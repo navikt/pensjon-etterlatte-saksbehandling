@@ -75,7 +75,7 @@ internal class RevurderingRoutesKtTest {
 
     @Test
     fun `returnerer bad request hvis det ikke finnes noen iverksatt behandling tidligere`() {
-        every { beanFactory.generellBehandlingService().hentSenestIverksatteBehandling(1) } returns null
+        every { beanFactory.generellBehandlingService().hentSisteIverksatte(1) } returns null
         testApplication {
             environment { config = hoconApplicationConfig }
             application { module(beanFactory) }

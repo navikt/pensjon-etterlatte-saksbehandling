@@ -263,31 +263,6 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
-    fun `Skal opprette en vilkaarsvurdering for revurdering for doed soeker`() {
-        val uuid = UUID.randomUUID()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { behandlingKlient.hentBehandling(uuid, any()) } returns mockk<DetaljertBehandling>().apply {
-            every { id } returns uuid
-            every { sak } returns 1L
-            every { sakType } returns SakType.BARNEPENSJON
-            every { behandlingType } returns BehandlingType.REVURDERING
-            every { soeker } returns "10095512345"
-            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-            every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
-        }
-
-        val vilkaarsvurdering = runBlocking {
-            service.opprettVilkaarsvurdering(uuid, bruker)
-        }
-
-        vilkaarsvurdering shouldNotBe null
-        vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN }.let { vilkaar ->
-            vilkaar.hovedvilkaar.type shouldBe VilkaarType.BP_ALDER_BARN
-        }
-    }
-
-    @Test
     fun `kan opprette og kopiere vilkaarsvurdering fra forrige behandling`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyBehandlingId = UUID.randomUUID()
@@ -334,9 +309,77 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
+    fun `revurdering kopierer forrige vilkaarsvurdering ved opprettelse`() {
+        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val revurderingId = UUID.randomUUID()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns mockk {
+            every { id } returns revurderingId
+            every { sak } returns 1L
+            every { sakType } returns SakType.BARNEPENSJON
+            every { behandlingType } returns BehandlingType.REVURDERING
+            every { soeker } returns "10095512345"
+            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+            every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+        }
+
+        val detaljertBehandling = mockk<DetaljertBehandling>()
+        every { detaljertBehandling.id } returns uuid
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns detaljertBehandling
+
+        val foerstegangsvilkaar = runBlocking {
+            service.opprettVilkaarsvurdering(uuid, bruker)
+            val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
+            vilkaarsvurdering.vilkaar.forEach { vilkaar ->
+                service.oppdaterVurderingPaaVilkaar(
+                    uuid,
+                    bruker,
+                    VurdertVilkaar(
+                        vilkaar.id,
+                        VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
+                        null,
+                        VilkaarVurderingData("kommentar", LocalDateTime.now(), "saksbehandler")
+                    )
+                )
+            }
+            service.oppdaterTotalVurdering(
+                uuid,
+                bruker,
+                VilkaarsvurderingResultat(
+                    VilkaarsvurderingUtfall.OPPFYLT,
+                    "kommentar",
+                    LocalDateTime.now(),
+                    "saksbehandler"
+                )
+            )
+
+            service.hentVilkaarsvurdering(uuid)!!
+        }
+
+        val revurderingsvilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, bruker) }
+        assertIsSimilar(foerstegangsvilkaar, revurderingsvilkaar)
+    }
+
+    @Test
     fun `kopier vilkaarsvurdering gir NullpointerException hvis det ikke finnes tidligere vilkaarsvurdering`() {
         assertThrows<NullPointerException> {
             runBlocking { service.kopierVilkaarsvurdering(UUID.randomUUID(), uuid, bruker) }
+        }
+    }
+
+    private fun assertIsSimilar(v1: Vilkaarsvurdering, v2: Vilkaarsvurdering) {
+        Assertions.assertEquals(v1.resultat, v2.resultat)
+        Assertions.assertEquals(v1.virkningstidspunkt, v2.virkningstidspunkt)
+        Assertions.assertEquals(v1.grunnlagVersjon, v2.grunnlagVersjon)
+
+        v1.vilkaar.forEach { v1Vilkaar ->
+            val v2Vilkaar = v2.vilkaar.find { it.hovedvilkaar.type == v1Vilkaar.hovedvilkaar.type }
+            Assertions.assertNotNull(v2Vilkaar)
+            Assertions.assertEquals(v1Vilkaar.vurdering, v2Vilkaar?.vurdering)
+            Assertions.assertEquals(v1Vilkaar.hovedvilkaar, v2Vilkaar?.hovedvilkaar)
+            Assertions.assertEquals(v1Vilkaar.unntaksvilkaar, v2Vilkaar?.unntaksvilkaar)
         }
     }
 

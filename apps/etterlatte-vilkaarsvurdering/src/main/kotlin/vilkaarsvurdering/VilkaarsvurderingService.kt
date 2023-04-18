@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
@@ -100,11 +101,11 @@ class VilkaarsvurderingService(
                 behandling.virkningstidspunkt ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
             vilkaarsvurderingRepository.kopierVilkaarsvurdering(
-                vilkaarsvurdering = Vilkaarsvurdering(
+                nyVilkaarsvurdering = Vilkaarsvurdering(
                     behandlingId = behandlingId,
                     grunnlagVersjon = grunnlag.metadata.versjon,
                     virkningstidspunkt = virkningstidspunkt.dato,
-                    vilkaar = tidligereVilkaarsvurdering.vilkaar,
+                    vilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
                     resultat = tidligereVilkaarsvurdering.resultat
                 ),
                 kopiertFraId = tidligereVilkaarsvurdering.id
@@ -119,6 +120,7 @@ class VilkaarsvurderingService(
             }
 
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, bruker)
+
             val virkningstidspunkt = behandling.virkningstidspunkt
                 ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
@@ -127,16 +129,30 @@ class VilkaarsvurderingService(
                     "behandlingType ${behandling.behandlingType}"
             )
 
-            val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, grunnlag, virkningstidspunkt)
+            when (behandling.behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, grunnlag, virkningstidspunkt)
 
-            vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-                Vilkaarsvurdering(
-                    behandlingId = behandlingId,
-                    vilkaar = vilkaar,
-                    virkningstidspunkt = virkningstidspunkt.dato,
-                    grunnlagVersjon = grunnlag.metadata.versjon
+                    vilkaarsvurderingRepository.opprettVilkaarsvurdering(
+                        Vilkaarsvurdering(
+                            behandlingId = behandlingId,
+                            vilkaar = vilkaar,
+                            virkningstidspunkt = virkningstidspunkt.dato,
+                            grunnlagVersjon = grunnlag.metadata.versjon
+                        )
+                    )
+                }
+
+                BehandlingType.REVURDERING -> {
+                    logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
+                    val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                    kopierVilkaarsvurdering(behandling.id, forrigeBehandling.id, bruker)
+                }
+
+                BehandlingType.MANUELT_OPPHOER -> throw RuntimeException(
+                    "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                 )
-            )
+            }
         }
 
     private fun finnVilkaarForNyVilkaarsvurdering(

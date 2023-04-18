@@ -33,7 +33,7 @@ internal fun Route.revurderingRoutes(
                 return@post
             }
 
-            generellBehandlingService.hentSenestIverksatteBehandling(sakId)?.let { forrigeIverksatteBehandling ->
+            generellBehandlingService.hentSisteIverksatte(sakId)?.let { forrigeIverksatteBehandling ->
                 val revurdering = revurderingService.opprettManuellRevurdering(
                     sakId = forrigeIverksatteBehandling.sak.id,
                     forrigeBehandling = forrigeIverksatteBehandling,

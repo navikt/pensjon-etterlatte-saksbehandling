@@ -7,18 +7,20 @@ private suspend fun ApplicationTestBuilder.verifyKlientOgRouteHarLikSignatur(
     request: Any
 ) {
     val sti = slot<String>()
+    val jsonHeader = header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+    val body = request.toJson()
     verify {
         runBlocking {
             klient.post(capture(sti)) {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                request.toJson()
+                jsonHeader
+                body
             }
         }
     }
 
     client.post(sti.captured) {
-        setBody(request.toJson())
-        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+        setBody(body)
+        jsonHeader
         header(HttpHeaders.Authorization, "Bearer $token")
     }.also { verify { it.status.isSuccess() } }
 }

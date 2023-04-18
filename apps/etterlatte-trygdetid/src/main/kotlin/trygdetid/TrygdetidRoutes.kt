@@ -12,8 +12,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
@@ -83,16 +82,30 @@ private fun BeregnetTrygdetid.toDto(): BeregnetTrygdetidDto =
 
 private fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
     GrunnlagOpplysningerDto(
-        avdoedFoedselsdato = this.finnOpplysning(Opplysningstype.FOEDSELSDATO),
-        avdoedDoedsdato = this.finnOpplysning(Opplysningstype.DOEDSDATO)
+        avdoedFoedselsdato = this.finnOpplysning(TrygdetidOpplysningType.FOEDSELSDATO),
+        avdoedDoedsdato = this.finnOpplysning(TrygdetidOpplysningType.DOEDSDATO),
+        avdoedFylteSeksten = this.finnOpplysning(TrygdetidOpplysningType.FYLT_16),
+        avdoedFyllerSeksti = this.finnOpplysning(TrygdetidOpplysningType.FYLLER_66)
     )
 
-private fun List<Opplysningsgrunnlag>.finnOpplysning(type: Opplysningstype): OpplysningsgrunnlagDto? =
+private fun List<Opplysningsgrunnlag>.finnOpplysning(type: TrygdetidOpplysningType): OpplysningsgrunnlagDto? =
     this.find { opplysning -> opplysning.type == type }?.toDto()
 
 private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto = OpplysningsgrunnlagDto(
     opplysning = this.opplysning,
-    kilde = objectMapper.readValue(this.kilde.asText(), OpplysningkildeDto::class.java)
+    kilde = when (this.kilde) {
+        is Grunnlagsopplysning.Pdl -> OpplysningkildeDto(
+            type = this.kilde.type,
+            tidspunkt = this.kilde.tidspunktForInnhenting.toString()
+        )
+
+        is Grunnlagsopplysning.RegelKilde -> OpplysningkildeDto(
+            type = this.kilde.type,
+            tidspunkt = this.kilde.ts.toString()
+        )
+
+        else -> throw Exception("Mangler gyldig kilde for opplysning $id")
+    }
 )
 
 private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(): TrygdetidGrunnlag =

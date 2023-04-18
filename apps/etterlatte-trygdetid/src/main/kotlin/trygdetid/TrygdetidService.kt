@@ -1,8 +1,9 @@
 package no.nav.etterlatte.trygdetid
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
@@ -23,12 +24,34 @@ class TrygdetidService(
             }
             val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
             val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, bruker).hentAvdoed()
-            val opplysninger = mapOf(
-                Opplysningstype.FOEDSELSDATO to avdoed.hentFoedselsdato(),
-                Opplysningstype.DOEDSDATO to avdoed.hentDoedsdato()
+
+            val foedselsdato = avdoed.hentFoedselsdato()
+            val opplysninger = listOf(
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, foedselsdato?.kilde, foedselsdato?.verdi),
+                Opplysningsgrunnlag.ny(
+                    TrygdetidOpplysningType.FYLT_16,
+                    kildeFoedselsnummer(),
+                    // Ifølge paragraf § 3-5 regnes trygdetid fra tidspunkt en person er fylt 16 år
+                    foedselsdato?.verdi?.plusYears(16)
+                ),
+                Opplysningsgrunnlag.ny(
+                    TrygdetidOpplysningType.FYLLER_66,
+                    kildeFoedselsnummer(),
+                    // Ifølge paragraf § 3-5 regnes trygdetid frem til tidspunkt en person er fyller 66 pår
+                    foedselsdato?.verdi?.plusYears(66)
+                ),
+                avdoed.hentDoedsdato().let {
+                    Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, it?.kilde, it?.verdi)
+                }
             )
             trygdetidRepository.opprettTrygdetid(behandling, opplysninger)
         }
+
+    private fun kildeFoedselsnummer(): RegelKilde = RegelKilde(
+        "Beregnet basert på fødselsdato fra pdl",
+        Tidspunkt.now(),
+        "1"
+    )
 
     suspend fun lagreTrygdetidGrunnlag(
         behandlingId: UUID,

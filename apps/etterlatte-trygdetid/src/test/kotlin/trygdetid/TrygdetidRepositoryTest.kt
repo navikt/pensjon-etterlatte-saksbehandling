@@ -6,9 +6,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.AfterAll
@@ -61,31 +60,42 @@ internal class TrygdetidRepositoryTest {
 
         val foedselsdato = LocalDate.of(2000, 1, 1)
         val doedsdato = LocalDate.of(2020, 1, 1)
+        val seksten = LocalDate.of(2016, 1, 1)
+        val seksti = LocalDate.of(2066, 1, 1)
+
         val pdl = Grunnlagsopplysning.Pdl("pdl", Tidspunkt.now(), null, "opplysningsId1")
-        val opplysninger = mapOf(
-            Opplysningstype.FOEDSELSDATO to mockk<Opplysning.Konstant<LocalDate>>().apply {
-                every { verdi } returns foedselsdato
-                every { kilde } returns pdl
-            },
-            Opplysningstype.DOEDSDATO to mockk<Opplysning.Konstant<LocalDate?>>().apply {
-                every { verdi } returns doedsdato
-                every { kilde } returns pdl
-            }
+        val regel = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
+        val opplysninger = listOf(
+            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, pdl, foedselsdato),
+            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, pdl, doedsdato),
+            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLT_16, regel, seksten),
+            Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLLER_66, regel, seksti)
         )
         val trygdetid = repository.opprettTrygdetid(behandling, opplysninger)
 
         trygdetid shouldNotBe null
         trygdetid.behandlingId shouldBe behandlingId
+        trygdetid.opplysninger.size shouldBe 4
 
         with(trygdetid.opplysninger[0]) {
-            type shouldBe Opplysningstype.FOEDSELSDATO
-            opplysning.toLocalDate() shouldBe foedselsdato
-            kilde shouldNotBe null
+            type shouldBe TrygdetidOpplysningType.FOEDSELSDATO
+            opplysning shouldBe foedselsdato.toJsonNode()
+            kilde shouldBe pdl
         }
         with(trygdetid.opplysninger[1]) {
-            type shouldBe Opplysningstype.DOEDSDATO
-            opplysning.toLocalDate() shouldBe doedsdato
-            kilde shouldNotBe null
+            type shouldBe TrygdetidOpplysningType.DOEDSDATO
+            opplysning shouldBe doedsdato.toJsonNode()
+            kilde shouldBe pdl
+        }
+        with(trygdetid.opplysninger[2]) {
+            type shouldBe TrygdetidOpplysningType.FYLT_16
+            opplysning shouldBe seksten.toJsonNode()
+            kilde shouldBe regel
+        }
+        with(trygdetid.opplysninger[3]) {
+            type shouldBe TrygdetidOpplysningType.FYLLER_66
+            opplysning shouldBe seksti.toJsonNode()
+            kilde shouldBe regel
         }
     }
 
@@ -96,7 +106,7 @@ internal class TrygdetidRepositoryTest {
             every { id } returns behandlingId
             every { sak } returns 123L
         }
-        repository.opprettTrygdetid(behandling, mapOf())
+        repository.opprettTrygdetid(behandling, emptyList())
 
         val trygdetid = repository.hentTrygdetid(behandlingId)
 
@@ -114,7 +124,7 @@ internal class TrygdetidRepositoryTest {
             every { id } returns behandlingId
             every { sak } returns 123L
         }
-        repository.opprettTrygdetid(behandling, mapOf())
+        repository.opprettTrygdetid(behandling, emptyList())
 
         val trygdetidMedTrygdetidGrunnlag =
             repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
@@ -134,7 +144,7 @@ internal class TrygdetidRepositoryTest {
         }
         val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
 
-        repository.opprettTrygdetid(behandling, mapOf())
+        repository.opprettTrygdetid(behandling, emptyList())
         repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
 
         val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(kilde = "test")
@@ -157,7 +167,7 @@ internal class TrygdetidRepositoryTest {
             every { sak } returns 123L
         }
 
-        repository.opprettTrygdetid(behandling, mapOf())
+        repository.opprettTrygdetid(behandling, emptyList())
         repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
 
         val hentetTrygdetidGrunnlag = repository.hentEnkeltTrygdetidGrunnlag(trygdetidGrunnlag.id)
@@ -173,7 +183,7 @@ internal class TrygdetidRepositoryTest {
             every { id } returns behandlingId
             every { sak } returns 123L
         }
-        repository.opprettTrygdetid(behandling, mapOf())
+        repository.opprettTrygdetid(behandling, emptyList())
 
         val trygdetidMedBeregnetTrygdetid = repository.oppdaterBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
 

@@ -73,10 +73,3 @@ const TrygdetidWrapper = styled.div`
   padding: 0 4em;
   max-width: 52em;
 `
-
-export const InfoWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding: 2em 0 2em 0;
-`

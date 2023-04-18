@@ -12,10 +12,14 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
+import no.nav.etterlatte.trygdetid.TrygdetidOpplysningType
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -77,6 +81,9 @@ internal class TrygdetidServiceTest {
             every { sak } returns sakId
         }
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val forventetFoedselsdato = grunnlag.hentAvdoed().hentFoedselsdato()!!.verdi
+        val forventetDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()!!.verdi
+
         every { repository.hentTrygdetid(any()) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -92,7 +99,31 @@ internal class TrygdetidServiceTest {
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             behandling.sak
             grunnlagKlient.hentGrunnlag(sakId, saksbehandler)
-            repository.opprettTrygdetid(behandling, any())
+            repository.opprettTrygdetid(
+                behandling,
+                withArg { opplysninger ->
+                    with(opplysninger[0]) {
+                        type shouldBe TrygdetidOpplysningType.FOEDSELSDATO
+                        opplysning shouldBe forventetFoedselsdato.toJsonNode()
+                        kilde shouldNotBe null
+                    }
+                    with(opplysninger[1]) {
+                        type shouldBe TrygdetidOpplysningType.FYLT_16
+                        opplysning shouldBe forventetFoedselsdato.plusYears(16).toJsonNode()
+                        kilde shouldNotBe null
+                    }
+                    with(opplysninger[2]) {
+                        type shouldBe TrygdetidOpplysningType.FYLLER_66
+                        opplysning shouldBe forventetFoedselsdato.plusYears(66).toJsonNode()
+                        kilde shouldNotBe null
+                    }
+                    with(opplysninger[3]) {
+                        type shouldBe TrygdetidOpplysningType.DOEDSDATO
+                        opplysning shouldBe forventetDoedsdato!!.toJsonNode()
+                        kilde shouldNotBe null
+                    }
+                }
+            )
         }
     }
 
@@ -158,7 +189,7 @@ internal class TrygdetidServiceTest {
             )
         }
         with(trygdetid.trygdetidGrunnlag.first()) {
-            beregnetTrygdetid?.verdi shouldBe java.time.Period.of(0, 1, 1)
+            beregnetTrygdetid?.verdi shouldBe Period.of(0, 1, 1)
             beregnetTrygdetid?.regelResultat shouldNotBe null
             beregnetTrygdetid?.tidspunkt shouldNotBe null
         }

@@ -81,7 +81,7 @@ data class Dokumentvarianter(
 )
 
 data class AvsenderMottaker(
-    val id: String,
-    val navn: String,
-    val erLikBruker: Boolean
+    val id: String?,
+    val navn: String?,
+    val erLikBruker: Boolean?
 )

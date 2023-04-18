@@ -8,6 +8,7 @@ import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_3
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
+import no.nav.etterlatte.fordeler.FordelerKriterie.BARNET_ER_SKJERMET
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -16,6 +17,7 @@ import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException
 import no.nav.etterlatte.readSoknad
+import no.nav.etterlatte.skjerming.SkjermingKlient
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -27,11 +29,13 @@ internal class FordelerServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val fordelerRepo = mockk<FordelerRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
+    private val skjermingKlient = mockk<SkjermingKlient>()
     private val fordelerService = FordelerService(
         FordelerKriterier(),
         pdlTjenesterKlient,
         fordelerRepo,
         maxFordelingTilDoffen = Long.MAX_VALUE,
+        skjermingKlient = skjermingKlient,
         behandlingKlient = behandlingKlient
     )
 
@@ -43,6 +47,7 @@ internal class FordelerServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 0
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
@@ -87,6 +92,7 @@ internal class FordelerServiceTest {
 
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
@@ -127,6 +133,54 @@ internal class FordelerServiceTest {
     }
 
     @Test
+    fun `skal feile dersom kall mot skjermetløsningen feiler`() {
+        coEvery { skjermingKlient.personErSkjermet(any()) } throws RuntimeException("Noe feilet")
+
+        assertThrows<RuntimeException> { fordelerService.sjekkGyldighetForBehandling(fordelerEvent()) }
+    }
+
+    @Test
+    fun `Skal fordele sak til PESYS hvis barn er skjermet`() {
+        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
+        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
+        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
+        every { fordelerRepo.finnFordeling(any()) } returns null
+        every { fordelerRepo.lagreFordeling(any()) } returns Unit
+        every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 0
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns true
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
+                foreldre = listOf(etterlattFnr, avdoedFnr),
+                barn = null
+            )
+        )
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
+            doedsdato = LocalDate.parse("2023-01-01"),
+            bostedsadresse = mockNorskAdresse()
+        )
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr),
+                foreldre = null,
+                barn = listOf(barnFnr)
+            )
+        )
+
+        val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
+        assertTrue(
+            resultat is FordelerResultat.IkkeGyldigForBehandling && resultat.ikkeOppfylteKriterier.contains(
+                BARNET_ER_SKJERMET
+            )
+        )
+    }
+
+    @Test
     fun `Er gyldig for behandling om søknad tidligere er fordelt til Doffen`() {
         every { fordelerRepo.finnFordeling(any()) } returns FordeltRecord(1, "DOFFEN", Tidspunkt.now())
         every { fordelerRepo.finnKriterier(any()) } returns emptyList()
@@ -157,6 +211,7 @@ internal class FordelerServiceTest {
             pdlTjenesterKlient,
             fordelerRepo,
             maxFordelingTilDoffen = 10,
+            skjermingKlient = skjermingKlient,
             behandlingKlient = behandlingKlient
         )
 
@@ -166,6 +221,7 @@ internal class FordelerServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("DOFFEN") } returns 10
+        coEvery { skjermingKlient.personErSkjermet(any()) } returns false
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
@@ -202,6 +258,7 @@ internal class FordelerServiceTest {
             pdlTjenesterKlient,
             fordelerRepo,
             maxFordelingTilDoffen = 10,
+            skjermingKlient = skjermingKlient,
             behandlingKlient = behandlingKlient
         )
         every { fordelerRepo.finnFordeling(any()) } returns null
@@ -245,6 +302,7 @@ internal class FordelerServiceTest {
             pdlTjenesterKlient,
             fordelerRepo,
             maxFordelingTilDoffen = 10,
+            skjermingKlient = skjermingKlient,
             behandlingKlient = behandlingKlient
         )
         every { fordelerRepo.finnFordeling(any()) } returns null

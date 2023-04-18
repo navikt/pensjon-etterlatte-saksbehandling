@@ -63,9 +63,17 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEHANDLING_URL
       value: http://etterlatte-behandling
+    - name: SKJERMING_URL
+      value: https://skjermede-personer-pip.intern.nav.no
+    - name: AZURE_SCOPE_SKJERMEDE_PIP
+      value: api://prod-gcp.nom.skjermede-personer-pip/.default
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-behandling
+        - application: skjermede-personer-pip
+          namespace: nom
+      external:
+        - host: skjermede-personer-pip.intern.nav.no

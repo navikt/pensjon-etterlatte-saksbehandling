@@ -52,7 +52,9 @@ enum class FordelerKriterie(val forklaring: String) {
 
     SOEKNAD_ER_IKKE_PAA_BOKMAAL("Søknaden er ikke sendt inn på bokmål"),
 
-    FAMILIERELASJON_MANGLER_IDENT("En person tilknyttet søknaden mangler en ident i PDL")
+    FAMILIERELASJON_MANGLER_IDENT("En person tilknyttet søknaden mangler en ident i PDL"),
+
+    BARNET_ER_SKJERMET("Barnet er skjermet")
 }
 
 class FordelerKriterier {
@@ -61,9 +63,10 @@ class FordelerKriterier {
         barn: Person,
         avdoed: Person,
         gjenlevende: Person,
-        soeknad: Barnepensjon
+        soeknad: Barnepensjon,
+        barnetErSKjermet: Boolean = false
     ): FordelerKriterierResultat {
-        return fordelerKriterier(barn, avdoed, gjenlevende)
+        return fordelerKriterier(barn, avdoed, gjenlevende, barnetErSKjermet)
             .filter { it.blirOppfyltAv(soeknad) }
             .map { it.fordelerKriterie }
             .let { FordelerKriterierResultat(it.isEmpty(), it) }
@@ -72,7 +75,12 @@ class FordelerKriterier {
     /**
      * Grunnlag for regler er også dokumenter på Confluence: https://confluence.adeo.no/display/TE/Fordelingsapp
      */
-    private fun fordelerKriterier(barn: Person, avdoed: Person, gjenlevende: Person) = listOf(
+    private fun fordelerKriterier(
+        barn: Person,
+        avdoed: Person,
+        gjenlevende: Person,
+        barnetErSKjermet: Boolean
+    ) = listOf(
         // Barn (søker)
         Kriterie(FordelerKriterie.BARN_ER_FOR_GAMMELT) { forGammel(barn) },
         Kriterie(FordelerKriterie.BARN_ER_IKKE_NORSK_STATSBORGER) { ikkeNorskStatsborger(barn) },
@@ -112,6 +120,9 @@ class FordelerKriterier {
 
         Kriterie(FordelerKriterie.SOEKNAD_ER_IKKE_PAA_BOKMAAL) {
             it.spraak != Spraak.NB
+        },
+        Kriterie(FordelerKriterie.BARNET_ER_SKJERMET) {
+            barnetErSKjermet
         }
     )
 

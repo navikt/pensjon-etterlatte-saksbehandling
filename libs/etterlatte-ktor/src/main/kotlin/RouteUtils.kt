@@ -13,17 +13,10 @@ import java.util.*
 
 const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
 const val SAKID_CALL_PARAMETER = "sakId"
-const val FNR_CALL_PARAMETER = "fnr"
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
     get() = call.parameters[BEHANDLINGSID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
         "BehandlingsId er ikke i path params"
-    )
-
-// Denne skal vi unngå å bruke, skal legges i request body med en post
-inline val PipelineContext<*, ApplicationCall>.fnr: String
-    get() = call.parameters[FNR_CALL_PARAMETER] ?: throw NullPointerException(
-        "Fnr er ikke i path params"
     )
 
 inline val PipelineContext<*, ApplicationCall>.sakId: Long

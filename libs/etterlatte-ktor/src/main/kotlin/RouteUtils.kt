@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -60,10 +61,11 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
-    fnr: String,
     personTilgangsSjekk: PersonTilgangsSjekk,
     onSuccess: (fnr: Folkeregisteridentifikator) -> Unit
-) = Folkeregisteridentifikator.of(fnr).let { foedselsnummer ->
+) {
+    val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
+    val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
     when (bruker) {
         is Saksbehandler -> {
             val harTilgangTilPerson = personTilgangsSjekk.harTilgangTilPerson(foedselsnummer, bruker as Saksbehandler)

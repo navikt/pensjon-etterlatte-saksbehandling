@@ -12,6 +12,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.HttpStatusCode.Companion.NotFound
 import io.ktor.http.HttpStatusCode.Companion.OK
+import io.ktor.http.contentType
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
@@ -26,6 +27,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SakTilgangsSjekk
@@ -120,8 +122,10 @@ class RestModuleTest {
             client.get("/sak/1") {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }.let { assertEquals(OK, it.status) }
-            client.get("/person/30106519672") {
+            client.post("/person") {
                 header(HttpHeaders.Authorization, "Bearer $token")
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO("30106519672").toJson())
             }.let { assertEquals(OK, it.status) }
 
             coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any()) } returns false
@@ -134,8 +138,10 @@ class RestModuleTest {
             client.get("/sak/1") {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }.let { assertEquals(NotFound, it.status) }
-            client.get("/person/30106519672") {
+            client.post("/person") {
                 header(HttpHeaders.Authorization, "Bearer $token")
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO("30106519672").toJson())
             }.let { assertEquals(NotFound, it.status) }
         }
     }
@@ -277,8 +283,8 @@ class RestModuleTest {
                     call.respond(OK)
                 }
             }
-            get("person/{fnr}") {
-                withFoedselsnummer(call.parameters["fnr"]!!, personTilgangsSjekkMock) {
+            post("person") {
+                withFoedselsnummer(personTilgangsSjekkMock) {
                     call.respond(OK)
                 }
             }

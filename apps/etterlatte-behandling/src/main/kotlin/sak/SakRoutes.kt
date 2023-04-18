@@ -2,7 +2,6 @@ package no.nav.etterlatte.sak
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -14,7 +13,6 @@ import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -44,20 +42,16 @@ internal fun Route.sakRoutes(
     }
 
     post("personer/saker/{type}") {
-        val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
-        val fnr = foedselsnummerDTO.foedselsnummer
-        withFoedselsnummer(fnr, tilgangService) {
+        withFoedselsnummer(tilgangService) { fnr ->
             val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
-            call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr, type) })
+            call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr.value, type) })
         }
     }
 
     route("/api/personer/") {
         post("behandlinger") {
-            val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
-            val fnr = foedselsnummerDTO.foedselsnummer
-            withFoedselsnummer(fnr, tilgangService) {
-                val behandlinger = sakService.finnSaker(fnr)
+            withFoedselsnummer(tilgangService) { fnr ->
+                val behandlinger = sakService.finnSaker(fnr.value)
                     .map { sak ->
                         generellBehandlingService.hentBehandlingerISak(sak.id).map {
                             it.toBehandlingSammendrag()
@@ -68,11 +62,9 @@ internal fun Route.sakRoutes(
         }
 
         post("grunnlagsendringshendelser") {
-            val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
-            val fnr = foedselsnummerDTO.foedselsnummer
-            withFoedselsnummer(fnr, tilgangService) {
+            withFoedselsnummer(tilgangService) { fnr ->
                 call.respond(
-                    sakService.finnSaker(fnr).map { sak ->
+                    sakService.finnSaker(fnr.value).map { sak ->
                         GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
                     }
                 )

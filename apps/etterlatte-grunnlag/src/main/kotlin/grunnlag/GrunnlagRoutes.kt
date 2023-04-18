@@ -13,7 +13,6 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
@@ -60,18 +59,14 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
         }
 
         post("/person/saker") {
-            val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
-            val fnr = foedselsnummerDTO.foedselsnummer
-            withFoedselsnummer(fnr, behandlingKlient) {
-                val saksliste = grunnlagService.hentAlleSakerForFnr(it)
+            withFoedselsnummer(behandlingKlient) { fnr ->
+                val saksliste = grunnlagService.hentAlleSakerForFnr(fnr)
                 call.respond(saksliste)
             }
         }
         post("/person/roller") {
-            val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
-            val fnr = foedselsnummerDTO.foedselsnummer
-            withFoedselsnummer(fnr, behandlingKlient) {
-                val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(it)
+            withFoedselsnummer(behandlingKlient) { fnr ->
+                val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
                 call.respond(personMedSakOgRoller)
             }
         }
@@ -81,9 +76,8 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 HttpStatusCode.Unauthorized,
                 "Kunne ikke hente ut navident for vurdering av ytelsen kommer barnet tilgode"
             )
-            val body = call.receive<FoedselsnummerDTO>()
 
-            withFoedselsnummer(body.foedselsnummer, behandlingKlient) { foedselsnummer ->
+            withFoedselsnummer(behandlingKlient) { foedselsnummer ->
                 val opplysning = grunnlagService.hentOpplysningstypeNavnFraFnr(
                     foedselsnummer,
                     navIdent

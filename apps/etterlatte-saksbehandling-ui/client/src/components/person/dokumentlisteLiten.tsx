@@ -31,7 +31,7 @@ export const DokumentlisteLiten = ({
               </Link>
             </Dokumentnavn>
             <Avsender>
-              {brev.journalposttype === 'I' ? 'Avsender' : 'Mottaker'}: {brev.avsenderMottaker.navn} (
+              {brev.journalposttype === 'I' ? 'Avsender' : 'Mottaker'}: {brev.avsenderMottaker.navn || 'Ukjent'} (
               {formaterStringDato(brev.datoOpprettet)})
             </Avsender>
           </div>

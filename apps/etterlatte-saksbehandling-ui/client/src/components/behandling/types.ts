@@ -18,9 +18,7 @@ export interface Journalpost {
   journalstatus: string
   dokumenter: Dokument[]
   avsenderMottaker: {
-    id: string
-    navn: string
-    erLikBruker: boolean
+    navn?: string
   }
   kanal: string
   datoOpprettet: string

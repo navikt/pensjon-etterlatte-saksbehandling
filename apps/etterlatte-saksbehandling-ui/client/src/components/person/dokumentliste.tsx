@@ -31,7 +31,9 @@ export const Dokumentliste = ({
             <Table.Row key={i} shadeOnHover={false}>
               <Table.DataCell key={`data${brev.journalpostId}`}>{brev.journalpostId}</Table.DataCell>
               <Table.DataCell key={`data${brev.tittel}`}>{brev.tittel}</Table.DataCell>
-              <Table.DataCell key={`data${brev.avsenderMottaker.navn}`}>{brev.avsenderMottaker.navn}</Table.DataCell>
+              <Table.DataCell key={`data${brev.avsenderMottaker.navn}`}>
+                {brev.avsenderMottaker.navn || 'Ukjent'}
+              </Table.DataCell>
               <Table.DataCell key={`data${brev.datoOpprettet}`}>
                 {formaterStringDato(brev.datoOpprettet)}
               </Table.DataCell>

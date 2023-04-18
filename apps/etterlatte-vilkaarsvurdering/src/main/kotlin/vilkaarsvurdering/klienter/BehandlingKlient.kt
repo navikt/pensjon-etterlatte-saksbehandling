@@ -23,6 +23,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
     suspend fun kanSetteBehandlingStatusVilkaarsvurdert(behandlingId: UUID, bruker: Bruker): Boolean
     suspend fun settBehandlingStatusOpprettet(behandlingId: UUID, bruker: Bruker, commit: Boolean): Boolean
     suspend fun settBehandlingStatusVilkaarsvurdert(behandlingId: UUID, bruker: Bruker): Boolean
+    suspend fun hentSisteIverksatteBehandling(sakId: Long, bruker: Bruker): DetaljertBehandling
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -100,6 +101,23 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             failure = {
                 logger.info("Kunne ikke committe vilkaarsvurdering på behandling med id $behandlingId", it.throwable)
                 false
+            }
+        )
+    }
+
+    override suspend fun hentSisteIverksatteBehandling(sakId: Long, bruker: Bruker): DetaljertBehandling {
+        logger.info("Henter seneste iverksatte behandling for sak med id $sakId")
+
+        val response = downstreamResourceClient.get(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/behandling/sak/$sakId/sisteIverksatte"),
+            bruker = bruker
+        )
+
+        return response.mapBoth(
+            success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+            failure = {
+                logger.error("Kunne ikke hente seneste iverksatte behandling for sak med id $sakId")
+                throw it.throwable
             }
         )
     }

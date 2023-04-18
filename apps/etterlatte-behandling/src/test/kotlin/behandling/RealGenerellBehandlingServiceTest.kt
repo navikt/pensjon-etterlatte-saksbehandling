@@ -337,7 +337,7 @@ class RealGenerellBehandlingServiceTest {
             featureToggleService = featureToggleService
         )
 
-        assertEquals(behandling1, service.hentSenestIverksatteBehandling(1))
+        assertEquals(behandling1, service.hentSisteIverksatte(1))
     }
 
     @Test

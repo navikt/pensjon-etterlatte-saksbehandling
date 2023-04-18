@@ -119,6 +119,7 @@ class VilkaarsvurderingService(
             }
 
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, bruker)
+
             val virkningstidspunkt = behandling.virkningstidspunkt
                 ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
@@ -127,16 +128,30 @@ class VilkaarsvurderingService(
                     "behandlingType ${behandling.behandlingType}"
             )
 
-            val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, grunnlag, virkningstidspunkt)
+            when (behandling.behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    val vilkaar = finnVilkaarForNyVilkaarsvurdering(behandling, grunnlag, virkningstidspunkt)
 
-            vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-                Vilkaarsvurdering(
-                    behandlingId = behandlingId,
-                    vilkaar = vilkaar,
-                    virkningstidspunkt = virkningstidspunkt.dato,
-                    grunnlagVersjon = grunnlag.metadata.versjon
+                    vilkaarsvurderingRepository.opprettVilkaarsvurdering(
+                        Vilkaarsvurdering(
+                            behandlingId = behandlingId,
+                            vilkaar = vilkaar,
+                            virkningstidspunkt = virkningstidspunkt.dato,
+                            grunnlagVersjon = grunnlag.metadata.versjon
+                        )
+                    )
+                }
+
+                BehandlingType.REVURDERING -> {
+                    logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
+                    val forrigeBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                    kopierVilkaarsvurdering(behandling.id, forrigeBehandling.id, bruker)
+                }
+
+                BehandlingType.MANUELT_OPPHOER -> throw RuntimeException(
+                    "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}"
                 )
-            )
+            }
         }
 
     private fun finnVilkaarForNyVilkaarsvurdering(

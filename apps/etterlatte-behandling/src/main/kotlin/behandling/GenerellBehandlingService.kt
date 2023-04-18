@@ -44,7 +44,7 @@ interface GenerellBehandlingService {
 
     fun hentBehandling(behandlingId: UUID): Behandling?
     fun hentBehandlingerISak(sakId: Long): List<Behandling>
-    fun hentSenestIverksatteBehandling(sakId: Long): Behandling?
+    fun hentSisteIverksatte(sakId: Long): Behandling?
     fun avbrytBehandling(behandlingId: UUID, saksbehandler: String)
     fun registrerVedtakHendelse(
         behandlingId: UUID,
@@ -111,7 +111,7 @@ class RealGenerellBehandlingService(
         }
     }
 
-    override fun hentSenestIverksatteBehandling(sakId: Long): Behandling? {
+    override fun hentSisteIverksatte(sakId: Long): Behandling? {
         return inTransaction { hentBehandlingerForSakId(sakId) }
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }

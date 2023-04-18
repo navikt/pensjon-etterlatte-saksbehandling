@@ -17,7 +17,7 @@ class OmregningService(
         fraDato: LocalDate,
         prosessType: Prosesstype
     ): Pair<UUID?, UUID> {
-        val forrigeBehandling = behandlingService.hentSenestIverksatteBehandling(sakId)
+        val forrigeBehandling = behandlingService.hentSisteIverksatte(sakId)
             ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
 
         val behandling = when (prosessType) {

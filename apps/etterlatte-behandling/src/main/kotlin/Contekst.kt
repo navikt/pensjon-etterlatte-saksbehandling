@@ -2,6 +2,8 @@ package no.nav.etterlatte
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
@@ -39,7 +41,7 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
 
 class Saksbehandler(
     identifiedBy: TokenValidationContext,
-    private val saksbehandlerGroupIdsByKey: Map<String, String>,
+    private val saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
     private val enhetService: EnhetService
 ) :
     ExternalUser(identifiedBy) {
@@ -56,33 +58,48 @@ class Saksbehandler(
     fun harRolleSaksbehandler(): Boolean {
         return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
             "groups",
-            saksbehandlerGroupIdsByKey["AZUREAD_SAKSBEHANDLER_GROUPID"]
+            saksbehandlerGroupIdsByKey[AzureGroup.SAKSBEHANDLER]
         )
     }
 
     fun harRolleAttestant(): Boolean {
         return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
             "groups",
-            saksbehandlerGroupIdsByKey["AZUREAD_ATTESTANT_GROUPID"]
+            saksbehandlerGroupIdsByKey[AzureGroup.ATTESTANT]
         )
     }
 
     fun harRolleStrengtFortrolig(): Boolean {
         return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
             "groups",
-            saksbehandlerGroupIdsByKey["AZUREAD_STRENGT_FORTROLIG_GROUPID"]
+            saksbehandlerGroupIdsByKey[AzureGroup.STRENGT_FORTROLIG]
         )
     }
 
     fun harRolleFortrolig(): Boolean {
         return identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims.containsClaim(
             "groups",
-            saksbehandlerGroupIdsByKey["AZUREAD_FORTROLIG_GROUPID"]
+            saksbehandlerGroupIdsByKey[AzureGroup.FORTROLIG]
+        )
+    }
+
+    fun harRolleNasjonalTilgang(): Boolean {
+        val jwtTokenClaims = identifiedBy.getJwtToken(AZURE_ISSUER).jwtTokenClaims
+        return jwtTokenClaims.containsClaim(
+            "groups",
+            saksbehandlerGroupIdsByKey[AzureGroup.NASJONAL_MED_LOGG]
+        ) || jwtTokenClaims.containsClaim(
+            "groups",
+            saksbehandlerGroupIdsByKey[AzureGroup.NASJONAL_UTEN_LOGG]
         )
     }
 
     fun enheter() = runBlocking {
-        enhetService.enheterForIdent(name())
+        if (harRolleNasjonalTilgang()) {
+            Enheter.nasjonalTilgangEnheter()
+        } else {
+            enhetService.enheterForIdent(name())
+        }
     }
 }
 
@@ -94,7 +111,7 @@ class Kunde(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
 
 fun decideUser(
     principal: TokenValidationContextPrincipal,
-    saksbehandlerGroupIdsByKey: Map<String, String>,
+    saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
     enhetService: EnhetService
 ): ExternalUser {
     return if (principal.context.issuers.contains("tokenx")) {

@@ -31,16 +31,6 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [sakId, setSakId] = useState<number | undefined>()
   const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
 
-  const mockHendelser = [
-    {
-      id: '16b07106-b562-4346-a5b4-3b88c862a4fd',
-      tittel: 'Regulering feilet',
-      dato: '15.08.2022 kl. 16:12',
-      kilde: 'Doffen',
-      beskrivelse: 'Regulering av pensjonen kunne ikke behandles automatisk. Saken må derfor behandles manuelt',
-    },
-  ]
-
   useEffect(() => {
     const getBehandlingsListeAsync = async (fnr: string) => {
       const response = await hentBehandlingerForPerson(fnr)
@@ -139,7 +129,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                     </EkstraHandlinger>
                   ) : null}
                   <UhaandterteHendelser
-                    hendelser={mockHendelser}
+                    hendelser={[]}
                     startRevurdering={() => setVisOpprettRevurderingsmodal(true)}
                     disabled={harAapenRevurdering}
                   />

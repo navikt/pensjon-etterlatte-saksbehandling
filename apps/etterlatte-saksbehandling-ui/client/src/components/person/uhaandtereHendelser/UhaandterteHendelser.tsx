@@ -1,30 +1,33 @@
 import { Alert, BodyShort, Button, Heading, Label } from '@navikt/ds-react'
 import styled from 'styled-components'
-type Hendelse = {
-  id: string
-  tittel: string
-  dato: string
-  kilde: string
-  beskrivelse: string
-}
+import { Grunnlagsendringshendelse } from '~components/person/typer'
+import {
+  grunnlagsendringsBeskrivelse,
+  grunnlagsendringsKilde,
+  grunnlagsendringsTittel,
+} from '~components/person/uhaandtereHendelser/utils'
+import { formaterStringDato } from '~utils/formattering'
 
 type Props = {
-  hendelser: Array<Hendelse>
+  hendelser: Array<Grunnlagsendringshendelse>
   startRevurdering: () => void
   disabled: boolean
 }
 
 const UhaandterteHendelser = (props: Props) => {
+  const { hendelser, disabled, startRevurdering } = props
+  if (hendelser.length === 0) return null
+
   return (
     <div>
       <StyledAlert>Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.</StyledAlert>
       <Heading size="medium">Hendelser</Heading>
-      {props.hendelser.map((hendelse) => (
+      {hendelser.map((hendelse) => (
         <UhaandtertHendelse
           key={hendelse.id}
           hendelse={hendelse}
-          disabled={props.disabled}
-          startRevurdering={props.startRevurdering}
+          disabled={disabled}
+          startRevurdering={startRevurdering}
         />
       ))}
     </div>
@@ -36,25 +39,32 @@ const StyledAlert = styled(Alert).attrs({ variant: 'warning' })`
   margin: 1em 0;
 `
 
-const UhaandtertHendelse = (props: { hendelse: Hendelse; disabled: boolean; startRevurdering: () => void }) => {
+const UhaandtertHendelse = (props: {
+  hendelse: Grunnlagsendringshendelse
+  disabled: boolean
+  startRevurdering: () => void
+}) => {
+  const { hendelse, disabled, startRevurdering } = props
+  const { type, opprettet } = hendelse
+
   return (
     <Wrapper>
-      <Label>{props.hendelse.tittel}</Label>
-      <Foo>
+      <Label>{grunnlagsendringsTittel[type]}</Label>
+      <Content>
         <Header>
           <BodyShort>Dato</BodyShort>
-          <BodyShort size="small">{props.hendelse.dato}</BodyShort>
+          <BodyShort size="small">{formaterStringDato(opprettet)}</BodyShort>
         </Header>
         <Header>
-          <BodyShort size="small">Hendelse fra {props.hendelse.kilde}</BodyShort>
+          <BodyShort size="small">Hendelse fra {grunnlagsendringsKilde(type)}</BodyShort>
           <BodyShort size="small" style={{ maxWidth: '25em' }}>
-            {props.hendelse.beskrivelse}
+            {grunnlagsendringsBeskrivelse[type]}
           </BodyShort>
         </Header>
-        <Button disabled={props.disabled} onClick={props.startRevurdering}>
+        <Button disabled={disabled} onClick={startRevurdering}>
           Start revurdering
         </Button>
-      </Foo>
+      </Content>
     </Wrapper>
   )
 }
@@ -62,14 +72,17 @@ const UhaandtertHendelse = (props: { hendelse: Hendelse; disabled: boolean; star
 const Wrapper = styled.div`
   display: 'flex';
   gap: 1em;
+  margin-bottom: 1rem;
+  max-width: 50rem;
 `
 const Header = styled.div`
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
 `
 
-const Foo = styled.div`
-  display: flex;
+const Content = styled.div`
+  display: grid;
+  grid-template-columns: 5rem auto 13rem;
   gap: 2em;
   align-items: center;
 `

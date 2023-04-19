@@ -1,3 +1,4 @@
 export enum Revurderingsaarsak {
+  SOESKENJUSTERING = 'SOESKENJUSTERING',
   REGULERING = 'REGULERING',
 }

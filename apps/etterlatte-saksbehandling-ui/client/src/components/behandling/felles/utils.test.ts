@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { behandlingErUtfylt } from '~components/behandling/felles/utils'
+import { behandlingErUtfylt, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import {
   IBehandlingStatus,
   IBehandlingsType,
@@ -113,6 +113,30 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
   })
 })
 
+describe('behandlingSkalSendeBrev', () => {
+  const behandling = opprettBehandling(ISaksType.BARNEPENSJON, null, null, undefined)
+  const revurdering = {
+    ...behandling,
+    behandlingType: IBehandlingsType.REVURDERING,
+    revurderingsaarsak: Revurderingsaarsak.SOESKENJUSTERING,
+  }
+  const regulering = {
+    ...revurdering,
+    revurderingsaarsak: Revurderingsaarsak.REGULERING,
+  }
+  const manueltopphoer = { ...behandling, behandlingType: IBehandlingsType.MANUELT_OPPHOER }
+
+  it('skal gi false for regulering og manuelt opphør', () => {
+    expect(behandlingSkalSendeBrev(regulering)).toBeFalsy()
+    expect(behandlingSkalSendeBrev(manueltopphoer)).toBeFalsy()
+  })
+
+  it('skal gi true for foerstegangsbehandling og revurderinger som ikke er regulering', () => {
+    expect(behandlingSkalSendeBrev(behandling)).toBeTruthy()
+    expect(behandlingSkalSendeBrev(revurdering)).toBeTruthy()
+  })
+})
+
 const opprettBehandling = (
   sakType: ISaksType,
   kommerBarnetTilgode: IKommerBarnetTilgode | null,
@@ -134,7 +158,7 @@ const opprettBehandling = (
     hendelser: [],
     behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
     prosesstype: IProsesstype.MANUELL,
-    revurderingsaarsak: Revurderingsaarsak.REGULERING,
+    revurderingsaarsak: null,
   }
 }
 

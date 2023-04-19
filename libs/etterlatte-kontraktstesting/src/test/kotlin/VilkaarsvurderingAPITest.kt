@@ -8,7 +8,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
+import io.mockk.CapturingSlot
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.slot
@@ -114,13 +116,20 @@ internal class VilkaarsvurderingAPITest {
                 }
             }
 
-            runBlocking {
-                client.post(sti.captured) {
-                    setBody(request.toJson())
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.also { assertTrue { it.status.isSuccess() } }
-            }
+            verifiserAtRutaMatcherDetKlientenKaller(sti, request)
+        }
+    }
+
+    private fun ApplicationTestBuilder.verifiserAtRutaMatcherDetKlientenKaller(
+        sti: CapturingSlot<String>,
+        request: Any
+    ) {
+        runBlocking {
+            client.post(sti.captured) {
+                setBody(request.toJson())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }.also { assertTrue { it.status.isSuccess() } }
         }
     }
 }

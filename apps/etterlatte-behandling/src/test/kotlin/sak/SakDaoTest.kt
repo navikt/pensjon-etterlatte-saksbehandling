@@ -51,19 +51,19 @@ class SakDaoTest {
 
     @Test
     fun `kan opprett sak med enhet`() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.DEFAULT_PORSGRUNN.enhetNr)
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-        Assertions.assertEquals(Enheter.DEFAULT_PORSGRUNN.enhetNr, opprettSak.enhet)
+        Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, opprettSak.enhet)
     }
 
     @Test
     fun `Skal kunne oppdatere enhet`() {
         val fnr = "fnr"
-        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.DEFAULT_PORSGRUNN.enhetNr)
+        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         val funnetSaker = sakRepo.finnSaker(fnr)
         Assertions.assertEquals(1, funnetSaker.size)
         Assertions.assertEquals(sak.id, funnetSaker[0].id)
-        sakRepo.opprettSak(fnr, SakType.OMSTILLINGSSTOENAD, Enheter.DEFAULT_PORSGRUNN.enhetNr).also {
+        sakRepo.opprettSak(fnr, SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).also {
             Assertions.assertNotNull(it)
         }
         val funnetSakermed2saker = sakRepo.finnSaker(fnr)

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -104,8 +103,8 @@ class RealSakService(
 
         return when {
             tilknytning.ukjent -> ArbeidsFordelingEnhet(
-                Enheter.DEFAULT_PORSGRUNN.navn,
-                Enheter.DEFAULT_PORSGRUNN.enhetNr
+                Enheter.defaultEnhet.navn,
+                Enheter.defaultEnhet.enhetNr
             )
             geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
                 Folkeregisteridentifikator.of(fnr),
@@ -120,8 +119,6 @@ class RealSakService(
 
     private fun finnEnhetForTemaOgOmraade(tema: String, omraade: String) =
         norg2Klient.hentEnheterForOmraade(tema, omraade).firstOrNull() ?: throw IngenEnhetFunnetException(omraade, tema)
-
-    private fun Saksbehandler.enheterIds() = this.enheter().map { it.id }
 
     private fun List<Sak>.filterForEnheter() = this.filterSakerForEnheter(
         featureToggleService,

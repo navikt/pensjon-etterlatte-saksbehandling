@@ -93,7 +93,7 @@ interface BeanFactory {
     fun vedtakKlient(): VedtakKlient
     fun behandlingsStatusService(): BehandlingStatusService
     fun sporingslogg(): Sporingslogg
-    fun getSaksbehandlerGroupIdsByKey(): Map<String, String>
+    fun getSaksbehandlerGroupIdsByKey(): Map<AzureGroup, String>
     fun featureToggleService(): FeatureToggleService
     fun norg2HttpClient(): Norg2Klient
     fun navAnsattKlient(): NavAnsattKlient
@@ -225,20 +225,8 @@ abstract class CommonFactory : BeanFactory {
 class EnvBasedBeanFactory(private val env: Map<String, String>) : CommonFactory() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> {
-        val attestantClaim = env["AZUREAD_ATTESTANT_GROUPID"]!!
-        val saksbehandlerClaim = env["AZUREAD_SAKSBEHANDLER_GROUPID"]!!
-        val strengFortroligClaim = env["AZUREAD_STRENGT_FORTROLIG_GROUPID"]!!
-        val fortroligClaim = env["AZUREAD_FORTROLIG_GROUPID"]!!
-        val egenAnsattClaim = env["AZUREAD_EGEN_ANSATT_GROUPID"]!!
-
-        return mapOf(
-            "AZUREAD_ATTESTANT_GROUPID" to attestantClaim,
-            "AZUREAD_SAKSBEHANDLER_GROUPID" to saksbehandlerClaim,
-            "AZUREAD_STRENGT_FORTROLIG_GROUPID" to strengFortroligClaim,
-            "AZUREAD_FORTROLIG_GROUPID" to fortroligClaim,
-            "AZUREAD_EGEN_ANSATT_GROUPID" to egenAnsattClaim
-        )
+    override fun getSaksbehandlerGroupIdsByKey(): Map<AzureGroup, String> {
+        return AzureGroup.values().associateWith { env[it.envKey]!! }
     }
 
     private val dataSource: DataSource by lazy { DataSourceBuilder.createDataSource(env) }

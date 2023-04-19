@@ -3,6 +3,7 @@ package no.nav.etterlatte.adressebeskyttelse
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.etterlatte.SaksbehandlerMedRoller
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -54,9 +55,9 @@ class TilgangServiceTest {
         tilgangService = TilgangServiceImpl(
             SakTilgangDao(dataSource),
             mapOf(
-                "AZUREAD_STRENGT_FORTROLIG_GROUPID" to strengtfortroligDev,
-                "AZUREAD_FORTROLIG_GROUPID" to fortroligDev,
-                "AZUREAD_EGEN_ANSATT_GROUPID" to egenAnsattDev
+                AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev,
+                AzureGroup.FORTROLIG to fortroligDev,
+                AzureGroup.EGEN_ANSATT to egenAnsattDev
             )
         )
         sakRepo = SakDao { dataSource.connection }

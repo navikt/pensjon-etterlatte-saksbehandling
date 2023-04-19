@@ -1,6 +1,7 @@
 package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.SaksbehandlerMedRoller
+import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -20,7 +21,7 @@ data class SakMedGraderingOgSkjermet(
 
 class TilgangServiceImpl(
     private val dao: SakTilgangDao,
-    private val saksbehandlereGroupIdsByKey: Map<String, String>
+    private val saksbehandlereGroupIdsByKey: Map<AzureGroup, String>
 ) : TilgangService {
 
     override suspend fun harTilgangTilPerson(
@@ -67,7 +68,7 @@ class TilgangServiceImpl(
         saksbehandlerMedRoller: SaksbehandlerMedRoller
     ): Boolean {
         return when (sak.erSkjermet) {
-            true -> saksbehandlerMedRoller.harRolleEgenansatt(saksbehandlereGroupIdsByKey)
+            true -> saksbehandlerMedRoller.harRolleEgenAnsatt(saksbehandlereGroupIdsByKey)
             false -> true
             null -> true
         }

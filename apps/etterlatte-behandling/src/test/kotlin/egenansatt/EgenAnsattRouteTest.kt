@@ -61,7 +61,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             }
             coEvery {
                 norg2Klient.hentEnheterForOmraade(any(), any())
-            } returns listOf(ArbeidsFordelingEnhet(Enheter.DEFAULT_PORSGRUNN.navn, Enheter.DEFAULT_PORSGRUNN.enhetNr))
+            } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
             val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
@@ -72,7 +72,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 it.body()
             }
             Assertions.assertNotNull(sak.id)
-            Assertions.assertEquals(Enheter.DEFAULT_PORSGRUNN.enhetNr, sak.enhet)
+            Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
 
             val virtuellEnhet = ArbeidsFordelingEnhet("virtuellenhet", "2222")
             coEvery { norg2Klient.hentEnheterForOmraade(any(), any()) } returns listOf(virtuellEnhet)

@@ -14,7 +14,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.Enheter
@@ -344,7 +343,7 @@ class RealGenerellBehandlingServiceTest {
     fun `skal hente behandlinger i sak hvor sak har enhet og brukeren har enhet`() {
         every {
             user.enheter()
-        } returns listOf(SaksbehandlerEnhet(Enheter.DEFAULT_PORSGRUNN.enhetNr, Enheter.DEFAULT_PORSGRUNN.navn))
+        } returns listOf(Enheter.PORSGRUNN.enhetNr)
 
         val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val behandlingDaoMock = mockk<BehandlingDao> {
@@ -352,9 +351,9 @@ class RealGenerellBehandlingServiceTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = RevurderingAarsak.REGULERING,
-                    enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+                    enhet = Enheter.PORSGRUNN.enhetNr
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr)
+                foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
@@ -386,7 +385,7 @@ class RealGenerellBehandlingServiceTest {
     fun `skal ikke hente behandlinger i sak hvor sak har enhet og brukeren har ikke enhet`() {
         every {
             user.enheter()
-        } returns listOf(SaksbehandlerEnhet(Enheter.EGNE_ANSATTE.enhetNr, Enheter.EGNE_ANSATTE.navn))
+        } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
         val hendleseskanal = mockk<BehandlingHendelserKanal>()
         val behandlingDaoMock = mockk<BehandlingDao> {
@@ -394,9 +393,9 @@ class RealGenerellBehandlingServiceTest {
                 revurdering(
                     sakId = 1,
                     revurderingAarsak = RevurderingAarsak.REGULERING,
-                    enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr
+                    enhet = Enheter.PORSGRUNN.enhetNr
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.DEFAULT_PORSGRUNN.enhetNr)
+                foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr)
             )
         }
         val hendelserMock = mockk<HendelseDao>()

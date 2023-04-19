@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.config.CommonFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
@@ -187,12 +188,14 @@ class TestBeanFactory(
     private val azureAdAttestantClaim: String,
     private val norg2Klient: Norg2Klient?
 ) : CommonFactory() {
-    override fun getSaksbehandlerGroupIdsByKey(): Map<String, String> =
+    override fun getSaksbehandlerGroupIdsByKey(): Map<AzureGroup, String> =
         mapOf(
-            "AZUREAD_ATTESTANT_GROUPID" to azureAdAttestantClaim,
-            "AZUREAD_SAKSBEHANDLER_GROUPID" to azureAdSaksbehandlerClaim,
-            "AZUREAD_STRENGT_FORTROLIG_GROUPID" to "5ef775f2-61f8-4283-bf3d-8d03f428aa14",
-            "AZUREAD_FORTROLIG_GROUPID" to "ea930b6b-9397-44d9-b9e6-f4cf527a632a"
+            AzureGroup.ATTESTANT to azureAdAttestantClaim,
+            AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
+            AzureGroup.STRENGT_FORTROLIG to "5ef775f2-61f8-4283-bf3d-8d03f428aa14",
+            AzureGroup.FORTROLIG to "ea930b6b-9397-44d9-b9e6-f4cf527a632a",
+            AzureGroup.NASJONAL_MED_LOGG to "753805ea-65a7-4855-bdc3-e6130348df9f",
+            AzureGroup.NASJONAL_UTEN_LOGG to "ea7411eb-8b48-41a0-bc56-7b521fbf0c25"
         )
 
     val rapidSingleton: TestProdusent<String, String> by lazy() { TestProdusent() }

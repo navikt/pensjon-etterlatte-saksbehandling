@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.config.AzureGroup
 import no.nav.etterlatte.config.BeanFactory
 import no.nav.etterlatte.config.EnvBasedBeanFactory
 import no.nav.etterlatte.egenansatt.EgenAnsattService
@@ -122,7 +123,7 @@ fun Application.module(beanFactory: BeanFactory) {
 private fun Route.attachContekst(
     ds: DataSource,
     enhetService: EnhetService,
-    saksbehandlerGroupIds: Map<String, String>
+    saksbehandlerGroupIds: Map<AzureGroup, String>
 ) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =

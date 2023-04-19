@@ -55,7 +55,7 @@ data class TrygdetidGrunnlag(
     val type: TrygdetidType,
     val bosted: String,
     val periode: TrygdetidPeriode,
-    val kilde: String,
+    val kilde: Grunnlagsopplysning.Saksbehandler? = null,
     val beregnetTrygdetid: BeregnetTrygdetidGrunnlag? = null
 )
 

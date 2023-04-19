@@ -127,7 +127,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         "bosted" to trygdetidGrunnlag.bosted,
                         "periodeFra" to trygdetidGrunnlag.periode.fra,
                         "periodeTil" to trygdetidGrunnlag.periode.til,
-                        "kilde" to trygdetidGrunnlag.kilde,
+                        "kilde" to trygdetidGrunnlag.kilde?.toJson(),
                         "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
                         "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
                         "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()
@@ -156,7 +156,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         "bosted" to trygdetidGrunnlag.bosted,
                         "periodeFra" to trygdetidGrunnlag.periode.fra,
                         "periodeTil" to trygdetidGrunnlag.periode.til,
-                        "kilde" to trygdetidGrunnlag.kilde,
+                        "kilde" to trygdetidGrunnlag.kilde?.toJson(),
                         "beregnetVerdi" to trygdetidGrunnlag.beregnetTrygdetid?.verdi.toString(),
                         "beregnetTidspunkt" to trygdetidGrunnlag.beregnetTrygdetid?.tidspunkt?.toTimestamp(),
                         "beregnetRegelresultat" to trygdetidGrunnlag.beregnetTrygdetid?.regelResultat?.toJson()
@@ -249,7 +249,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 fra = localDate("periode_fra"),
                 til = localDate("periode_til")
             ),
-            kilde = string("kilde"),
+            kilde = string("kilde").let { objectMapper.readValue(it) },
             beregnetTrygdetid = BeregnetTrygdetidGrunnlag(
                 verdi = string("beregnet_verdi").let { Period.parse(it) },
                 tidspunkt = sqlTimestamp("beregnet_tidspunkt").toTidspunkt(),

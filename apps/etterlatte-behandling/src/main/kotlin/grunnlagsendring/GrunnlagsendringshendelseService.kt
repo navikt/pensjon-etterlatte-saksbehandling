@@ -19,6 +19,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -87,6 +88,12 @@ class GrunnlagsendringshendelseService(
         return opprettHendelseAvTypeForPerson(
             vergeMaalEllerFremtidsfullmakt.fnr,
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT
+        )
+    }
+    fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> {
+        return opprettHendelseAvTypeForSak(
+            sakId,
+            GrunnlagsendringsType.GRUNNBELOEP
         )
     }
 
@@ -170,6 +177,37 @@ class GrunnlagsendringshendelseService(
                         )
                     }
             }
+        }
+    }
+
+    private fun opprettHendelseAvTypeForSak(
+        sakId: Long,
+        grunnlagendringType: GrunnlagsendringsType,
+        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
+    ): List<Grunnlagsendringshendelse> {
+        return if (hendelseEksistererFraFoer(sakId, null, grunnlagendringType)) {
+            emptyList()
+        } else {
+            listOf(
+                inTransaction {
+                    val hendelseId = UUID.randomUUID()
+                    logger.info(
+                        "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                            "type $grunnlagendringType på sak med id=$sakId"
+                    )
+                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                        Grunnlagsendringshendelse(
+                            id = hendelseId,
+                            sakId = sakId,
+                            status = grunnlagsEndringsStatus,
+                            type = grunnlagendringType,
+                            opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                            hendelseGjelderRolle = Saksrolle.SOEKER,
+                            gjelderPerson = sakService.finnSak(sakId)?.ident!!
+                        )
+                    )
+                }
+            )
         }
     }
 
@@ -271,6 +309,7 @@ class GrunnlagsendringshendelseService(
                     samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal
                 )
             }
+            GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomPdlOgGrunnlag.Grunnbeloep(samsvar = false)
         }
     }
 
@@ -314,14 +353,14 @@ class GrunnlagsendringshendelseService(
 
     private fun hendelseEksistererFraFoer(
         sakId: Long,
-        fnr: String,
+        fnr: String?,
         hendelsesType: GrunnlagsendringsType
     ): Boolean {
         return grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
             listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB)
         ).any {
-            it.gjelderPerson == fnr && it.type == hendelsesType
+            (fnr == null) || it.gjelderPerson == fnr && it.type == hendelsesType
         }
     }
 

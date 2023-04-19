@@ -45,4 +45,9 @@ sealed class SamsvarMellomPdlOgGrunnlag {
         val fraGrunnlag: List<Folkeregisteridentifikator>?,
         override val samsvar: Boolean
     ) : SamsvarMellomPdlOgGrunnlag()
+
+    @JsonTypeName("GRUNNBELOEP")
+    data class Grunnbeloep(
+        override val samsvar: Boolean
+    ) : SamsvarMellomPdlOgGrunnlag()
 }

@@ -542,4 +542,32 @@ internal class GrunnlagsendringshendelseServiceTest {
             }
         }
     }
+
+    @Test
+    fun `skal kunne opprette hendelser som følge av feilet regulering`() {
+        val sakId = 1L
+        val lagretHendelse = grunnlagsendringshendelseMedSamsvar(
+            type = GrunnlagsendringsType.GRUNNBELOEP,
+            id = UUID.randomUUID(),
+            sakId = sakId,
+            fnr = "test-fnr",
+            samsvarMellomPdlOgGrunnlag = null
+        )
+
+        val hendelseSomLagres = slot<Grunnlagsendringshendelse>()
+
+        every { sakService.finnSak(sakId) } returns Sak("test-fnr", SakType.BARNEPENSJON, sakId)
+
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(hendelseSomLagres))
+        } returns lagretHendelse
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, any())
+        } returns emptyList()
+
+        grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(sakId)
+
+        assertEquals(hendelseSomLagres.captured.type, GrunnlagsendringsType.GRUNNBELOEP)
+        assertEquals(hendelseSomLagres.captured.sakId, sakId)
+    }
 }

@@ -25,11 +25,14 @@ interface BehandlingService {
     fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
     fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse)
     fun sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt)
+    fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse)
     fun hentAlleSaker(): Saker
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
     fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe
     fun migrer(hendelse: MigreringRequest): UUID
 }
+
+data class ReguleringFeiletHendelse(val sakId: Long)
 
 class BehandlingServiceImpl(
     private val behandling_app: HttpClient,
@@ -77,6 +80,12 @@ class BehandlingServiceImpl(
                 contentType(ContentType.Application.Json)
                 setBody(vergeMaalEllerFremtidsfullmakt)
             }
+        }
+    }
+
+    override fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse) {
+        runBlocking {
+            behandling_app.post("$url/grunnlagsendringshendelse/reguleringfeilet")
         }
     }
 

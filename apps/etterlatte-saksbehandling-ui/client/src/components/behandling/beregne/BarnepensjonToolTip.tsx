@@ -11,7 +11,7 @@ interface ToolTipPerson {
   foedselsdato: string | Date
 }
 
-export const GjelderTooltip = ({ soesken, soeker }: { soesken: ToolTipPerson[]; soeker: ToolTipPerson }) => {
+export const BarnepensjonToolTip = ({ soesken, soeker }: { soesken: ToolTipPerson[]; soeker: ToolTipPerson }) => {
   const [isOpen, setIsOpen] = useState(false)
   const ref = useRef(null)
 

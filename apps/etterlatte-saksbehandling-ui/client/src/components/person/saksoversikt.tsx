@@ -119,13 +119,11 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       {kanOppretteManueltOpphoer && (
                         <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
                       )}
-                      {visOpprettRevurderingsmodal && (
-                        <OpprettRevurderingModal
-                          sakId={sakId}
-                          open={visOpprettRevurderingsmodal}
-                          setOpen={setVisOpprettRevurderingsmodal}
-                        />
-                      )}
+                      <OpprettRevurderingModal
+                        sakId={sakId}
+                        open={visOpprettRevurderingsmodal}
+                        setOpen={setVisOpprettRevurderingsmodal}
+                      />
                     </EkstraHandlinger>
                   ) : null}
                   <UhaandterteHendelser

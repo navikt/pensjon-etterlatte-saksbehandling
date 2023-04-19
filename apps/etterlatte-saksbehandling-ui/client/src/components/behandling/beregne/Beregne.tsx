@@ -45,9 +45,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     oppdaterVedtakRequest(behandling.id, () => {
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
       if (behandlingSkalSendeBrev(behandling)) {
-        setVisAttesteringsmodal(true)
-      } else {
         next()
+      } else {
+        setVisAttesteringsmodal(true)
       }
     })
   }

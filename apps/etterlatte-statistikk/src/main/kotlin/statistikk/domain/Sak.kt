@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.util.*
 
 enum class BehandlingMetode {
-    MANUELL
+    MANUELL, AUTOMATISK
 }
 
 enum class SakUtland {

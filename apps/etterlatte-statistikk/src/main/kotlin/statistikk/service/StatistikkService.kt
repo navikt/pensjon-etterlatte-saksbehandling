@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -26,7 +27,7 @@ import no.nav.etterlatte.statistikk.river.BehandlingIntern
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 class StatistikkService(
     private val stoenadRepository: StoenadRepository,
@@ -104,6 +105,11 @@ class StatistikkService(
             null
         }
 
+        val behandlingMetode = when (detaljertBehandling.prosesstype) {
+            Prosesstype.AUTOMATISK -> BehandlingMetode.AUTOMATISK
+            Prosesstype.MANUELL -> BehandlingMetode.MANUELL
+        }
+
         return SakRad(
             id = -1,
             behandlingId = vedtak.behandling.id,
@@ -116,7 +122,7 @@ class StatistikkService(
             behandlingStatus = hendelse.name,
             behandlingResultat = behandlingResultatFraVedtak(vedtak, hendelse, detaljertBehandling),
             resultatBegrunnelse = null,
-            behandlingMetode = BehandlingMetode.MANUELL,
+            behandlingMetode = behandlingMetode,
             soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = null,
             ansvarligBeslutter = vedtak.attestasjon?.attestant,

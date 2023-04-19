@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
@@ -20,8 +21,10 @@ import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.bruker
+import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import java.util.*
 
@@ -57,7 +60,7 @@ fun Route.trygdetid(trygdetidService: TrygdetidService, behandlingKlient: Behand
                     trygdetidService.lagreTrygdetidGrunnlag(
                         behandlingsId,
                         bruker,
-                        trygdetidgrunnlagDto.toTrygdetidGrunnlag()
+                        trygdetidgrunnlagDto.toTrygdetidGrunnlag(bruker)
                     )
                 call.respond(trygdetid.toDto())
             }
@@ -108,13 +111,13 @@ private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto = Opplysningsgru
     }
 )
 
-private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(): TrygdetidGrunnlag =
+private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(bruker: Bruker): TrygdetidGrunnlag =
     TrygdetidGrunnlag(
         id = id ?: UUID.randomUUID(),
         type = TrygdetidType.valueOf(type),
         bosted = bosted,
         periode = TrygdetidPeriode(periodeFra, periodeTil),
-        kilde = kilde
+        kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now())
     )
 
 private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
@@ -127,6 +130,9 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto {
         beregnet = beregnetTrygdetid?.let {
             BeregnetTrygdetidGrunnlagDto(it.verdi.days, it.verdi.months, it.verdi.years)
         },
-        kilde = kilde
+        kilde = TrygdetidGrunnlagKildeDto(
+            tidspunkt = kilde?.tidspunkt.toString(),
+            ident = kilde?.ident ?: throw Exception("Mangler gyldig kilde for trygdetidgrunnlag $id")
+        )
     )
 }

@@ -51,7 +51,8 @@ object TrygdetidBeregningService {
         val grunnlag = TrygdetidPeriodeGrunnlag(
             periodeFra = FaktumNode(
                 verdi = trygdetidGrunnlag.periode.fra,
-                kilde = trygdetidGrunnlag.kilde,
+                kilde = trygdetidGrunnlag.kilde
+                    ?: throw Exception("Mangler kilde for trygdetidgrunnlag ${trygdetidGrunnlag.id}"),
                 beskrivelse = "Startdato for trygdetidsperiode"
             ),
             periodeTil = FaktumNode(

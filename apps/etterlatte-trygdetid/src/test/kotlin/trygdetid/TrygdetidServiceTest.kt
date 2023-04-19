@@ -207,7 +207,7 @@ internal class TrygdetidServiceTest {
     fun `skal oppdatere trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
         val trygdetidGrunnlag = trygdetidGrunnlag()
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(kilde = "test")
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
         val trygdetidGrunnlagSlot = slot<TrygdetidGrunnlag>()
         val beregnetTrygdetidSlot = slot<BeregnetTrygdetid>()
 

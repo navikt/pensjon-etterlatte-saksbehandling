@@ -46,7 +46,10 @@ export interface ITrygdetidGrunnlag {
   periodeFra?: string
   periodeTil?: string
   beregnet?: IBeregnetTrygdetidGrunnlag
-  kilde: string
+  kilde: {
+    tidspunkt: string
+    ident: string
+  }
 }
 
 export interface IBeregnetTrygdetidGrunnlag {

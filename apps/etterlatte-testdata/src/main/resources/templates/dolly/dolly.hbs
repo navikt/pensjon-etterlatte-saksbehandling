@@ -47,10 +47,9 @@
             <thead>
             <tr>
                 <th>Avdød</th>
-                <th>Gjenlevende (innsender)</th>
+                <th>Gjenlevende</th>
                 <th>Barn</th>
-                <th>Antall Søsken</th>
-                <th></th>
+                <th style="text-align: right">Send søknad</th>
             </tr>
             </thead>
             <tbody>
@@ -101,20 +100,6 @@
                            required
                     />
                 </div>
-
-                <!--<div class="mb-4 col-md-3 form-group">
-                    <label for="halvsoeskenGjenlevende" class="form-label">Halvsøsken (gjenlevende)</label>
-                    <input type="number"
-                           pattern="[0-9]+"
-                           minlength="11"
-                           maxlength="11"
-                           name="halvsoeskenGjenlevende"
-                           id="halvsoeskenGjenlevende"
-                           class="form-control"
-                           value=0
-                           required
-                    />
-                </div>-->
             </div>
 
             <button type="submit" class="btn btn-primary">Opprett ny familie</button>
@@ -170,41 +155,45 @@
             data.forEach((familie) => {
                 const avdoed = familie.avdoed
                 const gjenlevende = familie.gjenlevende
-                const [barn, ...soesken] = familie.barn
+                const barn = familie.barn
 
                 const tableRow = document.createElement('tr')
 
                 const avdoedTableElement = document.createElement('td')
                 const gjenlevendeTableElement = document.createElement('td')
                 const barnTableElement = document.createElement('td')
-                const antallSoeskenTableElement = document.createElement('td')
                 const buttonTableElement = document.createElement('td')
 
-                const button = document.createElement('button')
-                button.classList.add('btn')
-                button.classList.add('btn-primary')
-                button.innerHTML = 'Send inn søknad for denne familien'
-                button.type = 'button'
-                button.onclick = () => sendSoeknad(avdoed, gjenlevende, barn, soesken)
-
-                avdoedTableElement.innerHTML = avdoed
-                avdoedTableElement.style.width = '200px'
+                if (familie.ibruk) {
+                    avdoedTableElement.innerHTML = `${avdoed} <span class="badge text-bg-warning">Brukt</span>`
+                } else {
+                    avdoedTableElement.innerHTML = avdoed
+                }
+                avdoedTableElement.style.width = '180px'
                 tableRow.appendChild(avdoedTableElement)
 
                 gjenlevendeTableElement.innerHTML = gjenlevende
-                gjenlevendeTableElement.style.width = '300px'
+                gjenlevendeTableElement.style.width = '150px'
                 tableRow.appendChild(gjenlevendeTableElement)
 
-                barnTableElement.innerHTML = barn
-                barnTableElement.style.width = '300px'
+                barnTableElement.innerHTML = `${barn[0]} (m/${(barn.length - 1) ?? '0'} søsken)`
+                barnTableElement.style.width = '200px'
                 tableRow.appendChild(barnTableElement)
 
-                antallSoeskenTableElement.innerHTML = soesken.length ?? '0'
-                antallSoeskenTableElement.style.width = '120px'
-                tableRow.appendChild(antallSoeskenTableElement)
+                const newButton = (type, label, btnClass) => {
+                    const btn = document.createElement('button')
+                    btn.classList.add('btn')
+                    btn.classList.add('me-1')
+                    btn.classList.add(btnClass)
+                    btn.innerHTML = label
+                    btn.type = 'button'
+                    btn.onclick = () => sendSoeknad(type, avdoed, gjenlevende, barn)
+                    return btn
+                }
 
-                buttonTableElement.appendChild(button)
-                buttonTableElement.style.textAlign = 'center'
+                buttonTableElement.appendChild(newButton('BARNEPENSJON', 'BP', 'btn-primary'))
+                buttonTableElement.appendChild(newButton('OMSTILLINGSSTOENAD', 'OMS', 'btn-info'))
+                buttonTableElement.style.textAlign = 'right'
                 buttonTableElement.style.width = '300px'
                 tableRow.appendChild(buttonTableElement)
 
@@ -213,14 +202,14 @@
         })
     }
 
-    const sendSoeknad = async (fnrAvdoed, fnrGjenlevende, fnrBarn, soesken) => {
+    const sendSoeknad = async (type, avdoed, gjenlevende, barn) => {
         soeknadInnsendtAlert.style.display = "none"
         await fetch('dolly/send-soeknad', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: `fnrAvdoed=${fnrAvdoed}&fnrGjenlevende=${fnrGjenlevende}&fnrBarn=${fnrBarn}&soesken=${JSON.stringify(soesken)}`
+            body: `type=${type}&avdoed=${avdoed}&gjenlevende=${gjenlevende}&barnListe=${JSON.stringify(barn)}`
         }).then(res => res.json()).then(data => {
             if ((data.status === 200)) {
                 soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert med nøkkel: ${data.noekkel}`

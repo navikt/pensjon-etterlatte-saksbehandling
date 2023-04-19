@@ -8,6 +8,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.HttpHeaders
 import no.nav.etterlatte.libs.common.objectMapper
@@ -28,6 +29,7 @@ interface DollyClient {
     ): TestGruppeBestillinger
 
     suspend fun hentPersonInfo(identer: List<String>, accessToken: String): List<DollyPersonResponse>
+    suspend fun markerIdentIBruk(ident: String, accessToken: String): DollyIBrukResponse
 }
 
 class DollyClientImpl(config: Config, private val httpClient: HttpClient) : DollyClient {
@@ -76,4 +78,9 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
         }.let {
             objectMapper.readValue(it.body<JsonNode>()["data"]["hentPersonBolk"].toJson())
         }
+
+    override suspend fun markerIdentIBruk(ident: String, accessToken: String): DollyIBrukResponse =
+        httpClient.put("$dollyUrl/ident/$ident/ibruk?iBruk=true") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
+        }.body()
 }

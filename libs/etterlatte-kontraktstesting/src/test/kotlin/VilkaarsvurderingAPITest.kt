@@ -1,11 +1,5 @@
 package no.nav.etterlatte
 
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.isSuccess
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
@@ -14,8 +8,6 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -29,13 +21,13 @@ import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingServiceImpl
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
+import verifiserAtRutaMatcherDetKlientenKallerForPost
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
@@ -90,7 +82,7 @@ internal class VilkaarsvurderingAPITest {
             }
             val (sti, request) = kallKlient()
             klargjoerRute()
-            verifiserAtRutaMatcherDetKlientenKaller(sti, request)
+            verifiserAtRutaMatcherDetKlientenKallerForPost(sti, request, token)
         }
     }
 
@@ -126,18 +118,5 @@ internal class VilkaarsvurderingAPITest {
         coEvery { klient.post(any(), capture(sti)) } returns mockk()
         klient.oppdaterTotalVurdering(UUID.randomUUID(), request)
         return Pair(sti.captured, request)
-    }
-
-    private fun ApplicationTestBuilder.verifiserAtRutaMatcherDetKlientenKaller(
-        sti: String,
-        request: Any
-    ) {
-        runBlocking {
-            client.post(sti) {
-                setBody(request.toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.also { assertTrue { it.status.isSuccess() } }
-        }
     }
 }

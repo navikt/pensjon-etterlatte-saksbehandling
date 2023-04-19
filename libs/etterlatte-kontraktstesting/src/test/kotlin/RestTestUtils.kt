@@ -1,26 +1,25 @@
-import io.ktor.client.HttpClient
+
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.isSuccess
 import io.ktor.server.testing.ApplicationTestBuilder
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.toJson
+import org.junit.jupiter.api.Assertions
 
-private suspend fun ApplicationTestBuilder.verifyKlientOgRouteHarLikSignaturForPost(
-    klient: HttpClient,
-    request: Any
+fun ApplicationTestBuilder.verifiserAtRutaMatcherDetKlientenKallerForPost(
+    sti: String,
+    request: Any,
+    token: String
 ) {
-    val sti = slot<String>()
-    val jsonHeader = header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-    val body = request.toJson()
-    verify {
-        runBlocking {
-            klient.post(capture(sti)) {
-                jsonHeader
-                body
-            }
-        }
+    runBlocking {
+        client.post(sti) {
+            setBody(request.toJson())
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            header(HttpHeaders.Authorization, "Bearer $token")
+        }.also { Assertions.assertTrue { it.status.isSuccess() } }
     }
-
-    client.post(sti.captured) {
-        setBody(body)
-        jsonHeader
-        header(HttpHeaders.Authorization, "Bearer $token")
-    }.also { verify { it.status.isSuccess() } }
 }

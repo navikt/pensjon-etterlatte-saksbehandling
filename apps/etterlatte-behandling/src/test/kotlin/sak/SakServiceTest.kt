@@ -216,7 +216,9 @@ internal class SakServiceTest {
 
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false) } returns true
-        every { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value) } throws responseException
+        every {
+            pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
+        } throws responseException
 
         val service: SakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
 
@@ -231,7 +233,7 @@ internal class SakServiceTest {
 
         verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }
         verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false) }
-        verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value) }
+        verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON) }
         verify {
             listOf(norg2Klient) wasNot Called
         }
@@ -242,7 +244,7 @@ internal class SakServiceTest {
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false) } returns true
         every {
-            pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value)
+            pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns emptyList()
 
@@ -257,7 +259,7 @@ internal class SakServiceTest {
 
         verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }
         verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false) }
-        verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value) }
+        verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
     }
 
@@ -274,7 +276,7 @@ internal class SakServiceTest {
         )
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false) } returns true
         every {
-            pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value)
+            pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns listOf(
             ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr)
@@ -293,7 +295,7 @@ internal class SakServiceTest {
 
         verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }
         verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false) }
-        verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value) }
+        verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
         verify(exactly = 1) {
             sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)

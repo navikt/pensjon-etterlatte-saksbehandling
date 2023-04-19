@@ -2,15 +2,19 @@ package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -20,7 +24,16 @@ import java.util.*
 
 class BesvarOpplysningsbehovTest {
     companion object {
-        val melding = readFile("/behov.json")
+        val melding = JsonMessage.newMessage(
+            mapOf(
+                BEHOV_NAME_KEY to Opplysningstype.SOEKER_PDL_V1,
+                "sakId" to 1L,
+                "sakType" to SakType.BARNEPENSJON,
+                "fnr" to "12101376212",
+                "rolle" to PersonRolle.GJENLEVENDE,
+                CORRELATION_ID_KEY to UUID.randomUUID().toString()
+            )
+        ).toJson()
 
         val pdlMock = mockk<Pdl>()
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
@@ -73,12 +86,12 @@ class BesvarOpplysningsbehovTest {
 
     @Test
     fun `skal lese melding om opplysningsbehov og returnere info fra PDL`() {
-        every { pdlMock.hentPerson(any(), any()) } answers { mockPerson(fnr = firstArg()).tilPerson() }
-        every { pdlMock.hentOpplysningsperson(any(), any()) } answers { mockPerson(fnr = firstArg()) }
+        every { pdlMock.hentPerson(any(), any(), any()) } answers { mockPerson(fnr = firstArg()).tilPerson() }
+        every { pdlMock.hentOpplysningsperson(any(), any(), any()) } answers { mockPerson(fnr = firstArg()) }
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         Assertions.assertEquals(Opplysningstype.SOEKER_PDL_V1.name, inspector.message(0).get(BEHOV_NAME_KEY).asText())
-        // TODO fikse litt på denne
+
         Assertions.assertEquals(
             "Ola",
             inspector.message(0).get("opplysning").first().get("opplysning").get("fornavn").asText()
@@ -88,8 +101,8 @@ class BesvarOpplysningsbehovTest {
 
     @Test
     fun `alle opplysninger har samme tidspunkt for innhenting`() {
-        every { pdlMock.hentPerson(any(), any()) } answers { mockPerson(fnr = firstArg()).tilPerson() }
-        every { pdlMock.hentOpplysningsperson(any(), any()) } answers { mockPerson(fnr = firstArg()) }
+        every { pdlMock.hentPerson(any(), any(), any()) } answers { mockPerson(fnr = firstArg()).tilPerson() }
+        every { pdlMock.hentOpplysningsperson(any(), any(), any()) } answers { mockPerson(fnr = firstArg()) }
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         val opplysninger = inspector.message(0).get("opplysning")

@@ -70,12 +70,13 @@ internal class BehandlingClientTest {
 
     @Test
     fun testSkaffSak() {
+        // TODO: er ikke denne litt ræva?
         val requestList = mutableListOf<HttpRequestData>()
         val httpClient = HttpClient(
             MockEngine { request ->
                 requestList.add(request)
                 respond(
-                    content = ByteReadChannel("""{"id":1}"""),
+                    content = ByteReadChannel("""{"id":1, "ident":"123", "sakType":"BARNEPENSJON"}"""),
                     status = HttpStatusCode.OK,
                     headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )
@@ -85,9 +86,9 @@ internal class BehandlingClientTest {
         }
 
         val behandlingsservice = BehandlingClient(httpClient, "http://behandlingsservice")
-        val skaffSakResultat = behandlingsservice.skaffSak("22", "barnepensjon")
+        val sak = behandlingsservice.skaffSak("22", "barnepensjon")
 
-        assertEquals(1, skaffSakResultat)
+        assertEquals(1L, sak.id)
         assertEquals("http://behandlingsservice/personer/saker/barnepensjon", requestList[0].url.toString())
     }
 }

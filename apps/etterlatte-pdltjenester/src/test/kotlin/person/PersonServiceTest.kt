@@ -72,6 +72,14 @@ internal class PersonServiceTest {
             pdlKlient.hentPdlIdentifikator(
                 HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent), SakType.BARNEPENSJON)
             )
+        } returns personIdentResponse
+        coEvery {
+            pdlKlient.hentPdlIdentifikator(
+                HentPdlIdentRequest(
+                    PersonIdent(aktorIdMedNpid),
+                    SakType.BARNEPENSJON
+                )
+            )
         } returns personNpidResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
@@ -210,15 +218,16 @@ internal class PersonServiceTest {
         val personIdentResponse = runBlocking {
             personService.hentPdlIdentifikator(
                 HentPdlIdentRequest(
-                    PersonIdent("2305469522806"),
+                    PersonIdent(aktorIdMedFolkeregisterIdent),
                     SakType.BARNEPENSJON
                 )
             )
         }
-        val expectedFolkeregisterIdent = "70078749472"
+
         if (personIdentResponse !is PdlIdentifikator.FolkeregisterIdent) {
             fail("Fikk ikke folkeregisteridentifikator")
         }
+        val expectedFolkeregisterIdent = "70078749472"
         assertEquals(expectedFolkeregisterIdent, personIdentResponse.folkeregisterident.value)
     }
 
@@ -232,10 +241,11 @@ internal class PersonServiceTest {
                 )
             )
         }
-        val expectedNpid = "09706511617"
+
         if (personIdentResponse !is PdlIdentifikator.Npid) {
             fail("Fikk ikke Npid")
         }
+        val expectedNpid = "09706511617"
         assertEquals(expectedNpid, personIdentResponse.npid.ident)
     }
 

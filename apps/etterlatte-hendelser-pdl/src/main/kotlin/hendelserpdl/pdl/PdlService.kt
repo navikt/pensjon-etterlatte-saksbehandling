@@ -32,7 +32,7 @@ class PdlService(
             return pdl_app.post("$url/pdlident") {
                 contentType(ContentType.Application.Json)
                 // TODO: uavklart om vi må slå opp i behandlingsdatabasen for å finne saktypen for å finne behandlingsnummer
-                // kan potensielt føre til at vi ikke finner personen.
+                // kan potensielt føre til at vi ikke finner personen. Men siden dette er en testfase kan vi vente med en avklaring
                 setBody(HentPdlIdentRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
             }.body()
         } catch (e: Exception) {

@@ -4,10 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad.InnsendtSoeknadRiver
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -28,7 +30,9 @@ internal class InnsendtSoeknadRiverTest {
         val sakId = 12345L
         val id = UUID.randomUUID()
 
-        every { behandlingClientMock.skaffSak(any(), any()) } returns sakId
+        every {
+            behandlingClientMock.skaffSak(any(), any())
+        } returns Sak("21478247343", SakType.BARNEPENSJON, sakId, null)
         every { behandlingClientMock.initierBehandling(any(), any(), any()) } returns id
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns Unit
 

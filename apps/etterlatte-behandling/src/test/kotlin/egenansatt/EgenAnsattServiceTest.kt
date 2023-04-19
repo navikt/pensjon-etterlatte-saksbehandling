@@ -64,7 +64,7 @@ class EgenAnsattServiceTest {
         sakService = spyk(RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService))
         egenAnsattService = EgenAnsattService(sakService, sikkerLogg)
 
-        every { pdlKlient.hentGeografiskTilknytning(any()) } returns GeografiskTilknytning(kommune = "0301")
+        every { pdlKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
         every {
             norg2Klient.hentEnheterForOmraade("EYB", "0301")
         } returns listOf(ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817"))

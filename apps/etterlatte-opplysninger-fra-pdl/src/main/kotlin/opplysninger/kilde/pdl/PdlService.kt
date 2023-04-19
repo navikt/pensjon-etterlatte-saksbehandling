@@ -7,15 +7,21 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
+interface Pdl {
+    fun hentPerson(foedselsnummer: String, rolle: PersonRolle, sakType: SakType): Person
+    fun hentOpplysningsperson(foedselsnummer: String, rolle: PersonRolle, sakType: SakType): PersonDTO
+}
+
 class PdlService(private val pdl: HttpClient, private val url: String) : Pdl {
-    override fun hentPerson(foedselsnummer: String, rolle: PersonRolle): Person {
-        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle)
+    override fun hentPerson(foedselsnummer: String, rolle: PersonRolle, sakType: SakType): Person {
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, sakType)
         val response = runBlocking {
             pdl.post("$url/person") {
                 contentType(ContentType.Application.Json)
@@ -25,8 +31,8 @@ class PdlService(private val pdl: HttpClient, private val url: String) : Pdl {
         return response
     }
 
-    override fun hentOpplysningsperson(foedselsnummer: String, rolle: PersonRolle): PersonDTO {
-        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle)
+    override fun hentOpplysningsperson(foedselsnummer: String, rolle: PersonRolle, sakType: SakType): PersonDTO {
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, sakType)
         val response = runBlocking {
             pdl.post("$url/person/v2") {
                 contentType(ContentType.Application.Json)

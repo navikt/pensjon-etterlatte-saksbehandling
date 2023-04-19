@@ -2,14 +2,17 @@ package no.nav.etterlatte.libs.common.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.etterlatte.libs.common.behandling.SakType
 
 data class HentPersonRequest(
     val foedselsnummer: Folkeregisteridentifikator,
-    val rolle: PersonRolle
+    val rolle: PersonRolle,
+    val saktype: SakType
 )
 
 data class HentPdlIdentRequest(
-    val ident: PersonIdent
+    val ident: PersonIdent,
+    val saktype: SakType
 )
 
 data class PersonIdent @JsonCreator constructor(

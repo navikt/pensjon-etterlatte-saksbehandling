@@ -29,7 +29,7 @@ class PersonService(
     suspend fun hentPerson(request: HentPersonRequest): Person {
         logger.info("Henter person med fnr=${request.foedselsnummer} fra PDL")
 
-        return pdlKlient.hentPerson(request.foedselsnummer, request.rolle).let {
+        return pdlKlient.hentPerson(request).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
@@ -45,7 +45,8 @@ class PersonService(
                     pdlKlient = pdlKlient,
                     fnr = request.foedselsnummer,
                     personRolle = request.rolle,
-                    hentPerson = it.data.hentPerson
+                    hentPerson = it.data.hentPerson,
+                    saktype = request.saktype
                 )
             }
         }
@@ -54,7 +55,7 @@ class PersonService(
     suspend fun hentOpplysningsperson(request: HentPersonRequest): PersonDTO {
         logger.info("Henter opplysninger for person med fnr=${request.foedselsnummer} fra PDL")
 
-        return pdlKlient.hentPerson(request.foedselsnummer, request.rolle).let {
+        return pdlKlient.hentPerson(request).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
@@ -68,8 +69,7 @@ class PersonService(
                 PersonMapper.mapOpplysningsperson(
                     ppsKlient = ppsKlient,
                     pdlKlient = pdlKlient,
-                    fnr = request.foedselsnummer,
-                    personRolle = request.rolle,
+                    request = request,
                     hentPerson = it.data.hentPerson
                 )
             }
@@ -79,7 +79,7 @@ class PersonService(
     suspend fun hentPdlIdentifikator(request: HentPdlIdentRequest): PdlIdentifikator {
         logger.info("Henter pdlidentifikator for ident=${request.ident} fra PDL")
 
-        return pdlKlient.hentPdlIdentifikator(request.ident).let { identResponse ->
+        return pdlKlient.hentPdlIdentifikator(request).let { identResponse ->
             if (identResponse.data?.hentIdenter == null) {
                 val pdlFeil = identResponse.errors?.asFormatertFeil()
                 if (identResponse.errors?.personIkkeFunnet() == true) {
@@ -119,7 +119,7 @@ class PersonService(
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): GeografiskTilknytning {
         logger.info("Henter geografisk tilknytning med fnr=${request.foedselsnummer} fra PDL")
 
-        return pdlKlient.hentGeografiskTilknytning(request.foedselsnummer).let {
+        return pdlKlient.hentGeografiskTilknytning(request).let {
             if (it.data?.hentGeografiskTilknytning == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {

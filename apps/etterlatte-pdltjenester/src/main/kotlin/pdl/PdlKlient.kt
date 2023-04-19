@@ -9,24 +9,33 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.Behandlingsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
+import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
-import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
 import org.slf4j.LoggerFactory
 
 class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
-    suspend fun hentPerson(fnr: Folkeregisteridentifikator, rolle: PersonRolle): PdlPersonResponse {
+    suspend fun hentPerson(hentPersonRequest: HentPersonRequest): PdlPersonResponse {
         val request = PdlGraphqlRequest(
             query = getQuery("/pdl/hentPerson.graphql"),
-            variables = toPdlVariables(fnr, rolle)
+            variables = toPdlVariables(hentPersonRequest.foedselsnummer, hentPersonRequest.rolle)
         )
+
+        val behandlingsnummer = when (hentPersonRequest.saktype) {
+            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
+            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
+        }
 
         return retry<PdlPersonResponse>(times = 3) {
             httpClient.post(apiUrl) {
-                header("Tema", TEMA)
+                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
                 accept(Json)
                 contentType(Json)
                 setBody(request)
@@ -40,7 +49,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
     }
 
     // TODO utvide til rolleliste?
-    suspend fun hentPersonBolk(fnr: List<Folkeregisteridentifikator>): PdlPersonResponseBolk {
+    suspend fun hentPersonBolk(fnr: List<Folkeregisteridentifikator>, saktype: SakType): PdlPersonResponseBolk {
         val request = PdlGraphqlBolkRequest(
             query = getQuery("/pdl/hentPersonBolk.graphql"),
             variables = PdlBolkVariables(
@@ -58,10 +67,15 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 vergemaal = true
             )
         )
+
+        val behandlingsnummer = when (saktype) {
+            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
+            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
+        }
         logger.info("Bolkhenter personer med fnr=${request.variables.identer} fra PDL")
         return retry<PdlPersonResponseBolk> {
             httpClient.post(apiUrl) {
-                header("Tema", TEMA)
+                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
                 accept(Json)
                 contentType(Json)
                 setBody(request)
@@ -74,22 +88,26 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
-    suspend fun hentPdlIdentifikator(ident: PersonIdent): PdlIdentResponse {
-        val request = PdlFolkeregisterIdentRequest(
+    suspend fun hentPdlIdentifikator(request: HentPdlIdentRequest): PdlIdentResponse {
+        val graphqlRequest = PdlFolkeregisterIdentRequest(
             query = getQuery("/pdl/hentFolkeregisterIdent.graphql"),
             variables = PdlFolkeregisterIdentVariables(
-                ident = ident.value,
+                ident = request.ident.value,
                 grupper = listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn, PDLIdentGruppeTyper.NPID.navn),
                 historikk = true
             )
         )
-        logger.info("Henter PdlIdentifikator for ident = $ident fra PDL")
+        val behandlingsnummer = when (request.saktype) {
+            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
+            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
+        }
+        logger.info("Henter PdlIdentifikator for ident = ${request.ident.value} fra PDL")
         return retry<PdlIdentResponse> {
             httpClient.post(apiUrl) {
-                header("Tema", TEMA)
+                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
                 accept(Json)
                 contentType(Json)
-                setBody(request)
+                setBody(graphqlRequest)
             }.body()
         }.let {
             when (it) {
@@ -99,22 +117,25 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
-    suspend fun hentGeografiskTilknytning(ident: Folkeregisteridentifikator): PdlGeografiskTilknytningResponse {
-        val request = PdlGeografiskTilknytningRequest(
+    suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): PdlGeografiskTilknytningResponse {
+        val graphqlRequest = PdlGeografiskTilknytningRequest(
             query = getQuery("/pdl/hentGeografiskTilknytning.graphql"),
             variables = PdlGeografiskTilknytningIdentVariables(
-                ident = ident.value
+                ident = request.foedselsnummer.value
             )
         )
 
-        logger.info("Henter geografisk tilknytning for fnr = $ident fra PDL")
-
+        logger.info("Henter geografisk tilknytning for fnr = ${request.foedselsnummer.value} fra PDL")
+        val behandlingsnummer = when (request.saktype) {
+            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
+            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
+        }
         return retry<PdlGeografiskTilknytningResponse> {
             httpClient.post(apiUrl) {
-                header("Tema", TEMA)
+                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
                 accept(Json)
                 contentType(Json)
-                setBody(request)
+                setBody(graphqlRequest)
             }.body()
         }.let {
             when (it) {
@@ -180,6 +201,6 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
 
     companion object {
-        const val TEMA = "PEN"
+        const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
     }
 }

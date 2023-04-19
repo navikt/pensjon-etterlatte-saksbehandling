@@ -7,6 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -20,8 +21,8 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 interface PdlKlient {
-    fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): PersonDTO
-    fun hentGeografiskTilknytning(foedselsnummer: String): GeografiskTilknytning
+    fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle, saktype: SakType): PersonDTO
+    fun hentGeografiskTilknytning(foedselsnummer: String, saktype: SakType): GeografiskTilknytning
 }
 
 class PdlKlientImpl(
@@ -33,9 +34,9 @@ class PdlKlientImpl(
         val logger: Logger = LoggerFactory.getLogger(PdlKlientImpl::class.java)
     }
 
-    override fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): PersonDTO {
+    override fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle, saktype: SakType): PersonDTO {
         logger.info("Henter Pdl-modell for ${rolle.name}")
-        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle)
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktype)
         val response = runBlocking {
             pdl_app.post("$url/person/v2") {
                 contentType(ContentType.Application.Json)
@@ -45,8 +46,8 @@ class PdlKlientImpl(
         return response
     }
 
-    override fun hentGeografiskTilknytning(foedselsnummer: String): GeografiskTilknytning {
-        val request = HentGeografiskTilknytningRequest(Folkeregisteridentifikator.of(foedselsnummer))
+    override fun hentGeografiskTilknytning(foedselsnummer: String, saktype: SakType): GeografiskTilknytning {
+        val request = HentGeografiskTilknytningRequest(Folkeregisteridentifikator.of(foedselsnummer), saktype)
         val response = runBlocking {
             pdl_app.post("$url/geografisktilknytning") {
                 contentType(ContentType.Application.Json)

@@ -24,7 +24,8 @@ class EgenAnsattService(private val sakService: SakService, val sikkerLogg: Logg
                 it.id,
                 sakService.finnEnhetForPersonOgTema(
                     skjermetHendelse.fnr,
-                    it.sakType.tema
+                    it.sakType.tema,
+                    it.sakType
                 ).enhetNr
             )
         }

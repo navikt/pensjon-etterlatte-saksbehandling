@@ -1,6 +1,5 @@
 package no.nav.etterlatte.gyldigsoeknad.client
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -11,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.sak.Sak
 import java.time.LocalDateTime
 import java.util.*
 
@@ -33,12 +33,12 @@ class BehandlingClient(
         }
     }
 
-    fun skaffSak(fnr: String, saktype: String): Long {
+    fun skaffSak(fnr: String, saktype: String): Sak {
         return runBlocking {
             sakOgBehandlingApp.post("$url/personer/saker/$saktype") {
                 contentType(ContentType.Application.Json)
                 setBody(FoedselsnummerDTO(fnr))
-            }.body<ObjectNode>()["id"].longValue()
+            }.body()
         }
     }
 

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -60,12 +61,18 @@ internal class PersonServiceTest {
             )
         )
 
-        coEvery { pdlKlient.hentPerson(any(), any()) } returns personResponse
-        coEvery { pdlKlient.hentPersonBolk(any()) } returns personBolkResponse
+        coEvery { pdlKlient.hentPerson(any()) } returns personResponse
+        coEvery { pdlKlient.hentPersonBolk(any(), any()) } returns personBolkResponse
         coEvery {
-            pdlKlient.hentPdlIdentifikator(PersonIdent(aktorIdMedFolkeregisterIdent))
+            pdlKlient.hentPdlIdentifikator(
+                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent), SakType.BARNEPENSJON)
+            )
         } returns personIdentResponse
-        coEvery { pdlKlient.hentPdlIdentifikator(PersonIdent(aktorIdMedNpid)) } returns personNpidResponse
+        coEvery {
+            pdlKlient.hentPdlIdentifikator(
+                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent), SakType.BARNEPENSJON)
+            )
+        } returns personNpidResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
         coEvery { ppsKlient.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
@@ -86,7 +93,9 @@ internal class PersonServiceTest {
     @Test
     fun `skal mappe avdoed med barnekull`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED))
+            personService.hentPerson(
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED, SakType.BARNEPENSJON)
+            )
         }
 
         val expectedBarnFnr = listOf("70078749472", "06067018735")
@@ -101,7 +110,7 @@ internal class PersonServiceTest {
     fun `skal mappe person som inkluderer familierelasjon (foreldre)`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
             )
         }
 
@@ -117,7 +126,7 @@ internal class PersonServiceTest {
     fun `skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
             )
         }
 
@@ -134,7 +143,7 @@ internal class PersonServiceTest {
     fun `skal mappe person som inkluderer familierelasjon (barn)`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
             )
         }
 
@@ -150,7 +159,7 @@ internal class PersonServiceTest {
     fun `Hent utland med innflytting mappes korrekt`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
             )
         }
 
@@ -163,7 +172,7 @@ internal class PersonServiceTest {
     fun `Hent utland med utflytting mappes korrekt`() {
         val person = runBlocking {
             personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN)
+                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
             )
         }
 
@@ -174,22 +183,24 @@ internal class PersonServiceTest {
 
     @Test
     fun `Person ikke finnes kaster exception`() {
-        coEvery { pdlKlient.hentPerson(any(), any()) } returns PdlPersonResponse(data = null, errors = emptyList())
+        coEvery { pdlKlient.hentPerson(any()) } returns PdlPersonResponse(data = null, errors = emptyList())
 
         assertThrows<PdlForesporselFeilet> {
             runBlocking {
-                personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
+                personService.hentPerson(
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
+                )
             }
         }
     }
 
     @Test
     fun `Finner ikke person i PDL`() {
-        coEvery { pdlKlient.hentPerson(any(), any()) } returns mockResponse("/pdl/person_ikke_funnet.json")
+        coEvery { pdlKlient.hentPerson(any()) } returns mockResponse("/pdl/person_ikke_funnet.json")
 
         runBlocking {
             assertThrows<PdlFantIkkePerson> {
-                personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN))
+                personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN, SakType.BARNEPENSJON))
             }
         }
     }
@@ -199,7 +210,8 @@ internal class PersonServiceTest {
         val personIdentResponse = runBlocking {
             personService.hentPdlIdentifikator(
                 HentPdlIdentRequest(
-                    PersonIdent("2305469522806")
+                    PersonIdent("2305469522806"),
+                    SakType.BARNEPENSJON
                 )
             )
         }
@@ -215,7 +227,8 @@ internal class PersonServiceTest {
         val personIdentResponse = runBlocking {
             personService.hentPdlIdentifikator(
                 HentPdlIdentRequest(
-                    PersonIdent(aktorIdMedNpid)
+                    PersonIdent(aktorIdMedNpid),
+                    SakType.BARNEPENSJON
                 )
             )
         }
@@ -231,7 +244,7 @@ internal class PersonServiceTest {
         coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
         runBlocking {
             assertThrows<PdlFantIkkePerson> {
-                personService.hentPdlIdentifikator(HentPdlIdentRequest(PersonIdent("1234")))
+                personService.hentPdlIdentifikator(HentPdlIdentRequest(PersonIdent("1234"), SakType.BARNEPENSJON))
             }
         }
     }
@@ -240,7 +253,7 @@ internal class PersonServiceTest {
     fun `skal mappe geografisk tilknytning`() {
         val tilknytning = runBlocking {
             personService.hentGeografiskTilknytning(
-                HentGeografiskTilknytningRequest(TRIVIELL_MIDTPUNKT)
+                HentGeografiskTilknytningRequest(TRIVIELL_MIDTPUNKT, SakType.BARNEPENSJON)
             )
         }
 

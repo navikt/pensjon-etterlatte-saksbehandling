@@ -1,11 +1,10 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -25,6 +24,7 @@ internal class BesvarOpplysningsbehov(
         River(rapidsConnection).apply {
             validate { it.requireKey(BEHOV_NAME_KEY) }
             validate { it.requireKey("sakId") }
+            validate { it.requireKey("sakType") }
             validate { it.requireKey("fnr") }
             validate { it.requireKey("rolle") }
             validate { it.rejectKey("opplysning") }
@@ -43,8 +43,9 @@ internal class BesvarOpplysningsbehov(
                 val fnr = packet["fnr"].textValue()
                 val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
                 val opplysningstype = objectMapper.treeToValue(packet[BEHOV_NAME_KEY], Opplysningstype::class.java)!!
-                val person = pdl.hentPerson(fnr, personRolle)
-                val opplysningsperson = pdl.hentOpplysningsperson(fnr, personRolle)
+                val saktype = objectMapper.treeToValue(packet["sakType"], SakType::class.java)
+                val person = pdl.hentPerson(fnr, personRolle, saktype)
+                val opplysningsperson = pdl.hentOpplysningsperson(fnr, personRolle, saktype)
 
                 packet["opplysning"] = lagEnkelopplysningerFraPDL(
                     person = person,
@@ -59,9 +60,4 @@ internal class BesvarOpplysningsbehov(
                 logger.info("Så et behov jeg ikke kunne svare på")
             }
         }
-}
-
-interface Pdl {
-    fun hentPerson(foedselsnummer: String, rolle: PersonRolle): Person
-    fun hentOpplysningsperson(foedselsnummer: String, rolle: PersonRolle): PersonDTO
 }

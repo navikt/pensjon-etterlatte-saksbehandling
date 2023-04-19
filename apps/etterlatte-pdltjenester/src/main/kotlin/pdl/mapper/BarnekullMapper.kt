@@ -1,5 +1,6 @@
 package no.nav.etterlatte.pdl.mapper
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -13,7 +14,8 @@ object BarnekullMapper {
     suspend fun mapBarnekull(
         pdlKlient: PdlKlient,
         ppsKlient: ParallelleSannheterKlient,
-        forelder: PdlHentPerson
+        forelder: PdlHentPerson,
+        saktype: SakType
     ): List<Person>? {
         val barnFnr = forelder.forelderBarnRelasjon
             ?.filter { it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN }
@@ -24,13 +26,14 @@ object BarnekullMapper {
             }
 
         return barnFnr?.let { fnr ->
-            pdlKlient.hentPersonBolk(fnr).data?.hentPersonBolk?.map {
+            pdlKlient.hentPersonBolk(fnr, saktype).data?.hentPersonBolk?.map {
                 PersonMapper.mapPerson(
                     ppsKlient,
                     pdlKlient,
                     Folkeregisteridentifikator.of(it.ident),
                     PersonRolle.BARN,
-                    it.person!!
+                    it.person!!,
+                    saktype
                 )
             }
         }

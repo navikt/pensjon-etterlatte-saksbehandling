@@ -6,6 +6,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
@@ -13,7 +14,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface Pdl {
-    suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator
+    suspend fun hentPdlIdentifikator(fnr: String): PdlIdentifikator
 }
 
 class PdlService(
@@ -25,12 +26,14 @@ class PdlService(
         val logger: Logger = LoggerFactory.getLogger(PdlService::class.java)
     }
 
-    override suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator {
+    override suspend fun hentPdlIdentifikator(fnr: String): PdlIdentifikator {
         logger.info("Henter folkeregisteridentifikator")
         try {
             return pdl_app.post("$url/pdlident") {
                 contentType(ContentType.Application.Json)
-                setBody(HentPdlIdentRequest(PersonIdent(ident)))
+                // TODO: uavklart om vi må slå opp i behandlingsdatabasen for å finne saktypen for å finne behandlingsnummer
+                // kan potensielt føre til at vi ikke finner personen.
+                setBody(HentPdlIdentRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
             }.body()
         } catch (e: Exception) {
             logger.info("Kunne ikke hente pdlident", e)

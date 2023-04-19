@@ -123,10 +123,10 @@ class GrunnlagsendringshendelseService(
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
             AdressebeskyttelseGradering.FORTROLIG -> {
-                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema).enhetNr
+                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
             AdressebeskyttelseGradering.UGRADERT -> {
-                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema).enhetNr
+                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
         }
     }
@@ -192,7 +192,8 @@ class GrunnlagsendringshendelseService(
         hendelse: Grunnlagsendringshendelse
     ) {
         val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle()
-        val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle)
+        val sak = sakService.finnSak(hendelse.sakId)!!
+        val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag = runBlocking {
             grunnlagKlient.hentGrunnlag(hendelse.sakId)
         }

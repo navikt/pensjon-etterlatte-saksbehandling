@@ -41,8 +41,13 @@ data class TrygdetidGrunnlagDto(
     val bosted: String,
     val periodeFra: LocalDate,
     val periodeTil: LocalDate,
-    val kilde: String,
+    val kilde: TrygdetidGrunnlagKildeDto?,
     val beregnet: BeregnetTrygdetidGrunnlagDto?
+)
+
+data class TrygdetidGrunnlagKildeDto(
+    val tidspunkt: String,
+    val ident: String
 )
 
 data class BeregnetTrygdetidGrunnlagDto(

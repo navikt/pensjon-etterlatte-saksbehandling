@@ -1,5 +1,6 @@
 package trygdetid
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.token.Saksbehandler
@@ -40,7 +41,7 @@ fun trygdetidGrunnlag(
     bosted = "Norge",
     periode = periode,
     beregnetTrygdetid = beregnetTrygdetidGrunnlag,
-    kilde = "pdl"
+    kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now())
 )
 
 fun beregnetTrygdetid(total: Int = 0, tidspunkt: Tidspunkt = Tidspunkt.now()) =

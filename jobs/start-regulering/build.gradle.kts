@@ -2,6 +2,19 @@ plugins {
     id("etterlatte.kafka")
 }
 
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
+        credentials {
+            username = "token"
+            password = System.getenv("GITHUB_TOKEN")
+        }
+    }
+    mavenCentral()
+    maven("https://packages.confluent.io/maven/")
+    maven("https://jitpack.io")
+}
+
 dependencies {
     api(kotlin("reflect"))
 

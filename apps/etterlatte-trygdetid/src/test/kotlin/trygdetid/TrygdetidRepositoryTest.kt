@@ -147,7 +147,7 @@ internal class TrygdetidRepositoryTest {
         repository.opprettTrygdetid(behandling, emptyList())
         repository.opprettTrygdetidGrunnlag(behandlingId, trygdetidGrunnlag)
 
-        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(kilde = "test")
+        val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = "Polen")
         val trygdetidMedOppdatertGrunnlag =
             repository.oppdaterTrygdetidGrunnlag(behandlingId, endretTrygdetidGrunnlag)
 

@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -92,7 +93,7 @@ class RealRevurderingService(
                 sakId,
                 forrigeBehandling,
                 revurderingAarsak,
-                fraDato,
+                fraDato.tilVirkningstidspunkt("Opprettet automatisk"),
                 Prosesstype.AUTOMATISK,
                 kilde
             )
@@ -103,7 +104,7 @@ class RealRevurderingService(
         sakId: Long,
         forrigeBehandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
-        fraDato: LocalDate?,
+        fraDato: Virkningstidspunkt?,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning
     ) = OpprettBehandling(
@@ -113,7 +114,7 @@ class RealRevurderingService(
         persongalleri = forrigeBehandling.persongalleri,
         revurderingsAarsak = revurderingAarsak,
         kommerBarnetTilgode = forrigeBehandling.kommerBarnetTilgode,
-        virkningstidspunkt = fraDato?.tilVirkningstidspunkt("Opprettet automatisk"),
+        virkningstidspunkt = fraDato,
         prosesstype = prosessType,
         kilde = kilde
     ).let { opprettBehandling ->

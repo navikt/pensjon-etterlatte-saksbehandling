@@ -60,6 +60,13 @@ internal fun Route.grunnlagsendringshendelseRoute(
             call.respond(HttpStatusCode.OK)
         }
 
+        post("/reguleringfeilet") {
+            val hendelse = call.receive<ReguleringFeiletHendelse>()
+            logger.info("Motter hendelse om at regulering har feilet i sag $sakId")
+            grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(hendelse.sakId)
+            call.respond(HttpStatusCode.OK)
+        }
+
         route("/{$SAKID_CALL_PARAMETER}") {
             get {
                 call.respond(GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)))
@@ -73,3 +80,4 @@ internal fun Route.grunnlagsendringshendelseRoute(
 }
 
 data class GrunnlagsendringsListe(val hendelser: List<Grunnlagsendringshendelse>)
+data class ReguleringFeiletHendelse(val sakId: Long)

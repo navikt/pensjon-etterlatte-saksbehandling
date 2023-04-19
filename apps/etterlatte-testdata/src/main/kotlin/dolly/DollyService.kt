@@ -38,12 +38,17 @@ class DollyService(
         dollyClient.hentTestGruppeBestillinger(gruppeId, accessToken, 0, 10).let { bestillinger ->
             dollyClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken)
                 .mapNotNull { personResponse ->
+                    val avdoed = personResponse.ident
+                    val ibruk = bestillinger.identer.any { avdoed == it.ident && it.ibruk }
+
                     val gjenlevendeEktefelle =
                         personResponse.person.sivilstand.firstOrNull { it.type == "GIFT" }?.relatertVedSivilstand
+
                     when (gjenlevendeEktefelle) {
                         null -> null
                         else -> ForenkletFamilieModell(
-                            avdoed = personResponse.ident,
+                            ibruk = ibruk,
+                            avdoed = avdoed,
                             gjenlevende = gjenlevendeEktefelle,
                             barn = personResponse.person.forelderBarnRelasjon
                                 .filter { it.barn }
@@ -51,6 +56,17 @@ class DollyService(
                         )
                     }
                 }
+        }
+    }
+
+    fun markerSomIBruk(ident: String, accessToken: String) = runBlocking {
+        try {
+            logger.info("Forsøker å markere testident $ident som 'i bruk'")
+
+            dollyClient.markerIdentIBruk(ident, accessToken)
+                .also { logger.info("Test ident $ident markert med 'iBruk=${it.ibruk}'") }
+        } catch (e: Exception) {
+            logger.error("Feil ved markering av testident $ident som 'i bruk'")
         }
     }
 

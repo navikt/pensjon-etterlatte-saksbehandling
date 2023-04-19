@@ -19,13 +19,16 @@ data class HentGruppeResponse(
 data class OpprettGruppeRequest(val navn: String, val hensikt: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+data class DollyIBrukResponse(val ident: String, val ibruk: Boolean, val beskrivelse: String, val gruppeId: Long)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class BestillingStatus(val id: Long, val ferdig: Boolean)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TestGruppeBestillinger(val identer: List<TestGruppeBestilling>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class TestGruppeBestilling(val ident: String, val bestillingId: List<Long>)
+data class TestGruppeBestilling(val ident: String, val bestillingId: List<Long>, val ibruk: Boolean)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class DollyPersonResponse(val ident: String, val person: DollyPerson)
@@ -55,7 +58,12 @@ data class Foedsel(val foedselsdato: String, val foedselsaar: Int)
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Navn(val fornavn: String, val etternavn: String)
 
-data class ForenkletFamilieModell(val avdoed: String, val gjenlevende: String, val barn: List<String>)
+data class ForenkletFamilieModell(
+    val ibruk: Boolean,
+    val avdoed: String,
+    val gjenlevende: String,
+    val barn: List<String>
+)
 
 data class BestillingRequest(
     val helsoesken: Int,

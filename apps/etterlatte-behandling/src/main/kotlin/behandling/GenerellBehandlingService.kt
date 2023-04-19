@@ -60,7 +60,6 @@ interface GenerellBehandlingService {
     ): Virkningstidspunkt
 
     fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse>
-    fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
     fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling?
     suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
@@ -313,12 +312,6 @@ class RealGenerellBehandlingService(
     override fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {
         return inTransaction {
             hendelseDao.finnHendelserIBehandling(behandlingId)
-        }
-    }
-
-    override fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling> {
-        return inTransaction {
-            behandlingDao.alleBehandlingerForSoekerMedFnr(fnr).filterForEnheter()
         }
     }
 

@@ -119,18 +119,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
-    fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling> {
-        val stmt =
-            connection().prepareStatement(
-                """
-                    $alleBehandlingerMedSak
-                    WHERE sak_id = ? AND b.soeker = ?
-                """.trimIndent()
-            )
-        stmt.setString(1, fnr)
-        return stmt.executeQuery().behandlingsListe()
-    }
-
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
         with(connection()) {
             val stmt = prepareStatement(

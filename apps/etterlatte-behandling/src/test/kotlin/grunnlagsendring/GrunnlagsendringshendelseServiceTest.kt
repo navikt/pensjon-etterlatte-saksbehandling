@@ -122,7 +122,6 @@ internal class GrunnlagsendringshendelseServiceTest {
         } returns emptyList()
 
         every { generellBehandlingService.hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
-        every { generellBehandlingService.alleBehandlingerForSoekerMedFnr(fnr) } returns foerstegangsbehandlinger
 
         coEvery { grunnlagClient.hentPersonSakOgRolle(any()) }
             .returns(PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER))))

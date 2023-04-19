@@ -43,6 +43,7 @@ class FordelerService(
     private val maxFordelingTilDoffen: Long
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun sjekkGyldighetForBehandling(event: FordelerEvent): FordelerResultat {
         if (ugyldigHendelse(event)) {
             return UgyldigHendelse(

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.testdata.features.dolly
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
@@ -12,7 +11,6 @@ import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.getClientAccessToken
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.producer
@@ -111,7 +109,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                             it["type"]!!,
                             it["avdoed"]!!,
                             it["gjenlevende"]!!,
-                            objectMapper.readValue(it["barn"] ?: "[]", jacksonTypeRef<List<String>>())
+                            objectMapper.readValue(it["barnListe"] ?: "[]", jacksonTypeRef<List<String>>())
                         )
                     }
 

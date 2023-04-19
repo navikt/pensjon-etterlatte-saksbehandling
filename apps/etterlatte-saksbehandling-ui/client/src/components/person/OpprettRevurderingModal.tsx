@@ -6,20 +6,14 @@ import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 
 type Props = {
+  open: boolean
+  setOpen: (value: boolean) => void
   sakId: number
 }
 const OpprettRevurderingModal = (props: Props) => {
-  const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [valgtAarsak, setValgtAarsak] = useState('')
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
-
-  const aapneModal = () => setOpen(true)
-  const lukkModal = () => {
-    setValgtAarsak('')
-    setError(null)
-    setOpen(false)
-  }
 
   const onSubmit = () => {
     if (valgtAarsak === '') {
@@ -39,10 +33,7 @@ const OpprettRevurderingModal = (props: Props) => {
 
   return (
     <>
-      <Button variant="primary" onClick={aapneModal}>
-        Opprett revurdering
-      </Button>
-      <Modal open={open} onClose={lukkModal}>
+      <Modal open={props.open} onClose={() => props.setOpen(false)}>
         <Modal.Content>
           <ModalContentWrapper>
             <Heading spacing size="large">
@@ -67,7 +58,7 @@ const OpprettRevurderingModal = (props: Props) => {
             <Button loading={isPending(opprettRevurderingStatus)} onClick={onSubmit}>
               Opprett
             </Button>
-            <Button onClick={lukkModal}>Avbryt</Button>
+            <Button onClick={() => props.setOpen(false)}>Avbryt</Button>
           </ButtonContainer>
         </Modal.Content>
       </Modal>

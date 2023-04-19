@@ -19,6 +19,7 @@ import {
 } from '~components/behandling/felles/utils'
 import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import UhaandterteHendelser from '~components/person/uhaandtereHendelser/UhaandterteHendelser'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -28,6 +29,17 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlinglisteError, setBehandlinglisteError] = useState<IBehandlingsammendrag[]>()
   const [grunnlagshendelserError, setGrunnlagshendelserError] = useState<Grunnlagsendringshendelse[]>()
   const [sakId, setSakId] = useState<number | undefined>()
+  const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
+
+  const mockHendelser = [
+    {
+      id: '16b07106-b562-4346-a5b4-3b88c862a4fd',
+      tittel: 'Regulering feilet',
+      dato: '15.08.2022 kl. 16:12',
+      kilde: 'Doffen',
+      beskrivelse: 'Regulering av pensjonen kunne ikke behandles automatisk. Saken må derfor behandles manuelt',
+    },
+  ]
 
   useEffect(() => {
     const getBehandlingsListeAsync = async (fnr: string) => {
@@ -87,14 +99,11 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const iverksatteBehandlinger = kunIverksatteBehandlinger(behandlingliste)
   const kanOppretteManueltOpphoer =
     iverksatteBehandlinger.length > 0 && harIngenUavbrutteManuelleOpphoer(behandlingliste)
-  /** TODO ai: I mangel på feature toggling i front */
-  const toggledOn = false
-  const kanOppretteRevurdering =
-    toggledOn &&
-    iverksatteBehandlinger.length > 0 &&
+
+  const harAapenRevurdering =
     behandlingliste
       .filter((behandling) => behandling.behandlingType === IBehandlingsType.REVURDERING)
-      .filter((behandling) => !erFerdigBehandlet(behandling.status)).length === 0
+      .filter((behandling) => !erFerdigBehandlet(behandling.status)).length > 0
 
   return (
     <>
@@ -120,9 +129,20 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                       {kanOppretteManueltOpphoer && (
                         <ManueltOpphoerModal sakId={sakId} iverksatteBehandlinger={iverksatteBehandlinger} />
                       )}
-                      {kanOppretteRevurdering && <OpprettRevurderingModal sakId={sakId} />}
+                      {visOpprettRevurderingsmodal && (
+                        <OpprettRevurderingModal
+                          sakId={sakId}
+                          open={visOpprettRevurderingsmodal}
+                          setOpen={setVisOpprettRevurderingsmodal}
+                        />
+                      )}
                     </EkstraHandlinger>
                   ) : null}
+                  <UhaandterteHendelser
+                    hendelser={mockHendelser}
+                    startRevurdering={() => setVisOpprettRevurderingsmodal(true)}
+                    disabled={harAapenRevurdering}
+                  />
                   <div className="behandlinger">
                     <h2>Behandlinger</h2>
                     {behandlingliste !== undefined && <Saksliste behandlinger={behandlingliste} />}

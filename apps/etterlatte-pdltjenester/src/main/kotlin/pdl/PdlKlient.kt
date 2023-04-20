@@ -96,7 +96,6 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         logger.info("Henter PdlIdentifikator for ident = ${request.ident.value} fra PDL")
         return retry<PdlIdentResponse> {
             httpClient.post(apiUrl) {
-                header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
                 setBody(graphqlRequest)

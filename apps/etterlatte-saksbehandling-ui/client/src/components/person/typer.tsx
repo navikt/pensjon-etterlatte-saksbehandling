@@ -98,7 +98,7 @@ export interface VergemaalEllerFremtidsfullmaktForholdSamsvar {
 }
 
 export interface ReguleringSamsvar {
-  type: 'REGULERING'
+  type: 'GRUNNBELOEP'
   samsvar: boolean
 }
 

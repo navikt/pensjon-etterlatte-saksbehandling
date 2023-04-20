@@ -62,7 +62,7 @@ internal fun Route.grunnlagsendringshendelseRoute(
 
         post("/reguleringfeilet") {
             val hendelse = call.receive<ReguleringFeiletHendelse>()
-            logger.info("Motter hendelse om at regulering har feilet i sag $sakId")
+            logger.info("Motter hendelse om at regulering har feilet i sak ${hendelse.sakId}")
             grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(hendelse.sakId)
             call.respond(HttpStatusCode.OK)
         }

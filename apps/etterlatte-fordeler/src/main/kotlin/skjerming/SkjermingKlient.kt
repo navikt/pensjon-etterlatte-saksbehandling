@@ -8,9 +8,10 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
@@ -66,11 +67,11 @@ interface Pingable {
     val beskrivelse: String
     val endpoint: String
     suspend fun ping(): PingResult
+
+    @OptIn(DelicateCoroutinesApi::class)
     fun asyncPing() {
-        runBlocking {
-            launch(Dispatchers.IO) {
-                ping()
-            }
+        GlobalScope.launch(Dispatchers.IO) {
+            ping()
         }
     }
 }

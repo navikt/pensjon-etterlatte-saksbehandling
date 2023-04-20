@@ -6,6 +6,8 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKanal
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -13,6 +15,7 @@ import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -52,7 +55,8 @@ class RealRevurderingService(
     private val behandlingHendelser: BehandlingHendelserKanal,
     private val featureToggleService: FeatureToggleService,
     private val behandlingDao: BehandlingDao,
-    private val hendelseDao: HendelseDao
+    private val hendelseDao: HendelseDao,
+    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RealRevurderingService::class.java)
 
@@ -74,7 +78,27 @@ class RealRevurderingService(
                     null,
                     Prosesstype.MANUELL,
                     kilde
-                )
+                )?.also { revurdering ->
+                    if (revurderingAarsak == RevurderingAarsak.REGULERING) {
+                        grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                            revurdering.sak.id,
+                            listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)
+                        )
+                            .filter { it.type == GrunnlagsendringsType.GRUNNBELOEP }
+                            .forEach {
+                                grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
+                                    it.id,
+                                    GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                                    GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
+                                    it.samsvarMellomKildeOgGrunnlag!!
+                                )
+                                grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
+                                    it.id,
+                                    revurdering.id
+                                )
+                            }
+                    }
+                }
             }
         } else {
             null

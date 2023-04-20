@@ -6,12 +6,17 @@ import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.junit.jupiter.api.AfterAll
@@ -22,6 +27,8 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDateTime
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RevurderingIntegrationTest : BehandlingIntegrationTest() {
@@ -77,7 +84,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 hendelser,
                 featureToggleService,
                 applicationContext.behandlingDao,
-                applicationContext.hendelseDao
+                applicationContext.hendelseDao,
+                applicationContext.grunnlagsendringshendelseDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
@@ -126,7 +134,8 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 hendelser,
                 featureToggleService,
                 applicationContext.behandlingDao,
-                applicationContext.hendelseDao
+                applicationContext.hendelseDao,
+                applicationContext.grunnlagsendringshendelseDao
             ).opprettManuellRevurdering(
                 sakId = sak.id,
                 forrigeBehandling = behandling!!,
@@ -134,5 +143,74 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 kilde = Vedtaksloesning.DOFFEN
             )
         )
+    }
+
+    @Test
+    fun `Ny regulering skal håndtere hendelser om nytt grunnbeløp`() {
+        val hendelser = applicationContext.behandlingsHendelser.hendelserKanal
+        val featureToggleService = mockk<FeatureToggleService>()
+
+        every {
+            featureToggleService.isEnabled(
+                RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
+                any()
+            )
+        } returns true
+
+        every {
+            featureToggleService.isEnabled(
+                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
+                false
+            )
+        } returns false
+
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
+
+        assertNotNull(behandling)
+
+        inTransaction {
+            applicationContext.behandlingDao.lagreStatus(
+                behandling!!.id,
+                BehandlingStatus.IVERKSATT,
+                Tidspunkt.now().toLocalDatetimeUTC()
+            )
+        }
+        val hendelse = inTransaction {
+            applicationContext.grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                Grunnlagsendringshendelse(
+                    UUID.randomUUID(),
+                    sak.id,
+                    GrunnlagsendringsType.GRUNNBELOEP,
+                    LocalDateTime.now(),
+                    GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                    null,
+                    Saksrolle.SOEKER,
+                    sak.ident,
+                    SamsvarMellomKildeOgGrunnlag.Grunnbeloep(false)
+                )
+            )
+        }
+
+        val revurdering =
+            RealRevurderingService(
+                hendelser,
+                featureToggleService,
+                applicationContext.behandlingDao,
+                applicationContext.hendelseDao,
+                applicationContext.grunnlagsendringshendelseDao
+            ).opprettManuellRevurdering(
+                sakId = sak.id,
+                forrigeBehandling = behandling!!,
+                revurderingAarsak = RevurderingAarsak.REGULERING,
+                kilde = Vedtaksloesning.DOFFEN
+            )
+
+        inTransaction {
+            Assertions.assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+            val grunnlaghendelse = applicationContext.grunnlagsendringshendelseDao.hentGrunnlagsendringshendelse(
+                hendelse.id
+            )
+            Assertions.assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
+        }
     }
 }

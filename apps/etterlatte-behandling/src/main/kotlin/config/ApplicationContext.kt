@@ -149,7 +149,8 @@ class ApplicationContext(
             behandlingHendelser = behandlingsHendelser.hendelserKanal,
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
-            hendelseDao = hendelseDao
+            hendelseDao = hendelseDao,
+            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao
         )
 
     val manueltOpphoerService =

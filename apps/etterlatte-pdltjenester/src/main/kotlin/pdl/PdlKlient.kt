@@ -28,10 +28,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             variables = toPdlVariables(hentPersonRequest.foedselsnummer, hentPersonRequest.rolle)
         )
 
-        val behandlingsnummer = when (hentPersonRequest.saktype) {
-            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
-            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
-        }
+        val behandlingsnummer = findBehandlingsnummerFromSaktype(hentPersonRequest.saktype)
 
         return retry<PdlPersonResponse>(times = 3) {
             httpClient.post(apiUrl) {
@@ -68,10 +65,8 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             )
         )
 
-        val behandlingsnummer = when (saktype) {
-            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
-            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
-        }
+        val behandlingsnummer = findBehandlingsnummerFromSaktype(saktype)
+
         logger.info("Bolkhenter personer med fnr=${request.variables.identer} fra PDL")
         return retry<PdlPersonResponseBolk> {
             httpClient.post(apiUrl) {
@@ -97,10 +92,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 historikk = true
             )
         )
-        val behandlingsnummer = when (request.saktype) {
-            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
-            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
-        }
+        val behandlingsnummer = findBehandlingsnummerFromSaktype(request.saktype)
         logger.info("Henter PdlIdentifikator for ident = ${request.ident.value} fra PDL")
         return retry<PdlIdentResponse> {
             httpClient.post(apiUrl) {
@@ -126,10 +118,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         )
 
         logger.info("Henter geografisk tilknytning for fnr = ${request.foedselsnummer.value} fra PDL")
-        val behandlingsnummer = when (request.saktype) {
-            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
-            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
-        }
+        val behandlingsnummer = findBehandlingsnummerFromSaktype(request.saktype)
         return retry<PdlGeografiskTilknytningResponse> {
             httpClient.post(apiUrl) {
                 header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
@@ -202,5 +191,12 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
 
     companion object {
         const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
+    }
+}
+
+fun findBehandlingsnummerFromSaktype(saktype: SakType): Behandlingsnummer {
+    return when (saktype) {
+        SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
+        SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
     }
 }

@@ -185,16 +185,16 @@ class GrunnlagsendringshendelseService(
         grunnlagendringType: GrunnlagsendringsType,
         grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
     ): List<Grunnlagsendringshendelse> {
-        return if (hendelseEksistererFraFoer(sakId, null, grunnlagendringType)) {
-            emptyList()
-        } else {
-            listOf(
-                inTransaction {
-                    val hendelseId = UUID.randomUUID()
-                    logger.info(
-                        "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                            "type $grunnlagendringType på sak med id=$sakId"
-                    )
+        return inTransaction {
+            if (hendelseEksistererFraFoer(sakId, null, grunnlagendringType)) {
+                emptyList()
+            } else {
+                val hendelseId = UUID.randomUUID()
+                logger.info(
+                    "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                        "type $grunnlagendringType på sak med id=$sakId"
+                )
+                listOf(
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
                         Grunnlagsendringshendelse(
                             id = hendelseId,
@@ -206,8 +206,9 @@ class GrunnlagsendringshendelseService(
                             gjelderPerson = sakService.finnSak(sakId)?.ident!!
                         )
                     )
-                }
-            )
+
+                )
+            }
         }
     }
 

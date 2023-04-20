@@ -78,7 +78,7 @@ internal class PdlKlientTest {
 
         runBlocking {
             val identResponse = pdlKlient.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent("2305469522806"), SakType.BARNEPENSJON)
+                HentPdlIdentRequest(PersonIdent("2305469522806"))
             )
             assertEquals("70078749472", identResponse.data?.hentIdenter?.identer?.first()?.ident)
             assertEquals(false, identResponse.data?.hentIdenter?.identer?.first()?.historisk)
@@ -92,7 +92,7 @@ internal class PdlKlientTest {
 
         runBlocking {
             val personResponse = pdlKlient.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent("1234"), SakType.BARNEPENSJON)
+                HentPdlIdentRequest(PersonIdent("1234"))
             )
             val errors = personResponse.errors
 

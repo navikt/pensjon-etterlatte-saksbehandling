@@ -11,8 +11,7 @@ data class HentPersonRequest(
 )
 
 data class HentPdlIdentRequest(
-    val ident: PersonIdent,
-    val saktype: SakType
+    val ident: PersonIdent
 )
 
 data class PersonIdent @JsonCreator constructor(

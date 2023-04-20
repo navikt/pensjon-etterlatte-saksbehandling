@@ -117,10 +117,7 @@ class PersonRouteTest {
 
     @Test
     fun `skal returnere folkeregisterIdent`() {
-        val hentPdlIdentRequest = HentPdlIdentRequest(
-            ident = PersonIdent("2305469522806"),
-            saktype = SakType.BARNEPENSJON
-        )
+        val hentPdlIdentRequest = HentPdlIdentRequest(ident = PersonIdent("2305469522806"))
         coEvery {
             personService.hentPdlIdentifikator(hentPdlIdentRequest)
         } returns mockFolkeregisterident(
@@ -213,10 +210,7 @@ class PersonRouteTest {
 
     @Test
     fun `skal returne 500 naar kall mot folkeregisterident feiler`() {
-        val hentFolkeregisterIdentReq = HentPdlIdentRequest(
-            ident = PersonIdent("2305469522806"),
-            saktype = SakType.BARNEPENSJON
-        )
+        val hentFolkeregisterIdentReq = HentPdlIdentRequest(ident = PersonIdent("2305469522806"))
 
         coEvery {
             personService.hentPdlIdentifikator(hentFolkeregisterIdentReq)

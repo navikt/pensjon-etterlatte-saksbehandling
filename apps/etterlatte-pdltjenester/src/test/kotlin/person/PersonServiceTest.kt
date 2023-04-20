@@ -65,19 +65,18 @@ internal class PersonServiceTest {
         coEvery { pdlKlient.hentPersonBolk(any(), any()) } returns personBolkResponse
         coEvery {
             pdlKlient.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent), SakType.BARNEPENSJON)
+                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent))
             )
         } returns personIdentResponse
         coEvery {
             pdlKlient.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent), SakType.BARNEPENSJON)
+                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent))
             )
         } returns personIdentResponse
         coEvery {
             pdlKlient.hentPdlIdentifikator(
                 HentPdlIdentRequest(
-                    PersonIdent(aktorIdMedNpid),
-                    SakType.BARNEPENSJON
+                    PersonIdent(aktorIdMedNpid)
                 )
             )
         } returns personNpidResponse
@@ -217,10 +216,7 @@ internal class PersonServiceTest {
     fun `Skal hente folkeregisterident for aktoerid`() {
         val personIdentResponse = runBlocking {
             personService.hentPdlIdentifikator(
-                HentPdlIdentRequest(
-                    PersonIdent(aktorIdMedFolkeregisterIdent),
-                    SakType.BARNEPENSJON
-                )
+                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent))
             )
         }
 
@@ -235,10 +231,7 @@ internal class PersonServiceTest {
     fun `Skal hente npid for aktoerid som ikke har folkeregisteridentifikator`() {
         val personIdentResponse = runBlocking {
             personService.hentPdlIdentifikator(
-                HentPdlIdentRequest(
-                    PersonIdent(aktorIdMedNpid),
-                    SakType.BARNEPENSJON
-                )
+                HentPdlIdentRequest(PersonIdent(aktorIdMedNpid))
             )
         }
 
@@ -254,7 +247,7 @@ internal class PersonServiceTest {
         coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
         runBlocking {
             assertThrows<PdlFantIkkePerson> {
-                personService.hentPdlIdentifikator(HentPdlIdentRequest(PersonIdent("1234"), SakType.BARNEPENSJON))
+                personService.hentPdlIdentifikator(HentPdlIdentRequest(PersonIdent("1234")))
             }
         }
     }

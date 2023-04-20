@@ -46,7 +46,6 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
-    // TODO utvide til rolleliste?
     suspend fun hentPersonBolk(fnr: List<Folkeregisteridentifikator>, saktype: SakType): PdlPersonResponseBolk {
         val request = PdlGraphqlBolkRequest(
             query = getQuery("/pdl/hentPersonBolk.graphql"),
@@ -94,11 +93,9 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 historikk = true
             )
         )
-        val behandlingsnummer = findBehandlingsnummerFromSaktype(request.saktype)
         logger.info("Henter PdlIdentifikator for ident = ${request.ident.value} fra PDL")
         return retry<PdlIdentResponse> {
             httpClient.post(apiUrl) {
-                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
                 header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)

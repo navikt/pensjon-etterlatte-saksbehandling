@@ -176,7 +176,15 @@
                 gjenlevendeTableElement.style.width = '150px'
                 tableRow.appendChild(gjenlevendeTableElement)
 
-                barnTableElement.innerHTML = `${barn[0]} (m/${(barn.length - 1) ?? '0'} søsken)`
+                if (barn.length) {
+                    if (barn.length === 1)
+                        barnTableElement.innerHTML = `${barn[0]}`
+                    else
+                        barnTableElement.innerHTML =
+                                `${barn[0]} <span class="badge text-bg-secondary">${(barn.length - 1)} søsken</span>`
+                } else {
+                    barnTableElement.innerHTML = `n/a`
+                }
                 barnTableElement.style.width = '200px'
                 tableRow.appendChild(barnTableElement)
 

@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
-import { Sammendrag } from './Sammendrag'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
@@ -18,6 +17,9 @@ import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBeh
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
+import { Beregningstype } from '~shared/types/Beregning'
+import { BarnepensjonSammendrag } from '~components/behandling/beregne/BarnepensjonSammendrag'
+import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -52,11 +54,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     })
   }
 
-  const soeker = behandling.søker
-  const soesken = behandling.familieforhold?.avdoede.opplysning.avdoedesBarn?.filter(
-    (barn) => barn.foedselsnummer !== soeker?.foedselsnummer
-  )
-
   return (
     <Content>
       <ContentHeader>
@@ -72,7 +69,11 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         </InfoWrapper>
         {!beregningFraState && !isFailure(beregning) && <Spinner visible label="Laster" />}
         {isFailure(beregning) && <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>}
-        {beregningFraState && <Sammendrag beregning={beregningFraState} soeker={soeker} soesken={soesken} />}
+        {beregningFraState &&
+          {
+            [Beregningstype.BP]: <BarnepensjonSammendrag behandling={behandling} beregning={beregningFraState} />,
+            [Beregningstype.OMS]: <OmstillingsstoenadSammendrag beregning={beregningFraState} />,
+          }[beregningFraState.type]}
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>

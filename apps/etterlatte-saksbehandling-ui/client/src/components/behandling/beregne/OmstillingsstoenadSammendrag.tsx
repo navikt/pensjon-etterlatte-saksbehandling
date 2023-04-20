@@ -2,17 +2,14 @@ import { Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
-import { IPdlPerson } from '~shared/types/Person'
-import { Beregning, Beregningstype } from '~shared/types/Beregning'
-import { GjelderTooltip } from '~components/behandling/beregne/GjelderToolTip'
+import { Beregning } from '~shared/types/Beregning'
+import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
 
 interface Props {
   beregning: Beregning
-  soeker?: IPdlPerson
-  soesken?: IPdlPerson[]
 }
 
-export const Sammendrag = ({ beregning, soeker, soesken }: Props) => {
+export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
   const beregningsperioder = beregning.beregningsperioder
 
   return (
@@ -27,7 +24,6 @@ export const Sammendrag = ({ beregning, soeker, soesken }: Props) => {
             <Table.HeaderCell>Ytelse</Table.HeaderCell>
             <Table.HeaderCell>Trygdetid</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
-            <Table.HeaderCell>Beregning gjelder</Table.HeaderCell>
             <Table.HeaderCell>Månedelig utbetaling før skatt</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
@@ -39,30 +35,12 @@ export const Sammendrag = ({ beregning, soeker, soesken }: Props) => {
                   beregningsperiode.datoTOM ? formaterDato(lastDayOfMonth(new Date(beregningsperiode.datoTOM))) : ''
                 }`}
               </Table.DataCell>
-              <Table.DataCell>
-                {
-                  {
-                    [Beregningstype.BP]: 'Barnepensjon',
-                    [Beregningstype.OMS]: 'Omstillingsstønad',
-                  }[beregning.type]
-                }
-              </Table.DataCell>
+              <Table.DataCell>Omstillingsstønad</Table.DataCell>
               <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
-                {beregningsperiode.soeskenFlokk && soeker ? (
-                  <GjelderTooltip
-                    soesken={beregningsperiode.soeskenFlokk.map((fnr) => {
-                      const soeskenMedData = soesken?.find((p) => p.foedselsnummer === fnr)
-                      return soeskenMedData!!
-                    })}
-                    soeker={soeker}
-                  />
-                ) : (
-                  '-'
-                )}
+                {beregningsperiode.utbetaltBeloep} kr <OmstillingsstoenadToolTip />
               </Table.DataCell>
-              <Table.DataCell>{beregningsperiode.utbetaltBeloep} kr</Table.DataCell>
             </Table.Row>
           ))}
         </Table.Body>

@@ -12,6 +12,7 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -33,7 +34,7 @@ internal class PdlKlientTest {
         val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModell(fnr.value, rolle)
+        val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON)
         Assertions.assertEquals("Ola", resultat.fornavn.verdi)
         Assertions.assertEquals("Nordmann", resultat.etternavn.verdi)
     }
@@ -44,7 +45,7 @@ internal class PdlKlientTest {
         val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentDoedsdato()
+        val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentDoedsdato()
         Assertions.assertEquals(mockPerson().doedsdato?.verdi, resultat)
     }
 
@@ -56,7 +57,7 @@ internal class PdlKlientTest {
         val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentAnsvarligeForeldre()
+        val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentAnsvarligeForeldre()
         Assertions.assertEquals(familierelasjon.ansvarligeForeldre, resultat)
     }
 
@@ -68,7 +69,7 @@ internal class PdlKlientTest {
         val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentBarn()
+        val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentBarn()
         Assertions.assertEquals(familierelasjon.barn, resultat)
     }
 
@@ -77,7 +78,7 @@ internal class PdlKlientTest {
         val klient = mockHttpClient(GeografiskTilknytning(kommune = "0301", ukjent = false))
         val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
-        val resultat = pdlService.hentGeografiskTilknytning(fnr.value).geografiskTilknytning()
+        val resultat = pdlService.hentGeografiskTilknytning(fnr.value, SakType.BARNEPENSJON).geografiskTilknytning()
         Assertions.assertEquals("0301", resultat)
     }
 
@@ -97,7 +98,7 @@ internal class PdlKlientTest {
         val pdlService = PdlKlientImpl(klient, "url")
         val fnr = TRIVIELL_MIDTPUNKT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModell(fnr.value, rolle).hentUtland()
+        val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentUtland()
         Assertions.assertEquals(utland, resultat)
     }
 

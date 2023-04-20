@@ -123,7 +123,8 @@ class FordelerService(
             foedselsnummer = soeknad.foreldre.first {
                 it.type == PersonType.GJENLEVENDE_FORELDER
             }.foedselsnummer.svar.toFolkeregisteridentifikator(),
-            rolle = PersonRolle.GJENLEVENDE
+            rolle = PersonRolle.GJENLEVENDE,
+            saktype = SakType.BARNEPENSJON
         )
 
     private fun hentAvdoedRequest(soeknad: Barnepensjon) =
@@ -131,13 +132,15 @@ class FordelerService(
             foedselsnummer = soeknad.foreldre.first {
                 it.type == PersonType.AVDOED
             }.foedselsnummer.svar.toFolkeregisteridentifikator(),
-            rolle = PersonRolle.AVDOED
+            rolle = PersonRolle.AVDOED,
+            saktype = SakType.BARNEPENSJON
         )
 
     private fun hentBarnRequest(soeknad: Barnepensjon) =
         HentPersonRequest(
             foedselsnummer = soeknad.soeker.foedselsnummer.svar.toFolkeregisteridentifikator(),
-            rolle = PersonRolle.BARN
+            rolle = PersonRolle.BARN,
+            saktype = SakType.BARNEPENSJON
         )
 
     fun hentSakId(fnr: String, barnepensjon: SakType): Long {

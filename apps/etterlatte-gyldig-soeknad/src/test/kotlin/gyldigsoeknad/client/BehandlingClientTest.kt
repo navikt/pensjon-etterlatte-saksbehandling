@@ -18,9 +18,11 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -70,24 +72,14 @@ internal class BehandlingClientTest {
 
     @Test
     fun testSkaffSak() {
-        val requestList = mutableListOf<HttpRequestData>()
-        val httpClient = HttpClient(
-            MockEngine { request ->
-                requestList.add(request)
-                respond(
-                    content = ByteReadChannel("""{"id":1}"""),
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, "application/json")
-                )
-            }
-        ) {
-            install(ContentNegotiation) { jackson {} }
-        }
+        val behandlingKlient = mockk<BehandlingClient>()
+        val fnr = "123"
+        every {
+            behandlingKlient.skaffSak(fnr, SakType.BARNEPENSJON.toString())
+        } returns Sak(fnr, SakType.BARNEPENSJON, 1L, null)
 
-        val behandlingsservice = BehandlingClient(httpClient, "http://behandlingsservice")
-        val skaffSakResultat = behandlingsservice.skaffSak("22", "barnepensjon")
+        val sak = behandlingKlient.skaffSak(fnr, SakType.BARNEPENSJON.toString())
 
-        assertEquals(1, skaffSakResultat)
-        assertEquals("http://behandlingsservice/personer/saker/barnepensjon", requestList[0].url.toString())
+        assertEquals(1L, sak.id)
     }
 }

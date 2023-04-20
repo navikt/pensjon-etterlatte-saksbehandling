@@ -15,6 +15,7 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -58,7 +59,8 @@ class PersonRouteTest {
     fun `skal returnere person`() {
         val hentPersonRequest = HentPersonRequest(
             foedselsnummer = TRIVIELL_MIDTPUNKT,
-            rolle = PersonRolle.BARN
+            rolle = PersonRolle.BARN,
+            saktype = SakType.BARNEPENSJON
         )
 
         coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().soeker
@@ -87,7 +89,8 @@ class PersonRouteTest {
     fun `skal returnere personopplysninger paa version 2`() {
         val hentPersonRequest = HentPersonRequest(
             foedselsnummer = TRIVIELL_MIDTPUNKT,
-            rolle = PersonRolle.BARN
+            rolle = PersonRolle.BARN,
+            saktype = SakType.BARNEPENSJON
         )
 
         coEvery { personService.hentOpplysningsperson(hentPersonRequest) } returns mockPerson()
@@ -114,9 +117,7 @@ class PersonRouteTest {
 
     @Test
     fun `skal returnere folkeregisterIdent`() {
-        val hentPdlIdentRequest = HentPdlIdentRequest(
-            ident = PersonIdent("2305469522806")
-        )
+        val hentPdlIdentRequest = HentPdlIdentRequest(ident = PersonIdent("2305469522806"))
         coEvery {
             personService.hentPdlIdentifikator(hentPdlIdentRequest)
         } returns mockFolkeregisterident(
@@ -146,7 +147,8 @@ class PersonRouteTest {
     @Test
     fun `skal returnere geografisk tilknytning`() {
         val hentGeografiskTilknytningRequest = HentGeografiskTilknytningRequest(
-            foedselsnummer = TRIVIELL_MIDTPUNKT
+            foedselsnummer = TRIVIELL_MIDTPUNKT,
+            saktype = SakType.BARNEPENSJON
         )
 
         coEvery {
@@ -177,7 +179,8 @@ class PersonRouteTest {
     fun `skal returne 500 naar kall mot person feiler`() {
         val hentPersonRequest = HentPersonRequest(
             foedselsnummer = TRIVIELL_MIDTPUNKT,
-            rolle = PersonRolle.BARN
+            rolle = PersonRolle.BARN,
+            saktype = SakType.BARNEPENSJON
         )
 
         coEvery {
@@ -207,9 +210,7 @@ class PersonRouteTest {
 
     @Test
     fun `skal returne 500 naar kall mot folkeregisterident feiler`() {
-        val hentFolkeregisterIdentReq = HentPdlIdentRequest(
-            ident = PersonIdent("2305469522806")
-        )
+        val hentFolkeregisterIdentReq = HentPdlIdentRequest(ident = PersonIdent("2305469522806"))
 
         coEvery {
             personService.hentPdlIdentifikator(hentFolkeregisterIdentReq)

@@ -2,6 +2,7 @@ package no.nav.etterlatte.gyldigsoeknad.barnepensjon
 
 import no.nav.etterlatte.gyldigsoeknad.client.PdlClient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
@@ -37,11 +38,11 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
         )
     }
 
-    fun vurderGyldighet(persongalleri: Persongalleri): GyldighetsResultat {
-        val soekerPdl = hentSoekerFraPdl(persongalleri.soeker)
+    fun vurderGyldighet(persongalleri: Persongalleri, saktype: SakType): GyldighetsResultat {
+        val soekerPdl = hentSoekerFraPdl(persongalleri.soeker, saktype)
         val familieRelasjonSoeker = soekerPdl?.familieRelasjon
-        val personinfoInnsender = persongalleri.innsender?.let { hentNavnFraPdl(it) }
-        val personinfoGjenlevende = persongalleri.gjenlevende.map { hentNavnFraPdl(it) }
+        val personinfoInnsender = persongalleri.innsender?.let { hentNavnFraPdl(it, saktype) }
+        val personinfoGjenlevende = persongalleri.gjenlevende.map { hentNavnFraPdl(it, saktype) }
 
         val innsenderErForelder = innsenderErForelder(
             GyldighetsTyper.INNSENDER_ER_FORELDER,
@@ -73,12 +74,12 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
         return GyldighetsResultat(gyldighetResultat, vurderingsliste, vurdertDato)
     }
 
-    private fun hentSoekerFraPdl(fnrSoeker: String): Person? {
-        return pdlClient.hentPerson(fnrSoeker, PersonRolle.BARN)
+    private fun hentSoekerFraPdl(fnrSoeker: String, saktype: SakType): Person? {
+        return pdlClient.hentPerson(fnrSoeker, PersonRolle.BARN, saktype)
     }
 
-    private fun hentNavnFraPdl(fnr: String): PersonInfoGyldighet? {
-        val person = pdlClient.hentPerson(fnr, PersonRolle.GJENLEVENDE)
+    private fun hentNavnFraPdl(fnr: String, saktype: SakType): PersonInfoGyldighet? {
+        val person = pdlClient.hentPerson(fnr, PersonRolle.GJENLEVENDE, saktype)
         val navn = person.let { it.fornavn + " " + it.etternavn }
         return PersonInfoGyldighet(navn, fnr)
     }

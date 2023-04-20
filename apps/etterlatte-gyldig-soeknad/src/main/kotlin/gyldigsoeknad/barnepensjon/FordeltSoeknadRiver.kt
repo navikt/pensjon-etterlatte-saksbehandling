@@ -3,6 +3,7 @@ package no.nav.etterlatte.gyldigsoeknad.barnepensjon
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
@@ -16,6 +17,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -46,19 +48,19 @@ internal class FordeltSoeknadRiver(
             try {
                 val soeknad = packet.soeknad()
                 val personGalleri = gyldigSoeknadService.hentPersongalleriFraSoeknad(soeknad)
-                val gyldighetsVurdering = gyldigSoeknadService.vurderGyldighet(personGalleri)
+                val sak = behandlingClient.skaffSak(personGalleri.soeker, SakType.BARNEPENSJON.toString())
+                val gyldighetsVurdering = gyldigSoeknadService.vurderGyldighet(personGalleri, sak.sakType)
                 logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
-                val sakId = behandlingClient.skaffSak(personGalleri.soeker, "BARNEPENSJON")
 
-                val behandlingId = behandlingClient.initierBehandling(sakId, soeknad.mottattDato, personGalleri)
+                val behandlingId = behandlingClient.initierBehandling(sak.id, soeknad.mottattDato, personGalleri)
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
-                logger.info("Behandling {} startet på sak {}", behandlingId, sakId)
+                logger.info("Behandling {} startet på sak {}", behandlingId, sak.id)
 
-                sendOpplysningsbehov(sakId, personGalleri, context, packet)
+                sendOpplysningsbehov(sak, personGalleri, context, packet)
 
                 context.publish(
                     packet.apply {
-                        set(GyldigSoeknadVurdert.sakIdKey, sakId)
+                        set(GyldigSoeknadVurdert.sakIdKey, sak.id)
                         set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
                     }.toJson()
                 )
@@ -70,7 +72,7 @@ internal class FordeltSoeknadRiver(
         }
 
     private fun sendOpplysningsbehov(
-        sakId: Long,
+        sak: Sak,
         persongalleri: Persongalleri,
         context: MessageContext,
         packet: JsonMessage
@@ -79,7 +81,8 @@ internal class FordeltSoeknadRiver(
             JsonMessage.newMessage(
                 mapOf(
                     BEHOV_NAME_KEY to Opplysningstype.SOEKER_PDL_V1,
-                    "sakId" to sakId,
+                    "sakId" to sak.id,
+                    "sakType" to sak.sakType,
                     "fnr" to persongalleri.soeker,
                     "rolle" to PersonRolle.BARN,
                     CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY]
@@ -92,7 +95,8 @@ internal class FordeltSoeknadRiver(
                 JsonMessage.newMessage(
                     mapOf(
                         BEHOV_NAME_KEY to Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
-                        "sakId" to sakId,
+                        "sakId" to sak.id,
+                        "sakType" to sak.sakType,
                         "fnr" to fnr,
                         "rolle" to PersonRolle.GJENLEVENDE,
                         CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY]
@@ -106,7 +110,8 @@ internal class FordeltSoeknadRiver(
                 JsonMessage.newMessage(
                     mapOf(
                         BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1,
-                        "sakId" to sakId,
+                        "sakId" to sak.id,
+                        "sakType" to sak.sakType,
                         "fnr" to fnr,
                         "rolle" to PersonRolle.AVDOED,
                         CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY]

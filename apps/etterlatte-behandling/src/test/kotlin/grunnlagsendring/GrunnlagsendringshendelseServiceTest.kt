@@ -438,6 +438,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 minutter
             )
         } returns grunnlagsendringshendelser
+        every { sakService.finnSak(any()) } returns Sak(avdoedFnr, SakType.BARNEPENSJON, sakId, null)
         every {
             grunnlagshendelsesDao.oppdaterGrunnlagsendringStatus(
                 capture(idArg),
@@ -449,7 +450,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val mockPdlModel = mockk<PersonDTO> {
             every { hentDoedsdato() } returns doedsdato
         }
-        every { pdlService.hentPdlModell(avdoedFnr, personRolle) } returns mockPdlModel
+        every { pdlService.hentPdlModell(avdoedFnr, personRolle, SakType.BARNEPENSJON) } returns mockPdlModel
 
         every { generellBehandlingService.hentBehandlingerISak(sakId) } returns listOf(
             mockk {
@@ -485,7 +486,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
         every {
-            sakService.finnEnhetForPersonOgTema(any(), any())
+            sakService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {
@@ -523,7 +524,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
         every {
-            sakService.finnEnhetForPersonOgTema(any(), any())
+            sakService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {

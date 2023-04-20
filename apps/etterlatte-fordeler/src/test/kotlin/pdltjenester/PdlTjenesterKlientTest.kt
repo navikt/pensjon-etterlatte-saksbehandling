@@ -11,6 +11,7 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.FNR_1
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -55,7 +56,8 @@ class PdlTjenesterKlientTest {
             pdlTjenesterKlient.hentPerson(
                 HentPersonRequest(
                     foedselsnummer = Folkeregisteridentifikator.of(FNR_1),
-                    rolle = PersonRolle.BARN
+                    rolle = PersonRolle.BARN,
+                    saktype = SakType.BARNEPENSJON
                 )
             )
         }

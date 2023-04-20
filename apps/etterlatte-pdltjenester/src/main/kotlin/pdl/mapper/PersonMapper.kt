@@ -1,10 +1,12 @@
 package no.nav.etterlatte.pdl.mapper
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
@@ -19,7 +21,8 @@ object PersonMapper {
         pdlKlient: PdlKlient,
         fnr: Folkeregisteridentifikator,
         personRolle: PersonRolle,
-        hentPerson: PdlHentPerson
+        hentPerson: PdlHentPerson,
+        saktype: SakType
     ): Person = runBlocking {
         val navn = ppsKlient.avklarNavn(hentPerson.navn)
         val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
@@ -55,7 +58,8 @@ object PersonMapper {
                 BarnekullMapper.mapBarnekull(
                     pdlKlient,
                     ppsKlient,
-                    hentPerson
+                    hentPerson,
+                    saktype
                 )
             } else {
                 null
@@ -67,8 +71,7 @@ object PersonMapper {
     fun mapOpplysningsperson(
         ppsKlient: ParallelleSannheterKlient,
         pdlKlient: PdlKlient,
-        fnr: Folkeregisteridentifikator,
-        personRolle: PersonRolle,
+        request: HentPersonRequest,
         hentPerson: PdlHentPerson
     ): PersonDTO = runBlocking {
         val navn = ppsKlient.avklarNavn(hentPerson.navn)
@@ -81,7 +84,7 @@ object PersonMapper {
         PersonDTO(
             fornavn = OpplysningDTO(navn.fornavn, navn.metadata.opplysningsId),
             etternavn = OpplysningDTO(navn.etternavn, navn.metadata.opplysningsId),
-            foedselsnummer = OpplysningDTO(fnr, null),
+            foedselsnummer = OpplysningDTO(request.foedselsnummer, null),
             foedselsdato = foedsel.foedselsdato?.let { OpplysningDTO(it, foedsel.metadata.opplysningsId) },
             foedselsaar = OpplysningDTO(foedsel.foedselsaar, foedsel.metadata.opplysningsId),
             doedsdato = doedsfall?.doedsdato?.let { OpplysningDTO(it, doedsfall.metadata.opplysningsId) },
@@ -109,14 +112,15 @@ object PersonMapper {
                 ?.map { OpplysningDTO(it, null) },
             utland = OpplysningDTO(UtlandMapper.mapUtland(hentPerson), null),
             familieRelasjon = OpplysningDTO(
-                FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle),
+                FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle),
                 null
             ), // TODO ai: tre opplysninger i en
-            avdoedesBarn = if (personRolle == PersonRolle.AVDOED) {
+            avdoedesBarn = if (request.rolle == PersonRolle.AVDOED) {
                 BarnekullMapper.mapBarnekull(
                     pdlKlient,
                     ppsKlient,
-                    hentPerson
+                    hentPerson,
+                    request.saktype
                 )
             } else {
                 null

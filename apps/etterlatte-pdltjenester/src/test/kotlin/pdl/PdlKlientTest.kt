@@ -10,7 +10,11 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
+import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -25,7 +29,9 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/person.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentPerson(STOR_SNERK, PersonRolle.BARN)
+            val personResponse = pdlKlient.hentPerson(
+                HentPersonRequest(STOR_SNERK, PersonRolle.BARN, SakType.BARNEPENSJON)
+            )
             val hentPerson = personResponse.data?.hentPerson
 
             assertEquals("LITEN", hentPerson?.navn?.first()?.fornavn)
@@ -41,7 +47,7 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/personBolk.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentPersonBolk(listOf(STOR_SNERK))
+            val personResponse = pdlKlient.hentPersonBolk(listOf(STOR_SNERK), SakType.BARNEPENSJON)
             val hentPerson = personResponse.data?.hentPersonBolk
 
             assertEquals("TRIVIELL", hentPerson?.first()?.person?.navn?.first()?.fornavn)
@@ -57,7 +63,9 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/person_ikke_funnet.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentPerson(STOR_SNERK, PersonRolle.BARN)
+            val personResponse = pdlKlient.hentPerson(
+                HentPersonRequest(STOR_SNERK, PersonRolle.BARN, SakType.BARNEPENSJON)
+            )
             val errors = personResponse.errors
 
             assertEquals("Fant ikke person", errors?.first()?.message)
@@ -69,7 +77,9 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/folkeregisterident.json")
 
         runBlocking {
-            val identResponse = pdlKlient.hentPdlIdentifikator(PersonIdent("2305469522806"))
+            val identResponse = pdlKlient.hentPdlIdentifikator(
+                HentPdlIdentRequest(PersonIdent("2305469522806"))
+            )
             assertEquals("70078749472", identResponse.data?.hentIdenter?.identer?.first()?.ident)
             assertEquals(false, identResponse.data?.hentIdenter?.identer?.first()?.historisk)
             assertEquals("FOLKEREGISTERIDENT", identResponse.data?.hentIdenter?.identer?.first()?.gruppe)
@@ -81,7 +91,9 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/ident_ikke_funnet.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentPdlIdentifikator(PersonIdent("1234"))
+            val personResponse = pdlKlient.hentPdlIdentifikator(
+                HentPdlIdentRequest(PersonIdent("1234"))
+            )
             val errors = personResponse.errors
 
             assertEquals("Fant ikke person", errors?.first()?.message)
@@ -93,7 +105,9 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/geografisk_tilknytning.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentGeografiskTilknytning(STOR_SNERK)
+            val personResponse = pdlKlient.hentGeografiskTilknytning(
+                HentGeografiskTilknytningRequest(STOR_SNERK, SakType.BARNEPENSJON)
+            )
 
             assertEquals("0301", personResponse.data?.hentGeografiskTilknytning?.gtKommune)
             assertEquals(PdlGtType.KOMMUNE, personResponse.data?.hentGeografiskTilknytning?.gtType)

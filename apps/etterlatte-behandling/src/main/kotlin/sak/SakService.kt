@@ -33,7 +33,7 @@ interface SakService {
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
     fun markerSakerMedSkjerming(sakIder: List<Long>, skjermet: Boolean)
-    fun finnEnhetForPersonOgTema(fnr: String, tema: String): ArbeidsFordelingEnhet
+    fun finnEnhetForPersonOgTema(fnr: String, tema: String, saktype: SakType): ArbeidsFordelingEnhet
     fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>)
 }
 
@@ -76,7 +76,7 @@ class RealSakService(
             fnr,
             type,
             if (featureToggleService.isEnabled(SakServiceFeatureToggle.OpprettMedEnhetId, false)) {
-                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema).enhetNr
+                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
             } else {
                 null
             }
@@ -97,8 +97,8 @@ class RealSakService(
         return dao.hentSak(id).sjekkEnhet()
     }
 
-    override fun finnEnhetForPersonOgTema(fnr: String, tema: String): ArbeidsFordelingEnhet {
-        val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr)
+    override fun finnEnhetForPersonOgTema(fnr: String, tema: String, saktype: SakType): ArbeidsFordelingEnhet {
+        val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr, saktype)
         val geografiskTilknytning = tilknytning.geografiskTilknytning()
 
         return when {

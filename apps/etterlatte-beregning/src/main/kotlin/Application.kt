@@ -5,6 +5,7 @@ import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import no.nav.etterlatte.beregning.avkorting
 import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.config.ApplicationContext
 import no.nav.etterlatte.libs.database.migrate
@@ -32,6 +33,7 @@ class Server(private val context: ApplicationContext) {
                 module {
                     restModule(sikkerLogg) {
                         beregning(beregningService, context.behandlingKlient)
+                        avkorting(avkortingService, context.behandlingKlient)
                     }
                 }
                 connector { port = properties.httpPort }

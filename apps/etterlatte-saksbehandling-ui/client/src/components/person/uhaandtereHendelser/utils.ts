@@ -1,7 +1,7 @@
 import { GrunnlagsendringsType } from '~components/person/typer'
 
 export const grunnlagsendringsTittel: Record<GrunnlagsendringsType, string> = {
-  REGULERING: 'Regulering feilet',
+  GRUNNBELOEP: 'Regulering feilet',
   DOEDSDATO: 'Dødsdato',
   UTLAND: 'Utlendingsstatus',
   BARN: 'Barn',
@@ -10,7 +10,7 @@ export const grunnlagsendringsTittel: Record<GrunnlagsendringsType, string> = {
 }
 
 export const grunnlagsendringsBeskrivelse: Record<GrunnlagsendringsType, string> = {
-  REGULERING: 'Regulering av pensjonen kunne ikke behandles automatisk. Saken må derfor behandles manuelt',
+  GRUNNBELOEP: 'Regulering av pensjonen kunne ikke behandles automatisk. Saken må derfor behandles manuelt',
   DOEDSDATO: 'Dødsdato',
   UTLAND: 'Utlendingsstatus',
   BARN: 'Barn',
@@ -20,7 +20,7 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagsendringsType, string>
 
 export const grunnlagsendringsKilde = (type: GrunnlagsendringsType): string => {
   switch (type) {
-    case 'REGULERING':
+    case 'GRUNNBELOEP':
       return 'Doffen'
     case 'DOEDSDATO':
     case 'UTLAND':

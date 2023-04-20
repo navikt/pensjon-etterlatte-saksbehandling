@@ -95,6 +95,8 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
       .filter((behandling) => behandling.behandlingType === IBehandlingsType.REVURDERING)
       .filter((behandling) => !erFerdigBehandlet(behandling.status)).length > 0
 
+  const hendelser = grunnlagshendelser?.filter((hendelse) => hendelse.type === 'GRUNNBELOEP') ?? []
+
   return (
     <>
       <Spinner visible={!lastetBehandlingliste || !lastetGrunnlagshendelser} label={'Laster'} />
@@ -127,7 +129,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                     </EkstraHandlinger>
                   ) : null}
                   <UhaandterteHendelser
-                    hendelser={[]}
+                    hendelser={hendelser}
                     startRevurdering={() => setVisOpprettRevurderingsmodal(true)}
                     disabled={harAapenRevurdering}
                   />

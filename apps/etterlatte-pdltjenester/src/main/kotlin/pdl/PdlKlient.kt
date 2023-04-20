@@ -33,6 +33,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         return retry<PdlPersonResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
+                header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
                 setBody(request)
@@ -71,6 +72,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         return retry<PdlPersonResponseBolk> {
             httpClient.post(apiUrl) {
                 header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
+                header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
                 setBody(request)
@@ -97,6 +99,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         return retry<PdlIdentResponse> {
             httpClient.post(apiUrl) {
                 header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
+                header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
                 setBody(graphqlRequest)
@@ -122,6 +125,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         return retry<PdlGeografiskTilknytningResponse> {
             httpClient.post(apiUrl) {
                 header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
+                header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
                 setBody(graphqlRequest)
@@ -191,6 +195,8 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
 
     companion object {
         const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
+        const val HEADER_TEMA = "Tema"
+        const val HEADER_TEMA_VALUE = "PEN"
     }
 }
 

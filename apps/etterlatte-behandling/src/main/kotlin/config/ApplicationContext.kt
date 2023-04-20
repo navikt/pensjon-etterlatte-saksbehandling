@@ -117,7 +117,7 @@ class ApplicationContext(
     // Klient
     val pdlKlient = PdlKlientImpl(pdlHttpClient, "http://etterlatte-pdltjenester")
     val grunnlagKlient = GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag")
-    val leaderElectionKlient = LeaderElection(leaderElectionHttpClient, env.getValue("ELECTOR_PATH"))
+    val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
     val behandlingsHendelser = BehandlingsHendelser(rapid, behandlingDao, dataSource)
 

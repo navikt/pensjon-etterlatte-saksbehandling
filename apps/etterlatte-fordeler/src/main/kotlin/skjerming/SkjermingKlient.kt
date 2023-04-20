@@ -9,9 +9,9 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
@@ -70,7 +70,7 @@ interface Pingable {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun asyncPing() {
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(newSingleThreadContext("pingThread")) {
             ping()
         }
     }

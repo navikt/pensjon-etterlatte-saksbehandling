@@ -85,7 +85,10 @@ class BehandlingServiceImpl(
 
     override fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse) {
         runBlocking {
-            behandling_app.post("$url/grunnlagsendringshendelse/reguleringfeilet")
+            behandling_app.post("$url/grunnlagsendringshendelse/reguleringfeilet") {
+                contentType(ContentType.Application.Json)
+                setBody(reguleringFeilethendelse)
+            }
         }
     }
 

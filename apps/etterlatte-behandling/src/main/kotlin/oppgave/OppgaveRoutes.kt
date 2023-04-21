@@ -50,6 +50,7 @@ data class OppgaveDTO(
     val beskrivelse: String,
     val saksbehandler: String,
     val handling: Handling,
+    val enhet: String? = null,
     val merknad: String? = null
 ) {
     companion object {
@@ -57,32 +58,34 @@ data class OppgaveDTO(
             return when (oppgave) {
                 is Oppgave.Grunnlagsendringsoppgave -> OppgaveDTO(
                     behandlingId = null,
-                    sakId = oppgave.sakId,
+                    sakId = oppgave.sak.id,
                     status = BehandlingStatus.OPPRETTET,
                     oppgaveStatus = oppgave.oppgaveStatus,
-                    soeknadType = oppgave.sakType.toString(),
+                    soeknadType = oppgave.sak.sakType.toString(),
                     oppgaveType = oppgave.oppgaveType,
                     regdato = oppgave.registrertDato.toLocalDatetimeUTC().toString(),
                     fristdato = oppgave.fristDato.atStartOfDay().toString(),
-                    fnr = oppgave.fnr.value,
+                    fnr = oppgave.sak.ident,
                     beskrivelse = oppgave.beskrivelse,
                     saksbehandler = "",
-                    handling = oppgave.handling
+                    handling = oppgave.handling,
+                    enhet = oppgave.sak.enhet
                 )
                 is Oppgave.BehandlingOppgave -> OppgaveDTO(
                     behandlingId = oppgave.behandlingId,
-                    sakId = oppgave.sakId,
+                    sakId = oppgave.sak.id,
                     status = oppgave.behandlingStatus,
                     oppgaveStatus = oppgave.oppgaveStatus,
-                    soeknadType = oppgave.sakType.toString(),
+                    soeknadType = oppgave.sak.sakType.toString(),
                     oppgaveType = oppgave.oppgaveType,
                     regdato = oppgave.registrertDato.toLocalDatetimeUTC().toString(),
                     fristdato = oppgave.fristDato.atStartOfDay().toString(),
-                    fnr = oppgave.fnr.value,
+                    fnr = oppgave.sak.ident,
                     beskrivelse = "",
                     saksbehandler = "",
                     handling = oppgave.handling,
-                    merknad = oppgave.merknad
+                    merknad = oppgave.merknad,
+                    enhet = oppgave.sak.enhet
                 )
             }
         }

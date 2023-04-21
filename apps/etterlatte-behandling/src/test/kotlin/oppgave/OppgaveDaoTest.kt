@@ -111,7 +111,7 @@ internal class OppgaveDaoTest {
         grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(hendelseIgnorert)
         val oppgaver = oppgaveDao.finnOppgaverFraGrunnlagsendringshendelser()
         assertEquals(oppgaver.size, 1)
-        assertEquals(oppgaver[0].sakId, sakid)
+        assertEquals(oppgaver[0].sak.id, sakid)
     }
 
     @Test
@@ -138,7 +138,7 @@ internal class OppgaveDaoTest {
         val oppgaver = oppgaveDao.finnOppgaverMedStatuser(alleBehandlingsStatuser)
         assertEquals(1, oppgaver.size)
         val oppgave = oppgaver.first() as Oppgave.BehandlingOppgave
-        assertEquals(Enheter.PORSGRUNN.enhetNr, oppgave.enhet)
+        assertEquals(Enheter.PORSGRUNN.enhetNr, oppgave.sak.enhet)
     }
 
     @Test

@@ -5,10 +5,9 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -75,7 +74,7 @@ class OppgaveDao(private val connection: () -> Connection) {
         with(connection()) {
             val stmt = prepareStatement(
                 """
-                SELECT g.sak_id, g.type, g.behandling_id, g.opprettet, s.fnr, s.sakType, g.hendelse_gjelder_rolle
+                SELECT g.sak_id, g.type, g.behandling_id, g.opprettet, s.fnr, s.sakType, s.enhet, g.hendelse_gjelder_rolle
                 FROM grunnlagsendringshendelse g 
                 INNER JOIN sak s ON g.sak_id = s.id
                 WHERE status = ?
@@ -85,10 +84,8 @@ class OppgaveDao(private val connection: () -> Connection) {
             return stmt.executeQuery().toList {
                 val registrertDato = getTidspunkt("opprettet")
                 Oppgave.Grunnlagsendringsoppgave(
-                    sakId = getLong("sak_id"),
-                    sakType = SakType.valueOf(getString("sakType")),
+                    sak = this.mapSak(),
                     registrertDato = registrertDato,
-                    fnr = Folkeregisteridentifikator.of(getString("fnr")),
                     grunnlagsendringsType = GrunnlagsendringsType.valueOf(getString("type")),
                     gjelderRolle = Saksrolle.enumVedNavnEllerUkjent(getString("hendelse_gjelder_rolle"))
                 )
@@ -98,6 +95,13 @@ class OppgaveDao(private val connection: () -> Connection) {
         }
     }
 
+    private fun ResultSet.mapSak() = Sak(
+        id = this.getLong("sak_id"),
+        sakType = enumValueOf(this.getString("sakType")),
+        ident = this.getString("fnr"),
+        enhet = this.getString("enhet").takeUnless { this.wasNull() }
+    )
+
     private val tilOppgave: (ResultSet) -> Oppgave = { rs ->
         val mottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")
             ?: rs.getTidspunktOrNull("behandling_opprettet")
@@ -106,14 +110,11 @@ class OppgaveDao(private val connection: () -> Connection) {
             )
 
         Oppgave.BehandlingOppgave(
+            sak = rs.mapSak(),
             behandlingId = rs.getObject("id") as UUID,
             behandlingStatus = BehandlingStatus.valueOf(rs.getString("status")),
-            sakId = rs.getLong("sak_id"),
-            sakType = enumValueOf(rs.getString("sakType")),
-            fnr = Folkeregisteridentifikator.of(rs.getString("fnr")),
             registrertDato = mottattDato,
             behandlingsType = BehandlingType.valueOf(rs.getString("behandlingstype")),
-            enhet = rs.getString("enhet").takeUnless { rs.wasNull() },
             merknad = rs.getString("merknad")
         )
     }

@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import org.junit.jupiter.api.Test
@@ -20,43 +21,52 @@ import java.util.*
 internal class OppgaveServiceTest {
     private val oppgaveListe: List<Oppgave> = listOf(
         Oppgave.BehandlingOppgave(
-            sakId = 1,
-            sakType = SakType.BARNEPENSJON,
+            sak = Sak(
+                id = 1,
+                sakType = SakType.BARNEPENSJON,
+                ident = TRIVIELL_MIDTPUNKT.value,
+                enhet = null
+            ),
             registrertDato = Tidspunkt.now(),
-            fnr = TRIVIELL_MIDTPUNKT,
             behandlingId = UUID.randomUUID(),
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
-            enhet = null,
             merknad = null
         ),
         Oppgave.BehandlingOppgave(
-            sakId = 2,
-            sakType = SakType.BARNEPENSJON,
+            sak = Sak(
+                id = 2,
+                sakType = SakType.BARNEPENSJON,
+                ident = TRIVIELL_MIDTPUNKT.value,
+                enhet = Enheter.PORSGRUNN.enhetNr
+            ),
             registrertDato = Tidspunkt.now(),
-            fnr = TRIVIELL_MIDTPUNKT,
             behandlingId = UUID.randomUUID(),
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
-            enhet = Enheter.PORSGRUNN.enhetNr,
             merknad = null
         ),
         Oppgave.BehandlingOppgave(
-            sakId = 3,
-            sakType = SakType.BARNEPENSJON,
+            sak = Sak(
+                id = 3,
+                sakType = SakType.BARNEPENSJON,
+                ident = TRIVIELL_MIDTPUNKT.value,
+                enhet = Enheter.STRENGT_FORTROLIG.enhetNr
+            ),
             registrertDato = Tidspunkt.now(),
-            fnr = TRIVIELL_MIDTPUNKT,
             behandlingId = UUID.randomUUID(),
             behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingStatus = BehandlingStatus.OPPRETTET,
-            enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
             merknad = null
         ),
         Oppgave.Grunnlagsendringsoppgave(
-            sakId = 4,
-            sakType = SakType.BARNEPENSJON,
+            sak = Sak(
+                id = 4,
+                sakType = SakType.BARNEPENSJON,
+                ident = TRIVIELL_MIDTPUNKT.value,
+                enhet = null
+            ),
             registrertDato = Tidspunkt.now(),
-            fnr = TRIVIELL_MIDTPUNKT,
             grunnlagsendringsType = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
             gjelderRolle = Saksrolle.SOEKER
         )
@@ -77,6 +87,6 @@ internal class OppgaveServiceTest {
         val filtered = oppgaveListe.filterOppgaverForEnheter(featureToggleService, user)
 
         filtered.size shouldBe 3
-        filtered.filter { it.sakId == 3L }.size shouldBe 0
+        filtered.filter { it.sak.id == 3L }.size shouldBe 0
     }
 }

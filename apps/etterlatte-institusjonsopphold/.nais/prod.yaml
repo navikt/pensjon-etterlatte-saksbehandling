@@ -28,10 +28,10 @@ spec:
   env:
     - name: KAFKA_RESET_POLICY
       value: earliest
-    - name: INSTITUSJON_OPPHOLD_GROUP_ID
+    - name: INSTITUSJONSOPPHOLD_GROUP_ID
       value: "etterlatte-v1"
-    - name: SKJERMING_TOPIC
-      value: institusjon-opphold-hendelser
+    - name: INSTITUSJONSOPPHOLD_TOPIC
+      value: "team-rocket.institusjon-opphold-hendelser"
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:

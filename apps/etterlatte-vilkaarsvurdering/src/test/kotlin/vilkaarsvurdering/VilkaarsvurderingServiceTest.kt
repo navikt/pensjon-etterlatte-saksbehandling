@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -360,6 +361,7 @@ internal class VilkaarsvurderingServiceTest {
 
         val revurderingsvilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, bruker) }
         assertIsSimilar(foerstegangsvilkaar, revurderingsvilkaar)
+        coVerify(exactly = 1) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(revurderingId, bruker) }
     }
 
     @Test

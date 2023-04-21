@@ -18,7 +18,7 @@ import { ISvar } from '~shared/types/ISvar'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 type Props = {
@@ -28,6 +28,7 @@ type Props = {
   oppdaterVilkaar: (vilkaarsvurdering: IVilkaarsvurdering) => void
   behandlingId: string
   redigerbar: boolean
+  behandlingstype: IBehandlingsType
 }
 
 export const Resultat: React.FC<Props> = ({
@@ -37,6 +38,7 @@ export const Resultat: React.FC<Props> = ({
   oppdaterVilkaar,
   behandlingId,
   redigerbar,
+  behandlingstype,
 }) => {
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
@@ -67,10 +69,17 @@ export const Resultat: React.FC<Props> = ({
     }
   }
 
-  const resultatTekst = () =>
-    vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
+  const resultatTekst = () => {
+    if (erRevurdering) {
+      return vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
+        ? 'Fortsatt oppfylt'
+        : 'Opphør av ytelse'
+    }
+
+    return vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
       ? 'Ja, vilkår er oppfylt'
       : 'Nei, vilkår er ikke oppfylt'
+  }
 
   const reset = () => {
     setSvar(undefined)
@@ -80,13 +89,17 @@ export const Resultat: React.FC<Props> = ({
 
   const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'
   const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
+  const erRevurdering = behandlingstype === IBehandlingsType.REVURDERING
+
   return (
     <>
       <VilkaarWrapper>
         <VilkaarsvurderingContent>
           <HeadingWrapper>
             <Heading size="small" level={'2'}>
-              Er vilkårene for {formaterSakstype(sakstype).toLowerCase()} oppfylt?
+              {erRevurdering
+                ? 'Utfall etter revurdering'
+                : `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`}
             </Heading>
           </HeadingWrapper>
           {vilkaarsvurdering.resultat && (
@@ -96,8 +109,11 @@ export const Resultat: React.FC<Props> = ({
               </TekstWrapper>
               {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
                 <BodyShort>
-                  {formaterSakstype(sakstype)} er innvilget f.o.m{' '}
-                  {formaterStringDato(vilkaarsvurdering.virkningstidspunkt)}
+                  {erRevurdering
+                    ? null
+                    : `${formaterSakstype(sakstype)} er innvilget f.o.m ${formaterStringDato(
+                        vilkaarsvurdering.virkningstidspunkt
+                      )}`}
                 </BodyShort>
               )}
               {vilkaarsvurdering?.resultat?.kommentar && (
@@ -134,8 +150,8 @@ export const Resultat: React.FC<Props> = ({
                   }}
                   error={radioError ? radioError : false}
                 >
-                  <Radio value={ISvar.JA}>Ja, vilkår er oppfylt</Radio>
-                  <Radio value={ISvar.NEI}>Nei, vilkår er ikke oppfylt</Radio>
+                  <Radio value={ISvar.JA}>{erRevurdering ? 'Fortsatt oppfylt' : 'Ja, vilkår er oppfylt'}</Radio>
+                  <Radio value={ISvar.NEI}>{erRevurdering ? 'Opphør av ytelse' : 'Nei, vilkår er ikke oppfylt'}</Radio>
                 </RadioGroup>
               </RadioGroupWrapper>
               <Textarea

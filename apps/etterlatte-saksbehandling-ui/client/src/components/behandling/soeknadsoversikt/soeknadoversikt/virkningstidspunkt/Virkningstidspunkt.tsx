@@ -17,9 +17,7 @@ import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
 import { KildePdl } from '~shared/types/kilde'
-import { formaterKildePdl } from '../../utils'
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
-import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 interface Props {
   behandlingId: string
@@ -28,7 +26,14 @@ interface Props {
   avdoedDoedsdato: string | undefined
   avdoedDoedsdatoKilde: KildePdl | undefined
   soeknadMottattDato: string
-  sakstype: ISaksType
+  hjemmler: Hjemmel[]
+  beskrivelse: string
+  children?: { info: React.ReactNode }
+}
+
+export interface Hjemmel {
+  lenke: string
+  tittel: string
 }
 
 const Virkningstidspunkt = (props: Props) => {
@@ -87,32 +92,14 @@ const Virkningstidspunkt = (props: Props) => {
     <>
       <Soeknadsvurdering
         tittel="Virkningstidspunkt"
-        hjemler={[
-          { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12', tittel: 'Folketrygdeloven § 22-12 første ledd' },
-          { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-13', tittel: '§ 22-13 fjerde ledd' },
-        ]}
+        hjemler={props.hjemmler}
         status={Boolean(props.virkningstidspunkt) ? 'success' : 'warning'}
       >
         <div>
-          {props.sakstype == ISaksType.BARNEPENSJON ? (
-            <Beskrivelse>
-              Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for
-              opptil tre år før søknaden er mottatt.
-            </Beskrivelse>
-          ) : (
-            <Beskrivelse>
-              Omstillingsstønad kan innvilges fra og med den første i måneden etter dødsfallet, men kan som hovedregel
-              ikke gis for mer enn tre måneder før søknaden er mottatt hos NAV.
-            </Beskrivelse>
-          )}
+          <Beskrivelse>{props.beskrivelse}</Beskrivelse>
           <InfobokserWrapper>
             <InfoWrapper>
-              <Info
-                label="Dødsdato"
-                tekst={props.avdoedDoedsdato ? formaterStringDato(props.avdoedDoedsdato) : ''}
-                undertekst={formaterKildePdl(props.avdoedDoedsdatoKilde)}
-              />
-              <Info label="Søknad mottatt" tekst={formaterStringDato(props.soeknadMottattDato)} />
+              {props.children?.info}
               <Info
                 label="Virkningstidspunkt"
                 tekst={props.virkningstidspunkt ? formaterStringDato(props.virkningstidspunkt.dato) : 'Ikke vurdert'}

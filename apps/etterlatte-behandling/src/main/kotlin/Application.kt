@@ -63,11 +63,15 @@ class Server(private val beanFactory: BeanFactory) {
 
         val behandlingHendelser = behandlingHendelser()
         val grunnlagsendringshendelseJob = grunnlagsendringshendelseJob()
-        Runtime.getRuntime().addShutdownHook(Thread { grunnlagsendringshendelseJob.cancel() })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                grunnlagsendringshendelseJob.cancel()
+                behandlingHendelser.nyHendelse.close()
+            }
+        )
         behandlingHendelser.start()
 
         setReady().also { engine.start(true) }
-        behandlingHendelser.nyHendelse.close()
     }
 }
 

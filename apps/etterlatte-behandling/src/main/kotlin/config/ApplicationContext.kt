@@ -85,7 +85,7 @@ class ApplicationContext(
     val env: Map<String, String> = System.getenv(),
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
-        if (env.getValue("DEV") == "true") {
+        if (env["DEV"] == "true") {
             TestProdusent()
         } else {
             GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))

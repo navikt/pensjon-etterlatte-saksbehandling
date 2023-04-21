@@ -4,8 +4,8 @@ import no.nav.etterlatte.hendelserpdl.pdl.Pdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.person.pdl.leesah.Personhendelse
-import no.nav.person.pdl.leesah.verge.VergemaalEllerFremtidsfullmakt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
@@ -19,20 +19,10 @@ class PersonHendelseFordeler(
     suspend fun haandterHendelse(personhendelse: Personhendelse) {
         when (personhendelse.opplysningstype) {
             LeesahOpplysningstyper.DOEDSFALL_V1.toString() -> haandterDoedsendelse(personhendelse)
-            LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(
-                personhendelse
-            )
-
-            LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(
-                personhendelse
-            )
-
-            LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(
-                personhendelse
-            )
-
+            LeesahOpplysningstyper.UTFLYTTING_FRA_NORGE.toString() -> haandterUtflyttingFraNorge(personhendelse)
+            LeesahOpplysningstyper.FORELDERBARNRELASJON_V1.toString() -> haandterForelderBarnRelasjon(personhendelse)
+            LeesahOpplysningstyper.ADRESSEBESKYTTELSE_V1.toString() -> haandterAdressebeskyttelse(personhendelse)
             LeesahOpplysningstyper.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1.toString() -> haandterVergemaal(personhendelse)
-
             else -> log.info("Så en hendelse av type ${personhendelse.opplysningstype} som vi ikke håndterer")
         }
     }
@@ -43,17 +33,15 @@ class PersonHendelseFordeler(
             personhendelse.vergemaalEllerFremtidsfullmakt
         if (vergemaalEllerFremtidsfullmakt?.type in
             listOf(
-                "ensligMindreaarigAsylsoeker",
-                "ensligMindreaarigFlyktning",
-                "mindreaarig",
-                "midlertidigForMindreaarig",
-                "forvaltningUtenforVergemaal"
-            )
+                    "ensligMindreaarigAsylsoeker",
+                    "ensligMindreaarigFlyktning",
+                    "mindreaarig",
+                    "midlertidigForMindreaarig",
+                    "forvaltningUtenforVergemaal"
+                )
         ) {
             try {
-                when (
-                    val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
-                ) {
+                when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
                     is PdlIdentifikator.Npid -> {
                         log.info(
                             "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
@@ -90,10 +78,7 @@ class PersonHendelseFordeler(
             return
         }
         try {
-            when (
-                val personnummer =
-                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
-            ) {
+            when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
                 is PdlIdentifikator.Npid -> {
                     log.info(
                         "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
@@ -124,10 +109,7 @@ class PersonHendelseFordeler(
     private suspend fun haandterForelderBarnRelasjon(personhendelse: Personhendelse) {
         val hendelseType = "Forelder-barn-relasjon-hendelse"
         try {
-            when (
-                val personnummer =
-                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
-            ) {
+            when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
                 is PdlIdentifikator.Npid -> {
                     log.info(
                         "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
@@ -160,10 +142,7 @@ class PersonHendelseFordeler(
     private suspend fun haandterDoedsendelse(personhendelse: Personhendelse) {
         val hendelseType = "Doedshendelse"
         try {
-            when (
-                val personnummer =
-                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
-            ) {
+            when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
                 is PdlIdentifikator.Npid -> {
                     log.info(
                         "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +
@@ -195,10 +174,7 @@ class PersonHendelseFordeler(
     private suspend fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
         val hendelseType = "Utflytting fra Norge-hendelse"
         try {
-            when (
-                val personnummer =
-                    pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())
-            ) {
+            when (val personnummer = pdlService.hentPdlIdentifikator(personhendelse.personidenter.first())) {
                 is PdlIdentifikator.Npid -> {
                     log.info(
                         "Ignorerer en hendelse med id=${personhendelse.hendelseId} om en person som kun har NPID " +

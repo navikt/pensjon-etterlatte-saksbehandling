@@ -44,5 +44,3 @@ include(
     "jobs:test-fordeler",
     "jobs:start-regulering"
 )
-include("libs:institusjonsopphold")
-findProject(":libs:institusjonsopphold")?.name = "institusjonsopphold"

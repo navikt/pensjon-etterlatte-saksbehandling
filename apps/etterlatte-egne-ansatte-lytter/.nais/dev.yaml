@@ -1,4 +1,4 @@
-  apiVersion: "nais.io/v1alpha1"
+apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: etterlatte-egne-ansatte-lytter

@@ -1,7 +1,7 @@
-  apiVersion: "nais.io/v1alpha1"
+apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: etterlatte-egne-ansatte-lytter
+  name: etterlatte-institusjonsopphold
   namespace: etterlatte
   labels:
     team: etterlatte
@@ -17,7 +17,7 @@ spec:
   strategy:
     type: Recreate
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   azure:
     application:
       enabled: true
@@ -28,12 +28,12 @@ spec:
   env:
     - name: KAFKA_RESET_POLICY
       value: earliest
-    - name: SKJERMING_GROUP_ID
+    - name: INSTITUSJON_OPPHOLD_GROUP_ID
       value: "etterlatte-v1"
     - name: SKJERMING_TOPIC
-      value: "nom.skjermede-personer-status-v1"
+      value: institusjon-opphold-hendelser
     - name: BEHANDLING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:
     outbound:
       rules:

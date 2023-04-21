@@ -10,6 +10,7 @@ include(
     "apps:etterlatte-opplysninger-fra-soeknad",
     "apps:etterlatte-opplysninger-fra-pdl",
     "apps:etterlatte-egne-ansatte-lytter",
+    "apps:etterlatte-institusjonsopphold",
     "apps:etterlatte-testdata",
     "apps:etterlatte-utbetaling",
     "apps:etterlatte-oppdater-behandling",
@@ -42,3 +43,5 @@ include(
     "jobs:test-fordeler",
     "jobs:start-regulering"
 )
+include("apps:etterlatte-institusjonsopphold")
+findProject(":apps:etterlatte-institusjonsopphold")?.name = "etterlatte-institusjonsopphold"

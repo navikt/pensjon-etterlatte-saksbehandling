@@ -2,6 +2,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -109,7 +110,9 @@ class VilkaarsvurderingService(
                     resultat = tidligereVilkaarsvurdering.resultat
                 ),
                 kopiertFraId = tidligereVilkaarsvurdering.id
-            )
+            ).also {
+                runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, bruker) }
+            }
         }
     }
 

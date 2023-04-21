@@ -60,11 +60,5 @@ sealed class Oppgave {
 
         override val oppgaveType: OppgaveType
             get() = OppgaveType.ENDRING_PAA_SAK
-
-        // På sikt kan vi vurdere om dette heller bør være strukturerte data som går til frontend, og
-        // utledes til en menneskelig lesbar tekst der i stedet. 07.02.2023 ØSH
-        val beskrivelse: String
-            get() = "Endring av $grunnlagsendringsType for $gjelderRolle".lowercase()
-                .replaceFirstChar { it.uppercase() }
     }
 }

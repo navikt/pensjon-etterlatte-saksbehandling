@@ -9,7 +9,9 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.behandling.OppgaveStatus
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.domain.Handling
 import no.nav.etterlatte.oppgave.domain.Oppgave
@@ -47,11 +49,10 @@ data class OppgaveDTO(
     val regdato: String,
     val fristdato: String,
     val fnr: String,
-    val beskrivelse: String,
-    val saksbehandler: String,
+    val saksbehandler: String = "",
     val handling: Handling,
     val enhet: String? = null,
-    val merknad: String? = null
+    val merknad: String?
 ) {
     companion object {
         fun fraOppgave(oppgave: Oppgave): OppgaveDTO {
@@ -66,9 +67,8 @@ data class OppgaveDTO(
                     regdato = oppgave.registrertDato.toLocalDatetimeUTC().toString(),
                     fristdato = oppgave.fristDato.atStartOfDay().toString(),
                     fnr = oppgave.sak.ident,
-                    beskrivelse = oppgave.beskrivelse,
-                    saksbehandler = "",
                     handling = oppgave.handling,
+                    merknad = oppgave.opprettMerknad(),
                     enhet = oppgave.sak.enhet
                 )
                 is Oppgave.BehandlingOppgave -> OppgaveDTO(
@@ -81,8 +81,6 @@ data class OppgaveDTO(
                     regdato = oppgave.registrertDato.toLocalDatetimeUTC().toString(),
                     fristdato = oppgave.fristDato.atStartOfDay().toString(),
                     fnr = oppgave.sak.ident,
-                    beskrivelse = "",
-                    saksbehandler = "",
                     handling = oppgave.handling,
                     merknad = oppgave.merknad,
                     enhet = oppgave.sak.enhet
@@ -90,4 +88,15 @@ data class OppgaveDTO(
             }
         }
     }
+}
+
+fun Oppgave.Grunnlagsendringsoppgave.opprettMerknad() = when (grunnlagsendringsType) {
+    GrunnlagsendringsType.DOEDSFALL -> when (gjelderRolle) {
+        Saksrolle.SOEKER -> "Mottaker er registrert død"
+        else -> "Dødsfall i familien"
+    }
+    GrunnlagsendringsType.GRUNNBELOEP -> "Endring i grunnbeløp"
+    GrunnlagsendringsType.UTFLYTTING -> "Utflytting"
+    GrunnlagsendringsType.FORELDER_BARN_RELASJON -> "Forelder-barn relasjon"
+    GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> "Vergemål eller fremtidsfullmakt"
 }

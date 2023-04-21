@@ -144,8 +144,7 @@ class GrunnlagsendringshendelseService(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
         grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
-    ):
-        List<Grunnlagsendringshendelse> {
+    ): List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
 

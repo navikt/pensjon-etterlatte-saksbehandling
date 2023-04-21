@@ -7,12 +7,20 @@ import {
   soeknadTypeFilter,
   statusFilter,
   StatusFilter,
+  enhetFilter,
+  EnhetFilter,
 } from './typer/oppgavebenken'
 import { format } from 'date-fns'
 import { Tag } from '@navikt/ds-react'
 import HandlingerKnapp from './handlinger/HandlingerKnapp'
 import BrukeroversiktLenke from './handlinger/BrukeroversiktKnapp'
 import { tagColors } from '~shared/Tags'
+
+const mapEnhetNavn = (enhet?: EnhetFilter): string => {
+  const navn = (enhet ? enhetFilter[enhet as EnhetFilter]?.navn : undefined) ?? 'Ukjent'
+
+  return navn.includes(' - ') ? navn.substring(0, navn.indexOf(' - ')) : navn
+}
 
 export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   {
@@ -78,6 +86,14 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
       return (
         <span>{oppgaveStatus ? statusFilter[oppgaveStatus as StatusFilter]?.navn ?? oppgaveStatus : 'Ukjent'}</span>
       )
+    },
+  },
+  {
+    Header: 'Enhet',
+    accessor: 'oppgaveEnhet',
+    filter: 'exact',
+    Cell: ({ value: enhet }) => {
+      return <span>{mapEnhetNavn(enhet)}</span>
     },
   },
   {

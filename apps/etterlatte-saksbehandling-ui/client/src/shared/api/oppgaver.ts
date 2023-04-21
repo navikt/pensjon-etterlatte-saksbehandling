@@ -12,6 +12,7 @@ export interface OppgaveDTO {
   saksbehandler: string
   handling: string
   merknad?: string
+  enhet: string | undefined
 }
 export interface OppgaveResponse {
   oppgaver: ReadonlyArray<OppgaveDTO>

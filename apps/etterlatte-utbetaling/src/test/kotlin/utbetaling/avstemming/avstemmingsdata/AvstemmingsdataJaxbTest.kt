@@ -146,7 +146,7 @@ internal class AvstemmingsdataJaxbTest {
                         <sats>10000</sats>
                         <satstypeKode>MND</satstypeKode>
                         <fradragTillegg>T</fradragTillegg>
-                        <brukKjoreplan>J</brukKjoreplan>
+                        <brukKjoreplan>N</brukKjoreplan>
                         <utbetalesTilId>123456</utbetalesTilId>
                         <attestantListe>
                             <attestantId>attestant</attestantId>

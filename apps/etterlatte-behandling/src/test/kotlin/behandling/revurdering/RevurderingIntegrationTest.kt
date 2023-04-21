@@ -43,7 +43,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `kan opprette ny revurdering og lagre i db`() {
-        val hendelser = applicationContext.behandlingsHendelser.nyHendelse
+        val hendelser = applicationContext.behandlingsHendelser.hendelserKanal
         val featureToggleService = mockk<FeatureToggleService>()
 
         every {
@@ -92,7 +92,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `hvis featuretoggle er av saa opprettes ikke revurdering`() {
-        val hendelser = applicationContext.behandlingsHendelser.nyHendelse
+        val hendelser = applicationContext.behandlingsHendelser.hendelserKanal
         val featureToggleService = mockk<FeatureToggleService>()
 
         every {

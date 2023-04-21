@@ -396,7 +396,7 @@ class IntegrationTest : BehandlingIntegrationTest() {
             }
         }
 
-        applicationContext.behandlingsHendelser.nyHendelse.close()
+        applicationContext.behandlingsHendelser.hendelserKanal.close()
 
         kotlin.runCatching { sleep(2000) }
         assertNotNull(behandlingOpprettet)

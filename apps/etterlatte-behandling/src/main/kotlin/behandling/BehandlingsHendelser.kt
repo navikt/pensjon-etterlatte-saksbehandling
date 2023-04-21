@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 enum class BehandlingHendelseType {
@@ -32,7 +32,7 @@ class BehandlingsHendelser(
     private val datasource: DataSource
 ) {
     private val kanal: Channel<Pair<UUID, BehandlingHendelseType>> = Channel(Channel.UNLIMITED)
-    val nyHendelse: BehandlingHendelserKanal get() = BehandlingHendelserKanal(kanal)
+    val hendelserKanal: BehandlingHendelserKanal get() = BehandlingHendelserKanal(kanal)
 
     private val logger: Logger = LoggerFactory.getLogger(BehandlingsHendelser::class.java)
 

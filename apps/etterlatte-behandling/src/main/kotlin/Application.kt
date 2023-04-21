@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.DatabaseContext
+import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
@@ -64,7 +65,7 @@ class Server(private val context: ApplicationContext) {
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 grunnlagsendringshendelseJob.cancel()
-                behandlingHendelser.nyHendelse.close()
+                behandlingHendelser.hendelserKanal.close()
             }
         )
     }

@@ -126,7 +126,7 @@ class ApplicationContext(
     val sakService = RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService)
     val generellBehandlingService = RealGenerellBehandlingService(
         behandlingDao = behandlingDao,
-        behandlingHendelser = behandlingsHendelser.nyHendelse,
+        behandlingHendelser = behandlingsHendelser.hendelserKanal,
         hendelseDao = hendelseDao,
         vedtakKlient = vedtakKlientObo,
         grunnlagKlient = grunnlagKlientObo,
@@ -139,13 +139,13 @@ class ApplicationContext(
             sakDao = sakDao,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
-            behandlingHendelser = behandlingsHendelser.nyHendelse,
+            behandlingHendelser = behandlingsHendelser.hendelserKanal,
             featureToggleService = featureToggleService
         )
 
     val revurderingService =
         RealRevurderingService(
-            behandlingHendelser = behandlingsHendelser.nyHendelse,
+            behandlingHendelser = behandlingsHendelser.hendelserKanal,
             featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao
@@ -154,7 +154,7 @@ class ApplicationContext(
     val manueltOpphoerService =
         RealManueltOpphoerService(
             behandlingDao = behandlingDao,
-            behandlingHendelser = behandlingsHendelser.nyHendelse,
+            behandlingHendelser = behandlingsHendelser.hendelserKanal,
             hendelseDao = hendelseDao,
             featureToggleService = featureToggleService
         )
@@ -181,7 +181,7 @@ class ApplicationContext(
     val migreringService = MigreringService(
         sakService = sakService,
         foerstegangsBehandlingService = foerstegangsbehandlingService,
-        behandlingsHendelser = behandlingsHendelser.nyHendelse,
+        behandlingsHendelser = behandlingsHendelser.hendelserKanal,
         migreringRepository = MigreringRepository(KotliqueryRepositoryWrapper(dataSource))
     )
 

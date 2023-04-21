@@ -8,6 +8,10 @@ import { Start } from '~components/behandling/handlinger/start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Innhold, Border } from '~components/behandling/soeknadsoversikt/styled'
 import { HeadingWrapper } from '~components/person/saksoversikt'
+import {
+  BP_REVURDERING_BESKRIVELSE,
+  BP_REVURDERING_HJEMLER,
+} from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -30,7 +34,8 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           avdoedDoedsdatoKilde={behandling.familieforhold?.avdoede?.kilde}
           soeknadMottattDato={behandling.soeknadMottattDato}
           behandlingId={behandling.id}
-          sakstype={behandling.sakType}
+          hjemmler={BP_REVURDERING_HJEMLER}
+          beskrivelse={BP_REVURDERING_BESKRIVELSE}
         />
       </Innhold>
       <Border />

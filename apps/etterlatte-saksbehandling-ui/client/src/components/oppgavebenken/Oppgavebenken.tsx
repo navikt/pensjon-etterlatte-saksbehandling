@@ -9,6 +9,7 @@ import {
   OppgaveTypeFilter,
   SoeknadTypeFilter,
   StatusFilter,
+  EnhetFilter,
 } from './typer/oppgavebenken'
 import { Column } from 'react-table'
 import { kolonner } from './OppgaveKolonner'
@@ -90,6 +91,7 @@ const mapOppgaveResponse = (data: OppgaveDTO): IOppgave => ({
   saksbehandler: data.saksbehandler,
   handling: data.handling.toUpperCase() as Handlinger,
   merknad: data.merknad,
+  oppgaveEnhet: data.enhet ? (`E${data.enhet}` as EnhetFilter) : EnhetFilter.INGEN_ENHET,
 })
 
 export default Oppgavebenken

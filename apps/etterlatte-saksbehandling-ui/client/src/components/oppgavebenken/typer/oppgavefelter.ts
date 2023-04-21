@@ -6,6 +6,8 @@ import {
   SoeknadTypeFilter,
   statusFilter,
   StatusFilter,
+  enhetFilter,
+  EnhetFilter,
 } from './oppgavebenken'
 
 export interface IOppgaveFilter {
@@ -29,6 +31,7 @@ export interface IOppgaveFelter {
   oppgaveType: IOppgaveFelt
   soeknadType: IOppgaveFelt
   oppgaveStatus: IOppgaveFelt
+  oppgaveEnhet: IOppgaveFelt
 }
 
 export enum FeltSortOrder {
@@ -94,6 +97,15 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
         type: 'select',
         selectedValue: StatusFilter.VELG,
         nedtrekksliste: statusFilter,
+      },
+    },
+    oppgaveEnhet: {
+      noekkel: 'oppgaveEnhet',
+      label: 'Enhet',
+      filter: {
+        type: 'select',
+        selectedValue: EnhetFilter.VELG,
+        nedtrekksliste: enhetFilter,
       },
     },
   }

@@ -10,6 +10,7 @@ export interface IOppgave {
   saksbehandler: string
   handling: Handlinger
   merknad?: string
+  oppgaveEnhet: EnhetFilter
 }
 
 export enum Handlinger {
@@ -62,6 +63,31 @@ export const statusFilter: Record<StatusFilter, IPar> = {
   NY: { id: 'NY', navn: 'Ny' },
   TIL_ATTESTERING: { id: 'TIL_ATTESTERING', navn: 'Til attestering' },
   RETURNERT: { id: 'RETURNERT', navn: 'Returnert' },
+}
+
+export enum EnhetFilter {
+  VELG = 'VELG',
+  INGEN_ENHET = 'INGEN_ENHET',
+  E0001 = 'E0001',
+  E2103 = 'E2103',
+  E4808 = 'E4808',
+  E4815 = 'E4815',
+  E4817 = 'E4817',
+  E4862 = 'E4862',
+  E4883 = 'E4883',
+}
+
+export const enhetFilter: Record<EnhetFilter, IPar> = {
+  VELG: { id: 'VELG', navn: 'Velg' },
+
+  INGEN_ENHET: { id: 'INGEN_ENHET', navn: 'Ingen' },
+  E4815: { id: 'E4815', navn: '4815 - Ålesund' },
+  E4808: { id: 'E4808', navn: '4808 - Porsgrunn' },
+  E4817: { id: 'E4817', navn: '4817 - Steinkjer' },
+  E4862: { id: 'E4862', navn: '4862 - Ålesund Utland' },
+  E0001: { id: 'E0001', navn: '0001 - Utland' },
+  E4883: { id: 'E4883', navn: '4883 - Egne ansatte' },
+  E2103: { id: 'E2103', navn: '2103 - Vikafossen' },
 }
 
 export interface FilterPar {

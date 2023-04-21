@@ -66,7 +66,7 @@ fun <T : Oppgave> List<T>.filterOppgaverForEnheter(
     user
 ) { item, enheter ->
     when (item) {
-        is Oppgave.BehandlingOppgave -> item.enhet == null || enheter.contains(item.enhet)
+        is Oppgave.BehandlingOppgave -> item.sak.enhet == null || enheter.contains(item.sak.enhet)
         else -> true
     }
 }

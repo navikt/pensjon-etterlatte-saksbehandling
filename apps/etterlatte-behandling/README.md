@@ -75,19 +75,27 @@ saksnummer.
 
 ## Kom i gang
 
-### Kjøre lokalt
-
-TODO: Hvordan kjøre appen lokalt.
-
+### Kjøre lokalt (auth fra dev-gcp + db lokalt eller proxy gcp)
+1. For å sette opp riktig konfigurasjon for applikasjonen, kjør scriptet `get-secret.sh` fra prosjektets [rotmappe](../..).
+```
+./get-secret.sh apps/etterlatte-behandling
+```
+2. Sett følgende environment-variabler under oppstart av applikasjonen.
+```
 DEV=true;
 NAIS_APP_NAME=etterlatte-behandling;
 NAIS_CLUSTER_NAME=dev-gcp;
-PDL_AZURE_SCOPE=api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default;
-GRUNNLAG_AZURE_SCOPE=api://dev-gcp.etterlatte.etterlatte-grunnlag/.default;
-ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE=api://dev-fss.teampensjon.navansatt/.default;
+DB_HOST=localhost;
+DB_PORT=5432;
+DB_DATABASE=postgres;
+DB_USERNAME=postgres;
+DB_PASSWORD=postgres;
 NAVANSATT_URL=http://localhost:9091;
-NORG2_URL=http://localhost;
+NORG2_URL=http://localhost:9091;
 ELECTOR_PATH=localhost:9091;
+ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE=api://dev-fss.teampensjon.navansatt/.default;
+GRUNNLAG_AZURE_SCOPE=api://dev-gcp.etterlatte.etterlatte-grunnlag/.default;
+PDL_AZURE_SCOPE=api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default;
 ETTERLATTE_VEDTAK_CLIENT_ID=069b1b2c-0a06-4cc9-8418-f100b8ff71be;
 ETTERLATTE_VEDTAK_URL=https://etterlatte-vedtak.intern.dev.nav.no;
 ETTERLATTE_GRUNNLAG_CLIENT_ID=ce96a301-13db-4409-b277-5b27f464d08b;
@@ -99,14 +107,27 @@ AZUREAD_FORTROLIG_GROUPID=ea930b6b-9397-44d9-b9e6-f4cf527a632a;
 AZUREAD_EGEN_ANSATT_GROUPID=dbe4ad45-320b-4e9a-aaa1-73cca4ee124d;
 AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID=753805ea-65a7-4855-bdc3-e6130348df9f;
 AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID=ea7411eb-8b48-41a0-bc56-7b521fbf0c25;
-DB_HOST=localhost;
-DB_PORT=5432;
-DB_DATABASE=postgres;
-DB_PASSWORD=postgres;
-DB_USERNAME=postgres;
 HENDELSE_JOB_FREKVENS=1;
 HENDELSE_MINUTTER_GAMLE_HENDELSER=1;
 HTTP_PORT=8090;
+```
+Legg også til `.env.dev-gcp` som `Env-file` under `Run configurations` i Intellij.
+
+3. Kjør opp en lokal postgres-database med `docker-compose up -d`. Alternativt er det mulig å kjøre en proxy mot
+   gcp-dev ved å kjøre `nais postgres proxy etterlatte-behandling`. Merk at for at dette skal fungere kan det ikke sendes
+   passord ved opprettelse av database-kobling.
+
+5. Om du skal kjøre med frontend og wonderwall må du også kjøre (fra rotmappe):
+   `./get-secret.sh apps/etterlatte-saksbehandling-ui`
+   og legge til følgende linjer nederst i `.env.dev-gcp` fila til saksbehandling-ui.
+```
+BEHANDLING_API_URL=http://host.docker.internal:8090
+BEHANDLING_API_SCOPE=api://<BEHANDLING_CLIENT_ID>/.default // Se .env.dev-gcp fila du opprettet i steg 1.
+```
+
+TODO: 
+Sette opp noen standard behandlinger
+
 
 ## Bygg og deploy
 

@@ -80,6 +80,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
             behandlingId={behandlingId}
             redigerbar={behandles}
+            behandlingstype={behandling.behandlingType}
           />
         </>
       )}

@@ -35,12 +35,12 @@ interface BehandlingService {
 data class ReguleringFeiletHendelse(val sakId: Long)
 
 class BehandlingServiceImpl(
-    private val behandling_app: HttpClient,
+    private val behandlingKlient: HttpClient,
     private val url: String
 ) : BehandlingService {
     override fun sendDoedshendelse(doedshendelse: Doedshendelse) {
         runBlocking {
-            behandling_app.post("$url/grunnlagsendringshendelse/doedshendelse") {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/doedshendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(doedshendelse)
             }
@@ -49,7 +49,7 @@ class BehandlingServiceImpl(
 
     override fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse) {
         runBlocking {
-            behandling_app.post("$url/grunnlagsendringshendelse/utflyttingshendelse") {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/utflyttingshendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(utflyttingsHendelse)
             }
@@ -58,7 +58,7 @@ class BehandlingServiceImpl(
 
     override fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse) {
         runBlocking {
-            behandling_app.post("$url/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(forelderBarnRelasjon)
             }
@@ -67,7 +67,7 @@ class BehandlingServiceImpl(
 
     override fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
         runBlocking {
-            behandling_app.post("$url/grunnlagsendringshendelse/adressebeskyttelse") {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/adressebeskyttelse") {
                 contentType(ContentType.Application.Json)
                 setBody(adressebeskyttelse)
             }
@@ -76,7 +76,7 @@ class BehandlingServiceImpl(
 
     override fun sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt) {
         runBlocking {
-            behandling_app.post("$url/grunnlagsendringshendelse/vergemaalellerfremtidsfullmakt") {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/vergemaalellerfremtidsfullmakt") {
                 contentType(ContentType.Application.Json)
                 setBody(vergeMaalEllerFremtidsfullmakt)
             }
@@ -85,7 +85,7 @@ class BehandlingServiceImpl(
 
     override fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse) {
         runBlocking {
-            behandling_app.post("$url/grunnlagsendringshendelse/reguleringfeilet") {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/reguleringfeilet") {
                 contentType(ContentType.Application.Json)
                 setBody(reguleringFeilethendelse)
             }
@@ -94,7 +94,7 @@ class BehandlingServiceImpl(
 
     override fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse {
         return runBlocking {
-            behandling_app.post("$url/omregning") {
+            behandlingKlient.post("$url/omregning") {
                 contentType(ContentType.Application.Json)
                 setBody(omregningshendelse)
             }.body()
@@ -103,14 +103,14 @@ class BehandlingServiceImpl(
 
     override fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe {
         return runBlocking {
-            behandling_app.post("$url/behandlinger/settTilbakeTilVilkaarsvurdert") {
+            behandlingKlient.post("$url/behandlinger/settTilbakeTilVilkaarsvurdert") {
                 contentType(ContentType.Application.Json)
             }.body()
         }
     }
 
     override fun migrer(hendelse: MigreringRequest): UUID = runBlocking {
-        behandling_app.post("$url/migrering") {
+        behandlingKlient.post("$url/migrering") {
             contentType(ContentType.Application.Json)
             setBody(hendelse)
         }.body()
@@ -118,7 +118,7 @@ class BehandlingServiceImpl(
 
     override fun hentAlleSaker(): Saker =
         runBlocking {
-            behandling_app.get("$url/saker").body()
+            behandlingKlient.get("$url/saker").body()
         }
 }
 

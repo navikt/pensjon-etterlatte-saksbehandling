@@ -8,11 +8,10 @@ export interface OppgaveDTO {
   fnr: string
   soeknadType: string
   oppgaveType: string
-  beskrivelse: string
   oppgaveStatus: string
   saksbehandler: string
   handling: string
-  merknad: string
+  merknad?: string
 }
 export interface OppgaveResponse {
   oppgaver: ReadonlyArray<OppgaveDTO>

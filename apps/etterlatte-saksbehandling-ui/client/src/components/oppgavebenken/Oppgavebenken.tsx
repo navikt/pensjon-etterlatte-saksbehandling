@@ -86,7 +86,6 @@ const mapOppgaveResponse = (data: OppgaveDTO): IOppgave => ({
   oppgaveType: data.oppgaveType.toUpperCase() as OppgaveTypeFilter,
   fristdato: new Date(data.fristdato),
   fnr: data.fnr,
-  beskrivelse: data.beskrivelse,
   oppgaveStatus: data.oppgaveStatus.toUpperCase() as StatusFilter,
   saksbehandler: data.saksbehandler,
   handling: data.handling.toUpperCase() as Handlinger,

@@ -1,5 +1,8 @@
 package no.nav.etterlatte.kafka
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import institusjonsopphold.KafkaOppholdHendelse
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import org.apache.kafka.clients.CommonClientConfigs
@@ -39,7 +42,7 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
             put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, fiveMinutesInMs)
             put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())
             put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
-            put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
+            put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer::class.java)
 
             put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
 
@@ -54,5 +57,13 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
             )
         }
         return properties
+    }
+
+    class JsonDeserializer : org.apache.kafka.common.serialization.Deserializer<KafkaOppholdHendelse> {
+        private val mapper = jacksonObjectMapper()
+
+        override fun deserialize(topic: String?, data: ByteArray): KafkaOppholdHendelse {
+            return mapper.readValue(data)
+        }
     }
 }

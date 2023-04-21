@@ -37,11 +37,12 @@ include(
     "libs:etterlatte-jobs",
     "libs:etterlatte-kafka",
     "libs:etterlatte-pdl-model",
+    "libs:etterlatte-institusjonsopphold",
     "libs:testdata",
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",
     "jobs:test-fordeler",
     "jobs:start-regulering"
 )
-include("apps:etterlatte-institusjonsopphold")
-findProject(":apps:etterlatte-institusjonsopphold")?.name = "etterlatte-institusjonsopphold"
+include("libs:institusjonsopphold")
+findProject(":libs:institusjonsopphold")?.name = "institusjonsopphold"

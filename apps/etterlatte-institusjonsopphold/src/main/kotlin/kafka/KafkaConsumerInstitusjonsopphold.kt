@@ -1,5 +1,6 @@
 package no.nav.etterlatte.kafka
 
+import institusjonsopphold.KafkaOppholdHendelse
 import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.libs.common.requireEnvValue
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -19,8 +20,10 @@ class KafkaConsumerInstitusjonsopphold(
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
     private val kafkaProperties: Properties = kafkaEnvironment.generateKafkaConsumerProperties(env)
-    private val skjermingTopic: String = env.requireEnvValue("SKJERMING_TOPIC")
-    private val consumer: KafkaConsumer<String, String> = KafkaConsumer<String, String>(kafkaProperties)
+    private val institusjonsTopic: String = env.requireEnvValue("INSTITUSJONSOPPHOLD_TOPIC")
+    private val consumer: KafkaConsumer<String, KafkaOppholdHendelse> = KafkaConsumer<String, KafkaOppholdHendelse>(
+        kafkaProperties
+    )
     private var antallMeldinger = 0
 
     fun getConsumer() = consumer
@@ -29,9 +32,9 @@ class KafkaConsumerInstitusjonsopphold(
     fun stream() {
         try {
             logger.info("Starter KafkaConsumerEgneAnsatte")
-            consumer.subscribe(listOf(skjermingTopic))
+            consumer.subscribe(listOf(institusjonsTopic))
             while (!closed.get()) {
-                val meldinger: ConsumerRecords<String, String> = consumer.poll(pollTimeoutInSeconds)
+                val meldinger: ConsumerRecords<String, KafkaOppholdHendelse> = consumer.poll(pollTimeoutInSeconds)
                 meldinger.forEach {
                     behandlingKlient.haandterHendelse(it)
                 }

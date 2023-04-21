@@ -28,7 +28,6 @@ export interface IOppgaveFelter {
   fnr: IOppgaveFelt
   oppgaveType: IOppgaveFelt
   soeknadType: IOppgaveFelt
-  beskrivelse: IOppgaveFelt
   oppgaveStatus: IOppgaveFelt
 }
 
@@ -70,7 +69,6 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
         selectedValue: '',
       },
     },
-
     oppgaveType: {
       noekkel: 'oppgaveType',
       label: 'Oppgavetype',
@@ -88,10 +86,6 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
         selectedValue: SoeknadTypeFilter.VELG,
         nedtrekksliste: soeknadTypeFilter,
       },
-    },
-    beskrivelse: {
-      noekkel: 'beskrivelse',
-      label: 'Beskrivelse',
     },
     oppgaveStatus: {
       noekkel: 'oppgaveStatus',

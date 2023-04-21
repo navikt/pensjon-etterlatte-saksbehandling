@@ -6,11 +6,10 @@ export interface IOppgave {
   fnr: string
   soeknadType: SoeknadTypeFilter
   oppgaveType: OppgaveTypeFilter
-  beskrivelse: string
   oppgaveStatus: StatusFilter
   saksbehandler: string
   handling: Handlinger
-  merknad: string
+  merknad?: string
 }
 
 export enum Handlinger {

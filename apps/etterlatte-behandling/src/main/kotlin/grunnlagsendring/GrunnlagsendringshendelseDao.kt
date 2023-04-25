@@ -29,7 +29,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 """
                 INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, status, hendelse_gjelder_rolle, 
                     samsvar_mellom_pdl_og_grunnlag, gjelder_person, beskrivelse)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
             with(hendelse) {

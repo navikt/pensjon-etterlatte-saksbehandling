@@ -230,7 +230,9 @@ class GrunnlagsendringshendelseService(
         hendelse: Grunnlagsendringshendelse
     ) {
         val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle()
-        val sak = sakService.finnSak(hendelse.sakId)!!
+        val sak = inTransaction {
+            sakService.finnSak(hendelse.sakId)!!
+        }
         val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag = runBlocking {
             grunnlagKlient.hentGrunnlag(hendelse.sakId)

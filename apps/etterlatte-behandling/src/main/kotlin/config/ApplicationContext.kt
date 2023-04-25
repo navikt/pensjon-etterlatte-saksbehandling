@@ -119,7 +119,8 @@ class ApplicationContext(
     val grunnlagKlient = GrunnlagKlientImpl(grunnlagHttpClient, "http://etterlatte-grunnlag")
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
-    val behandlingsHendelser = BehandlingsHendelser(rapid, behandlingDao, dataSource)
+    val behandlingsHendelser = BehandlingsHendelser(rapid, behandlingDao, dataSource).apply {
+    }
 
     // Service
     val oppgaveService = OppgaveServiceImpl(oppgaveDao, featureToggleService)

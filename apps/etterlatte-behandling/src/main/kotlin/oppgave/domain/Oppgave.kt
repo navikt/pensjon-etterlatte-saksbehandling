@@ -47,7 +47,8 @@ sealed class Oppgave {
         override val sak: Sak,
         override val registrertDato: Tidspunkt,
         val grunnlagsendringsType: GrunnlagsendringsType,
-        val gjelderRolle: Saksrolle
+        val gjelderRolle: Saksrolle,
+        val beskrivelse: String? = null
     ) : Oppgave() {
         override val oppgaveStatus: OppgaveStatus
             get() = OppgaveStatus.NY

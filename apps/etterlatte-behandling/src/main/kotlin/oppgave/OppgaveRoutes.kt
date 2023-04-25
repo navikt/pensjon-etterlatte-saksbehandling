@@ -99,4 +99,7 @@ fun Oppgave.Grunnlagsendringsoppgave.opprettMerknad() = when (grunnlagsendringsT
     GrunnlagsendringsType.UTFLYTTING -> "Utflytting"
     GrunnlagsendringsType.FORELDER_BARN_RELASJON -> "Forelder-barn relasjon"
     GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> "Vergemål eller fremtidsfullmakt"
+    GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> {
+        "Institusjonsoppholdet er $beskrivelse"
+    }
 }

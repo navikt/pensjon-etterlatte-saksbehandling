@@ -50,4 +50,9 @@ sealed class SamsvarMellomPdlOgGrunnlag {
     data class Grunnbeloep(
         override val samsvar: Boolean
     ) : SamsvarMellomPdlOgGrunnlag()
+
+    @JsonTypeName("INSTITUSJONSOPPHOLD")
+    data class INSTITUSJONSOPPHOLD(
+        override val samsvar: Boolean
+    ) : SamsvarMellomPdlOgGrunnlag()
 }

@@ -74,7 +74,7 @@ class OppgaveDao(private val connection: () -> Connection) {
         with(connection()) {
             val stmt = prepareStatement(
                 """
-                SELECT g.sak_id, g.type, g.behandling_id, g.opprettet, s.fnr, s.sakType, s.enhet, g.hendelse_gjelder_rolle
+                SELECT g.sak_id, g.type, g.behandling_id, g.opprettet, s.fnr, s.sakType, s.enhet, g.hendelse_gjelder_rolle, g.beskrivelse
                 FROM grunnlagsendringshendelse g 
                 INNER JOIN sak s ON g.sak_id = s.id
                 WHERE status = ?
@@ -87,7 +87,8 @@ class OppgaveDao(private val connection: () -> Connection) {
                     sak = this.mapSak(),
                     registrertDato = registrertDato,
                     grunnlagsendringsType = GrunnlagsendringsType.valueOf(getString("type")),
-                    gjelderRolle = Saksrolle.enumVedNavnEllerUkjent(getString("hendelse_gjelder_rolle"))
+                    gjelderRolle = Saksrolle.enumVedNavnEllerUkjent(getString("hendelse_gjelder_rolle")),
+                    beskrivelse = getString("beskrivelse")
                 )
             }.also {
                 logger.info("Hentet grunnlagsoppgaveliste for saksbehandler. Fant ${it.size} oppgaver")

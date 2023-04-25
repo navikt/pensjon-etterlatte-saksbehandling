@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import institusjonsopphold.KafkaOppholdHendelse
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -90,6 +91,15 @@ class GrunnlagsendringshendelseService(
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT
         )
     }
+
+    fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: KafkaOppholdHendelse): List<Grunnlagsendringshendelse> {
+        return opprettHendelseAvTypeForPerson(
+            fnr = oppholdsHendelse.norskident,
+            grunnlagendringType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
+            beskrivelse = oppholdsHendelse.type.toString()
+        )
+    }
+
     fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> {
         return opprettHendelseAvTypeForSak(
             sakId,
@@ -143,7 +153,8 @@ class GrunnlagsendringshendelseService(
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
-        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
+        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+        beskrivelse: String? = null
     ): List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
@@ -171,7 +182,8 @@ class GrunnlagsendringshendelseService(
                                 type = grunnlagendringType,
                                 opprettet = tidspunktForMottakAvHendelse,
                                 hendelseGjelderRolle = rolleOgSak.rolle,
-                                gjelderPerson = fnr
+                                gjelderPerson = fnr,
+                                beskrivelse = beskrivelse
                             )
                         )
                     }
@@ -313,6 +325,7 @@ class GrunnlagsendringshendelseService(
                 )
             }
             GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomPdlOgGrunnlag.Grunnbeloep(samsvar = false)
+            GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> SamsvarMellomPdlOgGrunnlag.INSTITUSJONSOPPHOLD(samsvar = false)
         }
     }
 

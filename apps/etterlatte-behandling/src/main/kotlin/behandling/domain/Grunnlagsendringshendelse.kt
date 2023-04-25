@@ -13,7 +13,8 @@ data class Grunnlagsendringshendelse(
     val behandlingId: UUID? = null,
     val hendelseGjelderRolle: Saksrolle,
     val gjelderPerson: String,
-    val samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag? = null
+    val samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag? = null, // TODO: kan slettes
+    val beskrivelse: String? = null
 )
 
 enum class GrunnlagsendringsType {
@@ -21,7 +22,8 @@ enum class GrunnlagsendringsType {
     UTFLYTTING,
     FORELDER_BARN_RELASJON,
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
-    GRUNNBELOEP
+    GRUNNBELOEP,
+    INSTITUSJONSOPPHOLD
 }
 
 enum class GrunnlagsendringStatus {

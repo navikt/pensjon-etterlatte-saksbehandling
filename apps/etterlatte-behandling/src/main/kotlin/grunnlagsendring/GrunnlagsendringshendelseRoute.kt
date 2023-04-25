@@ -62,9 +62,10 @@ internal fun Route.grunnlagsendringshendelseRoute(
         }
 
         post("/institusjonsopphold") {
-            call.receive<KafkaOppholdHendelse>()
+            val oppholdsHendelse = call.receive<KafkaOppholdHendelse>()
             logger.info("Mottar en institusjons-hendelse fra inst2")
-            // TODO: hvordan den skal behandles er usikkert
+            grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
+            call.respond(HttpStatusCode.OK)
         }
 
         post("/reguleringfeilet") {

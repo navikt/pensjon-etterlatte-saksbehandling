@@ -1,14 +1,20 @@
 package no.nav.etterlatte.beregning.regler
 
+import no.nav.etterlatte.beregning.Avkorting
+import no.nav.etterlatte.beregning.AvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.token.Saksbehandler
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
 
 val REGEL_PERIODE = RegelPeriode(LocalDate.of(2023, 1, 1))
 
@@ -37,3 +43,19 @@ fun Int.toBeregningstall(
 ) = Beregningstall(this).setScale(decimals, roundingMode)
 
 val bruker = Saksbehandler("token", "ident", null)
+
+fun avkorting(
+    behandlingId: UUID = UUID.randomUUID()
+) = Avkorting(
+    behandlingId = behandlingId,
+    avkortingGrunnlag = emptyList(),
+    beregningEtterAvkorting = emptyList(),
+    tidspunktForAvkorting = Tidspunkt.now()
+)
+
+fun avkortinggrunnlag() = AvkortingGrunnlag(
+    periode = Periode(fom = YearMonth.now(), tom = null),
+    aarsinntekt = 100000,
+    gjeldendeAar = 2023,
+    spesifikasjon = "Spesifikasjon"
+)

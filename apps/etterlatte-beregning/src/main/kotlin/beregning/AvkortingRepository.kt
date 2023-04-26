@@ -14,17 +14,14 @@ class AvkortingRepository(private val dataSource: DataSource) {
 
     fun hentAvkorting(behandlingId: UUID): Avkorting? = using(sessionOf(dataSource)) { session ->
         session.transaction { tx ->
-            val avkortinggrunnlag = queryOf(
-                statement = """
-                    SELECT * FROM avkortinggrunnlag WHERE behandling_id = :behandlingId
-                """.trimIndent(),
-                paramMap = mapOf("behandlingId" to behandlingId)
+            queryOf(
+                "SELECT * FROM avkortinggrunnlag WHERE behandling_id = ?",
+                behandlingId
             ).let { query ->
                 tx.run(query.map { row -> row.toAvkortinggrunnlag() }.asList).ifEmpty {
                     null
                 }
-            }
-            avkortinggrunnlag?.let {
+            }?.let { avkortinggrunnlag ->
                 Avkorting(
                     behandlingId = behandlingId,
                     avkortinggrunnlag,
@@ -39,10 +36,8 @@ class AvkortingRepository(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 queryOf(
-                    statement = """
-                        DELETE FROM avkortinggrunnlag WHERE behandling_id = :behandlingId
-                    """.trimIndent(),
-                    paramMap = mapOf("behandlingId" to behandlingId)
+                    "DELETE FROM avkortinggrunnlag WHERE behandling_id = ?",
+                    behandlingId
                 ).let { query ->
                     tx.run(query.asUpdate)
                 }

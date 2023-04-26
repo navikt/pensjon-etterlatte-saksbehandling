@@ -1,14 +1,16 @@
 package no.nav.etterlatte.beregning
 
+import no.nav.etterlatte.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
 import java.util.*
 
 class AvkortingService(
-    private val avkortingRepository: AvkortingRepository
+    private val avkortingRepository: AvkortingRepository,
+    private val behandlingKlient: BehandlingKlient
 ) {
-
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
+
     fun hentAvkorting(behandlingId: UUID): Avkorting? {
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         return avkortingRepository.hentAvkorting(behandlingId)
@@ -24,7 +26,7 @@ class AvkortingService(
     }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Avkorting): Avkorting {
-        val kanAvkorte = true // TODO Legge til tilstandsjekk
+        val kanAvkorte = behandlingKlient.beregn(behandlingId, bruker, commit = false)
         return if (kanAvkorte) {
             block()
         } else {

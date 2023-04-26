@@ -1,0 +1,32 @@
+######################
+# LES README PÅ ROOT #
+######################
+apiVersion: nais.io/v1
+kind: AzureAdApplication
+metadata:
+  name: etterlatte-behandling-lokal
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  preAuthorizedApplications:
+    - application: etterlatte-saksbehandling-ui-lokal
+      cluster: dev-gcp
+      namespace: etterlatte
+    - application: etterlatte-vedtak
+      cluster: dev-gcp
+      namespace: etterlatte
+    - application: etterlatte-grunnlag
+      cluster: dev-gcp
+      namespace: etterlatte
+    - application: etterlatte-pdltjenester
+      cluster: dev-gcp
+      namespace: etterlatte
+  tenant: trygdeetaten.no
+  secretName: azuread-etterlatte-behandling-lokal
+  claims:
+    groups:
+      - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # 0000-GA-PENSJON_ATTESTERING
+      - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
+    extra:
+      - NAVident

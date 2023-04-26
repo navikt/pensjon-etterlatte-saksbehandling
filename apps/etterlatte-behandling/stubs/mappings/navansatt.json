@@ -1,0 +1,13 @@
+{
+  "request" : {
+    "urlPathPattern" : "/navansatt/.*",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName": "navansatt-response.json",
+    "headers" : {
+      "Content-Type" : "application/json"
+    }
+  }
+}

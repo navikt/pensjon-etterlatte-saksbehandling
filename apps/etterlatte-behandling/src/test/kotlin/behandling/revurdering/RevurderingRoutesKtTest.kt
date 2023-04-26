@@ -13,7 +13,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
-import no.nav.etterlatte.config.BeanFactory
+import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module
@@ -28,7 +28,7 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RevurderingRoutesKtTest {
-    private val beanFactory: BeanFactory = mockk(relaxed = true)
+    private val applicationContext: ApplicationContext = mockk(relaxed = true)
     private val server: MockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
@@ -37,7 +37,7 @@ internal class RevurderingRoutesKtTest {
         server.start()
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
-        every { beanFactory.tilgangService() } returns mockk {
+        every { applicationContext.tilgangService } returns mockk {
             every { harTilgangTilBehandling(any(), any()) } returns true
             every { harTilgangTilSak(any(), any()) } returns true
         }
@@ -55,7 +55,7 @@ internal class RevurderingRoutesKtTest {
                 config = hoconApplicationConfig
             }
             application {
-                module(beanFactory)
+                module(applicationContext)
             }
             val client = createClient {
                 install(ContentNegotiation) {
@@ -75,10 +75,10 @@ internal class RevurderingRoutesKtTest {
 
     @Test
     fun `returnerer bad request hvis det ikke finnes noen iverksatt behandling tidligere`() {
-        every { beanFactory.generellBehandlingService().hentSisteIverksatte(1) } returns null
+        every { applicationContext.generellBehandlingService.hentSisteIverksatte(1) } returns null
         testApplication {
             environment { config = hoconApplicationConfig }
-            application { module(beanFactory) }
+            application { module(applicationContext) }
             val client = createClient {
                 install(ContentNegotiation) {
                     register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
@@ -99,7 +99,7 @@ internal class RevurderingRoutesKtTest {
     fun `returnerer bad request hvis payloaden er ugyldig for opprettelse av en revurdering`() {
         testApplication {
             environment { config = hoconApplicationConfig }
-            application { module(beanFactory) }
+            application { module(applicationContext) }
             val client = createClient {
                 install(ContentNegotiation) {
                     register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))

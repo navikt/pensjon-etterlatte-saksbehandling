@@ -37,7 +37,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() {
         startServer()
-        Kontekst.set(Context(mockk(), DatabaseContext(beanFactory.dataSource())))
+        Kontekst.set(Context(mockk(), DatabaseContext(applicationContext.dataSource)))
     }
 
     @AfterAll
@@ -45,7 +45,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
     @AfterEach
     fun afterEach() {
-        beanFactory.resetDatabase()
+        resetDatabase()
     }
 
     @Nested
@@ -54,7 +54,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
         @BeforeEach
         fun beforeEach() {
-            val (sak, behandling) = beanFactory.opprettSakMedFoerstegangsbehandling("234")
+            val (sak, behandling) = opprettSakMedFoerstegangsbehandling("234")
 
             sakId = sak.id
 
@@ -72,12 +72,12 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 .tilAttestert()
                 .tilIverksatt()
 
-            inTransaction { beanFactory.behandlingDao().lagreStatus(iverksattBehandling) }
+            inTransaction { applicationContext.behandlingDao.lagreStatus(iverksattBehandling) }
         }
 
         @AfterEach
         fun afterEach() {
-            beanFactory.resetDatabase()
+            resetDatabase()
         }
 
         @ParameterizedTest(name = "Kan opprette {0} omregningstype paa sak")
@@ -92,7 +92,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                         jackson { registerModule(JavaTimeModule()) }
                     }
                 }
-                application { module(beanFactory) }
+                application { module(applicationContext) }
 
                 val (omregning) = client.post("/omregning") {
                     addAuthToken(systemBruker)
@@ -135,7 +135,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                     jackson { registerModule(JavaTimeModule()) }
                 }
             }
-            application { module(beanFactory) }
+            application { module(applicationContext) }
 
             client.post("/omregning") {
                 addAuthToken(systemBruker)

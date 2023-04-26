@@ -13,7 +13,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.config.BeanFactory
+import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module
@@ -29,7 +29,7 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingsstatusRoutesTest {
 
-    private val beanFactory: BeanFactory = mockk(relaxed = true)
+    private val applicationContext: ApplicationContext = mockk(relaxed = true)
     private val server: MockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
@@ -38,7 +38,7 @@ internal class BehandlingsstatusRoutesTest {
         server.start()
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
-        every { beanFactory.tilgangService() } returns mockk {
+        every { applicationContext.tilgangService } returns mockk {
             every { harTilgangTilBehandling(any(), any()) } returns true
         }
     }
@@ -50,7 +50,7 @@ internal class BehandlingsstatusRoutesTest {
 
     @Test
     fun `skal returnere 200 OK hvis behandlingstatus kan settes til vilkaarsvurdert`() {
-        every { beanFactory.behandlingsStatusService() } returns mockk {
+        every { applicationContext.behandlingsStatusService } returns mockk {
             every { settVilkaarsvurdert(any(), any()) } just runs
         }
 
@@ -59,7 +59,7 @@ internal class BehandlingsstatusRoutesTest {
                 config = hoconApplicationConfig
             }
             application {
-                module(beanFactory)
+                module(applicationContext)
             }
 
             val response = client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
@@ -77,7 +77,7 @@ internal class BehandlingsstatusRoutesTest {
 
     @Test
     fun `skal returnere 409 Conflict naar behandlingstatus ikke kan settes til vilkaarsvurdert`() {
-        every { beanFactory.behandlingsStatusService() } returns mockk {
+        every { applicationContext.behandlingsStatusService } returns mockk {
             every {
                 settVilkaarsvurdert(
                     any(),
@@ -91,7 +91,7 @@ internal class BehandlingsstatusRoutesTest {
                 config = hoconApplicationConfig
             }
             application {
-                module(beanFactory)
+                module(applicationContext)
             }
 
             val response = client.get("/behandlinger/$behandlingId/vilkaarsvurder") {

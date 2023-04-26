@@ -16,7 +16,7 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient) {
 
     fun haandterHendelse(record: ConsumerRecord<String, KafkaOppholdHendelse>) {
         logger.debug(
-            "Behandler skjermet record med id: {}, partition {}, offset: {}",
+            "Behandler institusjonsopphold record med id: {}, partition {}, offset: {}",
             record.key(),
             record.partition(),
             record.offset()

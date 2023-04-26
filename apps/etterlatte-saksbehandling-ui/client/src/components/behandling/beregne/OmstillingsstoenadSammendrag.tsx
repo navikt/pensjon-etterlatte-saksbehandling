@@ -15,7 +15,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
   return (
     <TableWrapper>
       <Heading spacing size="small" level="2">
-        Beregningssammendrag
+        Beregning før avkorting
       </Heading>
       <Table className="table" zebraStripes>
         <Table.Header>
@@ -24,7 +24,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
             <Table.HeaderCell>Ytelse</Table.HeaderCell>
             <Table.HeaderCell>Trygdetid</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
-            <Table.HeaderCell>Månedelig utbetaling før skatt</Table.HeaderCell>
+            <Table.HeaderCell>Månedelig utbetaling før skatt og avkorting</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>

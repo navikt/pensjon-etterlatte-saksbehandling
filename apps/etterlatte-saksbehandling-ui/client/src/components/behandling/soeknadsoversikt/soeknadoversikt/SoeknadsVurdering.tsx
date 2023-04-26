@@ -1,23 +1,9 @@
-import { ExternalLink } from '@navikt/ds-icons'
-import { BodyLong, Heading, Link } from '@navikt/ds-react'
+import { BodyLong, Heading } from '@navikt/ds-react'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { SoeknadOversiktWrapper } from '../styled'
 import { StatusIconProps, StatusIcon } from '~shared/icons/statusIcon'
-
-interface HjemmelLenkeProps {
-  tittel: string
-  lenke: string
-}
-
-const HjemmelLenke = (props: HjemmelLenkeProps) => {
-  return (
-    <Link href={props.lenke} target="_blank" rel="noopener noreferrer">
-      {props.tittel}
-      <ExternalLink title={props.tittel} />
-    </Link>
-  )
-}
+import { HjemmelLenke, HjemmelLenkeProps } from '~components/behandling/felles/HjemmelLenke'
 
 interface SoeknadsVurderingProps {
   tittel: string

@@ -25,7 +25,7 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient) {
         val oppholdHendelse = record.value()
         logger.info(
             "Haandterer institusjonsopphold hendelse for fnr maskert " +
-                "${oppholdHendelse.norskident.maskerFnr()} hendelseId: $hendelseId"
+                "${oppholdHendelse.norskident.maskerFnr()} hendelseId: ${oppholdHendelse.hendelseId}"
         )
         postTilBehandling(oppholdHendelse = oppholdHendelse)
     }

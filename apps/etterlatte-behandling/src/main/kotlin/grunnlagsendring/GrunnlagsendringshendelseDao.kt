@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
-import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -39,7 +39,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 stmt.setTidspunkt(4, opprettet.toTidspunkt())
                 stmt.setString(5, status.name)
                 stmt.setString(6, hendelseGjelderRolle.name)
-                stmt.setJsonb(7, samsvarMellomPdlOgGrunnlag)
+                stmt.setJsonb(7, samsvarMellomKildeOgGrunnlag)
                 stmt.setString(8, gjelderPerson)
                 stmt.setString(9, beskrivelse)
             }
@@ -82,7 +82,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         hendelseId: UUID,
         foerStatus: GrunnlagsendringStatus,
         etterStatus: GrunnlagsendringStatus,
-        samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag
+        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag
     ) {
         with(connection()) {
             prepareStatement(
@@ -95,7 +95,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 """.trimIndent()
             ).use {
                 it.setString(1, etterStatus.name)
-                it.setJsonb(2, samsvarMellomPdlOgGrunnlag)
+                it.setJsonb(2, samsvarMellomKildeOgGrunnlag)
                 it.setObject(3, hendelseId)
                 it.setString(4, foerStatus.name)
                 it.executeUpdate()
@@ -183,7 +183,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             behandlingId = getObject("behandling_id")?.let { it as UUID },
             hendelseGjelderRolle = Saksrolle.valueOf(getString("hendelse_gjelder_rolle")),
             gjelderPerson = getString("gjelder_person"),
-            samsvarMellomPdlOgGrunnlag = objectMapper.readValue(
+            samsvarMellomKildeOgGrunnlag = objectMapper.readValue(
                 getString("samsvar_mellom_pdl_og_grunnlag")
             )
         )

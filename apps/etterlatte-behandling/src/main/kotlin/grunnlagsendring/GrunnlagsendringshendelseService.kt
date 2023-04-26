@@ -7,7 +7,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
-import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
@@ -259,9 +259,9 @@ class GrunnlagsendringshendelseService(
 
     private fun oppdaterHendelseSjekket(
         hendelse: Grunnlagsendringshendelse,
-        samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag
+        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag
     ) {
-        `siste ikke-avbrutte behandling uten manuelt opphoer`(hendelse.sakId, samsvarMellomPdlOgGrunnlag, hendelse.id)
+        `siste ikke-avbrutte behandling uten manuelt opphoer`(hendelse.sakId, samsvarMellomKildeOgGrunnlag, hendelse.id)
             ?: return
         inTransaction {
             logger.info(
@@ -273,7 +273,7 @@ class GrunnlagsendringshendelseService(
                 hendelseId = hendelse.id,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag
             )
         }
     }
@@ -282,7 +282,7 @@ class GrunnlagsendringshendelseService(
         hendelse: Grunnlagsendringshendelse,
         pdlData: PersonDTO,
         grunnlag: Grunnlag?
-    ): SamsvarMellomPdlOgGrunnlag {
+    ): SamsvarMellomKildeOgGrunnlag {
         val rolle = hendelse.hendelseGjelderRolle
         val fnr = hendelse.gjelderPerson
 
@@ -318,31 +318,33 @@ class GrunnlagsendringshendelseService(
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> {
                 val pdlVergemaal = pdlData.hentVergemaal()
                 val grunnlagVergemaal = grunnlag?.vergemaalellerfremtidsfullmakt(rolle)
-                SamsvarMellomPdlOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
+                SamsvarMellomKildeOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
                     fraPdl = pdlVergemaal,
                     fraGrunnlag = grunnlagVergemaal,
                     samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal
                 )
             }
-            GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomPdlOgGrunnlag.Grunnbeloep(samsvar = false)
-            GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> SamsvarMellomPdlOgGrunnlag.INSTITUSJONSOPPHOLD(samsvar = false)
+            GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
+            GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
+                samsvar = false
+            )
         }
     }
 
-    private fun forkastHendelse(hendelseId: UUID, samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag) =
+    private fun forkastHendelse(hendelseId: UUID, samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag) =
         inTransaction {
             logger.info("Forkaster grunnlagsendringshendelse med id $hendelseId.")
             grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
                 hendelseId = hendelseId,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 etterStatus = GrunnlagsendringStatus.FORKASTET,
-                samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag
             )
         }
 
     private fun `siste ikke-avbrutte behandling uten manuelt opphoer`(
         sakId: Long,
-        samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag,
+        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
         hendelseId: UUID
     ): Behandling? {
         val behandlingerISak = generellBehandlingService.hentBehandlingerISak(sakId)
@@ -354,13 +356,13 @@ class GrunnlagsendringshendelseService(
                     "Forkaster hendelse med id=$hendelseId fordi vi " +
                         "ikke har noen behandlinger som ikke er avbrutt"
                 )
-                forkastHendelse(hendelseId, samsvarMellomPdlOgGrunnlag)
+                forkastHendelse(hendelseId, samsvarMellomKildeOgGrunnlag)
                 return null
             }
         val harAlleredeEtManueltOpphoer = behandlingerISak.any { it.type == BehandlingType.MANUELT_OPPHOER }
         return if (harAlleredeEtManueltOpphoer) {
             logger.info("Forkaster hendelse med id=$hendelseId fordi vi har et manuelt opphør i saken")
-            forkastHendelse(hendelseId, samsvarMellomPdlOgGrunnlag)
+            forkastHendelse(hendelseId, samsvarMellomKildeOgGrunnlag)
             null
         } else {
             sisteBehandling

@@ -43,7 +43,6 @@ class BeregnBarnepensjonService(
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, bruker)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
-        // TODO: her brukes søskenjustering
         val beregningsgrunnlag = opprettBeregningsgrunnlag(requireNotNull(grunnlag.sak.hentSoeskenjustering()))
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")

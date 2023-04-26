@@ -108,7 +108,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
 
         val opprettGrunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
@@ -159,13 +159,13 @@ internal class GrunnlagsendringshendelseServiceTest {
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
         val grlagEndringForelderBarn = grunnlagsendringshendelseMedSamsvar(
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
 
         val opprettGrlaghendelseUtflytting = slot<Grunnlagsendringshendelse>()
@@ -221,7 +221,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
 
         val grunnlagsendringshendelse2 = grunnlagsendringshendelseMedSamsvar(
@@ -229,7 +229,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
 
         every {
@@ -288,14 +288,14 @@ internal class GrunnlagsendringshendelseServiceTest {
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
         val grunnlagsendringshendelse2 = grunnlagsendringshendelseMedSamsvar(
             type = GrunnlagsendringsType.DOEDSFALL,
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = fnr,
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
 
         every {
@@ -353,14 +353,14 @@ internal class GrunnlagsendringshendelseServiceTest {
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = "Soeker",
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
         val grunnlagsendringshendelse2 = grunnlagsendringshendelseMedSamsvar(
             type = GrunnlagsendringsType.DOEDSFALL,
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = "Soeker",
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
 
         every {
@@ -428,7 +428,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusHours(1),
                 fnr = avdoedFnr,
                 hendelseGjelderRolle = rolle,
-                samsvarMellomPdlOgGrunnlag = null
+                samsvarMellomKildeOgGrunnlag = null
             )
         )
 
@@ -551,7 +551,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             id = UUID.randomUUID(),
             sakId = sakId,
             fnr = "test-fnr",
-            samsvarMellomPdlOgGrunnlag = null
+            samsvarMellomKildeOgGrunnlag = null
         )
 
         val hendelseSomLagres = slot<Grunnlagsendringshendelse>()

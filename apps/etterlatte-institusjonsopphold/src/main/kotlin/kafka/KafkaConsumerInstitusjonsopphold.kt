@@ -31,7 +31,7 @@ class KafkaConsumerInstitusjonsopphold(
 
     fun stream() {
         try {
-            logger.info("Starter KafkaConsumerEgneAnsatte")
+            logger.info("Starter KafkaConsumerInstitusjonsopphold")
             consumer.subscribe(listOf(institusjonsTopic))
             while (!closed.get()) {
                 val meldinger: ConsumerRecords<String, KafkaOppholdHendelse> = consumer.poll(pollTimeoutInSeconds)
@@ -47,7 +47,7 @@ class KafkaConsumerInstitusjonsopphold(
             // Ignorerer exception hvis vi stenger ned
             if (!closed.get()) throw e
         } finally {
-            logger.info("Lukker KafkaConsumerEgneAnsatte")
+            logger.info("Lukker KafkaConsumerInstitusjonsopphold")
             consumer.close()
         }
     }

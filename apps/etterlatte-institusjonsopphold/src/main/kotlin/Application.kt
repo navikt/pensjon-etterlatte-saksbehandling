@@ -37,12 +37,12 @@ class Server {
     )
     fun run() {
         val env = System.getenv().toMutableMap()
-        startEgenAnsattLytter(env, defaultConfig)
+        startInstitusjonsoppholdLytter(env, defaultConfig)
         setReady().also { engine.start(true) }
     }
 }
 
-fun startEgenAnsattLytter(env: Map<String, String>, config: Config) {
+fun startInstitusjonsoppholdLytter(env: Map<String, String>, config: Config) {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
     val behandlingHttpClient = httpClientClientCredentials(

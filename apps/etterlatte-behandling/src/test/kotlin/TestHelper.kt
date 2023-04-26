@@ -8,7 +8,7 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -200,7 +200,7 @@ fun grunnlagsendringshendelseMedSamsvar(
     status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     behandlingId: UUID? = null,
     hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER,
-    samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag?
+    samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag?
 ) = Grunnlagsendringshendelse(
     id = id,
     sakId = sakId,
@@ -209,7 +209,7 @@ fun grunnlagsendringshendelseMedSamsvar(
     status = status,
     behandlingId = behandlingId,
     hendelseGjelderRolle = hendelseGjelderRolle,
-    samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag,
+    samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
     gjelderPerson = fnr
 )
 

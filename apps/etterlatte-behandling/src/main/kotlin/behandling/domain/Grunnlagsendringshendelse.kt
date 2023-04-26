@@ -13,7 +13,7 @@ data class Grunnlagsendringshendelse(
     val behandlingId: UUID? = null,
     val hendelseGjelderRolle: Saksrolle,
     val gjelderPerson: String,
-    val samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag? = null, // TODO: kan slettes
+    val samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag? = null,
     val beskrivelse: String? = null
 )
 

@@ -135,3 +135,4 @@ spec:
               - "kan-sette-kilde"
         - application: etterlatte-grunnlag
         - application: etterlatte-fordeler
+        - application: etterlatte-institusjonsopphold

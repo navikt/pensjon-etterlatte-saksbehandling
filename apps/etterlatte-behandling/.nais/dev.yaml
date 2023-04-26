@@ -129,3 +129,4 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-fordeler
         - application: etterlatte-trygdetid
+        - application: etterlatte-institusjonsopphold

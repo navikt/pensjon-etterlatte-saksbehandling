@@ -1,11 +1,13 @@
 package no.nav.etterlatte.oppgave
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -74,7 +76,7 @@ class OppgaveDao(private val connection: () -> Connection) {
         with(connection()) {
             val stmt = prepareStatement(
                 """
-                SELECT g.sak_id, g.type, g.behandling_id, g.opprettet, s.fnr, s.sakType, s.enhet, g.hendelse_gjelder_rolle
+                SELECT g.sak_id, g.type, g.behandling_id, g.opprettet, s.fnr, s.sakType, s.enhet, g.hendelse_gjelder_rolle, g.samsvar_mellom_pdl_og_grunnlag
                 FROM grunnlagsendringshendelse g 
                 INNER JOIN sak s ON g.sak_id = s.id
                 WHERE status = ?
@@ -87,7 +89,10 @@ class OppgaveDao(private val connection: () -> Connection) {
                     sak = this.mapSak(),
                     registrertDato = registrertDato,
                     grunnlagsendringsType = GrunnlagsendringsType.valueOf(getString("type")),
-                    gjelderRolle = Saksrolle.enumVedNavnEllerUkjent(getString("hendelse_gjelder_rolle"))
+                    gjelderRolle = Saksrolle.enumVedNavnEllerUkjent(getString("hendelse_gjelder_rolle")),
+                    samsvarMellomKildeOgGrunnlag = objectMapper.readValue(
+                        getString("samsvar_mellom_pdl_og_grunnlag")
+                    )
                 )
             }.also {
                 logger.info("Hentet grunnlagsoppgaveliste for saksbehandler. Fant ${it.size} oppgaver")

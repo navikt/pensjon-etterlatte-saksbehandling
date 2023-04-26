@@ -1,12 +1,13 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import institusjonsopphold.KafkaOppholdHendelse
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
-import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
@@ -90,6 +91,18 @@ class GrunnlagsendringshendelseService(
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT
         )
     }
+
+    fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: KafkaOppholdHendelse): List<Grunnlagsendringshendelse> {
+        return opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
+            fnr = oppholdsHendelse.norskident,
+            grunnlagendringType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
+            samsvar = SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
+                samsvar = false,
+                oppholdstype = oppholdsHendelse.type
+            )
+        )
+    }
+
     fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> {
         return opprettHendelseAvTypeForSak(
             sakId,
@@ -139,6 +152,48 @@ class GrunnlagsendringshendelseService(
     }
 
     data class SakMedEnhet(val id: Long, val enhet: String)
+
+    private fun opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
+        fnr: String,
+        grunnlagendringType: GrunnlagsendringsType,
+        samsvar: SamsvarMellomKildeOgGrunnlag
+    ): List<Grunnlagsendringshendelse> {
+        val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
+
+        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
+        val sakerForSoeker = sakerOgRoller.filter { Saksrolle.SOEKER == it.rolle }
+
+        return sakerForSoeker.let {
+            inTransaction {
+                it.filter { rolleOgSak ->
+                    !hendelseEksistererFraFoer(
+                        rolleOgSak.sakId,
+                        fnr,
+                        grunnlagendringType
+                    )
+                }
+                    .map { rolleOgSak ->
+                        val hendelseId = UUID.randomUUID()
+                        logger.info(
+                            "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                                "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
+                        )
+                        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                            Grunnlagsendringshendelse(
+                                id = hendelseId,
+                                sakId = rolleOgSak.sakId,
+                                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                                type = grunnlagendringType,
+                                opprettet = tidspunktForMottakAvHendelse,
+                                hendelseGjelderRolle = rolleOgSak.rolle,
+                                gjelderPerson = fnr,
+                                samsvarMellomKildeOgGrunnlag = samsvar
+                            )
+                        )
+                    }
+            }
+        }
+    }
 
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,
@@ -247,9 +302,9 @@ class GrunnlagsendringshendelseService(
 
     private fun oppdaterHendelseSjekket(
         hendelse: Grunnlagsendringshendelse,
-        samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag
+        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag
     ) {
-        `siste ikke-avbrutte behandling uten manuelt opphoer`(hendelse.sakId, samsvarMellomPdlOgGrunnlag, hendelse.id)
+        `siste ikke-avbrutte behandling uten manuelt opphoer`(hendelse.sakId, samsvarMellomKildeOgGrunnlag, hendelse.id)
             ?: return
         inTransaction {
             logger.info(
@@ -261,7 +316,7 @@ class GrunnlagsendringshendelseService(
                 hendelseId = hendelse.id,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag
             )
         }
     }
@@ -270,7 +325,7 @@ class GrunnlagsendringshendelseService(
         hendelse: Grunnlagsendringshendelse,
         pdlData: PersonDTO,
         grunnlag: Grunnlag?
-    ): SamsvarMellomPdlOgGrunnlag {
+    ): SamsvarMellomKildeOgGrunnlag {
         val rolle = hendelse.hendelseGjelderRolle
         val fnr = hendelse.gjelderPerson
 
@@ -306,30 +361,32 @@ class GrunnlagsendringshendelseService(
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> {
                 val pdlVergemaal = pdlData.hentVergemaal()
                 val grunnlagVergemaal = grunnlag?.vergemaalellerfremtidsfullmakt(rolle)
-                SamsvarMellomPdlOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
+                SamsvarMellomKildeOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
                     fraPdl = pdlVergemaal,
                     fraGrunnlag = grunnlagVergemaal,
                     samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal
                 )
             }
-            GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomPdlOgGrunnlag.Grunnbeloep(samsvar = false)
+            GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
+            GrunnlagsendringsType.INSTITUSJONSOPPHOLD ->
+                throw IllegalStateException("Denne hendelsen skal gå rett til oppgavelisten og aldri komme hit")
         }
     }
 
-    private fun forkastHendelse(hendelseId: UUID, samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag) =
+    private fun forkastHendelse(hendelseId: UUID, samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag) =
         inTransaction {
             logger.info("Forkaster grunnlagsendringshendelse med id $hendelseId.")
             grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatus(
                 hendelseId = hendelseId,
                 foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 etterStatus = GrunnlagsendringStatus.FORKASTET,
-                samsvarMellomPdlOgGrunnlag = samsvarMellomPdlOgGrunnlag
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag
             )
         }
 
     private fun `siste ikke-avbrutte behandling uten manuelt opphoer`(
         sakId: Long,
-        samsvarMellomPdlOgGrunnlag: SamsvarMellomPdlOgGrunnlag,
+        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
         hendelseId: UUID
     ): Behandling? {
         val behandlingerISak = generellBehandlingService.hentBehandlingerISak(sakId)
@@ -341,13 +398,13 @@ class GrunnlagsendringshendelseService(
                     "Forkaster hendelse med id=$hendelseId fordi vi " +
                         "ikke har noen behandlinger som ikke er avbrutt"
                 )
-                forkastHendelse(hendelseId, samsvarMellomPdlOgGrunnlag)
+                forkastHendelse(hendelseId, samsvarMellomKildeOgGrunnlag)
                 return null
             }
         val harAlleredeEtManueltOpphoer = behandlingerISak.any { it.type == BehandlingType.MANUELT_OPPHOER }
         return if (harAlleredeEtManueltOpphoer) {
             logger.info("Forkaster hendelse med id=$hendelseId fordi vi har et manuelt opphør i saken")
-            forkastHendelse(hendelseId, samsvarMellomPdlOgGrunnlag)
+            forkastHendelse(hendelseId, samsvarMellomKildeOgGrunnlag)
             null
         } else {
             sisteBehandling

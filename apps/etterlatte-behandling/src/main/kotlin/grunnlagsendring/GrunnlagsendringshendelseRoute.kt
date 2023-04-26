@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import institusjonsopphold.KafkaOppholdHendelse
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.log
@@ -57,6 +58,13 @@ internal fun Route.grunnlagsendringshendelseRoute(
             val vergeMaalEllerFremtidsfullmakt = call.receive<VergeMaalEllerFremtidsfullmakt>()
             logger.info("Mottar en vergeMaalEllerFremtidsfullmakt-hendelse fra PDL")
             grunnlagsendringshendelseService.opprettVergemaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
+            call.respond(HttpStatusCode.OK)
+        }
+
+        post("/institusjonsopphold") {
+            val oppholdsHendelse = call.receive<KafkaOppholdHendelse>()
+            logger.info("Mottar en institusjons-hendelse fra inst2")
+            grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
             call.respond(HttpStatusCode.OK)
         }
 

@@ -41,7 +41,7 @@ export enum AarsaksTyper {
   REGULERING = 'REGULERING',
 }
 
-export type GrunnlagsendringsType = SamsvarMellomGrunnlagOgPdl['type']
+export type GrunnlagsendringsType = SamsvarMellomKildeOgGrunnlag['type']
 
 const GRUNNLAGSENDRING_STATUS = [
   'VENTER_PAA_JOBB',
@@ -102,13 +102,20 @@ export interface ReguleringSamsvar {
   samsvar: boolean
 }
 
-export type SamsvarMellomGrunnlagOgPdl =
+export interface InstitusjonsoppholdSamsvar {
+  type: 'INSTITUSJONSOPPHOLD'
+  samsvar: boolean
+  oppholdstype: string
+}
+
+export type SamsvarMellomKildeOgGrunnlag =
   | DoedsdatoSamsvar
   | UtlandSamsvar
   | BarnSamsvar
   | AnsvarligeForeldreSamsvar
   | VergemaalEllerFremtidsfullmaktForholdSamsvar
   | ReguleringSamsvar
+  | InstitusjonsoppholdSamsvar
 
 export type GrunnlagsendringStatus = (typeof GRUNNLAGSENDRING_STATUS)[number]
 
@@ -129,7 +136,7 @@ export interface Grunnlagsendringshendelse {
   opprettet: string
   hendelseGjelderRolle: Saksrolle
   gjelderPerson: string
-  samsvarMellomPdlOgGrunnlag: SamsvarMellomGrunnlagOgPdl
+  samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag
 }
 
 export interface VedtakSammendrag {

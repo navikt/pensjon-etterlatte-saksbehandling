@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
-import no.nav.etterlatte.behandling.domain.SamsvarMellomPdlOgGrunnlag
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utland
 import java.time.LocalDate
@@ -8,7 +8,7 @@ import java.time.LocalDate
 fun samsvarDoedsdatoer(
     doedsdatoPdl: LocalDate?,
     doedsdatoGrunnlag: LocalDate?
-) = SamsvarMellomPdlOgGrunnlag.Doedsdatoforhold(
+) = SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(
     fraGrunnlag = doedsdatoGrunnlag,
     fraPdl = doedsdatoPdl,
     samsvar = doedsdatoPdl == doedsdatoGrunnlag
@@ -17,7 +17,7 @@ fun samsvarDoedsdatoer(
 fun samsvarAnsvarligeForeldre(
     ansvarligeForeldrePdl: List<Folkeregisteridentifikator>?,
     ansvarligeForeldreGrunnlag: List<Folkeregisteridentifikator>?
-) = SamsvarMellomPdlOgGrunnlag.AnsvarligeForeldre(
+) = SamsvarMellomKildeOgGrunnlag.AnsvarligeForeldre(
     fraPdl = ansvarligeForeldrePdl,
     fraGrunnlag = ansvarligeForeldreGrunnlag,
     samsvar = ansvarligeForeldrePdl erLikRekkefoelgeIgnorert ansvarligeForeldreGrunnlag
@@ -26,7 +26,7 @@ fun samsvarAnsvarligeForeldre(
 fun samsvarBarn(
     barnPdl: List<Folkeregisteridentifikator>?,
     barnGrunnlag: List<Folkeregisteridentifikator>?
-) = SamsvarMellomPdlOgGrunnlag.Barn(
+) = SamsvarMellomKildeOgGrunnlag.Barn(
     fraPdl = barnPdl,
     fraGrunnlag = barnGrunnlag,
     samsvar = barnPdl erLikRekkefoelgeIgnorert barnGrunnlag
@@ -35,7 +35,7 @@ fun samsvarBarn(
 fun samsvarUtflytting(
     utflyttingPdl: Utland?,
     utflyttingGrunnlag: Utland?
-) = SamsvarMellomPdlOgGrunnlag.Utlandsforhold(
+) = SamsvarMellomKildeOgGrunnlag.Utlandsforhold(
     fraPdl = utflyttingPdl,
     fraGrunnlag = utflyttingGrunnlag,
     samsvar = utflyttingPdl?.utflyttingFraNorge erLikRekkefoelgeIgnorert utflyttingGrunnlag?.utflyttingFraNorge &&

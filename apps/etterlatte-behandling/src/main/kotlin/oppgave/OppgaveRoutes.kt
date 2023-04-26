@@ -10,12 +10,14 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.behandling.OppgaveStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.domain.Handling
 import no.nav.etterlatte.oppgave.domain.Oppgave
 import no.nav.etterlatte.oppgave.domain.OppgaveType
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal fun Route.oppgaveRoutes(service: OppgaveService) {
@@ -90,13 +92,28 @@ data class OppgaveDTO(
     }
 }
 
-fun Oppgave.Grunnlagsendringsoppgave.opprettMerknad() = when (grunnlagsendringsType) {
-    GrunnlagsendringsType.DOEDSFALL -> when (gjelderRolle) {
-        Saksrolle.SOEKER -> "Mottaker er registrert død"
-        else -> "Dødsfall i familien"
+fun Oppgave.Grunnlagsendringsoppgave.opprettMerknad(): String {
+    val logger = LoggerFactory.getLogger(this::class.java)
+    return when (grunnlagsendringsType) {
+        GrunnlagsendringsType.DOEDSFALL -> when (gjelderRolle) {
+            Saksrolle.SOEKER -> "Mottaker er registrert død"
+            else -> "Dødsfall i familien"
+        }
+
+        GrunnlagsendringsType.GRUNNBELOEP -> "Endring i grunnbeløp"
+        GrunnlagsendringsType.UTFLYTTING -> "Utflytting"
+        GrunnlagsendringsType.FORELDER_BARN_RELASJON -> "Forelder-barn relasjon"
+        GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> "Vergemål eller fremtidsfullmakt"
+        GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> {
+            return when (samsvarMellomKildeOgGrunnlag) {
+                is SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD -> {
+                    "Institusjonsoppholdet for bruker er ${samsvarMellomKildeOgGrunnlag.oppholdstype}"
+                }
+                else -> {
+                    logger.error("Feil samsvar for $grunnlagsendringsType rolle: $gjelderRolle id: ${sak.id}")
+                    return "Feil"
+                }
+            }
+        }
     }
-    GrunnlagsendringsType.GRUNNBELOEP -> "Endring i grunnbeløp"
-    GrunnlagsendringsType.UTFLYTTING -> "Utflytting"
-    GrunnlagsendringsType.FORELDER_BARN_RELASJON -> "Forelder-barn relasjon"
-    GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> "Vergemål eller fremtidsfullmakt"
 }

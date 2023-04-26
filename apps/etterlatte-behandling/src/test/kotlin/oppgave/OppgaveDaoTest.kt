@@ -93,7 +93,7 @@ internal class OppgaveDaoTest {
             behandlingId = null,
             hendelseGjelderRolle = Saksrolle.SOEKER,
             gjelderPerson = "02458201458",
-            samsvarMellomPdlOgGrunnlag = samsvarDoedsdatoer(LocalDate.now().minusDays(3), null)
+            samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(LocalDate.now().minusDays(3), null)
         )
         val hendelseIgnorert = Grunnlagsendringshendelse(
             id = UUID.randomUUID(),
@@ -104,7 +104,7 @@ internal class OppgaveDaoTest {
             behandlingId = null,
             hendelseGjelderRolle = Saksrolle.SOESKEN,
             gjelderPerson = "12312312312",
-            samsvarMellomPdlOgGrunnlag = samsvarDoedsdatoer(LocalDate.now(), LocalDate.now())
+            samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(LocalDate.now(), LocalDate.now())
         )
 
         grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(hendelse)

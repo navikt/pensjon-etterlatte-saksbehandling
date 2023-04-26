@@ -1,0 +1,1 @@
+ALTER TABLE grunnlagsendringshendelse ADD COLUMN beskrivelse TEXT;

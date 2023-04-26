@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgave.domain
 
 import no.nav.etterlatte.behandling.OppgaveStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -48,7 +49,7 @@ sealed class Oppgave {
         override val registrertDato: Tidspunkt,
         val grunnlagsendringsType: GrunnlagsendringsType,
         val gjelderRolle: Saksrolle,
-        val beskrivelse: String? = null
+        val samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag? = null
     ) : Oppgave() {
         override val oppgaveStatus: OppgaveStatus
             get() = OppgaveStatus.NY

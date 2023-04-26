@@ -28,8 +28,8 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             val stmt = prepareStatement(
                 """
                 INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, status, hendelse_gjelder_rolle, 
-                    samsvar_mellom_pdl_og_grunnlag, gjelder_person, beskrivelse)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    samsvar_mellom_pdl_og_grunnlag, gjelder_person)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
             )
             with(hendelse) {
@@ -41,7 +41,6 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 stmt.setString(6, hendelseGjelderRolle.name)
                 stmt.setJsonb(7, samsvarMellomKildeOgGrunnlag)
                 stmt.setString(8, gjelderPerson)
-                stmt.setString(9, beskrivelse)
             }
             stmt.executeUpdate()
         }.let {

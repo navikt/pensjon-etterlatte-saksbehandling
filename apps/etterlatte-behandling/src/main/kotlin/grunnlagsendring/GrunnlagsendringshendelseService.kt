@@ -93,10 +93,10 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: KafkaOppholdHendelse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(
+        return opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
             fnr = oppholdsHendelse.norskident,
             grunnlagendringType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
-            beskrivelse = oppholdsHendelse.type.toString()
+            samsvar = SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(samsvar = false, type = oppholdsHendelse.type)
         )
     }
 
@@ -150,11 +150,52 @@ class GrunnlagsendringshendelseService(
 
     data class SakMedEnhet(val id: Long, val enhet: String)
 
+    private fun opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
+        fnr: String,
+        grunnlagendringType: GrunnlagsendringsType,
+        samsvar: SamsvarMellomKildeOgGrunnlag
+    ): List<Grunnlagsendringshendelse> {
+        val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
+
+        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
+        val sakerForSoeker = sakerOgRoller.filter { Saksrolle.SOEKER == it.rolle }
+
+        return sakerForSoeker.let {
+            inTransaction {
+                it.filter { rolleOgSak ->
+                    !hendelseEksistererFraFoer(
+                        rolleOgSak.sakId,
+                        fnr,
+                        grunnlagendringType
+                    )
+                }
+                    .map { rolleOgSak ->
+                        val hendelseId = UUID.randomUUID()
+                        logger.info(
+                            "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                                "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}"
+                        )
+                        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                            Grunnlagsendringshendelse(
+                                id = hendelseId,
+                                sakId = rolleOgSak.sakId,
+                                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                                type = grunnlagendringType,
+                                opprettet = tidspunktForMottakAvHendelse,
+                                hendelseGjelderRolle = rolleOgSak.rolle,
+                                gjelderPerson = fnr,
+                                samsvarMellomKildeOgGrunnlag = samsvar
+                            )
+                        )
+                    }
+            }
+        }
+    }
+
     private fun opprettHendelseAvTypeForPerson(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
-        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-        beskrivelse: String? = null
+        grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
     ): List<Grunnlagsendringshendelse> {
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
@@ -182,8 +223,7 @@ class GrunnlagsendringshendelseService(
                                 type = grunnlagendringType,
                                 opprettet = tidspunktForMottakAvHendelse,
                                 hendelseGjelderRolle = rolleOgSak.rolle,
-                                gjelderPerson = fnr,
-                                beskrivelse = beskrivelse
+                                gjelderPerson = fnr
                             )
                         )
                     }
@@ -325,9 +365,8 @@ class GrunnlagsendringshendelseService(
                 )
             }
             GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
-            GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
-                samsvar = false
-            )
+            GrunnlagsendringsType.INSTITUSJONSOPPHOLD ->
+                throw IllegalStateException("Denne hendelsen skal gå rett til oppgavelisten og aldri komme hit")
         }
     }
 

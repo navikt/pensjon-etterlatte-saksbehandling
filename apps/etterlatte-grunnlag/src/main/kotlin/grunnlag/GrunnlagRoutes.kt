@@ -64,6 +64,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 call.respond(saksliste)
             }
         }
+
         post("/person/roller") {
             withFoedselsnummer(behandlingKlient) { fnr ->
                 val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)

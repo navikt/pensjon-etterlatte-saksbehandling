@@ -34,7 +34,7 @@ class KafkaEnvironment : KafkaConsumerConfiguration {
             put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, env["KAFKA_CREDSTORE_PASSWORD"])
             // Nais doc: Password needed to use the keystore and truststore
 
-            put(ConsumerConfig.GROUP_ID_CONFIG, env["SKJERMING_GROUP_ID"])
+            put(ConsumerConfig.GROUP_ID_CONFIG, env["INSTITUSJONSOPPHOLD_GROUP_ID"])
             put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
             put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
             put(ConsumerConfig.CLIENT_ID_CONFIG, env["NAIS_APP_NAME"])

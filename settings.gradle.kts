@@ -37,7 +37,7 @@ include(
     "libs:etterlatte-jobs",
     "libs:etterlatte-kafka",
     "libs:etterlatte-pdl-model",
-    "libs:etterlatte-institusjonsopphold",
+    "libs:etterlatte-institusjonsopphold-model",
     "libs:testdata",
     "libs:etterlatte-regler",
     "libs:etterlatte-sporingslogg",

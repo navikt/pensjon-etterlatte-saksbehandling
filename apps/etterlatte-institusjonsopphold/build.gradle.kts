@@ -6,7 +6,7 @@ dependencies {
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
-    implementation(project(":libs:etterlatte-institusjonsopphold"))
+    implementation(project(":libs:etterlatte-institusjonsopphold-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)

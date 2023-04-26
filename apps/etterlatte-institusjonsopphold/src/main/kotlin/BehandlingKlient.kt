@@ -25,14 +25,14 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient) {
         val oppholdHendelse = record.value()
         logger.info(
             "Haandterer institusjonsopphold hendelse for fnr maskert " +
-                "${oppholdHendelse.norskident.maskerFnr()} hendelseId: $hendelseId"
+                "${oppholdHendelse.norskident.maskerFnr()} hendelseId: ${oppholdHendelse.hendelseId}"
         )
         postTilBehandling(oppholdHendelse = oppholdHendelse)
     }
 
     fun postTilBehandling(oppholdHendelse: KafkaOppholdHendelse) = runBlocking {
         behandlingHttpClient.post(
-            "http://etterlatte-behandling/institusjonsopphold"
+            "http://etterlatte-behandling/grunnlagsendringshendelse/institusjonsopphold"
         ) {
             contentType(ContentType.Application.Json)
             setBody(oppholdHendelse)

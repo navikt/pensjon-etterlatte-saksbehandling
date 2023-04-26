@@ -21,6 +21,7 @@ import { Beregningstype } from '~shared/types/Beregning'
 import { BarnepensjonSammendrag } from '~components/behandling/beregne/BarnepensjonSammendrag'
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { Avkorting } from '~components/behandling/beregne/Avkorting'
+import { ISaksType } from '~components/behandling/fargetags/saksType'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -75,7 +76,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             [Beregningstype.BP]: <BarnepensjonSammendrag behandling={behandling} beregning={beregningFraState} />,
             [Beregningstype.OMS]: <OmstillingsstoenadSammendrag beregning={beregningFraState} />,
           }[beregningFraState.type]}
-        <Avkorting />
+        {behandling.sakType === ISaksType.OMSTILLINGSSTOENAD && <Avkorting />}
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>

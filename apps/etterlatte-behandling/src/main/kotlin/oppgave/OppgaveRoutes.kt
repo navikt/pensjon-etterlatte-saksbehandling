@@ -107,7 +107,7 @@ fun Oppgave.Grunnlagsendringsoppgave.opprettMerknad(): String {
         GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> {
             return when (samsvarMellomKildeOgGrunnlag) {
                 is SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD -> {
-                    "Institusjonsoppholdet for bruker er ${samsvarMellomKildeOgGrunnlag.type}"
+                    "Institusjonsoppholdet for bruker er ${samsvarMellomKildeOgGrunnlag.oppholdstype}"
                 }
                 else -> {
                     logger.error("Feil samsvar for $grunnlagsendringsType rolle: $gjelderRolle id: ${sak.id}")

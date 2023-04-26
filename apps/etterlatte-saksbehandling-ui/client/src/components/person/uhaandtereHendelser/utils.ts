@@ -7,6 +7,7 @@ export const grunnlagsendringsTittel: Record<GrunnlagsendringsType, string> = {
   BARN: 'Barn',
   ANSVARLIGE_FORELDRE: 'Ansvarlige foreldre',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Vergemål eller fremtidsfullmakt',
+  INSTITUSJONSOPPHOLD: 'Institusjonsopphold',
 }
 
 export const grunnlagsendringsBeskrivelse: Record<GrunnlagsendringsType, string> = {
@@ -16,12 +17,15 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagsendringsType, string>
   BARN: 'Barn',
   ANSVARLIGE_FORELDRE: 'Ansvarlige foreldre',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Vergemål eller fremtidsfullmakt',
+  INSTITUSJONSOPPHOLD: 'INSTITUSJONSOPPHOLD',
 }
 
 export const grunnlagsendringsKilde = (type: GrunnlagsendringsType): string => {
   switch (type) {
     case 'GRUNNBELOEP':
       return 'Doffen'
+    case 'INSTITUSJONSOPPHOLD':
+      return 'Inst2'
     case 'DOEDSDATO':
     case 'UTLAND':
     case 'BARN':

@@ -96,7 +96,10 @@ class GrunnlagsendringshendelseService(
         return opprettHendelseAvTypeForPersonUtenSamsvarSjekketAvJobb(
             fnr = oppholdsHendelse.norskident,
             grunnlagendringType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
-            samsvar = SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(samsvar = false, type = oppholdsHendelse.type)
+            samsvar = SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
+                samsvar = false,
+                oppholdstype = oppholdsHendelse.type
+            )
         )
     }
 

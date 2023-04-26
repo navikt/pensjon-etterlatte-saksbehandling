@@ -4,7 +4,8 @@ import {
   DoedsdatoSamsvar,
   Grunnlagsendringshendelse,
   GrunnlagsendringStatus,
-  SamsvarMellomGrunnlagOgPdl,
+  InstitusjonsoppholdSamsvar,
+  SamsvarMellomKildeOgGrunnlag,
   UtlandSamsvar,
   VergemaalEllerFremtidsfullmaktForholdSamsvar,
 } from '../typer'
@@ -125,7 +126,14 @@ const VisVergemaalEllerFremtidsfullmaktForholdSamsvar = (props: {
   </HendelseSammenligning>
 )
 
-const HendelseVisning = (props: { data?: SamsvarMellomGrunnlagOgPdl }) => {
+const VisInstitusjonsopphold = (props: { data: InstitusjonsoppholdSamsvar }) => (
+  <HendelseSammenligning>
+    <dt>Institusonsoppholdstype:</dt>
+    <dd>{props.data.oppholdstype}</dd>
+  </HendelseSammenligning>
+)
+
+const HendelseVisning = (props: { data?: SamsvarMellomKildeOgGrunnlag }) => {
   switch (props.data?.type) {
     case 'DOEDSDATO':
       return <VisDoedsdatoSamsvar data={props.data} />
@@ -137,6 +145,8 @@ const HendelseVisning = (props: { data?: SamsvarMellomGrunnlagOgPdl }) => {
       return <VisAnsvarligeForeldreSamsvar data={props.data} />
     case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':
       return <VisVergemaalEllerFremtidsfullmaktForholdSamsvar data={props.data} />
+    case 'INSTITUSJONSOPPHOLD':
+      return <VisInstitusjonsopphold data={props.data} />
     default:
       return <p>Ukjent hendelse</p>
   }
@@ -155,7 +165,7 @@ const ListeAvHendelser = ({ hendelser }: { hendelser: Grunnlagsendringshendelse[
           <HendelseMetaItem>Opprettet {formaterStringDato(hendelse.opprettet)}</HendelseMetaItem>
         </HendelseMetaWrapper>
         <div>
-          <HendelseVisning data={hendelse.samsvarMellomPdlOgGrunnlag} />
+          <HendelseVisning data={hendelse.samsvarMellomKildeOgGrunnlag} />
         </div>
       </HendelseWrapper>
     ))}

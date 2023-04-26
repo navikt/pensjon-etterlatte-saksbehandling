@@ -16,4 +16,5 @@ export const teksterForGrunnlagshendelser: Record<GrunnlagsendringsType, string>
   DOEDSDATO: 'Dødsfall',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Vergemål',
   GRUNNBELOEP: 'Regulering',
+  INSTITUSJONSOPPHOLD: 'Institusjonsopphold',
 }

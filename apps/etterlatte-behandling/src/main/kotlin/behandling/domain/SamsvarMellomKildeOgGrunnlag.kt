@@ -55,6 +55,6 @@ sealed class SamsvarMellomKildeOgGrunnlag {
     @JsonTypeName("INSTITUSJONSOPPHOLD")
     data class INSTITUSJONSOPPHOLD(
         override val samsvar: Boolean,
-        val type: KafkaOppholdHendelse.Type
+        val oppholdstype: KafkaOppholdHendelse.Type
     ) : SamsvarMellomKildeOgGrunnlag()
 }

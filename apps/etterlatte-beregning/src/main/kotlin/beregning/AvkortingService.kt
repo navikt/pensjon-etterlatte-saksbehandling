@@ -9,7 +9,7 @@ class AvkortingService(
 ) {
 
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
-    fun hentAvkorting(behandlingId: UUID): Avkorting {
+    fun hentAvkorting(behandlingId: UUID): Avkorting? {
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         return avkortingRepository.hentAvkorting(behandlingId)
     }
@@ -20,7 +20,7 @@ class AvkortingService(
         avkortingGrunnlag: AvkortingGrunnlag
     ): Avkorting = tilstandssjekk(behandlingId, bruker) {
         logger.info("Lagre grunnlag for avkorting for behandlingId=$behandlingId")
-        avkortingRepository.lagreAvkortingGrunnlag(behandlingId, avkortingGrunnlag)
+        avkortingRepository.lagreEllerOppdaterAvkortingGrunnlag(behandlingId, avkortingGrunnlag)
     }
 
     private suspend fun tilstandssjekk(behandlingId: UUID, bruker: Bruker, block: suspend () -> Avkorting): Avkorting {

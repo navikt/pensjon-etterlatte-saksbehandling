@@ -31,6 +31,8 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [sakId, setSakId] = useState<number | undefined>()
   const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
 
+  const erUhaandtert = (hendelse: Grunnlagsendringshendelse) => hendelse.status === 'SJEKKET_AV_JOBB'
+
   useEffect(() => {
     const getBehandlingsListeAsync = async (fnr: string) => {
       const response = await hentBehandlingerForPerson(fnr)
@@ -95,7 +97,9 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
       .filter((behandling) => behandling.behandlingType === IBehandlingsType.REVURDERING)
       .filter((behandling) => !erFerdigBehandlet(behandling.status)).length > 0
 
-  const hendelser = grunnlagshendelser?.filter((hendelse) => hendelse.type === 'GRUNNBELOEP') ?? []
+  const hendelser = (grunnlagshendelser ?? [])
+    .filter(erUhaandtert)
+    .filter((hendelse) => hendelse.type === 'GRUNNBELOEP')
 
   return (
     <>

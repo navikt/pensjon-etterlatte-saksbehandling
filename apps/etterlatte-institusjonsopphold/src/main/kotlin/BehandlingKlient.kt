@@ -32,7 +32,7 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient) {
 
     fun postTilBehandling(oppholdHendelse: KafkaOppholdHendelse) = runBlocking {
         behandlingHttpClient.post(
-            "http://etterlatte-behandling/institusjonsopphold"
+            "http://etterlatte-behandling/grunnlagsendringshendelse/institusjonsopphold"
         ) {
             contentType(ContentType.Application.Json)
             setBody(oppholdHendelse)

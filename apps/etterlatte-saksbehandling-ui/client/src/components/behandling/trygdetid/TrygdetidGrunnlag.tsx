@@ -10,6 +10,7 @@ import { Calender } from '@navikt/ds-icons'
 import { useParams } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterStringDato } from '~utils/formattering'
+import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
 
 type Props = {
   trygdetid: ITrygdetid
@@ -176,7 +177,9 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({ trygdetid, setTrygdetid, tr
                     ? 'Fremtidig trygdetid'
                     : 'Faktisk trygdetid'}
                 </Label>
-                <div>{beregnetTrygdetid}</div>
+                <ManglerRegelspesifikasjon>
+                  <div>{beregnetTrygdetid}</div>
+                </ManglerRegelspesifikasjon>
               </TrygdetidBeregnet>
               <Kilde>
                 <Label>Kilde</Label>

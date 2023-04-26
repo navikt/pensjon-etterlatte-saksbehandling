@@ -3,13 +3,18 @@ import { formaterStringDato } from '~utils/formattering'
 import React from 'react'
 import { IGrunnlagOpplysninger, IOpplysningsgrunnlag } from '~shared/api/trygdetid'
 import styled from 'styled-components'
+import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
 
 export const Grunnlagopplysninger: React.FC<{ opplysninger: IGrunnlagOpplysninger }> = ({ opplysninger }) => (
   <InfoWrapper>
     <Opplysningsgrunnlag label={'Fødselsdato'} opplysningsgrunnlag={opplysninger.avdoedFoedselsdato} />
-    <Opplysningsgrunnlag label={'16 år'} opplysningsgrunnlag={opplysninger.avdoedFylteSeksten} />
+    <ManglerRegelspesifikasjon>
+      <Opplysningsgrunnlag label={'16 år'} opplysningsgrunnlag={opplysninger.avdoedFylteSeksten} />
+    </ManglerRegelspesifikasjon>
     <Opplysningsgrunnlag label={'Dødsdato'} opplysningsgrunnlag={opplysninger.avdoedDoedsdato} />
-    <Opplysningsgrunnlag label={'66 år'} opplysningsgrunnlag={opplysninger.avdoedFyllerSeksti} />
+    <ManglerRegelspesifikasjon>
+      <Opplysningsgrunnlag label={'66 år'} opplysningsgrunnlag={opplysninger.avdoedFyllerSeksti} />
+    </ManglerRegelspesifikasjon>
   </InfoWrapper>
 )
 

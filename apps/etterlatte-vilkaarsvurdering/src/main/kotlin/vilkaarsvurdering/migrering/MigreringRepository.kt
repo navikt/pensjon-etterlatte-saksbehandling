@@ -10,13 +10,13 @@ class MigreringRepository(
     private val delvilkaarRepository: DelvilkaarRepository,
     private val ds: DataSource
 ) {
-    fun endreUtfallForAlleVilkaar(vilkaar: List<Vilkaar>, utfall: Utfall) =
+    fun endreUtfallTilIkkeVurdertForAlleVilkaar(vilkaar: List<Vilkaar>) =
         ds.transaction { tx ->
             vilkaar.forEach {
                 delvilkaarRepository.settResultatPaaAlleDelvilkaar(
                     it.id,
                     tx,
-                    utfall
+                    Utfall.IKKE_VURDERT
                 )
             }
         }

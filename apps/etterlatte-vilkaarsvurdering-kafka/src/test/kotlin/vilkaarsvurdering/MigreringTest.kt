@@ -15,8 +15,7 @@ import java.util.*
 
 internal class MigreringTest {
     private val vilkaarsvurderingServiceMock = mockk<VilkaarsvurderingService> {
-        coEvery { oppdaterTotalVurdering(any(), any()) } returns mockk()
-        coEvery { endreStatusTilIkkeVurdertForAlleVilkaar(any()) } returns mockk()
+        coEvery { migrer(any()) } returns mockk()
     }
     private val testRapid = TestRapid()
         .apply { Migrering(this, vilkaarsvurderingServiceMock) }
@@ -35,14 +34,7 @@ internal class MigreringTest {
         testRapid.sendTestMessage(melding)
 
         coVerify(exactly = 1) {
-            vilkaarsvurderingServiceMock.oppdaterTotalVurdering(
-                behandlingId,
-                any()
-            )
-        }
-
-        coVerify(exactly = 1) {
-            vilkaarsvurderingServiceMock.endreStatusTilIkkeVurdertForAlleVilkaar(
+            vilkaarsvurderingServiceMock.migrer(
                 behandlingId
             )
         }

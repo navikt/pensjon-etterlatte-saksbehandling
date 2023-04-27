@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import java.util.*
 
-internal class DelvilkaarRepository {
+class DelvilkaarRepository {
 
     internal fun oppdaterDelvilkaar(vurdertVilkaar: VurdertVilkaar, tx: TransactionalSession) {
         lagreDelvilkaarResultat(vurdertVilkaar.vilkaarId, vurdertVilkaar.hovedvilkaar, tx)

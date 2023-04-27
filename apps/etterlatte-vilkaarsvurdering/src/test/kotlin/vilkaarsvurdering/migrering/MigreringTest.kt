@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.token.Bruker
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
@@ -139,7 +138,6 @@ class MigreringTest {
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        val oboToken = Bruker.of("token", "s1", null, null, null)
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 

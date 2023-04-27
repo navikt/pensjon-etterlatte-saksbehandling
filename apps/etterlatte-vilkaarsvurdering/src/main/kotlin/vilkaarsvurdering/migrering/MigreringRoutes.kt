@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 
 fun Route.migrering(migreringService: MigreringService, behandlingKlient: BehandlingKlient) {
-    route("/api/vilkaarsvurdering2/migrering") {
+    route("/api/vilkaarsvurdering/migrering") {
         val logger = application.log
 
         patch("/{$BEHANDLINGSID_CALL_PARAMETER}/vilkaar/utfall/{utfall}") {

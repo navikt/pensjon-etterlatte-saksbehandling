@@ -145,7 +145,7 @@ class MigreringTest {
             application { restModule(this.log) { migrering(migreringService, behandlingKlient) } }
 
             val response =
-                client.patch("/api/vilkaarsvurdering2/migrering/$behandlingId/vilkaar/utfall/${Utfall.IKKE_VURDERT}") {
+                client.patch("/api/vilkaarsvurdering/migrering/$behandlingId/vilkaar/utfall/${Utfall.IKKE_VURDERT}") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)

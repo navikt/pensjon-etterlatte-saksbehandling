@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -26,7 +27,10 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter avkorting med behandlingId=$it")
                 val avkorting = avkortingService.hentAvkorting(it)
-                call.respond(avkorting.toDto())
+                when (avkorting) {
+                    null -> call.response.status(HttpStatusCode.NotFound)
+                    else -> call.respond(avkorting.toDto())
+                }
             }
         }
 
@@ -50,7 +54,7 @@ data class AvkortingDto(
 data class AvkortingGrunnlagDto(
     val fom: YearMonth,
     val tom: YearMonth?,
-    val aarsInntekt: Int,
+    val aarsinntekt: Int,
     val gjeldendeAar: Int,
     val spesifikasjon: String
 )
@@ -64,14 +68,14 @@ fun Avkorting.toDto() = AvkortingDto(
 fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
     fom = periode.fom,
     tom = periode.tom,
-    aarsInntekt = aarsInntekt,
+    aarsinntekt = aarsinntekt,
     gjeldendeAar = gjeldendeAar,
     spesifikasjon = spesifikasjon
 )
 
 fun AvkortingGrunnlagDto.fromDto() = AvkortingGrunnlag(
     periode = Periode(fom = fom, tom = null),
-    aarsInntekt = aarsInntekt,
+    aarsinntekt = aarsinntekt,
     gjeldendeAar = gjeldendeAar,
     spesifikasjon = spesifikasjon
 )

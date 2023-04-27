@@ -13,7 +13,7 @@ data class Avkorting(
 
 data class AvkortingGrunnlag(
     val periode: Periode,
-    val aarsInntekt: Int,
+    val aarsinntekt: Int,
     val gjeldendeAar: Int,
     val spesifikasjon: String
 )

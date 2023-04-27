@@ -58,11 +58,11 @@ export const AvkortingInntekt = (props: {
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              value={inntektGrunnlag.aarsInntekt}
+              value={inntektGrunnlag.aarsinntekt}
               onChange={(e) =>
                 setInntektGrunnlag({
                   ...inntektGrunnlag,
-                  aarsInntekt: Number(e.target.value),
+                  aarsinntekt: Number(e.target.value),
                 })
               }
             />

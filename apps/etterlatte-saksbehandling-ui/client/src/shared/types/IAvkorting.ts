@@ -7,7 +7,7 @@ export interface IAvkorting {
 export interface IAvkortingGrunnlag {
   fom?: string
   tom?: string
-  aarsInntekt?: number
+  aarsinntekt?: number
   gjeldendeAar?: number
   spesifikasjon?: string
 }

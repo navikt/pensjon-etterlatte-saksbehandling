@@ -28,14 +28,18 @@ export const Avkorting = () => {
         Inntektsavkorting
       </Heading>
 
-      {avkorting && <AvkortingInntekt avkortingGrunnlag={avkorting?.avkortingGrunnlag} setAvkorting={setAvkorting} />}
+      {!['initial', 'pending'].includes(avkortingStatus.status) && (
+        <AvkortingInntekt avkortingGrunnlag={avkorting?.avkortingGrunnlag} setAvkorting={setAvkorting} />
+      )}
 
       <Heading spacing size="small" level="2">
         Omstillingsstønad etter avkorting
       </Heading>
 
       {isPending(avkortingStatus) && <Spinner visible={true} label={'Henter avkorting'} />}
-      {isFailure(avkortingStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      {isFailure(avkortingStatus) && avkortingStatus.error.statusCode !== 404 && (
+        <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
+      )}
     </AvkortingWrapper>
   )
 }

@@ -26,6 +26,7 @@ include(
     "apps:etterlatte-vilkaarsvurdering",
     "apps:etterlatte-vilkaarsvurdering-kafka",
     "apps:etterlatte-trygdetid",
+    "apps:etterlatte-trygdetid-kafka",
     "libs:ktor2client-auth-clientcredentials",
     "libs:etterlatte-token-model",
     "libs:saksbehandling-common",

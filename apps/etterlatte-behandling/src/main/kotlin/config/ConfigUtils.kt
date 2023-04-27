@@ -1,8 +1,9 @@
 package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
+import no.nav.etterlatte.libs.common.Miljoevariabler
 
-fun samle(config: Config, env: Map<String, String>): Map<String, String> {
+fun samle(config: Config, env: Map<String, String>): Miljoevariabler {
     val conf = config
         .root()
         .toList()
@@ -10,7 +11,7 @@ fun samle(config: Config, env: Map<String, String>): Map<String, String> {
         .filter { it.isNotEmpty() }
         .flatten()
         .associate { it.key to it.value.toString() }
-    return conf + env
+    return Miljoevariabler(conf + env)
 }
 
 private fun unwrap(set: MutableSet<Node>, node: Node): Set<Node> = when (node.value) {

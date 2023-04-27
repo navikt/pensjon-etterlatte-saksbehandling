@@ -5,6 +5,7 @@ import io.getunleash.UnleashContext
 import io.getunleash.UnleashContextProvider
 import io.getunleash.strategy.GradualRolloutRandomStrategy
 import io.getunleash.util.UnleashConfig
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -12,7 +13,7 @@ interface FeatureToggleService {
     fun isEnabled(toggleId: FeatureToggle, defaultValue: Boolean): Boolean
 
     companion object {
-        fun initialiser(env: Map<String, String>): FeatureToggleService {
+        fun initialiser(env: Miljoevariabler): FeatureToggleService {
             val enabled = env.getOrDefault(FeatureToggleServiceProperties.ENABLED.navn, "false").toBoolean()
             return if (enabled) {
                 UnleashFeatureToggleService(

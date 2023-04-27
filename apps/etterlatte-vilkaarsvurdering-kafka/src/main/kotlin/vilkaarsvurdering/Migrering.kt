@@ -20,7 +20,7 @@ internal class Migrering(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService
 ) : River.PacketListener {
-    private val logger = LoggerFactory.getLogger(Vilkaarsvurder::class.java)
+    private val logger = LoggerFactory.getLogger(Migrering::class.java)
 
     init {
         River(rapidsConnection).apply {
@@ -33,8 +33,8 @@ internal class Migrering(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
             withFeilhaandtering(packet, context, Migreringshendelser.VILKAARSVURDER) {
-                logger.info("Mottatt vilkårs-migreringshendelse")
                 val behandlingId = packet.behandlingId
+                logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
 
                 vilkaarsvurderingService.oppdaterTotalVurdering(
                     behandlingId,

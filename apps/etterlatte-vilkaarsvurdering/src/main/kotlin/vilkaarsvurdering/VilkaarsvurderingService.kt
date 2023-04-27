@@ -3,6 +3,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -203,9 +204,9 @@ class VilkaarsvurderingService(
     private suspend fun hentDataForVilkaarsvurdering(
         behandlingId: UUID,
         bruker: Bruker
-    ): Pair<VilkaarsvurderingBehandlingDTO, Grunnlag> {
+    ): Pair<DetaljertBehandling, Grunnlag> {
         return coroutineScope {
-            val behandling = VilkaarsvurderingBehandlingDTO.fra(behandlingKlient.hentBehandling(behandlingId, bruker))
+            val behandling = behandlingKlient.hentBehandling(behandlingId, bruker)
             val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, bruker) }
 
             Pair(behandling, grunnlag.await())

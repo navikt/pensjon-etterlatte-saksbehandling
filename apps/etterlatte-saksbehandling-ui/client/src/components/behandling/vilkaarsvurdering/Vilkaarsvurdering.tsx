@@ -6,13 +6,18 @@ import { ManueltVilkaar } from './ManueltVilkaar'
 import { VilkaarBorderTop } from './styled'
 import { Resultat } from './Resultat'
 import Spinner from '~shared/Spinner'
-import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
+import {
+  IBehandlingReducer,
+  oppdaterBehandlingsstatus,
+  updateVilkaarsvurdering,
+} from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { Heading } from '@navikt/ds-react'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -44,9 +49,12 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   }, [behandlingId])
 
   const opprettHvisDenIkkeFinnes = (behandlingId: string) => {
-    opprettNyVilkaarsvurdering(behandlingId, (vilkaarsvurdering) =>
+    opprettNyVilkaarsvurdering(behandlingId, (vilkaarsvurdering) => {
       dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
-    )
+      if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
+      }
+    })
   }
 
   return (

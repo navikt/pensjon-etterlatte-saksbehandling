@@ -77,7 +77,11 @@ internal class VilkaarsvurderingRoutesTest {
         ).also { it.migrate() }
 
         vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
+                behandlingKlient,
+                grunnlagKlient
+            )
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
@@ -477,7 +481,11 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
+                behandlingKlient,
+                grunnlagKlient
+            )
 
         testApplication {
             environment {
@@ -500,7 +508,11 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
+                behandlingKlient,
+                grunnlagKlient
+            )
 
         testApplication {
             environment {
@@ -525,7 +537,11 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
+                behandlingKlient,
+                grunnlagKlient
+            )
 
         testApplication {
             environment {
@@ -552,7 +568,11 @@ internal class VilkaarsvurderingRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
-            VilkaarsvurderingService(VilkaarsvurderingRepository(ds), behandlingKlient, grunnlagKlient)
+            VilkaarsvurderingService(
+                VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
+                behandlingKlient,
+                grunnlagKlient
+            )
 
         testApplication {
             environment {

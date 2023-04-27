@@ -22,7 +22,7 @@ class ApplicationContext {
     )
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val delvilkaarRepository = DelvilkaarRepository()
-    private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(dataSource)
+    private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(dataSource, delvilkaarRepository)
     val vilkaarsvurderingService = VilkaarsvurderingService(
         vilkaarsvurderingRepository = vilkaarsvurderingRepository,
         behandlingKlient = behandlingKlient,

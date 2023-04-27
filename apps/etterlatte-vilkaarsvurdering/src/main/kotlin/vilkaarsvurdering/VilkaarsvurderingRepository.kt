@@ -27,10 +27,9 @@ import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
-class VilkaarsvurderingRepository(private val ds: DataSource) {
+class VilkaarsvurderingRepository(private val ds: DataSource, private val delvilkaarRepository: DelvilkaarRepository) {
 
     private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(ds)
-    private val delvilkaarRepository = DelvilkaarRepository()
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->

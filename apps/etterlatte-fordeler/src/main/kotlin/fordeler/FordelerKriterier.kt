@@ -12,9 +12,10 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.aktiv
 import no.nav.etterlatte.libs.common.person.nyeste
 import java.time.LocalDate
+import java.time.Month
 
 private const val NORGE = "NOR"
-private val FEBRUAR_2006 = LocalDate.of(2006, 2, 1)
+private val FEBRUAR_2006 = LocalDate.of(2006, Month.FEBRUARY, 1)
 
 data class FordelerKriterierResultat(
     val kandidat: Boolean,
@@ -241,9 +242,8 @@ class FordelerKriterier {
     }
 
     private fun barnHarForGamleSoesken(barn: Person, avdoed: Person): Boolean {
-        return avdoed.familieRelasjon?.barn?.minus(barn.foedselsnummer)?.let { avdoedAndreBarn ->
-            avdoedAndreBarn.any { barn -> fyller18FoerFebruar2024(barn.getBirthDate()) }
-        } ?: false
+        return (avdoed.familieRelasjon?.barn ?: emptyList()).minus(barn.foedselsnummer)
+            .any { soesken -> fyller18FoerFebruar2024(soesken.getBirthDate()) }
     }
 
     private class Kriterie(val fordelerKriterie: FordelerKriterie, private val sjekk: (Barnepensjon) -> Boolean) {

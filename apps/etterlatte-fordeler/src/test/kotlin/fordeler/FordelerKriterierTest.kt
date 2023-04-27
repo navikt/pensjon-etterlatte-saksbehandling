@@ -259,7 +259,7 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `barn med soesken (av avdoede) foeds senere enn februar 2006 skal ikke utelukkes som gyldig kandidat`() {
+    fun `barn med soesken (av avdoede) foedt senere enn februar 2006 skal ikke utelukkes som gyldig kandidat`() {
         val barn = mockPerson(
             foedselsaar = now().year - 10,
             foedselsdato = now().minusYears(10)

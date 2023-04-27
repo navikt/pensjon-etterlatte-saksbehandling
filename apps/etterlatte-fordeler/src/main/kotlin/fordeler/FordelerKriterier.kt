@@ -10,11 +10,12 @@ import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.aktiv
-import no.nav.etterlatte.libs.common.person.alder
 import no.nav.etterlatte.libs.common.person.nyeste
 import java.time.LocalDate
+import java.time.Month
 
 private const val NORGE = "NOR"
+private val FEBRUAR_2006 = LocalDate.of(2006, Month.FEBRUARY, 1)
 
 data class FordelerKriterierResultat(
     val kandidat: Boolean,
@@ -198,8 +199,12 @@ class FordelerKriterier {
             adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
             adresse1?.postnr == adresse2?.postnr
 
-    private fun forGammel(person: Person, alder: Int = 14): Boolean {
-        return person.alder()?.let { it > alder } ?: true
+    private fun fyller18FoerFebruar2024(foedselsdato: LocalDate): Boolean {
+        return foedselsdato.isBefore(FEBRUAR_2006)
+    }
+
+    private fun forGammel(person: Person): Boolean {
+        return person.foedselsdato?.let { fyller18FoerFebruar2024(it) } ?: true
     }
 
     private fun harHuketAvForYrkesskade(barnepensjon: Barnepensjon): Boolean {
@@ -236,10 +241,9 @@ class FordelerKriterier {
         return barnepensjon.soeker.utenlandsAdresse?.svar?.verdi == JaNeiVetIkke.JA
     }
 
-    private fun barnHarForGamleSoesken(barn: Person, avdoed: Person, alder: Int = 14): Boolean {
-        return avdoed.familieRelasjon?.barn?.minus(barn.foedselsnummer)?.let { avdoedAndreBarn ->
-            avdoedAndreBarn.any { it.getAge() > alder }
-        } ?: false
+    private fun barnHarForGamleSoesken(barn: Person, avdoed: Person): Boolean {
+        return (avdoed.familieRelasjon?.barn ?: emptyList()).minus(barn.foedselsnummer)
+            .any { soesken -> fyller18FoerFebruar2024(soesken.getBirthDate()) }
     }
 
     private class Kriterie(val fordelerKriterie: FordelerKriterie, private val sjekk: (Barnepensjon) -> Boolean) {

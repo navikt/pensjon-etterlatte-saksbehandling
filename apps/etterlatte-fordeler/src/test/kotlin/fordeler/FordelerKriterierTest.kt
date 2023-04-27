@@ -43,7 +43,7 @@ internal class FordelerKriterierTest {
         )
         val avdoed = mockPerson(
             fnr = FNR_2,
-            doedsdato = LocalDate.now().plusMonths(11),
+            doedsdato = now().plusMonths(11),
             bostedsadresse = mockNorskAdresse(
                 gyldigTilOgMed = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(11)
             ),
@@ -63,10 +63,9 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `barn som er for gammelt er ikke en gyldig kandidat`() {
+    fun `barn som fyller 18 foer februar 2024 er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            foedselsaar = now().year - 15,
-            foedselsdato = now().minusYears(15)
+            foedselsdato = of(2024, 1, 31).minusYears(18)
         )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
@@ -77,7 +76,7 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `Skal godta bokmål som språk`() {
+    fun `Skal godta bokmaal som spraak`() {
         val barn = mockPerson(
             foedselsaar = now().year - 15,
             foedselsdato = now().minusYears(15)
@@ -91,7 +90,7 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `Skal ikke godta nynorsk som språk`() {
+    fun `Skal ikke godta nynorsk som spraak`() {
         val barn = mockPerson(
             foedselsaar = now().year - 15,
             foedselsdato = now().minusYears(15)
@@ -105,7 +104,7 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `Skal ikke godta engelsk som språk`() {
+    fun `Skal ikke godta engelsk som spraak`() {
         val barn = mockPerson(
             foedselsaar = now().year - 15,
             foedselsdato = now().minusYears(15)
@@ -237,9 +236,8 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `barn med soesken (av avdoede) som er over 14 aar er ikke en gyldig kandidat`() {
+    fun `barn med soesken (av avdoede) som fyller 18 foer februar 2024 er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            foedselsaar = now().year - 10,
             foedselsdato = now().minusYears(10)
         )
         val avdoed = mockPerson(
@@ -247,7 +245,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(
                     Folkeregisteridentifikator.of(barn.foedselsnummer.value),
-                    Folkeregisteridentifikator.of(FNR_1)
+                    Folkeregisteridentifikator.of(FNR_5)
                 ),
                 ansvarligeForeldre = null,
                 foreldre = null
@@ -261,7 +259,7 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `barn med soesken (av avdoede) som er under 14 aar skal ikke utelukkes som gyldig kandidat`() {
+    fun `barn med soesken (av avdoede) foedt senere enn februar 2006 skal ikke utelukkes som gyldig kandidat`() {
         val barn = mockPerson(
             foedselsaar = now().year - 10,
             foedselsdato = now().minusYears(10)
@@ -271,7 +269,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(
                     Folkeregisteridentifikator.of(barn.foedselsnummer.value),
-                    Folkeregisteridentifikator.of("12101376212")
+                    Folkeregisteridentifikator.of(FNR_1)
                 ),
                 ansvarligeForeldre = null,
                 foreldre = null

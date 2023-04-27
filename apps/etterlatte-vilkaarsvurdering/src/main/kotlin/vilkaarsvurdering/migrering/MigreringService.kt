@@ -8,10 +8,9 @@ class MigreringService(
     private val migreringRepository: MigreringRepository,
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository
 ) {
-    fun endreStatusForAlleVilkaar(behandlingId: UUID, utfall: Utfall): Any {
-        val vilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)
+    fun endreUtfallForAlleVilkaar(behandlingId: UUID, utfall: Utfall) =
+        vilkaarsvurderingRepository.hent(behandlingId)
+            ?.vilkaar
+            ?.let { migreringRepository.endreUtfallForAlleVilkaar(it, utfall) }
             ?: throw IllegalStateException("Vilkårsvurdering mangler for behandling $behandlingId")
-
-        return migreringRepository.endreStatusForAlleVilkaar(vilkaarsvurdering.vilkaar, utfall)
-    }
 }

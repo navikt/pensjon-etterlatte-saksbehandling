@@ -10,7 +10,7 @@ class MigreringRepository(
     private val delvilkaarRepository: DelvilkaarRepository,
     private val ds: DataSource
 ) {
-    fun endreStatusForAlleVilkaar(vilkaar: List<Vilkaar>, utfall: Utfall) =
+    fun endreUtfallForAlleVilkaar(vilkaar: List<Vilkaar>, utfall: Utfall) =
         ds.transaction { tx ->
             vilkaar.forEach {
                 delvilkaarRepository.settResultatPaaAlleDelvilkaar(

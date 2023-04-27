@@ -23,7 +23,7 @@ fun Route.migrering(migreringService: MigreringService, behandlingKlient: Behand
                     ?.let { Utfall.valueOf(it) }
                     ?: throw IllegalArgumentException("Utfall mangler for behandling $behandlingId")
                 logger.info("Setter alle vilkår til $utfall for behandling $behandlingId")
-                migreringService.endreStatusForAlleVilkaar(behandlingId, utfall)
+                migreringService.endreUtfallForAlleVilkaar(behandlingId, utfall)
                 call.respond(HttpStatusCode.Accepted)
             }
         }

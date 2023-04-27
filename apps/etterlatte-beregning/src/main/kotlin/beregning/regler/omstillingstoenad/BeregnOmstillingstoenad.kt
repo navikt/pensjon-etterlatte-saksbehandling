@@ -18,14 +18,14 @@ data class OmstillingstoenadGrunnlag(
 val beregnOmstillingsstoenadRegel = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
     beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
-    regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID")
+    regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-REDUSER-MOT-TRYGDETID")
 ) benytter omstillingsstoenadSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
     sats.multiply(trygdetidsfaktor)
 }
 
 val kroneavrundetOmstillingsstoenadRegel = RegelMeta(
     gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Gjør en kroneavrunding av omstillingsstønaden",
+    beskrivelse = "Gjør en kroneavrunding av beregningen",
     regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING")
 ) benytter beregnOmstillingsstoenadRegel med { beregnetOmstillingsstoenad ->
     beregnetOmstillingsstoenad.round(decimals = 0).toInteger()

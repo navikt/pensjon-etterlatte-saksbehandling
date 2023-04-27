@@ -39,7 +39,7 @@ internal class MigreringTest {
             )
         }
         with(testRapid.inspektør.message(0)) {
-            assertEquals(Migreringshendelser.BEREGN, this["@event_name"].asText())
+            assertEquals(Migreringshendelser.TRYGDETID, this["@event_name"].asText())
         }
     }
 }

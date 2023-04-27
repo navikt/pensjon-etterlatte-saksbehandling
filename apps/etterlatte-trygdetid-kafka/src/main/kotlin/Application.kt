@@ -1,5 +1,5 @@
-import no.nav.etterlatte.beregningkafka.AppBuilder
-import no.nav.etterlatte.beregningkafka.OmregningHendelser
+package no.nav.etterlatte.trygdetid.kafka
+
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
@@ -7,6 +7,6 @@ import rapidsandrivers.getRapidEnv
 fun main() {
     val rapidEnv = getRapidEnv()
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        OmregningHendelser(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv)).createBeregningService())
+        MigreringHendelser(rapidsConnection, AppBuilder(Miljoevariabler(rapidEnv)).createTrygdetidService())
     }.start()
 }

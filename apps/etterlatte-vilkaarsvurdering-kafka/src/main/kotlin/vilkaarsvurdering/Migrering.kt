@@ -12,9 +12,11 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.Status
 import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.Migreringshendelser
 import rapidsandrivers.withFeilhaandtering
+import java.util.*
 
 internal class Migrering(
     rapidsConnection: RapidsConnection,
@@ -36,19 +38,34 @@ internal class Migrering(
                 val behandlingId = packet.behandlingId
                 logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
 
-                vilkaarsvurderingService.oppdaterTotalVurdering(
-                    behandlingId,
-                    VurdertVilkaarsvurderingResultatDto(
-                        resultat = VilkaarsvurderingUtfall.OPPFYLT,
-                        kommentar =
-                        "Automatisk overført fra Pesys. Enkeltvilkår ikke vurdert, totalvurdering satt til oppfylt."
-                    )
-                )
-
-                packet.eventName = Migreringshendelser.BEREGN
-                context.publish(packet.toJson())
-                logger.info("Publiserte oppdatert migreringshendelse fra vilkårsvurdering for behandling $behandlingId")
-            }
+                oppdaterTotalVurdering(behandlingId)
+            }.takeIf { it == Status.SUKSESS }
+                ?.let {
+                    withFeilhaandtering(packet, context, Migreringshendelser.VILKAARSVURDER) {
+                        val behandlingId = packet.behandlingId
+                        vilkaarsvurderingService.endreStatusTilIkkeVurdertForAlleVilkaar(behandlingId)
+                        sendVidere(packet, context, behandlingId)
+                    }
+                }
         }
     }
+
+    private fun sendVidere(
+        packet: JsonMessage,
+        context: MessageContext,
+        behandlingId: UUID
+    ) {
+        packet.eventName = Migreringshendelser.BEREGN
+        context.publish(packet.toJson())
+        logger.info("Publiserte oppdatert migreringshendelse fra vilkårsvurdering for behandling $behandlingId")
+    }
+
+    private fun oppdaterTotalVurdering(behandlingId: UUID) = vilkaarsvurderingService.oppdaterTotalVurdering(
+        behandlingId,
+        VurdertVilkaarsvurderingResultatDto(
+            resultat = VilkaarsvurderingUtfall.OPPFYLT,
+            kommentar =
+            "Automatisk overført fra Pesys. Enkeltvilkår ikke vurdert, totalvurdering satt til oppfylt."
+        )
+    )
 }

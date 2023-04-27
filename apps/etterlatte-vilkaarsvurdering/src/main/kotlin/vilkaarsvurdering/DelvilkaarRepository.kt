@@ -122,11 +122,14 @@ class DelvilkaarRepository {
             .let { query -> session.run(query.map { row -> row.toDelvilkaar() }.asList) }
             .sortedBy { it.type.rekkefoelge }
 
-    internal fun slettDelvilkaarResultat(vilkaarId: UUID, tx: TransactionalSession) {
+    internal fun slettDelvilkaarResultat(vilkaarId: UUID, tx: TransactionalSession) =
+        settResultatPaaAlleDelvilkaar(vilkaarId, tx, null)
+
+    internal fun settResultatPaaAlleDelvilkaar(vilkaarId: UUID, tx: TransactionalSession, utfall: Utfall?) {
         queryOf(
             """
             UPDATE delvilkaar
-            SET resultat = null
+            SET resultat = ${utfall?.name?.let { "'$it'" }}
             WHERE vilkaar_id = :vilkaar_id
         """,
             mapOf("vilkaar_id" to vilkaarId)

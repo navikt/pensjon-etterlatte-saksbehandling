@@ -21,11 +21,15 @@ class ApplicationContext {
         password = properties.dbPassword
     )
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    val delvilkaarRepository = DelvilkaarRepository()
+    private val delvilkaarRepository = DelvilkaarRepository()
+    private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(dataSource)
     val vilkaarsvurderingService = VilkaarsvurderingService(
-        vilkaarsvurderingRepository = VilkaarsvurderingRepository(dataSource),
+        vilkaarsvurderingRepository = vilkaarsvurderingRepository,
         behandlingKlient = behandlingKlient,
         grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     )
-    val migreringService = MigreringService(MigreringRepository(delvilkaarRepository))
+    val migreringService = MigreringService(
+        MigreringRepository(delvilkaarRepository, dataSource),
+        vilkaarsvurderingRepository
+    )
 }

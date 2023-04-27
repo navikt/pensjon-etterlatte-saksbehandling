@@ -26,7 +26,6 @@ import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleServiceProperties
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -72,15 +71,6 @@ private fun navAnsattHttpClient(config: Config) = httpClientClientCredentials(
     azureAppScope = config.getString("navansatt.azure.scope")
 )
 
-private fun featureToggleProperties(config: Config) = mapOf(
-    FeatureToggleServiceProperties.ENABLED.navn to config.getString("funksjonsbrytere.enabled"),
-    FeatureToggleServiceProperties.APPLICATIONNAME.navn to config.getString(
-        "funksjonsbrytere.unleash.applicationName"
-    ),
-    FeatureToggleServiceProperties.URI.navn to config.getString("funksjonsbrytere.unleash.uri"),
-    FeatureToggleServiceProperties.CLUSTER.navn to config.getString("funksjonsbrytere.unleash.cluster")
-)
-
 class ApplicationContext(
     val env: Map<String, String> = System.getenv(),
     val config: Config = ConfigFactory.load(),
@@ -90,7 +80,7 @@ class ApplicationContext(
         } else {
             GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
         },
-    val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config)),
+    val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(samle(config, env)),
     val pdlHttpClient: HttpClient = pdlHttpClient(config),
     val grunnlagHttpClient: HttpClient = grunnlagHttpClient(config),
     val navAnsattKlient: NavAnsattKlient = NavAnsattKlientImpl(

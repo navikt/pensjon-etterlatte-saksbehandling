@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
+import no.nav.etterlatte.libs.database.KotliqueryRepository
 import no.nav.etterlatte.libs.database.tidspunkt
 import java.time.LocalDate
 import java.time.YearMonth
@@ -29,7 +29,7 @@ import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(private val ds: DataSource, private val delvilkaarRepository: DelvilkaarRepository) {
 
-    private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(ds)
+    private val repositoryWrapper: KotliqueryRepository = KotliqueryRepository(ds)
 
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->

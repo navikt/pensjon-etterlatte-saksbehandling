@@ -42,10 +42,7 @@ export const StatusBar = ({ theme, personInfo }: { theme: StatusBarTheme; person
 }
 
 const genererNavn = (personInfo: IPersonInfo) => {
-  if (personInfo.mellomnavn) {
-    return `${personInfo.fornavn} ${personInfo.mellomnavn} ${personInfo.etternavn}`
-  }
-  return `${personInfo.fornavn} ${personInfo.etternavn}`
+  return [personInfo.fornavn, personInfo.mellomnavn, personInfo.etternavn].join(' ')
 }
 
 const StatusBarWrapper = styled.div<{ theme: StatusBarTheme }>`

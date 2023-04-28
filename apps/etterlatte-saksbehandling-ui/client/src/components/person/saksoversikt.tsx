@@ -20,6 +20,8 @@ import {
 import OpprettRevurderingModal from '~components/person/OpprettRevurderingModal'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import UhaandterteHendelser from '~components/person/uhaandtereHendelser/UhaandterteHendelser'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentPersonerISak } from '~shared/api/grunnlag'
 
 export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [behandlingliste, setBehandlingliste] = useState<IBehandlingsammendrag[]>([])
@@ -30,6 +32,13 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
   const [grunnlagshendelserError, setGrunnlagshendelserError] = useState<Grunnlagsendringshendelse[]>()
   const [sakId, setSakId] = useState<number | undefined>()
   const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
+  const [personerISak, hentPersoner, resetPersoner] = useApiCall(hentPersonerISak)
+
+  useEffect(() => {
+    if (!sakId) return resetPersoner
+    void hentPersoner(sakId)
+    return resetPersoner
+  }, [sakId])
 
   const erUhaandtert = (hendelse: Grunnlagsendringshendelse) => hendelse.status === 'SJEKKET_AV_JOBB'
 
@@ -136,6 +145,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
                     hendelser={hendelser}
                     startRevurdering={() => setVisOpprettRevurderingsmodal(true)}
                     disabled={harAapenRevurdering}
+                    grunnlag={personerISak}
                   />
                   <div className="behandlinger">
                     <h2>Behandlinger</h2>

@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -24,7 +26,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.token.Bruker
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstype): Grunnlagsopplysning<JsonNode>?
@@ -50,6 +52,7 @@ interface GrunnlagService {
 
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
     fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long>
+    fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>?
 }
 
 class RealGrunnlagService(
@@ -123,6 +126,21 @@ class RealGrunnlagService(
 
     override fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long> =
         opplysningDao.finnAlleSakerForPerson(fnr)
+
+    override fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>? {
+        val grunnlag = hentOpplysningsgrunnlag(sakId) ?: return null
+
+        val personer = listOf(grunnlag.soeker) + grunnlag.familie
+        return personer.mapNotNull {
+            val navn = it.hentNavn()?.verdi ?: return@mapNotNull null
+            val fnr = it.hentFoedselsnummer()?.verdi ?: return@mapNotNull null
+            PersonMedNavn(
+                fnr = fnr,
+                fornavn = navn.fornavn,
+                etternavn = navn.etternavn
+            )
+        }.associateBy { it.fnr }
+    }
 
     private fun mapTilRolle(fnr: String, persongalleri: Persongalleri): Saksrolle = when (fnr) {
         persongalleri.soeker -> Saksrolle.SOEKER

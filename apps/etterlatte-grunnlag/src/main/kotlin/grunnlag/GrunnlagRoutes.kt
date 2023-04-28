@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
@@ -29,6 +30,15 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
                 when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(opplysningsgrunnlag)
+                }
+            }
+        }
+
+        get("{$SAKID_CALL_PARAMETER}/personer") {
+            withSakId(behandlingKlient) { sakId ->
+                when (val personerISak = grunnlagService.hentPersonerISak(sakId)) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(PersonerISakDto(personerISak))
                 }
             }
         }
@@ -110,6 +120,16 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
 
 private data class SoeskenMedIBeregningDTO(
     val soeskenMedIBeregning: List<SoeskenMedIBeregning>
+)
+
+private data class PersonerISakDto(
+    val personer: Map<Folkeregisteridentifikator, PersonMedNavn>
+)
+
+data class PersonMedNavn(
+    val fnr: Folkeregisteridentifikator,
+    val fornavn: String,
+    val etternavn: String
 )
 
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()

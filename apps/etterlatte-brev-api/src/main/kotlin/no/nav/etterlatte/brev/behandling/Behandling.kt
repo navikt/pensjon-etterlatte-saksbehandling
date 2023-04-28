@@ -2,12 +2,12 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
@@ -65,16 +65,9 @@ data class Persongalleri(
     val avdoed: Avdoed
 )
 
-fun Grunnlagsopplysning<InnsenderSoeknad>.mapInnsender(): Innsender = with(this.opplysning) {
-    Innsender(
-        navn = "$fornavn $etternavn",
-        fnr = foedselsnummer.value
-    )
-}
-
 fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
     Soeker(
-        navn = hentNavn()!!.verdi.let { "${it.fornavn} ${it.etternavn}" },
+        navn = hentNavn()!!.verdi.GenererFulltNavn(),
         fnr = hentFoedselsnummer()!!.verdi.value
     )
 }
@@ -83,9 +76,16 @@ fun Grunnlag.mapAvdoed(): Avdoed = with(this.familie) {
     val avdoed = hentAvdoed()
 
     Avdoed(
-        navn = avdoed.hentNavn()!!.verdi.let { "${it.fornavn} ${it.etternavn}" },
+        navn = avdoed.hentNavn()!!.verdi.GenererFulltNavn(),
         doedsdato = avdoed.hentDoedsdato()!!.verdi!!
     )
+}
+
+fun Navn.GenererFulltNavn(): String {
+    if (this.mellomnavn.isNullOrEmpty()) {
+        return "${this.fornavn} ${this.etternavn}"
+    }
+    return "${this.fornavn} ${this.mellomnavn} ${this.etternavn}"
 }
 
 fun Grunnlag.mapInnsender(): Innsender = with(this.sak) {

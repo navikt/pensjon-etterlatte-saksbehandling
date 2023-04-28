@@ -43,7 +43,7 @@ internal class GrunnlagServiceTest {
 
     @Nested
     inner class MapperTilRiktigKategoriTest {
-        private val nyttNavn = Navn("Mohammed", "Ali")
+        private val nyttNavn = Navn("Mohammed", "ali", "Ali")
         private val nyFødselsdag = LocalDate.of(2013, 12, 24)
 
         private fun lagGrunnlagForPerson(fnr: Folkeregisteridentifikator, personRolle: PersonRolle) = listOf(
@@ -280,7 +280,7 @@ internal class GrunnlagServiceTest {
                 NAVN,
                 id = statiskUuid,
                 fnr = testData.soeker.foedselsnummer,
-                verdi = Navn("Per", "Persson").toJsonNode(),
+                verdi = Navn("Per", "Kalle", "Persson").toJsonNode(),
                 kilde = kilde
             ),
             lagGrunnlagHendelse(
@@ -366,8 +366,8 @@ internal class GrunnlagServiceTest {
             )
 
             /*
-            * Barn 1 søker barnepensjon og har rolle søsken i annen sak
-            */
+             * Barn 1 søker barnepensjon og har rolle søsken i annen sak
+             */
             val barn1 = grunnlagService.hentSakerOgRoller(barnepensjonSoeker1)
             Assertions.assertEquals(2, barn1.sakerOgRoller.size)
             Assertions.assertEquals(barnepensjonSoeker1.value, barn1.fnr)
@@ -379,8 +379,8 @@ internal class GrunnlagServiceTest {
             Assertions.assertEquals(grunnlaghendelse2.sakId, barn1ErSoeskenIAnnenSak.sakId)
 
             /*
-            * Barn 2 søker barnepensjon og har rolle søsken i annen sak
-            */
+             * Barn 2 søker barnepensjon og har rolle søsken i annen sak
+             */
             val barn2 = grunnlagService.hentSakerOgRoller(barnepensjonSoeker2)
             Assertions.assertEquals(2, barn2.sakerOgRoller.size)
             Assertions.assertEquals(barnepensjonSoeker2.value, barn2.fnr)

@@ -13,6 +13,7 @@ import java.time.LocalDate
 
 data class PersonDTO(
     val fornavn: OpplysningDTO<String>,
+    val mellomnavn: OpplysningDTO<String>?,
     val etternavn: OpplysningDTO<String>,
     val foedselsnummer: OpplysningDTO<Folkeregisteridentifikator>,
     val foedselsdato: OpplysningDTO<LocalDate>?,
@@ -34,6 +35,7 @@ data class PersonDTO(
 ) {
     fun tilPerson() = Person(
         fornavn = fornavn.verdi,
+        mellomnavn = mellomnavn?.verdi,
         etternavn = etternavn.verdi,
         foedselsnummer = foedselsnummer.verdi,
         foedselsdato = foedselsdato?.verdi,

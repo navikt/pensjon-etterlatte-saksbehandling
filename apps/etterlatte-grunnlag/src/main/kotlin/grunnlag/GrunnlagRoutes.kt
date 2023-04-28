@@ -34,7 +34,7 @@ fun Route.grunnlagRoute(grunnlagService: GrunnlagService, behandlingKlient: Beha
             }
         }
 
-        get("{$SAKID_CALL_PARAMETER}/personer") {
+        get("{$SAKID_CALL_PARAMETER}/personer/alle") {
             withSakId(behandlingKlient) { sakId ->
                 when (val personerISak = grunnlagService.hentPersonerISak(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)

@@ -18,7 +18,7 @@ export const hentSoeskenjusteringsgrunnlag = async (
 }
 
 export const hentPersonerISak = async (sakId: number): Promise<ApiResponse<PersonerISakResponse>> => {
-  return apiClient.get(`/grunnlag/${sakId}/personer`)
+  return apiClient.get(`/grunnlag/${sakId}/personer/alle`)
 }
 
 export type PersonerISakResponse = {

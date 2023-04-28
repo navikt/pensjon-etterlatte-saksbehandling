@@ -21,14 +21,14 @@ internal class BehandlingTest {
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
 
-        Assertions.assertEquals(Soeker("Søker Barn", "16021254243"), grunnlag.mapSoeker())
+        Assertions.assertEquals(Soeker("Søker mellom Barn", "16021254243"), grunnlag.mapSoeker())
     }
 
     @Test
     fun `MapAvdoed mapper til Avdoed`() {
         val grunnlag = opprettGrunnlag()
 
-        Assertions.assertEquals(Avdoed("Død Far", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
+        Assertions.assertEquals(Avdoed("Død mellom Far", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
     }
 
     @Test

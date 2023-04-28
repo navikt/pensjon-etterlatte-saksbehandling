@@ -10,40 +10,42 @@ export enum StatusBarTheme {
 
 export interface IPersonInfo {
   fornavn: string
+  mellomnavn?: string
   etternavn: string
   fnr: string
 }
-export const StatusBar = ({
-  theme,
-  personInfo: { fnr, fornavn, etternavn },
-}: {
-  theme: StatusBarTheme
-  personInfo: IPersonInfo
-}) => {
+export const StatusBar = ({ theme, personInfo }: { theme: StatusBarTheme; personInfo: IPersonInfo }) => {
   const gender = (): GenderList => {
-    const genderNum = Number(fnr[8])
+    const genderNum = Number(personInfo.fnr[8])
     if (genderNum % 2 === 0) {
       return GenderList.female
     }
     return GenderList.male
   }
 
-  const navn = `${fornavn} ${etternavn}`
+  const navn = genererNavn(personInfo)
 
   return (
     <StatusBarWrapper theme={theme}>
-      {fnr && (
+      {personInfo.fnr && (
         <UserInfo>
           <GenderIcon gender={gender()} />
           <Name>
-            <Link href={`/person/${fnr}`}>{navn}</Link>{' '}
+            <Link href={`/person/${personInfo.fnr}`}>{navn}</Link>{' '}
           </Name>
           <Skilletegn>|</Skilletegn>
-          <Fnr copy value={fnr} />
+          <Fnr copy value={personInfo.fnr} />
         </UserInfo>
       )}
     </StatusBarWrapper>
   )
+}
+
+const genererNavn = (personInfo: IPersonInfo) => {
+  if (personInfo.mellomnavn) {
+    return `${personInfo.fornavn} ${personInfo.mellomnavn} ${personInfo.etternavn}`
+  }
+  return `${personInfo.fornavn} ${personInfo.etternavn}`
 }
 
 const StatusBarWrapper = styled.div<{ theme: StatusBarTheme }>`

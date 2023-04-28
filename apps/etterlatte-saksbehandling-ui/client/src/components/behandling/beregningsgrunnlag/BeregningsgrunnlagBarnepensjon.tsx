@@ -14,7 +14,7 @@ import { useAppDispatch } from '~store/Store'
 import { opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { hentSoeskenjusteringsgrunnlag, lagreSoeskenMedIBeregning } from '~shared/api/grunnlag'
-import { SoeskenMedIBeregning } from '~shared/types/Grunnlagsopplysning'
+import { SoeskenMedIBeregning } from '~shared/types/grunnlag'
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import {

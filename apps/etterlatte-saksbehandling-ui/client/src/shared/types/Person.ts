@@ -1,4 +1,4 @@
-import { Grunnlagsopplysning } from '~shared/types/Grunnlagsopplysning'
+import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
 import { KildePdl } from './kilde'
 

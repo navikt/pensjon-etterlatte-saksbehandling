@@ -23,6 +23,7 @@ export interface IFamilieRelasjon {
 
 export interface IPdlPerson {
   fornavn: string
+  mellomnavn?: string
   etternavn: string
   foedselsnummer: string
   foedselsdato: Date

@@ -41,7 +41,12 @@ export const Behandling = () => {
       {soekerInfo && (
         <StatusBar
           theme={StatusBarTheme.gray}
-          personInfo={{ fnr: soekerInfo.foedselsnummer, fornavn: soekerInfo.fornavn, etternavn: soekerInfo.etternavn }}
+          personInfo={{
+            fnr: soekerInfo.foedselsnummer,
+            fornavn: soekerInfo.fornavn,
+            mellomnavn: soekerInfo.mellomnavn,
+            etternavn: soekerInfo.etternavn,
+          }}
         />
       )}
       {behandling && <StegMeny behandling={behandling} />}

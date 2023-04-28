@@ -8,7 +8,8 @@ object Migreringshendelser {
     const val MIGRER_SAK = "${PREFIX}MIGRER_SAK"
     const val GRUNNLAG = "${PREFIX}GRUNNLAG"
     const val VILKAARSVURDER = "${PREFIX}VILKAARSVURDER"
-    const val BEREGN = "${PREFIX}BEREGN"
     const val TRYGDETID = "${PREFIX}TRYGDETID"
     const val TRYGDETID_GRUNNLAG = "${PREFIX}TRYGDETID_GRUNNLAG"
+    const val BEREGN = "${PREFIX}BEREGN"
+    const val VEDTAK = "${PREFIX}VEDTAK"
 }

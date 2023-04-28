@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
@@ -66,7 +67,7 @@ data class Persongalleri(
 
 fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
     Soeker(
-        navn = hentNavn()!!.verdi.let { "${it.fornavn} ${it.mellomnavn ?: ""} ${it.etternavn}" },
+        navn = hentNavn()!!.verdi.GenererFulltNavn(),
         fnr = hentFoedselsnummer()!!.verdi.value
     )
 }
@@ -75,9 +76,16 @@ fun Grunnlag.mapAvdoed(): Avdoed = with(this.familie) {
     val avdoed = hentAvdoed()
 
     Avdoed(
-        navn = avdoed.hentNavn()!!.verdi.let { "${it.fornavn} ${it.mellomnavn ?: ""} ${it.etternavn}" },
+        navn = avdoed.hentNavn()!!.verdi.GenererFulltNavn(),
         doedsdato = avdoed.hentDoedsdato()!!.verdi!!
     )
+}
+
+fun Navn.GenererFulltNavn(): String {
+    if (this.mellomnavn.isNullOrEmpty()) {
+        return "${this.fornavn} ${this.etternavn}"
+    }
+    return "${this.fornavn} ${this.mellomnavn} ${this.etternavn}"
 }
 
 fun Grunnlag.mapInnsender(): Innsender = with(this.sak) {

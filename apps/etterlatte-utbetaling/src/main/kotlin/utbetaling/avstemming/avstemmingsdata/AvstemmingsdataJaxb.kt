@@ -1,11 +1,11 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.JAXBElement
+import jakarta.xml.bind.Marshaller
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Konsistensavstemmingsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import java.io.StringWriter
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.JAXBElement
-import javax.xml.bind.Marshaller
 import javax.xml.namespace.QName
 
 object GrensesnittavstemmingsdataJaxb {

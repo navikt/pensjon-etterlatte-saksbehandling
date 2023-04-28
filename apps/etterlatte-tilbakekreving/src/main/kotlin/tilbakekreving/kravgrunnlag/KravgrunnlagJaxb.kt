@@ -1,12 +1,12 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.annotation.XmlAccessType
+import jakarta.xml.bind.annotation.XmlAccessorType
+import jakarta.xml.bind.annotation.XmlElement
+import jakarta.xml.bind.annotation.XmlRootElement
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import java.io.StringReader
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.annotation.XmlAccessType
-import javax.xml.bind.annotation.XmlAccessorType
-import javax.xml.bind.annotation.XmlElement
-import javax.xml.bind.annotation.XmlRootElement
 import javax.xml.stream.XMLInputFactory
 
 object KravgrunnlagJaxb {

@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory
 import java.io.Serializable
 import javax.sql.DataSource
 
-class KotliqueryRepositoryWrapper(private val datasource: DataSource) {
+class KotliqueryRepository(private val datasource: DataSource) {
 
-    private val logger = LoggerFactory.getLogger(KotliqueryRepositoryWrapper::class.java)
+    private val logger = LoggerFactory.getLogger(KotliqueryRepository::class.java)
 
     fun opprett(query: String, params: Map<String, Any?>, loggtekst: String) =
         using(sessionOf(datasource)) { session ->

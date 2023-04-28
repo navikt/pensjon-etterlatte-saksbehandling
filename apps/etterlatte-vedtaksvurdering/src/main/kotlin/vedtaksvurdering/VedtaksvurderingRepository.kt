@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
+import no.nav.etterlatte.libs.database.KotliqueryRepository
 import java.sql.Date
 import java.time.YearMonth
 import java.util.*
@@ -27,7 +27,7 @@ import javax.sql.DataSource
 
 class VedtaksvurderingRepository(val datasource: DataSource) {
 
-    private val repositoryWrapper: KotliqueryRepositoryWrapper = KotliqueryRepositoryWrapper(datasource)
+    private val repositoryWrapper: KotliqueryRepository = KotliqueryRepository(datasource)
 
     companion object {
         fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)

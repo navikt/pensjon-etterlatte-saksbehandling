@@ -44,7 +44,7 @@ internal class VilkaarsvurderingRepositoryTest {
             postgreSQLContainer.password
         ).also { it.migrate() }
 
-        vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds)
+        vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds, DelvilkaarRepository())
     }
 
     private fun cleanDatabase() {

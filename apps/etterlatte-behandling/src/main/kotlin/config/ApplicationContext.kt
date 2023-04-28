@@ -37,7 +37,7 @@ import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.KotliqueryRepositoryWrapper
+import no.nav.etterlatte.libs.database.KotliqueryRepository
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -183,7 +183,7 @@ class ApplicationContext(
         sakService = sakService,
         foerstegangsBehandlingService = foerstegangsbehandlingService,
         behandlingsHendelser = behandlingsHendelser.hendelserKanal,
-        migreringRepository = MigreringRepository(KotliqueryRepositoryWrapper(dataSource))
+        migreringRepository = MigreringRepository(KotliqueryRepository(dataSource))
     )
 
     // Job

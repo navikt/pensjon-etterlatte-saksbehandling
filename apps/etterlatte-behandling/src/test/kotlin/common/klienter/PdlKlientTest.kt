@@ -36,6 +36,7 @@ internal class PdlKlientTest {
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON)
         Assertions.assertEquals("Ola", resultat.fornavn.verdi)
+        Assertions.assertEquals("Mellom", resultat.mellomnavn?.verdi)
         Assertions.assertEquals("Nordmann", resultat.etternavn.verdi)
     }
 

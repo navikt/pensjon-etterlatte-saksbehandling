@@ -18,6 +18,7 @@ enum class PDLIdentGruppeTyper(val navn: String) {
 
 data class Person(
     val fornavn: String,
+    val mellomnavn: String? = null,
     val etternavn: String,
     val foedselsnummer: Folkeregisteridentifikator,
     val foedselsdato: LocalDate?,

@@ -61,7 +61,7 @@ val ADRESSE_DEFAULT =
     )
 
 internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Søker", "Barn").toJsonNode()),
+    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Søker", "mellom", "Barn").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
     FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
@@ -86,7 +86,7 @@ internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
 )
 
 internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Hel", "Søsken").toJsonNode()),
+    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Hel", "mellom", "Søsken").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
     FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
@@ -111,7 +111,7 @@ internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNod
 )
 
 internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Halv", "Søsken").toJsonNode()),
+    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Halv", "mellom", "Søsken").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
     FOEDSELSAAR to Opplysning.Konstant(
@@ -140,7 +140,7 @@ internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
 )
 
 internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Død", "Far").toJsonNode()),
+    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Død", "mellom", "Far").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
     FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
@@ -173,7 +173,7 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
 )
 
 internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Levende", "Mor").toJsonNode()),
+    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Levende", "mellom", "Mor").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
     FOEDSELSAAR to Opplysning.Konstant(

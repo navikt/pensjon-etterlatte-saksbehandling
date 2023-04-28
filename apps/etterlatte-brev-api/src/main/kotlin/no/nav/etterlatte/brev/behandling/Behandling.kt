@@ -74,7 +74,7 @@ fun Grunnlagsopplysning<InnsenderSoeknad>.mapInnsender(): Innsender = with(this.
 
 fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
     Soeker(
-        navn = hentNavn()!!.verdi.let { "${it.fornavn} ${it.etternavn}" },
+        navn = hentNavn()!!.verdi.let { "${it.fornavn} ${it.mellomnavn ?: ""} ${it.etternavn}" },
         fnr = hentFoedselsnummer()!!.verdi.value
     )
 }
@@ -83,7 +83,7 @@ fun Grunnlag.mapAvdoed(): Avdoed = with(this.familie) {
     val avdoed = hentAvdoed()
 
     Avdoed(
-        navn = avdoed.hentNavn()!!.verdi.let { "${it.fornavn} ${it.etternavn}" },
+        navn = avdoed.hentNavn()!!.verdi.let { "${it.fornavn} ${it.mellomnavn ?: ""} ${it.etternavn}" },
         doedsdato = avdoed.hentDoedsdato()!!.verdi!!
     )
 }

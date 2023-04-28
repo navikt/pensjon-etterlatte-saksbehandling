@@ -43,6 +43,7 @@ class BesvarOpplysningsbehovTest {
             fnr: String = "11057523044"
         ) = PersonDTO(
             fornavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
+            mellomnavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
             etternavn = OpplysningDTO(verdi = "Nordmann", opplysningsid = null),
             foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(fnr), null),
             foedselsdato = OpplysningDTO(LocalDate.now().minusYears(20), UUID.randomUUID().toString()),

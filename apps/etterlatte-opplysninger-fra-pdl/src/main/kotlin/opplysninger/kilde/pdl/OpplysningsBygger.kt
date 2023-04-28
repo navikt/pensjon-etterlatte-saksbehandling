@@ -80,7 +80,10 @@ fun lagEnkelopplysningerFraPDL(
     val personRolle = behovNameTilPersonRolle(opplysningsbehov)
 
     val opplysningNavn =
-        OpplysningDTO(Navn(personDTO.fornavn.verdi, personDTO.etternavn.verdi), personDTO.fornavn.opplysningsid)
+        OpplysningDTO(
+            Navn(personDTO.fornavn.verdi, personDTO.mellomnavn?.verdi, personDTO.etternavn.verdi),
+            personDTO.fornavn.opplysningsid
+        )
 
     opplysningsbolk.apply {
         leggTilOpplysning(NAVN, opplysningNavn)

@@ -33,6 +33,7 @@ object PersonMapper {
 
         Person(
             fornavn = navn.fornavn,
+            mellomnavn = navn.mellomnavn,
             etternavn = navn.etternavn,
             foedselsnummer = fnr,
             foedselsdato = foedsel.foedselsdato,
@@ -83,6 +84,7 @@ object PersonMapper {
 
         PersonDTO(
             fornavn = OpplysningDTO(navn.fornavn, navn.metadata.opplysningsId),
+            mellomnavn = navn.mellomnavn?.let { OpplysningDTO(navn.mellomnavn, navn.metadata.opplysningsId) },
             etternavn = OpplysningDTO(navn.etternavn, navn.metadata.opplysningsId),
             foedselsnummer = OpplysningDTO(request.foedselsnummer, null),
             foedselsdato = foedsel.foedselsdato?.let { OpplysningDTO(it, foedsel.metadata.opplysningsId) },
@@ -93,7 +95,7 @@ object PersonMapper {
                 OpplysningDTO(AdressebeskyttelseGradering.valueOf(it.gradering.toString()), it.metadata.opplysningsId)
             } ?: OpplysningDTO(AdressebeskyttelseGradering.UGRADERT, null),
             bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
-                ?.map { OpplysningDTO(it, null) }, /* Finn ut hva opplysningsid:n er for data fra pps */
+                ?.map { OpplysningDTO(it, null) }, // Finn ut hva opplysningsid:n er for data fra pps
             oppholdsadresse = hentPerson.oppholdsadresse?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) }
                 ?.map { OpplysningDTO(it, null) },
             deltBostedsadresse = hentPerson.deltBostedsadresse?.let {

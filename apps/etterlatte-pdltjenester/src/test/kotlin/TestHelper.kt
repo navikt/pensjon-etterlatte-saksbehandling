@@ -33,6 +33,7 @@ fun mockPerson(
     vergemaal: List<VergemaalEllerFremtidsfullmakt>? = null
 ) = PersonDTO(
     fornavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
+    mellomnavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
     etternavn = OpplysningDTO(verdi = "Nordmann", opplysningsid = null),
     foedselsnummer = OpplysningDTO(TRIVIELL_MIDTPUNKT, null),
     foedselsdato = OpplysningDTO(LocalDate.now().minusYears(20), UUID.randomUUID().toString()),

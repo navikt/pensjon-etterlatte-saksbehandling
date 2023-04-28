@@ -106,9 +106,7 @@ export const Saksoversikt = ({ fnr }: { fnr: string | undefined }) => {
       .filter((behandling) => behandling.behandlingType === IBehandlingsType.REVURDERING)
       .filter((behandling) => !erFerdigBehandlet(behandling.status)).length > 0
 
-  const hendelser = (grunnlagshendelser ?? [])
-    .filter(erUhaandtert)
-    .filter((hendelse) => hendelse.type === 'GRUNNBELOEP')
+  const hendelser = (grunnlagshendelser ?? []).filter(erUhaandtert)
 
   return (
     <>

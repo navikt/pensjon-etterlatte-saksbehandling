@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@navikt/ds-css": "^2.8.10",
-    "@navikt/ds-css-internal": "^2.8.10",
+    "@navikt/ds-css-internal": "^2.9.3",
     "@navikt/ds-react": "^2.8.10",
     "@navikt/ds-react-internal": "^2.8.10",
     "@navikt/navspa": "^6.0.1",

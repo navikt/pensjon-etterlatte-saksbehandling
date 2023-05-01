@@ -403,10 +403,10 @@
   resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-2.8.10.tgz#81b5c9f7486b4ee034768d4f645bd800a3332bf0"
   integrity sha512-Zs6Q2NKNbjWXSPr7xD8kM0x3HpKWHkr0hfYqLYyQuRPkcL+QDmNBMqjjOm2dVLW0b0JRgpm16gt6p0/k85ep0g==
 
-"@navikt/ds-css-internal@^2.8.10":
-  version "2.8.10"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-2.8.10.tgz#97d1dd70da9b75ba9522bd406d6c9a3788d7ec0f"
-  integrity sha512-db91L40fKBc+84QmDoqEpf6pQ5lXbW/dKdiRT/Bts/zQbfsVFXN6aN4E44RshUD/aa9TgAph+QEjsfqSaj7Xjg==
+"@navikt/ds-css-internal@^2.9.3":
+  version "2.9.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-2.9.3.tgz#070c6d3d45f0052bc81d6a13bcd12589feb6058f"
+  integrity sha512-+h9rtVS7Xt7O7pvJ5Kdo4rxjLmSaOo84UqX7REmjCOtcxC7EPjaSxm9BWCGOSF4GkfvWUglSenEuCU/jG3PBqg==
 
 "@navikt/ds-css@^2.8.10":
   version "2.8.10"

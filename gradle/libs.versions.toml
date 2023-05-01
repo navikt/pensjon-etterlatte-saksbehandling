@@ -5,7 +5,7 @@ cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.0" }
 
 [versions]
 jackson-version = "2.14.2"
-jupiter-version = "5.9.2"
+jupiter-version = "5.9.3"
 kotlinx-version = "1.6.4"
 ktor2-version = "2.2.4"
 navfelles-token-version = "3.0.9"

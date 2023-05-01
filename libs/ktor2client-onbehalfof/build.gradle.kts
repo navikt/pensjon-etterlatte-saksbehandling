@@ -21,7 +21,7 @@ dependencies {
     api(libs.ktor2.authjwt)
 
     api("com.natpryce:konfig:1.6.10.0")
-    api("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
+    api("com.michael-bull.kotlin-result:kotlin-result:1.1.17")
     api(libs.cache.caffeine)
     api(project(":libs:etterlatte-token-model"))
 

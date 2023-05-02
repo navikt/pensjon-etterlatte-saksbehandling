@@ -6,16 +6,20 @@ import { hentBehandlesFraStatus } from '../felles/utils'
 import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { Innhold, Border } from '~components/behandling/soeknadsoversikt/styled'
+import { Border, Innhold } from '~components/behandling/soeknadsoversikt/styled'
 import { HeadingWrapper } from '~components/person/saksoversikt'
 import {
+  BP_OPPHOER_BESKRIVELSE,
+  BP_OPPHOER_HJEMLER,
   BP_REVURDERING_BESKRIVELSE,
   BP_REVURDERING_HJEMLER,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
+import { erOpphoer } from '~shared/types/Revurderingsaarsak'
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const behandles = hentBehandlesFraStatus(behandling.status)
+  const opphoer = behandling?.revurderingsaarsak && erOpphoer(behandling?.revurderingsaarsak)
 
   return (
     <Content>
@@ -34,8 +38,8 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           avdoedDoedsdatoKilde={behandling.familieforhold?.avdoede?.kilde}
           soeknadMottattDato={behandling.soeknadMottattDato}
           behandlingId={behandling.id}
-          hjemmler={BP_REVURDERING_HJEMLER}
-          beskrivelse={BP_REVURDERING_BESKRIVELSE}
+          hjemmler={opphoer ? BP_OPPHOER_HJEMLER : BP_REVURDERING_HJEMLER}
+          beskrivelse={opphoer ? BP_OPPHOER_BESKRIVELSE : BP_REVURDERING_BESKRIVELSE}
         />
       </Innhold>
       <Border />

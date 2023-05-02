@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
@@ -11,10 +12,11 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 data class Behandling(
     val sakId: Long,
+    val sakType: SakType,
     val behandlingId: UUID,
     val spraak: Spraak,
     val persongalleri: Persongalleri,
@@ -62,13 +64,23 @@ data class Beregningsperiode(
 data class Persongalleri(
     val innsender: Innsender,
     val soeker: Soeker,
+    val gjenlevende: Gjenlevende,
     val avdoed: Avdoed
 )
 
 fun Grunnlag.mapSoeker(): Soeker = with(this.soeker) {
     Soeker(
-        navn = hentNavn()!!.verdi.GenererFulltNavn(),
+        navn = hentNavn()!!.verdi.fulltNavn(),
         fnr = hentFoedselsnummer()!!.verdi.value
+    )
+}
+
+fun Grunnlag.mapGjenlevende(): Gjenlevende = with(this.familie) {
+    val gjenlevende = hentGjenlevende()
+
+    Gjenlevende(
+        navn = gjenlevende.hentNavn()!!.verdi.fulltNavn(),
+        fnr = gjenlevende.hentFoedselsnummer()!!.verdi.value
     )
 }
 
@@ -76,16 +88,9 @@ fun Grunnlag.mapAvdoed(): Avdoed = with(this.familie) {
     val avdoed = hentAvdoed()
 
     Avdoed(
-        navn = avdoed.hentNavn()!!.verdi.GenererFulltNavn(),
+        navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
         doedsdato = avdoed.hentDoedsdato()!!.verdi!!
     )
-}
-
-fun Navn.GenererFulltNavn(): String {
-    if (this.mellomnavn.isNullOrEmpty()) {
-        return "${this.fornavn} ${this.etternavn}"
-    }
-    return "${this.fornavn} ${this.mellomnavn} ${this.etternavn}"
 }
 
 fun Grunnlag.mapInnsender(): Innsender = with(this.sak) {
@@ -113,3 +118,5 @@ fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {
     // TODO: Håndter grunnbeløpsendringer
     return this.last().utbetaltBeloep
 }
+
+private fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")

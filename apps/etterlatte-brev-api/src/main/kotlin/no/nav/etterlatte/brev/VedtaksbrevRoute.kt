@@ -17,7 +17,7 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
 
     route("brev") {
-        post("vedtak/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        post("behandling/{$BEHANDLINGSID_CALL_PARAMETER}/vedtak") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val (sakId) = call.receive<OpprettVedtaksbrevRequest>()
                 logger.info("Genererer vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
@@ -27,7 +27,7 @@ fun Route.vedtaksbrevRoute(service: VedtaksbrevService, behandlingKlient: Behand
             }
         }
 
-        post("attestert/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        post("behandling/{$BEHANDLINGSID_CALL_PARAMETER}/attestert") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val ferdigstiltOK = service.ferdigstillVedtaksbrev(behandlingId)
 

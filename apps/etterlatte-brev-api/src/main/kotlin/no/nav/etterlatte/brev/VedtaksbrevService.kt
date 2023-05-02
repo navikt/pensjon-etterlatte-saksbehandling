@@ -92,20 +92,20 @@ class VedtaksbrevService(
 
         val vedtakType = behandling.vedtak.type
 
-        val brevRequest = BrevRequestMapper.fra(vedtakType, behandling, avsender, mottaker, attestant)
+        val brevRequest = BrevRequestMapper.fra(behandling, avsender, mottaker, attestant)
 
         val pdf = pdfGenerator.genererPdf(brevRequest)
 
         logger.info("Generert brev for vedtak (vedtakId=${behandling.vedtak.id}) med størrelse: ${pdf.size}")
 
         return UlagretBrev(
-            behandling.behandlingId,
+            behandlingId = behandling.behandlingId,
             soekerFnr = behandling.persongalleri.soeker.fnr,
             tittel = "Vedtak om ${vedtakType.name.lowercase()}",
-            behandling.spraak,
-            mottaker,
+            spraak = behandling.spraak,
+            mottaker = mottaker,
             erVedtaksbrev = true,
-            pdf
+            pdf = pdf
         )
     }
 }

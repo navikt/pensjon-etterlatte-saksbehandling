@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.Gjenlevende
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.Persongalleri
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
@@ -32,6 +33,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
@@ -329,11 +331,13 @@ internal class VedtaksbrevServiceTest {
 
     private fun opprettBehandling() = Behandling(
         SAK_ID,
+        SakType.BARNEPENSJON,
         BEHANDLING_ID,
         Spraak.NB,
         Persongalleri(
             Innsender("STOR SNERK", "11057523044"),
             Soeker("GRØNN KOPP", "12345"),
+            Gjenlevende("LUR VANNFLASKE", "443434"),
             Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1))
         ),
         ForenkletVedtak(1, VedtakType.INNVILGELSE, Saksbehandler(ident, PORSGRUNN), Attestant(ident, PORSGRUNN)),

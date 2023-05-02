@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import styled from 'styled-components'
 import { Findout } from '@navikt/ds-icons'
-import { PdfVisning } from '../behandling/brev/pdf-visning'
 import Spinner from '~shared/Spinner'
+import { PdfVisning } from '~shared/brev/pdf-visning'
 
 const ButtonRow = styled.div`
   background: white;

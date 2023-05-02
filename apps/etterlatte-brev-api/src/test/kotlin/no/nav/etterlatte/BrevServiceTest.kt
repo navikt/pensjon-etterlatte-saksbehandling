@@ -25,7 +25,7 @@ internal class BrevServiceTest {
     private val adresseService = mockk<AdresseService>()
     private val distribusjonsService = mockk<DistribusjonService>()
 
-    private val service = BrevService(mockkDb, mockPdfGen, adresseService)
+    private val service = BrevService(mockkDb)
 
     @BeforeEach
     fun before() {

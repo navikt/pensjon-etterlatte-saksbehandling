@@ -52,11 +52,13 @@ class SakOgBehandlingService(
 
         return Behandling(
             sakId = vedtak.sak.id,
+            sakType = vedtak.sak.sakType,
             behandlingId = vedtak.behandling.id,
             spraak = grunnlag.mapSpraak(),
             persongalleri = Persongalleri(
                 innsender = grunnlag.mapInnsender(),
                 soeker = grunnlag.mapSoeker(),
+                gjenlevende = grunnlag.mapGjenlevende(),
                 avdoed = grunnlag.mapAvdoed()
             ),
             vedtak = ForenkletVedtak(

@@ -82,7 +82,7 @@ class ApplicationBuilder {
 
     private val brevbaker =
         BrevbakerKlient(
-            httpClient(scope = env.requireEnvValue("BREVBAKER_SCOPE")),
+            httpClient("BREVBAKER_SCOPE"),
             env.requireEnvValue("BREVBAKER_URL")
         )
 

@@ -2,7 +2,7 @@ package no.nav.etterlatte.trygdetid.kafka
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.get
+import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
@@ -15,7 +15,7 @@ class TrygdetidService(
 ) {
 
     fun beregnTrygdetid(behandlingId: UUID): TrygdetidDto = runBlocking {
-        trygdetidApp.get("$url/api/trygdetid/$behandlingId") {
+        trygdetidApp.post("$url/api/trygdetid/$behandlingId") {
             contentType(ContentType.Application.Json)
         }.body()
     }

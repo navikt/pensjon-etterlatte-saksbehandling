@@ -2,11 +2,11 @@ package no.nav.etterlatte.beregning.regler
 
 import no.nav.etterlatte.beregning.Avkorting
 import no.nav.etterlatte.beregning.AvkortingGrunnlag
+import no.nav.etterlatte.beregning.regler.avkorting.InntektAvkortingGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.AvdoedForelder
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
@@ -49,13 +49,18 @@ fun avkorting(
 ) = Avkorting(
     behandlingId = behandlingId,
     avkortingGrunnlag = emptyList(),
-    beregningEtterAvkorting = emptyList(),
-    tidspunktForAvkorting = Tidspunkt.now()
+    beregningEtterAvkorting = emptyList()
 )
 
-fun avkortinggrunnlag() = AvkortingGrunnlag(
+fun avkortinggrunnlag(
+    aarsinntekt: Int = 100000
+) = AvkortingGrunnlag(
     periode = Periode(fom = YearMonth.now(), tom = null),
-    aarsinntekt = 100000,
+    aarsinntekt = aarsinntekt,
     gjeldendeAar = 2023,
     spesifikasjon = "Spesifikasjon"
+)
+
+fun inntektAvkortingGrunnlag(inntekt: Int = 500000) = InntektAvkortingGrunnlag(
+    inntekt = FaktumNode(verdi = inntekt, "", "")
 )

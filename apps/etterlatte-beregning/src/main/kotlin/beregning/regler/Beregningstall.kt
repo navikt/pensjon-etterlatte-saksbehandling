@@ -118,5 +118,6 @@ class Beregningstall : Comparable<Beregningstall> {
         const val DESIMALER_DELBEREGNING = 16
         val AVRUNDING_DELBEREGNING = RoundingMode.FLOOR
         val AVRUNDING_BEREGNING = RoundingMode.HALF_UP
+        val NAERMESTE_TUSEN = RoundingMode.CEILING
     }
 }
